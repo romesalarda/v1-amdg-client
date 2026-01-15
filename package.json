@@ -1,0 +1,38 @@
+{
+  "name": "v1-amdg-client",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "generate-api": "openapi-ts"
+  },
+  "dependencies": {
+    "@hebilicious/vue-query-nuxt": "^0.3.0",
+    "@nuxt/ui": "^2.22.3",
+    "@pinia/nuxt": "^0.5.5",
+    "@tanstack/vue-query": "^5.92.6",
+    "axios": "^1.13.2",
+    "nuxt": "^3.20.2",
+    "pinia": "^2.3.1",
+    "vite": "^7.3.1",
+    "vue": "^3.5.26",
+    "vue-router": "^4.6.4",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@hey-api/client-axios": "^0.9.1",
+    "@hey-api/openapi-ts": "^0.90.3",
+    "@playwright/test": "^1.57.0",
+    "eslint": "^9.39.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.17",
+    "vue-tsc": "^3.2.2"
+  }
+}
