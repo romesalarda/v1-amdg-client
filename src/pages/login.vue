@@ -21,8 +21,16 @@
             size="lg"
           />
         </div>
+        
+        <div class="flex items-center justify-between">
+          <div class="text-sm">
+            <a href="#" class="font-medium text-gray-600 hover:text-gray-500">
+              Forgot your password?
+            </a>
+          </div>
+        </div>
 
-        <div>
+        <div class="space-y-4">
            <UButton 
              type="submit" 
              color="black" 
@@ -31,6 +39,27 @@
              :loading="loading"
            >
              Sign in
+           </UButton>
+
+           <div class="relative">
+             <div class="absolute inset-0 flex items-center">
+               <div class="w-full border-t border-gray-300"></div>
+             </div>
+             <div class="relative flex justify-center text-sm">
+               <span class="px-2 bg-gray-50 text-gray-500">Or continue with</span>
+             </div>
+           </div>
+
+           <UButton 
+             type="button"
+             color="white" 
+             block 
+             size="lg"
+             icon="i-logos-google-icon"
+             :loading="loading"
+             @click="handleGoogleLogin"
+           >
+             Sign in with Google
            </UButton>
         </div>
       </form>
@@ -45,7 +74,19 @@ const auth = useAuthStore()
 const loading = computed(() => auth.loading)
 
 const handleLogin = async () => {
-  await auth.login({ email: email.value, password: password.value })
-  navigateTo('/admin/dashboard')
+    try {
+        await auth.login({ email: email.value, password: password.value })
+        navigateTo('/admin/dashboard')
+    } catch (e) {
+        // Handle error (notification)
+    }
+}
+
+const handleGoogleLogin = async () => {
+    try {
+        await auth.loginWithGoogle()
+    } catch (e) {
+        // Handle error
+    }
 }
 </script>
