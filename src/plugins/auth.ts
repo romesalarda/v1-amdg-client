@@ -7,7 +7,13 @@ export default defineNuxtPlugin(async (nuxtApp) => {
     // For now, let's do it client-side or check if cookie exists.
 
     // Simple approach: Check auth on load
-    if (import.meta.client) {
+    // BUT: Don't re-fetch if user just logged out (prevents immediate re-auth)
+    if (import.meta.client && !auth.justLoggedOut) {
         await auth.fetchUser()
+    }
+
+    // Reset the logout flag after initial load
+    if (auth.justLoggedOut) {
+        auth.justLoggedOut = false
     }
 })

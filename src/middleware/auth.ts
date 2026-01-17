@@ -1,10 +1,13 @@
 export default defineNuxtRouteMiddleware((to, from) => {
     const auth = useAuthStore()
 
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login', '/', '/auth/callback']
+
     // Check if user is authenticated
     if (!auth.isAuthenticated) {
-        // Allow access to login page and functionality to avoid infinite loops
-        if (to.path !== '/login' && to.path !== '/') {
+        // Allow access to public routes
+        if (!publicRoutes.includes(to.path)) {
             return navigateTo('/login')
         }
     } else {

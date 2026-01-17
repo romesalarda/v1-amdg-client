@@ -16,7 +16,8 @@ export const useAuthStore = defineStore('auth', {
     state: () => ({
         user: null as User | null,
         isAuthenticated: false,
-        loading: false
+        loading: false,
+        justLoggedOut: false  // Flag to prevent re-auth after logout
     }),
 
     actions: {
@@ -29,9 +30,15 @@ export const useAuthStore = defineStore('auth', {
 
                 if (response.data) {
                     await this.fetchUser()
+                    // Ensure user was actually fetched before considering login successful
+                    if (!this.isAuthenticated) {
+                        throw new Error('Failed to fetch user after login')
+                    }
                 }
             } catch (error) {
                 console.error('Login failed:', error)
+                this.user = null
+                this.isAuthenticated = false
                 throw error
             } finally {
                 this.loading = false
@@ -43,7 +50,7 @@ export const useAuthStore = defineStore('auth', {
             try {
                 const response = await authGoogleAuthorizeCreate({
                     body: {
-                        redirect_uri: window.location.origin + '/login'
+                        redirect_uri: window.location.origin + '/auth/callback'
                     }
                 })
 
@@ -79,12 +86,18 @@ export const useAuthStore = defineStore('auth', {
 
         async logout() {
             try {
+                // Clear auth state FIRST, before API call and navigation
+                // This ensures middleware sees the user as logged out
+                this.user = null
+                this.isAuthenticated = false
+
+                // Then call the logout endpoint to clear server-side cookies
                 await authLogoutCreate()
             } catch (error) {
                 console.error('Logout failed:', error)
+                // Even if API call fails, keep user logged out on client
             } finally {
-                this.user = null
-                this.isAuthenticated = false
+                // Navigate to login page after state is cleared
                 const router = useRouter()
                 router.push('/login')
             }

@@ -76,9 +76,18 @@ const loading = computed(() => auth.loading)
 const handleLogin = async () => {
     try {
         await auth.login({ email: email.value, password: password.value })
-        navigateTo('/admin/dashboard')
+        // Only navigate if login was successful (auth.isAuthenticated will be true)
+        if (auth.isAuthenticated) {
+            navigateTo('/admin/dashboard')
+        }
     } catch (e) {
-        // Handle error (notification)
+        // Show error notification to user
+        const toast = useToast()
+        toast.add({
+            title: 'Login Failed',
+            description: 'Invalid email or password. Please try again.',
+            color: 'red'
+        })
     }
 }
 
