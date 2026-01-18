@@ -56,7 +56,8 @@
 
 <script setup lang="ts">
 definePageMeta({
-  layout: false // Full screen layout for admin
+  layout: false, // Full screen layout for admin
+  middleware: 'auth'
 })
 
 const auth = useAuthStore()

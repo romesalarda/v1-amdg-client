@@ -3,6 +3,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
   srcDir: 'src/',
+  ssr: false,  // Disable SSR - run as SPA for simpler auth
   modules: [
     '@nuxt/ui',
     '@pinia/nuxt',
@@ -18,7 +19,7 @@ export default defineNuxtConfig({
   vite: {
     server: {
       proxy: {
-        '^/api(?!/_nuxt_)': {
+        '/api': {
           target: 'http://localhost:8000',
           changeOrigin: true
         }

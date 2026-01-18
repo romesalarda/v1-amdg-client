@@ -1,6 +1,9 @@
 /**
  * Get CSRF token from cookie
  * Django sets csrftoken cookie, we need to send it back as X-CSRFToken header
+ * 
+ * Note: HTTP-only cookies (access, refresh) are NOT accessible via document.cookie
+ * Only the CSRF token cookie is accessible (HttpOnly=False) so we can read it
  */
 export function getCsrfToken(): string | null {
     if (typeof document === 'undefined') return null

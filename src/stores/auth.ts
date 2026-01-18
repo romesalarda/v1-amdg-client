@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import {
     authLoginCreate,
     authLogoutCreate,
+    authRefreshCreate,
     authGoogleAuthorizeCreate,
     usersMeRetrieve
 } from '@/api/sdk.gen'
@@ -17,7 +18,8 @@ export const useAuthStore = defineStore('auth', {
         user: null as User | null,
         isAuthenticated: false,
         loading: false,
-        justLoggedOut: false  // Flag to prevent re-auth after logout
+        initPromise: null as Promise<void> | null,  // Promise for initialization
+        refreshTimer: null as ReturnType<typeof setTimeout> | null,  // Timer for proactive refresh
     }),
 
     actions: {
@@ -30,13 +32,12 @@ export const useAuthStore = defineStore('auth', {
 
                 if (response.data) {
                     await this.fetchUser()
-                    // Ensure user was actually fetched before considering login successful
                     if (!this.isAuthenticated) {
                         throw new Error('Failed to fetch user after login')
                     }
+                    this.scheduleTokenRefresh()
                 }
             } catch (error) {
-                console.error('Login failed:', error)
                 this.user = null
                 this.isAuthenticated = false
                 throw error
@@ -61,7 +62,6 @@ export const useAuthStore = defineStore('auth', {
                     }
                 }
             } catch (error) {
-                console.error('Google login init failed:', error)
                 throw error
             } finally {
                 this.loading = false
@@ -69,43 +69,90 @@ export const useAuthStore = defineStore('auth', {
         },
 
         async fetchUser() {
+            if (!this.initPromise) {
+                this.initPromise = this._fetchUserInternal()
+            }
+            return this.initPromise
+        },
+
+        async _fetchUserInternal() {
             this.loading = true
             try {
                 const response = await usersMeRetrieve()
                 if (response.data) {
                     this.user = response.data
                     this.isAuthenticated = true
+                    this.scheduleTokenRefresh()
+                } else {
+                    this.user = null
+                    this.isAuthenticated = false
                 }
             } catch (error) {
                 this.user = null
                 this.isAuthenticated = false
             } finally {
                 this.loading = false
+                this.initPromise = null
+            }
+        },
+
+        async refreshToken() {
+            try {
+                const response = await authRefreshCreate({ 
+                    body: { refresh: '' }
+                })
+                
+                if (response.data) {
+                    this.scheduleTokenRefresh()
+                    return true
+                }
+                return false
+            } catch (error) {
+                return false
+            }
+        },
+
+        scheduleTokenRefresh() {
+            if (this.refreshTimer) {
+                clearTimeout(this.refreshTimer)
+            }
+
+            if (import.meta.client && this.isAuthenticated) {
+                const refreshInterval = 12 * 60 * 1000
+                
+                this.refreshTimer = setTimeout(async () => {
+                    await this.refreshToken()
+                }, refreshInterval)
+            }
+        },
+
+        clearRefreshTimer() {
+            if (this.refreshTimer) {
+                clearTimeout(this.refreshTimer)
+                this.refreshTimer = null
             }
         },
 
         async logout() {
             try {
-                // Clear auth state FIRST, before API call and navigation
-                // This ensures middleware sees the user as logged out
-                this.user = null
-                this.isAuthenticated = false
-
-                // Then call the logout endpoint to clear server-side cookies
                 await authLogoutCreate()
             } catch (error) {
-                console.error('Logout failed:', error)
-                // Even if API call fails, keep user logged out on client
+                // Continue with logout even if API call fails
             } finally {
-                // Navigate to login page after state is cleared
+                this.clearRefreshTimer()
+                this.user = null
+                this.isAuthenticated = false
+                this.initPromise = null
                 const router = useRouter()
                 router.push('/login')
             }
         },
 
         async handleUnauthorized() {
+            this.clearRefreshTimer()
             this.user = null
             this.isAuthenticated = false
+            this.initPromise = null
             const router = useRouter()
             router.push('/login')
         }
