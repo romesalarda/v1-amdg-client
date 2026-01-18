@@ -41,7 +41,7 @@
           <tbody>
             <tr v-for="event in events" :key="event.event_id" class="group hover:bg-gray-50">
               <td class="py-3 text-gray-900 font-medium">{{ event.title }}</td>
-              <td class="py-3 text-gray-500">{{ new Date(event.start_datetime).toLocaleDateString() }}</td>
+              <td class="py-3 text-gray-500">{{ formatDateTime(event.start_datetime) }}</td>
               <td class="py-3 text-gray-500">{{ event.event_type_name }}</td>
               <td class="py-3 text-right">
                 <UButton icon="i-heroicons-pencil" variant="ghost" color="gray" size="xs" />
@@ -55,18 +55,16 @@
 </template>
 
 <script setup lang="ts">
+
+import { useEvents } from '~/composables/resources/events/events'
+
 definePageMeta({
   layout: false, // Full screen layout for admin
   middleware: 'auth'
 })
 
 const auth = useAuthStore()
-// Guard: mock simple redirect
-if (!auth.isAuthenticated) {
-  // In real app, middleware handles this
-  // navigateTo('/login')
-}
 
 const { data, isLoading } = useEvents()
-const events = computed(() => data.value?.results || [])
+const events = computed(() => data.value?.data?.results || [])
 </script>

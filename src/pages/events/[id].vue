@@ -46,10 +46,13 @@
 </template>
 
 <script setup lang="ts">
+
+import { useEvent } from '~/composables/resources/events/events'
+
 const route = useRoute()
-const eventId = route.params.id as string
+const eventId = Number(route.params.id)
 const { data, isLoading } = useEvent(eventId)
-const event = computed(() => data.value)
+const event = computed(() => data.value?.data)
 
 useHead({
   title: computed(() => event.value?.title || 'Event Loading...')

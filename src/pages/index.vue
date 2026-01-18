@@ -6,12 +6,12 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="space-y-4">
+    <div v-if="eventsLoading" class="space-y-4">
       <USkeleton class="h-24 w-full" v-for="i in 3" :key="i" />
     </div>
 
     <!-- Error State -->
-    <div v-else-if="isError" class="bg-red-50 text-red-600 p-4 rounded-md">
+    <div v-else-if="eventsError" class="bg-red-50 text-red-600 p-4 rounded-md">
       Unable to load events.
     </div>
 
@@ -53,12 +53,45 @@
           </NuxtLink>
         </div>
       </div>
+      {{ profiles }}
+      <button @click="createButtonPressed">Create Event</button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const { data, isLoading, isError } = useEvents()
+
+import { profilesList } from '~/api';
+import { useAttendees } from '~/composables/resources/attendee/attendees';
+import { useBookings, useCreateBooking } from '~/composables/resources/booking/bookings';
+import { useCreateEvent, useEvents } from '~/composables/resources/events/events';
+import { useProfiles } from '~/composables/resources/user/profiles';
+
+const { data: eventsData, isLoading: eventsLoading, isError: eventsError } = useEvents()
+const { data: bookingsData, isLoading: bookingsLoading, isError: bookingsError } = useBookings()
+const { data: attendeesData, isLoading: attendeesLoading, isError: attendeesError } = useAttendees()
+const { data: profilesData, isLoading: profilesLoading, isError: profilesError } = useProfiles()
+
+const { mutate: createEvent } = useCreateEvent()
+
+const createButtonPressed = () => {
+  createEvent({
+      title: 'Sample Event',
+      short_description: 'This is a sample event created for testing.',
+      start_datetime: new Date().toISOString(),
+      end_datetime: new Date(new Date().getTime() + 3600000).toISOString(), // +1 hour
+      event_type: 1, // Assuming 1 is a valid event type ID,
+      display_code: 'PUBLIC',
+      timezone: 'UTC',
+      organisation: 1
+    })
+}
+
+
+
 // computed property to access results, assuming DRF pagination
-const events = computed(() => data.value?.results || [])
+const events = computed(() => eventsData.value?.data?.results || [])
+const bookings = computed(() => bookingsData.value?.data?.results || [])
+const attendees = computed(() => attendeesData.value?.data?.results || [])
+const profiles = computed(() => profilesData.value?.data?.results || [])
 </script>
