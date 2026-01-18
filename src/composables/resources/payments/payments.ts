@@ -8,6 +8,10 @@ import {
   paymentsListUpdate,
   paymentsListPartialUpdate,
   paymentsListDestroy,
+  paymentsListCancelCreate,
+  paymentsListMarkCompletedCreate,
+  paymentsListMarkFailedCreate,
+  paymentsListVerifyBankTransferCreate,
   paymentsHistoryList,
   paymentsHistoryRetrieve,
 } from '~/api/sdk.gen'
@@ -17,6 +21,10 @@ import type {
   PaymentsListUpdateData,
   PaymentsListPartialUpdateData,
   PaymentsListDestroyData,
+  PaymentsListCancelCreateData,
+  PaymentsListMarkCompletedCreateData,
+  PaymentsListMarkFailedCreateData,
+  PaymentsListVerifyBankTransferCreateData,
   PaymentsHistoryListData,
 } from '~/api/types.gen'
 
@@ -36,19 +44,6 @@ export function usePayments(params?: MaybeRefOrGetter<PaymentsListListData['quer
 }
 
 /**
- * List payment history
- */
-export function usePaymentHistory(params?: MaybeRefOrGetter<PaymentsHistoryListData['query'] | undefined>) {
-  return useQuery({
-    queryKey: [...QUERY_KEY, 'history', params] as const,
-    queryFn: () => {
-      const queryParams = toValue(params)
-      return paymentsHistoryList(queryParams ? { query: queryParams } : undefined)
-    },
-  })
-}
-
-/**
  * Retrieve a single payment by ID
  */
 export function usePayment(paymentId: MaybeRefOrGetter<number>) {
@@ -59,20 +54,6 @@ export function usePayment(paymentId: MaybeRefOrGetter<number>) {
       return paymentsListRetrieve({ path: { payment_id: String(id) } })
     },
     enabled: () => !!toValue(paymentId),
-  })
-}
-
-/**
- * Retrieve a single payment history item by ID
- */
-export function usePaymentHistoryItem(historyId: MaybeRefOrGetter<number>) {
-  return useQuery({
-    queryKey: [...QUERY_KEY, 'history', 'detail', historyId] as const,
-    queryFn: () => {
-      const id = toValue(historyId)
-      return paymentsHistoryRetrieve({ path: { id } })
-    },
-    enabled: () => !!toValue(historyId),
   })
 }
 
@@ -138,6 +119,75 @@ export function useDeletePayment() {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({
         queryKey: [...QUERY_KEY, 'detail', paymentId],
+      })
+    },
+  })
+}
+
+/**
+ * Cancel a pending payment
+ */
+export function useCancelPayment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (paymentId: string) => paymentsListCancelCreate({ path: { payment_id: paymentId } }),
+    onSuccess: (_, paymentId) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', paymentId],
+      })
+    },
+  })
+}
+
+/**
+ * Mark payment as completed
+ */
+export function useMarkPaymentCompleted() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (paymentId: string) => paymentsListMarkCompletedCreate({ path: { payment_id: paymentId } }),
+    onSuccess: (_, paymentId) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', paymentId],
+      })
+    },
+  })
+}
+
+/**
+ * Mark payment as failed
+ */
+export function useMarkPaymentFailed() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (paymentId: string) => paymentsListMarkFailedCreate({ path: { payment_id: paymentId } }),
+    onSuccess: (_, paymentId) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', paymentId],
+      })
+    },
+  })
+}
+
+/**
+ * Verify and complete a bank transfer payment
+ */
+export function useVerifyBankTransferPayment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ paymentId, body }: { paymentId: string; body: PaymentsListVerifyBankTransferCreateData['body'] }) =>
+      paymentsListVerifyBankTransferCreate({ path: { payment_id: paymentId }, body }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.paymentId],
       })
     },
   })
