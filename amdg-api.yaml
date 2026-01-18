@@ -68,7 +68,6 @@ paths:
       tags:
       - Accessibility Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -98,7 +97,6 @@ paths:
               $ref: '#/components/schemas/AccessibilityRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -123,7 +121,6 @@ paths:
       tags:
       - Accessibility Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -160,7 +157,6 @@ paths:
               $ref: '#/components/schemas/AccessibilityRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -195,7 +191,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAccessibilityRequirementRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -219,7 +214,6 @@ paths:
       tags:
       - Accessibility Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -287,7 +281,6 @@ paths:
       tags:
       - Attendee Actions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -317,7 +310,6 @@ paths:
               $ref: '#/components/schemas/AttendeeActionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -342,7 +334,6 @@ paths:
       tags:
       - Attendee Actions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -583,7 +574,6 @@ paths:
       tags:
       - Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -614,7 +604,6 @@ paths:
               $ref: '#/components/schemas/AttendeeCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -641,7 +630,6 @@ paths:
       tags:
       - Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -678,7 +666,6 @@ paths:
               $ref: '#/components/schemas/AttendeeUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -714,7 +701,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -739,7 +725,6 @@ paths:
       tags:
       - Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -804,7 +789,6 @@ paths:
       tags:
       - Attendee Accessibility
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -842,7 +826,6 @@ paths:
               $ref: '#/components/schemas/AttendeeAccessibilityRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -873,7 +856,6 @@ paths:
       tags:
       - Attendee Accessibility
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -915,7 +897,6 @@ paths:
               $ref: '#/components/schemas/AttendeeAccessibilityRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -955,7 +936,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeAccessibilityRequirementRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -985,7 +965,6 @@ paths:
       tags:
       - Attendee Accessibility
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1040,7 +1019,6 @@ paths:
       tags:
       - Attendee Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1077,7 +1055,6 @@ paths:
               $ref: '#/components/schemas/AttendeeConsentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1108,7 +1085,6 @@ paths:
       tags:
       - Attendee Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1150,7 +1126,6 @@ paths:
               $ref: '#/components/schemas/AttendeeConsentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1190,7 +1165,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeConsentRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1220,7 +1194,6 @@ paths:
       tags:
       - Attendee Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1285,7 +1258,6 @@ paths:
       tags:
       - Attendee Dietary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1323,7 +1295,6 @@ paths:
               $ref: '#/components/schemas/AttendeeDietaryRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1354,7 +1325,6 @@ paths:
       tags:
       - Attendee Dietary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1396,7 +1366,6 @@ paths:
               $ref: '#/components/schemas/AttendeeDietaryRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1436,7 +1405,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeDietaryRequirementRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1466,7 +1434,6 @@ paths:
       tags:
       - Attendee Dietary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1556,7 +1523,6 @@ paths:
       tags:
       - Emergency Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1593,7 +1559,6 @@ paths:
               $ref: '#/components/schemas/EmergencyContactRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1624,7 +1589,6 @@ paths:
       tags:
       - Emergency Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1666,7 +1630,6 @@ paths:
               $ref: '#/components/schemas/EmergencyContactRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1706,7 +1669,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEmergencyContactRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1736,7 +1698,6 @@ paths:
       tags:
       - Emergency Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1801,7 +1762,6 @@ paths:
       tags:
       - Attendee Medical
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1839,7 +1799,6 @@ paths:
               $ref: '#/components/schemas/AttendeeMedicalConditionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1870,7 +1829,6 @@ paths:
       tags:
       - Attendee Medical
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1912,7 +1870,6 @@ paths:
               $ref: '#/components/schemas/AttendeeMedicalConditionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1952,7 +1909,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeMedicalConditionRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1982,7 +1938,6 @@ paths:
       tags:
       - Attendee Medical
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2032,7 +1987,6 @@ paths:
       tags:
       - Attendee Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2069,7 +2023,6 @@ paths:
               $ref: '#/components/schemas/AttendeeOrganisationRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2100,7 +2053,6 @@ paths:
       tags:
       - Attendee Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2130,7 +2082,6 @@ paths:
       tags:
       - Attendee Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2158,7 +2109,6 @@ paths:
               $ref: '#/components/schemas/GoogleOAuthRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2190,7 +2140,6 @@ paths:
               $ref: '#/components/schemas/GoogleOAuthCallbackRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2256,7 +2205,6 @@ paths:
       tags:
       - Authentication
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2369,7 +2317,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2397,7 +2344,6 @@ paths:
               $ref: '#/components/schemas/EventAlternativeSigninCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2423,7 +2369,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2459,7 +2404,6 @@ paths:
               $ref: '#/components/schemas/EventAlternativeSigninCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2495,7 +2439,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAlternativeSigninCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2519,7 +2462,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2600,7 +2542,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2628,7 +2569,6 @@ paths:
               $ref: '#/components/schemas/AttendeeAlternativeSigninCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2653,7 +2593,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2689,7 +2628,6 @@ paths:
               $ref: '#/components/schemas/AttendeeAlternativeSigninCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2724,7 +2662,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeAlternativeSigninCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2747,7 +2684,6 @@ paths:
       tags:
       - Alternative Signins
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2847,7 +2783,6 @@ paths:
       tags:
       - Booking Intents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2876,7 +2811,6 @@ paths:
               $ref: '#/components/schemas/BookingIntentCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2901,7 +2835,6 @@ paths:
       tags:
       - Booking Intents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2937,7 +2870,6 @@ paths:
             schema:
               $ref: '#/components/schemas/BookingIntentUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2973,7 +2905,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedBookingIntentUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2997,7 +2928,6 @@ paths:
       tags:
       - Booking Intents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -3019,7 +2949,6 @@ paths:
       tags:
       - Booking Intents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3150,7 +3079,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3187,7 +3115,6 @@ paths:
             schema:
               $ref: '#/components/schemas/BookingCreateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3212,7 +3139,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3235,7 +3161,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3254,7 +3179,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3273,7 +3197,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -3293,7 +3216,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3421,7 +3343,6 @@ paths:
       tags:
       - Bookings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3453,7 +3374,6 @@ paths:
               $ref: '#/components/schemas/CheckoutRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3597,7 +3517,6 @@ paths:
       tags:
       - Booking Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3626,7 +3545,6 @@ paths:
               $ref: '#/components/schemas/BookingPackageCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3651,7 +3569,6 @@ paths:
       tags:
       - Booking Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3686,7 +3603,6 @@ paths:
               $ref: '#/components/schemas/BookingPackageCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3720,7 +3636,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedBookingPackageCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3743,7 +3658,6 @@ paths:
       tags:
       - Booking Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -3839,7 +3753,6 @@ paths:
       tags:
       - Booking Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3945,7 +3858,6 @@ paths:
       tags:
       - Ticket Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3974,7 +3886,6 @@ paths:
               $ref: '#/components/schemas/TicketTypeCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3998,7 +3909,6 @@ paths:
       tags:
       - Ticket Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4033,7 +3943,6 @@ paths:
               $ref: '#/components/schemas/TicketTypeCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4067,7 +3976,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedTicketTypeCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4090,7 +3998,6 @@ paths:
       tags:
       - Ticket Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4217,7 +4124,6 @@ paths:
       tags:
       - Tickets
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4242,7 +4148,6 @@ paths:
       tags:
       - Tickets
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4309,7 +4214,6 @@ paths:
       tags:
       - Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4339,7 +4243,6 @@ paths:
               $ref: '#/components/schemas/ConsentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4364,7 +4267,6 @@ paths:
       tags:
       - Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4400,7 +4302,6 @@ paths:
               $ref: '#/components/schemas/ConsentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4434,7 +4335,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedConsentRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4458,7 +4358,6 @@ paths:
       tags:
       - Consents
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4526,7 +4425,6 @@ paths:
       tags:
       - Dietary Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4556,7 +4454,6 @@ paths:
               $ref: '#/components/schemas/DietaryRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4581,7 +4478,6 @@ paths:
       tags:
       - Dietary Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4617,7 +4513,6 @@ paths:
               $ref: '#/components/schemas/DietaryRequirementRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4652,7 +4547,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDietaryRequirementRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4676,7 +4570,6 @@ paths:
       tags:
       - Dietary Requirements
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4730,7 +4623,6 @@ paths:
       tags:
       - Event Attendance
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4760,7 +4652,6 @@ paths:
               $ref: '#/components/schemas/EventAttendanceRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4786,7 +4677,6 @@ paths:
       tags:
       - Event Attendance
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4824,7 +4714,6 @@ paths:
               $ref: '#/components/schemas/EventAttendanceRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4859,7 +4748,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAttendanceRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4883,7 +4771,6 @@ paths:
       tags:
       - Event Attendance
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4916,7 +4803,6 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4946,7 +4832,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerChoiceRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4972,7 +4857,6 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5009,7 +4893,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerChoiceRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5045,7 +4928,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionAnswerChoiceRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5070,7 +4952,6 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5119,7 +5000,6 @@ paths:
       tags:
       - Event Authorizations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5149,7 +5029,6 @@ paths:
               $ref: '#/components/schemas/EventAuthorizationRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5175,7 +5054,6 @@ paths:
       tags:
       - Event Authorizations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5212,7 +5090,6 @@ paths:
               $ref: '#/components/schemas/EventAuthorizationRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5247,7 +5124,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAuthorizationRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5271,7 +5147,6 @@ paths:
       tags:
       - Event Authorizations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5328,7 +5203,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5360,7 +5234,6 @@ paths:
               $ref: '#/components/schemas/EventCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5387,7 +5260,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5425,7 +5297,6 @@ paths:
               $ref: '#/components/schemas/EventCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5461,7 +5332,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5486,7 +5356,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5521,7 +5390,6 @@ paths:
               $ref: '#/components/schemas/AvailabilityWindowRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5577,7 +5445,6 @@ paths:
               - name
               - image
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5651,7 +5518,6 @@ paths:
               - name
               - resource_type
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5696,7 +5562,6 @@ paths:
               required:
               - user_id
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5745,7 +5610,6 @@ paths:
               - user_id
               - permission_id
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5834,7 +5698,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5868,7 +5731,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5966,7 +5828,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6001,7 +5862,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6036,7 +5896,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6071,7 +5930,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6168,7 +6026,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6208,7 +6065,6 @@ paths:
               $ref: '#/components/schemas/EventDetailRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6241,7 +6097,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6269,7 +6124,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6311,7 +6165,6 @@ paths:
               $ref: '#/components/schemas/EventDetailRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6396,7 +6249,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6475,7 +6327,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6553,7 +6404,6 @@ paths:
       tags:
       - Events
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6601,7 +6451,6 @@ paths:
       tags:
       - Event Permission Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6631,7 +6480,6 @@ paths:
               $ref: '#/components/schemas/EventPermissionAssignmentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -6657,7 +6505,6 @@ paths:
       tags:
       - Event Permission Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6694,7 +6541,6 @@ paths:
               $ref: '#/components/schemas/EventPermissionAssignmentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6729,7 +6575,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventPermissionAssignmentRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6754,7 +6599,6 @@ paths:
       tags:
       - Event Permission Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6794,7 +6638,6 @@ paths:
       tags:
       - Event Permissions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6824,7 +6667,6 @@ paths:
               $ref: '#/components/schemas/EventPermissionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -6849,7 +6691,6 @@ paths:
       tags:
       - Event Permissions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6885,7 +6726,6 @@ paths:
               $ref: '#/components/schemas/EventPermissionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6920,7 +6760,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventPermissionRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6944,7 +6783,6 @@ paths:
       tags:
       - Event Permissions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6984,7 +6822,6 @@ paths:
       tags:
       - Event Question Answers
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7014,7 +6851,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7040,7 +6876,6 @@ paths:
       tags:
       - Event Question Answers
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7076,7 +6911,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7111,7 +6945,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionAnswerRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7135,7 +6968,6 @@ paths:
       tags:
       - Event Question Answers
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7170,7 +7002,6 @@ paths:
       tags:
       - Event Question Options
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7200,7 +7031,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionOptionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7225,7 +7055,6 @@ paths:
       tags:
       - Event Question Options
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7261,7 +7090,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionOptionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7296,7 +7124,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionOptionRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7320,7 +7147,6 @@ paths:
       tags:
       - Event Question Options
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7374,7 +7200,6 @@ paths:
       tags:
       - Event Questions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7404,7 +7229,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7430,7 +7254,6 @@ paths:
       tags:
       - Event Questions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7468,7 +7291,6 @@ paths:
               $ref: '#/components/schemas/EventQuestionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7504,7 +7326,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7529,7 +7350,6 @@ paths:
       tags:
       - Event Questions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7577,7 +7397,6 @@ paths:
       tags:
       - Event Reviews
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -7608,7 +7427,6 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7633,7 +7451,6 @@ paths:
       tags:
       - Event Reviews
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -7671,7 +7488,6 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7706,7 +7522,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventReviewRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7730,7 +7545,6 @@ paths:
       tags:
       - Event Reviews
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7764,7 +7578,6 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7811,7 +7624,6 @@ paths:
       tags:
       - Event Role Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7841,7 +7653,6 @@ paths:
               $ref: '#/components/schemas/EventRoleAssignmentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7867,7 +7678,6 @@ paths:
       tags:
       - Event Role Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7904,7 +7714,6 @@ paths:
               $ref: '#/components/schemas/EventRoleAssignmentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7939,7 +7748,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventRoleAssignmentRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7964,7 +7772,6 @@ paths:
       tags:
       - Event Role Assignments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8004,7 +7811,6 @@ paths:
       tags:
       - Event Roles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8034,7 +7840,6 @@ paths:
               $ref: '#/components/schemas/EventRoleRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8059,7 +7864,6 @@ paths:
       tags:
       - Event Roles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8095,7 +7899,6 @@ paths:
               $ref: '#/components/schemas/EventRoleRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8130,7 +7933,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventRoleRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8154,7 +7956,6 @@ paths:
       tags:
       - Event Roles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8195,7 +7996,6 @@ paths:
       tags:
       - Event Settings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8225,7 +8025,6 @@ paths:
               $ref: '#/components/schemas/EventSettingsRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8251,7 +8050,6 @@ paths:
       tags:
       - Event Settings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8288,7 +8086,6 @@ paths:
               $ref: '#/components/schemas/EventSettingsRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8324,7 +8121,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSettingsRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8349,7 +8145,6 @@ paths:
       tags:
       - Event Settings
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8386,7 +8181,6 @@ paths:
       tags:
       - Event Staff
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8416,7 +8210,6 @@ paths:
               $ref: '#/components/schemas/EventStaffRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8455,7 +8248,6 @@ paths:
       tags:
       - Event Staff Availability
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8485,7 +8277,6 @@ paths:
               $ref: '#/components/schemas/EventStaffAvailabilityRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8511,7 +8302,6 @@ paths:
       tags:
       - Event Staff Availability
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8548,7 +8338,6 @@ paths:
               $ref: '#/components/schemas/EventStaffAvailabilityRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8583,7 +8372,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventStaffAvailabilityRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8608,7 +8396,6 @@ paths:
       tags:
       - Event Staff Availability
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8631,7 +8418,6 @@ paths:
       tags:
       - Event Staff
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8669,7 +8455,6 @@ paths:
               $ref: '#/components/schemas/EventStaffRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8705,7 +8490,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventStaffRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8731,7 +8515,6 @@ paths:
       tags:
       - Event Staff
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8771,7 +8554,6 @@ paths:
       tags:
       - Event Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8802,7 +8584,6 @@ paths:
               $ref: '#/components/schemas/EventTypeRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8828,7 +8609,6 @@ paths:
       tags:
       - Event Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8865,7 +8645,6 @@ paths:
               $ref: '#/components/schemas/EventTypeRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8899,7 +8678,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventTypeRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8923,7 +8701,6 @@ paths:
       tags:
       - Event Types
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8974,7 +8751,6 @@ paths:
       tags:
       - Event Venues
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -9005,7 +8781,6 @@ paths:
               $ref: '#/components/schemas/EventVenueRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9031,7 +8806,6 @@ paths:
       tags:
       - Event Venues
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -9069,7 +8843,6 @@ paths:
               $ref: '#/components/schemas/EventVenueRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9105,7 +8878,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventVenueRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9131,7 +8903,6 @@ paths:
       tags:
       - Event Venues
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9197,7 +8968,6 @@ paths:
       tags:
       - Family Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9227,7 +8997,6 @@ paths:
               $ref: '#/components/schemas/FamilyAttendeeRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9253,7 +9022,6 @@ paths:
       tags:
       - Family Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9289,7 +9057,6 @@ paths:
               $ref: '#/components/schemas/FamilyAttendeeRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9324,7 +9091,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedFamilyAttendeeRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9348,7 +9114,6 @@ paths:
       tags:
       - Family Attendees
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9397,7 +9162,6 @@ paths:
       tags:
       - Family Groups
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9427,7 +9191,6 @@ paths:
               $ref: '#/components/schemas/FamilyGroupCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9453,7 +9216,6 @@ paths:
       tags:
       - Family Groups
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9489,7 +9251,6 @@ paths:
               $ref: '#/components/schemas/FamilyGroupCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9524,7 +9285,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedFamilyGroupCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9548,7 +9308,6 @@ paths:
       tags:
       - Family Groups
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9602,7 +9361,6 @@ paths:
       tags:
       - Family Groups
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9670,7 +9428,6 @@ paths:
       tags:
       - Attendee Guardians
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9700,7 +9457,6 @@ paths:
               $ref: '#/components/schemas/AttendeeGuardianRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9726,7 +9482,6 @@ paths:
       tags:
       - Attendee Guardians
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9761,7 +9516,6 @@ paths:
               $ref: '#/components/schemas/AttendeeGuardianRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9796,7 +9550,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeGuardianRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9820,7 +9573,6 @@ paths:
       tags:
       - Attendee Guardians
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9833,7 +9585,6 @@ paths:
       tags:
       - health
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -9946,7 +9697,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9974,7 +9724,6 @@ paths:
               $ref: '#/components/schemas/AreaLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9999,7 +9748,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10034,7 +9782,6 @@ paths:
               $ref: '#/components/schemas/AreaLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10068,7 +9815,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAreaLocationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10091,7 +9837,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -10194,7 +9939,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10279,7 +10023,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10307,7 +10050,6 @@ paths:
               $ref: '#/components/schemas/ChapterLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -10332,7 +10074,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10367,7 +10108,6 @@ paths:
               $ref: '#/components/schemas/ChapterLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10401,7 +10141,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedChapterLocationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10424,7 +10163,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -10511,7 +10249,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10591,7 +10328,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10619,7 +10355,6 @@ paths:
               $ref: '#/components/schemas/ClusterLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -10644,7 +10379,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10679,7 +10413,6 @@ paths:
               $ref: '#/components/schemas/ClusterLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10713,7 +10446,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedClusterLocationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10736,7 +10468,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -10818,7 +10549,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11477,7 +11207,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11505,7 +11234,6 @@ paths:
               $ref: '#/components/schemas/CountryLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -11530,7 +11258,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11565,7 +11292,6 @@ paths:
               $ref: '#/components/schemas/CountryLocationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11599,7 +11325,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedCountryLocationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11622,7 +11347,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12283,7 +12007,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12392,7 +12115,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12421,7 +12143,6 @@ paths:
               $ref: '#/components/schemas/POICreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12445,7 +12166,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12481,7 +12201,6 @@ paths:
               $ref: '#/components/schemas/POICreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12515,7 +12234,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPOICreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12538,7 +12256,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12586,7 +12303,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12614,7 +12330,6 @@ paths:
               $ref: '#/components/schemas/RelativeAreaCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12638,7 +12353,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12673,7 +12387,6 @@ paths:
               $ref: '#/components/schemas/RelativeAreaCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12707,7 +12420,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRelativeAreaCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12730,7 +12442,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12799,7 +12510,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12828,7 +12538,6 @@ paths:
               $ref: '#/components/schemas/RoomVenueCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12852,7 +12561,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12888,7 +12596,6 @@ paths:
               $ref: '#/components/schemas/RoomVenueCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12922,7 +12629,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRoomVenueCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12945,7 +12651,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13019,7 +12724,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13048,7 +12752,6 @@ paths:
               $ref: '#/components/schemas/VenueContactCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13072,7 +12775,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13108,7 +12810,6 @@ paths:
               $ref: '#/components/schemas/VenueContactCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13142,7 +12843,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueContactCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13165,7 +12865,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13225,7 +12924,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13254,7 +12952,6 @@ paths:
               $ref: '#/components/schemas/VenueMetadataCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13278,7 +12975,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13314,7 +13010,6 @@ paths:
               $ref: '#/components/schemas/VenueMetadataCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13348,7 +13043,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueMetadataCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13371,7 +13065,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13468,7 +13161,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13497,7 +13189,6 @@ paths:
               $ref: '#/components/schemas/VenueCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13522,7 +13213,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13558,7 +13248,6 @@ paths:
               $ref: '#/components/schemas/VenueCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13592,7 +13281,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13615,7 +13303,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13718,7 +13405,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13826,7 +13512,6 @@ paths:
       tags:
       - Locations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13900,7 +13585,6 @@ paths:
       tags:
       - Medical Conditions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13930,7 +13614,6 @@ paths:
               $ref: '#/components/schemas/MedicalConditionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13955,7 +13638,6 @@ paths:
       tags:
       - Medical Conditions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13992,7 +13674,6 @@ paths:
               $ref: '#/components/schemas/MedicalConditionRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14027,7 +13708,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedMedicalConditionRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14051,7 +13731,6 @@ paths:
       tags:
       - Medical Conditions
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14121,7 +13800,6 @@ paths:
       tags:
       - Attendee Messages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14151,7 +13829,6 @@ paths:
               $ref: '#/components/schemas/AttendeeMessageCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14177,7 +13854,6 @@ paths:
       tags:
       - Attendee Messages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14213,7 +13889,6 @@ paths:
             schema:
               $ref: '#/components/schemas/AttendeeMessageUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14248,7 +13923,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeMessageUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14277,7 +13951,6 @@ paths:
       tags:
       - messages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14350,7 +14023,6 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14378,7 +14050,6 @@ paths:
               $ref: '#/components/schemas/OrganisationAcceptanceCodeCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14403,7 +14074,6 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14439,7 +14109,6 @@ paths:
               $ref: '#/components/schemas/OrganisationAcceptanceCodeCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14474,7 +14143,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationAcceptanceCodeCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14498,7 +14166,6 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14546,7 +14213,6 @@ paths:
       tags:
       - Organisation Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14574,7 +14240,6 @@ paths:
               $ref: '#/components/schemas/OrganisationContactCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14598,7 +14263,6 @@ paths:
       tags:
       - Organisation Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14633,7 +14297,6 @@ paths:
               $ref: '#/components/schemas/OrganisationContactCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14667,7 +14330,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationContactCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14690,7 +14352,6 @@ paths:
       tags:
       - Organisation Contacts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14749,7 +14410,6 @@ paths:
       tags:
       - Organisation Controls
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14777,7 +14437,6 @@ paths:
               $ref: '#/components/schemas/OrganisationControlCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14801,7 +14460,6 @@ paths:
       tags:
       - Organisation Controls
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14824,7 +14482,6 @@ paths:
       tags:
       - Organisation Controls
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14898,7 +14555,6 @@ paths:
       tags:
       - Organisation Invites
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14926,7 +14582,6 @@ paths:
               $ref: '#/components/schemas/OrganisationInviteCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14951,7 +14606,6 @@ paths:
       tags:
       - Organisation Invites
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14987,7 +14641,6 @@ paths:
               $ref: '#/components/schemas/OrganisationInviteCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15022,7 +14675,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationInviteCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15046,7 +14698,6 @@ paths:
       tags:
       - Organisation Invites
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15067,7 +14718,6 @@ paths:
       tags:
       - Organisation Invites
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15155,7 +14805,6 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15183,7 +14832,6 @@ paths:
               $ref: '#/components/schemas/InvolvedEventOrganisationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15207,7 +14855,6 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15242,7 +14889,6 @@ paths:
               $ref: '#/components/schemas/InvolvedEventOrganisationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15276,7 +14922,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedInvolvedEventOrganisationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15299,7 +14944,6 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15358,7 +15002,6 @@ paths:
       tags:
       - Organisation Leaders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15386,7 +15029,6 @@ paths:
               $ref: '#/components/schemas/LeaderCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15410,7 +15052,6 @@ paths:
       tags:
       - Organisation Leaders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15445,7 +15086,6 @@ paths:
               $ref: '#/components/schemas/LeaderCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15479,7 +15119,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedLeaderCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15502,7 +15141,6 @@ paths:
       tags:
       - Organisation Leaders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15593,7 +15231,6 @@ paths:
       tags:
       - Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15622,7 +15259,6 @@ paths:
               $ref: '#/components/schemas/OrganisationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15647,7 +15283,6 @@ paths:
       tags:
       - Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15683,7 +15318,6 @@ paths:
               $ref: '#/components/schemas/OrganisationCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15717,7 +15351,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15740,7 +15373,6 @@ paths:
       tags:
       - Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15837,7 +15469,6 @@ paths:
       tags:
       - Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15939,7 +15570,6 @@ paths:
       tags:
       - Organisations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -16024,7 +15654,6 @@ paths:
       tags:
       - Organisation Memberships
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16052,7 +15681,6 @@ paths:
               $ref: '#/components/schemas/UserOrganisationMembershipCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16076,7 +15704,6 @@ paths:
       tags:
       - Organisation Memberships
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16099,7 +15726,6 @@ paths:
       tags:
       - Organisation Memberships
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16119,7 +15745,6 @@ paths:
       tags:
       - Organisation Memberships
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16151,7 +15776,6 @@ paths:
                 code:
                   type: string
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16230,7 +15854,6 @@ paths:
       tags:
       - Sponsorship Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16258,7 +15881,6 @@ paths:
               $ref: '#/components/schemas/EventSponsorPackageCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16283,7 +15905,6 @@ paths:
       tags:
       - Sponsorship Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16318,7 +15939,6 @@ paths:
               $ref: '#/components/schemas/EventSponsorPackageCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16352,7 +15972,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSponsorPackageCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16375,7 +15994,6 @@ paths:
       tags:
       - Sponsorship Packages
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16440,7 +16058,6 @@ paths:
       tags:
       - Event Sponsors
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16468,7 +16085,6 @@ paths:
               $ref: '#/components/schemas/EventSponsorCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16492,7 +16108,6 @@ paths:
       tags:
       - Event Sponsors
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16527,7 +16142,6 @@ paths:
               $ref: '#/components/schemas/EventSponsorCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16561,7 +16175,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSponsorCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16584,7 +16197,6 @@ paths:
       tags:
       - Event Sponsors
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16655,7 +16267,6 @@ paths:
       tags:
       - Event Sponsors
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16750,7 +16361,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16780,7 +16390,6 @@ paths:
               $ref: '#/components/schemas/DiscountRuleCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16806,7 +16415,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16843,7 +16451,6 @@ paths:
               $ref: '#/components/schemas/DiscountRuleCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16879,7 +16486,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDiscountRuleCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16904,7 +16510,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -17002,7 +16607,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17031,7 +16635,6 @@ paths:
               $ref: '#/components/schemas/DiscountCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17055,7 +16658,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17091,7 +16693,6 @@ paths:
               $ref: '#/components/schemas/DiscountCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17126,7 +16727,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDiscountCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17150,7 +16750,6 @@ paths:
       tags:
       - Discounts
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -17257,7 +16856,6 @@ paths:
       tags:
       - Donations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17285,7 +16883,6 @@ paths:
               $ref: '#/components/schemas/DonationCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17309,7 +16906,6 @@ paths:
       tags:
       - Donations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17344,7 +16940,6 @@ paths:
             schema:
               $ref: '#/components/schemas/DonationDetailRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17379,7 +16974,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDonationDetailRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17403,7 +16997,6 @@ paths:
       tags:
       - Donations
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -17436,7 +17029,6 @@ paths:
               $ref: '#/components/schemas/DonationVerificationRequestRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17493,7 +17085,6 @@ paths:
               $ref: '#/components/schemas/DonationCheckoutRequestRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17611,7 +17202,6 @@ paths:
       tags:
       - Payment History
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17637,7 +17227,6 @@ paths:
       tags:
       - Payment History
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17845,7 +17434,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17874,7 +17462,6 @@ paths:
               $ref: '#/components/schemas/PaymentCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17899,7 +17486,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17933,7 +17519,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PaymentUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17967,7 +17552,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPaymentUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17991,7 +17575,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18011,7 +17594,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18035,7 +17617,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18059,7 +17640,6 @@ paths:
       tags:
       - Payments
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18105,7 +17685,6 @@ paths:
               required:
               - verified
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18197,7 +17776,6 @@ paths:
       tags:
       - Payment Methods
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18225,7 +17803,6 @@ paths:
               $ref: '#/components/schemas/PaymentMethodCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18249,7 +17826,6 @@ paths:
       tags:
       - Payment Methods
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18285,7 +17861,6 @@ paths:
               $ref: '#/components/schemas/PaymentMethodCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18320,7 +17895,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPaymentMethodCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18344,7 +17918,6 @@ paths:
       tags:
       - Payment Methods
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18376,7 +17949,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18405,7 +17977,6 @@ paths:
               $ref: '#/components/schemas/RefundAssociationCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18431,7 +18002,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18468,7 +18038,6 @@ paths:
               $ref: '#/components/schemas/RefundAssociationCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18504,7 +18073,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundAssociationCreateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18529,7 +18097,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18603,7 +18170,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18632,7 +18198,6 @@ paths:
               $ref: '#/components/schemas/RefundPolicyCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18657,7 +18222,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18693,7 +18257,6 @@ paths:
               $ref: '#/components/schemas/RefundPolicyCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18728,7 +18291,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundPolicyCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18752,7 +18314,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18891,7 +18452,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18920,7 +18480,6 @@ paths:
               $ref: '#/components/schemas/RefundRequestCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18944,7 +18503,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18979,7 +18537,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19014,7 +18571,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundRequestUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19038,7 +18594,6 @@ paths:
       tags:
       - Refunds
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19069,7 +18624,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19104,7 +18658,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19139,7 +18692,6 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19192,7 +18744,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19221,7 +18772,6 @@ paths:
               $ref: '#/components/schemas/ProductCategoryCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19245,7 +18795,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19281,7 +18830,6 @@ paths:
               $ref: '#/components/schemas/ProductCategoryCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19315,7 +18863,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProductCategoryCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19339,7 +18886,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19410,7 +18956,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19439,7 +18984,6 @@ paths:
               $ref: '#/components/schemas/EventProductCategoryCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19464,7 +19008,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19488,7 +19031,6 @@ paths:
       tags:
       - Product Categories
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19636,7 +19178,6 @@ paths:
       tags:
       - Products
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19689,7 +19230,6 @@ paths:
                     type: string
                     format: binary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19714,7 +19254,6 @@ paths:
       tags:
       - Products
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19770,7 +19309,6 @@ paths:
                     type: string
                     format: binary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19826,7 +19364,6 @@ paths:
                     type: string
                     format: binary
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19850,7 +19387,6 @@ paths:
       tags:
       - Products
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19891,7 +19427,6 @@ paths:
               required:
               - image
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19951,7 +19486,6 @@ paths:
               required:
               - resource_id
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20005,7 +19539,6 @@ paths:
       tags:
       - Products
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20217,7 +19750,6 @@ paths:
       tags:
       - Product Variants
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20253,7 +19785,6 @@ paths:
               $ref: '#/components/schemas/ProductVariantCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -20284,7 +19815,6 @@ paths:
       tags:
       - Product Variants
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20326,7 +19856,6 @@ paths:
               $ref: '#/components/schemas/ProductVariantCreateUpdateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20366,7 +19895,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProductVariantCreateUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20396,7 +19924,6 @@ paths:
       tags:
       - Product Variants
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -20437,7 +19964,6 @@ paths:
               required:
               - amount
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20511,7 +20037,6 @@ paths:
               required:
               - amount
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20585,7 +20110,6 @@ paths:
               required:
               - stock_quantity
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20646,7 +20170,6 @@ paths:
       tags:
       - Product Variants
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20701,7 +20224,6 @@ paths:
       tags:
       - Order Items
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20725,7 +20247,6 @@ paths:
       tags:
       - Order Items
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20936,7 +20457,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20965,7 +20485,6 @@ paths:
               $ref: '#/components/schemas/OrderCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -20990,7 +20509,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21025,7 +20543,6 @@ paths:
             schema:
               $ref: '#/components/schemas/OrderUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21059,7 +20576,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrderUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21082,7 +20598,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -21116,7 +20631,6 @@ paths:
               $ref: '#/components/schemas/OrderItemCreateRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21185,7 +20699,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21257,7 +20770,6 @@ paths:
               $ref: '#/components/schemas/OrderCheckoutRequestRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -21348,7 +20860,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21406,7 +20917,6 @@ paths:
       tags:
       - Orders
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21512,7 +21022,6 @@ paths:
       tags:
       - Profiles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21553,7 +21062,6 @@ paths:
               $ref: '#/components/schemas/ProfileRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -21579,7 +21087,6 @@ paths:
       tags:
       - Profiles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21616,7 +21123,6 @@ paths:
               $ref: '#/components/schemas/ProfileRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21653,7 +21159,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProfileRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21678,7 +21183,6 @@ paths:
       tags:
       - Profiles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -21695,7 +21199,6 @@ paths:
       tags:
       - Profiles
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21713,7 +21216,6 @@ paths:
       tags:
       - Stripe
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -21744,7 +21246,6 @@ paths:
               $ref: '#/components/schemas/ConfirmPaymentIntentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21805,7 +21306,6 @@ paths:
               $ref: '#/components/schemas/CreatePaymentIntentRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -21884,7 +21384,6 @@ paths:
       tags:
       - Users
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21926,7 +21425,6 @@ paths:
               $ref: '#/components/schemas/UserRegistrationRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -21965,7 +21463,6 @@ paths:
       tags:
       - Users
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22007,7 +21504,6 @@ paths:
             schema:
               $ref: '#/components/schemas/UserUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22048,7 +21544,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedUserUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22079,7 +21574,6 @@ paths:
       tags:
       - Users
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -22105,7 +21599,6 @@ paths:
       tags:
       - Users
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22145,7 +21638,6 @@ paths:
               $ref: '#/components/schemas/ChangePasswordRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -22164,7 +21656,6 @@ paths:
       tags:
       - Users
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22196,7 +21687,6 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedUserUpdateRequest'
       security:
-      - jwtAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -22230,7 +21720,6 @@ paths:
               $ref: '#/components/schemas/EmailVerificationRequest'
         required: true
       security:
-      - jwtAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -24987,6 +24476,9 @@ components:
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           readOnly: true
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -25050,6 +24542,7 @@ components:
       required:
       - _links
       - base_amount
+      - base_amount_currency
       - created_at
       - created_by_name
       - event
@@ -25086,6 +24579,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        base_amount_currency:
+          type: string
           readOnly: true
         percentage_modifier:
           type: string
@@ -25134,6 +24630,7 @@ components:
       required:
       - _links
       - base_amount
+      - base_amount_currency
       - created_at
       - created_by_name
       - event
@@ -44352,6 +43849,10 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        base_amount_currency:
+          type: string
+          readOnly: true
+          nullable: true
         description:
           type: string
           nullable: true
@@ -44359,6 +43860,7 @@ components:
           nullable: true
       required:
       - base_amount
+      - base_amount_currency
       - event
       - user
     PaymentCreateRequest:
@@ -44484,6 +43986,10 @@ components:
         base_amount:
           type: string
           readOnly: true
+        base_amount_currency:
+          type: string
+          readOnly: true
+          nullable: true
         percentage_modifier:
           type: string
           format: decimal
@@ -44533,6 +44039,7 @@ components:
       - _links
       - amount
       - base_amount
+      - base_amount_currency
       - created_at
       - donations
       - event
@@ -45097,6 +44604,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -45109,6 +44619,7 @@ components:
           type: boolean
       required:
       - base_amount
+      - base_amount_currency
       - event
       - title
     ProductDetail:
@@ -45138,6 +44649,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -45260,6 +44774,7 @@ components:
       - added_by_name
       - availability_windows
       - base_amount
+      - base_amount_currency
       - categories
       - display_code
       - event
@@ -45301,6 +44816,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -45356,6 +44874,7 @@ components:
       - _links
       - added_at
       - base_amount
+      - base_amount_currency
       - categories
       - display_code
       - event
@@ -45399,6 +44918,9 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -45410,6 +44932,7 @@ components:
         is_active:
           type: boolean
       required:
+      - base_amount_currency
       - title
     ProductVariantCreateUpdate:
       type: object
@@ -45607,6 +45130,9 @@ components:
           type: string
           description: Return base amount as string.
           readOnly: true
+        base_amount_currency:
+          type: string
+          readOnly: true
         percentage_modifier:
           type: string
           format: decimal
@@ -45644,6 +45170,7 @@ components:
       - added_at
       - added_by_name
       - base_amount
+      - base_amount_currency
       - final_price
       - id
       - is_in_stock
@@ -48177,7 +47704,3 @@ components:
       type: apiKey
       in: cookie
       name: sessionid
-    jwtAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT

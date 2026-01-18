@@ -53,7 +53,7 @@
           </NuxtLink>
         </div>
       </div>
-      {{ profiles }}
+      {{ bookingPackages }}
       <button @click="createButtonPressed">Create Event</button>
     </div>
   </div>
@@ -63,6 +63,7 @@
 
 import { profilesList } from '~/api';
 import { useAttendees } from '~/composables/resources/attendee/attendees';
+import { useBookingPackages } from '~/composables/resources/booking/bookingPackages';
 import { useBookings, useCreateBooking } from '~/composables/resources/booking/bookings';
 import { useCreateEvent, useEvents } from '~/composables/resources/events/events';
 import { useProfiles } from '~/composables/resources/user/profiles';
@@ -71,7 +72,7 @@ const { data: eventsData, isLoading: eventsLoading, isError: eventsError } = use
 const { data: bookingsData, isLoading: bookingsLoading, isError: bookingsError } = useBookings()
 const { data: attendeesData, isLoading: attendeesLoading, isError: attendeesError } = useAttendees()
 const { data: profilesData, isLoading: profilesLoading, isError: profilesError } = useProfiles()
-
+const { data: bookingPackagesData, isLoading: bookingPackagesLoading, isError: bookingPackagesError } = useBookingPackages()
 const { mutate: createEvent } = useCreateEvent()
 
 const createButtonPressed = () => {
@@ -90,6 +91,7 @@ const createButtonPressed = () => {
 
 
 // computed property to access results, assuming DRF pagination
+const bookingPackages = computed(() => bookingPackagesData.value?.data?.results || [])
 const events = computed(() => eventsData.value?.data?.results || [])
 const bookings = computed(() => bookingsData.value?.data?.results || [])
 const attendees = computed(() => attendeesData.value?.data?.results || [])

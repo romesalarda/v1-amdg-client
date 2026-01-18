@@ -1279,6 +1279,7 @@ export type BookingPackageDetail = {
     ticket_type: number;
     readonly ticket_type_title: string;
     readonly base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -1318,6 +1319,7 @@ export type BookingPackageList = {
     ticket_type: number;
     readonly ticket_type_title: string;
     readonly base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -10810,6 +10812,7 @@ export type PaymentCreate = {
     event: number;
     method?: number | null;
     base_amount: string;
+    readonly base_amount_currency: string | null;
     description?: string | null;
     metadata?: unknown;
 };
@@ -10877,6 +10880,7 @@ export type PaymentDetail = {
     };
     description?: string | null;
     readonly base_amount: string;
+    readonly base_amount_currency: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -11186,6 +11190,7 @@ export type ProductCreate = {
     description?: string | null;
     event: number;
     base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -11205,6 +11210,7 @@ export type ProductDetail = {
     event: number;
     readonly event_name: string;
     base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -11264,6 +11270,7 @@ export type ProductList = {
     event: number;
     readonly event_name: string;
     base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -11316,6 +11323,7 @@ export type ProductUpdate = {
     title: string;
     description?: string | null;
     base_amount?: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -11422,6 +11430,7 @@ export type ProductVariantDetail = {
      * Return base amount as string.
      */
     readonly base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -16759,6 +16768,24 @@ export type PatchedRefundAssociationCreateRequestWritable = {
  * Note: target_type and target_id should only be set internally by the system,
  * not via external API calls. They are marked write_only for internal use only.
  */
+export type PaymentCreateWritable = {
+    /**
+     * Paid by
+     */
+    user: number;
+    event: number;
+    method?: number | null;
+    base_amount: string;
+    description?: string | null;
+    metadata?: unknown;
+};
+
+/**
+ * Create serializer for Payment with validation.
+ *
+ * Note: target_type and target_id should only be set internally by the system,
+ * not via external API calls. They are marked write_only for internal use only.
+ */
 export type PaymentCreateRequestWritable = {
     /**
      * Paid by
@@ -16887,6 +16914,22 @@ export type ProductCategoryWritable = {
 };
 
 /**
+ * Create serializer for Product with validation and image handling.
+ */
+export type ProductCreateWritable = {
+    title: string;
+    description?: string | null;
+    event: number;
+    base_amount: string;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+    verified?: boolean;
+    is_active?: boolean;
+};
+
+/**
  * Detailed serializer for Product with full information including images.
  */
 export type ProductDetailWritable = {
@@ -16911,6 +16954,21 @@ export type ProductListWritable = {
     title: string;
     event: number;
     base_amount: string;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+    verified?: boolean;
+    is_active?: boolean;
+};
+
+/**
+ * Update serializer for Product with validation.
+ */
+export type ProductUpdateWritable = {
+    title: string;
+    description?: string | null;
+    base_amount?: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */

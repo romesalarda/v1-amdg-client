@@ -24,7 +24,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * Retrieve a list of available accessibility requirement types that can be assigned to attendees. These represent various accessibility needs such as wheelchair access, sign language interpretation, visual aids, hearing assistance, and other accommodations. Each requirement includes verification status for compliance tracking.
  */
 export const accessibilityRequirementsList = <ThrowOnError extends boolean = false>(options?: Options<AccessibilityRequirementsListData, ThrowOnError>) => (options?.client ?? client).get<AccessibilityRequirementsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -39,7 +39,7 @@ export const accessibilityRequirementsList = <ThrowOnError extends boolean = fal
  * Create a new accessibility requirement type for event accessibility planning. Staff can define custom accessibility accommodations with codes, labels, and descriptions. Supports verification workflows for compliance.
  */
 export const accessibilityRequirementsCreate = <ThrowOnError extends boolean = false>(options: Options<AccessibilityRequirementsCreateData, ThrowOnError>) => (options.client ?? client).post<AccessibilityRequirementsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -58,7 +58,7 @@ export const accessibilityRequirementsCreate = <ThrowOnError extends boolean = f
  * Delete an accessibility requirement type (use with caution if assignments exist).
  */
 export const accessibilityRequirementsDestroy = <ThrowOnError extends boolean = false>(options: Options<AccessibilityRequirementsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AccessibilityRequirementsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -73,7 +73,7 @@ export const accessibilityRequirementsDestroy = <ThrowOnError extends boolean = 
  * Retrieve detailed information about a specific accessibility requirement type including code, label, description, verification status, and active status.
  */
 export const accessibilityRequirementsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AccessibilityRequirementsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AccessibilityRequirementsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -88,7 +88,7 @@ export const accessibilityRequirementsRetrieve = <ThrowOnError extends boolean =
  * Partially update an accessibility requirement without providing complete payload.
  */
 export const accessibilityRequirementsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AccessibilityRequirementsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AccessibilityRequirementsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -107,7 +107,7 @@ export const accessibilityRequirementsPartialUpdate = <ThrowOnError extends bool
  * Update an accessibility requirement type's details including label, description, verification status, or active status. Used to maintain the accessibility catalog.
  */
 export const accessibilityRequirementsUpdate = <ThrowOnError extends boolean = false>(options: Options<AccessibilityRequirementsUpdateData, ThrowOnError>) => (options.client ?? client).put<AccessibilityRequirementsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -126,7 +126,7 @@ export const accessibilityRequirementsUpdate = <ThrowOnError extends boolean = f
  * Retrieve an audit log of actions performed on attendees. Tracks check-ins, check-outs, registrations, and other attendee-related events. Useful for compliance, reporting, and activity monitoring.
  */
 export const actionsList = <ThrowOnError extends boolean = false>(options?: Options<ActionsListData, ThrowOnError>) => (options?.client ?? client).get<ActionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -141,7 +141,7 @@ export const actionsList = <ThrowOnError extends boolean = false>(options?: Opti
  * Log a new action performed on an attendee such as check-in, check-out, or status change. Creates an immutable audit trail entry for compliance and tracking purposes.
  */
 export const actionsCreate = <ThrowOnError extends boolean = false>(options: Options<ActionsCreateData, ThrowOnError>) => (options.client ?? client).post<ActionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -160,7 +160,7 @@ export const actionsCreate = <ThrowOnError extends boolean = false>(options: Opt
  * Retrieve detailed information about a specific attendee action including the action type, performer, timestamp, and associated attendee.
  */
 export const actionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ActionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<ActionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -175,7 +175,7 @@ export const actionsRetrieve = <ThrowOnError extends boolean = false>(options: O
  * Retrieve a paginated list of attendees with comprehensive filtering and search capabilities. Results include attendee demographics, contact information, event associations, and relationship details. Staff members can view all attendees, while regular users can only view attendees they own or guard.
  */
 export const attendeesList = <ThrowOnError extends boolean = false>(options?: Options<AttendeesListData, ThrowOnError>) => (options?.client ?? client).get<AttendeesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -190,7 +190,7 @@ export const attendeesList = <ThrowOnError extends boolean = false>(options?: Op
  * Create a new attendee record with personal information and event association. For attendees with 'SELF' relationship type, the authenticated user will be automatically linked. Generates a unique attendee display ID for easy reference.
  */
 export const attendeesCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -209,7 +209,7 @@ export const attendeesCreate = <ThrowOnError extends boolean = false>(options: O
  * Soft delete an attendee record by marking it as deleted without permanent removal. Records deleted timestamp and deleting user for audit purposes. Deleted attendees can be excluded from list queries.
  */
 export const attendeesDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -224,7 +224,7 @@ export const attendeesDestroy = <ThrowOnError extends boolean = false>(options: 
  * Retrieve comprehensive information about a specific attendee including personal details, event associations, emergency contacts, dietary requirements, medical conditions, accessibility requirements, and consent records. Includes HATEOAS links for related resources.
  */
 export const attendeesRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -239,7 +239,7 @@ export const attendeesRetrieve = <ThrowOnError extends boolean = false>(options:
  * Update specific fields of an attendee record without providing complete payload. Ideal for updating individual attributes like contact information or relationship status.
  */
 export const attendeesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -258,7 +258,7 @@ export const attendeesPartialUpdate = <ThrowOnError extends boolean = false>(opt
  * Update all fields of an existing attendee record. Requires full payload with all fields. Use PATCH for partial updates. Only attendee owners, guardians, or staff can update records.
  */
 export const attendeesUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -277,7 +277,7 @@ export const attendeesUpdate = <ThrowOnError extends boolean = false>(options: O
  * Retrieve accessibility requirements assigned to attendees. Shows which attendees have specific accessibility needs with detailed notes and verification status. Supports filtering by attendee, requirement type, and verification status for compliance reporting.
  */
 export const attendeesAccessibilityRequirementsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesAccessibilityRequirementsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -292,7 +292,7 @@ export const attendeesAccessibilityRequirementsList = <ThrowOnError extends bool
  * Assign an accessibility requirement to an attendee with specific details and accommodation notes. Captures attendee-specific needs beyond the standard requirement definition. Automatically tracks creation timestamp for audit purposes.
  */
 export const attendeesAccessibilityRequirementsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesAccessibilityRequirementsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -311,7 +311,7 @@ export const attendeesAccessibilityRequirementsCreate = <ThrowOnError extends bo
  * Remove an accessibility requirement assignment from an attendee when it is no longer needed. Does not delete the requirement type, only the assignment to this specific attendee.
  */
 export const attendeesAccessibilityRequirementsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesAccessibilityRequirementsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -326,7 +326,7 @@ export const attendeesAccessibilityRequirementsDestroy = <ThrowOnError extends b
  * Retrieve detailed information about a specific attendee's accessibility requirement including the requirement type, specific details, accommodation notes, verification status, and verification history.
  */
 export const attendeesAccessibilityRequirementsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesAccessibilityRequirementsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -341,7 +341,7 @@ export const attendeesAccessibilityRequirementsRetrieve = <ThrowOnError extends 
  * Partially update accessibility requirement details without providing complete payload.
  */
 export const attendeesAccessibilityRequirementsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesAccessibilityRequirementsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -360,7 +360,7 @@ export const attendeesAccessibilityRequirementsPartialUpdate = <ThrowOnError ext
  * Update an attendee's accessibility requirement details, notes, or verification status. Used to refine accommodation plans or update verification as accommodations are confirmed.
  */
 export const attendeesAccessibilityRequirementsUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesAccessibilityRequirementsUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesAccessibilityRequirementsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -379,7 +379,7 @@ export const attendeesAccessibilityRequirementsUpdate = <ThrowOnError extends bo
  * Retrieve consent records for attendees showing which consents have been granted or declined. Tracks attendee agreement to event terms, photo releases, liability waivers, and other legal permissions. Includes consent status (granted/declined), timestamp, and optional consent giver information for minors. Essential for legal compliance and event liability management.
  */
 export const attendeesConsentsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesConsentsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -394,7 +394,7 @@ export const attendeesConsentsList = <ThrowOnError extends boolean = false>(opti
  * Record a consent grant or decline for an attendee. Captures whether consent is given, when it was given, and optionally who gave consent (parent/guardian for minors). Creates an immutable audit trail for legal compliance.
  */
 export const attendeesConsentsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesConsentsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -413,7 +413,7 @@ export const attendeesConsentsCreate = <ThrowOnError extends boolean = false>(op
  * Remove a consent record from an attendee. Use with caution as consent records are typically maintained for legal compliance. Consider marking as declined rather than deleting for audit trail purposes.
  */
 export const attendeesConsentsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesConsentsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -428,7 +428,7 @@ export const attendeesConsentsDestroy = <ThrowOnError extends boolean = false>(o
  * Retrieve detailed information about a specific attendee's consent record including the consent type, granted status, recording timestamp, when consent was given, and who gave consent (for minors).
  */
 export const attendeesConsentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesConsentsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -443,7 +443,7 @@ export const attendeesConsentsRetrieve = <ThrowOnError extends boolean = false>(
  * Partially update consent record details without providing complete payload.
  */
 export const attendeesConsentsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesConsentsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -462,7 +462,7 @@ export const attendeesConsentsPartialUpdate = <ThrowOnError extends boolean = fa
  * Update an attendee's consent record such as changing consent status or recording withdrawal of consent. Maintains compliance with data protection regulations and consent management requirements.
  */
 export const attendeesConsentsUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesConsentsUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesConsentsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -481,7 +481,7 @@ export const attendeesConsentsUpdate = <ThrowOnError extends boolean = false>(op
  * Retrieve dietary requirements assigned to attendees for meal planning and catering. Shows which attendees have specific dietary needs with detailed notes and verification status. Essential for event catering, allergen management, and dietary compliance.
  */
 export const attendeesDietaryRequirementsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesDietaryRequirementsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -496,7 +496,7 @@ export const attendeesDietaryRequirementsList = <ThrowOnError extends boolean = 
  * Assign a dietary requirement to an attendee with specific details and preparation notes. Captures attendee-specific dietary needs, allergies, and restrictions for safe meal preparation. Automatically tracks creation timestamp for audit purposes.
  */
 export const attendeesDietaryRequirementsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesDietaryRequirementsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -515,7 +515,7 @@ export const attendeesDietaryRequirementsCreate = <ThrowOnError extends boolean 
  * Remove a dietary requirement assignment from an attendee when it is no longer applicable. Does not delete the requirement type, only the assignment to this specific attendee.
  */
 export const attendeesDietaryRequirementsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesDietaryRequirementsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -530,7 +530,7 @@ export const attendeesDietaryRequirementsDestroy = <ThrowOnError extends boolean
  * Retrieve detailed information about a specific attendee's dietary requirement including the requirement type, specific details, preparation notes, verification status, and verification history.
  */
 export const attendeesDietaryRequirementsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesDietaryRequirementsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -545,7 +545,7 @@ export const attendeesDietaryRequirementsRetrieve = <ThrowOnError extends boolea
  * Partially update dietary requirement details without providing complete payload.
  */
 export const attendeesDietaryRequirementsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesDietaryRequirementsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -564,7 +564,7 @@ export const attendeesDietaryRequirementsPartialUpdate = <ThrowOnError extends b
  * Update an attendee's dietary requirement details, notes, or verification status. Used to refine meal plans or update verification as dietary needs are confirmed.
  */
 export const attendeesDietaryRequirementsUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesDietaryRequirementsUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesDietaryRequirementsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -583,7 +583,7 @@ export const attendeesDietaryRequirementsUpdate = <ThrowOnError extends boolean 
  * Retrieve a list of emergency contacts for attendees. Emergency contacts are individuals to be notified in case of medical emergencies, accidents, or urgent situations. Each attendee can have multiple contacts with one designated as primary. Essential for event safety and emergency response protocols.
  */
 export const attendeesEmergencyContactsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesEmergencyContactsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -598,7 +598,7 @@ export const attendeesEmergencyContactsList = <ThrowOnError extends boolean = fa
  * Create a new emergency contact for an attendee. Requires contact name, relationship, and at least one contact method (phone or email). Designate as primary contact if this is the first or most important contact for emergencies.
  */
 export const attendeesEmergencyContactsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesEmergencyContactsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -617,7 +617,7 @@ export const attendeesEmergencyContactsCreate = <ThrowOnError extends boolean = 
  * Remove an emergency contact from an attendee's record. Use caution when removing primary contacts to ensure attendee always has emergency contact information.
  */
 export const attendeesEmergencyContactsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesEmergencyContactsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -632,7 +632,7 @@ export const attendeesEmergencyContactsDestroy = <ThrowOnError extends boolean =
  * Retrieve detailed information about a specific emergency contact including name, relationship to attendee, phone numbers, email, and primary contact designation.
  */
 export const attendeesEmergencyContactsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesEmergencyContactsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -647,7 +647,7 @@ export const attendeesEmergencyContactsRetrieve = <ThrowOnError extends boolean 
  * Partially update emergency contact details without providing complete payload.
  */
 export const attendeesEmergencyContactsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesEmergencyContactsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -666,7 +666,7 @@ export const attendeesEmergencyContactsPartialUpdate = <ThrowOnError extends boo
  * Update emergency contact information including contact details, relationship, or primary designation. Ensures attendee emergency information remains current for safety purposes.
  */
 export const attendeesEmergencyContactsUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesEmergencyContactsUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesEmergencyContactsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -685,7 +685,7 @@ export const attendeesEmergencyContactsUpdate = <ThrowOnError extends boolean = 
  * Retrieve medical conditions assigned to attendees for health monitoring and emergency response. Shows which attendees have specific medical conditions with severity levels (mild, moderate, severe), detailed notes, and verification status. Critical for event safety and medical preparedness.
  */
 export const attendeesMedicalConditionsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesMedicalConditionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -700,7 +700,7 @@ export const attendeesMedicalConditionsList = <ThrowOnError extends boolean = fa
  * Assign a medical condition to an attendee with severity level and specific medical details. Captures attendee-specific medical needs for emergency response planning and health monitoring. Severity levels: mild, moderate, severe. Automatically tracks creation timestamp for audit purposes.
  */
 export const attendeesMedicalConditionsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesMedicalConditionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -719,7 +719,7 @@ export const attendeesMedicalConditionsCreate = <ThrowOnError extends boolean = 
  * Remove a medical condition assignment from an attendee when it is no longer applicable. Does not delete the condition type, only the assignment to this specific attendee.
  */
 export const attendeesMedicalConditionsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesMedicalConditionsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -734,7 +734,7 @@ export const attendeesMedicalConditionsDestroy = <ThrowOnError extends boolean =
  * Retrieve detailed information about a specific attendee's medical condition including the condition type, severity level, specific details, medical notes, verification status, and verification history.
  */
 export const attendeesMedicalConditionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesMedicalConditionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -749,7 +749,7 @@ export const attendeesMedicalConditionsRetrieve = <ThrowOnError extends boolean 
  * Partially update medical condition details without providing complete payload.
  */
 export const attendeesMedicalConditionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<AttendeesMedicalConditionsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -768,7 +768,7 @@ export const attendeesMedicalConditionsPartialUpdate = <ThrowOnError extends boo
  * Update an attendee's medical condition details, severity level, notes, or verification status. Used to refine emergency response plans or update verification as medical information is confirmed.
  */
 export const attendeesMedicalConditionsUpdate = <ThrowOnError extends boolean = false>(options: Options<AttendeesMedicalConditionsUpdateData, ThrowOnError>) => (options.client ?? client).put<AttendeesMedicalConditionsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -787,7 +787,7 @@ export const attendeesMedicalConditionsUpdate = <ThrowOnError extends boolean = 
  * Retrieve organisation associations for attendees showing which organisations attendees belong to or represent. Useful for tracking institutional affiliations, group registrations, and organisational analytics. Supports filtering by organisation, attendee, or association date.
  */
 export const attendeesOrganisationsList = <ThrowOnError extends boolean = false>(options: Options<AttendeesOrganisationsListData, ThrowOnError>) => (options.client ?? client).get<AttendeesOrganisationsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -802,7 +802,7 @@ export const attendeesOrganisationsList = <ThrowOnError extends boolean = false>
  * Create a new association between an attendee and an organisation. Links attendees to institutions, companies, parishes, or other organisational entities they represent. Enables organisational reporting and group management.
  */
 export const attendeesOrganisationsCreate = <ThrowOnError extends boolean = false>(options: Options<AttendeesOrganisationsCreateData, ThrowOnError>) => (options.client ?? client).post<AttendeesOrganisationsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -821,7 +821,7 @@ export const attendeesOrganisationsCreate = <ThrowOnError extends boolean = fals
  * Remove an organisation association from an attendee when the affiliation is no longer valid. Does not delete the attendee or organisation records, only the association between them.
  */
 export const attendeesOrganisationsDestroy = <ThrowOnError extends boolean = false>(options: Options<AttendeesOrganisationsDestroyData, ThrowOnError>) => (options.client ?? client).delete<AttendeesOrganisationsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -836,7 +836,7 @@ export const attendeesOrganisationsDestroy = <ThrowOnError extends boolean = fal
  * Retrieve detailed information about a specific organisation association including the attendee, organisation details, association timestamp, and any additional context.
  */
 export const attendeesOrganisationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<AttendeesOrganisationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<AttendeesOrganisationsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -851,7 +851,7 @@ export const attendeesOrganisationsRetrieve = <ThrowOnError extends boolean = fa
  * Generate Google OAuth authorization URL for user authentication. Returns a URL that redirects users to Google's authorization page where they can grant permissions. After authorization, Google redirects back to the specified redirect_uri with an authorization code.
  */
 export const authGoogleAuthorizeCreate = <ThrowOnError extends boolean = false>(options: Options<AuthGoogleAuthorizeCreateData, ThrowOnError>) => (options.client ?? client).post<AuthGoogleAuthorizeCreateResponses, AuthGoogleAuthorizeCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -870,7 +870,7 @@ export const authGoogleAuthorizeCreate = <ThrowOnError extends boolean = false>(
  * Exchange Google OAuth authorization code for user information and authenticate the user. Creates a new user account if the Google email doesn't exist in the system, or logs in existing user. Returns JWT tokens in secure HTTP-only cookies and user profile data in response body. Automatically associates the Google account with the user for future OAuth logins.
  */
 export const authGoogleCallbackCreate = <ThrowOnError extends boolean = false>(options: Options<AuthGoogleCallbackCreateData, ThrowOnError>) => (options.client ?? client).post<AuthGoogleCallbackCreateResponses, AuthGoogleCallbackCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -903,7 +903,7 @@ export const authLoginCreate = <ThrowOnError extends boolean = false>(options: O
  * Logout user by clearing JWT tokens from HTTP-only cookies.
  */
 export const authLogoutCreate = <ThrowOnError extends boolean = false>(options?: Options<AuthLogoutCreateData, ThrowOnError>) => (options?.client ?? client).post<AuthLogoutCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -932,7 +932,7 @@ export const authRefreshCreate = <ThrowOnError extends boolean = false>(options:
  * Retrieve event alternative signin identifiers. Admin only.
  */
 export const bookingsAlternativeSigninsList = <ThrowOnError extends boolean = false>(options?: Options<BookingsAlternativeSigninsListData, ThrowOnError>) => (options?.client ?? client).get<BookingsAlternativeSigninsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -947,7 +947,7 @@ export const bookingsAlternativeSigninsList = <ThrowOnError extends boolean = fa
  * Create a new event alternative signin identifier. Admin only.
  */
 export const bookingsAlternativeSigninsCreate = <ThrowOnError extends boolean = false>(options: Options<BookingsAlternativeSigninsCreateData, ThrowOnError>) => (options.client ?? client).post<BookingsAlternativeSigninsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -966,7 +966,7 @@ export const bookingsAlternativeSigninsCreate = <ThrowOnError extends boolean = 
  * Delete an event alternative signin identifier. Admin only.
  */
 export const bookingsAlternativeSigninsDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsAlternativeSigninsDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsAlternativeSigninsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -981,7 +981,7 @@ export const bookingsAlternativeSigninsDestroy = <ThrowOnError extends boolean =
  * Get detailed information about an event alternative signin identifier. Admin only.
  */
 export const bookingsAlternativeSigninsRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsAlternativeSigninsRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsAlternativeSigninsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -996,7 +996,7 @@ export const bookingsAlternativeSigninsRetrieve = <ThrowOnError extends boolean 
  * Partially update an event alternative signin identifier. Admin only.
  */
 export const bookingsAlternativeSigninsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsAlternativeSigninsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsAlternativeSigninsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1015,7 +1015,7 @@ export const bookingsAlternativeSigninsPartialUpdate = <ThrowOnError extends boo
  * Update an existing event alternative signin identifier. Admin only.
  */
 export const bookingsAlternativeSigninsUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsAlternativeSigninsUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsAlternativeSigninsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1034,7 +1034,7 @@ export const bookingsAlternativeSigninsUpdate = <ThrowOnError extends boolean = 
  * Retrieve attendee alternative signin identifiers. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsList = <ThrowOnError extends boolean = false>(options?: Options<BookingsAttendeeAlternativeSigninsListData, ThrowOnError>) => (options?.client ?? client).get<BookingsAttendeeAlternativeSigninsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1049,7 +1049,7 @@ export const bookingsAttendeeAlternativeSigninsList = <ThrowOnError extends bool
  * Create a new attendee alternative signin identifier. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsCreate = <ThrowOnError extends boolean = false>(options: Options<BookingsAttendeeAlternativeSigninsCreateData, ThrowOnError>) => (options.client ?? client).post<BookingsAttendeeAlternativeSigninsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1068,7 +1068,7 @@ export const bookingsAttendeeAlternativeSigninsCreate = <ThrowOnError extends bo
  * Delete an attendee alternative signin identifier. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsAttendeeAlternativeSigninsDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsAttendeeAlternativeSigninsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1083,7 +1083,7 @@ export const bookingsAttendeeAlternativeSigninsDestroy = <ThrowOnError extends b
  * Get detailed information about an attendee alternative signin identifier. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsAttendeeAlternativeSigninsRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsAttendeeAlternativeSigninsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1098,7 +1098,7 @@ export const bookingsAttendeeAlternativeSigninsRetrieve = <ThrowOnError extends 
  * Partially update an attendee alternative signin identifier. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsAttendeeAlternativeSigninsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsAttendeeAlternativeSigninsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1117,7 +1117,7 @@ export const bookingsAttendeeAlternativeSigninsPartialUpdate = <ThrowOnError ext
  * Update an existing attendee alternative signin identifier. Admin only.
  */
 export const bookingsAttendeeAlternativeSigninsUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsAttendeeAlternativeSigninsUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsAttendeeAlternativeSigninsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1136,7 +1136,7 @@ export const bookingsAttendeeAlternativeSigninsUpdate = <ThrowOnError extends bo
  * Retrieve a paginated list of booking intents. Users see only their own intents, admins see all.
  */
 export const bookingsIntentsList = <ThrowOnError extends boolean = false>(options?: Options<BookingsIntentsListData, ThrowOnError>) => (options?.client ?? client).get<BookingsIntentsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1151,7 +1151,7 @@ export const bookingsIntentsList = <ThrowOnError extends boolean = false>(option
  * Create a new booking intent to reserve capacity for event tickets. Intent expires after 20 minutes.
  */
 export const bookingsIntentsCreate = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentsCreateData, ThrowOnError>) => (options.client ?? client).post<BookingsIntentsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1170,7 +1170,7 @@ export const bookingsIntentsCreate = <ThrowOnError extends boolean = false>(opti
  * Delete a booking intent. Only allowed for pending intents.
  */
 export const bookingsIntentsDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentsDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsIntentsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1185,7 +1185,7 @@ export const bookingsIntentsDestroy = <ThrowOnError extends boolean = false>(opt
  * Get detailed information about a specific booking intent.
  */
 export const bookingsIntentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsIntentsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1200,7 +1200,7 @@ export const bookingsIntentsRetrieve = <ThrowOnError extends boolean = false>(op
  * Partially update a booking intent. Only ticket count can be modified and only for pending intents.
  */
 export const bookingsIntentsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsIntentsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1219,7 +1219,7 @@ export const bookingsIntentsPartialUpdate = <ThrowOnError extends boolean = fals
  * Update an existing booking intent. Only ticket count can be modified and only for pending intents.
  */
 export const bookingsIntentsUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentsUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsIntentsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1238,7 +1238,7 @@ export const bookingsIntentsUpdate = <ThrowOnError extends boolean = false>(opti
  * Cancel a pending booking intent, releasing the reserved capacity. Cannot be undone.
  */
 export const bookingsIntentCancel = <ThrowOnError extends boolean = false>(options: Options<BookingsIntentCancelData, ThrowOnError>) => (options.client ?? client).post<BookingsIntentCancelResponses, BookingsIntentCancelErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1253,7 +1253,7 @@ export const bookingsIntentCancel = <ThrowOnError extends boolean = false>(optio
  * Retrieve a paginated list of bookings. Users see their own bookings, admins see all.
  */
 export const bookingsListList = <ThrowOnError extends boolean = false>(options?: Options<BookingsListListData, ThrowOnError>) => (options?.client ?? client).get<BookingsListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1268,7 +1268,7 @@ export const bookingsListList = <ThrowOnError extends boolean = false>(options?:
  * Create a new booking for an event. Booking reference is auto-generated. Requires a valid booking intent ID passed as query parameter 'intent'. The intent must be pending, not expired, and belong to the requesting user. Admin users can bypass this requirement.
  */
 export const bookingsListCreate = <ThrowOnError extends boolean = false>(options?: Options<BookingsListCreateData, ThrowOnError>) => (options?.client ?? client).post<BookingsListCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1287,7 +1287,7 @@ export const bookingsListCreate = <ThrowOnError extends boolean = false>(options
  * Delete a booking. Only allowed if no tickets have been issued.
  */
 export const bookingsListDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsListDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsListDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1302,7 +1302,7 @@ export const bookingsListDestroy = <ThrowOnError extends boolean = false>(option
  * Get detailed information about a specific booking including attendees, tickets, and payments.
  */
 export const bookingsListRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsListRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsListRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1317,7 +1317,7 @@ export const bookingsListRetrieve = <ThrowOnError extends boolean = false>(optio
  * Partially update a booking. Only certain fields can be modified.
  */
 export const bookingsListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsListPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1332,7 +1332,7 @@ export const bookingsListPartialUpdate = <ThrowOnError extends boolean = false>(
  * Update an existing booking. Only certain fields can be modified.
  */
 export const bookingsListUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsListUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsListUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1347,7 +1347,7 @@ export const bookingsListUpdate = <ThrowOnError extends boolean = false>(options
  * Retrieve all attendees associated with this booking.
  */
 export const bookingsBookingAttendeesList = <ThrowOnError extends boolean = false>(options: Options<BookingsBookingAttendeesListData, ThrowOnError>) => (options.client ?? client).get<BookingsBookingAttendeesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1362,7 +1362,7 @@ export const bookingsBookingAttendeesList = <ThrowOnError extends boolean = fals
  * Retrieve all tickets across all attendees for this booking.
  */
 export const bookingsBookingTicketsList = <ThrowOnError extends boolean = false>(options: Options<BookingsBookingTicketsListData, ThrowOnError>) => (options.client ?? client).get<BookingsBookingTicketsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1385,7 +1385,7 @@ export const bookingsBookingTicketsList = <ThrowOnError extends boolean = false>
  * 5. Handles failures with automatic cleanup and stock restoration
  */
 export const bookingsCheckout = <ThrowOnError extends boolean = false>(options: Options<BookingsCheckoutData, ThrowOnError>) => (options.client ?? client).post<BookingsCheckoutResponses, BookingsCheckoutErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1404,7 +1404,7 @@ export const bookingsCheckout = <ThrowOnError extends boolean = false>(options: 
  * Retrieve a list of booking packages. Filter by event, ticket type, or eligibility.
  */
 export const bookingsPackagesList = <ThrowOnError extends boolean = false>(options?: Options<BookingsPackagesListData, ThrowOnError>) => (options?.client ?? client).get<BookingsPackagesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1419,7 +1419,7 @@ export const bookingsPackagesList = <ThrowOnError extends boolean = false>(optio
  * Create a new booking package with optional rules. Requires administrative access.
  */
 export const bookingsPackagesCreate = <ThrowOnError extends boolean = false>(options: Options<BookingsPackagesCreateData, ThrowOnError>) => (options.client ?? client).post<BookingsPackagesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1438,7 +1438,7 @@ export const bookingsPackagesCreate = <ThrowOnError extends boolean = false>(opt
  * Delete a booking package. Requires administrative access.
  */
 export const bookingsPackagesDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsPackagesDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsPackagesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1453,7 +1453,7 @@ export const bookingsPackagesDestroy = <ThrowOnError extends boolean = false>(op
  * Get detailed information about a specific booking package including rules.
  */
 export const bookingsPackagesRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsPackagesRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsPackagesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1468,7 +1468,7 @@ export const bookingsPackagesRetrieve = <ThrowOnError extends boolean = false>(o
  * Partially update a booking package. Requires administrative access.
  */
 export const bookingsPackagesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsPackagesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsPackagesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1487,7 +1487,7 @@ export const bookingsPackagesPartialUpdate = <ThrowOnError extends boolean = fal
  * Update an existing booking package. Requires administrative access.
  */
 export const bookingsPackagesUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsPackagesUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsPackagesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1506,7 +1506,7 @@ export const bookingsPackagesUpdate = <ThrowOnError extends boolean = false>(opt
  * Retrieve all rules associated with this booking package.
  */
 export const bookingsPackageRulesList = <ThrowOnError extends boolean = false>(options: Options<BookingsPackageRulesListData, ThrowOnError>) => (options.client ?? client).get<BookingsPackageRulesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1521,7 +1521,7 @@ export const bookingsPackageRulesList = <ThrowOnError extends boolean = false>(o
  * Retrieve a list of ticket types. Filter by event, scope, or validity.
  */
 export const bookingsTicketTypesList = <ThrowOnError extends boolean = false>(options?: Options<BookingsTicketTypesListData, ThrowOnError>) => (options?.client ?? client).get<BookingsTicketTypesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1536,7 +1536,7 @@ export const bookingsTicketTypesList = <ThrowOnError extends boolean = false>(op
  * Create a new ticket type for an event. Requires administrative access.
  */
 export const bookingsTicketTypesCreate = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketTypesCreateData, ThrowOnError>) => (options.client ?? client).post<BookingsTicketTypesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1555,7 +1555,7 @@ export const bookingsTicketTypesCreate = <ThrowOnError extends boolean = false>(
  * Delete a ticket type. Requires administrative access.
  */
 export const bookingsTicketTypesDestroy = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketTypesDestroyData, ThrowOnError>) => (options.client ?? client).delete<BookingsTicketTypesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1570,7 +1570,7 @@ export const bookingsTicketTypesDestroy = <ThrowOnError extends boolean = false>
  * Get detailed information about a specific ticket type.
  */
 export const bookingsTicketTypesRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketTypesRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsTicketTypesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1585,7 +1585,7 @@ export const bookingsTicketTypesRetrieve = <ThrowOnError extends boolean = false
  * Partially update a ticket type. Requires administrative access.
  */
 export const bookingsTicketTypesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketTypesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<BookingsTicketTypesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1604,7 +1604,7 @@ export const bookingsTicketTypesPartialUpdate = <ThrowOnError extends boolean = 
  * Update an existing ticket type. Requires administrative access.
  */
 export const bookingsTicketTypesUpdate = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketTypesUpdateData, ThrowOnError>) => (options.client ?? client).put<BookingsTicketTypesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1623,7 +1623,7 @@ export const bookingsTicketTypesUpdate = <ThrowOnError extends boolean = false>(
  * Retrieve a list of tickets. Filter by status, attendee, booking, or type.
  */
 export const bookingsTicketsList = <ThrowOnError extends boolean = false>(options?: Options<BookingsTicketsListData, ThrowOnError>) => (options?.client ?? client).get<BookingsTicketsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1638,7 +1638,7 @@ export const bookingsTicketsList = <ThrowOnError extends boolean = false>(option
  * Get detailed information about a specific ticket.
  */
 export const bookingsTicketsRetrieve = <ThrowOnError extends boolean = false>(options: Options<BookingsTicketsRetrieveData, ThrowOnError>) => (options.client ?? client).get<BookingsTicketsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1653,7 +1653,7 @@ export const bookingsTicketsRetrieve = <ThrowOnError extends boolean = false>(op
  * Retrieve a list of available consent types for events. Consents are legal agreements or permissions required from attendees such as photo/video release, medical treatment authorization, liability waivers, code of conduct acknowledgment, and data processing permissions. Each consent type is associated with a specific event.
  */
 export const consentsList = <ThrowOnError extends boolean = false>(options?: Options<ConsentsListData, ThrowOnError>) => (options?.client ?? client).get<ConsentsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1668,7 +1668,7 @@ export const consentsList = <ThrowOnError extends boolean = false>(options?: Opt
  * Create a new consent type for an event. Define legal agreements or permissions required from attendees with unique codes, titles, and descriptions. Each consent can then be individually granted or declined by attendees.
  */
 export const consentsCreate = <ThrowOnError extends boolean = false>(options: Options<ConsentsCreateData, ThrowOnError>) => (options.client ?? client).post<ConsentsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1687,7 +1687,7 @@ export const consentsCreate = <ThrowOnError extends boolean = false>(options: Op
  * Delete a consent type (use with caution if attendee consent records exist).
  */
 export const consentsDestroy = <ThrowOnError extends boolean = false>(options: Options<ConsentsDestroyData, ThrowOnError>) => (options.client ?? client).delete<ConsentsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1702,7 +1702,7 @@ export const consentsDestroy = <ThrowOnError extends boolean = false>(options: O
  * Retrieve detailed information about a specific consent type including code, title, description, associated event, and creation timestamp.
  */
 export const consentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ConsentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<ConsentsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1717,7 +1717,7 @@ export const consentsRetrieve = <ThrowOnError extends boolean = false>(options: 
  * Partially update a consent type without providing complete payload.
  */
 export const consentsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ConsentsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ConsentsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1736,7 +1736,7 @@ export const consentsPartialUpdate = <ThrowOnError extends boolean = false>(opti
  * Update a consent type's details including title or description. Used to maintain consent definitions and legal language for compliance.
  */
 export const consentsUpdate = <ThrowOnError extends boolean = false>(options: Options<ConsentsUpdateData, ThrowOnError>) => (options.client ?? client).put<ConsentsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1755,7 +1755,7 @@ export const consentsUpdate = <ThrowOnError extends boolean = false>(options: Op
  * Retrieve a list of available dietary requirement types for event meal planning. Includes common dietary needs such as vegetarian, vegan, halal, kosher, gluten-free, lactose-free, nut allergies, and other dietary restrictions. Each requirement can be assigned to attendees for catering purposes.
  */
 export const dietaryRequirementsList = <ThrowOnError extends boolean = false>(options?: Options<DietaryRequirementsListData, ThrowOnError>) => (options?.client ?? client).get<DietaryRequirementsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1770,7 +1770,7 @@ export const dietaryRequirementsList = <ThrowOnError extends boolean = false>(op
  * Create a new dietary requirement type for meal planning and catering. Staff can define custom dietary needs with codes, labels, and descriptions. Supports verification workflows for dietary compliance.
  */
 export const dietaryRequirementsCreate = <ThrowOnError extends boolean = false>(options: Options<DietaryRequirementsCreateData, ThrowOnError>) => (options.client ?? client).post<DietaryRequirementsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1789,7 +1789,7 @@ export const dietaryRequirementsCreate = <ThrowOnError extends boolean = false>(
  * Delete a dietary requirement type (use with caution if assignments exist).
  */
 export const dietaryRequirementsDestroy = <ThrowOnError extends boolean = false>(options: Options<DietaryRequirementsDestroyData, ThrowOnError>) => (options.client ?? client).delete<DietaryRequirementsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1804,7 +1804,7 @@ export const dietaryRequirementsDestroy = <ThrowOnError extends boolean = false>
  * Retrieve detailed information about a specific dietary requirement type including code, label, description, verification status, and active status.
  */
 export const dietaryRequirementsRetrieve = <ThrowOnError extends boolean = false>(options: Options<DietaryRequirementsRetrieveData, ThrowOnError>) => (options.client ?? client).get<DietaryRequirementsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1819,7 +1819,7 @@ export const dietaryRequirementsRetrieve = <ThrowOnError extends boolean = false
  * Partially update a dietary requirement without providing complete payload.
  */
 export const dietaryRequirementsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<DietaryRequirementsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<DietaryRequirementsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1838,7 +1838,7 @@ export const dietaryRequirementsPartialUpdate = <ThrowOnError extends boolean = 
  * Update a dietary requirement type's details including label, description, verification status, or active status. Used to maintain the dietary catalog.
  */
 export const dietaryRequirementsUpdate = <ThrowOnError extends boolean = false>(options: Options<DietaryRequirementsUpdateData, ThrowOnError>) => (options.client ?? client).put<DietaryRequirementsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1857,7 +1857,7 @@ export const dietaryRequirementsUpdate = <ThrowOnError extends boolean = false>(
  * Retrieve a list of event attendance records tracking attendee check-ins and check-outs. Shows who attended events, arrival and departure times, and staff who processed check-in/check-out. Useful for attendance reporting, capacity monitoring, and event analytics. Supports filtering by event, attendee, and date ranges.
  */
 export const eventAttendancesList = <ThrowOnError extends boolean = false>(options?: Options<EventAttendancesListData, ThrowOnError>) => (options?.client ?? client).get<EventAttendancesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1872,7 +1872,7 @@ export const eventAttendancesList = <ThrowOnError extends boolean = false>(optio
  * Create a new attendance record when an attendee arrives at an event. Records check-in time and staff member who processed the check-in. Enables real-time event capacity monitoring and attendance tracking.
  */
 export const eventAttendancesCreate = <ThrowOnError extends boolean = false>(options: Options<EventAttendancesCreateData, ThrowOnError>) => (options.client ?? client).post<EventAttendancesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1891,7 +1891,7 @@ export const eventAttendancesCreate = <ThrowOnError extends boolean = false>(opt
  * Delete an attendance record (use with caution as this affects attendance history).
  */
 export const eventAttendancesDestroy = <ThrowOnError extends boolean = false>(options: Options<EventAttendancesDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventAttendancesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1906,7 +1906,7 @@ export const eventAttendancesDestroy = <ThrowOnError extends boolean = false>(op
  * Retrieve detailed information about a specific attendance record including event details, attendee information, check-in and check-out timestamps, and processing staff members.
  */
 export const eventAttendancesRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventAttendancesRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventAttendancesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1921,7 +1921,7 @@ export const eventAttendancesRetrieve = <ThrowOnError extends boolean = false>(o
  * Partially update attendance details such as check-out time without providing complete payload.
  */
 export const eventAttendancesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAttendancesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventAttendancesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1940,7 +1940,7 @@ export const eventAttendancesPartialUpdate = <ThrowOnError extends boolean = fal
  * Update an attendance record, typically to record check-out when an attendee leaves. Can also be used to correct check-in times or update processing staff information. Records check-out timestamp and staff member who processed departure.
  */
 export const eventAttendancesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAttendancesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventAttendancesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1959,7 +1959,7 @@ export const eventAttendancesUpdate = <ThrowOnError extends boolean = false>(opt
  * Retrieve a paginated list of answer choices representing specific option selections for multiple choice answers. Each choice links an answer to a specific option that was selected. Used for tracking individual selections in multi-select questions.
  */
 export const eventAnswerChoicesList = <ThrowOnError extends boolean = false>(options?: Options<EventAnswerChoicesListData, ThrowOnError>) => (options?.client ?? client).get<EventAnswerChoicesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1974,7 +1974,7 @@ export const eventAnswerChoicesList = <ThrowOnError extends boolean = false>(opt
  * Create a new answer choice linking an answer to a selected option. Used when attendees select options in multiple choice questions. Automatically validated against available options.
  */
 export const eventAnswerChoicesCreate = <ThrowOnError extends boolean = false>(options: Options<EventAnswerChoicesCreateData, ThrowOnError>) => (options.client ?? client).post<EventAnswerChoicesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -1993,7 +1993,7 @@ export const eventAnswerChoicesCreate = <ThrowOnError extends boolean = false>(o
  * Delete an answer choice, removing an option selection from an answer. Used when attendees change their multiple choice selections.
  */
 export const eventAnswerChoicesDestroy = <ThrowOnError extends boolean = false>(options: Options<EventAnswerChoicesDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventAnswerChoicesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2008,7 +2008,7 @@ export const eventAnswerChoicesDestroy = <ThrowOnError extends boolean = false>(
  * Retrieve detailed information about a specific answer choice including the answer, selected option, and related question context.
  */
 export const eventAnswerChoicesRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventAnswerChoicesRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventAnswerChoicesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2023,7 +2023,7 @@ export const eventAnswerChoicesRetrieve = <ThrowOnError extends boolean = false>
  * Partially update an answer choice. Use with caution as this affects attendee responses.
  */
 export const eventAnswerChoicesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAnswerChoicesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventAnswerChoicesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2042,7 +2042,7 @@ export const eventAnswerChoicesPartialUpdate = <ThrowOnError extends boolean = f
  * Update an answer choice. Rarely used as choices are typically created or deleted. Use with caution as this affects attendee responses.
  */
 export const eventAnswerChoicesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAnswerChoicesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventAnswerChoicesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2061,7 +2061,7 @@ export const eventAnswerChoicesUpdate = <ThrowOnError extends boolean = false>(o
  * Retrieve a paginated list of event authorizations with comprehensive filtering options. Authorizations track approval status for events requiring review before publication. Supports filtering by event, status, and reviewer. Useful for administrative workflows.
  */
 export const eventAuthorizationsList = <ThrowOnError extends boolean = false>(options?: Options<EventAuthorizationsListData, ThrowOnError>) => (options?.client ?? client).get<EventAuthorizationsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2076,7 +2076,7 @@ export const eventAuthorizationsList = <ThrowOnError extends boolean = false>(op
  * Create a new event authorization for review and approval workflow. Automatically assigns the authenticated user as the reviewer. Only administrators can create authorizations.
  */
 export const eventAuthorizationsCreate = <ThrowOnError extends boolean = false>(options: Options<EventAuthorizationsCreateData, ThrowOnError>) => (options.client ?? client).post<EventAuthorizationsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2095,7 +2095,7 @@ export const eventAuthorizationsCreate = <ThrowOnError extends boolean = false>(
  * Delete an event authorization record. Use with caution as this removes approval history. Only administrators should delete authorizations.
  */
 export const eventAuthorizationsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventAuthorizationsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventAuthorizationsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2110,7 +2110,7 @@ export const eventAuthorizationsDestroy = <ThrowOnError extends boolean = false>
  * Retrieve detailed information about a specific event authorization including review status, reviewer details, timestamps, and associated event information.
  */
 export const eventAuthorizationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventAuthorizationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventAuthorizationsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2125,7 +2125,7 @@ export const eventAuthorizationsRetrieve = <ThrowOnError extends boolean = false
  * Partially update an event authorization such as changing status or adding review notes. Only reviewers and administrators can update authorizations.
  */
 export const eventAuthorizationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAuthorizationsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventAuthorizationsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2144,7 +2144,7 @@ export const eventAuthorizationsPartialUpdate = <ThrowOnError extends boolean = 
  * Update an event authorization with complete payload including status and review comments. Use PATCH for partial updates. Only reviewers and administrators can update authorizations.
  */
 export const eventAuthorizationsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventAuthorizationsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventAuthorizationsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2163,7 +2163,7 @@ export const eventAuthorizationsUpdate = <ThrowOnError extends boolean = false>(
  * Retrieve a paginated list of all events with comprehensive filtering and search capabilities. Results include event details, status, type, organization, dates, and registration information. Non-staff users only see published and active events, while staff can view all events including drafts. Supports filtering by status, event type, organization, and text search across titles and descriptions.
  */
 export const eventListList = <ThrowOnError extends boolean = false>(options?: Options<EventListListData, ThrowOnError>) => (options?.client ?? client).get<EventListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2178,7 +2178,7 @@ export const eventListList = <ThrowOnError extends boolean = false>(options?: Op
  * Create a new event with complete information including title, dates, location, type, and settings. Automatically assigns the authenticated user as the event creator. Creates associated event settings and generates unique display code for identification.
  */
 export const eventListCreate = <ThrowOnError extends boolean = false>(options: Options<EventListCreateData, ThrowOnError>) => (options.client ?? client).post<EventListCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2197,7 +2197,7 @@ export const eventListCreate = <ThrowOnError extends boolean = false>(options: O
  * Soft delete an event by marking it as deleted without permanent removal. Soft-deleted events are hidden from public view but retained for audit purposes. Only event creators and staff can delete events.
  */
 export const eventListDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2212,7 +2212,7 @@ export const eventListDestroy = <ThrowOnError extends boolean = false>(options: 
  * Retrieve comprehensive details about a specific event including all metadata, dates, registration information, settings, staff, resources, reviews, and associated content. Includes HATEOAS links for related resources and nested endpoints.
  */
 export const eventListRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2227,7 +2227,7 @@ export const eventListRetrieve = <ThrowOnError extends boolean = false>(options:
  * Partially update an event without providing complete payload. Allows updating individual fields like dates, description, or status. Only event creators and staff can update events.
  */
 export const eventListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventListPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2246,7 +2246,7 @@ export const eventListPartialUpdate = <ThrowOnError extends boolean = false>(opt
  * Update all fields of an existing event. Requires complete payload with all fields. Use PATCH for partial updates. Only event creators and staff can update events.
  */
 export const eventListUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListUpdateData, ThrowOnError>) => (options.client ?? client).put<EventListUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2265,7 +2265,7 @@ export const eventListUpdate = <ThrowOnError extends boolean = false>(options: O
  * Add a new availability window to the event defining when registrations are open. Specify start and end times, capacity limits, and other scheduling constraints. Only event creators, staff, and superusers can add availability windows.
  */
 export const eventListAddAvailabilityWindowCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddAvailabilityWindowCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddAvailabilityWindowCreateResponses, EventListAddAvailabilityWindowCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2285,7 +2285,7 @@ export const eventListAddAvailabilityWindowCreate = <ThrowOnError extends boolea
  */
 export const eventListAddLandingImageCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddLandingImageCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddLandingImageCreateResponses, EventListAddLandingImageCreateErrors, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2305,7 +2305,7 @@ export const eventListAddLandingImageCreate = <ThrowOnError extends boolean = fa
  */
 export const eventListAddResourceCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddResourceCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddResourceCreateResponses, EventListAddResourceCreateErrors, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2324,7 +2324,7 @@ export const eventListAddResourceCreate = <ThrowOnError extends boolean = false>
  * Add a user as a staff member to the event with optional notes. Creates an EventStaff instance linking the user to the event. Only event creators, staff, and superusers can add staff members. Returns validation error if user is already a staff member.
  */
 export const eventListAddStaffCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddStaffCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddStaffCreateResponses, EventListAddStaffCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2343,7 +2343,7 @@ export const eventListAddStaffCreate = <ThrowOnError extends boolean = false>(op
  * Assign a specific permission to a user for this event, granting them access to perform specific actions. Creates an EventPermissionAssignment linking user, event, and permission. Prevents duplicate assignments to the same user for the same permission. Only event creators, staff, and superusers can assign permissions.
  */
 export const eventListAssignPermissionCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAssignPermissionCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAssignPermissionCreateResponses, EventListAssignPermissionCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2362,7 +2362,7 @@ export const eventListAssignPermissionCreate = <ThrowOnError extends boolean = f
  * Retrieve all availability windows configured for the event. Availability windows define time slots when the event is open for registrations or bookings. Used for scheduling and capacity management.
  */
 export const eventListAvailabilityWindowsList = <ThrowOnError extends boolean = false>(options: Options<EventListAvailabilityWindowsListData, ThrowOnError>) => (options.client ?? client).get<EventListAvailabilityWindowsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2377,7 +2377,7 @@ export const eventListAvailabilityWindowsList = <ThrowOnError extends boolean = 
  * Check what permissions a user has for this event including ownership status, staff membership, and assigned permissions. Returns a comprehensive overview of user's access rights for the event. If no user_id is provided, checks permissions for the currently authenticated user.
  */
 export const eventListCheckPermissionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListCheckPermissionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListCheckPermissionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2392,7 +2392,7 @@ export const eventListCheckPermissionsRetrieve = <ThrowOnError extends boolean =
  * Retrieve all landing images for the event including both main and secondary images. Landing images are displayed on event pages, listings, and promotional materials. Images are tagged as LANDING_PHOTO_MAIN or LANDING_PHOTO_SECONDARY for identification.
  */
 export const eventListLandingImagesList = <ThrowOnError extends boolean = false>(options: Options<EventListLandingImagesListData, ThrowOnError>) => (options.client ?? client).get<EventListLandingImagesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2407,7 +2407,7 @@ export const eventListLandingImagesList = <ThrowOnError extends boolean = false>
  * Remove an availability window from the event by its window ID. Permanently deletes the window and affects event scheduling. Only event creators, staff, and superusers can remove availability windows. Requires window_id query parameter.
  */
 export const eventListRemoveAvailabilityWindowDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveAvailabilityWindowDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveAvailabilityWindowDestroyResponses, EventListRemoveAvailabilityWindowDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2422,7 +2422,7 @@ export const eventListRemoveAvailabilityWindowDestroy = <ThrowOnError extends bo
  * Remove a resource from the event by its resource ID. Permanently deletes the resource including any uploaded files. Protected resources cannot be removed. Only event creators, staff, and superusers can remove resources. Requires resource_id query parameter.
  */
 export const eventListRemoveResourceDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveResourceDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveResourceDestroyResponses, EventListRemoveResourceDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2437,7 +2437,7 @@ export const eventListRemoveResourceDestroy = <ThrowOnError extends boolean = fa
  * Remove a staff member from an event by their staff ID. Permanently deletes the EventStaff instance. Only event creators, staff, and superusers can remove staff members. Requires staff_id query parameter.
  */
 export const eventListRemoveStaffDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveStaffDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveStaffDestroyResponses, EventListRemoveStaffDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2452,7 +2452,7 @@ export const eventListRemoveStaffDestroy = <ThrowOnError extends boolean = false
  * Retrieve all resources associated with the event including documents, images, videos, and links. Supports filtering by tag (e.g., LANDING_PHOTO) and resource type. Resources can be public or restricted based on permissions.
  */
 export const eventListResourcesList = <ThrowOnError extends boolean = false>(options: Options<EventListResourcesListData, ThrowOnError>) => (options.client ?? client).get<EventListResourcesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2467,7 +2467,7 @@ export const eventListResourcesList = <ThrowOnError extends boolean = false>(opt
  * Restore a previously soft-deleted event back to active status. Clears the deletion timestamp and deleted_by field. Makes the event visible and accessible again in all listings. Only event creators, staff, and superusers can restore events.
  */
 export const eventListRestoreCreate = <ThrowOnError extends boolean = false>(options: Options<EventListRestoreCreateData, ThrowOnError>) => (options.client ?? client).post<EventListRestoreCreateResponses, EventListRestoreCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2486,7 +2486,7 @@ export const eventListRestoreCreate = <ThrowOnError extends boolean = false>(opt
  * Revoke a specific permission from a user for this event by deleting the permission assignment. Immediately removes the user's access to perform the specific action. Only event creators, staff, and superusers can revoke permissions. Requires assignment_id query parameter.
  */
 export const eventListRevokePermissionDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRevokePermissionDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRevokePermissionDestroyResponses, EventListRevokePermissionDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2501,7 +2501,7 @@ export const eventListRevokePermissionDestroy = <ThrowOnError extends boolean = 
  * Retrieve configuration settings for a specific event including product selling options, order approval requirements, booking configuration, and other event-specific preferences.
  */
 export const eventListSettingsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListSettingsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListSettingsRetrieveResponses, EventListSettingsRetrieveErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2516,7 +2516,7 @@ export const eventListSettingsRetrieve = <ThrowOnError extends boolean = false>(
  * Soft delete an event by marking it as deleted without permanent removal. Records the user who performed the deletion and timestamp. Soft-deleted events can be restored later using the restore endpoint. Only event creators, staff, and superusers can soft delete events.
  */
 export const eventListSoftDeleteCreate = <ThrowOnError extends boolean = false>(options: Options<EventListSoftDeleteCreateData, ThrowOnError>) => (options.client ?? client).post<EventListSoftDeleteCreateResponses, EventListSoftDeleteCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2535,7 +2535,7 @@ export const eventListSoftDeleteCreate = <ThrowOnError extends boolean = false>(
  * Retrieve a complete list of all staff members assigned to the event. Includes user details, assignment information, and associated notes. Automatically includes related user and assigned_by data for efficient queries.
  */
 export const eventListStaffListList = <ThrowOnError extends boolean = false>(options: Options<EventListStaffListListData, ThrowOnError>) => (options.client ?? client).get<EventListStaffListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2550,7 +2550,7 @@ export const eventListStaffListList = <ThrowOnError extends boolean = false>(opt
  * Retrieve all currently active/ongoing events that have started but not yet ended. Perfect for displaying 'happening now' events and real-time event monitoring. Filters events where current time is between start and end datetime.
  */
 export const eventListOngoingList = <ThrowOnError extends boolean = false>(options?: Options<EventListOngoingListData, ThrowOnError>) => (options?.client ?? client).get<EventListOngoingListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2565,7 +2565,7 @@ export const eventListOngoingList = <ThrowOnError extends boolean = false>(optio
  * Retrieve all upcoming events that haven't started yet, ordered by start date. Useful for displaying future events on calendars and event listings. Includes pagination support for large result sets.
  */
 export const eventListUpcomingList = <ThrowOnError extends boolean = false>(options?: Options<EventListUpcomingListData, ThrowOnError>) => (options?.client ?? client).get<EventListUpcomingListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2580,7 +2580,7 @@ export const eventListUpcomingList = <ThrowOnError extends boolean = false>(opti
  * Retrieve a paginated list of event permission assignments showing which users have which permissions for which events. Includes details about assigned user, permission, event, and the administrator who made the assignment. Supports filtering by event, user, and permission for targeted queries.
  */
 export const eventPermissionAssignmentsList = <ThrowOnError extends boolean = false>(options?: Options<EventPermissionAssignmentsListData, ThrowOnError>) => (options?.client ?? client).get<EventPermissionAssignmentsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2595,7 +2595,7 @@ export const eventPermissionAssignmentsList = <ThrowOnError extends boolean = fa
  * Assign a specific permission to a user for an event, granting them access to perform specific actions. Automatically records the authenticated user as the assigner. Only event managers and administrators can assign permissions.
  */
 export const eventPermissionAssignmentsCreate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionAssignmentsCreateData, ThrowOnError>) => (options.client ?? client).post<EventPermissionAssignmentsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2614,7 +2614,7 @@ export const eventPermissionAssignmentsCreate = <ThrowOnError extends boolean = 
  * Remove a permission assignment, revoking the user's access to perform the specific action. Immediately affects user's permissions for the event. Only event managers and administrators can remove assignments.
  */
 export const eventPermissionAssignmentsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventPermissionAssignmentsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventPermissionAssignmentsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2629,7 +2629,7 @@ export const eventPermissionAssignmentsDestroy = <ThrowOnError extends boolean =
  * Retrieve detailed information about a specific permission assignment including user details, permission details, event context, assignment timestamp, and who made the assignment.
  */
 export const eventPermissionAssignmentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventPermissionAssignmentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventPermissionAssignmentsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2644,7 +2644,7 @@ export const eventPermissionAssignmentsRetrieve = <ThrowOnError extends boolean 
  * Partially update a permission assignment. Only event managers and administrators can update assignments.
  */
 export const eventPermissionAssignmentsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionAssignmentsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventPermissionAssignmentsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2663,7 +2663,7 @@ export const eventPermissionAssignmentsPartialUpdate = <ThrowOnError extends boo
  * Update a permission assignment with complete payload. Use with caution as changing assignments affects user access. Only event managers and administrators can update assignments.
  */
 export const eventPermissionAssignmentsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionAssignmentsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventPermissionAssignmentsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2682,7 +2682,7 @@ export const eventPermissionAssignmentsUpdate = <ThrowOnError extends boolean = 
  * Retrieve a paginated list of all available event permissions that can be assigned to users. Permissions define specific actions users can perform within events such as managing staff, resources, or settings. Supports filtering by category and searching by name or code.
  */
 export const eventPermissionsList = <ThrowOnError extends boolean = false>(options?: Options<EventPermissionsListData, ThrowOnError>) => (options?.client ?? client).get<EventPermissionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2697,7 +2697,7 @@ export const eventPermissionsList = <ThrowOnError extends boolean = false>(optio
  * Create a new event permission with specified name, code, and category. Only administrators can create new permissions. Permissions define granular access controls for event operations.
  */
 export const eventPermissionsCreate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionsCreateData, ThrowOnError>) => (options.client ?? client).post<EventPermissionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2716,7 +2716,7 @@ export const eventPermissionsCreate = <ThrowOnError extends boolean = false>(opt
  * Delete an event permission. Use with caution as this affects all assignments using this permission. Only administrators should delete permissions.
  */
 export const eventPermissionsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventPermissionsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventPermissionsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2731,7 +2731,7 @@ export const eventPermissionsDestroy = <ThrowOnError extends boolean = false>(op
  * Retrieve detailed information about a specific event permission including name, code, category, description, and scope of the permission.
  */
 export const eventPermissionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventPermissionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventPermissionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2746,7 +2746,7 @@ export const eventPermissionsRetrieve = <ThrowOnError extends boolean = false>(o
  * Partially update an event permission such as changing description or category. Only administrators can update permissions.
  */
 export const eventPermissionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventPermissionsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2765,7 +2765,7 @@ export const eventPermissionsPartialUpdate = <ThrowOnError extends boolean = fal
  * Update an event permission with complete payload. Use PATCH for partial updates. Only administrators can update permissions.
  */
 export const eventPermissionsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventPermissionsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventPermissionsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2784,7 +2784,7 @@ export const eventPermissionsUpdate = <ThrowOnError extends boolean = false>(opt
  * Retrieve a paginated list of answers submitted by attendees for event questions. Answers can be text responses, numeric values, or multiple choice selections. Supports filtering by question and attendee to view specific responses.
  */
 export const eventQuestionAnswersList = <ThrowOnError extends boolean = false>(options?: Options<EventQuestionAnswersListData, ThrowOnError>) => (options?.client ?? client).get<EventQuestionAnswersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2799,7 +2799,7 @@ export const eventQuestionAnswersList = <ThrowOnError extends boolean = false>(o
  * Submit a new answer to an event question during registration or survey completion. Answer format depends on question type (text, number, multiple choice, etc.). Validates answer against question requirements and constraints.
  */
 export const eventQuestionAnswersCreate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionAnswersCreateData, ThrowOnError>) => (options.client ?? client).post<EventQuestionAnswersCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2818,7 +2818,7 @@ export const eventQuestionAnswersCreate = <ThrowOnError extends boolean = false>
  * Delete an answer. Use with caution as this removes attendee response data. Only attendees or administrators can delete answers.
  */
 export const eventQuestionAnswersDestroy = <ThrowOnError extends boolean = false>(options: Options<EventQuestionAnswersDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventQuestionAnswersDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2833,7 +2833,7 @@ export const eventQuestionAnswersDestroy = <ThrowOnError extends boolean = false
  * Retrieve detailed information about a specific answer including answer text, numeric value, selected options, attendee details, and submission time.
  */
 export const eventQuestionAnswersRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventQuestionAnswersRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventQuestionAnswersRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2848,7 +2848,7 @@ export const eventQuestionAnswersRetrieve = <ThrowOnError extends boolean = fals
  * Partially update an answer such as changing text or selection. Attendees can update their own answers.
  */
 export const eventQuestionAnswersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionAnswersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventQuestionAnswersPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2867,7 +2867,7 @@ export const eventQuestionAnswersPartialUpdate = <ThrowOnError extends boolean =
  * Update an existing answer with complete payload. Use PATCH for partial updates. Attendees can update their own answers.
  */
 export const eventQuestionAnswersUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionAnswersUpdateData, ThrowOnError>) => (options.client ?? client).put<EventQuestionAnswersUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2886,7 +2886,7 @@ export const eventQuestionAnswersUpdate = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of question options for multiple choice and dropdown questions. Options define the available choices attendees can select when answering questions. Supports filtering by question to view all options for a specific question.
  */
 export const eventQuestionOptionsList = <ThrowOnError extends boolean = false>(options?: Options<EventQuestionOptionsListData, ThrowOnError>) => (options?.client ?? client).get<EventQuestionOptionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2901,7 +2901,7 @@ export const eventQuestionOptionsList = <ThrowOnError extends boolean = false>(o
  * Create a new option for a multiple choice or dropdown question. Specify option text, value, and display order. Only event managers and administrators can create options.
  */
 export const eventQuestionOptionsCreate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionOptionsCreateData, ThrowOnError>) => (options.client ?? client).post<EventQuestionOptionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2920,7 +2920,7 @@ export const eventQuestionOptionsCreate = <ThrowOnError extends boolean = false>
  * Delete a question option. Affects questions using this option. Only event managers and administrators can delete options.
  */
 export const eventQuestionOptionsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventQuestionOptionsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventQuestionOptionsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2935,7 +2935,7 @@ export const eventQuestionOptionsDestroy = <ThrowOnError extends boolean = false
  * Retrieve detailed information about a specific question option including option text, value, display order, and associated question.
  */
 export const eventQuestionOptionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventQuestionOptionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventQuestionOptionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2950,7 +2950,7 @@ export const eventQuestionOptionsRetrieve = <ThrowOnError extends boolean = fals
  * Partially update a question option such as changing text or order. Only event managers and administrators can update options.
  */
 export const eventQuestionOptionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionOptionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventQuestionOptionsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2969,7 +2969,7 @@ export const eventQuestionOptionsPartialUpdate = <ThrowOnError extends boolean =
  * Update a question option with complete payload. Use PATCH for partial updates. Only event managers and administrators can update options.
  */
 export const eventQuestionOptionsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionOptionsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventQuestionOptionsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -2988,7 +2988,7 @@ export const eventQuestionOptionsUpdate = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of event questions used for registration forms and surveys. Questions can be various types (text, multiple choice, rating, etc.) and are displayed to attendees during registration. Supports filtering by event, question type, required status, and public visibility. Ordered by question order.
  */
 export const eventQuestionsList = <ThrowOnError extends boolean = false>(options?: Options<EventQuestionsListData, ThrowOnError>) => (options?.client ?? client).get<EventQuestionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3003,7 +3003,7 @@ export const eventQuestionsList = <ThrowOnError extends boolean = false>(options
  * Create a new event question for registration forms or surveys. Specify question type, text, required status, and options if applicable. Only event managers and administrators can create questions.
  */
 export const eventQuestionsCreate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionsCreateData, ThrowOnError>) => (options.client ?? client).post<EventQuestionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3022,7 +3022,7 @@ export const eventQuestionsCreate = <ThrowOnError extends boolean = false>(optio
  * Delete an event question. Use with caution as this removes all associated answers. Only event managers and administrators can delete questions.
  */
 export const eventQuestionsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventQuestionsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventQuestionsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3037,7 +3037,7 @@ export const eventQuestionsDestroy = <ThrowOnError extends boolean = false>(opti
  * Retrieve detailed information about a specific event question including question text, type, options, validation rules, and display settings.
  */
 export const eventQuestionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventQuestionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventQuestionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3052,7 +3052,7 @@ export const eventQuestionsRetrieve = <ThrowOnError extends boolean = false>(opt
  * Partially update an event question such as changing text or required status. Only event managers and administrators can update questions.
  */
 export const eventQuestionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventQuestionsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3071,7 +3071,7 @@ export const eventQuestionsPartialUpdate = <ThrowOnError extends boolean = false
  * Update an event question with complete payload including all options. Use PATCH for partial updates. Only event managers and administrators can update questions.
  */
 export const eventQuestionsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventQuestionsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventQuestionsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3090,7 +3090,7 @@ export const eventQuestionsUpdate = <ThrowOnError extends boolean = false>(optio
  * Retrieve a paginated list of event reviews submitted by attendees. Reviews include ratings, comments, and approval status for moderation. Supports filtering by event and approval status to manage review visibility.
  */
 export const eventReviewsList = <ThrowOnError extends boolean = false>(options?: Options<EventReviewsListData, ThrowOnError>) => (options?.client ?? client).get<EventReviewsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3105,7 +3105,7 @@ export const eventReviewsList = <ThrowOnError extends boolean = false>(options?:
  * Create a new event review with rating and optional comment. Reviews require approval before being publicly visible. Only authenticated users who attended the event can create reviews.
  */
 export const eventReviewsCreate = <ThrowOnError extends boolean = false>(options: Options<EventReviewsCreateData, ThrowOnError>) => (options.client ?? client).post<EventReviewsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3124,7 +3124,7 @@ export const eventReviewsCreate = <ThrowOnError extends boolean = false>(options
  * Delete an event review permanently. Only the review author or administrators can delete reviews.
  */
 export const eventReviewsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventReviewsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventReviewsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3139,7 +3139,7 @@ export const eventReviewsDestroy = <ThrowOnError extends boolean = false>(option
  * Retrieve detailed information about a specific event review including rating, comment, reviewer details, submission time, and approval status.
  */
 export const eventReviewsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventReviewsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventReviewsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3154,7 +3154,7 @@ export const eventReviewsRetrieve = <ThrowOnError extends boolean = false>(optio
  * Partially update an event review such as changing rating or editing comment. Only the review author can update their review.
  */
 export const eventReviewsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventReviewsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventReviewsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3173,7 +3173,7 @@ export const eventReviewsPartialUpdate = <ThrowOnError extends boolean = false>(
  * Update an event review with complete payload including rating and comment. Use PATCH for partial updates. Only the review author can update their review.
  */
 export const eventReviewsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventReviewsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventReviewsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3192,7 +3192,7 @@ export const eventReviewsUpdate = <ThrowOnError extends boolean = false>(options
  * Approve a specific review making it publicly visible. Only staff and administrators can approve reviews. Approved reviews are displayed on event pages and contribute to event ratings.
  */
 export const eventReviewsApproveCreate = <ThrowOnError extends boolean = false>(options: Options<EventReviewsApproveCreateData, ThrowOnError>) => (options.client ?? client).post<EventReviewsApproveCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3211,7 +3211,7 @@ export const eventReviewsApproveCreate = <ThrowOnError extends boolean = false>(
  * Retrieve a paginated list of event role assignments showing which users have which roles for which events. Includes details about assigned user, role, event, and the administrator who made the assignment. Supports filtering by event, user, and role for targeted queries.
  */
 export const eventRoleAssignmentsList = <ThrowOnError extends boolean = false>(options?: Options<EventRoleAssignmentsListData, ThrowOnError>) => (options?.client ?? client).get<EventRoleAssignmentsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3226,7 +3226,7 @@ export const eventRoleAssignmentsList = <ThrowOnError extends boolean = false>(o
  * Assign a specific role to a user for an event, granting them all permissions associated with that role. Automatically records the authenticated user as the assigner. Only event managers and administrators can assign roles.
  */
 export const eventRoleAssignmentsCreate = <ThrowOnError extends boolean = false>(options: Options<EventRoleAssignmentsCreateData, ThrowOnError>) => (options.client ?? client).post<EventRoleAssignmentsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3245,7 +3245,7 @@ export const eventRoleAssignmentsCreate = <ThrowOnError extends boolean = false>
  * Remove a role assignment, revoking all permissions associated with that role for the user. Immediately affects user's permissions for the event. Only event managers and administrators can remove assignments.
  */
 export const eventRoleAssignmentsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventRoleAssignmentsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventRoleAssignmentsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3260,7 +3260,7 @@ export const eventRoleAssignmentsDestroy = <ThrowOnError extends boolean = false
  * Retrieve detailed information about a specific role assignment including user details, role details with permissions, event context, assignment timestamp, and who made the assignment.
  */
 export const eventRoleAssignmentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventRoleAssignmentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventRoleAssignmentsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3275,7 +3275,7 @@ export const eventRoleAssignmentsRetrieve = <ThrowOnError extends boolean = fals
  * Partially update a role assignment. Only event managers and administrators can update assignments.
  */
 export const eventRoleAssignmentsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventRoleAssignmentsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventRoleAssignmentsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3294,7 +3294,7 @@ export const eventRoleAssignmentsPartialUpdate = <ThrowOnError extends boolean =
  * Update a role assignment with complete payload. Use with caution as changing assignments affects user access. Only event managers and administrators can update assignments.
  */
 export const eventRoleAssignmentsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventRoleAssignmentsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventRoleAssignmentsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3313,7 +3313,7 @@ export const eventRoleAssignmentsUpdate = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of all available event roles that can be assigned to users. Roles group multiple permissions together for easier management and represent positions like organizer, volunteer, or coordinator. Supports filtering by category and searching by name or code.
  */
 export const eventRolesList = <ThrowOnError extends boolean = false>(options?: Options<EventRolesListData, ThrowOnError>) => (options?.client ?? client).get<EventRolesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3328,7 +3328,7 @@ export const eventRolesList = <ThrowOnError extends boolean = false>(options?: O
  * Create a new event role with specified name, code, category, and permissions. Only administrators can create new roles. Roles simplify permission management by grouping related permissions.
  */
 export const eventRolesCreate = <ThrowOnError extends boolean = false>(options: Options<EventRolesCreateData, ThrowOnError>) => (options.client ?? client).post<EventRolesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3347,7 +3347,7 @@ export const eventRolesCreate = <ThrowOnError extends boolean = false>(options: 
  * Delete an event role. Use with caution as this affects all assignments using this role. Only administrators should delete roles.
  */
 export const eventRolesDestroy = <ThrowOnError extends boolean = false>(options: Options<EventRolesDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventRolesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3362,7 +3362,7 @@ export const eventRolesDestroy = <ThrowOnError extends boolean = false>(options:
  * Retrieve detailed information about a specific event role including name, code, category, description, and associated permissions.
  */
 export const eventRolesRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventRolesRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventRolesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3377,7 +3377,7 @@ export const eventRolesRetrieve = <ThrowOnError extends boolean = false>(options
  * Partially update an event role such as changing description or adding permissions. Only administrators can update roles.
  */
 export const eventRolesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventRolesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventRolesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3396,7 +3396,7 @@ export const eventRolesPartialUpdate = <ThrowOnError extends boolean = false>(op
  * Update an event role with complete payload including permissions. Use PATCH for partial updates. Only administrators can update roles.
  */
 export const eventRolesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventRolesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventRolesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3415,7 +3415,7 @@ export const eventRolesUpdate = <ThrowOnError extends boolean = false>(options: 
  * Retrieve a paginated list of all event settings across the system. Event settings control various aspects of event behavior including product selling, order approval requirements, and booking configurations. Primarily used for administrative oversight.
  */
 export const eventSettingsList = <ThrowOnError extends boolean = false>(options?: Options<EventSettingsListData, ThrowOnError>) => (options?.client ?? client).get<EventSettingsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3430,7 +3430,7 @@ export const eventSettingsList = <ThrowOnError extends boolean = false>(options?
  * Create new settings for an event with specified configuration options. Typically created automatically when an event is created. Only event managers and administrators can create settings.
  */
 export const eventSettingsCreate = <ThrowOnError extends boolean = false>(options: Options<EventSettingsCreateData, ThrowOnError>) => (options.client ?? client).post<EventSettingsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3449,7 +3449,7 @@ export const eventSettingsCreate = <ThrowOnError extends boolean = false>(option
  * Delete event settings. Use with caution as this affects event functionality. Only administrators should delete event settings. Consider updating instead of deleting to preserve configuration history.
  */
 export const eventSettingsDestroy = <ThrowOnError extends boolean = false>(options: Options<EventSettingsDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventSettingsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3464,7 +3464,7 @@ export const eventSettingsDestroy = <ThrowOnError extends boolean = false>(optio
  * Retrieve detailed settings for a specific event including all configuration options. Settings control product selling options, order approval workflows, booking behavior, and other event-specific preferences.
  */
 export const eventSettingsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventSettingsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventSettingsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3479,7 +3479,7 @@ export const eventSettingsRetrieve = <ThrowOnError extends boolean = false>(opti
  * Partially update event settings without providing complete payload. Allows updating individual configuration options independently. Only event managers and administrators can update settings.
  */
 export const eventSettingsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventSettingsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventSettingsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3498,7 +3498,7 @@ export const eventSettingsPartialUpdate = <ThrowOnError extends boolean = false>
  * Update all settings for an event. Requires complete payload with all fields. Use PATCH for partial updates of individual settings. Only event managers and administrators can update settings.
  */
 export const eventSettingsUpdate = <ThrowOnError extends boolean = false>(options: Options<EventSettingsUpdateData, ThrowOnError>) => (options.client ?? client).put<EventSettingsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3517,7 +3517,7 @@ export const eventSettingsUpdate = <ThrowOnError extends boolean = false>(option
  * Retrieve a paginated list of event staff members across events. Includes user details, assignment information, availability, and role details. Supports filtering by event and user to find specific staff assignments.
  */
 export const eventStaffList = <ThrowOnError extends boolean = false>(options?: Options<EventStaffListData, ThrowOnError>) => (options?.client ?? client).get<EventStaffListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3532,7 +3532,7 @@ export const eventStaffList = <ThrowOnError extends boolean = false>(options?: O
  * Add a new staff member to an event with specified user and optional notes. Automatically records the authenticated user as the assigner. Only event managers and administrators can add staff members.
  */
 export const eventStaffCreate = <ThrowOnError extends boolean = false>(options: Options<EventStaffCreateData, ThrowOnError>) => (options.client ?? client).post<EventStaffCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3551,7 +3551,7 @@ export const eventStaffCreate = <ThrowOnError extends boolean = false>(options: 
  * Retrieve a paginated list of staff availability records defining when staff members are available. Each record specifies time windows when specific staff members can work. Supports filtering by staff member to view individual availability schedules.
  */
 export const eventStaffAvailabilityList = <ThrowOnError extends boolean = false>(options?: Options<EventStaffAvailabilityListData, ThrowOnError>) => (options?.client ?? client).get<EventStaffAvailabilityListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3566,7 +3566,7 @@ export const eventStaffAvailabilityList = <ThrowOnError extends boolean = false>
  * Create a new staff availability record specifying when a staff member is available to work. Used for scheduling and resource allocation. Only event managers and administrators can create availability records.
  */
 export const eventStaffAvailabilityCreate = <ThrowOnError extends boolean = false>(options: Options<EventStaffAvailabilityCreateData, ThrowOnError>) => (options.client ?? client).post<EventStaffAvailabilityCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3585,7 +3585,7 @@ export const eventStaffAvailabilityCreate = <ThrowOnError extends boolean = fals
  * Delete a staff availability record, removing the scheduled availability window. Affects scheduling and resource allocation. Only event managers and administrators can delete availability.
  */
 export const eventStaffAvailabilityDestroy = <ThrowOnError extends boolean = false>(options: Options<EventStaffAvailabilityDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventStaffAvailabilityDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3600,7 +3600,7 @@ export const eventStaffAvailabilityDestroy = <ThrowOnError extends boolean = fal
  * Retrieve detailed information about a specific staff availability record including start and end times, staff member details, and any notes or constraints.
  */
 export const eventStaffAvailabilityRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventStaffAvailabilityRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventStaffAvailabilityRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3615,7 +3615,7 @@ export const eventStaffAvailabilityRetrieve = <ThrowOnError extends boolean = fa
  * Partially update a staff availability record such as adjusting time windows. Only event managers and administrators can update availability.
  */
 export const eventStaffAvailabilityPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffAvailabilityPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventStaffAvailabilityPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3634,7 +3634,7 @@ export const eventStaffAvailabilityPartialUpdate = <ThrowOnError extends boolean
  * Update a staff availability record with complete payload including all time windows. Use PATCH for partial updates. Only event managers and administrators can update availability.
  */
 export const eventStaffAvailabilityUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffAvailabilityUpdateData, ThrowOnError>) => (options.client ?? client).put<EventStaffAvailabilityUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3653,7 +3653,7 @@ export const eventStaffAvailabilityUpdate = <ThrowOnError extends boolean = fals
  * Remove a staff member from an event, revoking their staff status. Consider soft deletion if historical records are important. Only event managers and administrators can remove staff.
  */
 export const eventStaffDestroy = <ThrowOnError extends boolean = false>(options: Options<EventStaffDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventStaffDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3668,7 +3668,7 @@ export const eventStaffDestroy = <ThrowOnError extends boolean = false>(options:
  * Retrieve detailed information about a specific staff member including user profile, assignment details, availability windows, notes, and who assigned them.
  */
 export const eventStaffRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventStaffRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventStaffRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3683,7 +3683,7 @@ export const eventStaffRetrieve = <ThrowOnError extends boolean = false>(options
  * Partially update a staff member's information such as notes or availability. Only event managers and administrators can update staff.
  */
 export const eventStaffPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventStaffPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3702,7 +3702,7 @@ export const eventStaffPartialUpdate = <ThrowOnError extends boolean = false>(op
  * Update a staff member's information with complete payload including notes and availability. Use PATCH for partial updates. Only event managers and administrators can update staff.
  */
 export const eventStaffUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffUpdateData, ThrowOnError>) => (options.client ?? client).put<EventStaffUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3721,7 +3721,7 @@ export const eventStaffUpdate = <ThrowOnError extends boolean = false>(options: 
  * Retrieve a paginated list of all event types available in the system. Event types categorize events by their nature such as conferences, workshops, retreats, seminars, etc. Supports search functionality by title, code, and description for easy discovery.
  */
 export const eventTypesList = <ThrowOnError extends boolean = false>(options?: Options<EventTypesListData, ThrowOnError>) => (options?.client ?? client).get<EventTypesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3736,7 +3736,7 @@ export const eventTypesList = <ThrowOnError extends boolean = false>(options?: O
  * Create a new event type category for organizing and categorizing events. Event types help users filter and understand the nature of events. Requires authentication and appropriate permissions.
  */
 export const eventTypesCreate = <ThrowOnError extends boolean = false>(options: Options<EventTypesCreateData, ThrowOnError>) => (options.client ?? client).post<EventTypesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3755,7 +3755,7 @@ export const eventTypesCreate = <ThrowOnError extends boolean = false>(options: 
  * Delete an event type category. Use with caution if events are associated with this type.
  */
 export const eventTypesDestroy = <ThrowOnError extends boolean = false>(options: Options<EventTypesDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventTypesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3770,7 +3770,7 @@ export const eventTypesDestroy = <ThrowOnError extends boolean = false>(options:
  * Retrieve comprehensive information about a specific event type including title, code, description, and associated metadata for categorizing events.
  */
 export const eventTypesRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventTypesRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventTypesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3785,7 +3785,7 @@ export const eventTypesRetrieve = <ThrowOnError extends boolean = false>(options
  * Partially update an event type without providing complete payload.
  */
 export const eventTypesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventTypesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventTypesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3804,7 +3804,7 @@ export const eventTypesPartialUpdate = <ThrowOnError extends boolean = false>(op
  * Update all fields of an existing event type. Requires complete payload. Use PATCH for partial updates.
  */
 export const eventTypesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventTypesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventTypesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3823,7 +3823,7 @@ export const eventTypesUpdate = <ThrowOnError extends boolean = false>(options: 
  * Retrieve a paginated list of all event-venue associations showing which venues host which events. Includes venue details, points of interest, and event information. Supports filtering by event or venue and searching by event title or venue name.
  */
 export const eventVenuesList = <ThrowOnError extends boolean = false>(options?: Options<EventVenuesListData, ThrowOnError>) => (options?.client ?? client).get<EventVenuesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3838,7 +3838,7 @@ export const eventVenuesList = <ThrowOnError extends boolean = false>(options?: 
  * Associate a venue with an event, specifying where the event will be held. Can include event-specific venue details and configurations. Only event managers and administrators can create venue associations.
  */
 export const eventVenuesCreate = <ThrowOnError extends boolean = false>(options: Options<EventVenuesCreateData, ThrowOnError>) => (options.client ?? client).post<EventVenuesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3857,7 +3857,7 @@ export const eventVenuesCreate = <ThrowOnError extends boolean = false>(options:
  * Remove a venue association from an event. Use when changing event location or removing venue assignment. Only event managers and administrators can delete associations.
  */
 export const eventVenuesDestroy = <ThrowOnError extends boolean = false>(options: Options<EventVenuesDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventVenuesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3872,7 +3872,7 @@ export const eventVenuesDestroy = <ThrowOnError extends boolean = false>(options
  * Retrieve detailed information about a specific event-venue association including venue facilities, location, capacity, and event-specific venue configurations.
  */
 export const eventVenuesRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventVenuesRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventVenuesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3887,7 +3887,7 @@ export const eventVenuesRetrieve = <ThrowOnError extends boolean = false>(option
  * Partially update an event-venue association such as changing configurations. Only event managers and administrators can update associations.
  */
 export const eventVenuesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventVenuesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventVenuesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3906,7 +3906,7 @@ export const eventVenuesPartialUpdate = <ThrowOnError extends boolean = false>(o
  * Update an event-venue association with complete payload. Use PATCH for partial updates. Only event managers and administrators can update associations.
  */
 export const eventVenuesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventVenuesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventVenuesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3925,7 +3925,7 @@ export const eventVenuesUpdate = <ThrowOnError extends boolean = false>(options:
  * Retrieve a list of family attendee memberships showing how attendees are associated with family groups. Includes relationship types (parent, child, sibling) and primary guardian status.
  */
 export const familyAttendeesList = <ThrowOnError extends boolean = false>(options?: Options<FamilyAttendeesListData, ThrowOnError>) => (options?.client ?? client).get<FamilyAttendeesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3940,7 +3940,7 @@ export const familyAttendeesList = <ThrowOnError extends boolean = false>(option
  * Add an attendee to a family group with a specified relationship (parent, child, sibling, spouse, etc.). Optionally designate them as the primary guardian for the family.
  */
 export const familyAttendeesCreate = <ThrowOnError extends boolean = false>(options: Options<FamilyAttendeesCreateData, ThrowOnError>) => (options.client ?? client).post<FamilyAttendeesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3959,7 +3959,7 @@ export const familyAttendeesCreate = <ThrowOnError extends boolean = false>(opti
  * Remove an attendee from a family group. This does not delete the attendee record, only the family association.
  */
 export const familyAttendeesDestroy = <ThrowOnError extends boolean = false>(options: Options<FamilyAttendeesDestroyData, ThrowOnError>) => (options.client ?? client).delete<FamilyAttendeesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3974,7 +3974,7 @@ export const familyAttendeesDestroy = <ThrowOnError extends boolean = false>(opt
  * Retrieve details of a specific family attendee membership including the attendee, family group, relationship type, and whether they are designated as primary guardian.
  */
 export const familyAttendeesRetrieve = <ThrowOnError extends boolean = false>(options: Options<FamilyAttendeesRetrieveData, ThrowOnError>) => (options.client ?? client).get<FamilyAttendeesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -3989,7 +3989,7 @@ export const familyAttendeesRetrieve = <ThrowOnError extends boolean = false>(op
  * Partially update family membership details without providing complete payload.
  */
 export const familyAttendeesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<FamilyAttendeesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<FamilyAttendeesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4008,7 +4008,7 @@ export const familyAttendeesPartialUpdate = <ThrowOnError extends boolean = fals
  * Update a family attendee membership to change relationship type or primary guardian status.
  */
 export const familyAttendeesUpdate = <ThrowOnError extends boolean = false>(options: Options<FamilyAttendeesUpdateData, ThrowOnError>) => (options.client ?? client).put<FamilyAttendeesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4027,7 +4027,7 @@ export const familyAttendeesUpdate = <ThrowOnError extends boolean = false>(opti
  * Retrieve a list of family groups with their associated members. Family groups organize attendees into related units for easier management and communication. Results include family name, creation details, and member count.
  */
 export const familyGroupsList = <ThrowOnError extends boolean = false>(options?: Options<FamilyGroupsListData, ThrowOnError>) => (options?.client ?? client).get<FamilyGroupsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4042,7 +4042,7 @@ export const familyGroupsList = <ThrowOnError extends boolean = false>(options?:
  * Create a new family group to organize related attendees. Family groups facilitate bulk operations and communication with multiple attendees who share family relationships.
  */
 export const familyGroupsCreate = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsCreateData, ThrowOnError>) => (options.client ?? client).post<FamilyGroupsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4061,7 +4061,7 @@ export const familyGroupsCreate = <ThrowOnError extends boolean = false>(options
  * Delete a family group and remove all member associations. This does not delete the individual attendee records, only the grouping relationship.
  */
 export const familyGroupsDestroy = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsDestroyData, ThrowOnError>) => (options.client ?? client).delete<FamilyGroupsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4076,7 +4076,7 @@ export const familyGroupsDestroy = <ThrowOnError extends boolean = false>(option
  * Retrieve comprehensive information about a specific family group including all members, their relationships within the family (parent, child, sibling, etc.), and primary guardian designations.
  */
 export const familyGroupsRetrieve = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsRetrieveData, ThrowOnError>) => (options.client ?? client).get<FamilyGroupsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4091,7 +4091,7 @@ export const familyGroupsRetrieve = <ThrowOnError extends boolean = false>(optio
  * Partially update family group information without providing complete payload.
  */
 export const familyGroupsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<FamilyGroupsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4110,7 +4110,7 @@ export const familyGroupsPartialUpdate = <ThrowOnError extends boolean = false>(
  * Update family group information such as the family name or designation. Use member management endpoints to add or remove attendees from the group.
  */
 export const familyGroupsUpdate = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsUpdateData, ThrowOnError>) => (options.client ?? client).put<FamilyGroupsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4129,7 +4129,7 @@ export const familyGroupsUpdate = <ThrowOnError extends boolean = false>(options
  * Retrieve all members of a specific family group with their relationships and roles. Shows which attendees belong to the family and their relationships (parent, child, sibling, etc.), including primary guardian designations.
  */
 export const familyGroupsMembersList = <ThrowOnError extends boolean = false>(options: Options<FamilyGroupsMembersListData, ThrowOnError>) => (options.client ?? client).get<FamilyGroupsMembersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4144,7 +4144,7 @@ export const familyGroupsMembersList = <ThrowOnError extends boolean = false>(op
  * Retrieve a list of guardian relationships linking users to attendees they are responsible for. Guardians have permission to view and manage attendee information for minors or dependents.
  */
 export const guardiansList = <ThrowOnError extends boolean = false>(options?: Options<GuardiansListData, ThrowOnError>) => (options?.client ?? client).get<GuardiansListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4159,7 +4159,7 @@ export const guardiansList = <ThrowOnError extends boolean = false>(options?: Op
  * Establish a new guardian relationship between a user and an attendee. This grants the user permission to manage the attendee's information and make decisions on their behalf.
  */
 export const guardiansCreate = <ThrowOnError extends boolean = false>(options: Options<GuardiansCreateData, ThrowOnError>) => (options.client ?? client).post<GuardiansCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4178,7 +4178,7 @@ export const guardiansCreate = <ThrowOnError extends boolean = false>(options: O
  * Remove a guardian relationship, revoking the user's permission to manage the attendee. This action does not delete the user or attendee records.
  */
 export const guardiansDestroy = <ThrowOnError extends boolean = false>(options: Options<GuardiansDestroyData, ThrowOnError>) => (options.client ?? client).delete<GuardiansDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4193,7 +4193,7 @@ export const guardiansDestroy = <ThrowOnError extends boolean = false>(options: 
  * Retrieve detailed information about a specific guardian relationship including the user serving as guardian, the attendee under their care, and the relationship timestamp.
  */
 export const guardiansRetrieve = <ThrowOnError extends boolean = false>(options: Options<GuardiansRetrieveData, ThrowOnError>) => (options.client ?? client).get<GuardiansRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4208,7 +4208,7 @@ export const guardiansRetrieve = <ThrowOnError extends boolean = false>(options:
  * Partially update a guardian relationship without providing complete payload.
  */
 export const guardiansPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<GuardiansPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<GuardiansPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4227,7 +4227,7 @@ export const guardiansPartialUpdate = <ThrowOnError extends boolean = false>(opt
  * Update details of an existing guardian relationship.
  */
 export const guardiansUpdate = <ThrowOnError extends boolean = false>(options: Options<GuardiansUpdateData, ThrowOnError>) => (options.client ?? client).put<GuardiansUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4246,7 +4246,7 @@ export const guardiansUpdate = <ThrowOnError extends boolean = false>(options: O
  * Simple health check endpoint for Docker/ECS healthchecks.
  */
 export const healthRetrieve = <ThrowOnError extends boolean = false>(options?: Options<HealthRetrieveData, ThrowOnError>) => (options?.client ?? client).get<HealthRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4261,7 +4261,7 @@ export const healthRetrieve = <ThrowOnError extends boolean = false>(options?: O
  * Retrieve a paginated list of area locations with filtering and search.
  */
 export const locationsLocationsAreasList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsAreasListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsAreasListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4276,7 +4276,7 @@ export const locationsLocationsAreasList = <ThrowOnError extends boolean = false
  * Create a new area location. Requires staff permissions.
  */
 export const locationsLocationsAreasCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsAreasCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4295,7 +4295,7 @@ export const locationsLocationsAreasCreate = <ThrowOnError extends boolean = fal
  * Delete an area location. Requires staff permissions.
  */
 export const locationsLocationsAreasDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsAreasDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4310,7 +4310,7 @@ export const locationsLocationsAreasDestroy = <ThrowOnError extends boolean = fa
  * Get detailed information about a specific area location including relative areas.
  */
 export const locationsLocationsAreasRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsAreasRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4325,7 +4325,7 @@ export const locationsLocationsAreasRetrieve = <ThrowOnError extends boolean = f
  * Partially update area location details. Requires staff permissions.
  */
 export const locationsLocationsAreasPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsAreasPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4344,7 +4344,7 @@ export const locationsLocationsAreasPartialUpdate = <ThrowOnError extends boolea
  * Update area location details. Requires staff permissions.
  */
 export const locationsLocationsAreasUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsAreasUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4363,7 +4363,7 @@ export const locationsLocationsAreasUpdate = <ThrowOnError extends boolean = fal
  * Get all relative search areas for a specific area location.
  */
 export const locationsLocationsAreasRelativeAreasList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsAreasRelativeAreasListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsAreasRelativeAreasListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4378,7 +4378,7 @@ export const locationsLocationsAreasRelativeAreasList = <ThrowOnError extends bo
  * Retrieve a paginated list of chapter locations with filtering.
  */
 export const locationsLocationsChaptersList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsChaptersListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsChaptersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4393,7 +4393,7 @@ export const locationsLocationsChaptersList = <ThrowOnError extends boolean = fa
  * Create a new chapter location. Requires staff permissions.
  */
 export const locationsLocationsChaptersCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsChaptersCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4412,7 +4412,7 @@ export const locationsLocationsChaptersCreate = <ThrowOnError extends boolean = 
  * Delete a chapter location. Requires staff permissions.
  */
 export const locationsLocationsChaptersDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsChaptersDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4427,7 +4427,7 @@ export const locationsLocationsChaptersDestroy = <ThrowOnError extends boolean =
  * Get detailed information about a specific chapter location including areas.
  */
 export const locationsLocationsChaptersRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsChaptersRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4442,7 +4442,7 @@ export const locationsLocationsChaptersRetrieve = <ThrowOnError extends boolean 
  * Partially update chapter location details. Requires staff permissions.
  */
 export const locationsLocationsChaptersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsChaptersPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4461,7 +4461,7 @@ export const locationsLocationsChaptersPartialUpdate = <ThrowOnError extends boo
  * Update chapter location details. Requires staff permissions.
  */
 export const locationsLocationsChaptersUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsChaptersUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4480,7 +4480,7 @@ export const locationsLocationsChaptersUpdate = <ThrowOnError extends boolean = 
  * Get all areas for a specific chapter location.
  */
 export const locationsLocationsChaptersAreasList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsChaptersAreasListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsChaptersAreasListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4495,7 +4495,7 @@ export const locationsLocationsChaptersAreasList = <ThrowOnError extends boolean
  * Retrieve a paginated list of cluster locations with filtering.
  */
 export const locationsLocationsClustersList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsClustersListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsClustersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4510,7 +4510,7 @@ export const locationsLocationsClustersList = <ThrowOnError extends boolean = fa
  * Create a new cluster location. Requires staff permissions.
  */
 export const locationsLocationsClustersCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsClustersCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4529,7 +4529,7 @@ export const locationsLocationsClustersCreate = <ThrowOnError extends boolean = 
  * Delete a cluster location. Requires staff permissions.
  */
 export const locationsLocationsClustersDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsClustersDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4544,7 +4544,7 @@ export const locationsLocationsClustersDestroy = <ThrowOnError extends boolean =
  * Get detailed information about a specific cluster location including chapters.
  */
 export const locationsLocationsClustersRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsClustersRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4559,7 +4559,7 @@ export const locationsLocationsClustersRetrieve = <ThrowOnError extends boolean 
  * Partially update cluster location details. Requires staff permissions.
  */
 export const locationsLocationsClustersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsClustersPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4578,7 +4578,7 @@ export const locationsLocationsClustersPartialUpdate = <ThrowOnError extends boo
  * Update cluster location details. Requires staff permissions.
  */
 export const locationsLocationsClustersUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsClustersUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4597,7 +4597,7 @@ export const locationsLocationsClustersUpdate = <ThrowOnError extends boolean = 
  * Get all chapters for a specific cluster location.
  */
 export const locationsLocationsClustersChaptersList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsClustersChaptersListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsClustersChaptersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4612,7 +4612,7 @@ export const locationsLocationsClustersChaptersList = <ThrowOnError extends bool
  * Retrieve a paginated list of country locations with filtering.
  */
 export const locationsLocationsCountriesList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsCountriesListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsCountriesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4627,7 +4627,7 @@ export const locationsLocationsCountriesList = <ThrowOnError extends boolean = f
  * Create a new country location. Requires staff permissions.
  */
 export const locationsLocationsCountriesCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsCountriesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4646,7 +4646,7 @@ export const locationsLocationsCountriesCreate = <ThrowOnError extends boolean =
  * Delete a country location. Requires staff permissions.
  */
 export const locationsLocationsCountriesDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsCountriesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4661,7 +4661,7 @@ export const locationsLocationsCountriesDestroy = <ThrowOnError extends boolean 
  * Get detailed information about a specific country location including clusters.
  */
 export const locationsLocationsCountriesRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsCountriesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4676,7 +4676,7 @@ export const locationsLocationsCountriesRetrieve = <ThrowOnError extends boolean
  * Partially update country location details. Requires staff permissions.
  */
 export const locationsLocationsCountriesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsCountriesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4695,7 +4695,7 @@ export const locationsLocationsCountriesPartialUpdate = <ThrowOnError extends bo
  * Update country location details. Requires staff permissions.
  */
 export const locationsLocationsCountriesUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsCountriesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4714,7 +4714,7 @@ export const locationsLocationsCountriesUpdate = <ThrowOnError extends boolean =
  * Get all clusters for a specific country location.
  */
 export const locationsLocationsCountriesClustersList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsCountriesClustersListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsCountriesClustersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4729,7 +4729,7 @@ export const locationsLocationsCountriesClustersList = <ThrowOnError extends boo
  * Retrieve a paginated list of POIs with filtering by type, city, etc.
  */
 export const locationsLocationsPoisList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsPoisListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsPoisListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4744,7 +4744,7 @@ export const locationsLocationsPoisList = <ThrowOnError extends boolean = false>
  * Create a new point of interest.
  */
 export const locationsLocationsPoisCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsPoisCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsPoisCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4763,7 +4763,7 @@ export const locationsLocationsPoisCreate = <ThrowOnError extends boolean = fals
  * Delete a point of interest.
  */
 export const locationsLocationsPoisDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsPoisDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsPoisDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4778,7 +4778,7 @@ export const locationsLocationsPoisDestroy = <ThrowOnError extends boolean = fal
  * Get detailed information about a specific point of interest.
  */
 export const locationsLocationsPoisRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsPoisRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsPoisRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4793,7 +4793,7 @@ export const locationsLocationsPoisRetrieve = <ThrowOnError extends boolean = fa
  * Partially update POI details.
  */
 export const locationsLocationsPoisPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsPoisPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsPoisPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4812,7 +4812,7 @@ export const locationsLocationsPoisPartialUpdate = <ThrowOnError extends boolean
  * Update POI details.
  */
 export const locationsLocationsPoisUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsPoisUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsPoisUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4831,7 +4831,7 @@ export const locationsLocationsPoisUpdate = <ThrowOnError extends boolean = fals
  * Retrieve a paginated list of relative search areas.
  */
 export const locationsLocationsRelativeAreasList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsRelativeAreasListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsRelativeAreasListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4846,7 +4846,7 @@ export const locationsLocationsRelativeAreasList = <ThrowOnError extends boolean
  * Create a new relative search area. Requires staff permissions.
  */
 export const locationsLocationsRelativeAreasCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRelativeAreasCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsRelativeAreasCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4865,7 +4865,7 @@ export const locationsLocationsRelativeAreasCreate = <ThrowOnError extends boole
  * Delete a relative area. Requires staff permissions.
  */
 export const locationsLocationsRelativeAreasDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRelativeAreasDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsRelativeAreasDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4880,7 +4880,7 @@ export const locationsLocationsRelativeAreasDestroy = <ThrowOnError extends bool
  * Get detailed information about a specific relative area.
  */
 export const locationsLocationsRelativeAreasRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRelativeAreasRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsRelativeAreasRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4895,7 +4895,7 @@ export const locationsLocationsRelativeAreasRetrieve = <ThrowOnError extends boo
  * Partially update relative area details. Requires staff permissions.
  */
 export const locationsLocationsRelativeAreasPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRelativeAreasPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsRelativeAreasPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4914,7 +4914,7 @@ export const locationsLocationsRelativeAreasPartialUpdate = <ThrowOnError extend
  * Update relative area details. Requires staff permissions.
  */
 export const locationsLocationsRelativeAreasUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRelativeAreasUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsRelativeAreasUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4933,7 +4933,7 @@ export const locationsLocationsRelativeAreasUpdate = <ThrowOnError extends boole
  * Retrieve a paginated list of venue rooms with filtering.
  */
 export const locationsLocationsRoomsList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsRoomsListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsRoomsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4948,7 +4948,7 @@ export const locationsLocationsRoomsList = <ThrowOnError extends boolean = false
  * Create a new room in a venue.
  */
 export const locationsLocationsRoomsCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRoomsCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsRoomsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4967,7 +4967,7 @@ export const locationsLocationsRoomsCreate = <ThrowOnError extends boolean = fal
  * Delete a venue room.
  */
 export const locationsLocationsRoomsDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRoomsDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsRoomsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4982,7 +4982,7 @@ export const locationsLocationsRoomsDestroy = <ThrowOnError extends boolean = fa
  * Get detailed information about a specific venue room.
  */
 export const locationsLocationsRoomsRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRoomsRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsRoomsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -4997,7 +4997,7 @@ export const locationsLocationsRoomsRetrieve = <ThrowOnError extends boolean = f
  * Partially update room details.
  */
 export const locationsLocationsRoomsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRoomsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsRoomsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5016,7 +5016,7 @@ export const locationsLocationsRoomsPartialUpdate = <ThrowOnError extends boolea
  * Update room details.
  */
 export const locationsLocationsRoomsUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsRoomsUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsRoomsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5035,7 +5035,7 @@ export const locationsLocationsRoomsUpdate = <ThrowOnError extends boolean = fal
  * Retrieve a paginated list of venue contacts with filtering.
  */
 export const locationsLocationsVenueContactsList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsVenueContactsListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsVenueContactsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5050,7 +5050,7 @@ export const locationsLocationsVenueContactsList = <ThrowOnError extends boolean
  * Create a new contact for a venue.
  */
 export const locationsLocationsVenueContactsCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueContactsCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsVenueContactsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5069,7 +5069,7 @@ export const locationsLocationsVenueContactsCreate = <ThrowOnError extends boole
  * Delete a venue contact.
  */
 export const locationsLocationsVenueContactsDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueContactsDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsVenueContactsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5084,7 +5084,7 @@ export const locationsLocationsVenueContactsDestroy = <ThrowOnError extends bool
  * Get detailed information about a specific venue contact.
  */
 export const locationsLocationsVenueContactsRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueContactsRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsVenueContactsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5099,7 +5099,7 @@ export const locationsLocationsVenueContactsRetrieve = <ThrowOnError extends boo
  * Partially update venue contact details.
  */
 export const locationsLocationsVenueContactsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueContactsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsVenueContactsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5118,7 +5118,7 @@ export const locationsLocationsVenueContactsPartialUpdate = <ThrowOnError extend
  * Update venue contact details.
  */
 export const locationsLocationsVenueContactsUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueContactsUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsVenueContactsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5137,7 +5137,7 @@ export const locationsLocationsVenueContactsUpdate = <ThrowOnError extends boole
  * Retrieve a paginated list of venue metadata entries.
  */
 export const locationsLocationsVenueMetadataList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsVenueMetadataListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsVenueMetadataListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5152,7 +5152,7 @@ export const locationsLocationsVenueMetadataList = <ThrowOnError extends boolean
  * Create a new metadata entry for a venue.
  */
 export const locationsLocationsVenueMetadataCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueMetadataCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsVenueMetadataCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5171,7 +5171,7 @@ export const locationsLocationsVenueMetadataCreate = <ThrowOnError extends boole
  * Delete a venue metadata entry.
  */
 export const locationsLocationsVenueMetadataDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueMetadataDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsVenueMetadataDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5186,7 +5186,7 @@ export const locationsLocationsVenueMetadataDestroy = <ThrowOnError extends bool
  * Get detailed information about a specific venue metadata entry.
  */
 export const locationsLocationsVenueMetadataRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueMetadataRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsVenueMetadataRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5201,7 +5201,7 @@ export const locationsLocationsVenueMetadataRetrieve = <ThrowOnError extends boo
  * Partially update venue metadata details.
  */
 export const locationsLocationsVenueMetadataPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueMetadataPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsVenueMetadataPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5220,7 +5220,7 @@ export const locationsLocationsVenueMetadataPartialUpdate = <ThrowOnError extend
  * Update venue metadata details.
  */
 export const locationsLocationsVenueMetadataUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenueMetadataUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsVenueMetadataUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5239,7 +5239,7 @@ export const locationsLocationsVenueMetadataUpdate = <ThrowOnError extends boole
  * Retrieve a paginated list of venues with filtering.
  */
 export const locationsLocationsVenuesList = <ThrowOnError extends boolean = false>(options?: Options<LocationsLocationsVenuesListData, ThrowOnError>) => (options?.client ?? client).get<LocationsLocationsVenuesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5254,7 +5254,7 @@ export const locationsLocationsVenuesList = <ThrowOnError extends boolean = fals
  * Create a new venue linked to a POI.
  */
 export const locationsLocationsVenuesCreate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesCreateData, ThrowOnError>) => (options.client ?? client).post<LocationsLocationsVenuesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5273,7 +5273,7 @@ export const locationsLocationsVenuesCreate = <ThrowOnError extends boolean = fa
  * Delete a venue.
  */
 export const locationsLocationsVenuesDestroy = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesDestroyData, ThrowOnError>) => (options.client ?? client).delete<LocationsLocationsVenuesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5288,7 +5288,7 @@ export const locationsLocationsVenuesDestroy = <ThrowOnError extends boolean = f
  * Get detailed information about a specific venue including rooms and contacts.
  */
 export const locationsLocationsVenuesRetrieve = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesRetrieveData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsVenuesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5303,7 +5303,7 @@ export const locationsLocationsVenuesRetrieve = <ThrowOnError extends boolean = 
  * Partially update venue details.
  */
 export const locationsLocationsVenuesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<LocationsLocationsVenuesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5322,7 +5322,7 @@ export const locationsLocationsVenuesPartialUpdate = <ThrowOnError extends boole
  * Update venue details.
  */
 export const locationsLocationsVenuesUpdate = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesUpdateData, ThrowOnError>) => (options.client ?? client).put<LocationsLocationsVenuesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5341,7 +5341,7 @@ export const locationsLocationsVenuesUpdate = <ThrowOnError extends boolean = fa
  * Get all contacts for a specific venue.
  */
 export const locationsLocationsVenuesContactsList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesContactsListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsVenuesContactsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5356,7 +5356,7 @@ export const locationsLocationsVenuesContactsList = <ThrowOnError extends boolea
  * Get all rooms for a specific venue.
  */
 export const locationsLocationsVenuesRoomsList = <ThrowOnError extends boolean = false>(options: Options<LocationsLocationsVenuesRoomsListData, ThrowOnError>) => (options.client ?? client).get<LocationsLocationsVenuesRoomsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5371,7 +5371,7 @@ export const locationsLocationsVenuesRoomsList = <ThrowOnError extends boolean =
  * Retrieve a list of available medical condition types for attendee health management. Includes common conditions such as asthma, diabetes, epilepsy, heart conditions, allergies, and other medical concerns requiring monitoring or emergency response. Each condition can be assigned to attendees with severity levels (mild, moderate, severe).
  */
 export const medicalConditionsList = <ThrowOnError extends boolean = false>(options?: Options<MedicalConditionsListData, ThrowOnError>) => (options?.client ?? client).get<MedicalConditionsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5386,7 +5386,7 @@ export const medicalConditionsList = <ThrowOnError extends boolean = false>(opti
  * Create a new medical condition type for health management and emergency response planning. Staff can define custom medical conditions with codes, labels, and descriptions. Supports verification workflows for medical compliance.
  */
 export const medicalConditionsCreate = <ThrowOnError extends boolean = false>(options: Options<MedicalConditionsCreateData, ThrowOnError>) => (options.client ?? client).post<MedicalConditionsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5405,7 +5405,7 @@ export const medicalConditionsCreate = <ThrowOnError extends boolean = false>(op
  * Delete a medical condition type (use with caution if assignments exist).
  */
 export const medicalConditionsDestroy = <ThrowOnError extends boolean = false>(options: Options<MedicalConditionsDestroyData, ThrowOnError>) => (options.client ?? client).delete<MedicalConditionsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5420,7 +5420,7 @@ export const medicalConditionsDestroy = <ThrowOnError extends boolean = false>(o
  * Retrieve detailed information about a specific medical condition type including code, label, description, verification status, and active status.
  */
 export const medicalConditionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<MedicalConditionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<MedicalConditionsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5435,7 +5435,7 @@ export const medicalConditionsRetrieve = <ThrowOnError extends boolean = false>(
  * Partially update a medical condition without providing complete payload.
  */
 export const medicalConditionsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<MedicalConditionsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<MedicalConditionsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5454,7 +5454,7 @@ export const medicalConditionsPartialUpdate = <ThrowOnError extends boolean = fa
  * Update a medical condition type's details including label, description, verification status, or active status. Used to maintain the medical conditions catalog.
  */
 export const medicalConditionsUpdate = <ThrowOnError extends boolean = false>(options: Options<MedicalConditionsUpdateData, ThrowOnError>) => (options.client ?? client).put<MedicalConditionsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5473,7 +5473,7 @@ export const medicalConditionsUpdate = <ThrowOnError extends boolean = false>(op
  * Retrieve a list of messages sent to or from attendees. Messages can be inquiries, requests, or communications between attendees and staff. Supports filtering by priority (low, medium, high) and response status.
  */
 export const messagesList = <ThrowOnError extends boolean = false>(options?: Options<MessagesListData, ThrowOnError>) => (options?.client ?? client).get<MessagesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5488,7 +5488,7 @@ export const messagesList = <ThrowOnError extends boolean = false>(options?: Opt
  * Create a new message from or about an attendee. Messages can be submitted by attendees with questions or requests, or by staff for record-keeping. Priority levels (low, medium, high) help staff prioritize responses.
  */
 export const messagesCreate = <ThrowOnError extends boolean = false>(options: Options<MessagesCreateData, ThrowOnError>) => (options.client ?? client).post<MessagesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5511,7 +5511,7 @@ export const messagesCreate = <ThrowOnError extends boolean = false>(options: Op
  * - Message threading and history
  */
 export const messagesDestroy = <ThrowOnError extends boolean = false>(options: Options<MessagesDestroyData, ThrowOnError>) => (options.client ?? client).delete<MessagesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5526,7 +5526,7 @@ export const messagesDestroy = <ThrowOnError extends boolean = false>(options: O
  * Retrieve full details of a specific attendee message including subject, message content, priority level, submission timestamp, response details, and staff notes. Shows complete message thread with any staff responses.
  */
 export const messagesRetrieve = <ThrowOnError extends boolean = false>(options: Options<MessagesRetrieveData, ThrowOnError>) => (options.client ?? client).get<MessagesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5541,7 +5541,7 @@ export const messagesRetrieve = <ThrowOnError extends boolean = false>(options: 
  * Partially update message fields such as priority, response, or admin notes without providing the complete message payload.
  */
 export const messagesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<MessagesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<MessagesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5560,7 +5560,7 @@ export const messagesPartialUpdate = <ThrowOnError extends boolean = false>(opti
  * Update a message, primarily used by staff to add responses or administrative notes. Can update priority level, response content, and internal staff notes. Response timestamp is automatically recorded when staff responds.
  */
 export const messagesUpdate = <ThrowOnError extends boolean = false>(options: Options<MessagesUpdateData, ThrowOnError>) => (options.client ?? client).put<MessagesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5579,7 +5579,7 @@ export const messagesUpdate = <ThrowOnError extends boolean = false>(options: Op
  * Retrieve a list of organisation acceptance codes.
  */
 export const organisationsAcceptanceCodesList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsAcceptanceCodesListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsAcceptanceCodesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5594,7 +5594,7 @@ export const organisationsAcceptanceCodesList = <ThrowOnError extends boolean = 
  * Create a new acceptance code for an organisation.
  */
 export const organisationsAcceptanceCodesCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsAcceptanceCodesCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsAcceptanceCodesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5613,7 +5613,7 @@ export const organisationsAcceptanceCodesCreate = <ThrowOnError extends boolean 
  * Delete an acceptance code.
  */
 export const organisationsAcceptanceCodesDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsAcceptanceCodesDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsAcceptanceCodesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5628,7 +5628,7 @@ export const organisationsAcceptanceCodesDestroy = <ThrowOnError extends boolean
  * Get detailed information about an acceptance code.
  */
 export const organisationsAcceptanceCodesRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsAcceptanceCodesRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsAcceptanceCodesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5643,7 +5643,7 @@ export const organisationsAcceptanceCodesRetrieve = <ThrowOnError extends boolea
  * Partially update acceptance code details.
  */
 export const organisationsAcceptanceCodesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsAcceptanceCodesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsAcceptanceCodesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5662,7 +5662,7 @@ export const organisationsAcceptanceCodesPartialUpdate = <ThrowOnError extends b
  * Update acceptance code details.
  */
 export const organisationsAcceptanceCodesUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsAcceptanceCodesUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsAcceptanceCodesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5681,7 +5681,7 @@ export const organisationsAcceptanceCodesUpdate = <ThrowOnError extends boolean 
  * Retrieve a paginated list of organisation contacts.
  */
 export const organisationsContactsList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsContactsListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsContactsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5696,7 +5696,7 @@ export const organisationsContactsList = <ThrowOnError extends boolean = false>(
  * Create a new contact for an organisation.
  */
 export const organisationsContactsCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsContactsCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsContactsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5715,7 +5715,7 @@ export const organisationsContactsCreate = <ThrowOnError extends boolean = false
  * Delete an organisation contact.
  */
 export const organisationsContactsDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsContactsDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsContactsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5730,7 +5730,7 @@ export const organisationsContactsDestroy = <ThrowOnError extends boolean = fals
  * Get detailed information about a specific contact.
  */
 export const organisationsContactsRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsContactsRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsContactsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5745,7 +5745,7 @@ export const organisationsContactsRetrieve = <ThrowOnError extends boolean = fal
  * Partially update contact details.
  */
 export const organisationsContactsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsContactsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsContactsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5764,7 +5764,7 @@ export const organisationsContactsPartialUpdate = <ThrowOnError extends boolean 
  * Update contact details.
  */
 export const organisationsContactsUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsContactsUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsContactsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5783,7 +5783,7 @@ export const organisationsContactsUpdate = <ThrowOnError extends boolean = false
  * Retrieve a list of organisation control assignments.
  */
 export const organisationsControlsList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsControlsListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsControlsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5798,7 +5798,7 @@ export const organisationsControlsList = <ThrowOnError extends boolean = false>(
  * Assign control of an organisation to a user.
  */
 export const organisationsControlsCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsControlsCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsControlsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5817,7 +5817,7 @@ export const organisationsControlsCreate = <ThrowOnError extends boolean = false
  * Remove control assignment from a user.
  */
 export const organisationsControlsDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsControlsDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsControlsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5832,7 +5832,7 @@ export const organisationsControlsDestroy = <ThrowOnError extends boolean = fals
  * Get detailed information about a control assignment.
  */
 export const organisationsControlsRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsControlsRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsControlsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5847,7 +5847,7 @@ export const organisationsControlsRetrieve = <ThrowOnError extends boolean = fal
  * Retrieve a list of organisation invites.
  */
 export const organisationsInvitesList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsInvitesListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsInvitesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5862,7 +5862,7 @@ export const organisationsInvitesList = <ThrowOnError extends boolean = false>(o
  * Create a new invite for a user to join an organisation.
  */
 export const organisationsInvitesCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsInvitesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5881,7 +5881,7 @@ export const organisationsInvitesCreate = <ThrowOnError extends boolean = false>
  * Delete an organisation invite.
  */
 export const organisationsInvitesDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsInvitesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5896,7 +5896,7 @@ export const organisationsInvitesDestroy = <ThrowOnError extends boolean = false
  * Get detailed information about an invite.
  */
 export const organisationsInvitesRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsInvitesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5911,7 +5911,7 @@ export const organisationsInvitesRetrieve = <ThrowOnError extends boolean = fals
  * Partially update invite details.
  */
 export const organisationsInvitesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsInvitesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5930,7 +5930,7 @@ export const organisationsInvitesPartialUpdate = <ThrowOnError extends boolean =
  * Update invite details.
  */
 export const organisationsInvitesUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsInvitesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5949,7 +5949,7 @@ export const organisationsInvitesUpdate = <ThrowOnError extends boolean = false>
  * Accept an organisation invite and create membership.
  */
 export const organisationsInvitesAcceptCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvitesAcceptCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsInvitesAcceptCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5964,7 +5964,7 @@ export const organisationsInvitesAcceptCreate = <ThrowOnError extends boolean = 
  * Retrieve a list of organisation involvements in events.
  */
 export const organisationsInvolvedEventsList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsInvolvedEventsListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsInvolvedEventsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5979,7 +5979,7 @@ export const organisationsInvolvedEventsList = <ThrowOnError extends boolean = f
  * Add an organisation to an event with a specific role.
  */
 export const organisationsInvolvedEventsCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvolvedEventsCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsInvolvedEventsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -5998,7 +5998,7 @@ export const organisationsInvolvedEventsCreate = <ThrowOnError extends boolean =
  * Remove an organisation's involvement in an event.
  */
 export const organisationsInvolvedEventsDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvolvedEventsDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsInvolvedEventsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6013,7 +6013,7 @@ export const organisationsInvolvedEventsDestroy = <ThrowOnError extends boolean 
  * Get detailed information about an involvement.
  */
 export const organisationsInvolvedEventsRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvolvedEventsRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsInvolvedEventsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6028,7 +6028,7 @@ export const organisationsInvolvedEventsRetrieve = <ThrowOnError extends boolean
  * Partially update involvement details.
  */
 export const organisationsInvolvedEventsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvolvedEventsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsInvolvedEventsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6047,7 +6047,7 @@ export const organisationsInvolvedEventsPartialUpdate = <ThrowOnError extends bo
  * Update involvement details.
  */
 export const organisationsInvolvedEventsUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsInvolvedEventsUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsInvolvedEventsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6066,7 +6066,7 @@ export const organisationsInvolvedEventsUpdate = <ThrowOnError extends boolean =
  * Retrieve a list of organisation leaders.
  */
 export const organisationsLeadersList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsLeadersListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsLeadersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6081,7 +6081,7 @@ export const organisationsLeadersList = <ThrowOnError extends boolean = false>(o
  * Assign a user as a leader of an organisation.
  */
 export const organisationsLeadersCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsLeadersCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsLeadersCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6100,7 +6100,7 @@ export const organisationsLeadersCreate = <ThrowOnError extends boolean = false>
  * Remove a user's leadership of an organisation.
  */
 export const organisationsLeadersDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsLeadersDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsLeadersDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6115,7 +6115,7 @@ export const organisationsLeadersDestroy = <ThrowOnError extends boolean = false
  * Get detailed information about a leader.
  */
 export const organisationsLeadersRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsLeadersRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsLeadersRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6130,7 +6130,7 @@ export const organisationsLeadersRetrieve = <ThrowOnError extends boolean = fals
  * Partially update leader notes.
  */
 export const organisationsLeadersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsLeadersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsLeadersPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6149,7 +6149,7 @@ export const organisationsLeadersPartialUpdate = <ThrowOnError extends boolean =
  * Update leader notes.
  */
 export const organisationsLeadersUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsLeadersUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsLeadersUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6168,7 +6168,7 @@ export const organisationsLeadersUpdate = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of organisations with advanced filtering.
  */
 export const organisationsListList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsListListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6183,7 +6183,7 @@ export const organisationsListList = <ThrowOnError extends boolean = false>(opti
  * Create a new organisation. User will be set as creator.
  */
 export const organisationsListCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsListCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6202,7 +6202,7 @@ export const organisationsListCreate = <ThrowOnError extends boolean = false>(op
  * Delete an organisation. Requires controller access.
  */
 export const organisationsListDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsListDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6217,7 +6217,7 @@ export const organisationsListDestroy = <ThrowOnError extends boolean = false>(o
  * Get detailed information about a specific organisation including contacts and statistics.
  */
 export const organisationsListRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsListRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6232,7 +6232,7 @@ export const organisationsListRetrieve = <ThrowOnError extends boolean = false>(
  * Partially update organisation details. Requires controller access.
  */
 export const organisationsListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsListPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6251,7 +6251,7 @@ export const organisationsListPartialUpdate = <ThrowOnError extends boolean = fa
  * Update organisation details. Requires controller access.
  */
 export const organisationsListUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsListUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6270,7 +6270,7 @@ export const organisationsListUpdate = <ThrowOnError extends boolean = false>(op
  * Get all contacts for a specific organisation.
  */
 export const organisationsListContactsList = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListContactsListData, ThrowOnError>) => (options.client ?? client).get<OrganisationsListContactsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6285,7 +6285,7 @@ export const organisationsListContactsList = <ThrowOnError extends boolean = fal
  * Get all memberships for a specific organisation.
  */
 export const organisationsListMembershipsList = <ThrowOnError extends boolean = false>(options: Options<OrganisationsListMembershipsListData, ThrowOnError>) => (options.client ?? client).get<OrganisationsListMembershipsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6300,7 +6300,7 @@ export const organisationsListMembershipsList = <ThrowOnError extends boolean = 
  * Retrieve a list of organisation memberships with verification status.
  */
 export const organisationsMembershipsList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsMembershipsListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsMembershipsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6315,7 +6315,7 @@ export const organisationsMembershipsList = <ThrowOnError extends boolean = fals
  * Add a user as a member of an organisation.
  */
 export const organisationsMembershipsCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsMembershipsCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsMembershipsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6334,7 +6334,7 @@ export const organisationsMembershipsCreate = <ThrowOnError extends boolean = fa
  * Remove a user's membership from an organisation.
  */
 export const organisationsMembershipsDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsMembershipsDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsMembershipsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6349,7 +6349,7 @@ export const organisationsMembershipsDestroy = <ThrowOnError extends boolean = f
  * Get detailed information about a membership.
  */
 export const organisationsMembershipsRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsMembershipsRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsMembershipsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6364,7 +6364,7 @@ export const organisationsMembershipsRetrieve = <ThrowOnError extends boolean = 
  * Manually verify a membership (requires controller access).
  */
 export const organisationsMembershipsVerifyManuallyCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsMembershipsVerifyManuallyCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsMembershipsVerifyManuallyCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6379,7 +6379,7 @@ export const organisationsMembershipsVerifyManuallyCreate = <ThrowOnError extend
  * Verify a membership using an acceptance code.
  */
 export const organisationsMembershipsVerifyWithCodeCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsMembershipsVerifyWithCodeCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsMembershipsVerifyWithCodeCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6398,7 +6398,7 @@ export const organisationsMembershipsVerifyWithCodeCreate = <ThrowOnError extend
  * Retrieve a list of sponsorship packages with payment info.
  */
 export const organisationsSponsorPackagesList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsSponsorPackagesListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsSponsorPackagesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6413,7 +6413,7 @@ export const organisationsSponsorPackagesList = <ThrowOnError extends boolean = 
  * Create a new sponsorship package.
  */
 export const organisationsSponsorPackagesCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorPackagesCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsSponsorPackagesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6432,7 +6432,7 @@ export const organisationsSponsorPackagesCreate = <ThrowOnError extends boolean 
  * Delete a sponsorship package.
  */
 export const organisationsSponsorPackagesDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorPackagesDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsSponsorPackagesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6447,7 +6447,7 @@ export const organisationsSponsorPackagesDestroy = <ThrowOnError extends boolean
  * Get detailed information about a sponsorship package including payment.
  */
 export const organisationsSponsorPackagesRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorPackagesRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsSponsorPackagesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6462,7 +6462,7 @@ export const organisationsSponsorPackagesRetrieve = <ThrowOnError extends boolea
  * Partially update package details.
  */
 export const organisationsSponsorPackagesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorPackagesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsSponsorPackagesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6481,7 +6481,7 @@ export const organisationsSponsorPackagesPartialUpdate = <ThrowOnError extends b
  * Update package details.
  */
 export const organisationsSponsorPackagesUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorPackagesUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsSponsorPackagesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6500,7 +6500,7 @@ export const organisationsSponsorPackagesUpdate = <ThrowOnError extends boolean 
  * Retrieve a list of event sponsors.
  */
 export const organisationsSponsorsList = <ThrowOnError extends boolean = false>(options?: Options<OrganisationsSponsorsListData, ThrowOnError>) => (options?.client ?? client).get<OrganisationsSponsorsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6515,7 +6515,7 @@ export const organisationsSponsorsList = <ThrowOnError extends boolean = false>(
  * Create a new event sponsor.
  */
 export const organisationsSponsorsCreate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsCreateData, ThrowOnError>) => (options.client ?? client).post<OrganisationsSponsorsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6534,7 +6534,7 @@ export const organisationsSponsorsCreate = <ThrowOnError extends boolean = false
  * Delete an event sponsor.
  */
 export const organisationsSponsorsDestroy = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsDestroyData, ThrowOnError>) => (options.client ?? client).delete<OrganisationsSponsorsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6549,7 +6549,7 @@ export const organisationsSponsorsDestroy = <ThrowOnError extends boolean = fals
  * Get detailed information about an event sponsor including packages.
  */
 export const organisationsSponsorsRetrieve = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsRetrieveData, ThrowOnError>) => (options.client ?? client).get<OrganisationsSponsorsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6564,7 +6564,7 @@ export const organisationsSponsorsRetrieve = <ThrowOnError extends boolean = fal
  * Partially update sponsor details.
  */
 export const organisationsSponsorsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<OrganisationsSponsorsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6583,7 +6583,7 @@ export const organisationsSponsorsPartialUpdate = <ThrowOnError extends boolean 
  * Update sponsor details.
  */
 export const organisationsSponsorsUpdate = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsUpdateData, ThrowOnError>) => (options.client ?? client).put<OrganisationsSponsorsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6602,7 +6602,7 @@ export const organisationsSponsorsUpdate = <ThrowOnError extends boolean = false
  * Get all sponsorship packages for a specific sponsor.
  */
 export const organisationsSponsorsPackagesList = <ThrowOnError extends boolean = false>(options: Options<OrganisationsSponsorsPackagesListData, ThrowOnError>) => (options.client ?? client).get<OrganisationsSponsorsPackagesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6617,7 +6617,7 @@ export const organisationsSponsorsPackagesList = <ThrowOnError extends boolean =
  * Retrieve all discount rules. Only accessible by administrative staff.
  */
 export const paymentsDiscountRulesList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsDiscountRulesListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsDiscountRulesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6632,7 +6632,7 @@ export const paymentsDiscountRulesList = <ThrowOnError extends boolean = false>(
  * Create a new discount rule for a discount. Rules define conditions and criteria for discount application. Only administrative staff can create discount rules.
  */
 export const paymentsDiscountRulesCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountRulesCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsDiscountRulesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6651,7 +6651,7 @@ export const paymentsDiscountRulesCreate = <ThrowOnError extends boolean = false
  * Delete a discount rule. Affects how discounts are applied. Only administrative staff can delete discount rules.
  */
 export const paymentsDiscountRulesDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountRulesDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsDiscountRulesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6666,7 +6666,7 @@ export const paymentsDiscountRulesDestroy = <ThrowOnError extends boolean = fals
  * Get detailed information about a specific discount rule including rule type, value, and conditions for discount application.
  */
 export const paymentsDiscountRulesRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountRulesRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsDiscountRulesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6681,7 +6681,7 @@ export const paymentsDiscountRulesRetrieve = <ThrowOnError extends boolean = fal
  * Partially update a discount rule such as changing value or conditions. Only administrative staff can update discount rules.
  */
 export const paymentsDiscountRulesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountRulesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsDiscountRulesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6700,7 +6700,7 @@ export const paymentsDiscountRulesPartialUpdate = <ThrowOnError extends boolean 
  * Update a discount rule with complete payload. Use PATCH for partial updates. Only administrative staff can update discount rules.
  */
 export const paymentsDiscountRulesUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountRulesUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsDiscountRulesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6719,7 +6719,7 @@ export const paymentsDiscountRulesUpdate = <ThrowOnError extends boolean = false
  * Retrieve all discounts. Only accessible by administrative staff.
  */
 export const paymentsDiscountsList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsDiscountsListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsDiscountsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6734,7 +6734,7 @@ export const paymentsDiscountsList = <ThrowOnError extends boolean = false>(opti
  * Create a new discount with specified type, value, and rules. Only administrative staff can create discounts.
  */
 export const paymentsDiscountsCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountsCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsDiscountsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6753,7 +6753,7 @@ export const paymentsDiscountsCreate = <ThrowOnError extends boolean = false>(op
  * Delete a discount. Use with caution as this affects pricing and promotions. Only administrative staff can delete discounts.
  */
 export const paymentsDiscountsDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountsDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsDiscountsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6768,7 +6768,7 @@ export const paymentsDiscountsDestroy = <ThrowOnError extends boolean = false>(o
  * Get detailed discount information including rules.
  */
 export const paymentsDiscountsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsDiscountsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6783,7 +6783,7 @@ export const paymentsDiscountsRetrieve = <ThrowOnError extends boolean = false>(
  * Partially update a discount such as changing status or rules. Only administrative staff can update discounts.
  */
 export const paymentsDiscountsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsDiscountsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6802,7 +6802,7 @@ export const paymentsDiscountsPartialUpdate = <ThrowOnError extends boolean = fa
  * Update a discount with complete payload including all rules. Use PATCH for partial updates. Only administrative staff can update discounts.
  */
 export const paymentsDiscountsUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDiscountsUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsDiscountsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6821,7 +6821,7 @@ export const paymentsDiscountsUpdate = <ThrowOnError extends boolean = false>(op
  * List donations. Users see their own, admins see all.
  */
 export const paymentsDonationsList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsDonationsListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsDonationsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6836,7 +6836,7 @@ export const paymentsDonationsList = <ThrowOnError extends boolean = false>(opti
  * Create a donation on a completed payment.
  */
 export const paymentsDonationsCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsDonationsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6855,7 +6855,7 @@ export const paymentsDonationsCreate = <ThrowOnError extends boolean = false>(op
  * Delete a donation. Can only delete pending donations. Only administrative staff can delete donations.
  */
 export const paymentsDonationsDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsDonationsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6870,7 +6870,7 @@ export const paymentsDonationsDestroy = <ThrowOnError extends boolean = false>(o
  * Get detailed donation information.
  */
 export const paymentsDonationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsDonationsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6885,7 +6885,7 @@ export const paymentsDonationsRetrieve = <ThrowOnError extends boolean = false>(
  * Partially update a donation such as amount or message. Only administrative staff can update donations.
  */
 export const paymentsDonationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsDonationsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6904,7 +6904,7 @@ export const paymentsDonationsPartialUpdate = <ThrowOnError extends boolean = fa
  * Update a donation with complete payload. Only administrative staff can update donations for verification purposes. Use PATCH for partial updates.
  */
 export const paymentsDonationsUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsDonationsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6923,7 +6923,7 @@ export const paymentsDonationsUpdate = <ThrowOnError extends boolean = false>(op
  * Admin endpoint to verify or reject a donation after payment is received. Marks donation as VERIFIED or REJECTED based on admin review.
  */
 export const paymentsDonationsVerifyDonationCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsVerifyDonationCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsDonationsVerifyDonationCreateResponses, PaymentsDonationsVerifyDonationCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6942,7 +6942,7 @@ export const paymentsDonationsVerifyDonationCreate = <ThrowOnError extends boole
  * Create a donation and payment in one transaction. Handles STRIPE (returns client_secret), BANK_TRANSFER (returns reference), and CASH (pending approval). Supports both event-specific and general donations.
  */
 export const paymentsDonationsCreateWithPaymentCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsDonationsCreateWithPaymentCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsDonationsCreateWithPaymentCreateResponses, PaymentsDonationsCreateWithPaymentCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6961,7 +6961,7 @@ export const paymentsDonationsCreateWithPaymentCreate = <ThrowOnError extends bo
  * List payment history. Only accessible by administrative staff.
  */
 export const paymentsHistoryList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsHistoryListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsHistoryListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6976,7 +6976,7 @@ export const paymentsHistoryList = <ThrowOnError extends boolean = false>(option
  * Get detailed information about a specific payment history action including action type, timestamp, performer, and associated metadata for audit trails.
  */
 export const paymentsHistoryRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsHistoryRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsHistoryRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -6991,7 +6991,7 @@ export const paymentsHistoryRetrieve = <ThrowOnError extends boolean = false>(op
  * Retrieve a paginated list of payments. Admins see all payments, users see only their own.
  */
 export const paymentsListList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsListListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7006,7 +7006,7 @@ export const paymentsListList = <ThrowOnError extends boolean = false>(options?:
  * Create a new payment in DRAFTING status. Only admins can create payments for other users.
  */
 export const paymentsListCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsListCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7025,7 +7025,7 @@ export const paymentsListCreate = <ThrowOnError extends boolean = false>(options
  * Delete a payment. Can only delete payments in DRAFTING or PENDING status. Only administrative staff can delete payments.
  */
 export const paymentsListDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsListDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsListDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7040,7 +7040,7 @@ export const paymentsListDestroy = <ThrowOnError extends boolean = false>(option
  * Get detailed information about a specific payment including target, refunds, and history.
  */
 export const paymentsListRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsListRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsListRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7055,7 +7055,7 @@ export const paymentsListRetrieve = <ThrowOnError extends boolean = false>(optio
  * Partially update payment details. Status transitions are validated.
  */
 export const paymentsListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsListPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7074,7 +7074,7 @@ export const paymentsListPartialUpdate = <ThrowOnError extends boolean = false>(
  * Update payment details. Status transitions are validated.
  */
 export const paymentsListUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsListUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7093,7 +7093,7 @@ export const paymentsListUpdate = <ThrowOnError extends boolean = false>(options
  * Cancel a pending payment. Only admins can do this.
  */
 export const paymentsListCancelCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListCancelCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsListCancelCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7108,7 +7108,7 @@ export const paymentsListCancelCreate = <ThrowOnError extends boolean = false>(o
  * Transition payment to COMPLETED status. Only admins can do this.
  */
 export const paymentsListMarkCompletedCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListMarkCompletedCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsListMarkCompletedCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7123,7 +7123,7 @@ export const paymentsListMarkCompletedCreate = <ThrowOnError extends boolean = f
  * Transition payment to FAILED status. Only admins can do this.
  */
 export const paymentsListMarkFailedCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListMarkFailedCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsListMarkFailedCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7144,7 +7144,7 @@ export const paymentsListMarkFailedCreate = <ThrowOnError extends boolean = fals
  * Only accessible by administrative staff.
  */
 export const paymentsListVerifyBankTransferCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsListVerifyBankTransferCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsListVerifyBankTransferCreateResponses, PaymentsListVerifyBankTransferCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7163,7 +7163,7 @@ export const paymentsListVerifyBankTransferCreate = <ThrowOnError extends boolea
  * Retrieve all payment methods. Only accessible by administrative staff.
  */
 export const paymentsMethodsList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsMethodsListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsMethodsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7178,7 +7178,7 @@ export const paymentsMethodsList = <ThrowOnError extends boolean = false>(option
  * Create a new payment method for an event. Only admins.
  */
 export const paymentsMethodsCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsMethodsCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsMethodsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7197,7 +7197,7 @@ export const paymentsMethodsCreate = <ThrowOnError extends boolean = false>(opti
  * Delete a payment method. Use with caution as this affects payment processing. Only administrative staff can delete payment methods.
  */
 export const paymentsMethodsDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsMethodsDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsMethodsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7212,7 +7212,7 @@ export const paymentsMethodsDestroy = <ThrowOnError extends boolean = false>(opt
  * Get detailed information about a specific payment method.
  */
 export const paymentsMethodsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsMethodsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsMethodsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7227,7 +7227,7 @@ export const paymentsMethodsRetrieve = <ThrowOnError extends boolean = false>(op
  * Partially update a payment method such as changing status or configuration. Only administrative staff can update payment methods.
  */
 export const paymentsMethodsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsMethodsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsMethodsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7246,7 +7246,7 @@ export const paymentsMethodsPartialUpdate = <ThrowOnError extends boolean = fals
  * Update a payment method with complete payload. Use PATCH for partial updates. Only administrative staff can update payment methods.
  */
 export const paymentsMethodsUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsMethodsUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsMethodsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7265,7 +7265,7 @@ export const paymentsMethodsUpdate = <ThrowOnError extends boolean = false>(opti
  * List refund associations. Only accessible by administrative staff.
  */
 export const paymentsRefundAssociationsList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsRefundAssociationsListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsRefundAssociationsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7280,7 +7280,7 @@ export const paymentsRefundAssociationsList = <ThrowOnError extends boolean = fa
  * Create a new refund association linking a refund request to refundable items. Only administrative staff can create refund associations.
  */
 export const paymentsRefundAssociationsCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundAssociationsCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundAssociationsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7299,7 +7299,7 @@ export const paymentsRefundAssociationsCreate = <ThrowOnError extends boolean = 
  * Delete a refund association. Removes link between refund request and refundable item. Only administrative staff can delete refund associations.
  */
 export const paymentsRefundAssociationsDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundAssociationsDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsRefundAssociationsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7314,7 +7314,7 @@ export const paymentsRefundAssociationsDestroy = <ThrowOnError extends boolean =
  * Get detailed information about a specific refund association including linked refund request and associated refundable items.
  */
 export const paymentsRefundAssociationsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundAssociationsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsRefundAssociationsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7329,7 +7329,7 @@ export const paymentsRefundAssociationsRetrieve = <ThrowOnError extends boolean 
  * Partially update a refund association. Only administrative staff can update refund associations.
  */
 export const paymentsRefundAssociationsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundAssociationsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsRefundAssociationsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7348,7 +7348,7 @@ export const paymentsRefundAssociationsPartialUpdate = <ThrowOnError extends boo
  * Update a refund association with complete payload. Use PATCH for partial updates. Only administrative staff can update refund associations.
  */
 export const paymentsRefundAssociationsUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundAssociationsUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsRefundAssociationsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7367,7 +7367,7 @@ export const paymentsRefundAssociationsUpdate = <ThrowOnError extends boolean = 
  * List refund policies. Only accessible by administrative staff.
  */
 export const paymentsRefundPoliciesList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsRefundPoliciesListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsRefundPoliciesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7382,7 +7382,7 @@ export const paymentsRefundPoliciesList = <ThrowOnError extends boolean = false>
  * Create a new refund policy for an event. Defines refund terms and conditions. Only administrative staff can create refund policies.
  */
 export const paymentsRefundPoliciesCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundPoliciesCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundPoliciesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7401,7 +7401,7 @@ export const paymentsRefundPoliciesCreate = <ThrowOnError extends boolean = fals
  * Delete a refund policy. Affects refund eligibility for associated event. Only administrative staff can delete refund policies.
  */
 export const paymentsRefundPoliciesDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundPoliciesDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsRefundPoliciesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7416,7 +7416,7 @@ export const paymentsRefundPoliciesDestroy = <ThrowOnError extends boolean = fal
  * Get detailed information about a specific refund policy including policy type, terms, and associated event.
  */
 export const paymentsRefundPoliciesRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundPoliciesRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsRefundPoliciesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7431,7 +7431,7 @@ export const paymentsRefundPoliciesRetrieve = <ThrowOnError extends boolean = fa
  * Partially update a refund policy such as changing terms or policy type. Only administrative staff can update refund policies.
  */
 export const paymentsRefundPoliciesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundPoliciesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsRefundPoliciesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7450,7 +7450,7 @@ export const paymentsRefundPoliciesPartialUpdate = <ThrowOnError extends boolean
  * Update a refund policy with complete payload. Use PATCH for partial updates. Only administrative staff can update refund policies.
  */
 export const paymentsRefundPoliciesUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundPoliciesUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsRefundPoliciesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7469,7 +7469,7 @@ export const paymentsRefundPoliciesUpdate = <ThrowOnError extends boolean = fals
  * List refund requests. Users see their own, admins see all.
  */
 export const paymentsRefundsList = <ThrowOnError extends boolean = false>(options?: Options<PaymentsRefundsListData, ThrowOnError>) => (options?.client ?? client).get<PaymentsRefundsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7484,7 +7484,7 @@ export const paymentsRefundsList = <ThrowOnError extends boolean = false>(option
  * Request a refund for a completed payment. Must be payment owner or admin.
  */
 export const paymentsRefundsCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7503,7 +7503,7 @@ export const paymentsRefundsCreate = <ThrowOnError extends boolean = false>(opti
  * Delete a refund request. Can only delete pending refund requests. Only administrative staff can delete refund requests.
  */
 export const paymentsRefundsDestroy = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsDestroyData, ThrowOnError>) => (options.client ?? client).delete<PaymentsRefundsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7518,7 +7518,7 @@ export const paymentsRefundsDestroy = <ThrowOnError extends boolean = false>(opt
  * Get detailed refund request information with associations.
  */
 export const paymentsRefundsRetrieve = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsRetrieveData, ThrowOnError>) => (options.client ?? client).get<PaymentsRefundsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7533,7 +7533,7 @@ export const paymentsRefundsRetrieve = <ThrowOnError extends boolean = false>(op
  * Partially update a refund request such as amount or reason. Only administrative staff can update refund requests.
  */
 export const paymentsRefundsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<PaymentsRefundsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7552,7 +7552,7 @@ export const paymentsRefundsPartialUpdate = <ThrowOnError extends boolean = fals
  * Update a refund request with complete payload. Only administrative staff can update refund requests. Use PATCH for partial updates.
  */
 export const paymentsRefundsUpdate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsUpdateData, ThrowOnError>) => (options.client ?? client).put<PaymentsRefundsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7571,7 +7571,7 @@ export const paymentsRefundsUpdate = <ThrowOnError extends boolean = false>(opti
  * Mark refund request as processed. Only admins.
  */
 export const paymentsRefundsProcessCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsProcessCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundsProcessCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7590,7 +7590,7 @@ export const paymentsRefundsProcessCreate = <ThrowOnError extends boolean = fals
  * Reject a pending refund request. Only admins.
  */
 export const paymentsRefundsRejectCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsRejectCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundsRejectCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7609,7 +7609,7 @@ export const paymentsRefundsRejectCreate = <ThrowOnError extends boolean = false
  * Mark refund request as verified. Only admins.
  */
 export const paymentsRefundsVerifyCreate = <ThrowOnError extends boolean = false>(options: Options<PaymentsRefundsVerifyCreateData, ThrowOnError>) => (options.client ?? client).post<PaymentsRefundsVerifyCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7628,7 +7628,7 @@ export const paymentsRefundsVerifyCreate = <ThrowOnError extends boolean = false
  * Retrieve a paginated list of all product categories. Categories are global across all events.
  */
 export const productsCategoriesList = <ThrowOnError extends boolean = false>(options?: Options<ProductsCategoriesListData, ThrowOnError>) => (options?.client ?? client).get<ProductsCategoriesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7643,7 +7643,7 @@ export const productsCategoriesList = <ThrowOnError extends boolean = false>(opt
  * Create a new product category. Only superusers and staff can create global categories.
  */
 export const productsCategoriesCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsCategoriesCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsCategoriesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7662,7 +7662,7 @@ export const productsCategoriesCreate = <ThrowOnError extends boolean = false>(o
  * Delete a product category. Only allowed if no products are using this category.
  */
 export const productsCategoriesDestroy = <ThrowOnError extends boolean = false>(options: Options<ProductsCategoriesDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProductsCategoriesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7677,7 +7677,7 @@ export const productsCategoriesDestroy = <ThrowOnError extends boolean = false>(
  * Get detailed information about a specific product category.
  */
 export const productsCategoriesRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsCategoriesRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsCategoriesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7692,7 +7692,7 @@ export const productsCategoriesRetrieve = <ThrowOnError extends boolean = false>
  * Partially update a product category.
  */
 export const productsCategoriesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsCategoriesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ProductsCategoriesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7711,7 +7711,7 @@ export const productsCategoriesPartialUpdate = <ThrowOnError extends boolean = f
  * Update an existing product category. Only superusers and staff can modify categories.
  */
 export const productsCategoriesUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsCategoriesUpdateData, ThrowOnError>) => (options.client ?? client).put<ProductsCategoriesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7730,7 +7730,7 @@ export const productsCategoriesUpdate = <ThrowOnError extends boolean = false>(o
  * Retrieve a paginated list of event-category associations.
  */
 export const productsEventCategoriesList = <ThrowOnError extends boolean = false>(options?: Options<ProductsEventCategoriesListData, ThrowOnError>) => (options?.client ?? client).get<ProductsEventCategoriesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7745,7 +7745,7 @@ export const productsEventCategoriesList = <ThrowOnError extends boolean = false
  * Create a new event-category association. Event administrators can manage their event's categories.
  */
 export const productsEventCategoriesCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsEventCategoriesCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsEventCategoriesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7764,7 +7764,7 @@ export const productsEventCategoriesCreate = <ThrowOnError extends boolean = fal
  * Delete an event-category association.
  */
 export const productsEventCategoriesDestroy = <ThrowOnError extends boolean = false>(options: Options<ProductsEventCategoriesDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProductsEventCategoriesDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7779,7 +7779,7 @@ export const productsEventCategoriesDestroy = <ThrowOnError extends boolean = fa
  * Get detailed information about a specific event-category association.
  */
 export const productsEventCategoriesRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsEventCategoriesRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsEventCategoriesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7794,7 +7794,7 @@ export const productsEventCategoriesRetrieve = <ThrowOnError extends boolean = f
  * Retrieve a paginated list of products. Supports extensive filtering for e-commerce-style search including price ranges, categories, stock availability, and full-text search.
  */
 export const productsListList = <ThrowOnError extends boolean = false>(options?: Options<ProductsListListData, ThrowOnError>) => (options?.client ?? client).get<ProductsListListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7810,7 +7810,7 @@ export const productsListList = <ThrowOnError extends boolean = false>(options?:
  */
 export const productsListCreate = <ThrowOnError extends boolean = false>(options?: Options<ProductsListCreateData, ThrowOnError>) => (options?.client ?? client).post<ProductsListCreateResponses, unknown, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7829,7 +7829,7 @@ export const productsListCreate = <ThrowOnError extends boolean = false>(options
  * Delete a product. Only allowed if no orders reference this product's variants.
  */
 export const productsListDestroy = <ThrowOnError extends boolean = false>(options: Options<ProductsListDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProductsListDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7844,7 +7844,7 @@ export const productsListDestroy = <ThrowOnError extends boolean = false>(option
  * Get detailed information about a specific product including images, variants, availability windows, and rules.
  */
 export const productsListRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsListRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsListRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7860,7 +7860,7 @@ export const productsListRetrieve = <ThrowOnError extends boolean = false>(optio
  */
 export const productsListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ProductsListPartialUpdateResponses, unknown, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7880,7 +7880,7 @@ export const productsListPartialUpdate = <ThrowOnError extends boolean = false>(
  */
 export const productsListUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsListUpdateData, ThrowOnError>) => (options.client ?? client).put<ProductsListUpdateResponses, unknown, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7900,7 +7900,7 @@ export const productsListUpdate = <ThrowOnError extends boolean = false>(options
  */
 export const productsListAddImageCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListAddImageCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListAddImageCreateResponses, ProductsListAddImageCreateErrors, ThrowOnError>({
     ...formDataBodySerializer,
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7919,7 +7919,7 @@ export const productsListAddImageCreate = <ThrowOnError extends boolean = false>
  * Remove an image resource from the product by providing the resource ID. The resource will be disassociated from the product.
  */
 export const productsListRemoveImageCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListRemoveImageCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListRemoveImageCreateResponses, ProductsListRemoveImageCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7938,7 +7938,7 @@ export const productsListRemoveImageCreate = <ThrowOnError extends boolean = fal
  * Toggle the is_active status of a product between true and false. Only administrators can perform this action. Active products are visible to regular users, inactive products are only visible to administrators.
  */
 export const productsListToggleActiveCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListToggleActiveCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListToggleActiveCreateResponses, ProductsListToggleActiveCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7953,7 +7953,7 @@ export const productsListToggleActiveCreate = <ThrowOnError extends boolean = fa
  * Retrieve a paginated list of product variants. Supports filtering by size, color, stock, price ranges. Can be accessed as nested route under products or standalone.
  */
 export const productsListVariantsList = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsListData, ThrowOnError>) => (options.client ?? client).get<ProductsListVariantsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7968,7 +7968,7 @@ export const productsListVariantsList = <ThrowOnError extends boolean = false>(o
  * Create a new product variant. Event administrators can create variants for their products.
  */
 export const productsListVariantsCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListVariantsCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -7987,7 +7987,7 @@ export const productsListVariantsCreate = <ThrowOnError extends boolean = false>
  * Delete a product variant. Only allowed if no orders reference this variant.
  */
 export const productsListVariantsDestroy = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProductsListVariantsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8002,7 +8002,7 @@ export const productsListVariantsDestroy = <ThrowOnError extends boolean = false
  * Get detailed information about a specific product variant including stock, pricing, and product details.
  */
 export const productsListVariantsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsListVariantsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8017,7 +8017,7 @@ export const productsListVariantsRetrieve = <ThrowOnError extends boolean = fals
  * Partially update a product variant.
  */
 export const productsListVariantsPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ProductsListVariantsPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8036,7 +8036,7 @@ export const productsListVariantsPartialUpdate = <ThrowOnError extends boolean =
  * Update an existing product variant. Only administrators can modify variants.
  */
 export const productsListVariantsUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsUpdateData, ThrowOnError>) => (options.client ?? client).put<ProductsListVariantsUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8055,7 +8055,7 @@ export const productsListVariantsUpdate = <ThrowOnError extends boolean = false>
  * Atomically decrement the stock quantity of a variant. The operation is atomic to prevent race conditions. Will fail if there is insufficient stock. Only administrators can perform stock operations.
  */
 export const productsListVariantsDecrementStockCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsDecrementStockCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListVariantsDecrementStockCreateResponses, ProductsListVariantsDecrementStockCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8074,7 +8074,7 @@ export const productsListVariantsDecrementStockCreate = <ThrowOnError extends bo
  * Atomically increment the stock quantity of a variant. The operation is atomic to prevent race conditions. If max_stock_quantity is set, the increment will fail if it would exceed the maximum. Only administrators can perform stock operations.
  */
 export const productsListVariantsIncrementStockCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsIncrementStockCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListVariantsIncrementStockCreateResponses, ProductsListVariantsIncrementStockCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8093,7 +8093,7 @@ export const productsListVariantsIncrementStockCreate = <ThrowOnError extends bo
  * Set the stock quantity to a specific value, overriding the current stock level. Useful for inventory adjustments or corrections. Only administrators can perform stock operations.
  */
 export const productsListVariantsSetStockCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsSetStockCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListVariantsSetStockCreateResponses, ProductsListVariantsSetStockCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8112,7 +8112,7 @@ export const productsListVariantsSetStockCreate = <ThrowOnError extends boolean 
  * Toggle the is_active status of a variant between true and false. Only administrators can perform this action. Inactive variants are not visible to regular users and cannot be purchased.
  */
 export const productsListVariantsToggleActiveCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsListVariantsToggleActiveCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsListVariantsToggleActiveCreateResponses, ProductsListVariantsToggleActiveCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8127,7 +8127,7 @@ export const productsListVariantsToggleActiveCreate = <ThrowOnError extends bool
  * Retrieve a paginated list of order items. Access controlled by order ownership.
  */
 export const productsOrderItemsList = <ThrowOnError extends boolean = false>(options?: Options<ProductsOrderItemsListData, ThrowOnError>) => (options?.client ?? client).get<ProductsOrderItemsListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8142,7 +8142,7 @@ export const productsOrderItemsList = <ThrowOnError extends boolean = false>(opt
  * Get detailed information about a specific order item.
  */
 export const productsOrderItemsRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsOrderItemsRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsOrderItemsRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8157,7 +8157,7 @@ export const productsOrderItemsRetrieve = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of orders. Users see their own orders, administrators see all orders for their events.
  */
 export const productsOrdersList = <ThrowOnError extends boolean = false>(options?: Options<ProductsOrdersListData, ThrowOnError>) => (options?.client ?? client).get<ProductsOrdersListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8172,7 +8172,7 @@ export const productsOrdersList = <ThrowOnError extends boolean = false>(options
  * Create a new order with items. Order starts in 'draft' status. Items are validated for stock and purchase eligibility.
  */
 export const productsOrdersCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8191,7 +8191,7 @@ export const productsOrdersCreate = <ThrowOnError extends boolean = false>(optio
  * Delete an order. Only draft orders can be deleted.
  */
 export const productsOrdersDestroy = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProductsOrdersDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8206,7 +8206,7 @@ export const productsOrdersDestroy = <ThrowOnError extends boolean = false>(opti
  * Get detailed information about a specific order including all items and payment details.
  */
 export const productsOrdersRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProductsOrdersRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8221,7 +8221,7 @@ export const productsOrdersRetrieve = <ThrowOnError extends boolean = false>(opt
  * Partially update order fields.
  */
 export const productsOrdersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ProductsOrdersPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8240,7 +8240,7 @@ export const productsOrdersPartialUpdate = <ThrowOnError extends boolean = false
  * Update order status. Status transitions are validated (e.g., draft → pending → processing → completed).
  */
 export const productsOrdersUpdate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersUpdateData, ThrowOnError>) => (options.client ?? client).put<ProductsOrdersUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8259,7 +8259,7 @@ export const productsOrdersUpdate = <ThrowOnError extends boolean = false>(optio
  * Add an item to a draft order. Only draft orders can have items added. Stock availability and purchase limits are validated. Order total is automatically recalculated.
  */
 export const productsOrdersAddItemCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersAddItemCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersAddItemCreateResponses, ProductsOrdersAddItemCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8278,7 +8278,7 @@ export const productsOrdersAddItemCreate = <ThrowOnError extends boolean = false
  * Cancel an order, transitioning it to 'cancelled' status. Stock is automatically restored for all items in the order. Only non-completed orders can be cancelled.
  */
 export const productsOrdersCancelCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersCancelCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersCancelCreateResponses, ProductsOrdersCancelCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8293,7 +8293,7 @@ export const productsOrdersCancelCreate = <ThrowOnError extends boolean = false>
  * Complete order checkout by creating payment. Handles STRIPE (returns client_secret), BANK_TRANSFER (returns reference), and CASH (pending approval at venue). Free orders (£0) skip payment creation. Order must be in PENDING status.
  */
 export const productsOrdersCheckoutCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersCheckoutCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersCheckoutCreateResponses, ProductsOrdersCheckoutCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8312,7 +8312,7 @@ export const productsOrdersCheckoutCreate = <ThrowOnError extends boolean = fals
  * Mark an order as completed. Only staff members can complete orders. Order must be in 'processing' status. This action is typically performed once payment has been verified and items are ready for fulfillment or have been fulfilled.
  */
 export const productsOrdersCompleteCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersCompleteCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersCompleteCreateResponses, ProductsOrdersCompleteCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8327,7 +8327,7 @@ export const productsOrdersCompleteCreate = <ThrowOnError extends boolean = fals
  * Submit an order, transitioning it from 'draft' to 'pending' status. Order must have at least one item. Stock is reserved when the order is submitted.
  */
 export const productsOrdersSubmitCreate = <ThrowOnError extends boolean = false>(options: Options<ProductsOrdersSubmitCreateData, ThrowOnError>) => (options.client ?? client).post<ProductsOrdersSubmitCreateResponses, ProductsOrdersSubmitCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8342,7 +8342,7 @@ export const productsOrdersSubmitCreate = <ThrowOnError extends boolean = false>
  * Retrieve a paginated list of user profiles with comprehensive filtering and search capabilities. Profiles contain extended user information including preferences, contact details, timezone, and language settings. Staff users can view all profiles, while regular users can only view their own. Supports filtering by location, language, timezone, and custom search.
  */
 export const profilesList = <ThrowOnError extends boolean = false>(options?: Options<ProfilesListData, ThrowOnError>) => (options?.client ?? client).get<ProfilesListResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8368,7 +8368,7 @@ export const profilesList = <ThrowOnError extends boolean = false>(options?: Opt
  * - Supports advanced filtering and search
  */
 export const profilesCreate = <ThrowOnError extends boolean = false>(options: Options<ProfilesCreateData, ThrowOnError>) => (options.client ?? client).post<ProfilesCreateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8387,7 +8387,7 @@ export const profilesCreate = <ThrowOnError extends boolean = false>(options: Op
  * Delete a user profile. This removes extended profile data but does not delete the user account. Use with caution as this operation cannot be easily undone.
  */
 export const profilesDestroy = <ThrowOnError extends boolean = false>(options: Options<ProfilesDestroyData, ThrowOnError>) => (options.client ?? client).delete<ProfilesDestroyResponses, ProfilesDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8402,7 +8402,7 @@ export const profilesDestroy = <ThrowOnError extends boolean = false>(options: O
  * Retrieve comprehensive information about a specific user profile including personal preferences, contact information, timezone, language settings, profile picture, and associated location data.
  */
 export const profilesRetrieve = <ThrowOnError extends boolean = false>(options: Options<ProfilesRetrieveData, ThrowOnError>) => (options.client ?? client).get<ProfilesRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8417,7 +8417,7 @@ export const profilesRetrieve = <ThrowOnError extends boolean = false>(options: 
  * Partially update a user's profile without providing complete payload. Ideal for updating individual profile attributes like preferred name, contact phone, timezone, or language settings. Users can only update their own profile unless they are staff.
  */
 export const profilesPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<ProfilesPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<ProfilesPartialUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8436,7 +8436,7 @@ export const profilesPartialUpdate = <ThrowOnError extends boolean = false>(opti
  * Fully update a user's profile with complete payload. Updates extended user information including preferences, contact details, timezone, and location. Users can only update their own profile unless they are staff.
  */
 export const profilesUpdate = <ThrowOnError extends boolean = false>(options: Options<ProfilesUpdateData, ThrowOnError>) => (options.client ?? client).put<ProfilesUpdateResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8455,7 +8455,7 @@ export const profilesUpdate = <ThrowOnError extends boolean = false>(options: Op
  * Retrieve the authenticated user's profile with all extended information. This is a convenience endpoint that returns the profile for the currently logged-in user. Automatically creates a profile if one doesn't exist.
  */
 export const profilesMeRetrieve = <ThrowOnError extends boolean = false>(options?: Options<ProfilesMeRetrieveData, ThrowOnError>) => (options?.client ?? client).get<ProfilesMeRetrieveResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8470,7 +8470,7 @@ export const profilesMeRetrieve = <ThrowOnError extends boolean = false>(options
  * Returns Stripe publishable key and test mode status for frontend initialization
  */
 export const getStripeConfig = <ThrowOnError extends boolean = false>(options?: Options<GetStripeConfigData, ThrowOnError>) => (options?.client ?? client).get<GetStripeConfigResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8485,7 +8485,7 @@ export const getStripeConfig = <ThrowOnError extends boolean = false>(options?: 
  * Manually confirms a Stripe PaymentIntent. Usually not needed as Stripe.js auto-confirms payments. Use for server-side payment flows or debugging.
  */
 export const confirmPaymentIntent = <ThrowOnError extends boolean = false>(options: Options<ConfirmPaymentIntentData, ThrowOnError>) => (options.client ?? client).post<ConfirmPaymentIntentResponses, ConfirmPaymentIntentErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8504,7 +8504,7 @@ export const confirmPaymentIntent = <ThrowOnError extends boolean = false>(optio
  * Creates a Stripe PaymentIntent for an Order or Booking. Returns client_secret for frontend payment collection with Stripe.js. Creates or reuses existing Payment record.
  */
 export const createPaymentIntent = <ThrowOnError extends boolean = false>(options: Options<CreatePaymentIntentData, ThrowOnError>) => (options.client ?? client).post<CreatePaymentIntentResponses, CreatePaymentIntentErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8523,7 +8523,7 @@ export const createPaymentIntent = <ThrowOnError extends boolean = false>(option
  * Retrieve a paginated list of all users with advanced filtering and search capabilities. Staff users can view all users with complete information, while regular users can only view their own profile. Supports searching by email, username, name, and filtering by active status and OAuth provider.
  */
 export const usersList = <ThrowOnError extends boolean = false>(options?: Options<UsersListData, ThrowOnError>) => (options?.client ?? client).get<UsersListResponses, UsersListErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8538,7 +8538,7 @@ export const usersList = <ThrowOnError extends boolean = false>(options?: Option
  * Create a new user account with email and password authentication. This endpoint is public and does not require authentication. Automatically creates associated profile and returns JWT tokens in HTTP-only cookies. Email verification may be required based on system configuration.
  */
 export const usersCreate = <ThrowOnError extends boolean = false>(options: Options<UsersCreateData, ThrowOnError>) => (options.client ?? client).post<UsersCreateResponses, UsersCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8557,7 +8557,7 @@ export const usersCreate = <ThrowOnError extends boolean = false>(options: Optio
  * Soft delete a user account by deactivating it instead of permanent removal. Users can delete their own account, and staff members can delete any account. Deactivated accounts retain data for compliance but cannot log in. This is a soft delete operation - the account is marked inactive rather than removed from the database.
  */
 export const usersDestroy = <ThrowOnError extends boolean = false>(options: Options<UsersDestroyData, ThrowOnError>) => (options.client ?? client).delete<UsersDestroyResponses, UsersDestroyErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8572,7 +8572,7 @@ export const usersDestroy = <ThrowOnError extends boolean = false>(options: Opti
  * Retrieve comprehensive information about a specific user including profile data, account status, and timestamps. Regular users can only view their own profile, while staff members can view any user. Includes HATEOAS links for related resources.
  */
 export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersRetrieveData, ThrowOnError>) => (options.client ?? client).get<UsersRetrieveResponses, UsersRetrieveErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8587,7 +8587,7 @@ export const usersRetrieve = <ThrowOnError extends boolean = false>(options: Opt
  * Partially update a user's account information without providing complete payload. Allows updating individual fields like first name, last name, or other profile attributes. Users can only update their own profile unless they are staff.
  */
 export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<UsersPartialUpdateResponses, UsersPartialUpdateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8606,7 +8606,7 @@ export const usersPartialUpdate = <ThrowOnError extends boolean = false>(options
  * Fully update a user's account information including personal details and preferences. Requires complete payload with all fields. Users can only update their own profile unless they are staff. Use PATCH for partial updates.
  */
 export const usersUpdate = <ThrowOnError extends boolean = false>(options: Options<UsersUpdateData, ThrowOnError>) => (options.client ?? client).put<UsersUpdateResponses, UsersUpdateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8625,7 +8625,7 @@ export const usersUpdate = <ThrowOnError extends boolean = false>(options: Optio
  * Retrieve a specific user's profile information including extended profile data. Access is restricted based on permissions - users can view their own profile, staff can view any profile.
  */
 export const usersProfileRetrieve = <ThrowOnError extends boolean = false>(options: Options<UsersProfileRetrieveData, ThrowOnError>) => (options.client ?? client).get<UsersProfileRetrieveResponses, UsersProfileRetrieveErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8640,7 +8640,7 @@ export const usersProfileRetrieve = <ThrowOnError extends boolean = false>(optio
  * Change the authenticated user's password with verification. Requires the current password for security validation before setting the new password. New password must meet security requirements (minimum length, complexity).
  */
 export const usersChangePasswordCreate = <ThrowOnError extends boolean = false>(options: Options<UsersChangePasswordCreateData, ThrowOnError>) => (options.client ?? client).post<UsersChangePasswordCreateResponses, UsersChangePasswordCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8659,7 +8659,7 @@ export const usersChangePasswordCreate = <ThrowOnError extends boolean = false>(
  * Retrieve the authenticated user's complete profile information including all personal details, profile data, account status, and timestamps. This is a convenience endpoint equivalent to GET /users/{id}/ with the current user's ID.
  */
 export const usersMeRetrieve = <ThrowOnError extends boolean = false>(options?: Options<UsersMeRetrieveData, ThrowOnError>) => (options?.client ?? client).get<UsersMeRetrieveResponses, UsersMeRetrieveErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8674,7 +8674,7 @@ export const usersMeRetrieve = <ThrowOnError extends boolean = false>(options?: 
  * Update the authenticated user's profile information using a partial update. Allows modifying personal details like name, contact information, and preferences without providing all fields.
  */
 export const usersMeUpdatePartialUpdate = <ThrowOnError extends boolean = false>(options?: Options<UsersMeUpdatePartialUpdateData, ThrowOnError>) => (options?.client ?? client).patch<UsersMeUpdatePartialUpdateResponses, UsersMeUpdatePartialUpdateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
@@ -8693,7 +8693,7 @@ export const usersMeUpdatePartialUpdate = <ThrowOnError extends boolean = false>
  * Verify a user's email address using the verification token sent via email. Email verification ensures that users have access to the email address they registered with. May be required for certain features or event registrations.
  */
 export const usersVerifyEmailCreate = <ThrowOnError extends boolean = false>(options: Options<UsersVerifyEmailCreateData, ThrowOnError>) => (options.client ?? client).post<UsersVerifyEmailCreateResponses, UsersVerifyEmailCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
+    security: [{
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
