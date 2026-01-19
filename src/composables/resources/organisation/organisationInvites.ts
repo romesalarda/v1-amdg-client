@@ -122,7 +122,7 @@ export function useAcceptOrganisationInvite() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (inviteId: number) => organisationsInvitesAcceptCreate({ path: { id: String(inviteId) } }),
+    mutationFn: (inviteId: string) => organisationsInvitesAcceptCreate({ path: { id: String(inviteId) }, throwOnError: true }),
     onSuccess: (_, inviteId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
