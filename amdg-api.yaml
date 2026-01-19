@@ -21857,13 +21857,11 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
       required:
       - area_code
       - area_name
       - chapter
-      - established_date
     AreaLocationCreateUpdateRequest:
       type: object
       description: Create/Update serializer for AreaLocation.
@@ -21888,6 +21886,10 @@ components:
         active:
           type: boolean
           title: Is-active-area
+        established_date:
+          type: string
+          format: date
+          nullable: true
       required:
       - area_code
       - area_name
@@ -21926,7 +21928,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -21971,7 +21972,6 @@ components:
       - chapter_name
       - date_added
       - date_updated
-      - established_date
       - id
       - leaders
       - relative_areas
@@ -22009,7 +22009,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -22042,7 +22041,6 @@ components:
       - chapter_name
       - date_added
       - date_updated
-      - established_date
       - id
     AttendeeAccessibilityRequirement:
       type: object
@@ -24867,12 +24865,10 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
       required:
       - chapter_name
       - cluster
-      - established_date
     ChapterLocationCreateUpdateRequest:
       type: object
       description: Create/Update serializer for ChapterLocation.
@@ -24897,6 +24893,10 @@ components:
         active:
           type: boolean
           title: Is-active-chapter
+        established_date:
+          type: string
+          format: date
+          nullable: true
       required:
       - chapter_name
       - cluster
@@ -24931,7 +24931,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -24975,7 +24974,6 @@ components:
       - cluster_name
       - date_added
       - date_updated
-      - established_date
       - id
       - leaders
     ChapterLocationList:
@@ -25009,7 +25007,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -25040,7 +25037,6 @@ components:
       - cluster_name
       - date_added
       - date_updated
-      - established_date
       - id
     CheckoutRequest:
       type: object
@@ -25092,12 +25088,10 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
       required:
       - cluster_name
       - country
-      - established_date
     ClusterLocationCreateUpdateRequest:
       type: object
       description: Create/Update serializer for ClusterLocation.
@@ -25120,6 +25114,10 @@ components:
         active:
           type: boolean
           title: Is-active-cluster
+        established_date:
+          type: string
+          format: date
+          nullable: true
       required:
       - cluster_name
       - country
@@ -25152,7 +25150,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -25196,7 +25193,6 @@ components:
       - country_name
       - date_added
       - date_updated
-      - established_date
       - id
       - leaders
     ClusterLocationList:
@@ -25228,7 +25224,6 @@ components:
         established_date:
           type: string
           format: date
-          readOnly: true
           nullable: true
         date_added:
           type: string
@@ -25259,7 +25254,6 @@ components:
       - country_name
       - date_added
       - date_updated
-      - established_date
       - id
     ConfirmPaymentIntentRequest:
       type: object
@@ -37855,6 +37849,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+        landing_image:
+          type: string
+          format: uri
+          nullable: true
+        logo:
+          type: string
+          format: uri
+          nullable: true
         _links:
           type: object
           properties:
@@ -37872,10 +37874,6 @@ components:
               format: uri
           readOnly: true
           title: ' links'
-        logo:
-          type: string
-          format: uri
-          nullable: true
         logo_url:
           type: string
           readOnly: true
@@ -37884,10 +37882,6 @@ components:
           type: string
           format: date-time
           readOnly: true
-        landing_image:
-          type: string
-          format: uri
-          nullable: true
         landing_image_url:
           type: string
           readOnly: true
@@ -38162,6 +38156,14 @@ components:
           type: string
           format: date-time
           readOnly: true
+        landing_image:
+          type: string
+          format: uri
+          nullable: true
+        logo:
+          type: string
+          format: uri
+          nullable: true
         _links:
           type: object
           properties:
@@ -40340,6 +40342,10 @@ components:
         active:
           type: boolean
           title: Is-active-area
+        established_date:
+          type: string
+          format: date
+          nullable: true
     PatchedAttendeeAccessibilityRequirementRequest:
       type: object
       description: Serializer for AttendeeAccessibilityRequirement with nested requirement
@@ -40639,6 +40645,10 @@ components:
         active:
           type: boolean
           title: Is-active-chapter
+        established_date:
+          type: string
+          format: date
+          nullable: true
     PatchedClusterLocationCreateUpdateRequest:
       type: object
       description: Create/Update serializer for ClusterLocation.
@@ -40661,6 +40671,10 @@ components:
         active:
           type: boolean
           title: Is-active-cluster
+        established_date:
+          type: string
+          format: date
+          nullable: true
     PatchedConsentRequest:
       type: object
       description: Serializer for Consent.

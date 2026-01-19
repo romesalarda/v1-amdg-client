@@ -68,6 +68,11 @@
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  layout: false,
+})
+
+const route = useRoute()
 const email = ref('')
 const password = ref('')
 const auth = useAuthStore()
@@ -78,7 +83,9 @@ const handleLogin = async () => {
         await auth.login({ email: email.value, password: password.value })
         // Only navigate if login was successful (auth.isAuthenticated will be true)
         if (auth.isAuthenticated) {
-            navigateTo('/admin/dashboard')
+            // Redirect to the original page or my-dashboard
+            const redirectTo = (route.query.redirect as string) || '/my-dashboard'
+            navigateTo(redirectTo)
         }
     } catch (e) {
         // Show error notification to user

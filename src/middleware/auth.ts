@@ -14,11 +14,15 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     // Check if user is authenticated
     if (!auth.isAuthenticated) {
         if (!publicRoutes.includes(to.path)) {
-            return navigateTo('/login')
+            // Store the original path as a query parameter
+            return navigateTo({
+                path: '/login',
+                query: { redirect: to.fullPath }
+            })
         }
     } else {
         if (to.path === '/login') {
-            return navigateTo('/admin/dashboard')
+            return navigateTo('/my-dashboard')
         }
     }
 })

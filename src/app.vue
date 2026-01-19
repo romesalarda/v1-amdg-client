@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-gray-50 text-gray-900 font-sans antialiased">
+  <div class="min-h-screen text-gray-900 font-sans antialiased">
     <NuxtLoadingIndicator />
     <NuxtLayout>
       <NuxtPage />

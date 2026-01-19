@@ -48,8 +48,8 @@ onMounted(async () => {
       // Fetch user data to update store
       await auth.fetchUser()
       
-      // Redirect to dashboard
-      router.push('/admin/dashboard')
+      // Redirect to my-dashboard
+      router.push('/my-dashboard')
     } else {
       error.value = 'Failed to authenticate with Google'
       loading.value = false

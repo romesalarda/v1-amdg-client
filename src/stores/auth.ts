@@ -154,7 +154,12 @@ export const useAuthStore = defineStore('auth', {
             this.isAuthenticated = false
             this.initPromise = null
             const router = useRouter()
-            router.push('/login')
+            const route = useRoute()
+            // Store current path for redirect after login
+            router.push({
+                path: '/login',
+                query: { redirect: route.fullPath }
+            })
         }
     }
 })

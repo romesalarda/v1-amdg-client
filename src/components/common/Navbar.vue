@@ -16,8 +16,11 @@
         <NuxtLink to="/events" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
           Events
         </NuxtLink>
-        <NuxtLink to="/workshops" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
-          Workshops
+        <NuxtLink to="/communities" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
+          Communities
+        </NuxtLink>
+        <NuxtLink v-if="userData && profileData" to="/my-dashboard" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors no-underline shadow-sm">
+          My Dashboard
         </NuxtLink>
       </div>
 

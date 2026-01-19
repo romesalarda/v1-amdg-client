@@ -69,7 +69,7 @@ export type AreaLocationCreateUpdate = {
      * Is-active-area
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
 };
 
 /**
@@ -90,6 +90,7 @@ export type AreaLocationCreateUpdateRequest = {
      * Is-active-area
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -113,7 +114,7 @@ export type AreaLocationDetail = {
      * Is-active-area
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -155,7 +156,7 @@ export type AreaLocationList = {
      * Is-active-area
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -1479,7 +1480,7 @@ export type ChapterLocationCreateUpdate = {
      * Is-active-chapter
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
 };
 
 /**
@@ -1500,6 +1501,7 @@ export type ChapterLocationCreateUpdateRequest = {
      * Is-active-chapter
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -1522,7 +1524,7 @@ export type ChapterLocationDetail = {
      * Is-active-chapter
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -1563,7 +1565,7 @@ export type ChapterLocationList = {
      * Is-active-chapter
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -1615,7 +1617,7 @@ export type ClusterLocationCreateUpdate = {
      * Is-active-cluster
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
 };
 
 /**
@@ -1633,6 +1635,7 @@ export type ClusterLocationCreateUpdateRequest = {
      * Is-active-cluster
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -1652,7 +1655,7 @@ export type ClusterLocationDetail = {
      * Is-active-cluster
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -1690,7 +1693,7 @@ export type ClusterLocationList = {
      * Is-active-cluster
      */
     active?: boolean;
-    readonly established_date: string | null;
+    established_date?: string | null;
     readonly date_added: string;
     readonly date_updated: string;
     /**
@@ -8020,6 +8023,8 @@ export type OrganisationDetail = {
     readonly created_by_name: string | null;
     readonly added_at: string;
     readonly updated_at: string;
+    landing_image?: string | null;
+    logo?: string | null;
     /**
      *  links
      */
@@ -8029,13 +8034,11 @@ export type OrganisationDetail = {
         contacts?: string;
         memberships?: string;
     };
-    logo?: string | null;
     /**
      * Logo image URL
      */
     readonly logo_url: string;
     readonly logo_uploaded_at: string;
-    landing_image?: string | null;
     /**
      * Landing image URL
      */
@@ -8147,6 +8150,8 @@ export type OrganisationList = {
     readonly created_by_name: string | null;
     readonly added_at: string;
     readonly updated_at: string;
+    landing_image?: string | null;
+    logo?: string | null;
     /**
      *  links
      */
@@ -8862,6 +8867,7 @@ export type PatchedAreaLocationCreateUpdateRequest = {
      * Is-active-area
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -9042,6 +9048,7 @@ export type PatchedChapterLocationCreateUpdateRequest = {
      * Is-active-chapter
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -9059,6 +9066,7 @@ export type PatchedClusterLocationCreateUpdateRequest = {
      * Is-active-cluster
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -12852,26 +12860,6 @@ export type AccessibilityRequirementWritable = {
 };
 
 /**
- * Create/Update serializer for AreaLocation.
- */
-export type AreaLocationCreateUpdateWritable = {
-    /**
-     * Name-of-area
-     */
-    area_name: string;
-    area_code: string | null;
-    chapter: number;
-    /**
-     * description of the area location
-     */
-    description?: string | null;
-    /**
-     * Is-active-area
-     */
-    active?: boolean;
-};
-
-/**
  * Detailed serializer for AreaLocation.
  */
 export type AreaLocationDetailWritable = {
@@ -12889,6 +12877,7 @@ export type AreaLocationDetailWritable = {
      * Is-active-area
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -12909,6 +12898,7 @@ export type AreaLocationListWritable = {
      * Is-active-area
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -13369,26 +13359,6 @@ export type BookingPackageRuleWritable = {
 };
 
 /**
- * Create/Update serializer for ChapterLocation.
- */
-export type ChapterLocationCreateUpdateWritable = {
-    /**
-     * Name-of-chapter
-     */
-    chapter_name: string;
-    chapter_code?: string | null;
-    cluster: number;
-    /**
-     * description of the chapter location
-     */
-    description?: string | null;
-    /**
-     * Is-active-chapter
-     */
-    active?: boolean;
-};
-
-/**
  * Detailed serializer for ChapterLocation.
  */
 export type ChapterLocationDetailWritable = {
@@ -13406,6 +13376,7 @@ export type ChapterLocationDetailWritable = {
      * Is-active-chapter
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -13426,23 +13397,7 @@ export type ChapterLocationListWritable = {
      * Is-active-chapter
      */
     active?: boolean;
-};
-
-/**
- * Create/Update serializer for ClusterLocation.
- */
-export type ClusterLocationCreateUpdateWritable = {
-    /**
-     * Name-of-cluster
-     */
-    cluster_name: string;
-    cluster_code?: string | null;
-    country: number;
-    description?: string | null;
-    /**
-     * Is-active-cluster
-     */
-    active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -13460,6 +13415,7 @@ export type ClusterLocationDetailWritable = {
      * Is-active-cluster
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -13477,6 +13433,7 @@ export type ClusterLocationListWritable = {
      * Is-active-cluster
      */
     active?: boolean;
+    established_date?: string | null;
 };
 
 /**
@@ -16070,8 +16027,8 @@ export type OrganisationDetailWritable = {
     required_acceptance_code?: boolean;
     requires_manual_verification?: boolean;
     created_by?: number | null;
-    logo?: string | null;
     landing_image?: string | null;
+    logo?: string | null;
 };
 
 /**
@@ -16106,6 +16063,8 @@ export type OrganisationListWritable = {
     required_acceptance_code?: boolean;
     requires_manual_verification?: boolean;
     created_by?: number | null;
+    landing_image?: string | null;
+    logo?: string | null;
 };
 
 /**

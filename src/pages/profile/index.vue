@@ -1,8 +1,6 @@
 <template>
-  <div>
-    <Navbar />
-    <main class="min-h-[calc(100vh-64px)] py-8 bg-gray-50">
-      <div class="max-w-4xl mx-auto px-6">
+  <div class="py-8 bg-gray-50">
+    <div class="max-w-4xl mx-auto px-6">
         <!-- Header -->
         <div class="mb-8">
           <h1 class="text-3xl font-bold text-gray-900 mb-2">Profile Settings</h1>
@@ -216,8 +214,7 @@
             <p class="text-sm font-medium text-green-900">Profile updated successfully!</p>
           </div>
         </Transition>
-      </div>
-    </main>
+    </div>
   </div>
 </template>
 
@@ -226,7 +223,6 @@ import { ref, watch, onUnmounted } from 'vue'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
 import type { ProfileRequest } from '~/api/types.gen'
-import Navbar from '~/components/common/Navbar.vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { ProfileSchema } from '~/schemas/profile.schema'
@@ -424,7 +420,6 @@ const handleSubmit = handleFormSubmit(async (values) => {
 })
 
 definePageMeta({
-  layout: false, // Full screen layout for admin
   middleware: 'auth'
 })
 </script>
