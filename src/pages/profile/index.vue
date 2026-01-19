@@ -40,8 +40,14 @@
             <div class="flex items-center gap-6">
               <div class="w-24 h-24 rounded-full overflow-hidden flex-shrink-0 border-2 border-gray-200">
                 <img
-                  v-if="profileData.data?.profile_picture_url"
-                  :src="profileData.data.profile_picture_url"
+                  v-if="imagePreview"
+                  :src="imagePreview"
+                  alt="Preview"
+                  class="w-full h-full object-cover"
+                />
+                <img
+                  v-else-if="profileData.data?.profile_picture_url"
+                  :src="resolveImageUrl(profileData.data.profile_picture_url)"
                   :alt="userData.data?.display_name"
                   class="w-full h-full object-cover"
                 />
@@ -60,6 +66,7 @@
                   />
                 </label>
                 <p class="mt-2 text-xs text-gray-500">JPG, PNG or GIF. Max size 5MB.</p>
+                <p v-if="profilePicture" class="mt-1 text-xs text-green-600 font-medium">✓ New image selected: {{ profilePicture.name }}</p>
               </div>
             </div>
           </div>
@@ -215,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
 import type { ProfileRequest } from '~/api/types.gen'
@@ -223,6 +230,7 @@ import Navbar from '~/components/common/Navbar.vue'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { ProfileSchema } from '~/schemas/profile.schema'
+import { validateImageFile, createImagePreview, resolveImageUrl } from '~/utils/image'
 
 const { $notyf } = useNuxtApp()
 
@@ -256,12 +264,20 @@ const { value: preferred_language } = useField<string>('preferred_language')
 const { value: timezone } = useField<string>('timezone')
 
 const profilePicture = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
 const showSuccess = ref(false)
 
 // Computed states
 const isLoading = computed(() => isUserLoading.value || isProfileLoading.value)
 const isSaving = computed(() => isUpdatingUser.value || isUpdatingProfile.value)
 const error = computed(() => userError.value || profileError.value)
+
+// Cleanup image preview on unmount
+onUnmounted(() => {
+  if (imagePreview.value) {
+    URL.revokeObjectURL(imagePreview.value)
+  }
+})
 
 // Initialize form data when profile loads
 watch([userData, profileData], () => {
@@ -277,18 +293,37 @@ watch([userData, profileData], () => {
   }
 }, { immediate: true })
 
-// Handle file change
+// Handle file change with validation and preview
 const handleFileChange = (event: Event) => {
   const target = event.target as HTMLInputElement
   if (target.files && target.files[0]) {
     const file = target.files[0]
-    // Validate file size (5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size must be less than 5MB')
-      target.value = ''
-      return
+    
+    try {
+      // Validate image file
+      validateImageFile(file, {
+        allowedTypes: ['image/jpeg', 'image/png', 'image/gif'],
+        maxSizeBytes: 5 * 1024 * 1024, // 5MB
+      })
+      
+      // Clean up old preview
+      if (imagePreview.value) {
+        URL.revokeObjectURL(imagePreview.value)
+      }
+      
+      // Set new file and create preview
+      profilePicture.value = file
+      imagePreview.value = createImagePreview(file)
+      
+      $notyf.success('Image selected successfully')
     }
-    profilePicture.value = file
+    catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Invalid file'
+      $notyf.error(errorMessage)
+      target.value = ''
+      profilePicture.value = null
+      imagePreview.value = null
+    }
   }
 }
 
@@ -304,8 +339,15 @@ const resetForm = () => {
       timezone: profileData.value.data.timezone || 'Europe/London',
     })
   }
+  
+  // Cleanup preview and file
+  if (imagePreview.value) {
+    URL.revokeObjectURL(imagePreview.value)
+    imagePreview.value = null
+  }
   profilePicture.value = null
-  // Clear any file input
+  
+  // Clear file input
   const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
   if (fileInput) fileInput.value = ''
 }
@@ -326,23 +368,36 @@ const handleSubmit = handleFormSubmit(async (values) => {
       })
     }
 
-    // Prepare profile update data
-    const profileUpdateData: Partial<ProfileRequest> = {
-      preferred_name: values.preferred_name || '',
-      contact_phone: values.contact_phone || '',
-      preferred_language: values.preferred_language || '',
-      timezone: values.timezone,
-    }
-
+    // Update profile - composable handles both JSON and FormData
     if (profilePicture.value) {
-      profileUpdateData.profile_picture = profilePicture.value
+      // Create FormData for multipart upload
+      const formData = new FormData()
+      formData.append('profile_picture', profilePicture.value)
+      formData.append('preferred_name', values.preferred_name || '')
+      formData.append('contact_phone', values.contact_phone || '')
+      formData.append('preferred_language', values.preferred_language || '')
+      formData.append('timezone', values.timezone)
+      
+      // Composable detects FormData and uses uploadMultipart internally
+      await updateProfileAsync({
+        profileId: Number(profileId),
+        body: formData as any,
+      })
     }
-
-    // Update profile
-    await updateProfileAsync({
-      profileId: Number(profileId),
-      body: profileUpdateData,
-    })
+    else {
+      // Update profile without image - composable uses SDK
+      const profileUpdateData: Partial<ProfileRequest> = {
+        preferred_name: values.preferred_name || '',
+        contact_phone: values.contact_phone || '',
+        preferred_language: values.preferred_language || '',
+        timezone: values.timezone,
+      }
+      
+      await updateProfileAsync({
+        profileId: Number(profileId),
+        body: profileUpdateData,
+      })
+    }
 
     // Show success message
     showSuccess.value = true
@@ -351,8 +406,16 @@ const handleSubmit = handleFormSubmit(async (values) => {
       showSuccess.value = false
     }, 3000)
 
-    // Reset profile picture input
+    // Cleanup
+    if (imagePreview.value) {
+      URL.revokeObjectURL(imagePreview.value)
+      imagePreview.value = null
+    }
     profilePicture.value = null
+    
+    // Clear file input
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+    if (fileInput) fileInput.value = ''
   }
   catch (err) {
     console.error('Error updating profile:', err)

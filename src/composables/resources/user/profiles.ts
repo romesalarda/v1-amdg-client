@@ -17,6 +17,7 @@ import type {
   ProfilesPartialUpdateData,
   ProfilesDestroyData,
 } from '~/api/types.gen'
+import { uploadMultipart, isFormData } from '~/utils/upload'
 
 const QUERY_KEY = ['profiles'] as const
 
@@ -91,13 +92,21 @@ export function useUpdateProfile() {
 
 /**
  * Partially update an existing profile
+ * Supports both JSON updates (via SDK) and multipart/form-data (for file uploads)
  */
 export function usePartialUpdateProfile() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ profileId, body }: { profileId: number; body?: ProfilesPartialUpdateData['body'] }) =>
-      profilesPartialUpdate({ path: { id: profileId }, body , throwOnError: true}),
+    mutationFn: ({ profileId, body }: { profileId: number; body?: ProfilesPartialUpdateData['body'] | FormData }) => {
+      // Handle multipart uploads (e.g., with profile_picture)
+      if (isFormData(body)) {
+        return uploadMultipart(`/api/profiles/${profileId}/`, body, { method: 'PATCH' })
+      }
+      
+      // Handle regular JSON updates via SDK
+      return profilesPartialUpdate({ path: { id: profileId }, body, throwOnError: true })
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

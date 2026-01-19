@@ -35,9 +35,10 @@
             <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
               <img
                 v-if="profileData.data?.profile_picture_url"
-                :src="profileData.data.profile_picture_url"
+                :src="resolveImageUrl(profileData.data.profile_picture_url)"
                 :alt="`${userData.data?.display_name}'s profile`"
                 class="w-full h-full object-cover"
+                @error="(e) => onImageError(e)"
               />
               <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold text-sm">
                 {{ getInitials(userData.data?.display_name) }}
@@ -131,6 +132,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useMe } from '~/composables/resources/user/users'
 import { useMyProfile } from '~/composables/resources/user/profiles'
 import { useLogout } from '~/composables/resources/user/auth'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 
 // Fetch current user and profile
 const { data: userData, isLoading: isUserLoading } = useMe()

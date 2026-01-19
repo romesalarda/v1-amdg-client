@@ -1,0 +1,118 @@
+/**
+ * Resolves an image source to a valid absolute URL.
+ * If the source is invalid or null, returns a fallback image.
+ *
+ * @param src - The image source path (may be relative, absolute, or null)
+ * @param fallback - Fallback image path/URL (default: '/images/placeholder.png')
+ * @returns A valid absolute image URL
+ */
+export function resolveImageUrl(
+  src?: string | null,
+  fallback: string = '/images/placeholder.png'
+): string {
+  // Return fallback if source is null, undefined, or empty
+  if (!src || src.trim() === '') {
+    return fallback;
+  }
+
+  // If already absolute URL, return as-is
+  if (src.startsWith('http://') || src.startsWith('https://')) {
+    return src;
+  }
+
+  // If relative path starting with '/', treat as static asset
+  if (src.startsWith('/')) {
+    return src;
+  }
+
+  // Otherwise, prepend API base URL
+  const apiUrl = import.meta.env.VITE_API_URL || '';
+  const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+  const path = src.startsWith('/') ? src : `/${src}`;
+
+  return `${baseUrl}${path}`;
+}
+
+/**
+ * Handles image load errors by replacing the src with a fallback.
+ * Safe to use directly in Vue templates as @error handler.
+ *
+ * @param event - The error event from the img element
+ * @param fallback - Fallback image path (default: '/images/placeholder.png')
+ */
+export function onImageError(
+  event: Event,
+  fallback: string = '/images/placeholder.png'
+): void {
+  const img = event.target as HTMLImageElement;
+  if (img && img.src !== fallback) {
+    img.src = fallback;
+  }
+}
+
+/**
+ * Options for image file validation
+ */
+export interface ImageValidationOptions {
+  /** Allowed MIME types (default: jpeg, png, webp) */
+  allowedTypes?: string[];
+  /** Maximum file size in bytes (default: 5MB) */
+  maxSizeBytes?: number;
+}
+
+/**
+ * Validates an image file before upload.
+ * Throws an error if the file doesn't meet the requirements.
+ *
+ * @param file - The file to validate
+ * @param options - Validation options
+ * @throws {Error} If validation fails
+ */
+export function validateImageFile(
+  file: File,
+  options?: ImageValidationOptions
+): void {
+  const allowedTypes = options?.allowedTypes || [
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+  ];
+  const maxSizeBytes = options?.maxSizeBytes || 5 * 1024 * 1024; // 5MB
+
+  // Check MIME type
+  if (!allowedTypes.includes(file.type)) {
+    throw new Error(
+      `Invalid file type. Allowed types: ${allowedTypes.map((t) => t.split('/')[1]).join(', ')}`
+    );
+  }
+
+  // Check file size
+  if (file.size > maxSizeBytes) {
+    const maxSizeMB = (maxSizeBytes / (1024 * 1024)).toFixed(1);
+    throw new Error(`File size exceeds ${maxSizeMB}MB`);
+  }
+}
+
+/**
+ * Creates a blob URL for previewing an image file.
+ * Caller is responsible for revoking the URL with URL.revokeObjectURL().
+ *
+ * @param file - The image file to preview
+ * @returns A blob URL string
+ */
+export function createImagePreview(file: File): string {
+  return URL.createObjectURL(file);
+}
+
+/**
+ * Converts an image file to FormData for uploading.
+ *
+ * @param file - The image file to convert
+ * @param fieldName - The field name for the file (default: 'image')
+ * @returns FormData containing the file
+ */
+export function imageToFormData(file: File, fieldName: string = 'image'): FormData {
+  const formData = new FormData();
+  formData.append(fieldName, file);
+  return formData;
+}
