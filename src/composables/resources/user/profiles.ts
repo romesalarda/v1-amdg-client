@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient, shouldThrowError } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
@@ -97,7 +97,7 @@ export function usePartialUpdateProfile() {
 
   return useMutation({
     mutationFn: ({ profileId, body }: { profileId: number; body?: ProfilesPartialUpdateData['body'] }) =>
-      profilesPartialUpdate({ path: { id: profileId }, body }),
+      profilesPartialUpdate({ path: { id: profileId }, body , throwOnError: true}),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
