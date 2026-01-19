@@ -54,6 +54,7 @@
         </div>
       </div>
       {{ bookingPackages }}
+      {{ formatMoney("19.00", 'GBP') }}
       <button @click="createButtonPressed">Create Event</button>
     </div>
   </div>

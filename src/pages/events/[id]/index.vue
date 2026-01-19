@@ -7,7 +7,7 @@
       <USkeleton class="h-4 w-1/2" />
       <USkeleton class="h-64 w-full" />
     </div>
-
+    
     <div v-else-if="event" class="max-w-4xl mx-auto space-y-8">
       <header class="space-y-4 text-center">
         <!-- <span class="inline-block px-3 py-1 bg-amber-50 text-amber-700 text-sm font-semibold tracking-wider uppercase rounded-full">
@@ -50,8 +50,8 @@
 import { useEvent } from '~/composables/resources/events/events'
 
 const route = useRoute()
-const eventId = Number(route.params.id)
-const { data, isLoading } = useEvent(eventId)
+const eventId = String(route.params.id)
+const { data, isLoading, isError, isFetched, isEnabled } = useEvent(eventId)
 const event = computed(() => data.value?.data)
 
 useHead({

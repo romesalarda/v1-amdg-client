@@ -65,7 +65,7 @@ export function useOngoingEvents(params?: MaybeRefOrGetter<EventListOngoingListD
 /**
  * Retrieve a single event by ID
  */
-export function useEvent(eventId: MaybeRefOrGetter<number>) {
+export function useEvent(eventId: MaybeRefOrGetter<String>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', eventId] as const,
     queryFn: () => {
