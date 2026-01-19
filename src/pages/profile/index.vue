@@ -71,29 +71,41 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">First Name</label>
                 <input
-                  v-model="formData.first_name"
+                  v-model="first_name"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.first_name ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="Enter first name"
                 />
+                <p v-if="errors.first_name" class="mt-1 text-sm text-red-600">{{ errors.first_name }}</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
                 <input
-                  v-model="formData.last_name"
+                  v-model="last_name"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.last_name ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="Enter last name"
                 />
+                <p v-if="errors.last_name" class="mt-1 text-sm text-red-600">{{ errors.last_name }}</p>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Name</label>
                 <input
-                  v-model="formData.preferred_name"
+                  v-model="preferred_name"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.preferred_name ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="How would you like to be called?"
                 />
+                <p v-if="errors.preferred_name" class="mt-1 text-sm text-red-600">{{ errors.preferred_name }}</p>
               </div>
               <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -115,29 +127,41 @@
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number</label>
                 <input
-                  v-model="formData.contact_phone"
+                  v-model="contact_phone"
                   type="tel"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.contact_phone ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="+44 1234 567890"
                 />
+                <p v-if="errors.contact_phone" class="mt-1 text-sm text-red-600">{{ errors.contact_phone }}</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Preferred Language</label>
                 <input
-                  v-model="formData.preferred_language"
+                  v-model="preferred_language"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.preferred_language ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="English"
                 />
+                <p v-if="errors.preferred_language" class="mt-1 text-sm text-red-600">{{ errors.preferred_language }}</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">Timezone</label>
                 <input
-                  v-model="formData.timezone"
+                  v-model="timezone"
                   type="text"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                  :class="[
+                    'w-full px-4 py-2 border rounded-lg outline-none transition',
+                    errors.timezone ? 'border-red-500 focus:ring-2 focus:ring-red-500' : 'border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                  ]"
                   placeholder="Europe/London"
                 />
+                <p v-if="errors.timezone" class="mt-1 text-sm text-red-600">{{ errors.timezone }}</p>
               </div>
             </div>
           </div>
@@ -191,21 +215,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
 import type { ProfileRequest } from '~/api/types.gen'
 import Navbar from '~/components/common/Navbar.vue'
-
-import { useForm } from 'vee-validate'
+import { useForm, useField } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
 import { ProfileSchema } from '~/schemas/profile.schema'
 
-const { values, handleSubmit: handleFormSubmit, errors, isSubmitting } = useForm({
-  validationSchema: ProfileSchema,
-})
-
-
-const {$notyf} = useNuxtApp()
+const { $notyf } = useNuxtApp()
 
 // Fetch user and profile data
 const { data: userData, isLoading: isUserLoading, error: userError } = useMe()
@@ -215,15 +234,26 @@ const { data: profileData, isLoading: isProfileLoading, error: profileError } = 
 const { mutate: updateUser, isPending: isUpdatingUser, mutateAsync: updateUserAsync } = useUpdateMe()
 const { mutate: updateProfile, isPending: isUpdatingProfile, mutateAsync: updateProfileAsync } = usePartialUpdateProfile()
 
-// Form state
-const formData = reactive({
-  first_name: '',
-  last_name: '',
-  preferred_name: '',
-  contact_phone: '',
-  preferred_language: '',
-  timezone: '',
+// Setup vee-validate form with zod schema
+const { handleSubmit: handleFormSubmit, errors, resetForm: veeResetForm, setValues } = useForm({
+  validationSchema: toTypedSchema(ProfileSchema),
+  initialValues: {
+    first_name: '',
+    last_name: '',
+    preferred_name: '',
+    contact_phone: '',
+    preferred_language: '',
+    timezone: 'Europe/London',
+  },
 })
+
+// Define form fields with vee-validate
+const { value: first_name } = useField<string>('first_name')
+const { value: last_name } = useField<string>('last_name')
+const { value: preferred_name } = useField<string>('preferred_name')
+const { value: contact_phone } = useField<string>('contact_phone')
+const { value: preferred_language } = useField<string>('preferred_language')
+const { value: timezone } = useField<string>('timezone')
 
 const profilePicture = ref<File | null>(null)
 const showSuccess = ref(false)
@@ -236,12 +266,14 @@ const error = computed(() => userError.value || profileError.value)
 // Initialize form data when profile loads
 watch([userData, profileData], () => {
   if (userData.value?.data && profileData.value?.data) {
-    formData.first_name = userData.value.data.first_name || ''
-    formData.last_name = userData.value.data.last_name || ''
-    formData.preferred_name = profileData.value.data.preferred_name || ''
-    formData.contact_phone = profileData.value.data.contact_phone || ''
-    formData.preferred_language = profileData.value.data.preferred_language || ''
-    formData.timezone = profileData.value.data.timezone || ''
+    setValues({
+      first_name: userData.value.data.first_name || '',
+      last_name: userData.value.data.last_name || '',
+      preferred_name: profileData.value.data.preferred_name || '',
+      contact_phone: profileData.value.data.contact_phone || '',
+      preferred_language: profileData.value.data.preferred_language || '',
+      timezone: profileData.value.data.timezone || 'Europe/London',
+    })
   }
 }, { immediate: true })
 
@@ -260,93 +292,73 @@ const handleFileChange = (event: Event) => {
   }
 }
 
-// Reset form
+// Reset form to initial values
 const resetForm = () => {
   if (userData.value?.data && profileData.value?.data) {
-    formData.first_name = userData.value.data.first_name || ''
-    formData.last_name = userData.value.data.last_name || ''
-    formData.preferred_name = profileData.value.data.preferred_name || ''
-    formData.contact_phone = profileData.value.data.contact_phone || ''
-    formData.preferred_language = profileData.value.data.preferred_language || ''
-    formData.timezone = profileData.value.data.timezone || ''
+    setValues({
+      first_name: userData.value.data.first_name || '',
+      last_name: userData.value.data.last_name || '',
+      preferred_name: profileData.value.data.preferred_name || '',
+      contact_phone: profileData.value.data.contact_phone || '',
+      preferred_language: profileData.value.data.preferred_language || '',
+      timezone: profileData.value.data.timezone || 'Europe/London',
+    })
   }
   profilePicture.value = null
+  // Clear any file input
+  const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
+  if (fileInput) fileInput.value = ''
 }
 
-// Handle form submission
-const handleSubmit = async () => {
+// Handle form submission with vee-validate
+const handleSubmit = handleFormSubmit(async (values) => {
   if (!userData.value?.data || !profileData.value?.data) return
 
   const profileId = profileData.value.data.url.split('/').filter(Boolean).pop()
   if (!profileId) return
 
   try {
-    // Update user data
-    if (formData.first_name !== userData.value.data.first_name || formData.last_name !== userData.value.data.last_name) {
-      await new Promise((resolve, reject) => {
-        updateUser(
-          {
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          },
-          {
-            onSuccess: resolve,
-            onError: reject,
-          },
-        )
+    // Update user data if changed
+    if (values.first_name !== userData.value.data.first_name || values.last_name !== userData.value.data.last_name) {
+      await updateUserAsync({
+        first_name: values.first_name,
+        last_name: values.last_name,
       })
     }
 
-    // Update profile data
+    // Prepare profile update data
     const profileUpdateData: Partial<ProfileRequest> = {
-      preferred_name: formData.preferred_name,
-      contact_phone: formData.contact_phone,
-      preferred_language: formData.preferred_language,
-      timezone: formData.timezone,
+      preferred_name: values.preferred_name || '',
+      contact_phone: values.contact_phone || '',
+      preferred_language: values.preferred_language || '',
+      timezone: values.timezone,
     }
 
     if (profilePicture.value) {
       profileUpdateData.profile_picture = profilePicture.value
     }
 
-
-    await updateProfileAsync(
-        {
-          profileId: Number(profileId),
-          body: profileUpdateData,
-        },
-       {
-         onSuccess: () => {
-           // Show success message
-           showSuccess.value = true
-           setTimeout(() => {
-             showSuccess.value = false
-             $notyf.success('Profile updated successfully!')
-           }, 3000)
-         },
-         onError: (err) => {
-           $notyf.error('Error updating profile' + (err instanceof Error ? `: ${err.message}` : ''))
-           console.log(err);
-           
-         },
-       }
-    
-    )
+    // Update profile
+    await updateProfileAsync({
+      profileId: Number(profileId),
+      body: profileUpdateData,
+    })
 
     // Show success message
-    // showSuccess.value = true
-    // setTimeout(() => {
-    //   showSuccess.value = false
-    //   $notyf.success('Profile updated successfully!')
-    // }, 3000)
+    showSuccess.value = true
+    $notyf.success('Profile updated successfully!')
+    setTimeout(() => {
+      showSuccess.value = false
+    }, 3000)
 
     // Reset profile picture input
     profilePicture.value = null
   }
   catch (err) {
     console.error('Error updating profile:', err)
+    $notyf.error('Error updating profile' + (err instanceof Error ? `: ${err.message}` : ''))
   }
-}
+})
 
 definePageMeta({
   layout: false, // Full screen layout for admin
