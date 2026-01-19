@@ -105,7 +105,7 @@ export function useDeleteOrganisationInvite() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (inviteId: number) => organisationsInvitesDestroy({ path: { id: String(inviteId) } }),
+    mutationFn: (inviteId: string) => organisationsInvitesDestroy({ path: { id: String(inviteId) } }),
     onSuccess: (_, inviteId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

@@ -1,0 +1,39 @@
+import { organisationsControlsList } from '~/api/sdk.gen'
+
+export default defineNuxtRouteMiddleware(async (to) => {
+  const authStore = useAuthStore()
+  
+  // Ensure user is authenticated
+  if (!authStore.isAuthenticated) {
+    return navigateTo('/login')
+  }
+
+  // Get organization ID from route
+  const orgId = to.params.id
+  
+  if (!orgId) {
+    return navigateTo('/communities')
+  }
+
+  // Check if user is a controller of this organization
+  try {
+    const response = await organisationsControlsList({
+      query: {
+        organisation: Number(orgId),
+        user: authStore.user?.id,
+      }
+    })
+
+    const controls = response.data?.results || []
+    
+    if (controls.length === 0) {
+      // User is not a controller
+    //   useNuxtApp().$notyf?.error('You do not have permission to access this page')
+      return navigateTo(`/404`)
+    }
+  } catch (error) {
+    // console.error('Permission check error:', error)
+    // useNuxtApp().$notyf?.error('Unable to verify permissions')
+    return navigateTo(`/404`)
+  }
+})

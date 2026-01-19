@@ -23,21 +23,32 @@
         >
           Back to Communities
         </UButton>
-        <UButton 
-          to="/communities/inbox" 
-          color="gray"
-          variant="outline"
-          class="relative"
-        >
-          <UIcon name="i-heroicons-inbox" class="w-5 h-5 mr-2" />
-          Invitations
-          <span 
-            v-if="pendingInvitesCount > 0" 
-            class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+        <div class="flex items-center gap-3">
+          <UButton 
+            v-if="isController"
+            :to="`/communities/${organisationId}/m/dashboard`" 
+            color="primary"
+            variant="outline"
           >
-            {{ pendingInvitesCount > 9 ? '9+' : pendingInvitesCount }}
-          </span>
-        </UButton>
+            <UIcon name="i-heroicons-cog-6-tooth" class="w-5 h-5 mr-2" />
+            Manage Community
+          </UButton>
+          <UButton 
+            to="/communities/inbox" 
+            color="gray"
+            variant="outline"
+            class="relative"
+          >
+            <UIcon name="i-heroicons-inbox" class="w-5 h-5 mr-2" />
+            Invitations
+            <span 
+              v-if="pendingInvitesCount > 0" 
+              class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white"
+            >
+              {{ pendingInvitesCount > 9 ? '9+' : pendingInvitesCount }}
+            </span>
+          </UButton>
+        </div>
       </div>
 
       <!-- Hero Section with Landing Image -->
@@ -231,6 +242,7 @@
 <script setup lang="ts">
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { useOrganisationMemberships, useCreateOrganisationMembership } from '~/composables/resources/organisation/organisationMemberships'
+import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
 import { useOrganisationInvolvedEvents } from '~/composables/resources/organisation/organisationInvolvedEvents'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { useAuthStore } from '~/stores/auth'
@@ -257,6 +269,16 @@ const { data: membershipsData } = useOrganisationMemberships(computed(() => ({
 const isMember = computed(() => {
   const memberships = membershipsData.value?.data?.results || []
   return memberships.some(m => m.user === authStore.user?.id)
+})
+
+// Check if user is a controller
+const { data: controlsData } = useOrganisationControls(computed(() => ({
+  organisation: organisationId.value,
+  user: authStore.user?.id,
+})))
+const isController = computed(() => {
+  const controls = controlsData.value?.data?.results || []
+  return controls.length > 0
 })
 
 // Check if user can view events (workaround: check involved events)

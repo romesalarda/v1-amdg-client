@@ -16,6 +16,7 @@ import type {
   OrganisationsListPartialUpdateData,
   OrganisationsListDestroyData,
 } from '~/api/types.gen'
+import { uploadMultipart, isFormData } from '~/utils/upload'
 
 const QUERY_KEY = ['organisations'] as const
 
@@ -80,13 +81,21 @@ export function useUpdateOrganisation() {
 
 /**
  * Partially update an existing organisation
+ * Supports both JSON updates (via SDK) and multipart/form-data (for file uploads)
  */
 export function usePartialUpdateOrganisation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ organisationId, body }: { organisationId: number; body?: OrganisationsListPartialUpdateData['body'] }) =>
-      organisationsListPartialUpdate({ path: { id: organisationId }, body }),
+    mutationFn: ({ organisationId, body }: { organisationId: number; body?: OrganisationsListPartialUpdateData['body'] | FormData }) => {
+      // Handle multipart uploads (e.g., with logo or landing_image)
+      if (isFormData(body)) {
+        return uploadMultipart(`/api/organisations/${organisationId}/`, body, { method: 'PATCH' })
+      }
+      
+      // Handle regular JSON updates via SDK
+      return organisationsListPartialUpdate({ path: { id: organisationId }, body })
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
