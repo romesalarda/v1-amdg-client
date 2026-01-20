@@ -70,7 +70,7 @@ export function useEvent(eventId: MaybeRefOrGetter<String>) {
     queryKey: [...QUERY_KEY, 'detail', eventId] as const,
     queryFn: () => {
       const id = toValue(eventId)
-      return eventListRetrieve({ path: { event_id: String(id) } })
+      return eventListRetrieve({ path: { event_id: String(id) } , throwOnError: true})
     },
     enabled: () => !!toValue(eventId),
   })

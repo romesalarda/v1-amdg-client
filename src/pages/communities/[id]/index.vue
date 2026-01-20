@@ -112,9 +112,21 @@
               <UIcon name="i-heroicons-calendar" class="w-5 h-5" />
               Events
             </h2>
-            <!-- Fetch and display events for this organization -->
-            <div class="text-gray-600">
-              <p>Organization events will be displayed here for members.</p>
+            <!-- Display organization events -->
+            <div v-if="isLoadingEvents" class="space-y-4">
+              <USkeleton class="h-32 w-full" />
+              <USkeleton class="h-32 w-full" />
+            </div>
+            <div v-else-if="organizationEvents && organizationEvents.length > 0" class="space-y-4">
+              <EventListItem 
+                v-for="event in organizationEvents" 
+                :key="event.event_id" 
+                :event="event" 
+              />
+            </div>
+            <div v-else class="text-center py-8 text-gray-500">
+              <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 mx-auto mb-3 text-gray-400" />
+              <p>No events available yet.</p>
             </div>
           </div>
         </div>
@@ -244,8 +256,10 @@ import { useOrganisation } from '~/composables/resources/organisation/organisati
 import { useOrganisationMemberships, useCreateOrganisationMembership } from '~/composables/resources/organisation/organisationMemberships'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
 import { useOrganisationInvolvedEvents } from '~/composables/resources/organisation/organisationInvolvedEvents'
+import { useEvents } from '~/composables/resources/events/events'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { useAuthStore } from '~/stores/auth'
+import EventListItem from '~/components/events/display/EventListItem.vue'
 
 definePageMeta({
   layout: 'default',
@@ -289,6 +303,12 @@ const canViewEvents = computed(() => {
   // Can view if member or if there are public involved events
   return isMember.value || (involvedEventsData.value?.data?.results?.length || 0) > 0
 })
+
+// Fetch events for this organization
+const { data: eventsData, isLoading: isLoadingEvents } = useEvents(computed(() => ({
+  organisation: organisationId.value,
+})))
+const organizationEvents = computed(() => eventsData.value?.data?.results || [])
 
 // Request membership mutation
 const { mutate: createMembership, isPending: joiningOrganisation } = useCreateOrganisationMembership()

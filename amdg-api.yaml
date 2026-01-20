@@ -4968,8 +4968,13 @@ paths:
       - in: query
         name: event
         schema:
-          type: integer
+          type: string
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: ordering
         required: false
         in: query
@@ -8720,6 +8725,11 @@ paths:
           type: string
           format: uuid
         description: Filter by event ID (UUID)
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: ordering
         required: false
         in: query
@@ -29233,7 +29243,8 @@ components:
           readOnly: true
           nullable: true
         event:
-          type: integer
+          type: string
+          format: uuid
         event_title:
           type: string
           readOnly: true
@@ -29306,7 +29317,8 @@ components:
       type: object
       properties:
         event:
-          type: integer
+          type: string
+          format: uuid
         status:
           enum:
           - PENDING
@@ -41557,7 +41569,8 @@ components:
       type: object
       properties:
         event:
-          type: integer
+          type: string
+          format: uuid
         status:
           enum:
           - PENDING
@@ -46969,11 +46982,15 @@ components:
       type: object
       description: Create/Update serializer for UserOrganisationMembership.
       properties:
+        id:
+          type: integer
+          readOnly: true
         organisation:
           type: integer
         user:
           type: integer
       required:
+      - id
       - organisation
       - user
     UserOrganisationMembershipCreateUpdateRequest:

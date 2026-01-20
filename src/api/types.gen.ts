@@ -3739,7 +3739,7 @@ export type EventAuthorization = {
     readonly id: number;
     readonly review_id: string;
     readonly review_code: string | null;
-    event: number;
+    event: string;
     readonly event_title: string;
     readonly reviewed_by: number;
     readonly reviewed_by_email: string;
@@ -9532,7 +9532,7 @@ export type PatchedEventAttendanceRequest = {
 };
 
 export type PatchedEventAuthorizationRequest = {
-    event?: number;
+    event?: string;
     /**
      * * `PENDING` - Pending Review
      * * `APPROVED` - Approved
@@ -12452,6 +12452,7 @@ export type UserDetail = {
  * Create/Update serializer for UserOrganisationMembership.
  */
 export type UserOrganisationMembershipCreateUpdate = {
+    readonly id: number;
     organisation: number;
     user: number;
 };
@@ -14296,7 +14297,7 @@ export type EventAttendanceWritable = {
 };
 
 export type EventAuthorizationWritable = {
-    event: number;
+    event: string;
     /**
      * * `PENDING` - Pending Review
      * * `APPROVED` - Approved
@@ -17417,6 +17418,14 @@ export type UserDetailWritable = {
 };
 
 /**
+ * Create/Update serializer for UserOrganisationMembership.
+ */
+export type UserOrganisationMembershipCreateUpdateWritable = {
+    organisation: number;
+    user: number;
+};
+
+/**
  * Detailed serializer for UserOrganisationMembership.
  */
 export type UserOrganisationMembershipDetailWritable = {
@@ -20499,6 +20508,7 @@ export type EventAuthorizationsListData = {
          * Filter by event ID
          */
         event?: string;
+        event__event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -22920,6 +22930,7 @@ export type EventVenuesListData = {
          * Filter by event ID (UUID)
          */
         event?: string;
+        event__event_id?: string;
         /**
          * Which field to use when ordering the results.
          */

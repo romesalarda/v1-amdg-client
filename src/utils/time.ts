@@ -16,7 +16,10 @@ export function formatDateTime(dateString: string, timeZone: string = 'Europe/Lo
  * @param format - Output format (default: 'MMM d, yyyy')
  * @returns Formatted date string
  */
-export function formatDate(dateString: string, format: string = 'MMM d, yyyy'): string {
+export function formatDate(dateString: string | undefined, format: string = 'MMM d, yyyy'): string {
+  if (!dateString) {
+    return '';
+  }
   try {
     const dt = DateTime.fromISO(dateString);
     if (!dt.isValid) {
@@ -70,4 +73,108 @@ export function formatDateTimeCompact(dateString: string, timeZone: string = 'UT
     hour: '2-digit',
     minute: '2-digit',
   });
+}
+
+/**
+ * Calculate countdown to a specific date
+ * @param targetDate - ISO date string or DateTime
+ * @param timezone - Timezone (default: 'UTC')
+ * @returns Object with days, hours, minutes, seconds
+ */
+export function calculateCountdown(targetDate: string, timezone: string = 'UTC'): {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isExpired: boolean;
+} {
+  try {
+    const target = DateTime.fromISO(targetDate, { zone: timezone });
+    const now = DateTime.now().setZone(timezone);
+    
+    if (!target.isValid) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
+    }
+
+    const diff = target.diff(now, ['days', 'hours', 'minutes', 'seconds']);
+    
+    if (diff.milliseconds < 0) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
+    }
+
+    return {
+      days: Math.floor(diff.days),
+      hours: Math.floor(diff.hours % 24),
+      minutes: Math.floor(diff.minutes % 60),
+      seconds: Math.floor(diff.seconds % 60),
+      isExpired: false,
+    };
+  } catch {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
+  }
+}
+
+/**
+ * Create a reactive countdown composable
+ * @param targetDate - ISO date string or ref to date string
+ * @param timezone - Timezone (default: 'UTC')
+ * @returns Reactive countdown values
+ */
+export function useCountdown(
+  targetDate: MaybeRefOrGetter<string | undefined>,
+  timezone: MaybeRefOrGetter<string | undefined> = 'UTC'
+) {
+  const countdown = ref(calculateCountdown(toValue(targetDate) || '', toValue(timezone) || 'UTC'));
+  
+  let intervalId: number | null = null;
+
+  const startCountdown = () => {
+    if (intervalId) return;
+
+    intervalId = setInterval(() => {
+      const date = toValue(targetDate);
+      const tz = toValue(timezone);
+      if (date) {
+        countdown.value = calculateCountdown(date, tz || 'UTC');
+        
+        if (countdown.value.isExpired && intervalId) {
+          clearInterval(intervalId);
+          intervalId = null;
+        }
+      }
+    }, 1000);
+  };
+
+  const stopCountdown = () => {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  };
+
+  onMounted(() => {
+    startCountdown();
+  });
+
+  onBeforeUnmount(() => {
+    stopCountdown();
+  });
+
+  return {
+    countdown: readonly(countdown),
+    startCountdown,
+    stopCountdown,
+  };
+}
+
+export const formatTime = (dateString: string | undefined, timezone: string = 'UTC'): string => {
+  if (!dateString) {
+    return '';
+  }
+  try {
+    const dt = DateTime.fromISO(dateString, { zone: 'utc' }).setZone(timezone)
+    return dt.toLocaleString(DateTime.TIME_SIMPLE)
+  } catch {
+    return ''
+  }
 }
