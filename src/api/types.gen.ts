@@ -20628,6 +20628,7 @@ export type EventListListData = {
     body?: never;
     path?: never;
     query?: {
+        event_id?: string;
         /**
          * Filter by event type ID
          */
@@ -20951,6 +20952,7 @@ export type EventListAvailabilityWindowsListData = {
         event_id: string;
     };
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21025,6 +21027,7 @@ export type EventListLandingImagesListData = {
         event_id: string;
     };
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21186,6 +21189,7 @@ export type EventListResourcesListData = {
         event_id: string;
     };
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21355,6 +21359,7 @@ export type EventListStaffListListData = {
         event_id: string;
     };
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21400,6 +21405,7 @@ export type EventListOngoingListData = {
     body?: never;
     path?: never;
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21445,6 +21451,7 @@ export type EventListUpcomingListData = {
     body?: never;
     path?: never;
     query?: {
+        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -21494,6 +21501,7 @@ export type EventPermissionAssignmentsListData = {
          * Filter by event ID
          */
         event?: number;
+        event__event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -21963,6 +21971,7 @@ export type EventQuestionsListData = {
          * Filter by event ID
          */
         event?: number;
+        event__event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -22091,6 +22100,7 @@ export type EventReviewsListData = {
          * Filter by event ID
          */
         event?: number;
+        event__event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -22228,6 +22238,7 @@ export type EventRoleAssignmentsListData = {
          * Filter by event ID
          */
         event?: number;
+        event__event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -22583,6 +22594,7 @@ export type EventStaffListData = {
          * Filter by event ID
          */
         event?: number;
+        event__event_id?: string;
         /**
          * A page number within the paginated result set.
          */

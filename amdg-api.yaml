@@ -5168,6 +5168,11 @@ paths:
       summary: List Events
       parameters:
       - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: event_type
         schema:
           type: integer
@@ -5642,6 +5647,11 @@ paths:
           format: uuid
         required: true
       - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: event_type
         schema:
           type: integer
@@ -5771,6 +5781,11 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: event_type
         schema:
@@ -5959,6 +5974,11 @@ paths:
           type: string
           format: uuid
         required: true
+      - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: event_type
         schema:
@@ -6193,6 +6213,11 @@ paths:
           format: uuid
         required: true
       - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: event_type
         schema:
           type: integer
@@ -6273,6 +6298,11 @@ paths:
       summary: Get Ongoing Events
       parameters:
       - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: event_type
         schema:
           type: integer
@@ -6349,6 +6379,11 @@ paths:
         listings. Includes pagination support for large result sets.
       summary: Get Upcoming Events
       parameters:
+      - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: event_type
         schema:
@@ -6432,6 +6467,11 @@ paths:
         schema:
           type: integer
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: page
         required: false
         in: query
@@ -7171,6 +7211,11 @@ paths:
         schema:
           type: integer
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: ordering
         required: false
         in: query
@@ -7377,6 +7422,11 @@ paths:
         schema:
           type: integer
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: ordering
         required: false
         in: query
@@ -7605,6 +7655,11 @@ paths:
         schema:
           type: integer
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: page
         required: false
         in: query
@@ -8167,6 +8222,11 @@ paths:
         schema:
           type: integer
         description: Filter by event ID
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
       - name: page
         required: false
         in: query

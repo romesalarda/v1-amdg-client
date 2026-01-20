@@ -8,6 +8,7 @@ import {
   eventSettingsUpdate,
   eventSettingsPartialUpdate,
   eventSettingsDestroy,
+  eventListSettingsRetrieve,
 } from '~/api/sdk.gen'
 import type {
   EventSettingsListData,
@@ -22,13 +23,27 @@ const QUERY_KEY = ['eventSettings'] as const
 /**
  * List all event settings
  */
-export function useEventSettings(params?: MaybeRefOrGetter<EventSettingsListData['query'] | undefined>) {
+export function useEventSettingsList(params?: MaybeRefOrGetter<EventSettingsListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
       return eventSettingsList(queryParams ? { query: queryParams } : undefined)
     },
+  })
+}
+
+/**
+ * Get event settings by event ID
+ */
+export function useEventSettings(eventId: MaybeRefOrGetter<string>) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'event', eventId] as const,
+    queryFn: () => {
+      const id = toValue(eventId)
+      return eventListSettingsRetrieve({ path: { event_id: id } })
+    },
+    enabled: () => !!toValue(eventId),
   })
 }
 

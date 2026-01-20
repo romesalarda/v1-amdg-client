@@ -1,6 +1,9 @@
 import { DateTime } from 'luxon';
 
-export function formatDateTime(dateString: string, timeZone: string = 'Europe/London', options?: Intl.DateTimeFormatOptions): string {
+export function formatDateTime(dateString: string | undefined, timeZone: string = 'Europe/London', options?: Intl.DateTimeFormatOptions): string {
+  if (!dateString) {
+    return '';
+  }
   const dt = DateTime.fromISO(dateString, { zone: 'utc' });
   if (!dt.isValid) {
     return dateString; // Return the original string if invalid
@@ -176,5 +179,53 @@ export const formatTime = (dateString: string | undefined, timezone: string = 'U
     return dt.toLocaleString(DateTime.TIME_SIMPLE)
   } catch {
     return ''
+  }
+}
+
+/**
+ * Format date to a compact human-readable format
+ * @param dateString - ISO date string
+ * @returns Formatted date string (e.g., "2 days ago", "Jan 15", "15 Jan 2025")
+ */
+export function formatCompactDateTime(dateString: string | undefined): string {
+  if (!dateString) {
+    return '';
+  }
+  try {
+    const dt = DateTime.fromISO(dateString);
+    if (!dt.isValid) {
+      return dateString;
+    }
+    
+    const now = DateTime.now();
+    const diff = now.diff(dt, ['days', 'hours', 'minutes']);
+    
+    // Less than 1 minute
+    if (diff.as('minutes') < 1) {
+      return 'Just now';
+    }
+    // Less than 1 hour
+    if (diff.as('hours') < 1) {
+      const mins = Math.floor(diff.as('minutes'));
+      return `${mins} min${mins !== 1 ? 's' : ''} ago`;
+    }
+    // Less than 24 hours
+    if (diff.as('hours') < 24) {
+      const hours = Math.floor(diff.as('hours'));
+      return `${hours} hour${hours !== 1 ? 's' : ''} ago`;
+    }
+    // Less than 7 days
+    if (diff.as('days') < 7) {
+      const days = Math.floor(diff.as('days'));
+      return `${days} day${days !== 1 ? 's' : ''} ago`;
+    }
+    // Same year
+    if (dt.year === now.year) {
+      return dt.toFormat('MMM d');
+    }
+    // Different year
+    return dt.toFormat('MMM d, yyyy');
+  } catch {
+    return dateString;
   }
 }
