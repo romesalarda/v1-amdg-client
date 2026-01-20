@@ -3775,7 +3775,7 @@ export type EventAuthorization = {
 };
 
 export type EventAuthorizationRequest = {
-    event: number;
+    event: string;
     /**
      * * `PENDING` - Pending Review
      * * `APPROVED` - Approved
@@ -20498,7 +20498,7 @@ export type EventAuthorizationsListData = {
         /**
          * Filter by event ID
          */
-        event?: number;
+        event?: string;
         /**
          * Which field to use when ordering the results.
          */

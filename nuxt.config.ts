@@ -16,6 +16,9 @@ export default defineNuxtConfig({
   ui: {
     global: true
   },
+  colorMode: {
+    preference: 'light'
+  },
   vite: {
     server: {
       proxy: {

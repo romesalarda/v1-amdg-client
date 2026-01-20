@@ -55,3 +55,19 @@ export function isExpiringSoon(dateString: string): boolean {
   const days = daysDifference(dateString);
   return days <= 3 && days >= 0;
 }
+
+/**
+ * Format a date string to a compact format with time
+ * @param dateString - ISO date string
+ * @param timeZone - Timezone (default: 'UTC')
+ * @returns Formatted date string (e.g., "Jan 15, 2026, 3:30 PM")
+ */
+export function formatDateTimeCompact(dateString: string, timeZone: string = 'UTC'): string {
+  return formatDateTime(dateString, timeZone, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}

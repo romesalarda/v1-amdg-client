@@ -90,7 +90,7 @@ export function usePartialUpdateOrganisation() {
     mutationFn: ({ organisationId, body }: { organisationId: number; body?: OrganisationsListPartialUpdateData['body'] | FormData }) => {
       // Handle multipart uploads (e.g., with logo or landing_image)
       if (isFormData(body)) {
-        return uploadMultipart(`/api/organisations/${organisationId}/`, body, { method: 'PATCH' })
+        return uploadMultipart(`/api/organisations/list/${organisationId}/`, body, { method: 'PATCH' })
       }
       
       // Handle regular JSON updates via SDK
