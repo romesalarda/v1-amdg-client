@@ -8,11 +8,11 @@
           <div class="flex items-start gap-4 flex-1">
             <!-- Event Image -->
             <div
-              v-if="event?.landing_images && event.landing_images.length > 0"
+              v-if="event?.main_landing_image?.image"
               class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200"
             >
               <img
-                :src="event.landing_images[0]?.file || ''"
+                :src="resolveImageUrl(event.main_landing_image.image)"
                 :alt="event.title"
                 class="w-full h-full object-cover"
                 @error="onImageError"
@@ -107,7 +107,7 @@
 </template>
 
 <script setup lang="ts">
-import { onImageError } from '~/utils/image'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 import { formatDateTime } from '~/utils/time'
 import type { EventDetail } from '~/api/types.gen'
 

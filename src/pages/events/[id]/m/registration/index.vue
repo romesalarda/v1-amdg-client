@@ -2,127 +2,146 @@
   <EventsManagementLayout :event-id="id" :event="event?.data">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
-      <div class="lg:col-span-3 space-y-6">
-        <!-- Questions List -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold">Registration Questions</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Configure questions to ask during event registration
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Question"
-                @click="openAddModal()"
-              />
-            </div>
-          </template>
-
-          <div v-if="questionsLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-20" />
+      <div class="lg:col-span-3 space-y-4">
+        <!-- Header Card -->
+        <UCard class="border-t-4 border-t-primary">
+          <div class="space-y-2">
+            <h1 class="text-3xl font-bold text-gray-900">Registration Form</h1>
+            <p class="text-gray-600">
+              Configure questions to collect information from attendees during registration
+            </p>
           </div>
+        </UCard>
 
-          <div v-else-if="questionsList.length" class="space-y-3">
-            <div
-              v-for="question in questionsList"
-              :key="question.id"
-              class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-            >
+        <!-- Questions List - Google Forms Style -->
+        <div v-if="questionsLoading" class="space-y-4">
+          <USkeleton v-for="i in 3" :key="i" class="h-32" />
+        </div>
+
+        <div v-else-if="questionsList.length" class="space-y-4">
+          <UCard
+            v-for="(question, index) in questionsList"
+            :key="question.id"
+            class="hover:shadow-md transition-shadow"
+          >
+            <div class="space-y-4">
               <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold">{{ question.question_title }}</h3>
+                <div class="flex-1 space-y-2">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-medium text-gray-500">Question {{ index + 1 }}</span>
                     <UBadge
                       v-if="question.required"
                       label="Required"
                       color="red"
-                      variant="subtle"
+                      variant="soft"
+                      size="xs"
+                    />
+                    <UBadge
+                      :label="formatQuestionType(question.question_type || 'short_answer')"
+                      color="primary"
+                      variant="soft"
                       size="xs"
                     />
                   </div>
                   
-                  <p v-if="question.question_body" class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    {{ question.question_title }}
+                  </h3>
+                  
+                  <p v-if="question.question_body" class="text-sm text-gray-600">
                     {{ question.question_body }}
                   </p>
-                  
-                  <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
-                    <span class="flex items-center gap-1">
-                      <UIcon :name="getQuestionTypeIcon(question.question_type || 'short_answer')" />
-                      {{ formatQuestionType(question.question_type || 'short_answer') }}
-                    </span>
-                    <span v-if="question.order">Order: {{ question.order }}</span>
-                  </div>
 
                   <!-- Show options for multiple choice questions -->
                   <div
                     v-if="question.question_type && ['multiple_choice', 'single_choice'].includes(question.question_type) && question.options?.length"
-                    class="mt-3 space-y-1"
+                    class="mt-3 space-y-2"
                   >
-                    <div class="text-xs text-gray-500 dark:text-gray-400 font-semibold">Options:</div>
-                    <div class="flex flex-wrap gap-2">
-                      <UBadge
+                    <p class="text-xs font-medium text-gray-500 uppercase">Options</p>
+                    <div class="space-y-1">
+                      <div
                         v-for="option in question.options"
                         :key="option.id"
-                        :label="option.option_text"
-                        variant="subtle"
-                        size="xs"
-                      />
+                        class="flex items-center gap-2 text-sm text-gray-700"
+                      >
+                        <UIcon
+                          :name="question.question_type === 'single_choice' ? 'i-heroicons-stop-circle' : 'i-heroicons-check-circle'"
+                          class="w-4 h-4 text-gray-400"
+                        />
+                        {{ option.option_text }}
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1">
                   <UButton
                     icon="i-heroicons-pencil"
                     variant="ghost"
                     size="sm"
+                    color="gray"
                     @click="openEditModal(question)"
                   />
                   <UButton
                     icon="i-heroicons-trash"
-                    color="red"
                     variant="ghost"
                     size="sm"
+                    color="red"
                     @click="removeQuestion(question.id)"
                   />
                 </div>
               </div>
             </div>
-          </div>
+          </UCard>
+        </div>
 
-          <div v-else class="text-center py-12">
-            <div class="text-gray-400 dark:text-gray-600 mb-4">
-              <UIcon name="i-heroicons-clipboard-document-list" class="text-5xl" />
+        <UCard v-else class="text-center py-16">
+          <div class="space-y-4">
+            <div class="flex justify-center">
+              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
+                <UIcon name="i-heroicons-clipboard-document-list" class="w-8 h-8 text-gray-400" />
+              </div>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">No registration questions yet</p>
+            <div>
+              <h3 class="font-semibold text-gray-900 mb-1">No questions yet</h3>
+              <p class="text-sm text-gray-600">Create your first question to start building the registration form</p>
+            </div>
             <UButton
               label="Add First Question"
+              icon="i-heroicons-plus"
               @click="openAddModal()"
             />
           </div>
         </UCard>
+
+        <!-- Add Question Button -->
+        <UButton
+          v-if="questionsList.length"
+          block
+          icon="i-heroicons-plus"
+          label="Add Question"
+          variant="outline"
+          @click="openAddModal()"
+        />
       </div>
 
       <!-- Sidebar (1/4) -->
-      <div class="space-y-6">
+      <div class="space-y-4">
         <!-- Stats Card -->
         <UCard>
           <template #header>
-            <h3 class="font-semibold">Form Overview</h3>
+            <h3 class="font-semibold text-gray-900">Form Overview</h3>
           </template>
           <div class="space-y-4">
             <div>
-              <div class="text-2xl font-bold">{{ questionsList.length }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Total Questions</div>
+              <div class="text-3xl font-bold text-gray-900">{{ questionsList.length }}</div>
+              <div class="text-sm text-gray-600">Total Questions</div>
             </div>
             <div>
-              <div class="text-2xl font-bold">
+              <div class="text-3xl font-bold text-primary">
                 {{ questionsList.filter((q: any) => q.required).length }}
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Required Questions</div>
+              <div class="text-sm text-gray-600">Required Questions</div>
             </div>
           </div>
         </UCard>
@@ -130,32 +149,32 @@
         <!-- Question Types Guide -->
         <UCard>
           <template #header>
-            <h3 class="font-semibold">Question Types</h3>
+            <h3 class="font-semibold text-gray-900">Question Types</h3>
           </template>
           <div class="space-y-3 text-sm">
             <div>
-              <div class="font-medium">Short Answer</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Single line text input</div>
+              <div class="font-medium text-gray-900">Short Answer</div>
+              <div class="text-gray-600 text-xs">Single line text input</div>
             </div>
             <div>
-              <div class="font-medium">Long Answer</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Multi-line text area</div>
+              <div class="font-medium text-gray-900">Long Answer</div>
+              <div class="text-gray-600 text-xs">Multi-line text area</div>
             </div>
             <div>
-              <div class="font-medium">Multiple Choice</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Select multiple options</div>
+              <div class="font-medium text-gray-900">Multiple Choice</div>
+              <div class="text-gray-600 text-xs">Select multiple options</div>
             </div>
             <div>
-              <div class="font-medium">Single Choice</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Select one option</div>
+              <div class="font-medium text-gray-900">Single Choice</div>
+              <div class="text-gray-600 text-xs">Select one option</div>
             </div>
             <div>
-              <div class="font-medium">File Upload</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Upload documents/images</div>
+              <div class="font-medium text-gray-900">File Upload</div>
+              <div class="text-gray-600 text-xs">Upload documents/images</div>
             </div>
             <div>
-              <div class="font-medium">Slider</div>
-              <div class="text-gray-500 dark:text-gray-400 text-xs">Numeric scale input</div>
+              <div class="font-medium text-gray-900">Slider</div>
+              <div class="text-gray-600 text-xs">Numeric scale input</div>
             </div>
           </div>
         </UCard>
@@ -268,6 +287,9 @@ import type { EventQuestion } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions, useCreateEventQuestion, useDeleteEventQuestion } from '~/composables/resources/events/eventQuestions'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import { eventQuestionSchema } from '~/schemas/events/registration'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useForm } from 'vee-validate'
 
 definePageMeta({
   layout: false,

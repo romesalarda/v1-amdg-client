@@ -32,8 +32,8 @@
         <!-- Background Image or Placeholder -->
         <div class="absolute inset-0">
           <img
-            v-if="event.main_landing_image?.file"
-            :src="resolveImageUrl(event.main_landing_image.file)"
+            v-if="event.main_landing_image?.image"
+            :src="resolveImageUrl(event.main_landing_image.image)"
             :alt="event.title"
             class="w-full h-full object-cover"
             @error="(e) => onImageError(e)"

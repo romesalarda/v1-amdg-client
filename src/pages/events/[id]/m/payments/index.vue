@@ -6,8 +6,8 @@
         <!-- Payment Settings -->
         <UCard>
           <template #header>
-            <h2 class="text-xl font-bold">Payment Settings</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            <h2 class="text-xl font-bold text-gray-900">Payment Settings</h2>
+            <p class="text-sm text-gray-600 mt-1">
               Configure payment options and features for this event
             </p>
           </template>
@@ -82,8 +82,8 @@
           <template #header>
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold">Ticket Types</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 class="text-xl font-bold text-gray-900">Ticket Types</h2>
+                <p class="text-sm text-gray-600 mt-1">
                   Define ticket categories for your event (required for packages)
                 </p>
               </div>
@@ -103,12 +103,12 @@
             <div
               v-for="ticketType in ticketTypes"
               :key="ticketType.id"
-              class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
-                    <h3 class="font-semibold">{{ ticketType.title }}</h3>
+                    <h3 class="font-semibold text-gray-900">{{ ticketType.title }}</h3>
                     <UBadge
                       v-if="ticketType.is_active"
                       label="Active"
@@ -129,7 +129,7 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-8 text-gray-600">
             <p>No ticket types defined</p>
             <p class="text-xs mt-2">Create a ticket type before adding packages</p>
           </div>
@@ -162,12 +162,12 @@
             <div
               v-for="pkg in packagesList"
               :key="pkg.id"
-              class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold">{{ pkg.name }}</h3>
+                    <h3 class="font-semibold text-gray-900">{{ pkg.name }}</h3>
                     <UBadge
                       v-if="pkg.is_active"
                       label="Active"
@@ -176,27 +176,36 @@
                       size="xs"
                     />
                   </div>
-                  <div class="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                  <div class="text-sm text-gray-600 mb-2">
                     Ticket Type: {{ pkg.ticket_type_title }}
                   </div>
                   <div class="flex items-center gap-4 text-sm">
-                    <span class="font-semibold text-primary-600 dark:text-primary-400">
+                    <span class="font-semibold text-primary-600">
                       ${{ pkg.base_amount }}
                     </span>
                   </div>
                 </div>
-                <UButton
-                  icon="i-heroicons-trash"
-                  color="red"
-                  variant="ghost"
-                  size="sm"
-                  @click="removePackage(pkg.id)"
-                />
+                <div class="flex gap-2">
+                  <UButton
+                    icon="i-heroicons-pencil"
+                    color="gray"
+                    variant="ghost"
+                    size="sm"
+                    @click="editPackage(pkg)"
+                  />
+                  <UButton
+                    icon="i-heroicons-trash"
+                    color="red"
+                    variant="ghost"
+                    size="sm"
+                    @click="removePackage(pkg.id)"
+                  />
+                </div>
               </div>
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-8 text-gray-600">
             <p v-if="!settingsForm.payment_enabled">
               Enable payments to create booking packages
             </p>
@@ -209,8 +218,8 @@
           <template #header>
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold">Discount Codes</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 class="text-xl font-bold text-gray-900">Discount Codes</h2>
+                <p class="text-sm text-gray-600 mt-1">
                   Create promotional codes for discounted registration
                 </p>
               </div>
@@ -223,7 +232,7 @@
             </div>
           </template>
 
-          <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div class="text-center py-8 text-gray-600">
             <p v-if="!settingsForm.payment_enabled">
               Enable payments to create discount codes
             </p>
@@ -237,8 +246,8 @@
           <template #header>
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold">Alternative Sign-ins</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 class="text-xl font-bold text-gray-900">Alternative Sign-ins</h2>
+                <p class="text-sm text-gray-600 mt-1">
                   Configure additional check-in methods for attendees
                 </p>
               </div>
@@ -258,11 +267,11 @@
             <div
               v-for="signIn in signIns"
               :key="signIn.id"
-              class="p-3 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <h3 class="font-semibold">{{ signIn.title }}</h3>
+                  <h3 class="font-semibold text-gray-900">{{ signIn.title }}</h3>
                 </div>
                 <UButton
                   icon="i-heroicons-trash"
@@ -275,7 +284,7 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-8 text-gray-600">
             <p>No alternative sign-in methods configured</p>
             <p class="text-xs mt-2">Add methods like QR codes, RFID, etc.</p>
           </div>
@@ -328,14 +337,14 @@
           </template>
           <div class="space-y-4">
             <div>
-              <div class="text-2xl font-bold">{{ packages.length || 0 }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Total Packages</div>
+              <div class="text-2xl font-bold text-gray-900">{{ packages.length || 0 }}</div>
+              <div class="text-sm text-gray-600">Total Packages</div>
             </div>
             <div v-if="packages.length">
-              <div class="text-2xl font-bold">
+              <div class="text-2xl font-bold text-gray-900">
                 ${{ Math.min(...packages.map((p: any) => Number(p.base_amount))) }} - ${{ Math.max(...packages.map((p: any) => Number(p.base_amount))) }}
               </div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Price Range</div>
+              <div class="text-sm text-gray-600">Price Range</div>
             </div>
           </div>
         </UCard>
@@ -345,7 +354,7 @@
           <template #header>
             <h3 class="font-semibold">Payment Help</h3>
           </template>
-          <div class="text-sm space-y-3 text-gray-600 dark:text-gray-400">
+          <div class="text-sm space-y-3 text-gray-600">
             <p>
               <strong>Booking Packages</strong> allow you to create different pricing tiers for your event.
             </p>
@@ -428,6 +437,15 @@
         </form>
       </UCard>
     </UModal>
+
+    <!-- Edit Package Modal -->
+    <EditPackageModal
+      v-model="showEditPackageModal"
+      :package="editingPackage"
+      :ticket-types="ticketTypes"
+      :on-update="handlePackageUpdate"
+      :is-loading="updatePackageMutation?.isPending?.value || false"
+    />
 
     <!-- Add Ticket Type Modal -->
     <UModal v-model="showTicketTypeModal">
@@ -513,7 +531,7 @@
           <h3 class="text-lg font-semibold">Add Discount Code</h3>
         </template>
 
-        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+        <div class="text-center py-8 text-gray-600">
           <p>Discount code management coming soon</p>
         </div>
 
@@ -538,6 +556,16 @@ import { useBookingPackages, useCreateBookingPackage, useDeleteBookingPackage } 
 import { useBookingTicketTypes, useCreateBookingTicketType, useDeleteBookingTicketType } from '~/composables/resources/booking/bookingTicketTypes'
 import { useBookingAlternativeSignins, useCreateBookingAlternativeSignin, useDeleteBookingAlternativeSignin } from '~/composables/resources/booking/bookingAlternativeSignins'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EditPackageModal from '~/components/events/EditPackageModal.vue'
+
+// Try to import update mutation if it exists
+let usePartialUpdateBookingPackage: any = null
+try {
+  const module = await import('~/composables/resources/booking/bookingPackages')
+  usePartialUpdateBookingPackage = (module as any).usePartialUpdateBookingPackage
+} catch {
+  console.warn('usePartialUpdateBookingPackage not available')
+}
 
 definePageMeta({
   layout: false,
@@ -703,6 +731,55 @@ const removePackage = async (packageId: number) => {
   } catch (error) {
     toast.add({
       title: 'Failed to remove package',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+// Edit package
+const showEditPackageModal = ref(false)
+const editingPackage = ref<any>(null)
+
+const editPackage = (pkg: any) => {
+  editingPackage.value = pkg
+  showEditPackageModal.value = true
+}
+
+// Check if update mutation exists in composable
+const updatePackageMutationExists = () => {
+  try {
+    return typeof usePartialUpdateBookingPackage !== 'undefined'
+  } catch {
+    return false
+  }
+}
+
+// Use the update mutation if it exists
+const updatePackageMutation = updatePackageMutationExists() 
+  ? (usePartialUpdateBookingPackage as any)() 
+  : null
+
+const handlePackageUpdate = async (data: any) => {
+  if (!updatePackageMutation || !editingPackage.value) return
+
+  try {
+    await updatePackageMutation.mutateAsync({
+      packageId: editingPackage.value.id,
+      body: data,
+    })
+
+    toast.add({
+      title: 'Package updated',
+      color: 'green',
+    })
+
+    showEditPackageModal.value = false
+    editingPackage.value = null
+    refetchPackages()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update package',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'red',
     })

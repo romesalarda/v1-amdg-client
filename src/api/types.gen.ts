@@ -3882,6 +3882,7 @@ export type EventCreateUpdateRequest = {
 };
 
 export type EventDetail = {
+    readonly id: number;
     readonly event_id: string;
     display_code: string;
     readonly display_identifier: string;
@@ -5219,6 +5220,7 @@ export type EventDetailRequest = {
 };
 
 export type EventList = {
+    readonly id: number;
     readonly event_id: string;
     display_code: string;
     display_identifier?: string;
@@ -19023,6 +19025,7 @@ export type BookingsIntentsListData = {
          * Filter by event UUID
          */
         event?: string;
+        event__event_id?: string;
         /**
          * Filter intents expiring on or after this datetime
          */

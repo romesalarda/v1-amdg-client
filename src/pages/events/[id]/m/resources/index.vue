@@ -24,7 +24,7 @@
           </div>
 
           <div class="p-6">
-            <div v-if="resources.isPending" class="space-y-3">
+            <div v-if="resources.isLoading" class="space-y-3">
               <div v-for="i in 5" :key="i" class="animate-pulse flex items-center gap-3 p-4 border border-gray-200 rounded-lg">
                 <div class="w-10 h-10 bg-gray-200 rounded" />
                 <div class="flex-1">

@@ -2714,6 +2714,11 @@ paths:
           format: uuid
         description: Filter by event UUID
       - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: expires_after
         schema:
           type: string
@@ -29611,6 +29616,9 @@ components:
     EventDetail:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         event_id:
           type: string
           format: uuid
@@ -31026,6 +31034,7 @@ components:
       - duration_days
       - event_id
       - event_type_details
+      - id
       - is_approved
       - is_deleted
       - is_ongoing
@@ -32325,6 +32334,9 @@ components:
     EventList:
       type: object
       properties:
+        id:
+          type: integer
+          readOnly: true
         event_id:
           type: string
           format: uuid
@@ -32440,6 +32452,7 @@ components:
       - end_datetime
       - event_id
       - event_type_name
+      - id
       - organisation_name
       - start_datetime
       - status_display

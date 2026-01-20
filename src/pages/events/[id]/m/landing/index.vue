@@ -22,24 +22,24 @@
               </UButton>
             </div>
           </div>
-
           <div class="p-6">
-            <div v-if="landingImages.isPending" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div v-if="3 > 5" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div v-for="i in 3" :key="i" class="animate-pulse">
                 <div class="aspect-video bg-gray-200 rounded-lg" />
               </div>
             </div>
 
-            <div v-else-if="landingImagesList.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div v-else-if="landingImagesList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div
                 v-for="image in landingImagesList"
                 :key="image.id"
                 class="group relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 hover:border-blue-500 transition-colors"
               >
                 <img
-                  :src="image.resource_url"
+                  :src="resolveImageUrl(image.image)"
                   :alt="image.name"
                   class="w-full h-full object-cover"
+                  @error="onImageError"
                 />
                 <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-opacity flex items-center justify-center">
                   <div class="opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
@@ -208,6 +208,7 @@
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventLandingImages, useAddEventLandingImage } from '~/composables/resources/events/eventLandingImages'
 import { useRemoveEventResource } from '~/composables/resources/events/eventResources'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
 
 definePageMeta({

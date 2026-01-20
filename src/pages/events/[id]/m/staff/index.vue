@@ -8,8 +8,8 @@
           <template #header>
             <div class="flex justify-between items-center">
               <div>
-                <h2 class="text-xl font-bold">Event Staff</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 class="text-xl font-bold text-gray-900">Event Staff</h2>
+                <p class="text-sm text-gray-600 mt-1">
                   Manage staff members and their roles for this event
                 </p>
               </div>
@@ -29,21 +29,21 @@
             <div
               v-for="staff in staffList"
               :key="staff.staff_id"
-              class="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div class="flex items-center gap-4">
                 <div
-                  class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center"
+                  class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center"
                 >
-                  <span class="text-sm font-semibold text-primary-600 dark:text-primary-400">
+                  <span class="text-sm font-semibold text-primary-600">
                     {{ staff.user_email?.[0]?.toUpperCase() || '?' }}
                   </span>
                 </div>
                 <div>
-                  <div class="font-semibold">
+                  <div class="font-semibold text-gray-900">
                     {{ staff.user_email }}
                   </div>
-                  <div class="text-sm text-gray-500 dark:text-gray-400">
+                  <div class="text-sm text-gray-600">
                     Staff ID: {{ staff.staff_id }}
                   </div>
                 </div>
@@ -62,10 +62,10 @@
           </div>
 
           <div v-else class="text-center py-12">
-            <div class="text-gray-400 dark:text-gray-600 mb-4">
+            <div class="text-gray-600 mb-4">
               <UIcon name="i-heroicons-users" class="text-5xl" />
             </div>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">No staff members yet</p>
+            <p class="text-gray-600 mb-4">No staff members yet</p>
             <UButton
               label="Add First Staff Member"
               @click="showAddModal = true"
@@ -79,7 +79,7 @@
             <div class="flex justify-between items-center">
               <div>
                 <h2 class="text-xl font-bold">Staff Roles</h2>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p class="text-sm text-gray-600 mt-1">
                   Define roles that can be assigned to staff members
                 </p>
               </div>
@@ -99,11 +99,11 @@
             <div
               v-for="role in rolesList"
               :key="role.id"
-              class="flex items-center justify-between p-3 border border-gray-200 dark:border-gray-700 rounded-lg"
+              class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
             >
               <div>
                 <div class="font-semibold">{{ role.name }}</div>
-                <div v-if="role.description" class="text-sm text-gray-500 dark:text-gray-400">
+                <div v-if="role.description" class="text-sm text-gray-600">
                   {{ role.description }}
                 </div>
               </div>
@@ -117,7 +117,7 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div v-else class="text-center py-8 text-gray-600">
             No roles defined
           </div>
         </UCard>
@@ -133,11 +133,11 @@
           <div class="space-y-4">
             <div>
               <div class="text-2xl font-bold">{{ staffList.length }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Total Staff</div>
+              <div class="text-sm text-gray-600">Total Staff</div>
             </div>
             <div>
               <div class="text-2xl font-bold">{{ rolesList.length }}</div>
-              <div class="text-sm text-gray-500 dark:text-gray-400">Defined Roles</div>
+              <div class="text-sm text-gray-600">Defined Roles</div>
             </div>
           </div>
         </UCard>
@@ -173,12 +173,33 @@
         </template>
 
         <form @submit="onAddStaff" class="space-y-4">
-          <UFormGroup label="User ID" name="user" required>
-            <UInput
-              v-model="addStaffForm.user"
-              type="number"
-              placeholder="Enter user ID"
-            />
+          <UFormGroup label="User" name="user" required>
+            <USelectMenu
+              v-model="selectedUser"
+              :options="usersList"
+              searchable
+              :search-attributes="['email', 'first_name', 'last_name']"
+              placeholder="Search for a user..."
+              value-attribute="id"
+              @update:query="userSearch = $event"
+            >
+              <template #label>
+                <span v-if="selectedUser" class="truncate">
+                  {{ selectedUser.email }}
+                  <span v-if="selectedUser.first_name || selectedUser.last_name" class="text-gray-500">
+                    ({{ selectedUser.first_name }} {{ selectedUser.last_name }})
+                  </span>
+                </span>
+              </template>
+              <template #option="{ option }">
+                <div class="flex flex-col">
+                  <span class="font-medium">{{ option.email }}</span>
+                  <span v-if="option.first_name || option.last_name" class="text-sm text-gray-500">
+                    {{ option.first_name }} {{ option.last_name }}
+                  </span>
+                </div>
+              </template>
+            </USelectMenu>
           </UFormGroup>
 
           <UFormGroup label="Role" name="role">
@@ -253,6 +274,7 @@
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventStaff, useCreateEventStaff, useDeleteEventStaff } from '~/composables/resources/events/eventStaff'
 import { useEventRoles, useCreateEventRole, useDeleteEventRole } from '~/composables/resources/events/eventRoles'
+import { useUsers } from '~/composables/resources/user/users'
 import EventsManagementLayout from "~/components/events/EventManagementLayout.vue"
 
 definePageMeta({
@@ -274,13 +296,21 @@ const { data: rolesData, isLoading: rolesLoading, refetch: refetchRoles } = useE
 const staffList = computed(() => staffData.value?.data?.results || [])
 const rolesList = computed(() => rolesData.value?.data?.results || [])
 
+// User search for adding staff
+const userSearch = ref('')
+const usersParams = computed(() => ({
+  search: userSearch.value || undefined,
+}))
+const { data: usersData } = useUsers(usersParams)
+const usersList = computed(() => usersData.value?.data?.results || [])
+const selectedUser = ref<any>(null)
+
 // Modals
 const showAddModal = ref(false)
 const showAddRoleModal = ref(false)
 
 // Add staff form
 const addStaffForm = reactive({
-  user: '',
   role: null as number | null,
 })
 
@@ -289,9 +319,17 @@ const addStaffMutation = useCreateEventStaff()
 const onAddStaff = async (e: Event) => {
   e.preventDefault()
 
+  if (!selectedUser.value) {
+    toast.add({
+      title: 'Please select a user',
+      color: 'red',
+    })
+    return
+  }
+
   try {
     await addStaffMutation.mutateAsync({
-      user: Number(addStaffForm.user),
+      user: selectedUser.value.id,
       event: Number(route.params.id),
     })
 
@@ -301,7 +339,7 @@ const onAddStaff = async (e: Event) => {
     })
 
     showAddModal.value = false
-    addStaffForm.user = ''
+    selectedUser.value = null
     addStaffForm.role = null
     refetchStaff()
   } catch (error) {
