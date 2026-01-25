@@ -4544,6 +4544,48 @@ export type EventDetail = {
      * Check if the event is soft-deleted.
      */
     readonly is_deleted: boolean;
+    readonly user_permissions: {
+        /**
+         * Whether the current user is the event creator
+         */
+        is_creator: boolean;
+        /**
+         * Whether the current user is an event staff member
+         */
+        is_staff_member: boolean;
+        /**
+         * Whether the current user is a Django staff/superuser
+         */
+        is_admin: boolean;
+        /**
+         * Whether the user can edit event details (creator, staff, or admin)
+         */
+        can_manage_event: boolean;
+        /**
+         * Whether the user can add/remove staff members
+         */
+        can_manage_staff: boolean;
+        /**
+         * Whether the user can create/manage staff invites
+         */
+        can_manage_invites: boolean;
+        /**
+         * Whether the user can add/remove resources
+         */
+        can_manage_resources: boolean;
+        /**
+         * Whether the user can soft delete the event
+         */
+        can_delete_event: boolean;
+        /**
+         * List of permission codes explicitly assigned to the user for this event
+         */
+        assigned_permissions: Array<string>;
+        /**
+         * List of role names assigned to the user for this event
+         */
+        assigned_roles: Array<string>;
+    };
     /**
      *  links
      */
@@ -5323,6 +5365,13 @@ export type EventPermissionAssignment = {
     readonly user_email: string;
     permission: number;
     readonly permission_name: string;
+    readonly permission_code: string;
+    readonly permission_category: string;
+    read_only?: boolean;
+    allow_update?: boolean;
+    allow_delete?: boolean;
+    allow_create?: boolean;
+    readonly has_full_access: boolean;
     readonly assigned_at: string;
     readonly assigned_by: number | null;
     readonly assigned_by_email: string;
@@ -5357,6 +5406,10 @@ export type EventPermissionAssignmentRequest = {
     event: number;
     user: number;
     permission: number;
+    read_only?: boolean;
+    allow_update?: boolean;
+    allow_delete?: boolean;
+    allow_create?: boolean;
 };
 
 export type EventPermissionRequest = {
@@ -7217,6 +7270,106 @@ export type EventStaffAvailabilityRequest = {
     available_to?: string;
 };
 
+/**
+ * Serializer for EventStaffInvite model with HATEOAS support.
+ */
+export type EventStaffInvite = {
+    readonly id: string;
+    readonly event: string;
+    readonly event_title: string;
+    readonly event_display_code: string;
+    target_user: number | null;
+    readonly target_user_email: string;
+    /**
+     * Get full name of the target user.
+     */
+    readonly target_user_name: string;
+    readonly invited_by: number | null;
+    readonly invited_by_email: string;
+    /**
+     * Get full name of the user who sent the invite.
+     */
+    readonly invited_by_name: string;
+    accepted?: boolean;
+    readonly accepted_at: string | null;
+    expires_at?: string | null;
+    readonly added_at: string;
+    is_active?: boolean;
+    readonly is_valid: boolean;
+    /**
+     *  links
+     */
+    readonly _links: {
+        /**
+         * Link to this invite
+         */
+        self: string;
+        /**
+         * Link to the event
+         */
+        event?: string;
+        /**
+         * Link to the target user
+         */
+        target_user?: string;
+        /**
+         * Link to the user who sent the invite
+         */
+        invited_by?: string;
+        /**
+         * Link to accept this invite
+         */
+        accept?: string;
+    };
+};
+
+/**
+ * Lightweight serializer for listing staff invites.
+ */
+export type EventStaffInviteList = {
+    readonly id: string;
+    readonly event_title: string;
+    readonly event_display_code: string;
+    readonly target_user_email: string;
+    /**
+     * Get full name of the target user.
+     */
+    readonly target_user_name: string;
+    readonly invited_by_email: string;
+    readonly accepted: boolean;
+    readonly added_at: string;
+    readonly expires_at: string | null;
+    readonly is_active: boolean;
+    readonly is_valid: boolean;
+    /**
+     *  links
+     */
+    readonly _links: {
+        /**
+         * Link to this invite
+         */
+        self: string;
+        /**
+         * Link to the event
+         */
+        event?: string;
+        /**
+         * Link to accept this invite
+         */
+        accept?: string;
+    };
+};
+
+/**
+ * Serializer for EventStaffInvite model with HATEOAS support.
+ */
+export type EventStaffInviteRequest = {
+    target_user: number | null;
+    accepted?: boolean;
+    expires_at?: string | null;
+    is_active?: boolean;
+};
+
 export type EventStaffRequest = {
     event: number;
     user: number | null;
@@ -7550,18 +7703,26 @@ export type InvolvedEventOrganisationCreateUpdateRequest = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation-only support.
+ * Create/Update serializer for Leader with organisation required.
  */
 export type LeaderCreateUpdate = {
     user: number;
+    /**
+     * The organisation this leader belongs to (required for grouping)
+     */
+    organisation: number;
     notes?: string;
 };
 
 /**
- * Create/Update serializer for Leader with organisation-only support.
+ * Create/Update serializer for Leader with organisation required.
  */
 export type LeaderCreateUpdateRequest = {
     user: number;
+    /**
+     * The organisation this leader belongs to (required for grouping)
+     */
+    organisation: number;
     notes?: string;
 };
 
@@ -7573,12 +7734,14 @@ export type LeaderDetail = {
     user: number;
     readonly user_name: string;
     readonly user_email: string;
+    organisation?: number | null;
+    readonly organisation_name: string;
     /**
-     * Type of authority (organisation)
+     * Type of authority
      */
     readonly authority_type: string;
     /**
-     * Name of the authority object
+     * Name of the authority object (country, cluster, chapter, area, or organisation)
      */
     readonly authority_object_name: string;
     notes?: string;
@@ -7592,24 +7755,27 @@ export type LeaderDetail = {
     readonly _links: {
         self?: string;
         user?: string;
+        organisation?: string;
         authority_object?: string;
     };
 };
 
 /**
- * List serializer for Leader (Organisation authority only).
+ * List serializer for Leader with organisation grouping.
  */
 export type LeaderList = {
     readonly id: number;
     user: number;
     readonly user_name: string;
     readonly user_email: string;
+    organisation?: number | null;
+    readonly organisation_name: string;
     /**
-     * Type of authority (organisation)
+     * Type of authority
      */
     readonly authority_type: string;
     /**
-     * Name of the authority object
+     * Name of the authority object (country, cluster, chapter, area, or organisation)
      */
     readonly authority_object_name: string;
     notes?: string;
@@ -7623,6 +7789,7 @@ export type LeaderList = {
     readonly _links: {
         self?: string;
         user?: string;
+        organisation?: string;
         authority_object?: string;
     };
 };
@@ -8579,6 +8746,13 @@ export type PaginatedEventStaffAvailabilityList = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventStaffAvailability>;
+};
+
+export type PaginatedEventStaffInviteListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventStaffInviteList>;
 };
 
 export type PaginatedEventStaffList = {
@@ -9588,6 +9762,10 @@ export type PatchedEventPermissionAssignmentRequest = {
     event?: number;
     user?: number;
     permission?: number;
+    read_only?: boolean;
+    allow_update?: boolean;
+    allow_delete?: boolean;
+    allow_create?: boolean;
 };
 
 export type PatchedEventPermissionRequest = {
@@ -10332,6 +10510,16 @@ export type PatchedEventStaffAvailabilityRequest = {
     available_to?: string;
 };
 
+/**
+ * Serializer for EventStaffInvite model with HATEOAS support.
+ */
+export type PatchedEventStaffInviteRequest = {
+    target_user?: number | null;
+    accepted?: boolean;
+    expires_at?: string | null;
+    is_active?: boolean;
+};
+
 export type PatchedEventStaffRequest = {
     event?: number;
     user?: number | null;
@@ -10396,10 +10584,14 @@ export type PatchedInvolvedEventOrganisationCreateUpdateRequest = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation-only support.
+ * Create/Update serializer for Leader with organisation required.
  */
 export type PatchedLeaderCreateUpdateRequest = {
     user?: number;
+    /**
+     * The organisation this leader belongs to (required for grouping)
+     */
+    organisation?: number;
     notes?: string;
 };
 
@@ -15036,6 +15228,10 @@ export type EventPermissionAssignmentWritable = {
     event: number;
     user: number;
     permission: number;
+    read_only?: boolean;
+    allow_update?: boolean;
+    allow_delete?: boolean;
+    allow_create?: boolean;
 };
 
 /**
@@ -15807,6 +16003,23 @@ export type EventStaffAvailabilityWritable = {
     available_to?: string;
 };
 
+/**
+ * Serializer for EventStaffInvite model with HATEOAS support.
+ */
+export type EventStaffInviteWritable = {
+    target_user: number | null;
+    accepted?: boolean;
+    expires_at?: string | null;
+    is_active?: boolean;
+};
+
+/**
+ * Lightweight serializer for listing staff invites.
+ */
+export type EventStaffInviteListWritable = {
+    [key: string]: unknown;
+};
+
 export type EventTypeWritable = {
     title: string;
     code: string;
@@ -15875,14 +16088,22 @@ export type InvolvedEventOrganisationWritable = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation-only support.
+ * Create/Update serializer for Leader with organisation required.
  */
 export type LeaderCreateUpdateRequestWritable = {
     user: number;
     /**
-     * The organisation this user will lead
+     * The organisation this leader belongs to (required for grouping)
      */
     organisation: number;
+    /**
+     * Internal use only - do not set manually
+     */
+    target_type?: string;
+    /**
+     * Internal use only - do not set manually
+     */
+    target_id?: number;
     notes?: string;
 };
 
@@ -15891,15 +16112,17 @@ export type LeaderCreateUpdateRequestWritable = {
  */
 export type LeaderDetailWritable = {
     user: number;
+    organisation?: number | null;
     notes?: string;
     added_by?: number | null;
 };
 
 /**
- * List serializer for Leader (Organisation authority only).
+ * List serializer for Leader with organisation grouping.
  */
 export type LeaderListWritable = {
     user: number;
+    organisation?: number | null;
     notes?: string;
     added_by?: number | null;
 };
@@ -16420,6 +16643,13 @@ export type PaginatedEventStaffAvailabilityListWritable = {
     results: Array<EventStaffAvailabilityWritable>;
 };
 
+export type PaginatedEventStaffInviteListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventStaffInviteListWritable>;
+};
+
 export type PaginatedEventStaffListWritable = {
     count: number;
     next?: string | null;
@@ -16696,14 +16926,22 @@ export type PatchedDiscountCreateUpdateRequestWritable = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation-only support.
+ * Create/Update serializer for Leader with organisation required.
  */
 export type PatchedLeaderCreateUpdateRequestWritable = {
     user?: number;
     /**
-     * The organisation this user will lead
+     * The organisation this leader belongs to (required for grouping)
      */
     organisation?: number;
+    /**
+     * Internal use only - do not set manually
+     */
+    target_type?: string;
+    /**
+     * Internal use only - do not set manually
+     */
+    target_id?: number;
     notes?: string;
 };
 
@@ -20924,6 +21162,22 @@ export type EventListAssignPermissionCreateData = {
          * Permission ID
          */
         permission_id: number;
+        /**
+         * If True, user can only READ (other flags ignored)
+         */
+        read_only?: boolean;
+        /**
+         * Allow CREATE operations
+         */
+        allow_create?: boolean;
+        /**
+         * Allow UPDATE operations
+         */
+        allow_update?: boolean;
+        /**
+         * Allow DELETE operations
+         */
+        allow_delete?: boolean;
     };
     path: {
         event_id: string;
@@ -21004,20 +21258,98 @@ export type EventListCheckPermissionsRetrieveData = {
     };
     query?: {
         /**
-         * User ID to check permissions for. If not provided, checks current user.
+         * Optional: Check permissions for a specific user ID. If omitted, checks current authenticated user.
          */
         user_id?: number;
     };
     url: '/api/event/list/{event_id}/check-permissions/';
 };
 
+export type EventListCheckPermissionsRetrieveErrors = {
+    /**
+     * Authentication required. User must be logged in to check permissions
+     */
+    401: unknown;
+    /**
+     * Permission denied. Only admins and event creators can check permissions for other users
+     */
+    403: unknown;
+    /**
+     * User not found with the specified user_id
+     */
+    404: unknown;
+};
+
 export type EventListCheckPermissionsRetrieveResponses = {
+    /**
+     * Comprehensive permission information for the user
+     */
     200: {
-        user_id?: number;
-        is_owner?: boolean;
-        is_staff_member?: boolean;
-        permissions?: Array<{
-            [key: string]: unknown;
+        /**
+         * ID of the user whose permissions were checked
+         */
+        user_id: number;
+        /**
+         * Email address of the user
+         */
+        user_email: string;
+        /**
+         * Full name of the user
+         */
+        user_name?: string;
+        /**
+         * Whether the user created this event
+         */
+        is_creator: boolean;
+        /**
+         * Whether the user is an event staff member
+         */
+        is_staff_member: boolean;
+        /**
+         * Whether the user is a Django staff/superuser
+         */
+        is_admin: boolean;
+        /**
+         * Can edit event details and settings
+         */
+        can_manage_event: boolean;
+        /**
+         * Can add/remove staff members
+         */
+        can_manage_staff: boolean;
+        /**
+         * Can create/manage staff invitations
+         */
+        can_manage_invites: boolean;
+        /**
+         * Can add/remove resources (images, documents, links)
+         */
+        can_manage_resources: boolean;
+        /**
+         * Can soft delete or restore the event
+         */
+        can_delete_event: boolean;
+        /**
+         * List of explicitly assigned permissions with details
+         */
+        assigned_permissions: Array<{
+            id?: number;
+            permission_name?: string;
+            permission_code?: string;
+            permission_category?: string;
+            assigned_at?: string;
+            assigned_by_email?: string;
+        }>;
+        /**
+         * List of assigned roles with details
+         */
+        assigned_roles: Array<{
+            id?: number;
+            role_name?: string;
+            role_code?: string;
+            role_category?: string;
+            assigned_at?: string;
+            assigned_by_email?: string;
         }>;
     };
 };
@@ -21356,6 +21688,353 @@ export type EventListSoftDeleteCreateResponses = {
     200: unknown;
 };
 
+export type EventStaffInvitesListData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the event to list invites for
+         */
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Filter invites by acceptance status. true=accepted, false=not accepted
+         */
+        accepted?: boolean;
+        /**
+         * Filter invites by validity status. Valid invites are: active, not expired, and not yet accepted. Use true to get only valid (pending) invites, false to get invalid invites
+         */
+        is_valid?: boolean;
+        /**
+         * Page number for pagination
+         */
+        page?: number;
+        /**
+         * Number of results per page (default: 20)
+         */
+        page_size?: number;
+        /**
+         * Search invites by target user email address. Case-insensitive partial match
+         */
+        search?: string;
+        /**
+         * Filter invites by target user ID. Returns all invites sent to the specified user for this event
+         */
+        target_user?: number;
+    };
+    url: '/api/event/list/{event_id}/staff-invites/';
+};
+
+export type EventStaffInvitesListErrors = {
+    /**
+     * Authentication required. User must be logged in to list invites
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator, staff, or target user
+     */
+    403: unknown;
+    /**
+     * Event not found with the specified event_id
+     */
+    404: unknown;
+};
+
+export type EventStaffInvitesListResponses = {
+    /**
+     * Successfully retrieved list of invites. Returns paginated results with invite summaries including: invite ID, event details, target user info, inviter info, acceptance status, validity status, timestamps, and HATEOAS links for related actions
+     */
+    200: PaginatedEventStaffInviteListList;
+};
+
+export type EventStaffInvitesListResponse = EventStaffInvitesListResponses[keyof EventStaffInvitesListResponses];
+
+export type EventStaffInvitesCreateData = {
+    body: EventStaffInviteRequest;
+    path: {
+        /**
+         * UUID of the event to create invite for
+         */
+        event_id: string;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/';
+};
+
+export type EventStaffInvitesCreateErrors = {
+    /**
+     * Bad request - validation errors occurred. Common causes:
+     * - Target user already has an active invite for this event
+     * - Target user is already an event staff member
+     * - Expiry date is in the past
+     * - Required fields missing (target_user)
+     * - Invalid field values or formats
+     */
+    400: unknown;
+    /**
+     * Authentication required. User must be logged in to create invites
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator or existing staff member
+     */
+    403: unknown;
+    /**
+     * Event not found with the specified event_id
+     */
+    404: unknown;
+};
+
+export type EventStaffInvitesCreateResponses = {
+    /**
+     * Successfully created new staff invite. Returns complete invite details including: invite ID, event information, target user details, inviter details, expiry date, validity status, and HATEOAS links for management and acceptance actions
+     */
+    201: EventStaffInvite;
+};
+
+export type EventStaffInvitesCreateResponse = EventStaffInvitesCreateResponses[keyof EventStaffInvitesCreateResponses];
+
+export type EventStaffInviteDeleteData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the event containing the invite
+         */
+        event_id: string;
+        /**
+         * Integer ID of the specific staff invite to delete
+         */
+        invite_id: number;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+};
+
+export type EventStaffInviteDeleteErrors = {
+    /**
+     * Authentication required. User must be logged in
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator or existing staff member
+     */
+    403: unknown;
+    /**
+     * Invite not found
+     */
+    404: unknown;
+};
+
+export type EventStaffInviteDeleteResponses = {
+    /**
+     * Successfully deleted invite. The invite has been permanently removed from the system
+     */
+    204: void;
+};
+
+export type EventStaffInviteDeleteResponse = EventStaffInviteDeleteResponses[keyof EventStaffInviteDeleteResponses];
+
+export type EventStaffInviteRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the event containing the invite
+         */
+        event_id: string;
+        /**
+         * Integer ID of the specific staff invite to retrieve
+         */
+        invite_id: number;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+};
+
+export type EventStaffInviteRetrieveErrors = {
+    /**
+     * Authentication required. User must be logged in to access invites
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator, staff, or the target user
+     */
+    403: unknown;
+    /**
+     * Not found. Either the event does not exist with the specified event_id, or the invite does not exist with the specified invite_id for this event
+     */
+    404: unknown;
+};
+
+export type EventStaffInviteRetrieveResponses = {
+    /**
+     * Successfully retrieved invite. Returns complete invite details with all fields including: invite ID, event information, target user details, inviter details, acceptance status, validity status, timestamps, expiry date, and HATEOAS links
+     */
+    200: EventStaffInvite;
+};
+
+export type EventStaffInviteRetrieveResponse = EventStaffInviteRetrieveResponses[keyof EventStaffInviteRetrieveResponses];
+
+export type EventStaffInvitePartialUpdateData = {
+    body?: PatchedEventStaffInviteRequest;
+    path: {
+        /**
+         * UUID of the event containing the invite
+         */
+        event_id: string;
+        /**
+         * Integer ID of the specific staff invite to update
+         */
+        invite_id: number;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+};
+
+export type EventStaffInvitePartialUpdateErrors = {
+    /**
+     * Bad request - validation errors occurred. Common causes:
+     * - Attempting to modify an already-accepted invite
+     * - New target user already has an active invite for this event
+     * - New expiry date is in the past
+     */
+    400: unknown;
+    /**
+     * Authentication required. User must be logged in
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator or existing staff member
+     */
+    403: unknown;
+    /**
+     * Invite not found
+     */
+    404: unknown;
+};
+
+export type EventStaffInvitePartialUpdateResponses = {
+    /**
+     * Successfully updated invite. Returns complete updated invite details
+     */
+    200: EventStaffInvite;
+};
+
+export type EventStaffInvitePartialUpdateResponse = EventStaffInvitePartialUpdateResponses[keyof EventStaffInvitePartialUpdateResponses];
+
+export type EventStaffInviteUpdateData = {
+    body: EventStaffInviteRequest;
+    path: {
+        /**
+         * UUID of the event containing the invite
+         */
+        event_id: string;
+        /**
+         * Integer ID of the specific staff invite to update
+         */
+        invite_id: number;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+};
+
+export type EventStaffInviteUpdateErrors = {
+    /**
+     * Bad request - validation errors occurred. Common causes:
+     * - Attempting to modify an already-accepted invite
+     * - New target user already has an active invite for this event
+     * - New target user is already an event staff member
+     * - New expiry date is in the past
+     * - Required fields missing
+     */
+    400: unknown;
+    /**
+     * Authentication required. User must be logged in
+     */
+    401: unknown;
+    /**
+     * Permission denied. User is not event creator or existing staff member
+     */
+    403: unknown;
+    /**
+     * Invite not found
+     */
+    404: unknown;
+};
+
+export type EventStaffInviteUpdateResponses = {
+    /**
+     * Successfully updated invite. Returns complete updated invite details
+     */
+    200: EventStaffInvite;
+};
+
+export type EventStaffInviteUpdateResponse = EventStaffInviteUpdateResponses[keyof EventStaffInviteUpdateResponses];
+
+export type EventListStaffInvitesAcceptCreateData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the event for which the invite was sent
+         */
+        event_id: string;
+        /**
+         * Integer ID of the specific staff invite to accept
+         */
+        invite_id: number;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/accept/';
+};
+
+export type EventListStaffInvitesAcceptCreateErrors = {
+    /**
+     * Bad request - invite is not valid for acceptance. Common causes:
+     * - Invite has already been accepted (accepted=True)
+     * - Invite has been deactivated (is_active=False)
+     * - Invite has expired (expires_at in the past)
+     * - User is already an event staff member
+     * - Invite is in an invalid state
+     *
+     * Error response includes a specific message explaining why the invite cannot be accepted
+     */
+    400: unknown;
+    /**
+     * Authentication required. User must be logged in to accept invites
+     */
+    401: unknown;
+    /**
+     * Permission denied. The authenticated user is not the target user of this invite. Users can only accept invites that were sent to them specifically
+     */
+    403: unknown;
+    /**
+     * Not found. Either:
+     * - The event does not exist with the specified event_id
+     * - The invite does not exist with the specified invite_id
+     * - The invite exists but is not associated with this event
+     */
+    404: unknown;
+};
+
+export type EventListStaffInvitesAcceptCreateResponses = {
+    /**
+     * Invite successfully accepted. User has been added to the event staff team. Returns a success message and the EventStaff object containing: staff ID, event details, user information, role, join date, and management links
+     */
+    200: {
+        /**
+         * Success confirmation message
+         */
+        message?: string;
+        /**
+         * The newly created EventStaff object with complete details
+         */
+        staff?: {
+            [key: string]: unknown;
+        };
+    };
+};
+
+export type EventListStaffInvitesAcceptCreateResponse = EventListStaffInvitesAcceptCreateResponses[keyof EventListStaffInvitesAcceptCreateResponses];
+
 export type EventListStaffListListData = {
     body?: never;
     path: {
@@ -21545,7 +22224,7 @@ export type EventPermissionAssignmentsDestroyData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this event permission assignment.
+         * A unique integer value identifying this Event Permission Assignment.
          */
         id: number;
     };
@@ -21566,7 +22245,7 @@ export type EventPermissionAssignmentsRetrieveData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this event permission assignment.
+         * A unique integer value identifying this Event Permission Assignment.
          */
         id: number;
     };
@@ -21584,7 +22263,7 @@ export type EventPermissionAssignmentsPartialUpdateData = {
     body?: PatchedEventPermissionAssignmentRequest;
     path: {
         /**
-         * A unique integer value identifying this event permission assignment.
+         * A unique integer value identifying this Event Permission Assignment.
          */
         id: number;
     };
@@ -21602,7 +22281,7 @@ export type EventPermissionAssignmentsUpdateData = {
     body: EventPermissionAssignmentRequest;
     path: {
         /**
-         * A unique integer value identifying this event permission assignment.
+         * A unique integer value identifying this Event Permission Assignment.
          */
         id: number;
     };
@@ -23649,6 +24328,44 @@ export type LocationsLocationsAreasUpdateResponses = {
 
 export type LocationsLocationsAreasUpdateResponse = LocationsLocationsAreasUpdateResponses[keyof LocationsLocationsAreasUpdateResponses];
 
+export type LocationsLocationsAreasAddLeaderCreateData = {
+    body?: {
+        user_id: number;
+        organisation_id: number;
+        notes?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this area location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/areas/{id}/add-leader/';
+};
+
+export type LocationsLocationsAreasAddLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or organisation not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsAreasAddLeaderCreateResponses = {
+    /**
+     * Leader added successfully
+     */
+    201: unknown;
+};
+
 export type LocationsLocationsAreasRelativeAreasListData = {
     body?: never;
     path: {
@@ -23724,6 +24441,42 @@ export type LocationsLocationsAreasRelativeAreasListResponses = {
 };
 
 export type LocationsLocationsAreasRelativeAreasListResponse = LocationsLocationsAreasRelativeAreasListResponses[keyof LocationsLocationsAreasRelativeAreasListResponses];
+
+export type LocationsLocationsAreasRemoveLeaderCreateData = {
+    body?: {
+        user_id: number;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this area location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/areas/{id}/remove-leader/';
+};
+
+export type LocationsLocationsAreasRemoveLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or leadership not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsAreasRemoveLeaderCreateResponses = {
+    /**
+     * Leader removed successfully
+     */
+    200: unknown;
+};
 
 export type LocationsLocationsChaptersListData = {
     body?: never;
@@ -23872,6 +24625,44 @@ export type LocationsLocationsChaptersUpdateResponses = {
 
 export type LocationsLocationsChaptersUpdateResponse = LocationsLocationsChaptersUpdateResponses[keyof LocationsLocationsChaptersUpdateResponses];
 
+export type LocationsLocationsChaptersAddLeaderCreateData = {
+    body?: {
+        user_id: number;
+        organisation_id: number;
+        notes?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this chapter location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/chapters/{id}/add-leader/';
+};
+
+export type LocationsLocationsChaptersAddLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or organisation not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsChaptersAddLeaderCreateResponses = {
+    /**
+     * Leader added successfully
+     */
+    201: unknown;
+};
+
 export type LocationsLocationsChaptersAreasListData = {
     body?: never;
     path: {
@@ -23935,6 +24726,42 @@ export type LocationsLocationsChaptersAreasListResponses = {
 };
 
 export type LocationsLocationsChaptersAreasListResponse = LocationsLocationsChaptersAreasListResponses[keyof LocationsLocationsChaptersAreasListResponses];
+
+export type LocationsLocationsChaptersRemoveLeaderCreateData = {
+    body?: {
+        user_id: number;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this chapter location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/chapters/{id}/remove-leader/';
+};
+
+export type LocationsLocationsChaptersRemoveLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or leadership not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsChaptersRemoveLeaderCreateResponses = {
+    /**
+     * Leader removed successfully
+     */
+    200: unknown;
+};
 
 export type LocationsLocationsClustersListData = {
     body?: never;
@@ -24079,6 +24906,44 @@ export type LocationsLocationsClustersUpdateResponses = {
 
 export type LocationsLocationsClustersUpdateResponse = LocationsLocationsClustersUpdateResponses[keyof LocationsLocationsClustersUpdateResponses];
 
+export type LocationsLocationsClustersAddLeaderCreateData = {
+    body?: {
+        user_id: number;
+        organisation_id: number;
+        notes?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this cluster location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/clusters/{id}/add-leader/';
+};
+
+export type LocationsLocationsClustersAddLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or organisation not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsClustersAddLeaderCreateResponses = {
+    /**
+     * Leader added successfully
+     */
+    201: unknown;
+};
+
 export type LocationsLocationsClustersChaptersListData = {
     body?: never;
     path: {
@@ -24138,6 +25003,42 @@ export type LocationsLocationsClustersChaptersListResponses = {
 };
 
 export type LocationsLocationsClustersChaptersListResponse = LocationsLocationsClustersChaptersListResponses[keyof LocationsLocationsClustersChaptersListResponses];
+
+export type LocationsLocationsClustersRemoveLeaderCreateData = {
+    body?: {
+        user_id: number;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this cluster location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/clusters/{id}/remove-leader/';
+};
+
+export type LocationsLocationsClustersRemoveLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or leadership not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsClustersRemoveLeaderCreateResponses = {
+    /**
+     * Leader removed successfully
+     */
+    200: unknown;
+};
 
 export type LocationsLocationsCountriesListData = {
     body?: never;
@@ -24572,6 +25473,53 @@ export type LocationsLocationsCountriesUpdateResponses = {
 
 export type LocationsLocationsCountriesUpdateResponse = LocationsLocationsCountriesUpdateResponses[keyof LocationsLocationsCountriesUpdateResponses];
 
+export type LocationsLocationsCountriesAddLeaderCreateData = {
+    body?: {
+        /**
+         * ID of the user to assign as leader
+         */
+        user_id: number;
+        /**
+         * ID of the organisation the leader belongs to
+         */
+        organisation_id: number;
+        /**
+         * Optional notes about this leadership assignment
+         */
+        notes?: string;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this country location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/countries/{id}/add-leader/';
+};
+
+export type LocationsLocationsCountriesAddLeaderCreateErrors = {
+    /**
+     * Invalid data or duplicate assignment
+     */
+    400: unknown;
+    /**
+     * Not authorized - requires organisation controller permissions
+     */
+    403: unknown;
+    /**
+     * User or organisation not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsCountriesAddLeaderCreateResponses = {
+    /**
+     * Leader added successfully
+     */
+    201: unknown;
+};
+
 export type LocationsLocationsCountriesClustersListData = {
     body?: never;
     path: {
@@ -24921,6 +25869,45 @@ export type LocationsLocationsCountriesClustersListResponses = {
 };
 
 export type LocationsLocationsCountriesClustersListResponse = LocationsLocationsCountriesClustersListResponses[keyof LocationsLocationsCountriesClustersListResponses];
+
+export type LocationsLocationsCountriesRemoveLeaderCreateData = {
+    body?: {
+        /**
+         * ID of the user to remove as leader
+         */
+        user_id: number;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this country location.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/locations/locations/countries/{id}/remove-leader/';
+};
+
+export type LocationsLocationsCountriesRemoveLeaderCreateErrors = {
+    /**
+     * Invalid data
+     */
+    400: unknown;
+    /**
+     * Not authorized
+     */
+    403: unknown;
+    /**
+     * User or leadership assignment not found
+     */
+    404: unknown;
+};
+
+export type LocationsLocationsCountriesRemoveLeaderCreateResponses = {
+    /**
+     * Leader removed successfully
+     */
+    200: unknown;
+};
 
 export type LocationsLocationsPoisListData = {
     body?: never;
@@ -26867,6 +27854,14 @@ export type OrganisationsLeadersListData = {
          */
         added_by?: number;
         /**
+         * Filter by authority object ID
+         */
+        authority_id?: number;
+        /**
+         * Filter by authority type (country, cluster, chapter, area, organisation)
+         */
+        authority_type?: string;
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
@@ -26882,6 +27877,10 @@ export type OrganisationsLeadersListData = {
          * Number of results to return per page.
          */
         page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
         /**
          * Filter by user ID
          */

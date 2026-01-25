@@ -229,7 +229,7 @@
       </UCard>
     </UModal>
 
-    <!-- Add Role Modal -->
+    <!-- Add Role Modal -->s
     <UModal v-model="showAddRoleModal">
       <UCard>
         <template #header>
@@ -276,9 +276,16 @@ import { useEventStaff, useCreateEventStaff, useDeleteEventStaff } from '~/compo
 import { useEventRoles, useCreateEventRole, useDeleteEventRole } from '~/composables/resources/events/eventRoles'
 import { useUsers } from '~/composables/resources/user/users'
 import EventsManagementLayout from "~/components/events/EventManagementLayout.vue"
+import { useCurrentUserEventPermissions } from '~/composables/permissions'
+
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'STAFF',
+    action: 'read'
+  }
 })
 
 const route = useRoute()

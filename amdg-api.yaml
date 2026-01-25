@@ -68,6 +68,7 @@ paths:
       tags:
       - Accessibility Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -97,6 +98,7 @@ paths:
               $ref: '#/components/schemas/AccessibilityRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -121,6 +123,7 @@ paths:
       tags:
       - Accessibility Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -157,6 +160,7 @@ paths:
               $ref: '#/components/schemas/AccessibilityRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -191,6 +195,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAccessibilityRequirementRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -214,6 +219,7 @@ paths:
       tags:
       - Accessibility Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -281,6 +287,7 @@ paths:
       tags:
       - Attendee Actions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -310,6 +317,7 @@ paths:
               $ref: '#/components/schemas/AttendeeActionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -334,6 +342,7 @@ paths:
       tags:
       - Attendee Actions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -574,6 +583,7 @@ paths:
       tags:
       - Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -604,6 +614,7 @@ paths:
               $ref: '#/components/schemas/AttendeeCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -630,6 +641,7 @@ paths:
       tags:
       - Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -666,6 +678,7 @@ paths:
               $ref: '#/components/schemas/AttendeeUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -701,6 +714,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -725,6 +739,7 @@ paths:
       tags:
       - Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -789,6 +804,7 @@ paths:
       tags:
       - Attendee Accessibility
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -826,6 +842,7 @@ paths:
               $ref: '#/components/schemas/AttendeeAccessibilityRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -856,6 +873,7 @@ paths:
       tags:
       - Attendee Accessibility
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -897,6 +915,7 @@ paths:
               $ref: '#/components/schemas/AttendeeAccessibilityRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -936,6 +955,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeAccessibilityRequirementRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -965,6 +985,7 @@ paths:
       tags:
       - Attendee Accessibility
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1019,6 +1040,7 @@ paths:
       tags:
       - Attendee Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1055,6 +1077,7 @@ paths:
               $ref: '#/components/schemas/AttendeeConsentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1085,6 +1108,7 @@ paths:
       tags:
       - Attendee Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1126,6 +1150,7 @@ paths:
               $ref: '#/components/schemas/AttendeeConsentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1165,6 +1190,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeConsentRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1194,6 +1220,7 @@ paths:
       tags:
       - Attendee Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1258,6 +1285,7 @@ paths:
       tags:
       - Attendee Dietary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1295,6 +1323,7 @@ paths:
               $ref: '#/components/schemas/AttendeeDietaryRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1325,6 +1354,7 @@ paths:
       tags:
       - Attendee Dietary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1366,6 +1396,7 @@ paths:
               $ref: '#/components/schemas/AttendeeDietaryRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1405,6 +1436,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeDietaryRequirementRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1434,6 +1466,7 @@ paths:
       tags:
       - Attendee Dietary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1523,6 +1556,7 @@ paths:
       tags:
       - Emergency Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1559,6 +1593,7 @@ paths:
               $ref: '#/components/schemas/EmergencyContactRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1589,6 +1624,7 @@ paths:
       tags:
       - Emergency Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1630,6 +1666,7 @@ paths:
               $ref: '#/components/schemas/EmergencyContactRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1669,6 +1706,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEmergencyContactRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1698,6 +1736,7 @@ paths:
       tags:
       - Emergency Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1762,6 +1801,7 @@ paths:
       tags:
       - Attendee Medical
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1799,6 +1839,7 @@ paths:
               $ref: '#/components/schemas/AttendeeMedicalConditionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -1829,6 +1870,7 @@ paths:
       tags:
       - Attendee Medical
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1870,6 +1912,7 @@ paths:
               $ref: '#/components/schemas/AttendeeMedicalConditionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1909,6 +1952,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeMedicalConditionRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -1938,6 +1982,7 @@ paths:
       tags:
       - Attendee Medical
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -1987,6 +2032,7 @@ paths:
       tags:
       - Attendee Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2023,6 +2069,7 @@ paths:
               $ref: '#/components/schemas/AttendeeOrganisationRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2053,6 +2100,7 @@ paths:
       tags:
       - Attendee Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2082,6 +2130,7 @@ paths:
       tags:
       - Attendee Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2109,6 +2158,7 @@ paths:
               $ref: '#/components/schemas/GoogleOAuthRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2140,6 +2190,7 @@ paths:
               $ref: '#/components/schemas/GoogleOAuthCallbackRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -2205,6 +2256,7 @@ paths:
       tags:
       - Authentication
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2317,6 +2369,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2344,6 +2397,7 @@ paths:
               $ref: '#/components/schemas/EventAlternativeSigninCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2369,6 +2423,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2404,6 +2459,7 @@ paths:
               $ref: '#/components/schemas/EventAlternativeSigninCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2439,6 +2495,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAlternativeSigninCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2462,6 +2519,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2542,6 +2600,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2569,6 +2628,7 @@ paths:
               $ref: '#/components/schemas/AttendeeAlternativeSigninCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2593,6 +2653,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2628,6 +2689,7 @@ paths:
               $ref: '#/components/schemas/AttendeeAlternativeSigninCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2662,6 +2724,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeAlternativeSigninCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2684,6 +2747,7 @@ paths:
       tags:
       - Alternative Signins
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2788,6 +2852,7 @@ paths:
       tags:
       - Booking Intents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2816,6 +2881,7 @@ paths:
               $ref: '#/components/schemas/BookingIntentCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -2840,6 +2906,7 @@ paths:
       tags:
       - Booking Intents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2875,6 +2942,7 @@ paths:
             schema:
               $ref: '#/components/schemas/BookingIntentUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2910,6 +2978,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedBookingIntentUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -2933,6 +3002,7 @@ paths:
       tags:
       - Booking Intents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -2954,6 +3024,7 @@ paths:
       tags:
       - Booking Intents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3084,6 +3155,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3120,6 +3192,7 @@ paths:
             schema:
               $ref: '#/components/schemas/BookingCreateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3144,6 +3217,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3166,6 +3240,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3184,6 +3259,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3202,6 +3278,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -3221,6 +3298,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3348,6 +3426,7 @@ paths:
       tags:
       - Bookings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3379,6 +3458,7 @@ paths:
               $ref: '#/components/schemas/CheckoutRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3522,6 +3602,7 @@ paths:
       tags:
       - Booking Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3550,6 +3631,7 @@ paths:
               $ref: '#/components/schemas/BookingPackageCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3574,6 +3656,7 @@ paths:
       tags:
       - Booking Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3608,6 +3691,7 @@ paths:
               $ref: '#/components/schemas/BookingPackageCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3641,6 +3725,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedBookingPackageCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3663,6 +3748,7 @@ paths:
       tags:
       - Booking Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -3758,6 +3844,7 @@ paths:
       tags:
       - Booking Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3863,6 +3950,7 @@ paths:
       tags:
       - Ticket Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3891,6 +3979,7 @@ paths:
               $ref: '#/components/schemas/TicketTypeCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -3914,6 +4003,7 @@ paths:
       tags:
       - Ticket Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3948,6 +4038,7 @@ paths:
               $ref: '#/components/schemas/TicketTypeCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -3981,6 +4072,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedTicketTypeCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4003,6 +4095,7 @@ paths:
       tags:
       - Ticket Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4129,6 +4222,7 @@ paths:
       tags:
       - Tickets
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4153,6 +4247,7 @@ paths:
       tags:
       - Tickets
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4219,6 +4314,7 @@ paths:
       tags:
       - Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4248,6 +4344,7 @@ paths:
               $ref: '#/components/schemas/ConsentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4272,6 +4369,7 @@ paths:
       tags:
       - Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4307,6 +4405,7 @@ paths:
               $ref: '#/components/schemas/ConsentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4340,6 +4439,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedConsentRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4363,6 +4463,7 @@ paths:
       tags:
       - Consents
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4430,6 +4531,7 @@ paths:
       tags:
       - Dietary Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4459,6 +4561,7 @@ paths:
               $ref: '#/components/schemas/DietaryRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4483,6 +4586,7 @@ paths:
       tags:
       - Dietary Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4518,6 +4622,7 @@ paths:
               $ref: '#/components/schemas/DietaryRequirementRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4552,6 +4657,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDietaryRequirementRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4575,6 +4681,7 @@ paths:
       tags:
       - Dietary Requirements
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4628,6 +4735,7 @@ paths:
       tags:
       - Event Attendance
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4657,6 +4765,7 @@ paths:
               $ref: '#/components/schemas/EventAttendanceRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4682,6 +4791,7 @@ paths:
       tags:
       - Event Attendance
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4719,6 +4829,7 @@ paths:
               $ref: '#/components/schemas/EventAttendanceRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4753,6 +4864,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAttendanceRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4776,6 +4888,7 @@ paths:
       tags:
       - Event Attendance
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -4808,6 +4921,7 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4837,6 +4951,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerChoiceRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -4862,6 +4977,7 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4898,6 +5014,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerChoiceRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4933,6 +5050,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionAnswerChoiceRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -4957,6 +5075,7 @@ paths:
       tags:
       - Event Question Answer Choices
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5010,6 +5129,7 @@ paths:
       tags:
       - Event Authorizations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5039,6 +5159,7 @@ paths:
               $ref: '#/components/schemas/EventAuthorizationRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5064,6 +5185,7 @@ paths:
       tags:
       - Event Authorizations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5100,6 +5222,7 @@ paths:
               $ref: '#/components/schemas/EventAuthorizationRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5134,6 +5257,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventAuthorizationRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5157,6 +5281,7 @@ paths:
       tags:
       - Event Authorizations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5218,6 +5343,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5249,6 +5375,7 @@ paths:
               $ref: '#/components/schemas/EventCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5275,6 +5402,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5312,6 +5440,7 @@ paths:
               $ref: '#/components/schemas/EventCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5347,6 +5476,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -5371,6 +5501,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5405,6 +5536,7 @@ paths:
               $ref: '#/components/schemas/AvailabilityWindowRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5460,6 +5592,7 @@ paths:
               - name
               - image
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5533,6 +5666,7 @@ paths:
               - name
               - resource_type
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5577,6 +5711,7 @@ paths:
               required:
               - user_id
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5594,11 +5729,12 @@ paths:
   /api/event/list/{event_id}/assign-permission/:
     post:
       operationId: event_list_assign_permission_create
-      description: Assign a specific permission to a user for this event, granting
+      description: 'Assign a specific permission to a user for this event, granting
         them access to perform specific actions. Creates an EventPermissionAssignment
-        linking user, event, and permission. Prevents duplicate assignments to the
-        same user for the same permission. Only event creators, staff, and superusers
-        can assign permissions.
+        linking user, event, and permission with CRUD flags. CRUD flags control granular
+        access: read_only (if True, only read access), allow_create, allow_update,
+        allow_delete. Prevents duplicate assignments to the same user for the same
+        permission. Only event creators, staff, and superusers can assign permissions.'
       summary: Assign Permission to User
       parameters:
       - in: path
@@ -5621,10 +5757,27 @@ paths:
                 permission_id:
                   type: integer
                   description: Permission ID
+                read_only:
+                  type: boolean
+                  description: If True, user can only READ (other flags ignored)
+                  default: false
+                allow_create:
+                  type: boolean
+                  description: Allow CREATE operations
+                  default: false
+                allow_update:
+                  type: boolean
+                  description: Allow UPDATE operations
+                  default: false
+                allow_delete:
+                  type: boolean
+                  description: Allow DELETE operations
+                  default: false
               required:
               - user_id
               - permission_id
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -5718,6 +5871,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5730,11 +5884,31 @@ paths:
   /api/event/list/{event_id}/check-permissions/:
     get:
       operationId: event_list_check_permissions_retrieve
-      description: Check what permissions a user has for this event including ownership
-        status, staff membership, and assigned permissions. Returns a comprehensive
-        overview of user's access rights for the event. If no user_id is provided,
-        checks permissions for the currently authenticated user.
-      summary: Check User Permissions
+      description: |-
+        Get comprehensive permission information for a user on this event. Returns detailed access rights including:
+
+        **User Relationships:**
+        - Whether the user is the event creator
+        - Whether the user is an event staff member
+        - Whether the user is a Django admin/staff
+
+        **Computed Permissions:**
+        - `can_manage_event`: Edit event details, settings, and configuration
+        - `can_manage_staff`: Add/remove staff members and manage team
+        - `can_manage_invites`: Create and manage staff invitations
+        - `can_manage_resources`: Add/remove event resources (documents, images, links)
+        - `can_delete_event`: Soft delete or restore the event
+
+        **Explicit Assignments:**
+        - List of specific permissions explicitly assigned to the user
+        - List of roles assigned to the user (which grant bundles of permissions)
+
+        **Usage:**
+        - If `user_id` query param is provided, checks permissions for that user (requires admin/owner access)
+        - If no `user_id` provided, checks permissions for the currently authenticated user
+        - Useful for UI to show/hide management buttons based on user access
+        - Helps frontend determine what actions are available to the user
+      summary: Check User Permissions for Event
       parameters:
       - in: path
         name: event_id
@@ -5746,11 +5920,13 @@ paths:
         name: user_id
         schema:
           type: integer
-        description: User ID to check permissions for. If not provided, checks current
-          user.
+        description: 'Optional: Check permissions for a specific user ID. If omitted,
+          checks current authenticated user.'
       tags:
       - Events
+      - Permissions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5762,15 +5938,96 @@ paths:
                 properties:
                   user_id:
                     type: integer
-                  is_owner:
+                    description: ID of the user whose permissions were checked
+                  user_email:
+                    type: string
+                    description: Email address of the user
+                  user_name:
+                    type: string
+                    description: Full name of the user
+                  is_creator:
                     type: boolean
+                    description: Whether the user created this event
                   is_staff_member:
                     type: boolean
-                  permissions:
+                    description: Whether the user is an event staff member
+                  is_admin:
+                    type: boolean
+                    description: Whether the user is a Django staff/superuser
+                  can_manage_event:
+                    type: boolean
+                    description: Can edit event details and settings
+                  can_manage_staff:
+                    type: boolean
+                    description: Can add/remove staff members
+                  can_manage_invites:
+                    type: boolean
+                    description: Can create/manage staff invitations
+                  can_manage_resources:
+                    type: boolean
+                    description: Can add/remove resources (images, documents, links)
+                  can_delete_event:
+                    type: boolean
+                    description: Can soft delete or restore the event
+                  assigned_permissions:
                     type: array
                     items:
                       type: object
-          description: ''
+                      properties:
+                        id:
+                          type: integer
+                        permission_name:
+                          type: string
+                        permission_code:
+                          type: string
+                        permission_category:
+                          type: string
+                        assigned_at:
+                          type: string
+                          format: date-time
+                        assigned_by_email:
+                          type: string
+                    description: List of explicitly assigned permissions with details
+                  assigned_roles:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        role_name:
+                          type: string
+                        role_code:
+                          type: string
+                        role_category:
+                          type: string
+                        assigned_at:
+                          type: string
+                          format: date-time
+                        assigned_by_email:
+                          type: string
+                    description: List of assigned roles with details
+                required:
+                - user_id
+                - user_email
+                - is_creator
+                - is_staff_member
+                - is_admin
+                - can_manage_event
+                - can_manage_staff
+                - can_manage_invites
+                - can_manage_resources
+                - can_delete_event
+                - assigned_permissions
+                - assigned_roles
+          description: Comprehensive permission information for the user
+        '401':
+          description: Authentication required. User must be logged in to check permissions
+        '403':
+          description: Permission denied. Only admins and event creators can check
+            permissions for other users
+        '404':
+          description: User not found with the specified user_id
   /api/event/list/{event_id}/landing-images/:
     get:
       operationId: event_list_landing_images_list
@@ -5853,6 +6110,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -5887,6 +6145,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5921,6 +6180,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -5955,6 +6215,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6056,6 +6317,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6095,6 +6357,7 @@ paths:
               $ref: '#/components/schemas/EventDetailRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6127,6 +6390,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6154,6 +6418,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6195,6 +6460,7 @@ paths:
               $ref: '#/components/schemas/EventDetailRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6203,6 +6469,530 @@ paths:
           description: Event is already deleted
         '403':
           description: Permission denied
+  /api/event/list/{event_id}/staff-invites/:
+    get:
+      operationId: event_staff_invites_list
+      description: |-
+        Retrieve a paginated list of all staff invites for this specific event with comprehensive filtering capabilities. Permission-based visibility ensures users only see relevant invites:
+        - Event creators and existing staff members can view ALL invites for their event
+        - Regular authenticated users can only see invites where they are the target user
+        - Django staff and superusers have full visibility
+
+        **Filtering Options:**
+        - `accepted`: Filter by whether invite has been accepted (true/false)
+        - `is_valid`: Filter by validity status - valid invites are active, not expired, and not accepted
+        - `target_user`: Filter by target user ID to see all invites for a specific user
+        - `search`: Search by target user email address for quick lookup
+
+        Results are automatically ordered by creation date (newest first) and include:
+        - Invite status (active, accepted, expired)
+        - Target user information (email, name)
+        - Inviter information (who sent the invite)
+        - Validity status (is_valid property)
+        - HATEOAS links for invite management and acceptance
+      summary: List Event Staff Invites
+      parameters:
+      - in: query
+        name: accepted
+        schema:
+          type: boolean
+        description: Filter invites by acceptance status. true=accepted, false=not
+          accepted
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event to list invites for
+        required: true
+      - in: query
+        name: is_valid
+        schema:
+          type: boolean
+        description: 'Filter invites by validity status. Valid invites are: active,
+          not expired, and not yet accepted. Use true to get only valid (pending)
+          invites, false to get invalid invites'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number for pagination
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'Number of results per page (default: 20)'
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search invites by target user email address. Case-insensitive
+          partial match
+      - in: query
+        name: target_user
+        schema:
+          type: integer
+        description: Filter invites by target user ID. Returns all invites sent to
+          the specified user for this event
+      tags:
+      - Events
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventStaffInviteListList'
+          description: 'Successfully retrieved list of invites. Returns paginated
+            results with invite summaries including: invite ID, event details, target
+            user info, inviter info, acceptance status, validity status, timestamps,
+            and HATEOAS links for related actions'
+        '401':
+          description: Authentication required. User must be logged in to list invites
+        '403':
+          description: Permission denied. User is not event creator, staff, or target
+            user
+        '404':
+          description: Event not found with the specified event_id
+    post:
+      operationId: event_staff_invites_create
+      description: |-
+        Create a new staff invite to invite a user to join the event staff team. The invite is sent to a target user who can then accept it to become an event staff member.
+
+        **Required Fields:**
+        - `target_user` (integer): ID of the user being invited
+
+        **Optional Fields:**
+        - `expires_at` (datetime): When the invite expires (ISO 8601 format). If omitted, invite never expires
+
+        **Permissions:**
+        Only event creators and existing event staff members can create invites. Django staff and superusers also have permission.
+
+        **Validations:**
+        - Target user must exist in the system
+        - Target user cannot already have an active invite for this event
+        - Target user cannot already be an event staff member
+        - Expiry date (if provided) must be in the future
+        - The authenticated user is automatically recorded as the inviter
+
+        **Workflow:**
+        1. Event creator/staff creates invite
+        2. Target user receives notification (outside API scope)
+        3. Target user can view invite via GET request or my-invites action
+        4. Target user accepts invite via accept action
+        5. EventStaff record is automatically created
+        6. Invite is marked as accepted and inactive
+      summary: Create Event Staff Invite
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event to create invite for
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+        required: true
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaffInvite'
+          description: 'Successfully created new staff invite. Returns complete invite
+            details including: invite ID, event information, target user details,
+            inviter details, expiry date, validity status, and HATEOAS links for management
+            and acceptance actions'
+        '400':
+          description: |-
+            Bad request - validation errors occurred. Common causes:
+            - Target user already has an active invite for this event
+            - Target user is already an event staff member
+            - Expiry date is in the past
+            - Required fields missing (target_user)
+            - Invalid field values or formats
+        '401':
+          description: Authentication required. User must be logged in to create invites
+        '403':
+          description: Permission denied. User is not event creator or existing staff
+            member
+        '404':
+          description: Event not found with the specified event_id
+  /api/event/list/{event_id}/staff-invites/{invite_id}/:
+    get:
+      operationId: event_staff_invite_retrieve
+      description: |-
+        Fetch complete details for a specific event staff invite including:
+        - Full invite metadata (ID, status, created/updated timestamps)
+        - Complete event information (ID, name, description, dates)
+        - Target user details (ID, email, name, profile)
+        - Inviter information (who sent the invite)
+        - Validity and acceptance status
+        - Expiry information (if applicable)
+        - HATEOAS links for invite management and acceptance
+
+        **Permissions:** Users can retrieve invites if they are:
+        - The event creator or existing staff member (can see all invites)
+        - The target user of the invite (can see their own invite)
+        - Django staff or superuser (full visibility)
+      summary: Retrieve Staff Invite Details
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event containing the invite
+        required: true
+      - in: path
+        name: invite_id
+        schema:
+          type: integer
+        description: Integer ID of the specific staff invite to retrieve
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaffInvite'
+          description: 'Successfully retrieved invite. Returns complete invite details
+            with all fields including: invite ID, event information, target user details,
+            inviter details, acceptance status, validity status, timestamps, expiry
+            date, and HATEOAS links'
+        '401':
+          description: Authentication required. User must be logged in to access invites
+        '403':
+          description: Permission denied. User is not event creator, staff, or the
+            target user
+        '404':
+          description: Not found. Either the event does not exist with the specified
+            event_id, or the invite does not exist with the specified invite_id for
+            this event
+    put:
+      operationId: event_staff_invite_update
+      description: |-
+        Completely replace an existing staff invite with new data. All fields must be provided.
+
+        **Required Fields:**
+        - `target_user` (integer): New target user ID
+        - `expires_at` (datetime or null): New expiry date (ISO 8601) or null for no expiry
+
+        **Behavior:**
+        - Replaces ALL editable fields with provided values
+        - Read-only fields (event, created_at, updated_at) are preserved
+        - Can change target user if new user doesn't have existing invite
+        - Can modify expiry date or remove it (set to null)
+        - Cannot modify already accepted invites
+
+        **Permissions:**
+        Only event creators and existing event staff members can update invites. Django staff and superusers also have full access.
+      summary: Full Update Staff Invite
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event containing the invite
+        required: true
+      - in: path
+        name: invite_id
+        schema:
+          type: integer
+        description: Integer ID of the specific staff invite to update
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventStaffInviteRequest'
+        required: true
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaffInvite'
+          description: Successfully updated invite. Returns complete updated invite
+            details
+        '400':
+          description: |-
+            Bad request - validation errors occurred. Common causes:
+            - Attempting to modify an already-accepted invite
+            - New target user already has an active invite for this event
+            - New target user is already an event staff member
+            - New expiry date is in the past
+            - Required fields missing
+        '401':
+          description: Authentication required. User must be logged in
+        '403':
+          description: Permission denied. User is not event creator or existing staff
+            member
+        '404':
+          description: Invite not found
+    patch:
+      operationId: event_staff_invite_partial_update
+      description: |-
+        Update specific fields of an existing staff invite without replacing the entire object.
+
+        **Optional Fields** (provide only what you want to change):
+        - `target_user` (integer): Change the target user
+        - `expires_at` (datetime or null): Modify expiry date or remove expiry
+
+        **Behavior:**
+        - Only provided fields are updated
+        - Unprovided fields remain unchanged
+        - Useful for extending expiry without changing target user
+        - Cannot modify already accepted invites
+
+        **Permissions:**
+        Only event creators and existing event staff members can update invites. Django staff and superusers also have full access.
+      summary: Partial Update Staff Invite
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event containing the invite
+        required: true
+      - in: path
+        name: invite_id
+        schema:
+          type: integer
+        description: Integer ID of the specific staff invite to update
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEventStaffInviteRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEventStaffInviteRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEventStaffInviteRequest'
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaffInvite'
+          description: Successfully updated invite. Returns complete updated invite
+            details
+        '400':
+          description: |-
+            Bad request - validation errors occurred. Common causes:
+            - Attempting to modify an already-accepted invite
+            - New target user already has an active invite for this event
+            - New expiry date is in the past
+        '401':
+          description: Authentication required. User must be logged in
+        '403':
+          description: Permission denied. User is not event creator or existing staff
+            member
+        '404':
+          description: Invite not found
+    delete:
+      operationId: event_staff_invite_delete
+      description: |-
+        Permanently delete a staff invite from the system. This action is irreversible.
+
+        **Use Cases:**
+        - Rescind an invite before it's accepted
+        - Clean up expired or invalid invites
+        - Remove duplicate or erroneous invites
+
+        **Behavior:**
+        - Completely removes invite record from database
+        - Cannot be undone
+        - Safe to delete accepted invites (doesn't affect EventStaff membership)
+        - No response body on success (204 status)
+
+        **Permissions:**
+        Only event creators and existing event staff members can delete invites. Django staff and superusers also have full access.
+      summary: Delete Staff Invite
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event containing the invite
+        required: true
+      - in: path
+        name: invite_id
+        schema:
+          type: integer
+        description: Integer ID of the specific staff invite to delete
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: Successfully deleted invite. The invite has been permanently
+            removed from the system
+        '401':
+          description: Authentication required. User must be logged in
+        '403':
+          description: Permission denied. User is not event creator or existing staff
+            member
+        '404':
+          description: Invite not found
+  /api/event/list/{event_id}/staff-invites/{invite_id}/accept/:
+    post:
+      operationId: event_list_staff_invites_accept_create
+      description: |-
+        **Accept Staff Invitation and Join Event Team**
+
+        This endpoint allows a user to accept a staff invitation they received for an event. Accepting the invite automatically adds the user to the event's staff team and marks the invite as processed.
+
+        **Workflow:**
+        1. User receives a staff invite (created via POST /staff-invites/)
+        2. User can view their pending invites via GET /staff-invites/ or my-invites action
+        3. User accepts invite by calling this endpoint
+        4. System validates the invite is still valid
+        5. System creates EventStaff record for the user
+        6. Invite is marked as accepted and deactivated
+        7. User now has staff permissions for the event
+
+        **Permissions:**
+        Only the target user specified in the invite can accept it. The system validates:
+        - The authenticated user matches the invite's target_user
+        - The invite is still active and not deactivated
+        - The invite has not already been accepted
+        - The invite has not expired (if expiry date was set)
+        - The user is not already a staff member for this event
+
+        **Validation Checks:**
+        - **Active Status**: Invite must be active (is_active=True)
+        - **Acceptance Status**: Invite must not be already accepted
+        - **Expiry Date**: If set, expires_at must be in the future
+        - **Target User**: Authenticated user must be the invite target
+        - **Duplicate Staff**: User cannot already be an event staff member
+
+        **Success Response:**
+        Returns a success message and the newly created EventStaff object with:
+        - Staff member ID and role information
+        - Event details
+        - User information
+        - Timestamps (joined date)
+        - HATEOAS links for staff management
+
+        **Atomic Operation:**
+        The acceptance process is atomic - either both the EventStaff record is created AND the invite is marked as accepted, or neither happens. This prevents data inconsistencies.
+      summary: Accept Event Staff Invite
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        description: UUID of the event for which the invite was sent
+        required: true
+      - in: path
+        name: invite_id
+        schema:
+          type: integer
+        description: Integer ID of the specific staff invite to accept
+        required: true
+      tags:
+      - Events
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invite accepted successfully. You are now an event staff
+                      member.
+                    description: Success confirmation message
+                  staff:
+                    type: object
+                    description: The newly created EventStaff object with complete
+                      details
+          description: 'Invite successfully accepted. User has been added to the event
+            staff team. Returns a success message and the EventStaff object containing:
+            staff ID, event details, user information, role, join date, and management
+            links'
+        '400':
+          description: |-
+            Bad request - invite is not valid for acceptance. Common causes:
+            - Invite has already been accepted (accepted=True)
+            - Invite has been deactivated (is_active=False)
+            - Invite has expired (expires_at in the past)
+            - User is already an event staff member
+            - Invite is in an invalid state
+
+            Error response includes a specific message explaining why the invite cannot be accepted
+        '401':
+          description: Authentication required. User must be logged in to accept invites
+        '403':
+          description: Permission denied. The authenticated user is not the target
+            user of this invite. Users can only accept invites that were sent to them
+            specifically
+        '404':
+          description: |-
+            Not found. Either:
+            - The event does not exist with the specified event_id
+            - The invite does not exist with the specified invite_id
+            - The invite exists but is not associated with this event
   /api/event/list/{event_id}/staff-list/:
     get:
       operationId: event_list_staff_list_list
@@ -6284,6 +7074,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6367,6 +7158,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6449,6 +7241,7 @@ paths:
       tags:
       - Events
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -6501,6 +7294,7 @@ paths:
       tags:
       - Event Permission Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6530,6 +7324,7 @@ paths:
               $ref: '#/components/schemas/EventPermissionAssignmentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -6550,11 +7345,12 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this event permission assignment.
+        description: A unique integer value identifying this Event Permission Assignment.
         required: true
       tags:
       - Event Permission Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6574,7 +7370,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this event permission assignment.
+        description: A unique integer value identifying this Event Permission Assignment.
         required: true
       tags:
       - Event Permission Assignments
@@ -6591,6 +7387,7 @@ paths:
               $ref: '#/components/schemas/EventPermissionAssignmentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6609,7 +7406,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this event permission assignment.
+        description: A unique integer value identifying this Event Permission Assignment.
         required: true
       tags:
       - Event Permission Assignments
@@ -6625,6 +7422,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventPermissionAssignmentRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6644,11 +7442,12 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this event permission assignment.
+        description: A unique integer value identifying this Event Permission Assignment.
         required: true
       tags:
       - Event Permission Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6688,6 +7487,7 @@ paths:
       tags:
       - Event Permissions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6717,6 +7517,7 @@ paths:
               $ref: '#/components/schemas/EventPermissionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -6741,6 +7542,7 @@ paths:
       tags:
       - Event Permissions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6776,6 +7578,7 @@ paths:
               $ref: '#/components/schemas/EventPermissionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6810,6 +7613,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventPermissionRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6833,6 +7637,7 @@ paths:
       tags:
       - Event Permissions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -6872,6 +7677,7 @@ paths:
       tags:
       - Event Question Answers
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6901,6 +7707,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -6926,6 +7733,7 @@ paths:
       tags:
       - Event Question Answers
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6961,6 +7769,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionAnswerRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -6995,6 +7804,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionAnswerRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7018,6 +7828,7 @@ paths:
       tags:
       - Event Question Answers
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7052,6 +7863,7 @@ paths:
       tags:
       - Event Question Options
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7081,6 +7893,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionOptionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7105,6 +7918,7 @@ paths:
       tags:
       - Event Question Options
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7140,6 +7954,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionOptionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7174,6 +7989,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionOptionRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7197,6 +8013,7 @@ paths:
       tags:
       - Event Question Options
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7255,6 +8072,7 @@ paths:
       tags:
       - Event Questions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7284,6 +8102,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7309,6 +8128,7 @@ paths:
       tags:
       - Event Questions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7346,6 +8166,7 @@ paths:
               $ref: '#/components/schemas/EventQuestionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7381,6 +8202,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventQuestionRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7405,6 +8227,7 @@ paths:
       tags:
       - Event Questions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7457,6 +8280,7 @@ paths:
       tags:
       - Event Reviews
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -7487,6 +8311,7 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7511,6 +8336,7 @@ paths:
       tags:
       - Event Reviews
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -7548,6 +8374,7 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7582,6 +8409,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventReviewRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7605,6 +8433,7 @@ paths:
       tags:
       - Event Reviews
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7638,6 +8467,7 @@ paths:
               $ref: '#/components/schemas/EventReviewRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7689,6 +8519,7 @@ paths:
       tags:
       - Event Role Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7718,6 +8549,7 @@ paths:
               $ref: '#/components/schemas/EventRoleAssignmentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7743,6 +8575,7 @@ paths:
       tags:
       - Event Role Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7779,6 +8612,7 @@ paths:
               $ref: '#/components/schemas/EventRoleAssignmentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7813,6 +8647,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventRoleAssignmentRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7837,6 +8672,7 @@ paths:
       tags:
       - Event Role Assignments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -7876,6 +8712,7 @@ paths:
       tags:
       - Event Roles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7905,6 +8742,7 @@ paths:
               $ref: '#/components/schemas/EventRoleRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -7929,6 +8767,7 @@ paths:
       tags:
       - Event Roles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7964,6 +8803,7 @@ paths:
               $ref: '#/components/schemas/EventRoleRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -7998,6 +8838,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventRoleRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8021,6 +8862,7 @@ paths:
       tags:
       - Event Roles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8061,6 +8903,7 @@ paths:
       tags:
       - Event Settings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8090,6 +8933,7 @@ paths:
               $ref: '#/components/schemas/EventSettingsRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8115,6 +8959,7 @@ paths:
       tags:
       - Event Settings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8151,6 +8996,7 @@ paths:
               $ref: '#/components/schemas/EventSettingsRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8186,6 +9032,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSettingsRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8210,6 +9057,7 @@ paths:
       tags:
       - Event Settings
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8251,6 +9099,7 @@ paths:
       tags:
       - Event Staff
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8280,6 +9129,7 @@ paths:
               $ref: '#/components/schemas/EventStaffRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8318,6 +9168,7 @@ paths:
       tags:
       - Event Staff Availability
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8347,6 +9198,7 @@ paths:
               $ref: '#/components/schemas/EventStaffAvailabilityRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8372,6 +9224,7 @@ paths:
       tags:
       - Event Staff Availability
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8408,6 +9261,7 @@ paths:
               $ref: '#/components/schemas/EventStaffAvailabilityRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8442,6 +9296,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventStaffAvailabilityRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8466,6 +9321,7 @@ paths:
       tags:
       - Event Staff Availability
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8488,6 +9344,7 @@ paths:
       tags:
       - Event Staff
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8525,6 +9382,7 @@ paths:
               $ref: '#/components/schemas/EventStaffRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8560,6 +9418,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventStaffRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8585,6 +9444,7 @@ paths:
       tags:
       - Event Staff
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8624,6 +9484,7 @@ paths:
       tags:
       - Event Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8654,6 +9515,7 @@ paths:
               $ref: '#/components/schemas/EventTypeRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8679,6 +9541,7 @@ paths:
       tags:
       - Event Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8715,6 +9578,7 @@ paths:
               $ref: '#/components/schemas/EventTypeRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8748,6 +9612,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventTypeRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8771,6 +9636,7 @@ paths:
       tags:
       - Event Types
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -8826,6 +9692,7 @@ paths:
       tags:
       - Event Venues
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8856,6 +9723,7 @@ paths:
               $ref: '#/components/schemas/EventVenueRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -8881,6 +9749,7 @@ paths:
       tags:
       - Event Venues
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -8918,6 +9787,7 @@ paths:
               $ref: '#/components/schemas/EventVenueRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8953,6 +9823,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventVenueRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -8978,6 +9849,7 @@ paths:
       tags:
       - Event Venues
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9043,6 +9915,7 @@ paths:
       tags:
       - Family Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9072,6 +9945,7 @@ paths:
               $ref: '#/components/schemas/FamilyAttendeeRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9097,6 +9971,7 @@ paths:
       tags:
       - Family Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9132,6 +10007,7 @@ paths:
               $ref: '#/components/schemas/FamilyAttendeeRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9166,6 +10042,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedFamilyAttendeeRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9189,6 +10066,7 @@ paths:
       tags:
       - Family Attendees
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9237,6 +10115,7 @@ paths:
       tags:
       - Family Groups
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9266,6 +10145,7 @@ paths:
               $ref: '#/components/schemas/FamilyGroupCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9291,6 +10171,7 @@ paths:
       tags:
       - Family Groups
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9326,6 +10207,7 @@ paths:
               $ref: '#/components/schemas/FamilyGroupCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9360,6 +10242,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedFamilyGroupCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9383,6 +10266,7 @@ paths:
       tags:
       - Family Groups
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9436,6 +10320,7 @@ paths:
       tags:
       - Family Groups
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9503,6 +10388,7 @@ paths:
       tags:
       - Attendee Guardians
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9532,6 +10418,7 @@ paths:
               $ref: '#/components/schemas/AttendeeGuardianRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9557,6 +10444,7 @@ paths:
       tags:
       - Attendee Guardians
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9591,6 +10479,7 @@ paths:
               $ref: '#/components/schemas/AttendeeGuardianRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9625,6 +10514,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeGuardianRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9648,6 +10538,7 @@ paths:
       tags:
       - Attendee Guardians
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -9660,6 +10551,7 @@ paths:
       tags:
       - health
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -9772,6 +10664,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9799,6 +10692,7 @@ paths:
               $ref: '#/components/schemas/AreaLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -9823,6 +10717,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9857,6 +10752,7 @@ paths:
               $ref: '#/components/schemas/AreaLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9890,6 +10786,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAreaLocationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -9912,10 +10809,53 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/locations/locations/areas/{id}/add-leader/:
+    post:
+      operationId: locations_locations_areas_add_leader_create
+      description: Assign a user as a leader of this area location. Requires organisation
+        controller permissions.
+      summary: Add leader to area
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this area location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                organisation_id:
+                  type: integer
+                notes:
+                  type: string
+              required:
+              - user_id
+              - organisation_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          description: Leader added successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or organisation not found
   /api/locations/locations/areas/{id}/relative_areas/:
     get:
       operationId: locations_locations_areas_relative_areas_list
@@ -10014,6 +10954,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10022,6 +10963,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedRelativeAreaList'
           description: ''
+  /api/locations/locations/areas/{id}/remove-leader/:
+    post:
+      operationId: locations_locations_areas_remove_leader_create
+      description: Remove a user's leadership assignment from this area location.
+        Requires organisation controller permissions.
+      summary: Remove leader from area
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this area location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+              required:
+              - user_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Leader removed successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or leadership not found
   /api/locations/locations/chapters/:
     get:
       operationId: locations_locations_chapters_list
@@ -10098,6 +11076,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10125,6 +11104,7 @@ paths:
               $ref: '#/components/schemas/ChapterLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -10149,6 +11129,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10183,6 +11164,7 @@ paths:
               $ref: '#/components/schemas/ChapterLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10216,6 +11198,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedChapterLocationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10238,10 +11221,53 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/locations/locations/chapters/{id}/add-leader/:
+    post:
+      operationId: locations_locations_chapters_add_leader_create
+      description: Assign a user as a leader of this chapter location. Requires organisation
+        controller permissions.
+      summary: Add leader to chapter
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chapter location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                organisation_id:
+                  type: integer
+                notes:
+                  type: string
+              required:
+              - user_id
+              - organisation_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          description: Leader added successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or organisation not found
   /api/locations/locations/chapters/{id}/areas/:
     get:
       operationId: locations_locations_chapters_areas_list
@@ -10324,6 +11350,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10332,6 +11359,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedAreaLocationListList'
           description: ''
+  /api/locations/locations/chapters/{id}/remove-leader/:
+    post:
+      operationId: locations_locations_chapters_remove_leader_create
+      description: Remove a user's leadership assignment from this chapter location.
+        Requires organisation controller permissions.
+      summary: Remove leader from chapter
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this chapter location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+              required:
+              - user_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Leader removed successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or leadership not found
   /api/locations/locations/clusters/:
     get:
       operationId: locations_locations_clusters_list
@@ -10403,6 +11467,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10430,6 +11495,7 @@ paths:
               $ref: '#/components/schemas/ClusterLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -10454,6 +11520,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10488,6 +11555,7 @@ paths:
               $ref: '#/components/schemas/ClusterLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10521,6 +11589,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedClusterLocationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10543,10 +11612,53 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/locations/locations/clusters/{id}/add-leader/:
+    post:
+      operationId: locations_locations_clusters_add_leader_create
+      description: Assign a user as a leader of this cluster location. Requires organisation
+        controller permissions.
+      summary: Add leader to cluster
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cluster location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                organisation_id:
+                  type: integer
+                notes:
+                  type: string
+              required:
+              - user_id
+              - organisation_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          description: Leader added successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or organisation not found
   /api/locations/locations/clusters/{id}/chapters/:
     get:
       operationId: locations_locations_clusters_chapters_list
@@ -10624,6 +11736,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -10632,6 +11745,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedChapterLocationListList'
           description: ''
+  /api/locations/locations/clusters/{id}/remove-leader/:
+    post:
+      operationId: locations_locations_clusters_remove_leader_create
+      description: Remove a user's leadership assignment from this cluster location.
+        Requires organisation controller permissions.
+      summary: Remove leader from cluster
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this cluster location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+              required:
+              - user_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Leader removed successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or leadership not found
   /api/locations/locations/countries/:
     get:
       operationId: locations_locations_countries_list
@@ -11282,6 +12432,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11309,6 +12460,7 @@ paths:
               $ref: '#/components/schemas/CountryLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -11333,6 +12485,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11367,6 +12520,7 @@ paths:
               $ref: '#/components/schemas/CountryLocationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11400,6 +12554,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedCountryLocationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -11422,10 +12577,57 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
           description: No response body
+  /api/locations/locations/countries/{id}/add-leader/:
+    post:
+      operationId: locations_locations_countries_add_leader_create
+      description: Assign a user as a leader of this country location. Requires organisation
+        controller permissions for the specified organisation. Leaders must belong
+        to an organisation for grouping purposes.
+      summary: Add leader to country
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this country location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: ID of the user to assign as leader
+                organisation_id:
+                  type: integer
+                  description: ID of the organisation the leader belongs to
+                notes:
+                  type: string
+                  description: Optional notes about this leadership assignment
+              required:
+              - user_id
+              - organisation_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          description: Leader added successfully
+        '400':
+          description: Invalid data or duplicate assignment
+        '403':
+          description: Not authorized - requires organisation controller permissions
+        '404':
+          description: User or organisation not found
   /api/locations/locations/countries/{id}/clusters/:
     get:
       operationId: locations_locations_countries_clusters_list
@@ -12082,6 +13284,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12090,6 +13293,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedClusterLocationListList'
           description: ''
+  /api/locations/locations/countries/{id}/remove-leader/:
+    post:
+      operationId: locations_locations_countries_remove_leader_create
+      description: Remove a user's leadership assignment from this country location.
+        Requires organisation controller permissions for the leader's organisation.
+      summary: Remove leader from country
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this country location.
+        required: true
+      tags:
+      - Locations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  type: integer
+                  description: ID of the user to remove as leader
+              required:
+              - user_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Leader removed successfully
+        '400':
+          description: Invalid data
+        '403':
+          description: Not authorized
+        '404':
+          description: User or leadership assignment not found
   /api/locations/locations/pois/:
     get:
       operationId: locations_locations_pois_list
@@ -12190,6 +13431,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12218,6 +13460,7 @@ paths:
               $ref: '#/components/schemas/POICreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12241,6 +13484,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12276,6 +13520,7 @@ paths:
               $ref: '#/components/schemas/POICreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12309,6 +13554,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPOICreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12331,6 +13577,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12378,6 +13625,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12405,6 +13653,7 @@ paths:
               $ref: '#/components/schemas/RelativeAreaCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12428,6 +13677,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12462,6 +13712,7 @@ paths:
               $ref: '#/components/schemas/RelativeAreaCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12495,6 +13746,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRelativeAreaCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12517,6 +13769,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12585,6 +13838,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12613,6 +13867,7 @@ paths:
               $ref: '#/components/schemas/RoomVenueCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12636,6 +13891,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12671,6 +13927,7 @@ paths:
               $ref: '#/components/schemas/RoomVenueCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12704,6 +13961,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRoomVenueCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12726,6 +13984,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12799,6 +14058,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12827,6 +14087,7 @@ paths:
               $ref: '#/components/schemas/VenueContactCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -12850,6 +14111,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -12885,6 +14147,7 @@ paths:
               $ref: '#/components/schemas/VenueContactCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12918,6 +14181,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueContactCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -12940,6 +14204,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -12999,6 +14264,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13027,6 +14293,7 @@ paths:
               $ref: '#/components/schemas/VenueMetadataCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13050,6 +14317,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13085,6 +14353,7 @@ paths:
               $ref: '#/components/schemas/VenueMetadataCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13118,6 +14387,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueMetadataCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13140,6 +14410,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13236,6 +14507,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13264,6 +14536,7 @@ paths:
               $ref: '#/components/schemas/VenueCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13288,6 +14561,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13323,6 +14597,7 @@ paths:
               $ref: '#/components/schemas/VenueCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13356,6 +14631,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedVenueCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13378,6 +14654,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13480,6 +14757,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13587,6 +14865,7 @@ paths:
       tags:
       - Locations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -13660,6 +14939,7 @@ paths:
       tags:
       - Medical Conditions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13689,6 +14969,7 @@ paths:
               $ref: '#/components/schemas/MedicalConditionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13713,6 +14994,7 @@ paths:
       tags:
       - Medical Conditions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13749,6 +15031,7 @@ paths:
               $ref: '#/components/schemas/MedicalConditionRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13783,6 +15066,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedMedicalConditionRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13806,6 +15090,7 @@ paths:
       tags:
       - Medical Conditions
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -13875,6 +15160,7 @@ paths:
       tags:
       - Attendee Messages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13904,6 +15190,7 @@ paths:
               $ref: '#/components/schemas/AttendeeMessageCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -13929,6 +15216,7 @@ paths:
       tags:
       - Attendee Messages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13964,6 +15252,7 @@ paths:
             schema:
               $ref: '#/components/schemas/AttendeeMessageUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -13998,6 +15287,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedAttendeeMessageUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14026,6 +15316,7 @@ paths:
       tags:
       - messages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14098,6 +15389,7 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14125,6 +15417,7 @@ paths:
               $ref: '#/components/schemas/OrganisationAcceptanceCodeCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14149,6 +15442,7 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14184,6 +15478,7 @@ paths:
               $ref: '#/components/schemas/OrganisationAcceptanceCodeCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14218,6 +15513,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationAcceptanceCodeCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14241,6 +15537,7 @@ paths:
       tags:
       - Organisation Acceptance Codes
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14288,6 +15585,7 @@ paths:
       tags:
       - Organisation Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14315,6 +15613,7 @@ paths:
               $ref: '#/components/schemas/OrganisationContactCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14338,6 +15637,7 @@ paths:
       tags:
       - Organisation Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14372,6 +15672,7 @@ paths:
               $ref: '#/components/schemas/OrganisationContactCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14405,6 +15706,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationContactCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14427,6 +15729,7 @@ paths:
       tags:
       - Organisation Contacts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14485,6 +15788,7 @@ paths:
       tags:
       - Organisation Controls
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14512,6 +15816,7 @@ paths:
               $ref: '#/components/schemas/OrganisationControlCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14535,6 +15840,7 @@ paths:
       tags:
       - Organisation Controls
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14557,6 +15863,7 @@ paths:
       tags:
       - Organisation Controls
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14630,6 +15937,7 @@ paths:
       tags:
       - Organisation Invites
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14657,6 +15965,7 @@ paths:
               $ref: '#/components/schemas/OrganisationInviteCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14681,6 +15990,7 @@ paths:
       tags:
       - Organisation Invites
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14716,6 +16026,7 @@ paths:
               $ref: '#/components/schemas/OrganisationInviteCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14750,6 +16061,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationInviteCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14773,6 +16085,7 @@ paths:
       tags:
       - Organisation Invites
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -14793,6 +16106,7 @@ paths:
       tags:
       - Organisation Invites
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14880,6 +16194,7 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14907,6 +16222,7 @@ paths:
               $ref: '#/components/schemas/InvolvedEventOrganisationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -14930,6 +16246,7 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14964,6 +16281,7 @@ paths:
               $ref: '#/components/schemas/InvolvedEventOrganisationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -14997,6 +16315,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedInvolvedEventOrganisationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15019,6 +16338,7 @@ paths:
       tags:
       - Event Organisation Involvement
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15026,8 +16346,11 @@ paths:
   /api/organisations/leaders/:
     get:
       operationId: organisations_leaders_list
-      description: Retrieve a list of organisation leaders.
-      summary: List organisation leaders
+      description: Retrieve a list of leaders across organisations and locations.
+        Leaders can be assigned to organisations, countries, clusters, chapters, or
+        areas. All leaders must belong to an organisation for grouping purposes. Supports
+        filtering by organisation, authority type, and user.
+      summary: List leaders
       parameters:
       - in: query
         name: added_after
@@ -15046,6 +16369,16 @@ paths:
         schema:
           type: integer
         description: Filter by who added the leader
+      - in: query
+        name: authority_id
+        schema:
+          type: integer
+        description: Filter by authority object ID
+      - in: query
+        name: authority_type
+        schema:
+          type: string
+        description: Filter by authority type (country, cluster, chapter, area, organisation)
       - name: ordering
         required: false
         in: query
@@ -15055,7 +16388,7 @@ paths:
       - in: query
         name: organisation
         schema:
-          type: number
+          type: integer
         description: Filter by organisation ID
       - name: page
         required: false
@@ -15069,6 +16402,12 @@ paths:
         description: Number of results to return per page.
         schema:
           type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
       - in: query
         name: user
         schema:
@@ -15077,6 +16416,7 @@ paths:
       tags:
       - Organisation Leaders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15087,7 +16427,10 @@ paths:
           description: ''
     post:
       operationId: organisations_leaders_create
-      description: Assign a user as a leader of an organisation.
+      description: Assign a user as a leader of an organisation. Leaders must belong
+        to an organisation for grouping. Use location-specific endpoints to assign
+        leaders to countries, clusters, chapters, or areas. Requires organisation
+        controller permissions.
       summary: Create leader
       tags:
       - Organisation Leaders
@@ -15104,6 +16447,7 @@ paths:
               $ref: '#/components/schemas/LeaderCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15115,7 +16459,8 @@ paths:
   /api/organisations/leaders/{id}/:
     get:
       operationId: organisations_leaders_retrieve
-      description: Get detailed information about a leader.
+      description: Get detailed information about a specific leader assignment including
+        user details, organisation membership, authority object, and assignment metadata.
       summary: Retrieve leader details
       parameters:
       - in: path
@@ -15127,6 +16472,7 @@ paths:
       tags:
       - Organisation Leaders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15137,7 +16483,9 @@ paths:
           description: ''
     put:
       operationId: organisations_leaders_update
-      description: Update leader notes.
+      description: Update leader details such as notes. Authority assignment (target_type
+        and target_id) cannot be changed after creation. Requires organisation controller
+        permissions.
       summary: Update leader
       parameters:
       - in: path
@@ -15161,6 +16509,7 @@ paths:
               $ref: '#/components/schemas/LeaderCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15171,7 +16520,8 @@ paths:
           description: ''
     patch:
       operationId: organisations_leaders_partial_update
-      description: Partially update leader notes.
+      description: Partially update leader details such as notes. Authority assignment
+        cannot be changed after creation. Requires organisation controller permissions.
       summary: Partially update leader
       parameters:
       - in: path
@@ -15194,6 +16544,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedLeaderCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15204,7 +16555,8 @@ paths:
           description: ''
     delete:
       operationId: organisations_leaders_destroy
-      description: Remove a user's leadership of an organisation.
+      description: Remove a user's leadership assignment. This permanently removes
+        the leadership relationship. Requires organisation controller permissions.
       summary: Remove leader
       parameters:
       - in: path
@@ -15216,6 +16568,7 @@ paths:
       tags:
       - Organisation Leaders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15306,6 +16659,7 @@ paths:
       tags:
       - Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15334,6 +16688,7 @@ paths:
               $ref: '#/components/schemas/OrganisationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15358,6 +16713,7 @@ paths:
       tags:
       - Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15393,6 +16749,7 @@ paths:
               $ref: '#/components/schemas/OrganisationCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15426,6 +16783,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrganisationCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15448,6 +16806,7 @@ paths:
       tags:
       - Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15544,6 +16903,7 @@ paths:
       tags:
       - Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15645,6 +17005,7 @@ paths:
       tags:
       - Organisations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -15729,6 +17090,7 @@ paths:
       tags:
       - Organisation Memberships
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15756,6 +17118,7 @@ paths:
               $ref: '#/components/schemas/UserOrganisationMembershipCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15779,6 +17142,7 @@ paths:
       tags:
       - Organisation Memberships
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15801,6 +17165,7 @@ paths:
       tags:
       - Organisation Memberships
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -15820,6 +17185,7 @@ paths:
       tags:
       - Organisation Memberships
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15851,6 +17217,7 @@ paths:
                 code:
                   type: string
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15929,6 +17296,7 @@ paths:
       tags:
       - Sponsorship Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -15956,6 +17324,7 @@ paths:
               $ref: '#/components/schemas/EventSponsorPackageCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -15980,6 +17349,7 @@ paths:
       tags:
       - Sponsorship Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16014,6 +17384,7 @@ paths:
               $ref: '#/components/schemas/EventSponsorPackageCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16047,6 +17418,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSponsorPackageCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16069,6 +17441,7 @@ paths:
       tags:
       - Sponsorship Packages
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16133,6 +17506,7 @@ paths:
       tags:
       - Event Sponsors
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16160,6 +17534,7 @@ paths:
               $ref: '#/components/schemas/EventSponsorCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16183,6 +17558,7 @@ paths:
       tags:
       - Event Sponsors
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16217,6 +17593,7 @@ paths:
               $ref: '#/components/schemas/EventSponsorCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16250,6 +17627,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedEventSponsorCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16272,6 +17650,7 @@ paths:
       tags:
       - Event Sponsors
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16342,6 +17721,7 @@ paths:
       tags:
       - Event Sponsors
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16436,6 +17816,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16465,6 +17846,7 @@ paths:
               $ref: '#/components/schemas/DiscountRuleCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16490,6 +17872,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16526,6 +17909,7 @@ paths:
               $ref: '#/components/schemas/DiscountRuleCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16561,6 +17945,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDiscountRuleCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16585,6 +17970,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16682,6 +18068,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16710,6 +18097,7 @@ paths:
               $ref: '#/components/schemas/DiscountCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16733,6 +18121,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16768,6 +18157,7 @@ paths:
               $ref: '#/components/schemas/DiscountCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16802,6 +18192,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDiscountCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16825,6 +18216,7 @@ paths:
       tags:
       - Discounts
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -16931,6 +18323,7 @@ paths:
       tags:
       - Donations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -16958,6 +18351,7 @@ paths:
               $ref: '#/components/schemas/DonationCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -16981,6 +18375,7 @@ paths:
       tags:
       - Donations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17015,6 +18410,7 @@ paths:
             schema:
               $ref: '#/components/schemas/DonationDetailRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17049,6 +18445,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedDonationDetailRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17072,6 +18469,7 @@ paths:
       tags:
       - Donations
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -17104,6 +18502,7 @@ paths:
               $ref: '#/components/schemas/DonationVerificationRequestRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17160,6 +18559,7 @@ paths:
               $ref: '#/components/schemas/DonationCheckoutRequestRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17277,6 +18677,7 @@ paths:
       tags:
       - Payment History
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17302,6 +18703,7 @@ paths:
       tags:
       - Payment History
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17509,6 +18911,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17537,6 +18940,7 @@ paths:
               $ref: '#/components/schemas/PaymentCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17561,6 +18965,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17594,6 +18999,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PaymentUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17627,6 +19033,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPaymentUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17650,6 +19057,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -17669,6 +19077,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17692,6 +19101,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17715,6 +19125,7 @@ paths:
       tags:
       - Payments
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17760,6 +19171,7 @@ paths:
               required:
               - verified
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17851,6 +19263,7 @@ paths:
       tags:
       - Payment Methods
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17878,6 +19291,7 @@ paths:
               $ref: '#/components/schemas/PaymentMethodCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -17901,6 +19315,7 @@ paths:
       tags:
       - Payment Methods
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17936,6 +19351,7 @@ paths:
               $ref: '#/components/schemas/PaymentMethodCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17970,6 +19386,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedPaymentMethodCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -17993,6 +19410,7 @@ paths:
       tags:
       - Payment Methods
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18024,6 +19442,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18052,6 +19471,7 @@ paths:
               $ref: '#/components/schemas/RefundAssociationCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18077,6 +19497,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18113,6 +19534,7 @@ paths:
               $ref: '#/components/schemas/RefundAssociationCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18148,6 +19570,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundAssociationCreateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18172,6 +19595,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18245,6 +19669,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18273,6 +19698,7 @@ paths:
               $ref: '#/components/schemas/RefundPolicyCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18297,6 +19723,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18332,6 +19759,7 @@ paths:
               $ref: '#/components/schemas/RefundPolicyCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18366,6 +19794,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundPolicyCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18389,6 +19818,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18527,6 +19957,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18555,6 +19986,7 @@ paths:
               $ref: '#/components/schemas/RefundRequestCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18578,6 +20010,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18612,6 +20045,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18646,6 +20080,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedRefundRequestUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18669,6 +20104,7 @@ paths:
       tags:
       - Refunds
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -18699,6 +20135,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18733,6 +20170,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18767,6 +20205,7 @@ paths:
             schema:
               $ref: '#/components/schemas/RefundRequestUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18819,6 +20258,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18847,6 +20287,7 @@ paths:
               $ref: '#/components/schemas/ProductCategoryCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -18870,6 +20311,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18905,6 +20347,7 @@ paths:
               $ref: '#/components/schemas/ProductCategoryCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18938,6 +20381,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProductCategoryCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -18961,6 +20405,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19031,6 +20476,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19059,6 +20505,7 @@ paths:
               $ref: '#/components/schemas/EventProductCategoryCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19083,6 +20530,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19106,6 +20554,7 @@ paths:
       tags:
       - Product Categories
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19253,6 +20702,7 @@ paths:
       tags:
       - Products
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19305,6 +20755,7 @@ paths:
                     type: string
                     format: binary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19329,6 +20780,7 @@ paths:
       tags:
       - Products
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19384,6 +20836,7 @@ paths:
                     type: string
                     format: binary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19439,6 +20892,7 @@ paths:
                     type: string
                     format: binary
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19462,6 +20916,7 @@ paths:
       tags:
       - Products
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -19502,6 +20957,7 @@ paths:
               required:
               - image
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19561,6 +21017,7 @@ paths:
               required:
               - resource_id
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19614,6 +21071,7 @@ paths:
       tags:
       - Products
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19825,6 +21283,7 @@ paths:
       tags:
       - Product Variants
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19860,6 +21319,7 @@ paths:
               $ref: '#/components/schemas/ProductVariantCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -19890,6 +21350,7 @@ paths:
       tags:
       - Product Variants
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19931,6 +21392,7 @@ paths:
               $ref: '#/components/schemas/ProductVariantCreateUpdateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19970,6 +21432,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProductVariantCreateUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -19999,6 +21462,7 @@ paths:
       tags:
       - Product Variants
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -20039,6 +21503,7 @@ paths:
               required:
               - amount
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20112,6 +21577,7 @@ paths:
               required:
               - amount
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20185,6 +21651,7 @@ paths:
               required:
               - stock_quantity
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20245,6 +21712,7 @@ paths:
       tags:
       - Product Variants
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20299,6 +21767,7 @@ paths:
       tags:
       - Order Items
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20322,6 +21791,7 @@ paths:
       tags:
       - Order Items
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20532,6 +22002,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20560,6 +22031,7 @@ paths:
               $ref: '#/components/schemas/OrderCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -20584,6 +22056,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20618,6 +22091,7 @@ paths:
             schema:
               $ref: '#/components/schemas/OrderUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20651,6 +22125,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedOrderUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20673,6 +22148,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -20706,6 +22182,7 @@ paths:
               $ref: '#/components/schemas/OrderItemCreateRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20774,6 +22251,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20845,6 +22323,7 @@ paths:
               $ref: '#/components/schemas/OrderCheckoutRequestRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -20935,6 +22414,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -20992,6 +22472,7 @@ paths:
       tags:
       - Orders
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21097,6 +22578,7 @@ paths:
       tags:
       - Profiles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21137,6 +22619,7 @@ paths:
               $ref: '#/components/schemas/ProfileRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -21162,6 +22645,7 @@ paths:
       tags:
       - Profiles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21198,6 +22682,7 @@ paths:
               $ref: '#/components/schemas/ProfileRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21234,6 +22719,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedProfileRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21258,6 +22744,7 @@ paths:
       tags:
       - Profiles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -21274,6 +22761,7 @@ paths:
       tags:
       - Profiles
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21291,6 +22779,7 @@ paths:
       tags:
       - Stripe
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -21321,6 +22810,7 @@ paths:
               $ref: '#/components/schemas/ConfirmPaymentIntentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21381,6 +22871,7 @@ paths:
               $ref: '#/components/schemas/CreatePaymentIntentRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '201':
@@ -21459,6 +22950,7 @@ paths:
       tags:
       - Users
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21500,6 +22992,7 @@ paths:
               $ref: '#/components/schemas/UserRegistrationRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -21538,6 +23031,7 @@ paths:
       tags:
       - Users
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21579,6 +23073,7 @@ paths:
             schema:
               $ref: '#/components/schemas/UserUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21619,6 +23114,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedUserUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21649,6 +23145,7 @@ paths:
       tags:
       - Users
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '204':
@@ -21674,6 +23171,7 @@ paths:
       tags:
       - Users
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21713,6 +23211,7 @@ paths:
               $ref: '#/components/schemas/ChangePasswordRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -21731,6 +23230,7 @@ paths:
       tags:
       - Users
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21762,6 +23262,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PatchedUserUpdateRequest'
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       responses:
         '200':
@@ -21795,6 +23296,7 @@ paths:
               $ref: '#/components/schemas/EmailVerificationRequest'
         required: true
       security:
+      - jwtCookieAuth: []
       - cookieAuth: []
       - {}
       responses:
@@ -30980,6 +32482,57 @@ components:
           type: boolean
           description: Check if the event is soft-deleted.
           readOnly: true
+        user_permissions:
+          type: object
+          properties:
+            is_creator:
+              type: boolean
+              description: Whether the current user is the event creator
+            is_staff_member:
+              type: boolean
+              description: Whether the current user is an event staff member
+            is_admin:
+              type: boolean
+              description: Whether the current user is a Django staff/superuser
+            can_manage_event:
+              type: boolean
+              description: Whether the user can edit event details (creator, staff,
+                or admin)
+            can_manage_staff:
+              type: boolean
+              description: Whether the user can add/remove staff members
+            can_manage_invites:
+              type: boolean
+              description: Whether the user can create/manage staff invites
+            can_manage_resources:
+              type: boolean
+              description: Whether the user can add/remove resources
+            can_delete_event:
+              type: boolean
+              description: Whether the user can soft delete the event
+            assigned_permissions:
+              type: array
+              items:
+                type: string
+              description: List of permission codes explicitly assigned to the user
+                for this event
+            assigned_roles:
+              type: array
+              items:
+                type: string
+              description: List of role names assigned to the user for this event
+          required:
+          - is_creator
+          - is_staff_member
+          - is_admin
+          - can_manage_event
+          - can_manage_staff
+          - can_manage_invites
+          - can_manage_resources
+          - can_delete_event
+          - assigned_permissions
+          - assigned_roles
+          readOnly: true
         _links:
           type: object
           properties:
@@ -31048,6 +32601,7 @@ components:
       - title
       - updated_at
       - url_safe_title
+      - user_permissions
     EventDetailRequest:
       type: object
       properties:
@@ -32548,6 +34102,27 @@ components:
         permission_name:
           type: string
           readOnly: true
+        permission_code:
+          type: string
+          readOnly: true
+        permission_category:
+          type: string
+          readOnly: true
+        read_only:
+          type: boolean
+          default: false
+        allow_update:
+          type: boolean
+          default: false
+        allow_delete:
+          type: boolean
+          default: false
+        allow_create:
+          type: boolean
+          default: false
+        has_full_access:
+          type: boolean
+          readOnly: true
         assigned_at:
           type: string
           format: date-time
@@ -32594,8 +34169,11 @@ components:
       - assigned_by_email
       - event
       - event_title
+      - has_full_access
       - id
       - permission
+      - permission_category
+      - permission_code
       - permission_name
       - user
       - user_email
@@ -32608,6 +34186,18 @@ components:
           type: integer
         permission:
           type: integer
+        read_only:
+          type: boolean
+          default: false
+        allow_update:
+          type: boolean
+          default: false
+        allow_delete:
+          type: boolean
+          default: false
+        allow_create:
+          type: boolean
+          default: false
       required:
       - event
       - permission
@@ -36345,6 +37935,202 @@ components:
           format: date-time
       required:
       - staff
+    EventStaffInvite:
+      type: object
+      description: Serializer for EventStaffInvite model with HATEOAS support.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        event:
+          type: string
+          format: uuid
+          readOnly: true
+        event_title:
+          type: string
+          readOnly: true
+        event_display_code:
+          type: string
+          readOnly: true
+        target_user:
+          type: integer
+          nullable: true
+        target_user_email:
+          type: string
+          format: email
+          readOnly: true
+        target_user_name:
+          type: string
+          description: Get full name of the target user.
+          readOnly: true
+        invited_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        invited_by_email:
+          type: string
+          format: email
+          readOnly: true
+        invited_by_name:
+          type: string
+          description: Get full name of the user who sent the invite.
+          readOnly: true
+        accepted:
+          type: boolean
+        accepted_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        added_at:
+          type: string
+          format: date-time
+          readOnly: true
+        is_active:
+          type: boolean
+        is_valid:
+          type: boolean
+          readOnly: true
+        _links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+              description: Link to this invite
+            event:
+              type: string
+              format: uri
+              description: Link to the event
+            target_user:
+              type: string
+              format: uri
+              description: Link to the target user
+            invited_by:
+              type: string
+              format: uri
+              description: Link to the user who sent the invite
+            accept:
+              type: string
+              format: uri
+              description: Link to accept this invite
+          required:
+          - self
+          readOnly: true
+          title: ' links'
+      required:
+      - _links
+      - accepted_at
+      - added_at
+      - event
+      - event_display_code
+      - event_title
+      - id
+      - invited_by
+      - invited_by_email
+      - invited_by_name
+      - is_valid
+      - target_user
+      - target_user_email
+      - target_user_name
+    EventStaffInviteList:
+      type: object
+      description: Lightweight serializer for listing staff invites.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        event_title:
+          type: string
+          readOnly: true
+        event_display_code:
+          type: string
+          readOnly: true
+        target_user_email:
+          type: string
+          format: email
+          readOnly: true
+        target_user_name:
+          type: string
+          description: Get full name of the target user.
+          readOnly: true
+        invited_by_email:
+          type: string
+          format: email
+          readOnly: true
+        accepted:
+          type: boolean
+          readOnly: true
+        added_at:
+          type: string
+          format: date-time
+          readOnly: true
+        expires_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+        is_valid:
+          type: boolean
+          readOnly: true
+        _links:
+          type: object
+          properties:
+            self:
+              type: string
+              format: uri
+              description: Link to this invite
+            event:
+              type: string
+              format: uri
+              description: Link to the event
+            accept:
+              type: string
+              format: uri
+              description: Link to accept this invite
+          required:
+          - self
+          readOnly: true
+          title: ' links'
+      required:
+      - _links
+      - accepted
+      - added_at
+      - event_display_code
+      - event_title
+      - expires_at
+      - id
+      - invited_by_email
+      - is_active
+      - is_valid
+      - target_user_email
+      - target_user_name
+    EventStaffInviteRequest:
+      type: object
+      description: Serializer for EventStaffInvite model with HATEOAS support.
+      properties:
+        target_user:
+          type: integer
+          nullable: true
+        accepted:
+          type: boolean
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
+      required:
+      - target_user
     EventStaffRequest:
       type: object
       properties:
@@ -36936,24 +38722,36 @@ components:
       - organisation
     LeaderCreateUpdate:
       type: object
-      description: Create/Update serializer for Leader with organisation-only support.
-      properties:
-        user:
-          type: integer
-        notes:
-          type: string
-      required:
-      - user
-    LeaderCreateUpdateRequest:
-      type: object
-      description: Create/Update serializer for Leader with organisation-only support.
+      description: Create/Update serializer for Leader with organisation required.
       properties:
         user:
           type: integer
         organisation:
           type: integer
+          description: The organisation this leader belongs to (required for grouping)
+        notes:
+          type: string
+      required:
+      - organisation
+      - user
+    LeaderCreateUpdateRequest:
+      type: object
+      description: Create/Update serializer for Leader with organisation required.
+      properties:
+        user:
+          type: integer
+        organisation:
+          type: integer
+          description: The organisation this leader belongs to (required for grouping)
+        target_type:
+          type: string
           writeOnly: true
-          description: The organisation this user will lead
+          minLength: 1
+          description: Internal use only - do not set manually
+        target_id:
+          type: integer
+          writeOnly: true
+          description: Internal use only - do not set manually
         notes:
           type: string
       required:
@@ -36975,13 +38773,20 @@ components:
           type: string
           format: email
           readOnly: true
+        organisation:
+          type: integer
+          nullable: true
+        organisation_name:
+          type: string
+          readOnly: true
         authority_type:
           type: string
-          description: Type of authority (organisation)
+          description: Type of authority
           readOnly: true
         authority_object_name:
           type: string
-          description: Name of the authority object
+          description: Name of the authority object (country, cluster, chapter, area,
+            or organisation)
           readOnly: true
         notes:
           type: string
@@ -37009,6 +38814,9 @@ components:
             user:
               type: string
               format: uri
+            organisation:
+              type: string
+              format: uri
             authority_object:
               type: string
               format: uri
@@ -37021,13 +38829,14 @@ components:
       - authority_object_name
       - authority_type
       - id
+      - organisation_name
       - updated_at
       - user
       - user_email
       - user_name
     LeaderList:
       type: object
-      description: List serializer for Leader (Organisation authority only).
+      description: List serializer for Leader with organisation grouping.
       properties:
         id:
           type: integer
@@ -37041,13 +38850,20 @@ components:
           type: string
           format: email
           readOnly: true
+        organisation:
+          type: integer
+          nullable: true
+        organisation_name:
+          type: string
+          readOnly: true
         authority_type:
           type: string
-          description: Type of authority (organisation)
+          description: Type of authority
           readOnly: true
         authority_object_name:
           type: string
-          description: Name of the authority object
+          description: Name of the authority object (country, cluster, chapter, area,
+            or organisation)
           readOnly: true
         notes:
           type: string
@@ -37075,6 +38891,9 @@ components:
             user:
               type: string
               format: uri
+            organisation:
+              type: string
+              format: uri
             authority_object:
               type: string
               format: uri
@@ -37087,6 +38906,7 @@ components:
       - authority_object_name
       - authority_type
       - id
+      - organisation_name
       - updated_at
       - user
       - user_email
@@ -39542,6 +41362,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventStaffAvailability'
+    PaginatedEventStaffInviteListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventStaffInviteList'
     PaginatedEventStaffList:
       type: object
       required:
@@ -41757,6 +43600,18 @@ components:
           type: integer
         permission:
           type: integer
+        read_only:
+          type: boolean
+          default: false
+        allow_update:
+          type: boolean
+          default: false
+        allow_delete:
+          type: boolean
+          default: false
+        allow_create:
+          type: boolean
+          default: false
     PatchedEventPermissionRequest:
       type: object
       properties:
@@ -43200,6 +45055,21 @@ components:
         available_to:
           type: string
           format: date-time
+    PatchedEventStaffInviteRequest:
+      type: object
+      description: Serializer for EventStaffInvite model with HATEOAS support.
+      properties:
+        target_user:
+          type: integer
+          nullable: true
+        accepted:
+          type: boolean
+        expires_at:
+          type: string
+          format: date-time
+          nullable: true
+        is_active:
+          type: boolean
     PatchedEventStaffRequest:
       type: object
       properties:
@@ -43299,14 +45169,22 @@ components:
           default: COMMUNITY
     PatchedLeaderCreateUpdateRequest:
       type: object
-      description: Create/Update serializer for Leader with organisation-only support.
+      description: Create/Update serializer for Leader with organisation required.
       properties:
         user:
           type: integer
         organisation:
           type: integer
+          description: The organisation this leader belongs to (required for grouping)
+        target_type:
+          type: string
           writeOnly: true
-          description: The organisation this user will lead
+          minLength: 1
+          description: Internal use only - do not set manually
+        target_id:
+          type: integer
+          writeOnly: true
+          description: Internal use only - do not set manually
         notes:
           type: string
     PatchedMedicalConditionRequest:
@@ -47808,3 +49686,14 @@ components:
       type: apiKey
       in: cookie
       name: sessionid
+    jwtCookieAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |-
+        JWT authentication using HTTP-only cookies or Authorization header. The access token can be provided in two ways:
+
+        1. **Cookie (Recommended)**: HTTP-only cookie named "access" (automatically handled by browser)
+        2. **Header**: Authorization header with format: `Bearer <token>`
+
+        Cookie-based authentication is more secure as it cannot be accessed by JavaScript.

@@ -1,6 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
+    <Navbar />
     <div class="bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Event Info & Back Button -->
@@ -110,6 +111,7 @@
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { formatDateTime } from '~/utils/time'
 import type { EventDetail } from '~/api/types.gen'
+import Navbar from '../common/Navbar.vue';
 
 const props = defineProps<{
   eventId: string | number
