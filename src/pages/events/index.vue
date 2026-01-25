@@ -70,10 +70,10 @@
           </UBadge>
         </div>
         
-        <div v-if="isLoadingMyEvents" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="isLoadingMyEvents" class="flex flex-col gap-4">
           <USkeleton v-for="i in 3" :key="i" class="h-48 w-full" />
         </div>
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-else class="flex flex-col gap-4">
           <EventListItem 
             v-for="event in myOrganizationEvents" 
             :key="event.event_id" 
@@ -96,12 +96,12 @@
         </div>
         
         <!-- Loading State -->
-        <div v-if="isLoadingEvents" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-if="isLoadingEvents" class="flex flex-col gap-4">
           <USkeleton v-for="i in 6" :key="i" class="h-48 w-full" />
         </div>
         
         <!-- Events Grid -->
-        <div v-else-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-else-if="filteredEvents.length > 0" class="flex flex-col gap-4">
           <EventListItem 
             v-for="event in paginatedEvents" 
             :key="event.event_id" 

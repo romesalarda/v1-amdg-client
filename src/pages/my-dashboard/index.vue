@@ -143,7 +143,36 @@
             <EventListItem 
               v-for="event in myUpcomingEvents" 
               :key="event.event_id" 
-              :event="event" 
+              :event="event"
+              :show-staff-controls="false"
+            />
+          </div>
+        </section>
+
+        <!-- Staff Events Section -->
+        <section v-if="staffEvents.length > 0">
+          <div class="flex items-center justify-between mb-6 px-2">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-lg bg-purple-100 flex items-center justify-center">
+                <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-purple-600" />
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold tracking-tight">Events I'm Staffing</h2>
+                <p class="text-sm text-gray-600">{{ staffEvents.length }} event{{ staffEvents.length === 1 ? '' : 's' }}</p>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="isLoadingStaff" class="space-y-4">
+            <USkeleton v-for="i in 3" :key="i" class="h-32 w-full" />
+          </div>
+          
+          <div v-else class="space-y-4">
+            <EventListItem 
+              v-for="event in staffEvents" 
+              :key="'staff-' + event.event_id" 
+              :event="event"
+              :show-staff-controls="true"
             />
           </div>
         </section>
@@ -186,9 +215,11 @@
 import { useUpcomingEvents } from '~/composables/resources/events/events'
 import { useOrganisationMemberships } from '~/composables/resources/organisation/organisationMemberships'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
+import { useEventStaff } from '~/composables/resources/events/eventStaff'
 import { useAuthStore } from '~/stores/auth'
 import { DateTime } from 'luxon'
 import EventListItem from '~/components/events/display/EventListItem.vue'
+import type { EventList } from '~/api/types.gen'
 
 definePageMeta({
   middleware: 'auth'
@@ -225,10 +256,32 @@ const userOrganizationIds = computed(() => {
 const { data: eventsData, isLoading: isLoadingEvents } = useUpcomingEvents()
 const allEvents = computed(() => eventsData.value?.data?.results || [])
 
-// Filter user's upcoming events (from their organizations)
+// Fetch staff assignments for current user
+const { data: staffData, isLoading: isLoadingStaff } = useEventStaff(computed(() => ({
+  user: authStore.user?.id,
+})))
+const staffAssignments = computed(() => staffData.value?.data?.results || [])
+
+// Get event IDs where user is staff
+const staffEventIds = computed(() => {
+  return new Set(staffAssignments.value.map(s => s.event))
+})
+
+// Filter user's upcoming events (from their organizations, excluding staff events)
 const myUpcomingEvents = computed(() => {
   return allEvents.value
-    .filter(event => event.organisation && userOrganizationIds.value.includes(event.organisation))
+    .filter(event => 
+      event.organisation && 
+      userOrganizationIds.value.includes(event.organisation) &&
+      !staffEventIds.value.has(event.id)
+    )
+    .slice(0, 6)
+})
+
+// Events where user is staff
+const staffEvents = computed(() => {
+  return allEvents.value
+    .filter(event => staffEventIds.value.has(event.id))
     .slice(0, 6)
 })
 
@@ -242,10 +295,13 @@ const upcomingEventsCount = computed(() => {
   }).length
 })
 
-// Recommended events (events from other organizations)
+// Recommended events (events from other organizations, excluding staff events)
 const recommendedEvents = computed(() => {
   return allEvents.value
-    .filter(event => !event.organisation || !userOrganizationIds.value.includes(event.organisation))
+    .filter(event => 
+      (!event.organisation || !userOrganizationIds.value.includes(event.organisation)) &&
+      !staffEventIds.value.has(event.id)
+    )
     .slice(0, 6)
 })
 

@@ -1,147 +1,508 @@
 <template>
   <EventsManagementLayout :event-id="id" :event="event?.data">
+    <!-- Floating Action Bar -->
+    <div
+      v-if="hasUnsavedChanges || isSaving"
+      class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-gray-200"
+    >
+      <UIcon
+        v-if="isSaving"
+        name="i-heroicons-arrow-path"
+        class="w-5 h-5 text-blue-600 animate-spin"
+      />
+      <span class="text-sm font-medium text-gray-700">
+        {{ isSaving ? 'Saving...' : 'Unsaved changes' }}
+      </span>
+      <UButton
+        v-if="hasUnsavedChanges && !isSaving"
+        label="Save All"
+        size="xs"
+        @click="saveAll"
+      />
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3 space-y-4">
-        <!-- Header Card -->
-        <UCard class="border-t-4 border-t-primary">
-          <div class="space-y-2">
-            <h1 class="text-3xl font-bold text-gray-900">Registration Form</h1>
-            <p class="text-gray-600">
-              Configure questions to collect information from attendees during registration
-            </p>
+        <!-- Header Card with Toolbar -->
+        <UCard class="border-t-4 border-t-blue-500">
+          <div class="flex items-start justify-between gap-4">
+            <div class="flex-1 space-y-2">
+              <div class="flex items-center gap-3">
+                <h1 class="text-3xl font-bold text-gray-900">Registration Form</h1>
+                <UBadge
+                  v-if="previewMode"
+                  label="Preview Mode"
+                  color="blue"
+                  variant="soft"
+                />
+              </div>
+              <p class="text-gray-600">
+                {{ previewMode ? 'This is how attendees will see the form' : 'Configure questions to collect information from attendees' }}
+              </p>
+            </div>
+            
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Undo/Redo -->
+              <UTooltip text="Undo (Ctrl+Z)">
+                <UButton
+                  icon="i-heroicons-arrow-uturn-left"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="!canUndo"
+                  @click="undo"
+                />
+              </UTooltip>
+              <UTooltip text="Redo (Ctrl+Y)">
+                <UButton
+                  icon="i-heroicons-arrow-uturn-right"
+                  variant="ghost"
+                  size="sm"
+                  :disabled="!canRedo"
+                  @click="redo"
+                />
+              </UTooltip>
+              
+              <div class="w-px h-6 bg-gray-300" />
+              
+              <!-- View Controls -->
+              <UTooltip :text="previewMode ? 'Exit Preview' : 'Preview Form'">
+                <UButton
+                  :icon="previewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
+                  :variant="previewMode ? 'solid' : 'ghost'"
+                  size="sm"
+                  @click="previewMode = !previewMode"
+                />
+              </UTooltip>
+              
+              <UTooltip text="Collapse All">
+                <UButton
+                  icon="i-heroicons-chevron-up-down"
+                  variant="ghost"
+                  size="sm"
+                  @click="collapseAll"
+                />
+              </UTooltip>
+              
+              <div class="w-px h-6 bg-gray-300" />
+              
+              <!-- Save -->
+              <UButton
+                label="Save All"
+                icon="i-heroicons-cloud-arrow-up"
+                size="sm"
+                :loading="isSaving"
+                :disabled="!hasUnsavedChanges"
+                @click="saveAll"
+              />
+            </div>
           </div>
         </UCard>
 
-        <!-- Questions List - Google Forms Style -->
+        <!-- Questions List - Google Forms Style with Drag & Drop -->
         <div v-if="questionsLoading" class="space-y-4">
-          <USkeleton v-for="i in 3" :key="i" class="h-32" />
+          <USkeleton v-for="i in 3" :key="i" class="h-48" />
         </div>
 
-        <div v-else-if="questionsList.length" class="space-y-4">
-          <UCard
-            v-for="(question, index) in questionsList"
-            :key="question.id"
-            class="hover:shadow-md transition-shadow"
+        <div v-else class="space-y-4">
+          <draggable
+            v-model="questions"
+            item-key="id"
+            handle=".drag-handle"
+            :animation="200"
+            ghost-class="opacity-50"
+            @end="onDragEnd"
           >
-            <div class="space-y-4">
-              <div class="flex items-start justify-between">
-                <div class="flex-1 space-y-2">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-medium text-gray-500">Question {{ index + 1 }}</span>
-                    <UBadge
-                      v-if="question.required"
-                      label="Required"
-                      color="red"
-                      variant="soft"
-                      size="xs"
-                    />
-                    <UBadge
-                      :label="formatQuestionType(question.question_type || 'short_answer')"
-                      color="primary"
-                      variant="soft"
-                      size="xs"
-                    />
+            <template #item="{ element: question, index }">
+              <UCard
+                :key="question.id || question.tempId"
+                :data-question-id="question.id || question.tempId"
+                class="group relative transition-all hover:shadow-md"
+                :class="{
+                  'ring-2 ring-blue-500': selectedQuestion?.id === question.id || selectedQuestion?.tempId === question.tempId,
+                  'border-l-4 border-l-blue-500': question.isExpanded,
+                }"
+                @click="selectedQuestion = question"
+              >
+                <!-- Drag Handle -->
+                <div
+                  v-if="!previewMode"
+                  class="drag-handle absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
+                >
+                  <div class="bg-gray-200 rounded p-1.5 hover:bg-gray-300">
+                    <UIcon name="i-heroicons-bars-3" class="w-4 h-4 text-gray-600" />
                   </div>
-                  
-                  <h3 class="text-lg font-semibold text-gray-900">
-                    {{ question.question_title }}
-                  </h3>
-                  
-                  <p v-if="question.question_body" class="text-sm text-gray-600">
-                    {{ question.question_body }}
-                  </p>
+                </div>
 
-                  <!-- Show options for multiple choice questions -->
-                  <div
-                    v-if="question.question_type && ['multiple_choice', 'single_choice'].includes(question.question_type) && question.options?.length"
-                    class="mt-3 space-y-2"
-                  >
-                    <p class="text-xs font-medium text-gray-500 uppercase">Options</p>
-                    <div class="space-y-1">
-                      <div
-                        v-for="option in question.options"
-                        :key="option.id"
-                        class="flex items-center gap-2 text-sm text-gray-700"
-                      >
-                        <UIcon
-                          :name="question.question_type === 'single_choice' ? 'i-heroicons-stop-circle' : 'i-heroicons-check-circle'"
-                          class="w-4 h-4 text-gray-400"
+                <div class="space-y-4">
+                  <!-- Question Header -->
+                  <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1 space-y-3">
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <span class="text-sm font-medium text-gray-500">Question {{ index + 1 }}</span>
+                        <UBadge
+                          v-if="question.required"
+                          label="Required"
+                          color="red"
+                          variant="soft"
+                          size="xs"
                         />
-                        {{ option.option_text }}
+                        <UBadge
+                          :label="formatQuestionType(question.question_type || 'short_answer')"
+                          color="blue"
+                          variant="soft"
+                          size="xs"
+                        />
+                        <UBadge
+                          v-if="question.isNew"
+                          label="Draft"
+                          color="yellow"
+                          variant="soft"
+                          size="xs"
+                        />
                       </div>
+
+                      <!-- Editable Title -->
+                      <div v-if="question.isExpanded && !previewMode">
+                        <UInput
+                          v-model="question.question_title"
+                          placeholder="Question title"
+                          size="lg"
+                          variant="outline"
+                          class="font-semibold"
+                          @blur="updateQuestion(question, { question_title: question.question_title })"
+                        />
+                      </div>
+                      <h3
+                        v-else
+                        class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600"
+                        @click="!previewMode && toggleExpanded(question)"
+                      >
+                        {{ question.question_title }}
+                        <span v-if="question.required" class="text-red-500">*</span>
+                      </h3>
+
+                      <!-- Editable Description -->
+                      <div v-if="question.isExpanded && !previewMode">
+                        <UTextarea
+                          v-model="question.question_body"
+                          placeholder="Description (optional)"
+                          :rows="2"
+                          variant="outline"
+                          @blur="updateQuestion(question, { question_body: question.question_body })"
+                        />
+                      </div>
+                      <p
+                        v-else-if="question.question_body"
+                        class="text-sm text-gray-600"
+                      >
+                        {{ question.question_body }}
+                      </p>
+
+                      <!-- Expanded Content -->
+                      <div v-if="question.isExpanded" class="space-y-4 pt-2">
+                        <!-- Question Type Selector (Edit Mode) -->
+                        <div v-if="!previewMode" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <UFormGroup label="Question Type" size="sm">
+                            <USelectMenu
+                              v-model="question.question_type"
+                              :options="questionTypes"
+                              value-attribute="value"
+                              size="sm"
+                              @update:model-value="updateQuestion(question, { question_type: typeof $event === 'string' ? $event : $event?.value })"
+                            />
+                          </UFormGroup>
+                          
+                          <div class="flex items-end">
+                            <UCheckbox
+                              v-model="question.required"
+                              label="Required"
+                              @update:model-value="updateQuestion(question, { required: $event })"
+                            />
+                          </div>
+                        </div>
+
+                        <!-- Question Preview/Options -->
+                        <div class="border-t border-gray-200 pt-4">
+                          <div class="space-y-3">
+                            <!-- Short Answer Preview -->
+                            <div v-if="question.question_type === 'short_answer'" class="text-sm text-gray-600">
+                              <UInput placeholder="Short answer text" disabled />
+                            </div>
+
+                            <!-- Long Answer Preview -->
+                            <div v-else-if="question.question_type === 'long_answer'" class="text-sm text-gray-600">
+                              <UTextarea placeholder="Long answer text" :rows="3" disabled />
+                            </div>
+
+                            <!-- Multiple/Single Choice Options -->
+                            <div v-else-if="['multiple_choice', 'single_choice'].includes(question.question_type || '')" class="space-y-2">
+                              <div v-if="!previewMode" class="space-y-2">
+                                <div
+                                  v-for="(option, optIndex) in (question.options || [])"
+                                  :key="optIndex"
+                                  class="flex items-center gap-2"
+                                >
+                                  <UIcon
+                                    :name="question.question_type === 'single_choice' ? 'i-heroicons-stop-circle' : 'i-heroicons-check-circle'"
+                                    class="w-4 h-4 text-gray-400"
+                                  />
+                                  <UInput
+                                    :model-value="typeof option === 'string' ? option : option.option_text"
+                                    placeholder="Option text"
+                                    class="flex-1"
+                                    @blur="updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
+                                  />
+                                  <UButton
+                                    icon="i-heroicons-x-mark"
+                                    color="red"
+                                    variant="ghost"
+                                    size="sm"
+                                    @click="removeQuestionOption(question, optIndex)"
+                                  />
+                                </div>
+                                <UButton
+                                  icon="i-heroicons-plus"
+                                  label="Add Option"
+                                  variant="soft"
+                                  size="sm"
+                                  @click="addQuestionOption(question)"
+                                />
+                              </div>
+                              <div v-else class="space-y-2">
+                                <div
+                                  v-for="(option, optIndex) in (question.options || [])"
+                                  :key="optIndex"
+                                  class="flex items-center gap-2 text-sm"
+                                >
+                                  <UIcon
+                                    :name="question.question_type === 'single_choice' ? 'i-heroicons-stop-circle' : 'i-heroicons-check-circle'"
+                                    class="w-4 h-4 text-gray-400"
+                                  />
+                                  <span>{{ typeof option === 'string' ? option : option.option_text }}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <!-- File Upload Preview -->
+                            <div v-else-if="question.question_type === 'upload'" class="text-sm text-gray-600">
+                              <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                <UIcon name="i-heroicons-arrow-up-tray" class="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                                <p class="text-gray-500">Click to upload or drag and drop</p>
+                              </div>
+                            </div>
+
+                            <!-- Slider Preview -->
+                            <div v-else-if="question.question_type === 'slider'" class="text-sm text-gray-600">
+                              <input type="range" class="w-full" min="0" max="10" disabled />
+                              <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0</span>
+                                <span>10</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div v-if="!previewMode" class="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <UTooltip text="Expand/Collapse">
+                        <UButton
+                          :icon="question.isExpanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                          variant="ghost"
+                          size="sm"
+                          color="gray"
+                          @click.stop="toggleExpanded(question)"
+                        />
+                      </UTooltip>
+                      
+                      <UTooltip text="Duplicate (Ctrl+D)">
+                        <UButton
+                          icon="i-heroicons-document-duplicate"
+                          variant="ghost"
+                          size="sm"
+                          color="gray"
+                          @click.stop="duplicateQuestion(question)"
+                        />
+                      </UTooltip>
+                      
+                      <UTooltip text="Delete (Del)">
+                        <UButton
+                          icon="i-heroicons-trash"
+                          variant="ghost"
+                          size="sm"
+                          color="red"
+                          @click.stop="confirmDelete(question)"
+                        />
+                      </UTooltip>
                     </div>
                   </div>
                 </div>
+              </UCard>
+            </template>
+          </draggable>
 
-                <div class="flex items-center gap-1">
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    variant="ghost"
-                    size="sm"
-                    color="gray"
-                    @click="openEditModal(question)"
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    variant="ghost"
-                    size="sm"
-                    color="red"
-                    @click="removeQuestion(question.id)"
-                  />
+          <!-- Empty State -->
+          <UCard v-if="questions.length === 0" class="text-center py-16">
+            <div class="space-y-4">
+              <div class="flex justify-center">
+                <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                  <UIcon name="i-heroicons-clipboard-document-list" class="w-10 h-10 text-blue-600" />
                 </div>
+              </div>
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No questions yet</h3>
+                <p class="text-sm text-gray-600 mb-6">Start building your registration form by adding questions</p>
+              </div>
+              <div class="flex items-center justify-center gap-3">
+                <UButton
+                  label="Add Question"
+                  icon="i-heroicons-plus"
+                  size="lg"
+                  @click="addQuestion()"
+                />
+                <UDropdown
+                  :items="templateMenuItems"
+                  :popper="{ placement: 'bottom-start' }"
+                >
+                  <UButton
+                    label="Use Template"
+                    icon="i-heroicons-sparkles"
+                    variant="outline"
+                    size="lg"
+                  />
+                </UDropdown>
               </div>
             </div>
           </UCard>
-        </div>
 
-        <UCard v-else class="text-center py-16">
-          <div class="space-y-4">
-            <div class="flex justify-center">
-              <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center">
-                <UIcon name="i-heroicons-clipboard-document-list" class="w-8 h-8 text-gray-400" />
-              </div>
-            </div>
-            <div>
-              <h3 class="font-semibold text-gray-900 mb-1">No questions yet</h3>
-              <p class="text-sm text-gray-600">Create your first question to start building the registration form</p>
-            </div>
+          <!-- Add Question Button -->
+          <div v-else class="flex items-center gap-3">
             <UButton
-              label="Add First Question"
+              block
               icon="i-heroicons-plus"
-              @click="openAddModal()"
+              label="Add Question"
+              variant="outline"
+              size="lg"
+              @click="addQuestion()"
             />
+            
+            <UDropdown
+              :items="templateMenuItems"
+              :popper="{ placement: 'bottom-start' }"
+            >
+              <UButton
+                icon="i-heroicons-sparkles"
+                label="Template"
+                variant="outline"
+                size="lg"
+              />
+            </UDropdown>
           </div>
-        </UCard>
-
-        <!-- Add Question Button -->
-        <UButton
-          v-if="questionsList.length"
-          block
-          icon="i-heroicons-plus"
-          label="Add Question"
-          variant="outline"
-          @click="openAddModal()"
-        />
+        </div>
       </div>
 
-      <!-- Sidebar (1/4) -->
+      <!-- Enhanced Sidebar (1/4) -->
       <div class="space-y-4">
-        <!-- Stats Card -->
+        <!-- Quick Stats -->
         <UCard>
           <template #header>
-            <h3 class="font-semibold text-gray-900">Form Overview</h3>
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-gray-900">Form Overview</h3>
+              <UIcon
+                name="i-heroicons-chart-bar"
+                class="w-5 h-5 text-gray-400"
+              />
+            </div>
           </template>
           <div class="space-y-4">
             <div>
-              <div class="text-3xl font-bold text-gray-900">{{ questionsList.length }}</div>
+              <div class="text-3xl font-bold text-gray-900">{{ questions.length }}</div>
               <div class="text-sm text-gray-600">Total Questions</div>
             </div>
             <div>
-              <div class="text-3xl font-bold text-primary">
-                {{ questionsList.filter((q: any) => q.required).length }}
+              <div class="text-3xl font-bold text-blue-600">
+                {{ questions.filter((q: any) => q.required).length }}
               </div>
-              <div class="text-sm text-gray-600">Required Questions</div>
+              <div class="text-sm text-gray-600">Required</div>
+            </div>
+            <div class="pt-3 border-t border-gray-200">
+              <div class="flex items-center justify-between text-sm">
+                <span class="text-gray-600">Auto-save</span>
+                <UBadge
+                  label="Active"
+                  color="green"
+                  variant="soft"
+                  size="xs"
+                />
+              </div>
+            </div>
+          </div>
+        </UCard>
+
+        <!-- Jump to Question -->
+        <UCard v-if="questions.length > 3">
+          <template #header>
+            <h3 class="font-semibold text-gray-900">Jump to Question</h3>
+          </template>
+          <div class="space-y-1 max-h-64 overflow-y-auto">
+            <button
+              v-for="(question, index) in questions"
+              :key="question.id || question.tempId"
+              class="w-full text-left px-3 py-2 rounded hover:bg-gray-50 transition-colors text-sm group"
+              :class="{
+                'bg-blue-50 text-blue-700': selectedQuestion?.id === question.id || selectedQuestion?.tempId === question.tempId
+              }"
+              @click="scrollToQuestion(question)"
+            >
+              <div class="flex items-start gap-2">
+                <span class="text-gray-500 font-medium flex-shrink-0">{{ index + 1 }}.</span>
+                <span class="flex-1 truncate">{{ question.question_title }}</span>
+                <UBadge
+                  v-if="question.required"
+                  label="*"
+                  color="red"
+                  variant="soft"
+                  size="xs"
+                  class="flex-shrink-0"
+                />
+              </div>
+            </button>
+          </div>
+        </UCard>
+
+        <!-- Keyboard Shortcuts -->
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-gray-900">Keyboard Shortcuts</h3>
+              <UIcon
+                name="i-heroicons-command-line"
+                class="w-5 h-5 text-gray-400"
+              />
+            </div>
+          </template>
+          <div class="space-y-2 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Undo</span>
+              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+Z</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Redo</span>
+              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+Y</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Save</span>
+              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+S</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Duplicate</span>
+              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+D</kbd>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-gray-600">Delete</span>
+              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Del</kbd>
             </div>
           </div>
         </UCard>
@@ -151,163 +512,89 @@
           <template #header>
             <h3 class="font-semibold text-gray-900">Question Types</h3>
           </template>
-          <div class="space-y-3 text-sm">
-            <div>
-              <div class="font-medium text-gray-900">Short Answer</div>
-              <div class="text-gray-600 text-xs">Single line text input</div>
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">Long Answer</div>
-              <div class="text-gray-600 text-xs">Multi-line text area</div>
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">Multiple Choice</div>
-              <div class="text-gray-600 text-xs">Select multiple options</div>
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">Single Choice</div>
-              <div class="text-gray-600 text-xs">Select one option</div>
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">File Upload</div>
-              <div class="text-gray-600 text-xs">Upload documents/images</div>
-            </div>
-            <div>
-              <div class="font-medium text-gray-900">Slider</div>
-              <div class="text-gray-600 text-xs">Numeric scale input</div>
+          <div class="space-y-2 text-sm">
+            <div v-for="type in questionTypes" :key="type.value" class="flex items-start gap-2">
+              <UIcon
+                :name="getQuestionTypeIcon(type.value)"
+                class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
+              />
+              <div class="flex-1">
+                <div class="font-medium text-gray-900">{{ type.label }}</div>
+                <div class="text-gray-600 text-xs">{{ getQuestionTypeDescription(type.value) }}</div>
+              </div>
             </div>
           </div>
         </UCard>
       </div>
     </div>
-
-    <!-- Add/Edit Question Modal -->
-    <UModal v-model="showQuestionModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            {{ editingQuestion ? 'Edit Question' : 'Add Question' }}
-          </h3>
-        </template>
-
-        <form @submit="onSubmitQuestion" class="space-y-4">
-          <UFormGroup label="Question Title" name="question_title" required>
-            <UInput
-              v-model="questionForm.question_title"
-              placeholder="Enter your question title"
-            />
-          </UFormGroup>
-
-          <UFormGroup label="Question Body" name="question_body">
-            <UTextarea
-              v-model="questionForm.question_body"
-              placeholder="Additional details or instructions..."
-              :rows="2"
-            />
-          </UFormGroup>
-
-          <UFormGroup label="Question Type" name="question_type" required>
-            <USelectMenu
-              v-model="questionForm.question_type"
-              :options="questionTypes"
-              placeholder="Select question type"
-            />
-          </UFormGroup>
-
-          <UFormGroup label="Order" name="order">
-            <UInput
-              v-model="questionForm.order"
-              type="number"
-              placeholder="Question order (optional)"
-            />
-          </UFormGroup>
-
-          <UFormGroup name="required">
-            <UCheckbox
-              v-model="questionForm.required"
-              label="Required Question"
-            />
-          </UFormGroup>
-
-          <!-- Options for multiple/single choice questions -->
-          <div
-            v-if="['multiple_choice', 'single_choice'].includes(questionForm.question_type)"
-            class="space-y-2"
-          >
-            <label class="block text-sm font-medium">Options</label>
-            <div class="space-y-2">
-              <div
-                v-for="(option, index) in questionForm.options"
-                :key="index"
-                class="flex items-center gap-2"
-              >
-                <UInput
-                  v-model="questionForm.options[index]"
-                  placeholder="Option text"
-                  class="flex-1"
-                />
-                <UButton
-                  icon="i-heroicons-x-mark"
-                  color="red"
-                  variant="ghost"
-                  size="sm"
-                  @click="questionForm.options.splice(index, 1)"
-                />
-              </div>
-            </div>
-            <UButton
-              icon="i-heroicons-plus"
-              label="Add Option"
-              variant="soft"
-              size="sm"
-              @click="questionForm.options.push('')"
-            />
-          </div>
-
-          <div class="flex justify-end gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
-              @click="closeQuestionModal()"
-            />
-            <UButton
-              :label="editingQuestion ? 'Update' : 'Create'"
-              type="submit"
-              :loading="questionMutation.isPending.value"
-            />
-          </div>
-        </form>
-      </UCard>
-    </UModal>
   </EventsManagementLayout>
 </template>
 
 <script setup lang="ts">
 import type { EventQuestion } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
-import { useEventQuestions, useCreateEventQuestion, useDeleteEventQuestion } from '~/composables/resources/events/eventQuestions'
+import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
-import { eventQuestionSchema } from '~/schemas/events/registration'
-import { toTypedSchema } from '@vee-validate/zod'
-import { useForm } from 'vee-validate'
+import { useRegistrationFormBuilder } from '~/composables/useRegistrationFormBuilder'
+import draggable from 'vuedraggable'
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'REGISTRATION',
+    action: 'write'
+  }
 })
 
 const route = useRoute()
 const id = computed(() => String(route.params.id))
-const toast = useToast()
 
 // Fetch event data
 const { data: event } = useEvent(id)
 
-// Fetch questions
-const eventIdFilter = { event__event_id: route.params.id as string }
-const { data: questionsData, isLoading: questionsLoading, refetch: refetchQuestions } = useEventQuestions(eventIdFilter)
-const questionsList = computed(() => questionsData.value?.data?.results || [])
+// Get event integer ID for API calls
+const eventIntId = computed(() => event.value?.data?.id)
 
-// Question types
+// Fetch questions from API
+const eventIdFilter = { event__event_id: route.params.id as string }
+const { data: questionsData, isLoading: questionsLoading } = useEventQuestions(eventIdFilter)
+
+// Initialize form builder with all Google Forms features
+const {
+  questions,
+  selectedQuestion,
+  previewMode,
+  isSaving,
+  hasUnsavedChanges,
+  questionTemplates,
+  canUndo,
+  canRedo,
+  undo,
+  redo,
+  addQuestion,
+  duplicateQuestion,
+  deleteQuestion,
+  updateQuestion,
+  toggleExpanded,
+  collapseAll,
+  expandAll,
+  saveAll,
+} = useRegistrationFormBuilder(eventIntId)
+
+// Sync API data with local state (only on initial load)
+watch(questionsData, (newData) => {
+  if (newData?.data?.results && questions.value.length === 0) {
+    questions.value = newData.data.results.map((q: any) => ({
+      ...q,
+      isExpanded: false,
+      isEditing: false,
+      isNew: false,
+    }))
+  }
+}, { immediate: true })
+
+// Question types configuration
 const questionTypes = [
   { label: 'Short Answer', value: 'short_answer' },
   { label: 'Long Answer', value: 'long_answer' },
@@ -317,100 +604,83 @@ const questionTypes = [
   { label: 'Slider', value: 'slider' },
 ]
 
-// Modal state
-const showQuestionModal = ref(false)
-const editingQuestion = ref<EventQuestion | null>(null)
-
-// Question form
-const questionForm = reactive({
-  question_title: '',
-  question_body: '',
-  question_type: 'short_answer' as 'short_answer' | 'long_answer' | 'multiple_choice' | 'single_choice' | 'upload' | 'slider',
-  order: '',
-  required: false,
-  options: [] as string[],
+// Template menu items for dropdown
+const templateMenuItems = computed(() => {
+  const items: any[][] = [
+    [
+      {
+        label: 'Common Questions',
+        slot: 'header',
+      },
+    ],
+  ]
+  
+  const templateItems = questionTemplates.map(template => ({
+    label: template.name,
+    icon: 'i-heroicons-sparkles',
+    click: () => addQuestion(template),
+  }))
+  
+  if (templateItems.length > 0) {
+    items.push(templateItems)
+  }
+  
+  return items
 })
 
-const questionMutation = useCreateEventQuestion()
-
-const openAddModal = () => {
-  editingQuestion.value = null
-  questionForm.question_title = ''
-  questionForm.question_body = ''
-  questionForm.question_type = 'short_answer'
-  questionForm.order = ''
-  questionForm.required = false
-  questionForm.options = []
-  showQuestionModal.value = true
+// Drag end handler - auto-save new order
+const onDragEnd = () => {
+  questions.value.forEach((q: any, index: number) => {
+    q.order = index
+  })
+  saveAll()
 }
 
-const openEditModal = (question: EventQuestion) => {
-  editingQuestion.value = question
-  questionForm.question_title = question.question_title
-  questionForm.question_body = question.question_body
-  questionForm.question_type = (question.question_type || 'short_answer') as typeof questionForm.question_type
-  questionForm.order = question.order?.toString() || ''
-  questionForm.required = question.required || false
-  questionForm.options = question.options?.map((o: any) => o.option_text) || []
-  showQuestionModal.value = true
-}
-
-const closeQuestionModal = () => {
-  showQuestionModal.value = false
-  editingQuestion.value = null
-}
-
-const onSubmitQuestion = async (e: Event) => {
-  e.preventDefault()
-
-  try {
-    await questionMutation.mutateAsync({
-      question_title: questionForm.question_title,
-      question_body: questionForm.question_body,
-      question_type: questionForm.question_type,
-      event: Number(route.params.id),
-      order: questionForm.order ? Number(questionForm.order) : undefined,
-      required: questionForm.required,
-      // Options will need to be created separately via API
-    })
-
-    toast.add({
-      title: editingQuestion.value ? 'Question updated' : 'Question created',
-      color: 'green',
-    })
-
-    closeQuestionModal()
-    refetchQuestions()
-  } catch (error) {
-    toast.add({
-      title: 'Failed to save question',
-      description: error instanceof Error ? error.message : 'An error occurred',
-      color: 'red',
-    })
+// Confirm delete with user
+const confirmDelete = (question: any) => {
+  if (confirm('Delete this question? All responses will be lost.')) {
+    deleteQuestion(question)
   }
 }
 
-// Remove question
-const removeQuestionMutation = useDeleteEventQuestion()
+// Scroll to specific question
+const scrollToQuestion = (question: any) => {
+  selectedQuestion.value = question
+  question.isExpanded = true
+  
+  nextTick(() => {
+    const element = document.querySelector(`[data-question-id="${question.id || question.tempId}"]`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  })
+}
 
-const removeQuestion = async (questionId: number | string) => {
-  if (!confirm('Remove this question? All responses will be lost.')) return
+// Option management for multiple/single choice questions
+const addQuestionOption = (question: any) => {
+  if (!question.options) {
+    question.options = []
+  }
+  question.options.push('')
+}
 
-  try {
-    await removeQuestionMutation.mutateAsync(typeof questionId === 'string' ? parseInt(questionId) : questionId)
+const removeQuestionOption = (question: any, index: number | string) => {
+  const idx = typeof index === 'string' ? parseInt(index) : index
+  if (question.options && !isNaN(idx)) {
+    question.options.splice(idx, 1)
+    updateQuestion(question, { options: question.options })
+  }
+}
 
-    toast.add({
-      title: 'Question removed',
-      color: 'green',
-    })
-
-    refetchQuestions()
-  } catch (error) {
-    toast.add({
-      title: 'Failed to remove question',
-      description: error instanceof Error ? error.message : 'An error occurred',
-      color: 'red',
-    })
+const updateQuestionOption = (question: any, index: number | string, value: string) => {
+  const idx = typeof index === 'string' ? parseInt(index) : index
+  if (question.options && !isNaN(idx)) {
+    if (typeof question.options[idx] === 'string') {
+      question.options[idx] = value
+    } else {
+      question.options[idx].option_text = value
+    }
+    updateQuestion(question, { options: question.options })
   }
 }
 
@@ -420,14 +690,32 @@ const getQuestionTypeIcon = (type: string) => {
     short_answer: 'i-heroicons-pencil',
     long_answer: 'i-heroicons-document-text',
     multiple_choice: 'i-heroicons-check-circle',
-    single_choice: 'i-heroicons-radio',
+    single_choice: 'i-heroicons-stop-circle',
     upload: 'i-heroicons-arrow-up-tray',
     slider: 'i-heroicons-adjustments-horizontal',
   }
   return icons[type] || 'i-heroicons-question-mark-circle'
 }
 
+const getQuestionTypeDescription = (type: string) => {
+  const descriptions: Record<string, string> = {
+    short_answer: 'Single line text input',
+    long_answer: 'Multi-line text area',
+    multiple_choice: 'Select multiple options',
+    single_choice: 'Select one option',
+    upload: 'Upload documents/images',
+    slider: 'Numeric scale input',
+  }
+  return descriptions[type] || ''
+}
+
 const formatQuestionType = (type: string) => {
   return questionTypes.find(t => t.value === type)?.label || type
 }
 </script>
+
+<style scoped>
+kbd {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+</style>

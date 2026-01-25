@@ -35,12 +35,12 @@ export function useEventQuestions(params?: MaybeRefOrGetter<EventQuestionsListDa
 /**
  * Get a single event question by ID
  */
-export function useEventQuestion(questionId: MaybeRefOrGetter<number>) {
+export function useEventQuestion(questionId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', questionId] as const,
     queryFn: () => {
       const id = toValue(questionId)
-      return eventQuestionsRetrieve({ path: { id: String(id) } })
+      return eventQuestionsRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(questionId),
   })
@@ -85,8 +85,8 @@ export function usePartialUpdateEventQuestion() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ questionId, body }: { questionId: number; body?: EventQuestionsPartialUpdateData['body'] }) =>
-      eventQuestionsPartialUpdate({ path: { id: String(questionId) }, body }),
+    mutationFn: ({ questionId, body }: { questionId: string; body?: EventQuestionsPartialUpdateData['body'] }) =>
+      eventQuestionsPartialUpdate({ path: { id: questionId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteEventQuestion() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (questionId: number) => eventQuestionsDestroy({ path: { id: String(questionId) } }),
+    mutationFn: (questionId: string) => eventQuestionsDestroy({ path: { id: questionId } }),
     onSuccess: (_, questionId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

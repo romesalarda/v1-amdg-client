@@ -5274,6 +5274,8 @@ export type EventList = {
      * URL safe title
      */
     readonly url_safe_title: string | null;
+    readonly landing_images: Array<Resource>;
+    main_landing_image: Resource;
     /**
      * * `DRAFTING` - Drafting
      * * `PUBLISHED` - Published
@@ -7330,6 +7332,7 @@ export type EventStaffInviteList = {
     readonly id: string;
     readonly event_title: string;
     readonly event_display_code: string;
+    readonly event: string;
     readonly target_user_email: string;
     /**
      * Get full name of the target user.
@@ -21802,9 +21805,9 @@ export type EventStaffInviteDeleteData = {
          */
         event_id: string;
         /**
-         * Integer ID of the specific staff invite to delete
+         * UUID of the specific staff invite to delete
          */
-        invite_id: number;
+        invite_id: string;
     };
     query?: never;
     url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
@@ -21844,7 +21847,7 @@ export type EventStaffInviteRetrieveData = {
         /**
          * Integer ID of the specific staff invite to retrieve
          */
-        invite_id: number;
+        invite_id: string;
     };
     query?: never;
     url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
@@ -21882,9 +21885,9 @@ export type EventStaffInvitePartialUpdateData = {
          */
         event_id: string;
         /**
-         * Integer ID of the specific staff invite to update
+         * UUID of the specific staff invite to update
          */
-        invite_id: number;
+        invite_id: string;
     };
     query?: never;
     url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
@@ -21929,9 +21932,9 @@ export type EventStaffInviteUpdateData = {
          */
         event_id: string;
         /**
-         * Integer ID of the specific staff invite to update
+         * UUID of the specific staff invite to update
          */
-        invite_id: number;
+        invite_id: string;
     };
     query?: never;
     url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
@@ -21978,9 +21981,9 @@ export type EventListStaffInvitesAcceptCreateData = {
          */
         event_id: string;
         /**
-         * Integer ID of the specific staff invite to accept
+         * UUID of the specific staff invite to accept
          */
-        invite_id: number;
+        invite_id: string;
     };
     query?: never;
     url: '/api/event/list/{event_id}/staff-invites/{invite_id}/accept/';
@@ -23422,6 +23425,106 @@ export type EventStaffAvailabilityUpdateResponses = {
 };
 
 export type EventStaffAvailabilityUpdateResponse = EventStaffAvailabilityUpdateResponses[keyof EventStaffAvailabilityUpdateResponses];
+
+export type EventStaffInvitesList2Data = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by acceptance status
+         */
+        accepted?: boolean;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by validity status
+         */
+        is_valid?: boolean;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by target user ID
+         */
+        target_user?: number;
+    };
+    url: '/api/event/staff-invites/';
+};
+
+export type EventStaffInvitesList2Responses = {
+    200: PaginatedEventStaffInviteListList;
+};
+
+export type EventStaffInvitesList2Response = EventStaffInvitesList2Responses[keyof EventStaffInvitesList2Responses];
+
+export type EventStaffInvitesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event staff invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/staff-invites/{id}/';
+};
+
+export type EventStaffInvitesRetrieveResponses = {
+    200: EventStaffInviteList;
+};
+
+export type EventStaffInvitesRetrieveResponse = EventStaffInvitesRetrieveResponses[keyof EventStaffInvitesRetrieveResponses];
+
+export type EventStaffInvitesMyInvitesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by acceptance status. true=accepted, false=not accepted
+         */
+        accepted?: boolean;
+        /**
+         * Filter by validity status. Valid invites are: active, not expired, and not yet accepted. Use true to get only valid (pending) invites, false to get invalid invites
+         */
+        is_valid?: boolean;
+        /**
+         * Page number for pagination
+         */
+        page?: number;
+        /**
+         * Number of results per page (default: 20)
+         */
+        page_size?: number;
+    };
+    url: '/api/event/staff-invites/my-invites/';
+};
+
+export type EventStaffInvitesMyInvitesErrors = {
+    /**
+     * Authentication required. User must be logged in to view their invites
+     */
+    401: unknown;
+};
+
+export type EventStaffInvitesMyInvitesResponses = {
+    /**
+     * Successfully retrieved list of invites. Returns paginated results with invite summaries for all events.
+     */
+    200: PaginatedEventStaffInviteListList;
+};
+
+export type EventStaffInvitesMyInvitesResponse = EventStaffInvitesMyInvitesResponses[keyof EventStaffInvitesMyInvitesResponses];
 
 export type EventStaffDestroyData = {
     body?: never;

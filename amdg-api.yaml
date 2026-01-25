@@ -6666,7 +6666,8 @@ paths:
       - in: path
         name: invite_id
         schema:
-          type: integer
+          type: string
+          format: uuid
         description: Integer ID of the specific staff invite to retrieve
         required: true
       tags:
@@ -6724,8 +6725,9 @@ paths:
       - in: path
         name: invite_id
         schema:
-          type: integer
-        description: Integer ID of the specific staff invite to update
+          type: string
+          format: uuid
+        description: UUID of the specific staff invite to update
         required: true
       tags:
       - Events
@@ -6797,8 +6799,9 @@ paths:
       - in: path
         name: invite_id
         schema:
-          type: integer
-        description: Integer ID of the specific staff invite to update
+          type: string
+          format: uuid
+        description: UUID of the specific staff invite to update
         required: true
       tags:
       - Events
@@ -6868,8 +6871,9 @@ paths:
       - in: path
         name: invite_id
         schema:
-          type: integer
-        description: Integer ID of the specific staff invite to delete
+          type: string
+          format: uuid
+        description: UUID of the specific staff invite to delete
         required: true
       tags:
       - Events
@@ -6942,8 +6946,9 @@ paths:
       - in: path
         name: invite_id
         schema:
-          type: integer
-        description: Integer ID of the specific staff invite to accept
+          type: string
+          format: uuid
+        description: UUID of the specific staff invite to accept
         required: true
       tags:
       - Events
@@ -9326,6 +9331,154 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/event/staff-invites/:
+    get:
+      operationId: event_staff_invites_list_2
+      description: Retrieve a paginated list of all event staff invites across all
+        events. This endpoint is primarily for administrative purposes and viewing
+        invites globally. Users can filter to see only their own invites using the
+        my-invites action.
+      summary: List All Event Staff Invites
+      parameters:
+      - in: query
+        name: accepted
+        schema:
+          type: boolean
+        description: Filter by acceptance status
+      - in: query
+        name: event
+        schema:
+          type: integer
+        description: Filter by event ID
+      - in: query
+        name: is_valid
+        schema:
+          type: boolean
+        description: Filter by validity status
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: target_user
+        schema:
+          type: integer
+        description: Filter by target user ID
+      tags:
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventStaffInviteListList'
+          description: ''
+  /api/event/staff-invites/{id}/:
+    get:
+      operationId: event_staff_invites_retrieve
+      description: |-
+        ViewSet for viewing event staff invites globally.
+
+        Provides endpoints to view staff invites across all events with filtering capabilities.
+        Includes special action for users to view their own pending invites.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this event staff invite.
+        required: true
+      tags:
+      - event
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventStaffInviteList'
+          description: ''
+  /api/event/staff-invites/my-invites/:
+    get:
+      operationId: event_staff_invites_my_invites
+      description: |-
+        Retrieve all event staff invites for the authenticated user across all events. This endpoint allows users to see all events they've been invited to staff.
+
+        **Filtering Options:**
+        - `accepted`: Filter by acceptance status (true/false)
+        - `is_valid`: Filter by validity status - valid invites are active, not expired, and not accepted
+
+        **Common Use Cases:**
+        - Get pending invites: `?is_valid=true&accepted=false`
+        - Get accepted invites: `?accepted=true`
+        - Get all invites: no filters
+
+        Results include:
+        - Event details (title, display code, dates)
+        - Invite status (active, accepted, expired)
+        - Inviter information
+        - Expiry date (if applicable)
+        - HATEOAS links for acceptance and viewing event details
+      summary: Get My Event Staff Invites
+      parameters:
+      - in: query
+        name: accepted
+        schema:
+          type: boolean
+        description: Filter by acceptance status. true=accepted, false=not accepted
+      - in: query
+        name: is_valid
+        schema:
+          type: boolean
+        description: 'Filter by validity status. Valid invites are: active, not expired,
+          and not yet accepted. Use true to get only valid (pending) invites, false
+          to get invalid invites'
+      - in: query
+        name: page
+        schema:
+          type: integer
+        description: Page number for pagination
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+        description: 'Number of results per page (default: 20)'
+      tags:
+      - Event Staff Invites
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventStaffInviteListList'
+          description: Successfully retrieved list of invites. Returns paginated results
+            with invite summaries for all events.
+        '401':
+          description: Authentication required. User must be logged in to view their
+            invites
   /api/event/staff/{staff_id}/:
     get:
       operationId: event_staff_retrieve
@@ -33912,6 +34065,15 @@ components:
           readOnly: true
           nullable: true
           description: URL safe title
+        landing_images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Resource'
+          readOnly: true
+        main_landing_image:
+          allOf:
+          - $ref: '#/components/schemas/Resource'
+          readOnly: true
         status:
           enum:
           - DRAFTING
@@ -34007,6 +34169,8 @@ components:
       - event_id
       - event_type_name
       - id
+      - landing_images
+      - main_landing_image
       - organisation_name
       - start_datetime
       - status_display
@@ -38052,6 +38216,10 @@ components:
         event_display_code:
           type: string
           readOnly: true
+        event:
+          type: string
+          format: uuid
+          readOnly: true
         target_user_email:
           type: string
           format: email
@@ -38105,6 +38273,7 @@ components:
       - _links
       - accepted
       - added_at
+      - event
       - event_display_code
       - event_title
       - expires_at
