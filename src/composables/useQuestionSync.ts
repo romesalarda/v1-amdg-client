@@ -7,6 +7,7 @@ import type {
 } from '~/types/websocket'
 import type { useEventWebSocket } from './useEventWebSocket'
 import { eventQuestionsRetrieve } from '~/api/sdk.gen'
+import { useAuthStore } from '~/stores/auth'
 
 /**
  * Question synchronization composable for real-time updates
@@ -16,12 +17,14 @@ import { eventQuestionsRetrieve } from '~/api/sdk.gen'
  * 
  * @param eventId - Event ID to sync questions for
  * @param ws - WebSocket connection instance
+ * @param externalQuestions - External questions ref to sync with
  * @returns Question sync state and methods
  * 
  * @example
  * ```ts
  * const ws = useEventWebSocket(eventId)
- * const sync = useQuestionSync(eventId, ws)
+ * const { questions } = useRegistrationFormBuilder(eventId)
+ * const sync = useQuestionSync(eventId, ws, questions)
  * 
  * // Mark question as being edited
  * sync.markAsEditing(questionId)
@@ -33,34 +36,84 @@ import { eventQuestionsRetrieve } from '~/api/sdk.gen'
  * sync.resolveConflict(questionId, 'keep') // or 'refresh'
  * ```
  */
-export function useQuestionSync(
+export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   eventId: MaybeRef<string>,
-  ws: ReturnType<typeof useEventWebSocket>
+  ws: ReturnType<typeof useEventWebSocket>,
+  externalQuestions: Ref<T[]> // Accept external questions ref with generic type
 ) {
   const toast = useToast()
+  const authStore = useAuthStore()
+  const currentUserEmail = computed(() => authStore.user?.email || null)
   
-  // Local state
-  const questions = ref<EventQuestion[]>([])
+  // Use external questions ref instead of creating our own
+  const questions = externalQuestions as Ref<any[]> // Type assertion for internal use
   const conflictingQuestions = ref<Set<string>>(new Set())
   const editingQuestions = ref<Set<string>>(new Set())
+  const deletedQuestions = ref<Set<string>>(new Set()) // Track recently deleted to prevent re-adding
   
   // Track if we're performing an undo operation
   const isPerformingUndo = ref(false)
+  
+  // Track if we're in a bulk operation (suppress individual notifications)
+  const isBulkOperation = ref(false)
   
   /**
    * Handle question created event from WebSocket
    */
   function handleQuestionCreated(data: QuestionEventData) {
+    // Defensive check: ensure data exists and has required properties
+    if (!data || !data.question) {
+      console.warn('[QuestionSync] Received invalid question create data:', data)
+      return
+    }
+    
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { question } = data
+    const { question, actor } = data
+    const isOwnAction = actor?.email === currentUserEmail.value
+    
+    console.log('[QuestionSync] handleQuestionCreated:', {
+      questionId: question.id,
+      questionTitle: question.question_title,
+      actorEmail: actor?.email,
+      currentUserEmail: currentUserEmail.value,
+      isOwnAction,
+      existingQuestions: questions.value.length
+    })
     
     // Check if question already exists (optimistic create)
     const existingIndex = questions.value.findIndex(q => q.id === question.id)
     
+    console.log('[QuestionSync] Existing check:', {
+      existingIndex,
+      existsById: existingIndex !== -1
+    })
+    
     if (existingIndex === -1) {
+      // If this is our own action, the question is already in the array from optimistic update
+      // It just might not have the server ID yet (race condition: WebSocket arrives before HTTP response)
+      if (isOwnAction) {
+        console.log('[QuestionSync] Own action - question already in array from optimistic update, skipping WebSocket add')
+        
+        // Try to find by tempId and update it with server data
+        const tempIndex = questions.value.findIndex(q => q.tempId && !q.id)
+        if (tempIndex !== -1) {
+          console.log('[QuestionSync] Found temp question, updating with server ID')
+          questions.value[tempIndex] = {
+            ...questions.value[tempIndex],
+            ...question,
+            id: question.id,
+            isNew: false,
+          }
+        } else {
+          console.log('[QuestionSync] No temp question found - HTTP response likely already updated it')
+        }
+        return // Don't add duplicate - it's already there
+      }
+      
       // New question from another user - add to array
+      console.log('[QuestionSync] Adding new question from another user')
       questions.value.push(question)
       
       // Sort by order
@@ -69,14 +122,23 @@ export function useQuestionSync(
       // Show notification
       toast.add({
         title: 'Question Added',
-        description: `"${question.question_title}" was added by ${data.actor?.email || 'another admin'}`,
+        description: `"${question.question_title}" was added by ${actor?.email || 'another admin'}`,
         color: 'blue',
         timeout: 4000,
         icon: 'i-heroicons-plus-circle',
       })
     } else {
       // Question already exists (from optimistic update) - update with server data
-      questions.value[existingIndex] = question
+      console.log('[QuestionSync] Question already exists - updating with server data')
+      const preservedState = {
+        isExpanded: questions.value[existingIndex].isExpanded,
+        isEditing: questions.value[existingIndex].isEditing,
+      }
+      questions.value[existingIndex] = {
+        ...question,
+        ...preservedState,
+        isNew: false,
+      }
     }
   }
   
@@ -84,6 +146,12 @@ export function useQuestionSync(
    * Handle question updated event from WebSocket
    */
   function handleQuestionUpdated(data: QuestionEventData) {
+    // Defensive check: ensure data exists and has required properties
+    if (!data || !data.question) {
+      console.warn('[QuestionSync] Received invalid question update data:', data)
+      return
+    }
+    
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
@@ -93,7 +161,14 @@ export function useQuestionSync(
     const index = questions.value.findIndex(q => q.id === question.id)
     
     if (index === -1) {
-      // Question doesn't exist locally - might have been deleted, add it back
+      // Question doesn't exist locally
+      // Check if it was recently deleted - don't re-add it
+      if (deletedQuestions.value.has(question.id)) {
+        console.log('[QuestionSync] Ignoring update for recently deleted question:', question.id)
+        return
+      }
+      
+      // Not deleted - must be new from another admin, add it
       questions.value.push(question)
       questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
       return
@@ -141,17 +216,11 @@ export function useQuestionSync(
         ],
       })
     } else {
-      // Not editing - safely merge changes
+      // Not editing - silently merge changes
       questions.value[index] = question
       
-      // Show subtle notification
-      toast.add({
-        title: 'Question Updated',
-        description: `"${question.question_title}" was updated`,
-        color: 'blue',
-        timeout: 3000,
-        icon: 'i-heroicons-arrow-path',
-      })
+      // Only show notification if not in bulk operation (like reordering)
+      // This prevents notification spam when multiple questions update at once
     }
   }
   
@@ -159,6 +228,12 @@ export function useQuestionSync(
    * Handle question deleted event from WebSocket
    */
   function handleQuestionDeleted(data: QuestionDeletedData) {
+    // Defensive check: ensure data exists and has required properties
+    if (!data || !data.question_id) {
+      console.warn('[QuestionSync] Received invalid question delete data:', data)
+      return
+    }
+    
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
@@ -169,6 +244,14 @@ export function useQuestionSync(
     
     if (index !== -1) {
       const deletedQuestion = questions.value[index]
+      
+      // Add to deleted tracking to prevent re-adding
+      deletedQuestions.value.add(question_id)
+      
+      // Clear from deleted tracking after 10 seconds (enough time for any pending WebSocket messages)
+      setTimeout(() => {
+        deletedQuestions.value.delete(question_id)
+      }, 10000)
       
       // Check if user was editing
       const wasEditing = editingQuestions.value.has(question_id)
@@ -203,10 +286,19 @@ export function useQuestionSync(
    * Handle question reordered event from WebSocket
    */
   function handleQuestionReordered(data: QuestionReorderedData) {
+    // Defensive check
+    if (!data || !data.question_ids) {
+      console.warn('[QuestionSync] Received invalid reorder data:', data)
+      return
+    }
+    
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { question_ids } = data
+    const { question_ids, actor } = data
+    
+    // Set bulk operation flag to suppress individual update notifications
+    isBulkOperation.value = true
     
     // Reorder questions to match server order
     const orderedQuestions: EventQuestion[] = []
@@ -226,6 +318,20 @@ export function useQuestionSync(
     })
     
     questions.value = orderedQuestions
+    
+    // Show single notification for reorder operation
+    toast.add({
+      title: 'Questions Reordered',
+      description: actor ? `Reordered by ${actor}` : 'Question order updated',
+      color: 'blue',
+      timeout: 2000,
+      icon: 'i-heroicons-arrows-up-down',
+    })
+    
+    // Clear bulk operation flag after a short delay
+    setTimeout(() => {
+      isBulkOperation.value = false
+    }, 1000)
   }
   
   /**
@@ -294,13 +400,6 @@ export function useQuestionSync(
   }
   
   /**
-   * Initialize local questions from provided data
-   */
-  function setQuestions(newQuestions: EventQuestion[]) {
-    questions.value = [...newQuestions].sort((a, b) => (a.order || 0) - (b.order || 0))
-  }
-  
-  /**
    * Set undo operation flag
    */
   function setUndoMode(enabled: boolean) {
@@ -325,7 +424,6 @@ export function useQuestionSync(
   
   return {
     // State
-    questions,
     conflictingQuestions: readonly(conflictingQuestions),
     editingQuestions: readonly(editingQuestions),
     
@@ -333,7 +431,6 @@ export function useQuestionSync(
     markAsEditing,
     markAsNotEditing,
     resolveConflict,
-    setQuestions,
     setUndoMode,
     
     // Computed

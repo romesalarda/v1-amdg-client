@@ -1,5 +1,6 @@
 import type { EventQuestion, EventQuestionOption } from '~/api/types.gen'
 import { useDebounceFn } from '@vueuse/core'
+import { nextTick } from 'vue'
 import { useCreateEventQuestion, usePartialUpdateEventQuestion, useDeleteEventQuestion } from '~/composables/resources/events/eventQuestions'
 import { useOptimisticUpdates } from './useOptimisticUpdates'
 import { useAuthStore } from '~/stores/auth'
@@ -25,7 +26,10 @@ interface UndoState {
   timestamp: number
 }
 
-export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) => {
+export const useRegistrationFormBuilder = (
+  eventIntId: Ref<number | undefined>,
+  focusedFields?: Ref<Set<string>>
+) => {
   const toast = useToast()
   const queryClient = useQueryClient()
   const { $api } = useNuxtApp()
@@ -123,7 +127,34 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
   
   // Save question to backend with optimistic updates (debounced)
   const saveQuestion = async (question: QuestionDraft) => {
-    if (!question.question_title || !question.question_type) return
+    // Validate required fields
+    if (!question.question_title || !question.question_type) {
+      toast.add({
+        title: 'Validation Error',
+        description: 'Question title and type are required',
+        color: 'red',
+      })
+      return
+    }
+    
+    if (!question.question_body || question.question_body.trim().length === 0) {
+      toast.add({
+        title: 'Description Required',
+        description: 'Please add a description for this question',
+        color: 'red',
+      })
+      return
+    }
+    
+    // Filter out empty options for choice questions
+    if (['multiple_choice', 'single_choice'].includes(question.question_type)) {
+      if (question.options) {
+        question.options = question.options.filter((opt: any) => {
+          const optionText = typeof opt === 'string' ? opt : opt.option_text
+          return optionText && optionText.trim().length > 0
+        }) as any
+      }
+    }
     
     // Validate eventId
     if (!eventIntId.value) {
@@ -335,11 +366,6 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
       })
       
       hasUnsavedChanges.value = false
-      
-      toast.add({
-        title: 'Order saved',
-        color: 'green',
-      })
     } catch (error: any) {
       let errorMessage = 'An error occurred while saving order'
       if (error?.data?.non_field_errors) {
@@ -447,6 +473,14 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
     questions.value.push(newQuestion)
     selectedQuestion.value = newQuestion
     hasUnsavedChanges.value = true
+    
+    // Auto-save template questions (they have valid data)
+    if (template && newQuestion.question_title && newQuestion.question_type) {
+      // Use nextTick to ensure the question is added to the DOM first
+      nextTick(() => {
+        saveQuestion(newQuestion)
+      })
+    }
   }
   
   // Duplicate question
@@ -558,6 +592,15 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
     // If new question (no server ID yet), don't call API
     if (question.isNew || !question.id || question.id.startsWith('temp-')) {
       return
+    }
+    
+    // Don't auto-save if user is actively typing in a field for this question
+    const questionId = question.id || question.tempId
+    const isFieldFocused = focusedFields?.value && 
+      Array.from(focusedFields.value).some(field => field.startsWith(String(questionId)))
+    
+    if (isFieldFocused) {
+      return // Wait until blur to save
     }
     
     // Trigger debounced save with the updated question

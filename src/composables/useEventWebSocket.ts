@@ -214,9 +214,13 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
           // Dispatch to registered handlers
           const handlers = messageHandlers.get(message.type)
           if (handlers) {
+            // The backend sends the payload at the top level, not nested under 'data'
+            // Extract relevant fields (everything except 'type') as the data payload
+            const { type, ...payload } = message as any
+            
             handlers.forEach(handler => {
               try {
-                handler(message.data)
+                handler(payload)
               } catch (err) {
                 console.error('[WebSocket] Handler error:', err)
               }

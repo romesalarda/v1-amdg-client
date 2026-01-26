@@ -87,7 +87,7 @@
                   :icon="previewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
                   :variant="previewMode ? 'solid' : 'ghost'"
                   size="sm"
-                  @click="previewMode = !previewMode"
+                  @click="togglePreviewMode"
                 />
               </UTooltip>
               
@@ -120,7 +120,7 @@
           <USkeleton v-for="i in 3" :key="i" class="h-48" />
         </div>
 
-        <div v-else class="space-y-6">
+        <div v-else class="space-y-8">
           <draggable
             v-model="questions"
             item-key="id"
@@ -139,7 +139,6 @@
                   'border-l-4 border-l-blue-500': question.isExpanded,
                   'ring-2 ring-amber-500': questionSync.conflictingQuestions.value.has(question.id),
                 }"
-                @click="selectedQuestion = question"
               >
                 <!-- Loading Overlay -->
                 <div 
@@ -193,10 +192,10 @@
                   </div>
                 </div>
 
-                <div class="space-y-5 p-1">
+                <div class="space-y-5 p-1" @click="handleQuestionCardClick(question, $event)">
                   <!-- Question Header -->
                   <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1 space-y-3">
+                    <div class="flex-1 space-y-3" @click.stop>
                       <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-sm font-medium text-gray-500">Question {{ index + 1 }}</span>
                         <UBadge
@@ -229,8 +228,8 @@
                           size="lg"
                           variant="outline"
                           class="font-semibold"
-                          @focus="markEditing(question.id)"
-                          @blur="unmarkEditing(question.id); updateQuestion(question, { question_title: question.question_title })"
+                          @focus="markEditing(question.id); focusedFields.add(`${question.id}-title`)"
+                          @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-title`); updateQuestion(question, { question_title: question.question_title })"
                         />
                       </div>
                       <h3
@@ -244,13 +243,16 @@
 
                       <!-- Editable Description -->
                       <div v-if="question.isExpanded && !previewMode">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                          Description <span class="text-red-500">*</span>
+                        </label>
                         <UTextarea
                           v-model="question.question_body"
-                          placeholder="Description (optional)"
+                          placeholder="Enter question description"
                           :rows="2"
                           variant="outline"
-                          @focus="markEditing(question.id)"
-                          @blur="unmarkEditing(question.id); updateQuestion(question, { question_body: question.question_body })"
+                          @focus="markEditing(question.id); focusedFields.add(`${question.id}-body`)"
+                          @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-body`); updateQuestion(question, { question_body: question.question_body })"
                         />
                       </div>
                       <p
@@ -301,7 +303,7 @@
                               <div v-if="!previewMode" class="space-y-2">
                                 <div
                                   v-for="(option, optIndex) in (question.options || [])"
-                                  :key="optIndex"
+                                  :key="`${question.id || question.tempId}-option-${optIndex}-${typeof option === 'string' ? option : option.id || option.option_text}`"
                                   class="flex items-center gap-2"
                                 >
                                   <UIcon
@@ -312,8 +314,8 @@
                                     :model-value="typeof option === 'string' ? option : option.option_text"
                                     placeholder="Option text"
                                     class="flex-1"
-                                    @focus="markEditing(question.id)"
-                                    @blur="unmarkEditing(question.id); updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
+                                    @focus="markEditing(question.id); focusedFields.add(`${question.id}-option-${optIndex}`)"
+                                    @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-option-${optIndex}`); updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
                                   />
                                   <UButton
                                     icon="i-heroicons-x-mark"
@@ -440,9 +442,9 @@
           </UCard>
 
           <!-- Add Question Button -->
-          <div v-else class="flex items-center gap-3">
+          <div v-else class="flex items-center gap-3 flex-wrap">
             <UButton
-              block
+              class="flex-1 min-w-[200px]"
               icon="i-heroicons-plus"
               label="Add Question"
               variant="outline"
@@ -602,6 +604,10 @@ import { useRegistrationFormBuilder } from '~/composables/useRegistrationFormBui
 import { useEventWebSocket } from '~/composables/useEventWebSocket'
 import { useQuestionSync } from '~/composables/useQuestionSync'
 import draggable from 'vuedraggable'
+import Swal from 'sweetalert2'
+
+// Track focused fields to prevent auto-save while typing
+const focusedFields = ref(new Set<string>())
 
 definePageMeta({
   layout: false,
@@ -626,10 +632,6 @@ const eventIntId = computed(() => event.value?.data?.id)
 const eventIdFilter = { event__event_id: route.params.id as string }
 const { data: questionsData, isLoading: questionsLoading } = useEventQuestions(eventIdFilter)
 
-// Initialize WebSocket connection
-const ws = useEventWebSocket(id)
-const questionSync = useQuestionSync(id, ws)
-
 // Initialize form builder with all Google Forms features
 const {
   questions,
@@ -652,7 +654,56 @@ const {
   collapseAll,
   expandAll,
   saveAll,
-} = useRegistrationFormBuilder(eventIntId)
+} = useRegistrationFormBuilder(eventIntId, focusedFields)
+
+// Initialize WebSocket connection - pass questions ref to prevent race conditions
+const ws = useEventWebSocket(id)
+const questionSync = useQuestionSync(id, ws, questions as Ref<EventQuestion[]>)
+
+// Handle preview mode toggle with unsaved changes warning
+const togglePreviewMode = async () => {
+  if (!previewMode.value && hasUnsavedChanges.value) {
+    const result = await Swal.fire({
+      title: 'Unsaved Changes',
+      text: 'You have unsaved changes. Do you want to save before previewing?',
+      icon: 'warning',
+      showCancelButton: true,
+      showDenyButton: true,
+      confirmButtonColor: '#3b82f6',
+      denyButtonColor: '#6b7280',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Save & Preview',
+      denyButtonText: 'Preview Without Saving',
+      cancelButtonText: 'Cancel'
+    })
+    
+    if (result.isConfirmed) {
+      await saveAll()
+      previewMode.value = true
+      expandAll()
+    } else if (result.isDenied) {
+      previewMode.value = true
+      expandAll()
+    }
+  } else {
+    previewMode.value = !previewMode.value
+    if (previewMode.value) {
+      expandAll()
+    }
+  }
+}
+
+// Handle clicks on question cards - close expanded when clicking outside edit area
+const handleQuestionCardClick = (question: any, event: MouseEvent) => {
+  selectedQuestion.value = question
+  // If clicking on the card background (not on inputs/buttons), toggle expansion
+  const target = event.target as HTMLElement
+  if (!target.closest('input, textarea, button, select')) {
+    if (question.isExpanded && !previewMode.value) {
+      question.isExpanded = false
+    }
+  }
+}
 
 // Sync API data with local state (only on initial load)
 watch(questionsData, (newData) => {
@@ -664,56 +715,9 @@ watch(questionsData, (newData) => {
       isNew: false,
     }))
     questions.value = initialQuestions
-    // Also initialize WebSocket sync state
-    questionSync.setQuestions(initialQuestions)
+    // No need to sync with questionSync - it uses the same ref now
   }
 }, { immediate: true })
-
-// Sync WebSocket questions with form builder
-watch(
-  () => questionSync.questions.value,
-  (wsQuestions) => {
-    // Only merge if questions differ and user is not actively editing
-    wsQuestions.forEach(wsQuestion => {
-      const localIndex = questions.value.findIndex(q => q.id === wsQuestion.id)
-      
-      if (localIndex === -1) {
-        // New question from WebSocket - add it
-        questions.value.push({
-          ...wsQuestion,
-          isExpanded: false,
-          isEditing: false,
-          isNew: false,
-        })
-        
-        // Sort by order
-        questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
-      } else {
-        // Question exists - check if we should merge
-        const isEditing = questionSync.editingQuestions.value.has(wsQuestion.id)
-        
-        if (!isEditing) {
-          // Not editing - safe to merge
-          const currentExpanded = questions.value[localIndex].isExpanded
-          const currentEditing = questions.value[localIndex].isEditing
-          
-          questions.value[localIndex] = {
-            ...wsQuestion,
-            isExpanded: currentExpanded,
-            isEditing: currentEditing,
-            isNew: false,
-          }
-        }
-      }
-    })
-    
-    // Remove deleted questions (but keep new unsaved ones)
-    questions.value = questions.value.filter(localQ => {
-      return wsQuestions.some(wsQ => wsQ.id === localQ.id) || localQ.isNew
-    })
-  },
-  { deep: true }
-)
 
 // Show conflict warning
 function showConflictWarning(question: EventQuestion) {
@@ -827,9 +831,20 @@ const onDragEnd = () => {
   saveAll()
 }
 
-// Confirm delete with user
-const confirmDelete = (question: any) => {
-  if (confirm('Delete this question? All responses will be lost.')) {
+// Confirm delete with user using SweetAlert2
+const confirmDelete = async (question: any) => {
+  const result = await Swal.fire({
+    title: 'Delete Question?',
+    text: question.question_title || 'This question',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel'
+  })
+  
+  if (result.isConfirmed) {
     deleteQuestion(question)
   }
 }
