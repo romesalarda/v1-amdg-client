@@ -1,6 +1,8 @@
-import type { EventQuestion } from '~/api/types.gen'
+import type { EventQuestion, EventQuestionOption } from '~/api/types.gen'
 import { useDebounceFn } from '@vueuse/core'
 import { useCreateEventQuestion, usePartialUpdateEventQuestion, useDeleteEventQuestion } from '~/composables/resources/events/eventQuestions'
+import { useOptimisticUpdates } from './useOptimisticUpdates'
+import { useAuthStore } from '~/stores/auth'
 
 interface QuestionDraft {
   id?: string  // UUID from backend
@@ -10,10 +12,11 @@ interface QuestionDraft {
   question_type?: string
   required?: boolean
   order?: number
-  options?: any[]
+  options?: EventQuestionOption[] | string[]  // Support both formats
   isNew?: boolean
   isExpanded?: boolean
   isEditing?: boolean
+  operationId?: string  // Track optimistic operation
   [key: string]: any
 }
 
@@ -24,11 +27,23 @@ interface UndoState {
 
 export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) => {
   const toast = useToast()
+  const queryClient = useQueryClient()
+  const { $api } = useNuxtApp()
+  
+  // Get current user for actor tracking
+  const authStore = useAuthStore()
+  const actorEmail = computed(() => authStore.user?.email || 'unknown')
   
   // Initialize mutations at top level (required for Vue Query)
   const createMutation = useCreateEventQuestion()
   const updateMutation = usePartialUpdateEventQuestion()
   const deleteMutation = useDeleteEventQuestion()
+  
+  // Optimistic updates manager
+  const optimistic = useOptimisticUpdates<QuestionDraft>()
+  
+  // Per-question loading states
+  const questionLoadingStates = ref<Map<string, boolean>>(new Map())
   
   // State
   const questions = ref<QuestionDraft[]>([])
@@ -84,14 +99,29 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
     },
     {
       name: 'How did you hear about us?',
-      question_title: 'How did you hear about this event?',
+      question_title: 'How did you hear about us?',
       question_type: 'multiple_choice',
       required: false,
-      options: ['Social Media', 'Friend/Family', 'Email', 'Website', 'Other'],
+      options: ['Social Media', 'Friend', 'Search Engine', 'Advertisement', 'Other'],
     },
   ]
+
+  // Normalize options to EventQuestionOption format
+  const normalizeOptions = (options: any[] | undefined): EventQuestionOption[] => {
+    if (!options) return []
+    
+    return options.map((opt, index) => {
+      if (typeof opt === 'string') {
+        return {
+          option_text: opt,
+          order: index,
+        } as any  // API will set other fields
+      }
+      return opt
+    })
+  }
   
-  // Save question to backend (debounced)
+  // Save question to backend with optimistic updates (debounced)
   const saveQuestion = async (question: QuestionDraft) => {
     if (!question.question_title || !question.question_type) return
     
@@ -105,110 +135,165 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
       return
     }
     
+    // Set loading state for this question
+    const questionKey = question.id || question.tempId || 'unknown'
+    questionLoadingStates.value.set(questionKey, true)
     isSaving.value = true
+    
+    // Store original state for rollback
+    const originalQuestion = { ...question }
+    
     try {
       // Determine if this is a new question (needs CREATE) or existing (needs UPDATE)
       const isNewQuestion = question.isNew || !question.id || question.id.startsWith('temp-')
       
       if (isNewQuestion) {
-        // CREATE new question
-        const result = await createMutation.mutateAsync({
-          question_title: question.question_title,
-          question_body: question.question_body || '',
-          question_type: question.question_type as any,
-          event: eventIntId.value,
-          order: question.order ?? questions.value.length,
-          required: question.required || false,
-        })
-        
-        // Update local state with server response (including UUID)
-        const index = questions.value.findIndex(q => 
-          q.tempId === question.tempId || q.id === question.id
-        )
-        if (index !== -1 && result) {
-          questions.value[index] = {
-            ...result,
-            isNew: false,
-            isExpanded: question.isExpanded,
-            isEditing: question.isEditing,
+        // CREATE new question with optimistic update
+        const operationId = optimistic.addOperation(
+          'create',
+          question,
+          originalQuestion,
+          async () => {
+            // Prepare options for nested creation
+            const optionsPayload = (question.options || []).map((opt, idx) => {
+              if (typeof opt === 'string') {
+                return {
+                  option_text: opt,
+                  order: idx
+                } as any
+              }
+              return {
+                option_text: opt.option_text || opt,
+                order: idx
+              } as any
+            })
+            
+            const result = await createMutation.mutateAsync({
+              question_title: question.question_title!,
+              question_body: question.question_body || '',
+              question_type: question.question_type as any,
+              event: eventIntId.value!,
+              order: question.order ?? questions.value.length,
+              required: question.required || false,
+              options: optionsPayload, // Include nested options
+            })
+            
+            // Update local state with server response (including UUID)
+            const index = questions.value.findIndex(q => 
+              q.tempId === question.tempId || q.id === question.id
+            )
+            if (index !== -1 && result?.data) {
+              questions.value[index] = {
+                ...result.data,
+                isNew: false,
+                isExpanded: question.isExpanded,
+                isEditing: question.isEditing,
+                options: (result.data as any).options || [],
+              }
+            }
+            
+            // Manual cache update
+            queryClient.setQueryData(
+              ['event-questions', { event__event_id: eventIntId.value }],
+              (old: any) => {
+                if (!old?.data?.results) return old
+                return {
+                  ...old,
+                  data: {
+                    ...old.data,
+                    results: [...(old.data.results || []), result]
+                  }
+                }
+              }
+            )
+            
+            return result
           }
-        }
+        )
+        
+        question.operationId = operationId
       } else {
-        // UPDATE existing question
-        await updateMutation.mutateAsync({
-          questionId: question.id as string,  // UUID string
-          body: {
-            question_title: question.question_title,
-            question_body: question.question_body,
-            question_type: question.question_type as any,
-            order: question.order,
-            required: question.required,
-          },
-        })
-        
-        // Mark as no longer new after successful update
-        const index = questions.value.findIndex(q => q.id === question.id)
-        if (index !== -1) {
-          questions.value[index].isNew = false
-        }
-      }
-      
-      // Only mark as saved if no errors occurred
-      hasUnsavedChanges.value = false
-    } catch (error: any) {
-      // Keep hasUnsavedChanges as true so save button stays enabled
-      
-      // Extract error message from various possible error formats
-      let errorMessage = 'An error occurred while saving'
-      if (error?.data) {
-        if (Array.isArray(error.data)) {
-          errorMessage = error.data[0]
-        } else if (error.data.detail) {
-          errorMessage = Array.isArray(error.data.detail) ? error.data.detail[0] : error.data.detail
-        } else if (error.data.event) {
-          errorMessage = Array.isArray(error.data.event) ? error.data.event[0] : error.data.event
-        } else if (error.data.non_field_errors) {
-          errorMessage = Array.isArray(error.data.non_field_errors) 
-            ? error.data.non_field_errors[0] 
-            : error.data.non_field_errors
-        } else if (typeof error.data === 'string') {
-          errorMessage = error.data
-        }
-      } else if (error?.message) {
-        errorMessage = error.message
-      }
-      
-      // Handle specific error cases
-      if (errorMessage.includes('Invalid pk') || errorMessage.includes('object does not exist')) {
-        // Question was deleted from backend
-        const index = questions.value.findIndex(q => 
-          q.tempId === question.tempId || q.id === question.id
-        )
-        if (index !== -1) {
-          questions.value[index].isNew = true
-          questions.value[index].id = undefined
-          if (!questions.value[index].tempId) {
-            questions.value[index].tempId = `temp-${Date.now()}`
+        // UPDATE existing question with optimistic update
+        const operationId = optimistic.addOperation(
+          'update',
+          question,
+          originalQuestion,
+          async () => {
+            // Prepare options payload (only id, option_text, order)
+            const optionsPayload = (question.options || []).map((opt, idx) => {
+              if (typeof opt === 'string') {
+                return {
+                  option_text: opt,
+                  order: idx
+                }
+              }
+              // Only include id if it exists (for updates)
+              const payload: any = {
+                option_text: opt.option_text || opt,
+                order: idx
+              }
+              if (opt.id) {
+                payload.id = opt.id
+              }
+              return payload
+            })
+            
+            await updateMutation.mutateAsync({
+              questionId: question.id as string,
+              body: {
+                question_title: question.question_title,
+                question_body: question.question_body,
+                question_type: question.question_type as any,
+                order: question.order,
+                required: question.required,
+                options: optionsPayload as any,
+              } as any,
+            })
+            
+            // Manual cache update
+            queryClient.setQueryData(
+              ['event-questions', { event__event_id: eventIntId.value }],
+              (old: any) => {
+                if (!old?.data?.results) return old
+                return {
+                  ...old,
+                  data: {
+                    ...old.data,
+                    results: old.data.results.map((q: any) =>
+                      q.id === question.id ? { ...q, options: optionsPayload } : q
+                    )
+                  }
+                }
+              }
+            )
+            
+            // Mark as no longer new after successful update
+            const index = questions.value.findIndex(q => q.id === question.id)
+            if (index !== -1) {
+              questions.value[index].isNew = false
+            }
           }
-          errorMessage = 'Question no longer exists in database. It has been marked as new - please save again.'
-        }
-      } else if (errorMessage.includes('unique') || errorMessage.includes('already exists')) {
-        // Unique constraint violation (likely order conflict)
-        errorMessage = 'A question with this order already exists. Try reordering and saving again.'
+        )
+        
+        question.operationId = operationId
       }
-      
+    } catch (error: unknown) {
+      console.error('Save question error:', error)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
       toast.add({
-        title: 'Failed to save question',
+        title: 'Save Failed',
         description: errorMessage,
         color: 'red',
       })
-      throw error
     } finally {
+      // Clear loading state
+      questionLoadingStates.value.set(questionKey, false)
       isSaving.value = false
     }
   }
   
-  const debouncedSave = useDebounceFn(saveQuestion, 1000)
+  // Debounced save with 2 second delay
+  const debouncedSave = useDebounceFn(saveQuestion, 2000)
   
   // Save all questions order
   const saveQuestionsOrder = async () => {
@@ -353,6 +438,7 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
       question_type: template?.question_type || 'short_answer',
       required: template?.required || false,
       order: questions.value.length,
+      options: template?.options || [],
       isNew: true,
       isExpanded: true,
       isEditing: true,
@@ -406,12 +492,21 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
   const deleteQuestion = async (question: QuestionDraft) => {
     addToHistory()
     
-    if (!question.id || typeof question.id === 'string') {
-      // Just remove from local state if not saved yet or tempId
-      const index = questions.value.findIndex(q => q.tempId === question.tempId)
+    // Check if this is a new unsaved question
+    const isUnsaved = !question.id || question.id.startsWith('temp-') || question.isNew
+    
+    if (isUnsaved) {
+      // Just remove from local state if not saved yet
+      const index = questions.value.findIndex(q => 
+        (q.tempId && q.tempId === question.tempId) || (q.id && q.id === question.id)
+      )
       if (index !== -1) {
         questions.value.splice(index, 1)
       }
+      toast.add({
+        title: 'Question removed',
+        color: 'green',
+      })
       return
     }
     
@@ -448,28 +543,25 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
   }
   
   // Update question (triggers auto-save only for existing questions)
-  const updateQuestion = (question: QuestionDraft, changes: Partial<QuestionDraft>) => {
+  const updateQuestion = async (question: QuestionDraft, changes: Partial<QuestionDraft>) => {
     const index = questions.value.findIndex(q => 
       (q.id && q.id === question.id) || (q.tempId && q.tempId === question.tempId)
     )
     
-    if (index !== -1) {
-      questions.value[index] = {
-        ...questions.value[index],
-        ...changes,
-      }
-      
-      hasUnsavedChanges.value = true
-      
-      // Only auto-save if question has valid UUID from server and is not new
-      const hasValidId = questions.value[index].id && 
-                        typeof questions.value[index].id === 'string' &&
-                        !questions.value[index].id!.startsWith('temp-')
-      
-      if (!questions.value[index].isNew && hasValidId) {
-        debouncedSave(questions.value[index])
-      }
+    if (index === -1) return
+    
+    // Apply changes optimistically
+    Object.assign(questions.value[index], changes)
+    
+    hasUnsavedChanges.value = true
+    
+    // If new question (no server ID yet), don't call API
+    if (question.isNew || !question.id || question.id.startsWith('temp-')) {
+      return
     }
+    
+    // Trigger debounced save with the updated question
+    debouncedSave(questions.value[index])
   }
   
   // Toggle question expansion (saves new questions when collapsed)
@@ -606,6 +698,10 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
     isSaving,
     hasUnsavedChanges,
     questionTemplates,
+    questionLoadingStates: readonly(questionLoadingStates),
+    
+    // Optimistic updates
+    optimistic,
     
     // Undo/Redo
     canUndo: computed(() => undoStack.value.length > 0),
@@ -625,7 +721,9 @@ export const useRegistrationFormBuilder = (eventIntId: Ref<number | undefined>) 
     // Save actions
     saveQuestion,
     saveAll,
+    saveQuestionsOrder,
     debouncedSave,
+    debouncedSaveOrder,
     
     // Utils
     addToHistory,

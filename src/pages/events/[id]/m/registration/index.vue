@@ -36,6 +36,22 @@
                   color="blue"
                   variant="soft"
                 />
+                
+                <!-- WebSocket Connection Status -->
+                <div class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-50">
+                  <div 
+                    class="w-2 h-2 rounded-full transition-colors"
+                    :class="{
+                      'bg-green-500': ws.isConnected.value,
+                      'bg-yellow-500 animate-pulse': ws.isConnecting.value,
+                      'bg-red-500': ws.hasError.value,
+                      'bg-gray-400': ws.isDisconnected.value
+                    }"
+                  />
+                  <span class="text-xs text-gray-600 font-medium">
+                    {{ ws.isConnected.value ? 'Live' : ws.isConnecting.value ? 'Connecting...' : ws.hasError.value ? 'Connection Error' : 'Offline' }}
+                  </span>
+                </div>
               </div>
               <p class="text-gray-600">
                 {{ previewMode ? 'This is how attendees will see the form' : 'Configure questions to collect information from attendees' }}
@@ -104,7 +120,7 @@
           <USkeleton v-for="i in 3" :key="i" class="h-48" />
         </div>
 
-        <div v-else class="space-y-4">
+        <div v-else class="space-y-6">
           <draggable
             v-model="questions"
             item-key="id"
@@ -117,13 +133,56 @@
               <UCard
                 :key="question.id || question.tempId"
                 :data-question-id="question.id || question.tempId"
-                class="group relative transition-all hover:shadow-md"
+                class="group relative transition-all hover:shadow-lg"
                 :class="{
                   'ring-2 ring-blue-500': selectedQuestion?.id === question.id || selectedQuestion?.tempId === question.tempId,
                   'border-l-4 border-l-blue-500': question.isExpanded,
+                  'ring-2 ring-amber-500': questionSync.conflictingQuestions.value.has(question.id),
                 }"
                 @click="selectedQuestion = question"
               >
+                <!-- Loading Overlay -->
+                <div 
+                  v-if="questionLoadingStates.get(question.id || question.tempId || '')" 
+                  class="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg"
+                >
+                  <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-lg">
+                    <UIcon name="i-heroicons-arrow-path" class="w-4 h-4 text-blue-600 animate-spin" />
+                    <span class="text-sm font-medium text-gray-700">Saving...</span>
+                  </div>
+                </div>
+                
+                <!-- Conflict Warning Banner -->
+                <div 
+                  v-if="questionSync.conflictingQuestions.value.has(question.id)" 
+                  class="absolute top-0 left-0 right-0 bg-amber-100 border-b border-amber-300 px-4 py-2 z-20 rounded-t-lg"
+                >
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-amber-700" />
+                      <span class="text-sm font-medium text-amber-900">
+                        Another admin modified this question
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <UButton
+                        label="Keep Mine"
+                        size="xs"
+                        color="amber"
+                        variant="solid"
+                        @click.stop="questionSync.resolveConflict(question.id, 'keep')"
+                      />
+                      <UButton
+                        label="Use Theirs"
+                        size="xs"
+                        color="amber"
+                        variant="outline"
+                        @click.stop="questionSync.resolveConflict(question.id, 'refresh')"
+                      />
+                    </div>
+                  </div>
+                </div>
+                
                 <!-- Drag Handle -->
                 <div
                   v-if="!previewMode"
@@ -134,7 +193,7 @@
                   </div>
                 </div>
 
-                <div class="space-y-4">
+                <div class="space-y-5 p-1">
                   <!-- Question Header -->
                   <div class="flex items-start justify-between gap-4">
                     <div class="flex-1 space-y-3">
@@ -170,7 +229,8 @@
                           size="lg"
                           variant="outline"
                           class="font-semibold"
-                          @blur="updateQuestion(question, { question_title: question.question_title })"
+                          @focus="markEditing(question.id)"
+                          @blur="unmarkEditing(question.id); updateQuestion(question, { question_title: question.question_title })"
                         />
                       </div>
                       <h3
@@ -189,7 +249,8 @@
                           placeholder="Description (optional)"
                           :rows="2"
                           variant="outline"
-                          @blur="updateQuestion(question, { question_body: question.question_body })"
+                          @focus="markEditing(question.id)"
+                          @blur="unmarkEditing(question.id); updateQuestion(question, { question_body: question.question_body })"
                         />
                       </div>
                       <p
@@ -251,7 +312,8 @@
                                     :model-value="typeof option === 'string' ? option : option.option_text"
                                     placeholder="Option text"
                                     class="flex-1"
-                                    @blur="updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
+                                    @focus="markEditing(question.id)"
+                                    @blur="unmarkEditing(question.id); updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
                                   />
                                   <UButton
                                     icon="i-heroicons-x-mark"
@@ -532,10 +594,13 @@
 
 <script setup lang="ts">
 import type { EventQuestion } from '~/api/types.gen'
+import { eventQuestionsRetrieve } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { useRegistrationFormBuilder } from '~/composables/useRegistrationFormBuilder'
+import { useEventWebSocket } from '~/composables/useEventWebSocket'
+import { useQuestionSync } from '~/composables/useQuestionSync'
 import draggable from 'vuedraggable'
 
 definePageMeta({
@@ -549,6 +614,7 @@ definePageMeta({
 
 const route = useRoute()
 const id = computed(() => String(route.params.id))
+const toast = useToast()
 
 // Fetch event data
 const { data: event } = useEvent(id)
@@ -560,6 +626,10 @@ const eventIntId = computed(() => event.value?.data?.id)
 const eventIdFilter = { event__event_id: route.params.id as string }
 const { data: questionsData, isLoading: questionsLoading } = useEventQuestions(eventIdFilter)
 
+// Initialize WebSocket connection
+const ws = useEventWebSocket(id)
+const questionSync = useQuestionSync(id, ws)
+
 // Initialize form builder with all Google Forms features
 const {
   questions,
@@ -568,6 +638,8 @@ const {
   isSaving,
   hasUnsavedChanges,
   questionTemplates,
+  questionLoadingStates,
+  optimistic,
   canUndo,
   canRedo,
   undo,
@@ -585,14 +657,133 @@ const {
 // Sync API data with local state (only on initial load)
 watch(questionsData, (newData) => {
   if (newData?.data?.results && questions.value.length === 0) {
-    questions.value = newData.data.results.map((q: any) => ({
+    const initialQuestions = newData.data.results.map((q: any) => ({
       ...q,
       isExpanded: false,
       isEditing: false,
       isNew: false,
     }))
+    questions.value = initialQuestions
+    // Also initialize WebSocket sync state
+    questionSync.setQuestions(initialQuestions)
   }
 }, { immediate: true })
+
+// Sync WebSocket questions with form builder
+watch(
+  () => questionSync.questions.value,
+  (wsQuestions) => {
+    // Only merge if questions differ and user is not actively editing
+    wsQuestions.forEach(wsQuestion => {
+      const localIndex = questions.value.findIndex(q => q.id === wsQuestion.id)
+      
+      if (localIndex === -1) {
+        // New question from WebSocket - add it
+        questions.value.push({
+          ...wsQuestion,
+          isExpanded: false,
+          isEditing: false,
+          isNew: false,
+        })
+        
+        // Sort by order
+        questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
+      } else {
+        // Question exists - check if we should merge
+        const isEditing = questionSync.editingQuestions.value.has(wsQuestion.id)
+        
+        if (!isEditing) {
+          // Not editing - safe to merge
+          const currentExpanded = questions.value[localIndex].isExpanded
+          const currentEditing = questions.value[localIndex].isEditing
+          
+          questions.value[localIndex] = {
+            ...wsQuestion,
+            isExpanded: currentExpanded,
+            isEditing: currentEditing,
+            isNew: false,
+          }
+        }
+      }
+    })
+    
+    // Remove deleted questions (but keep new unsaved ones)
+    questions.value = questions.value.filter(localQ => {
+      return wsQuestions.some(wsQ => wsQ.id === localQ.id) || localQ.isNew
+    })
+  },
+  { deep: true }
+)
+
+// Show conflict warning
+function showConflictWarning(question: EventQuestion) {
+  toast.add({
+    id: `conflict-${question.id}`,
+    title: 'Question Updated',
+    description: `"${question.question_title}" was modified by another admin.`,
+    color: 'yellow',
+    icon: 'i-heroicons-exclamation-triangle',
+    timeout: 10000,
+    actions: [
+      {
+        label: 'View Changes',
+        click: () => {
+          // Refresh this question from server
+          questionSync.resolveConflict(question.id!, 'refresh')
+          fetchAndMergeQuestion(question.id!)
+        }
+      },
+      {
+        label: 'Keep Mine',
+        click: () => {
+          questionSync.resolveConflict(question.id!, 'keep')
+        }
+      }
+    ]
+  })
+}
+
+// Fetch specific question and merge
+async function fetchAndMergeQuestion(questionId: string) {
+  try {
+    const response = await eventQuestionsRetrieve({
+      path: { id: questionId }
+    })
+    
+    if (response.data) {
+      const index = questions.value.findIndex(q => q.id === questionId)
+      if (index !== -1) {
+        Object.assign(questions.value[index], response.data)
+        toast.add({
+          title: 'Question Refreshed',
+          description: 'Loaded latest version from server',
+          color: 'green',
+          timeout: 3000
+        })
+      }
+    }
+  } catch (error) {
+    toast.add({
+      title: 'Refresh Failed',
+      description: 'Could not fetch latest question',
+      color: 'red',
+      timeout: 5000
+    })
+  }
+}
+
+// Mark questions as editing when user focuses on them
+const markEditing = (questionId: string | undefined) => {
+  if (questionId) {
+    questionSync.markAsEditing(questionId)
+  }
+}
+
+const unmarkEditing = (questionId: string | undefined) => {
+  if (questionId) {
+    questionSync.markAsNotEditing(questionId)
+  }
+}
 
 // Question types configuration
 const questionTypes = [
@@ -658,29 +849,41 @@ const scrollToQuestion = (question: any) => {
 
 // Option management for multiple/single choice questions
 const addQuestionOption = (question: any) => {
-  if (!question.options) {
-    question.options = []
-  }
-  question.options.push('')
+  const currentOptions = question.options || []
+  const newOptions = [...currentOptions, { option_text: '', order: currentOptions.length }]
+  updateQuestion(question, { options: newOptions })
 }
 
 const removeQuestionOption = (question: any, index: number | string) => {
   const idx = typeof index === 'string' ? parseInt(index) : index
   if (question.options && !isNaN(idx)) {
-    question.options.splice(idx, 1)
-    updateQuestion(question, { options: question.options })
+    // Create new array without the removed item
+    const newOptions = question.options.filter((_: any, i: number) => i !== idx)
+      .map((opt: any, newIdx: number) => ({
+        ...opt,
+        order: newIdx
+      }))
+    // Save with updated options
+    updateQuestion(question, { options: newOptions })
   }
 }
 
 const updateQuestionOption = (question: any, index: number | string, value: string) => {
   const idx = typeof index === 'string' ? parseInt(index) : index
   if (question.options && !isNaN(idx)) {
-    if (typeof question.options[idx] === 'string') {
-      question.options[idx] = value
-    } else {
-      question.options[idx].option_text = value
-    }
-    updateQuestion(question, { options: question.options })
+    // Create new array with updated option
+    const newOptions = question.options.map((opt: any, i: number) => {
+      if (i !== idx) return opt
+      if (typeof opt === 'string') {
+        return value
+      }
+      return {
+        ...opt,
+        option_text: value
+      }
+    })
+    // Trigger debounced save via updateQuestion
+    updateQuestion(question, { options: newOptions })
   }
 }
 

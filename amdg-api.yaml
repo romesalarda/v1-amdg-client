@@ -7089,6 +7089,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedEventStaffList'
           description: ''
+  /api/event/list/{event_id}/ws-token/:
+    post:
+      operationId: event_list_ws_token_create
+      description: "Exchange a valid HTTP JWT for a short-lived WebSocket-specific\
+        \ JWT token. This token is required to establish WebSocket connections for\
+        \ real-time updates. \n\n**Security:**\n- Token expires in 5 minutes\n- Token\
+        \ type='websocket' to prevent cross-use with HTTP endpoints\n- User must have\
+        \ permission to access the event (creator, staff, or admin)\n\n\n**Usage:**\n\
+        1. Call this endpoint with valid HTTP authentication\n2. Receive short-lived\
+        \ WebSocket token\n3. Connect to WebSocket: `ws://host/ws/events/{event_id}/questions/?token={ws_token}`\n\
+        4. Token must be refreshed every 5 minutes for ongoing connections\n\n\n**Response\
+        \ includes:**\n- `token`: The WebSocket JWT to use in query parameter\n- `expires_in`:\
+        \ Seconds until expiration (300)\n- `ws_url`: Complete WebSocket URL with\
+        \ placeholders\n"
+      summary: Get WebSocket Token
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Events
+      - WebSocket
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EventDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EventDetailRequest'
+        required: true
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: WebSocket-specific JWT token (5-minute expiry)
+                  expires_in:
+                    type: integer
+                    description: Token lifetime in seconds (300)
+                    example: 300
+                  ws_url:
+                    type: string
+                    description: WebSocket URL pattern to connect to
+                    example: ws://localhost:8000/ws/events/{event_id}/questions/?token={token}
+          description: WebSocket token successfully generated
+        '403':
+          description: Permission denied - user does not have access to this event
+        '404':
+          description: Event not found
   /api/event/list/ongoing/:
     get:
       operationId: event_list_ongoing_list
@@ -7838,6 +7901,83 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/event/question-answers/submit-form/:
+    post:
+      operationId: event_question_answers_submit_form_create
+      description: "Submit all answers for a registration form in a single atomic\
+        \ transaction. Validates that all required questions are answered and creates\
+        \ all answers atomically. \n\n**Features:**\n- Atomic transaction: all answers\
+        \ created or none\n- Validates all required questions are answered\n- Supports\
+        \ text answers and option selections\n- Bulk creates all answers and choices\n\
+        - Returns complete submission with any validation errors\n\n\n**Request Format:**\n\
+        ```json\n{\n  \"attendee\": 123,\n  \"answers\": [\n    {\n      \"question\"\
+        : \"uuid1\",\n      \"answer_text\": \"My answer\",\n      \"selected_option_ids\"\
+        : []\n    },\n    {\n      \"question\": \"uuid2\",\n      \"answer_text\"\
+        : \"\",\n      \"selected_option_ids\": [1, 2]\n    }\n  ]\n}\n```\n"
+      summary: Submit Form (Batch Answers)
+      parameters:
+      - in: query
+        name: attendee
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: question
+        schema:
+          type: string
+          format: uuid
+      tags:
+      - Event Question Answers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                attendee:
+                  type: integer
+                answers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      question:
+                        type: string
+                        format: uuid
+                      answer_text:
+                        type: string
+                      selected_option_ids:
+                        type: array
+                        items:
+                          type: integer
+                    required:
+                    - question
+              required:
+              - attendee
+              - answers
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventQuestionAnswerList'
+          description: ''
+        '400':
+          description: Validation errors or missing required answers
   /api/event/question-options/:
     get:
       operationId: event_question_options_list
@@ -8237,6 +8377,162 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/event/questions/bulk-create/:
+    post:
+      operationId: event_questions_bulk_create_create
+      description: "Create multiple event questions in a single request with nested\
+        \ options. All questions are validated before any are created (all-or-nothing).\
+        \ Useful for importing pre-built forms or creating entire sections at once.\
+        \ \n\n**Features:**\n- Atomic transaction: all questions created or none\n\
+        - Supports nested options for choice questions\n- Validates all questions\
+        \ before creating any\n- Returns all created questions with IDs\n\n\n**Request\
+        \ Format:**\nArray of question objects, each with:\n- event: Event UUID\n\
+        - question_title: String\n- question_body: String\n- question_type: Choice\
+        \ type\n- required: Boolean (optional)\n- order: Integer (optional)\n- options:\
+        \ Array of {option_text, order} (for choice questions)\n"
+      summary: Bulk Create Questions
+      parameters:
+      - in: query
+        name: event
+        schema:
+          type: integer
+      - in: query
+        name: event__event_id
+        schema:
+          type: string
+          format: uuid
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: public
+        schema:
+          type: boolean
+      - in: query
+        name: question_type
+        schema:
+          type: string
+          x-spec-enum-id: edad4945d07dc59b
+          enum:
+          - long_answer
+          - multiple_choice
+          - short_answer
+          - single_choice
+          - slider
+          - upload
+        description: |-
+          * `short_answer` - Short Answer
+          * `long_answer` - Long Answer
+          * `upload` - Upload
+          * `multiple_choice` - Multiple Choice
+          * `single_choice` - Single Choice
+          * `slider` - Slider
+      - in: query
+        name: required
+        schema:
+          type: boolean
+      tags:
+      - Event Questions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  event:
+                    type: string
+                    format: uuid
+                  question_title:
+                    type: string
+                  question_body:
+                    type: string
+                  question_type:
+                    type: string
+                  required:
+                    type: boolean
+                  order:
+                    type: integer
+                  options:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        option_text:
+                          type: string
+                        order:
+                          type: integer
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedEventQuestionList'
+          description: ''
+        '400':
+          description: Validation errors in one or more questions
+  /api/event/questions/reorder/:
+    post:
+      operationId: event_questions_reorder_create
+      description: "Update the display order of multiple questions in a single atomic\
+        \ operation. Useful for drag-and-drop reordering in form builders. \n\n**Features:**\n\
+        - Atomic transaction: all orders updated or none\n- Validates all question\
+        \ IDs exist and belong to same event\n- Handles unique constraint by updating\
+        \ in correct sequence\n- Broadcasts update via WebSocket after success\n\n\
+        \n**Request Format:**\n```json\n{\n  \"questions\": [\n    {\"id\": \"uuid1\"\
+        , \"order\": 0},\n    {\"id\": \"uuid2\", \"order\": 1},\n    {\"id\": \"\
+        uuid3\", \"order\": 2}\n  ]\n}\n```"
+      summary: Reorder Questions
+      tags:
+      - Event Questions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                questions:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                      order:
+                        type: integer
+                    required:
+                    - id
+                    - order
+              required:
+              - questions
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Questions reordered successfully
+        '400':
+          description: Validation errors
   /api/event/reviews/:
     get:
       operationId: event_reviews_list
@@ -34471,6 +34767,16 @@ components:
       - event
     EventQuestion:
       type: object
+      description: |-
+        Serializer for EventQuestion with nested writable options.
+
+        Supports creating and updating questions with nested options in a single request.
+        Options can be provided as an array of objects with option_text and order.
+
+        For updates:
+        - Options with 'id' field: update existing
+        - Options without 'id': create new
+        - Existing options not in payload: deleted
       properties:
         id:
           type: string
@@ -34529,7 +34835,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EventQuestionOption'
-          readOnly: true
         created_at:
           type: string
           format: date-time
@@ -34559,13 +34864,17 @@ components:
       - event
       - event_title
       - id
-      - options
       - question_body
       - question_title
       - question_type_display
       - updated_at
     EventQuestionAnswer:
       type: object
+      description: |-
+        Serializer for EventQuestionAnswer with nested writable selected options.
+
+        Supports creating and updating answers with option selections.
+        Validates option selections against question constraints.
       properties:
         id:
           type: integer
@@ -34677,6 +34986,11 @@ components:
       - option
     EventQuestionAnswerRequest:
       type: object
+      description: |-
+        Serializer for EventQuestionAnswer with nested writable selected options.
+
+        Supports creating and updating answers with option selections.
+        Validates option selections against question constraints.
       properties:
         question:
           type: string
@@ -34686,6 +35000,12 @@ components:
         answer_text:
           type: string
           minLength: 1
+        selected_option_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+          description: List of option IDs to select for choice questions
       required:
       - answer_text
       - attendee
@@ -34757,6 +35077,16 @@ components:
       - question
     EventQuestionRequest:
       type: object
+      description: |-
+        Serializer for EventQuestion with nested writable options.
+
+        Supports creating and updating questions with nested options in a single request.
+        Options can be provided as an array of objects with option_text and order.
+
+        For updates:
+        - Options with 'id' field: update existing
+        - Options without 'id': create new
+        - Existing options not in payload: deleted
       properties:
         event:
           type: integer
@@ -34803,6 +35133,10 @@ components:
           maximum: 2147483647
           minimum: -2147483648
           nullable: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventQuestionOptionRequest'
       required:
       - event
       - question_body
@@ -43821,6 +44155,11 @@ components:
           type: integer
     PatchedEventQuestionAnswerRequest:
       type: object
+      description: |-
+        Serializer for EventQuestionAnswer with nested writable selected options.
+
+        Supports creating and updating answers with option selections.
+        Validates option selections against question constraints.
       properties:
         question:
           type: string
@@ -43830,6 +44169,12 @@ components:
         answer_text:
           type: string
           minLength: 1
+        selected_option_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
+          description: List of option IDs to select for choice questions
     PatchedEventQuestionOptionRequest:
       type: object
       properties:
@@ -43847,6 +44192,16 @@ components:
           default: 0
     PatchedEventQuestionRequest:
       type: object
+      description: |-
+        Serializer for EventQuestion with nested writable options.
+
+        Supports creating and updating questions with nested options in a single request.
+        Options can be provided as an array of objects with option_text and order.
+
+        For updates:
+        - Options with 'id' field: update existing
+        - Options without 'id': create new
+        - Existing options not in payload: deleted
       properties:
         event:
           type: integer
@@ -43893,6 +44248,10 @@ components:
           maximum: 2147483647
           minimum: -2147483648
           nullable: true
+        options:
+          type: array
+          items:
+            $ref: '#/components/schemas/EventQuestionOptionRequest'
     PatchedEventReviewRequest:
       type: object
       properties:

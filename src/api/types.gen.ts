@@ -5474,6 +5474,17 @@ export type EventProductCategoryCreateUpdateRequest = {
     category: number;
 };
 
+/**
+ * Serializer for EventQuestion with nested writable options.
+ *
+ * Supports creating and updating questions with nested options in a single request.
+ * Options can be provided as an array of objects with option_text and order.
+ *
+ * For updates:
+ * - Options with 'id' field: update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
 export type EventQuestion = {
     readonly id: string;
     event: number;
@@ -5495,7 +5506,7 @@ export type EventQuestion = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    readonly options: Array<EventQuestionOption>;
+    options?: Array<EventQuestionOption>;
     readonly created_at: string;
     readonly updated_at: string;
     /**
@@ -5513,6 +5524,12 @@ export type EventQuestion = {
     };
 };
 
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
 export type EventQuestionAnswer = {
     readonly id: number;
     question: string;
@@ -5568,6 +5585,12 @@ export type EventQuestionAnswerChoiceRequest = {
     option: number;
 };
 
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
 export type EventQuestionAnswerRequest = {
     question: string;
     attendee: number;
@@ -5602,6 +5625,17 @@ export type EventQuestionOptionRequest = {
     order?: number;
 };
 
+/**
+ * Serializer for EventQuestion with nested writable options.
+ *
+ * Supports creating and updating questions with nested options in a single request.
+ * Options can be provided as an array of objects with option_text and order.
+ *
+ * For updates:
+ * - Options with 'id' field: update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
 export type EventQuestionRequest = {
     event: number;
     question_title: string;
@@ -5620,6 +5654,7 @@ export type EventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
+    options?: Array<EventQuestionOptionRequest>;
 };
 
 export type EventReview = {
@@ -9791,6 +9826,12 @@ export type PatchedEventQuestionAnswerChoiceRequest = {
     option?: number;
 };
 
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
 export type PatchedEventQuestionAnswerRequest = {
     question?: string;
     attendee?: number;
@@ -9803,6 +9844,17 @@ export type PatchedEventQuestionOptionRequest = {
     order?: number;
 };
 
+/**
+ * Serializer for EventQuestion with nested writable options.
+ *
+ * Supports creating and updating questions with nested options in a single request.
+ * Options can be provided as an array of objects with option_text and order.
+ *
+ * For updates:
+ * - Options with 'id' field: update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
 export type PatchedEventQuestionRequest = {
     event?: number;
     question_title?: string;
@@ -9821,6 +9873,7 @@ export type PatchedEventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
+    options?: Array<EventQuestionOptionRequest>;
 };
 
 export type PatchedEventReviewRequest = {
@@ -15248,6 +15301,17 @@ export type EventProductCategoryWritable = {
     category: number;
 };
 
+/**
+ * Serializer for EventQuestion with nested writable options.
+ *
+ * Supports creating and updating questions with nested options in a single request.
+ * Options can be provided as an array of objects with option_text and order.
+ *
+ * For updates:
+ * - Options with 'id' field: update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
 export type EventQuestionWritable = {
     event: number;
     question_title: string;
@@ -15266,8 +15330,15 @@ export type EventQuestionWritable = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
+    options?: Array<EventQuestionOptionWritable>;
 };
 
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
 export type EventQuestionAnswerWritable = {
     question: string;
     attendee: number;
@@ -15277,6 +15348,22 @@ export type EventQuestionAnswerWritable = {
 export type EventQuestionAnswerChoiceWritable = {
     answer: number;
     option: number;
+};
+
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
+export type EventQuestionAnswerRequestWritable = {
+    question: string;
+    attendee: number;
+    answer_text: string;
+    /**
+     * List of option IDs to select for choice questions
+     */
+    selected_option_ids?: Array<number>;
 };
 
 export type EventQuestionOptionWritable = {
@@ -16926,6 +17013,22 @@ export type PatchedDiscountCreateUpdateRequestWritable = {
     target_type?: number | null;
     target_id?: number | null;
     active?: boolean;
+};
+
+/**
+ * Serializer for EventQuestionAnswer with nested writable selected options.
+ *
+ * Supports creating and updating answers with option selections.
+ * Validates option selections against question constraints.
+ */
+export type PatchedEventQuestionAnswerRequestWritable = {
+    question?: string;
+    attendee?: number;
+    answer_text?: string;
+    /**
+     * List of option IDs to select for choice questions
+     */
+    selected_option_ids?: Array<number>;
 };
 
 /**
@@ -22086,6 +22189,48 @@ export type EventListStaffListListResponses = {
 
 export type EventListStaffListListResponse = EventListStaffListListResponses[keyof EventListStaffListListResponses];
 
+export type EventListWsTokenCreateData = {
+    body: EventDetailRequest;
+    path: {
+        event_id: string;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/ws-token/';
+};
+
+export type EventListWsTokenCreateErrors = {
+    /**
+     * Permission denied - user does not have access to this event
+     */
+    403: unknown;
+    /**
+     * Event not found
+     */
+    404: unknown;
+};
+
+export type EventListWsTokenCreateResponses = {
+    /**
+     * WebSocket token successfully generated
+     */
+    200: {
+        /**
+         * WebSocket-specific JWT token (5-minute expiry)
+         */
+        token?: string;
+        /**
+         * Token lifetime in seconds (300)
+         */
+        expires_in?: number;
+        /**
+         * WebSocket URL pattern to connect to
+         */
+        ws_url?: string;
+    };
+};
+
+export type EventListWsTokenCreateResponse = EventListWsTokenCreateResponses[keyof EventListWsTokenCreateResponses];
+
 export type EventListOngoingListData = {
     body?: never;
     path?: never;
@@ -22447,7 +22592,7 @@ export type EventQuestionAnswersListResponses = {
 export type EventQuestionAnswersListResponse = EventQuestionAnswersListResponses[keyof EventQuestionAnswersListResponses];
 
 export type EventQuestionAnswersCreateData = {
-    body: EventQuestionAnswerRequest;
+    body: EventQuestionAnswerRequestWritable;
     path?: never;
     query?: never;
     url: '/api/event/question-answers/';
@@ -22499,7 +22644,7 @@ export type EventQuestionAnswersRetrieveResponses = {
 export type EventQuestionAnswersRetrieveResponse = EventQuestionAnswersRetrieveResponses[keyof EventQuestionAnswersRetrieveResponses];
 
 export type EventQuestionAnswersPartialUpdateData = {
-    body?: PatchedEventQuestionAnswerRequest;
+    body?: PatchedEventQuestionAnswerRequestWritable;
     path: {
         /**
          * A unique integer value identifying this event question answer.
@@ -22517,7 +22662,7 @@ export type EventQuestionAnswersPartialUpdateResponses = {
 export type EventQuestionAnswersPartialUpdateResponse = EventQuestionAnswersPartialUpdateResponses[keyof EventQuestionAnswersPartialUpdateResponses];
 
 export type EventQuestionAnswersUpdateData = {
-    body: EventQuestionAnswerRequest;
+    body: EventQuestionAnswerRequestWritable;
     path: {
         /**
          * A unique integer value identifying this event question answer.
@@ -22533,6 +22678,44 @@ export type EventQuestionAnswersUpdateResponses = {
 };
 
 export type EventQuestionAnswersUpdateResponse = EventQuestionAnswersUpdateResponses[keyof EventQuestionAnswersUpdateResponses];
+
+export type EventQuestionAnswersSubmitFormCreateData = {
+    body?: {
+        attendee: number;
+        answers: Array<{
+            question: string;
+            answer_text?: string;
+            selected_option_ids?: Array<number>;
+        }>;
+    };
+    path?: never;
+    query?: {
+        attendee?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        question?: string;
+    };
+    url: '/api/event/question-answers/submit-form/';
+};
+
+export type EventQuestionAnswersSubmitFormCreateErrors = {
+    /**
+     * Validation errors or missing required answers
+     */
+    400: unknown;
+};
+
+export type EventQuestionAnswersSubmitFormCreateResponses = {
+    201: PaginatedEventQuestionAnswerList;
+};
+
+export type EventQuestionAnswersSubmitFormCreateResponse = EventQuestionAnswersSubmitFormCreateResponses[keyof EventQuestionAnswersSubmitFormCreateResponses];
 
 export type EventQuestionOptionsListData = {
     body?: never;
@@ -22772,6 +22955,89 @@ export type EventQuestionsUpdateResponses = {
 };
 
 export type EventQuestionsUpdateResponse = EventQuestionsUpdateResponses[keyof EventQuestionsUpdateResponses];
+
+export type EventQuestionsBulkCreateCreateData = {
+    body?: Array<{
+        event?: string;
+        question_title?: string;
+        question_body?: string;
+        question_type?: string;
+        required?: boolean;
+        order?: number;
+        options?: Array<{
+            option_text?: string;
+            order?: number;
+        }>;
+    }>;
+    path?: never;
+    query?: {
+        event?: number;
+        event__event_id?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        public?: boolean;
+        /**
+         * * `short_answer` - Short Answer
+         * * `long_answer` - Long Answer
+         * * `upload` - Upload
+         * * `multiple_choice` - Multiple Choice
+         * * `single_choice` - Single Choice
+         * * `slider` - Slider
+         */
+        question_type?: 'long_answer' | 'multiple_choice' | 'short_answer' | 'single_choice' | 'slider' | 'upload';
+        required?: boolean;
+    };
+    url: '/api/event/questions/bulk-create/';
+};
+
+export type EventQuestionsBulkCreateCreateErrors = {
+    /**
+     * Validation errors in one or more questions
+     */
+    400: unknown;
+};
+
+export type EventQuestionsBulkCreateCreateResponses = {
+    201: PaginatedEventQuestionList;
+};
+
+export type EventQuestionsBulkCreateCreateResponse = EventQuestionsBulkCreateCreateResponses[keyof EventQuestionsBulkCreateCreateResponses];
+
+export type EventQuestionsReorderCreateData = {
+    body?: {
+        questions: Array<{
+            id: string;
+            order: number;
+        }>;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/event/questions/reorder/';
+};
+
+export type EventQuestionsReorderCreateErrors = {
+    /**
+     * Validation errors
+     */
+    400: unknown;
+};
+
+export type EventQuestionsReorderCreateResponses = {
+    /**
+     * Questions reordered successfully
+     */
+    200: unknown;
+};
 
 export type EventReviewsListData = {
     body?: never;
