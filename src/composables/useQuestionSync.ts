@@ -48,6 +48,9 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   // Use external questions ref instead of creating our own
   const questions = externalQuestions as Ref<any[]> // Type assertion for internal use
   const conflictingQuestions = ref<Set<string>>(new Set())
+  
+  // Presence tracking
+  const activeUsers = ref<Array<{ id: number; email: string; name: string }>>([])
   const editingQuestions = ref<Set<string>>(new Set())
   const deletedQuestions = ref<Set<string>>(new Set()) // Track recently deleted to prevent re-adding
   
@@ -56,6 +59,43 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   
   // Track if we're in a bulk operation (suppress individual notifications)
   const isBulkOperation = ref(false)
+  
+  /**
+   * Handle user presence events (joined/left)
+   */
+  function handleUserJoined(data: any) {
+    const { user } = data
+    if (!user || user.email === currentUserEmail.value) return
+    
+    const exists = activeUsers.value.some(u => u.id === user.id)
+    if (!exists) {
+      activeUsers.value.push(user)
+      toast.add({
+        title: 'User Joined',
+        description: `${user.name} is now viewing this form`,
+        icon: 'i-heroicons-user-plus',
+        color: 'blue',
+        timeout: 3000,
+      })
+    }
+  }
+  
+  function handleUserLeft(data: any) {
+    const { user } = data
+    if (!user) return
+    
+    const index = activeUsers.value.findIndex(u => u.id === user.id)
+    if (index !== -1) {
+      activeUsers.value.splice(index, 1)
+      toast.add({
+        title: 'User Left',
+        description: `${user.name} left`,
+        icon: 'i-heroicons-user-minus',
+        color: 'gray',
+        timeout: 2000,
+      })
+    }
+  }
   
   /**
    * Handle question created event from WebSocket
@@ -415,6 +455,8 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       ws.on('question.updated', handleQuestionUpdated),
       ws.on('question.deleted', handleQuestionDeleted),
       ws.on('question.reordered', handleQuestionReordered),
+      ws.on('user.joined', handleUserJoined),
+      ws.on('user.left', handleUserLeft),
     )
     
     onBeforeUnmount(() => {
@@ -426,6 +468,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     // State
     conflictingQuestions: readonly(conflictingQuestions),
     editingQuestions: readonly(editingQuestions),
+    activeUsers: readonly(activeUsers),
     
     // Methods
     markAsEditing,

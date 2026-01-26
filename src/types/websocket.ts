@@ -3,7 +3,7 @@ import type { EventQuestion } from '~/api/types.gen'
 /**
  * WebSocket connection states
  */
-export type WSConnectionState = 'connecting' | 'connected' | 'disconnecting' | 'disconnected' | 'error'
+export type WSConnectionState = 'connecting' | 'authenticating' | 'connected' | 'disconnecting' | 'disconnected' | 'error'
 
 /**
  * Token response from /ws-token/ endpoint

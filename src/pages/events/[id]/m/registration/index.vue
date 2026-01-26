@@ -43,15 +43,24 @@
                     class="w-2 h-2 rounded-full transition-colors"
                     :class="{
                       'bg-green-500': ws.isConnected.value,
-                      'bg-yellow-500 animate-pulse': ws.isConnecting.value,
+                      'bg-yellow-500 animate-pulse': ws.isConnecting.value || ws.connectionState.value === 'authenticating',
                       'bg-red-500': ws.hasError.value,
                       'bg-gray-400': ws.isDisconnected.value
                     }"
                   />
                   <span class="text-xs text-gray-600 font-medium">
-                    {{ ws.isConnected.value ? 'Live' : ws.isConnecting.value ? 'Connecting...' : ws.hasError.value ? 'Connection Error' : 'Offline' }}
+                    {{ 
+                      ws.isConnected.value ? 'Live' : 
+                      ws.connectionState.value === 'authenticating' ? 'Authenticating...' :
+                      ws.isConnecting.value ? 'Connecting...' : 
+                      ws.hasError.value ? 'Connection Error' : 
+                      'Offline' 
+                    }}
                   </span>
                 </div>
+                
+                <!-- Presence Indicator -->
+                <PresenceIndicator :active-users="[...activeUsers]" />
               </div>
               <p class="text-gray-600">
                 {{ previewMode ? 'This is how attendees will see the form' : 'Configure questions to collect information from attendees' }}
@@ -659,6 +668,9 @@ const {
 // Initialize WebSocket connection - pass questions ref to prevent race conditions
 const ws = useEventWebSocket(id)
 const questionSync = useQuestionSync(id, ws, questions as Ref<EventQuestion[]>)
+
+// Unwrap activeUsers for template use
+const activeUsers = computed(() => questionSync.activeUsers.value)
 
 // Handle preview mode toggle with unsaved changes warning
 const togglePreviewMode = async () => {

@@ -153,18 +153,30 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
         await fetchToken()
       }
       
-      // Build WebSocket URL
+      // Build WebSocket URL (without token - more secure)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
       const apiBaseUrl = (config.public.apiBaseUrl as string | undefined)
       const wsHost = apiBaseUrl?.replace(/^https?:\/\//, '') || 'localhost:8000'
-      const wsUrl = `${wsProtocol}//${wsHost}/ws/events/${unref(eventId)}/questions/?token=${token.value}`
+      const wsUrl = `${wsProtocol}//${wsHost}/ws/events/${unref(eventId)}/questions/`
       
       // Create WebSocket connection
       socket.value = new WebSocket(wsUrl)
       
+      // Store token to send after connection
+      const authToken = token.value
+      
       // Connection opened
       socket.value.onopen = () => {
-        connectionState.value = 'connected'
+        // Send authentication as first message (more secure than URL)
+        if (socket.value && authToken) {
+          socket.value.send(JSON.stringify({
+            type: 'authenticate',
+            token: authToken,
+          }))
+        }
+        
+        // Note: Connection is not fully ready until auth confirmation
+        connectionState.value = 'authenticating'
         reconnectAttempts = 0
         lastPongReceived = Date.now()
         
@@ -193,6 +205,13 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
           // Handle pong
           if (message.type === 'pong') {
             lastPongReceived = Date.now()
+            return
+          }
+          
+          // Handle authentication confirmation
+          if (message.type === 'authenticated') {
+            connectionState.value = 'connected'
+            console.log('[WebSocket] Authenticated successfully')
             return
           }
           
