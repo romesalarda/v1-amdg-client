@@ -106,6 +106,12 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
     stopHeartbeat()
     
     heartbeatInterval = setInterval(() => {
+      // Don't send ping if page is hidden/inactive
+      if (document.hidden) {
+        console.log('[WebSocket] Page hidden, skipping heartbeat')
+        return
+      }
+      
       if (socket.value?.readyState === WebSocket.OPEN) {
         // Send ping
         const ping: PingMessage = {
@@ -114,7 +120,7 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
         }
         socket.value.send(JSON.stringify(ping))
         
-        // Check if we received pong recently
+        // Check if we received pong recently (only if page is visible)
         const timeSinceLastPong = Date.now() - lastPongReceived
         if (timeSinceLastPong > pongTimeoutMs + heartbeatIntervalMs) {
           console.warn('[WebSocket] No pong received, reconnecting...')
@@ -139,9 +145,14 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
    */
   async function connect() {
     // Prevent multiple simultaneous connections
-    if (connectionState.value === 'connecting' || connectionState.value === 'connected') {
+    if (connectionState.value === 'connecting' || 
+        connectionState.value === 'connected' || 
+        connectionState.value === 'authenticating') {
+      console.log('[WebSocket] Already connecting/connected, skipping duplicate connect()')
       return
     }
+    
+    console.log('[WebSocket] Initiating connection to event:', unref(eventId))
     
     connectionState.value = 'connecting'
     error.value = null
@@ -202,9 +213,12 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
           const message: WSMessage = JSON.parse(event.data)
           lastMessage.value = message
           
+          // Update last pong time for ANY message (server is alive)
+          // This prevents false disconnects when other messages are flowing
+          lastPongReceived = Date.now()
+          
           // Handle pong
           if (message.type === 'pong') {
-            lastPongReceived = Date.now()
             return
           }
           
@@ -233,6 +247,7 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
           // Dispatch to registered handlers
           const handlers = messageHandlers.get(message.type)
           if (handlers) {
+            console.log(`[WebSocket] Dispatching ${message.type} to ${handlers.size} handler(s)`)
             // The backend sends the payload at the top level, not nested under 'data'
             // Extract relevant fields (everything except 'type') as the data payload
             const { type, ...payload } = message as any
@@ -244,6 +259,8 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
                 console.error('[WebSocket] Handler error:', err)
               }
             })
+          } else {
+            console.log(`[WebSocket] No handlers registered for message type: ${message.type}`)
           }
         } catch (err) {
           console.error('[WebSocket] Failed to parse message:', err)
@@ -357,15 +374,20 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
       messageHandlers.set(eventType, new Set())
     }
     
-    messageHandlers.get(eventType)!.add(handler as WSMessageHandler)
+    const handlers = messageHandlers.get(eventType)!
+    handlers.add(handler as WSMessageHandler)
+    
+    console.log(`[WebSocket] Registered handler for '${eventType}' (total: ${handlers.size})`)
     
     // Return unsubscribe function
     return () => {
       const handlers = messageHandlers.get(eventType)
       if (handlers) {
         handlers.delete(handler as WSMessageHandler)
+        console.log(`[WebSocket] Unregistered handler for '${eventType}' (remaining: ${handlers.size})`)
         if (handlers.size === 0) {
           messageHandlers.delete(eventType)
+          console.log(`[WebSocket] Removed empty handler set for '${eventType}'`)
         }
       }
     }
@@ -383,13 +405,41 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
     }
   }
   
-  // Auto-connect on mount
-  onMounted(() => {
+  // Auto-connect immediately (not in onMounted to avoid SSR issues)
+  if (import.meta.client) {
+    console.log('[WebSocket] Auto-connecting on composable init')
     connect()
-  })
+    
+    // Handle page visibility changes
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        console.log('[WebSocket] Page hidden, pausing heartbeat')
+        // Page is hidden - heartbeat will skip pings but keep connection alive
+      } else {
+        console.log('[WebSocket] Page visible again')
+        // Update lastPongReceived to prevent false timeout after tab becomes visible
+        lastPongReceived = Date.now()
+        
+        // Check if connection is still alive
+        if (socket.value?.readyState !== WebSocket.OPEN && 
+            socket.value?.readyState !== WebSocket.CONNECTING) {
+          console.log('[WebSocket] Connection lost while hidden, reconnecting...')
+          reconnect()
+        }
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    
+    // Cleanup visibility listener on unmount
+    onBeforeUnmount(() => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    })
+  }
   
   // Disconnect on unmount
   onBeforeUnmount(() => {
+    console.log('[WebSocket] Component unmounting, disconnecting')
     disconnect()
   })
   

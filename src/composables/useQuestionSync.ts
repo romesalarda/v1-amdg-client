@@ -65,19 +65,40 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
    */
   function handleUserJoined(data: any) {
     const { user } = data
-    if (!user || user.email === currentUserEmail.value) return
+    console.log('[QuestionSync] user.joined event:', { user, currentUser: currentUserEmail.value })
+    
+    if (!user || user.email === currentUserEmail.value) {
+      console.log('[QuestionSync] Ignoring own join event')
+      return
+    }
     
     const exists = activeUsers.value.some(u => u.id === user.id)
     if (!exists) {
       activeUsers.value.push(user)
-      toast.add({
-        title: 'User Joined',
-        description: `${user.name} is now viewing this form`,
-        icon: 'i-heroicons-user-plus',
-        color: 'blue',
-        timeout: 3000,
-      })
+      console.log('[QuestionSync] Added user to activeUsers:', user)
+      // No toast notification - presence is shown in the UI indicator
+    } else {
+      console.log('[QuestionSync] User already in activeUsers')
     }
+  }
+  
+  /**
+   * Handle presence list (sent when we first join)
+   */
+  function handlePresenceList(data: any) {
+    const { users } = data
+    console.log('[QuestionSync] Received presence.list:', { users, currentUser: currentUserEmail.value })
+    
+    if (!users || !Array.isArray(users)) {
+      console.warn('[QuestionSync] Invalid presence list data:', data)
+      return
+    }
+    
+    // Filter out current user and populate activeUsers
+    activeUsers.value = users.filter(u => u.email !== currentUserEmail.value)
+    
+    console.log('[QuestionSync] Active users after filtering:', activeUsers.value)
+    // No notification - presence indicator in UI is sufficient
   }
   
   function handleUserLeft(data: any) {
@@ -87,13 +108,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     const index = activeUsers.value.findIndex(u => u.id === user.id)
     if (index !== -1) {
       activeUsers.value.splice(index, 1)
-      toast.add({
-        title: 'User Left',
-        description: `${user.name} left`,
-        icon: 'i-heroicons-user-minus',
-        color: 'gray',
-        timeout: 2000,
-      })
+      // No notification - presence indicator updates automatically
     }
   }
   
@@ -101,6 +116,8 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
    * Handle question created event from WebSocket
    */
   function handleQuestionCreated(data: QuestionEventData) {
+    console.log('[QuestionSync] handleQuestionCreated called with data:', data)
+    
     // Defensive check: ensure data exists and has required properties
     if (!data || !data.question) {
       console.warn('[QuestionSync] Received invalid question create data:', data)
@@ -108,12 +125,15 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     }
     
     // Ignore our own changes during undo
-    if (isPerformingUndo.value) return
+    if (isPerformingUndo.value) {
+      console.log('[QuestionSync] Ignoring create during undo')
+      return
+    }
     
     const { question, actor } = data
     const isOwnAction = actor?.email === currentUserEmail.value
     
-    console.log('[QuestionSync] handleQuestionCreated:', {
+    console.log('[QuestionSync] Processing question create:', {
       questionId: question.id,
       questionTitle: question.question_title,
       actorEmail: actor?.email,
@@ -159,14 +179,16 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       // Sort by order
       questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
       
-      // Show notification
-      toast.add({
-        title: 'Question Added',
-        description: `"${question.question_title}" was added by ${actor?.email || 'another admin'}`,
-        color: 'blue',
-        timeout: 4000,
-        icon: 'i-heroicons-plus-circle',
-      })
+      // Only show notification if it's from another user
+      if (!isOwnAction) {
+        toast.add({
+          title: 'Question Added',
+          description: `"${question.question_title}" was added`,
+          color: 'blue',
+          timeout: 3000,
+          icon: 'i-heroicons-plus-circle',
+        })
+      }
     } else {
       // Question already exists (from optimistic update) - update with server data
       console.log('[QuestionSync] Question already exists - updating with server data')
@@ -257,10 +279,29 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       })
     } else {
       // Not editing - silently merge changes
+      const isOwnAction = actor?.email === currentUserEmail.value
+      const oldOrder = questions.value[index].order
+      const newOrder = question.order
+      
+      console.log('[QuestionSync] Updating question (not editing):', {
+        questionId: question.id,
+        isOwnAction,
+        actor: actor?.email,
+        currentUser: currentUserEmail.value,
+        orderChanged: oldOrder !== newOrder,
+        oldOrder,
+        newOrder
+      })
+      
       questions.value[index] = question
       
-      // Only show notification if not in bulk operation (like reordering)
-      // This prevents notification spam when multiple questions update at once
+      // Re-sort if order changed to maintain proper visual ordering
+      if (oldOrder !== newOrder) {
+        questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
+      }
+      
+      // No notification - content updates happen silently for better UX
+      // Users can see the changes happening in real-time without notification spam
     }
   }
   
@@ -325,48 +366,67 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   /**
    * Handle question reordered event from WebSocket
    */
-  function handleQuestionReordered(data: QuestionReorderedData) {
-    // Defensive check
-    if (!data || !data.question_ids) {
-      console.warn('[QuestionSync] Received invalid reorder data:', data)
+  function handleQuestionReordered(data: any) {
+    console.log('[QuestionSync] handleQuestionReordered called with data:', data)
+    
+    // Defensive check - backend sends question_ids in question.question_ids
+    const question_ids = data?.question?.question_ids
+    if (!question_ids || !Array.isArray(question_ids)) {
+      console.warn('[QuestionSync] Invalid reorder data:', data)
       return
     }
     
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { question_ids, actor } = data
+    const { actor } = data
+    const isOwnAction = actor?.email === currentUserEmail.value
+    
+    console.log('[QuestionSync] Processing reorder:', {
+      questionCount: question_ids.length,
+      actor: actor?.email,
+      currentUser: currentUserEmail.value,
+      isOwnAction
+    })
+    
+    // Ignore our own reorder actions
+    if (isOwnAction) {
+      console.log('[QuestionSync] Ignoring own reorder action')
+      return
+    }
     
     // Set bulk operation flag to suppress individual update notifications
     isBulkOperation.value = true
     
-    // Reorder questions to match server order
-    const orderedQuestions: EventQuestion[] = []
+    console.log('[QuestionSync] Current order:', questions.value.map(q => ({ id: q.id, order: q.order })))
+    console.log('[QuestionSync] New order from server:', question_ids)
     
-    question_ids.forEach((id, index) => {
+    // Create new array in the correct order to force Vue reactivity
+    const reorderedQuestions: EventQuestion[] = []
+    
+    question_ids.forEach((id: string, index: number) => {
       const question = questions.value.find(q => q.id === id)
       if (question) {
-        orderedQuestions.push({ ...question, order: index })
+        // Create new object to force reactivity
+        reorderedQuestions.push({ ...question, order: index })
       }
     })
     
     // Add any questions not in the reorder list (shouldn't happen)
     questions.value.forEach(q => {
       if (!question_ids.includes(q.id)) {
-        orderedQuestions.push(q)
+        reorderedQuestions.push({ ...q })
       }
     })
     
-    questions.value = orderedQuestions
+    console.log('[QuestionSync] Reordered array:', reorderedQuestions.map(q => ({ id: q.id, order: q.order })))
     
-    // Show single notification for reorder operation
-    toast.add({
-      title: 'Questions Reordered',
-      description: actor ? `Reordered by ${actor}` : 'Question order updated',
-      color: 'blue',
-      timeout: 2000,
-      icon: 'i-heroicons-arrows-up-down',
-    })
+    // Replace the entire array to trigger Vue reactivity
+    questions.value.splice(0, questions.value.length, ...reorderedQuestions)
+    
+    console.log('[QuestionSync] Questions after splice:', questions.value.map(q => ({ id: q.id, order: q.order })))
+    
+    // No notification - visual reordering is sufficient feedback
     
     // Clear bulk operation flag after a short delay
     setTimeout(() => {
@@ -446,22 +506,26 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     isPerformingUndo.value = enabled
   }
   
-  // Subscribe to WebSocket events
-  onMounted(() => {
-    const unsubscribers: (() => void)[] = []
-    
-    unsubscribers.push(
-      ws.on('question.created', handleQuestionCreated),
-      ws.on('question.updated', handleQuestionUpdated),
-      ws.on('question.deleted', handleQuestionDeleted),
-      ws.on('question.reordered', handleQuestionReordered),
-      ws.on('user.joined', handleUserJoined),
-      ws.on('user.left', handleUserLeft),
-    )
-    
-    onBeforeUnmount(() => {
-      unsubscribers.forEach(unsub => unsub())
-    })
+  // Subscribe to WebSocket events IMMEDIATELY (not in onMounted)
+  // This prevents race condition where messages arrive before handlers are registered
+  console.log('[QuestionSync] Registering WebSocket event handlers')
+  
+  const unsubscribers: (() => void)[] = [
+    ws.on('question.created', handleQuestionCreated),
+    ws.on('question.updated', handleQuestionUpdated),
+    ws.on('question.deleted', handleQuestionDeleted),
+    ws.on('question.reordered', handleQuestionReordered),
+    ws.on('user.joined', handleUserJoined),
+    ws.on('user.left', handleUserLeft),
+    ws.on('presence.list', handlePresenceList),
+  ]
+  
+  console.log('[QuestionSync] Registered', unsubscribers.length, 'event handlers')
+  
+  // Cleanup on unmount
+  onBeforeUnmount(() => {
+    console.log('[QuestionSync] Cleaning up event handlers')
+    unsubscribers.forEach(unsub => unsub())
   })
   
   return {

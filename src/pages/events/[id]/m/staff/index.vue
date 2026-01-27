@@ -229,7 +229,7 @@
       </UCard>
     </UModal>
 
-    <!-- Add Role Modal -->s
+    <!-- Add Role Modal -->
     <UModal v-model="showAddRoleModal">
       <UCard>
         <template #header>
