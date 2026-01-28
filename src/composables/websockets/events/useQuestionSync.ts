@@ -61,6 +61,27 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   const isBulkOperation = ref(false)
   
   /**
+   * Check if event is from our own action (deduplication via txn_id)
+   */
+  function isOwnAction(data: any): boolean {
+    const { txn_id, actor } = data
+    
+    // First check: transaction ID matches our last sent ID
+    if (txn_id && txn_id === ws.lastSentTxnId.value) {
+      console.log('[QuestionSync] Own action detected via txn_id:', txn_id)
+      return true
+    }
+    
+    // Fallback: check actor email
+    if (actor?.email === currentUserEmail.value) {
+      console.log('[QuestionSync] Own action detected via actor email')
+      return true
+    }
+    
+    return false
+  }
+  
+  /**
    * Handle user presence events (joined/left)
    */
   function handleUserJoined(data: any) {
@@ -115,7 +136,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   /**
    * Handle question created event from WebSocket
    */
-  function handleQuestionCreated(data: QuestionEventData) {
+  function handleQuestionCreated(data: QuestionEventData & { txn_id?: string }) {
     console.log('[QuestionSync] handleQuestionCreated called with data:', data)
     
     // Defensive check: ensure data exists and has required properties
@@ -130,15 +151,16 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       return
     }
     
-    const { question, actor } = data
-    const isOwnAction = actor?.email === currentUserEmail.value
+    const { question, actor, txn_id } = data
+    const isOwn = isOwnAction(data)
     
     console.log('[QuestionSync] Processing question create:', {
       questionId: question.id,
       questionTitle: question.question_title,
       actorEmail: actor?.email,
+      txnId: txn_id,
       currentUserEmail: currentUserEmail.value,
-      isOwnAction,
+      isOwnAction: isOwn,
       existingQuestions: questions.value.length
     })
     
@@ -153,7 +175,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     if (existingIndex === -1) {
       // If this is our own action, the question is already in the array from optimistic update
       // It just might not have the server ID yet (race condition: WebSocket arrives before HTTP response)
-      if (isOwnAction) {
+      if (isOwn) {
         console.log('[QuestionSync] Own action - question already in array from optimistic update, skipping WebSocket add')
         
         // Try to find by tempId and update it with server data
@@ -167,7 +189,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
             isNew: false,
           }
         } else {
-          console.log('[QuestionSync] No temp question found - HTTP response likely already updated it')
+          console.log('[QuestionSync] No temp question found - already updated')
         }
         return // Don't add duplicate - it's already there
       }
@@ -179,11 +201,11 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       // Sort by order
       questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
       
-      // Only show notification if it's from another user
-      if (!isOwnAction) {
+      // Show notification only if NOT our own action
+      if (!isOwn) {
         toast.add({
           title: 'Question Added',
-          description: `"${question.question_title}" was added`,
+          description: `"${question.question_title}" was added by ${actor?.email || 'another admin'}`,
           color: 'blue',
           timeout: 3000,
           icon: 'i-heroicons-plus-circle',
@@ -207,7 +229,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   /**
    * Handle question updated event from WebSocket
    */
-  function handleQuestionUpdated(data: QuestionEventData) {
+  function handleQuestionUpdated(data: QuestionEventData & { txn_id?: string }) {
     // Defensive check: ensure data exists and has required properties
     if (!data || !data.question) {
       console.warn('[QuestionSync] Received invalid question update data:', data)
@@ -217,7 +239,15 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { question, actor } = data
+    const { question, actor, txn_id } = data
+    const isOwn = isOwnAction(data)
+    
+    console.log('[QuestionSync] Processing question update:', {
+      questionId: question.id,
+      actorEmail: actor?.email,
+      txnId: txn_id,
+      isOwnAction: isOwn
+    })
     
     // Find question in local array
     const index = questions.value.findIndex(q => q.id === question.id)
@@ -231,16 +261,18 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       }
       
       // Not deleted - must be new from another admin, add it
-      questions.value.push(question)
-      questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
+      if (!isOwn) {
+        questions.value.push(question)
+        questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
+      }
       return
     }
     
     // Check if user is currently editing this question
     const isEditing = editingQuestions.value.has(question.id)
     
-    if (isEditing) {
-      // User is editing - create conflict
+    if (isEditing && !isOwn) {
+      // User is editing and it's NOT our own action - create conflict
       conflictingQuestions.value.add(question.id)
       
       // Show conflict warning
@@ -278,29 +310,36 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
         ],
       })
     } else {
-      // Not editing - silently merge changes
-      const isOwnAction = actor?.email === currentUserEmail.value
+      // Not editing OR it's our own action - silently merge changes
       const oldOrder = questions.value[index].order
       const newOrder = question.order
       
-      console.log('[QuestionSync] Updating question (not editing):', {
+      console.log('[QuestionSync] Updating question:', {
         questionId: question.id,
-        isOwnAction,
-        actor: actor?.email,
-        currentUser: currentUserEmail.value,
+        isOwnAction: isOwn,
+        isEditing,
         orderChanged: oldOrder !== newOrder,
         oldOrder,
         newOrder
       })
       
-      questions.value[index] = question
+      // Preserve UI state
+      const preservedState = {
+        isExpanded: questions.value[index].isExpanded,
+        isEditing: questions.value[index].isEditing,
+      }
+      
+      questions.value[index] = {
+        ...question,
+        ...preservedState,
+      }
       
       // Re-sort if order changed to maintain proper visual ordering
       if (oldOrder !== newOrder) {
         questions.value.sort((a, b) => (a.order || 0) - (b.order || 0))
       }
       
-      // No notification - content updates happen silently for better UX
+      // No notification for own actions or silent updates
       // Users can see the changes happening in real-time without notification spam
     }
   }
@@ -308,7 +347,7 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   /**
    * Handle question deleted event from WebSocket
    */
-  function handleQuestionDeleted(data: QuestionDeletedData) {
+  function handleQuestionDeleted(data: QuestionDeletedData & { txn_id?: string; actor?: any }) {
     // Defensive check: ensure data exists and has required properties
     if (!data || !data.question_id) {
       console.warn('[QuestionSync] Received invalid question delete data:', data)
@@ -318,7 +357,15 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { question_id, actor } = data
+    const { question_id, actor, txn_id } = data
+    const isOwn = isOwnAction(data)
+    
+    console.log('[QuestionSync] Processing question delete:', {
+      questionId: question_id,
+      actorEmail: actor?.email,
+      txnId: txn_id,
+      isOwnAction: isOwn
+    })
     
     // Find and remove question
     const index = questions.value.findIndex(q => q.id === question_id)
@@ -342,23 +389,25 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
       conflictingQuestions.value.delete(question_id)
       editingQuestions.value.delete(question_id)
       
-      // Show notification
-      if (wasEditing) {
-        toast.add({
-          title: 'Question Deleted',
-          description: `"${deletedQuestion.question_title}" was deleted by ${actor?.email || 'another admin'} while you were editing it.`,
-          color: 'red',
-          timeout: 6000,
-          icon: 'i-heroicons-trash',
-        })
-      } else {
-        toast.add({
-          title: 'Question Deleted',
-          description: `"${deletedQuestion.question_title}" was deleted`,
-          color: 'orange',
-          timeout: 4000,
-          icon: 'i-heroicons-trash',
-        })
+      // Show notification only if NOT our own action
+      if (!isOwn) {
+        if (wasEditing) {
+          toast.add({
+            title: 'Question Deleted',
+            description: `"${deletedQuestion.question_title}" was deleted by ${actor?.email || 'another admin'} while you were editing it.`,
+            color: 'red',
+            timeout: 6000,
+            icon: 'i-heroicons-trash',
+          })
+        } else {
+          toast.add({
+            title: 'Question Deleted',
+            description: `"${deletedQuestion.question_title}" was deleted by ${actor?.email || 'another admin'}`,
+            color: 'orange',
+            timeout: 4000,
+            icon: 'i-heroicons-trash',
+          })
+        }
       }
     }
   }
@@ -369,9 +418,9 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
   function handleQuestionReordered(data: any) {
     console.log('[QuestionSync] handleQuestionReordered called with data:', data)
     
-    // Defensive check - backend sends question_ids in question.question_ids
-    const question_ids = data?.question?.question_ids
-    if (!question_ids || !Array.isArray(question_ids)) {
+    // Defensive check - backend sends questions array with id/order
+    const questionsOrder = data?.questions
+    if (!questionsOrder || !Array.isArray(questionsOrder)) {
       console.warn('[QuestionSync] Invalid reorder data:', data)
       return
     }
@@ -379,18 +428,19 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     // Ignore our own changes during undo
     if (isPerformingUndo.value) return
     
-    const { actor } = data
-    const isOwnAction = actor?.email === currentUserEmail.value
+    const { actor, txn_id } = data
+    const isOwn = isOwnAction(data)
     
     console.log('[QuestionSync] Processing reorder:', {
-      questionCount: question_ids.length,
+      questionCount: questionsOrder.length,
       actor: actor?.email,
+      txnId: txn_id,
       currentUser: currentUserEmail.value,
-      isOwnAction
+      isOwnAction: isOwn
     })
     
-    // Ignore our own reorder actions
-    if (isOwnAction) {
+    // If it's our own action, skip processing (we already updated optimistically)
+    if (isOwn) {
       console.log('[QuestionSync] Ignoring own reorder action')
       return
     }
@@ -399,22 +449,23 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     isBulkOperation.value = true
     
     console.log('[QuestionSync] Current order:', questions.value.map(q => ({ id: q.id, order: q.order })))
-    console.log('[QuestionSync] New order from server:', question_ids)
+    console.log('[QuestionSync] New order from server:', questionsOrder)
     
     // Create new array in the correct order to force Vue reactivity
     const reorderedQuestions: EventQuestion[] = []
     
-    question_ids.forEach((id: string, index: number) => {
-      const question = questions.value.find(q => q.id === id)
+    questionsOrder.forEach((item: { id: string; order: number }) => {
+      const question = questions.value.find(q => q.id === item.id)
       if (question) {
         // Create new object to force reactivity
-        reorderedQuestions.push({ ...question, order: index })
+        reorderedQuestions.push({ ...question, order: item.order })
       }
     })
     
     // Add any questions not in the reorder list (shouldn't happen)
+    const reorderedIds = questionsOrder.map((item: { id: string }) => item.id)
     questions.value.forEach(q => {
-      if (!question_ids.includes(q.id)) {
+      if (!reorderedIds.includes(q.id)) {
         reorderedQuestions.push({ ...q })
       }
     })
@@ -426,7 +477,15 @@ export function useQuestionSync<T extends EventQuestion = EventQuestion>(
     
     console.log('[QuestionSync] Questions after splice:', questions.value.map(q => ({ id: q.id, order: q.order })))
     
-    // No notification - visual reordering is sufficient feedback
+    // Show notification only if NOT our own action
+    if (!isOwn) {
+      toast.add({
+        title: 'Questions Reordered',
+        description: `Questions were reordered by ${actor?.email || 'another admin'}`,
+        color: 'blue',
+        timeout: 3000,
+      })
+    }
     
     // Clear bulk operation flag after a short delay
     setTimeout(() => {

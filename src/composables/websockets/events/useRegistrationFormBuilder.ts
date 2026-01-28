@@ -1,9 +1,7 @@
 import type { EventQuestion, EventQuestionOption } from '~/api/types.gen'
 import { useDebounceFn } from '@vueuse/core'
 import { nextTick } from 'vue'
-import { useCreateEventQuestion, usePartialUpdateEventQuestion, useDeleteEventQuestion } from '~/composables/resources/events/eventQuestions'
-import { useOptimisticUpdates } from './useOptimisticUpdates'
-import { useAuthStore } from '~/stores/auth'
+import type { useEventWebSocket } from './useEventWebSocket'
 
 interface QuestionDraft {
   id?: string  // UUID from backend
@@ -17,7 +15,6 @@ interface QuestionDraft {
   isNew?: boolean
   isExpanded?: boolean
   isEditing?: boolean
-  operationId?: string  // Track optimistic operation
   [key: string]: any
 }
 
@@ -28,23 +25,11 @@ interface UndoState {
 
 export const useRegistrationFormBuilder = (
   eventIntId: Ref<number | undefined>,
+  ws: ReturnType<typeof useEventWebSocket>,
   focusedFields?: Ref<Set<string>>
 ) => {
   const toast = useToast()
   const queryClient = useQueryClient()
-  const { $api } = useNuxtApp()
-  
-  // Get current user for actor tracking
-  const authStore = useAuthStore()
-  const actorEmail = computed(() => authStore.user?.email || 'unknown')
-  
-  // Initialize mutations at top level (required for Vue Query)
-  const createMutation = useCreateEventQuestion()
-  const updateMutation = usePartialUpdateEventQuestion()
-  const deleteMutation = useDeleteEventQuestion()
-  
-  // Optimistic updates manager
-  const optimistic = useOptimisticUpdates<QuestionDraft>()
   
   // Per-question loading states
   const questionLoadingStates = ref<Map<string, boolean>>(new Map())
@@ -125,7 +110,7 @@ export const useRegistrationFormBuilder = (
     })
   }
   
-  // Save question to backend with optimistic updates (debounced)
+  // Save question to backend via WebSocket (debounced)
   const saveQuestion = async (question: QuestionDraft) => {
     // Validate required fields
     if (!question.question_title || !question.question_type) {
@@ -166,6 +151,17 @@ export const useRegistrationFormBuilder = (
       return
     }
     
+    // Check WebSocket connection
+    if (!ws.isConnected.value) {
+      toast.add({
+        title: 'Not Connected',
+        description: 'WebSocket connection lost. Please wait for reconnection.',
+        color: 'amber',
+        timeout: 5000,
+      })
+      return
+    }
+    
     // Set loading state for this question
     const questionKey = question.id || question.tempId || 'unknown'
     questionLoadingStates.value.set(questionKey, true)
@@ -173,148 +169,114 @@ export const useRegistrationFormBuilder = (
     
     // Store original state for rollback
     const originalQuestion = { ...question }
+    const questionIndex = questions.value.findIndex(q => 
+      (q.tempId && q.tempId === question.tempId) || (q.id && q.id === question.id)
+    )
     
     try {
       // Determine if this is a new question (needs CREATE) or existing (needs UPDATE)
       const isNewQuestion = question.isNew || !question.id || question.id.startsWith('temp-')
       
       if (isNewQuestion) {
-        // CREATE new question with optimistic update
-        const operationId = optimistic.addOperation(
-          'create',
-          question,
-          originalQuestion,
-          async () => {
-            // Prepare options for nested creation
-            const optionsPayload = (question.options || []).map((opt, idx) => {
-              if (typeof opt === 'string') {
-                return {
-                  option_text: opt,
-                  order: idx
-                } as any
-              }
-              return {
-                option_text: opt.option_text || opt,
-                order: idx
-              } as any
-            })
-            
-            const result = await createMutation.mutateAsync({
-              question_title: question.question_title!,
-              question_body: question.question_body || '',
-              question_type: question.question_type as any,
-              event: eventIntId.value!,
-              order: question.order ?? questions.value.length,
-              required: question.required || false,
-              options: optionsPayload, // Include nested options
-            })
-            
-            // Update local state with server response (including UUID)
-            const index = questions.value.findIndex(q => 
-              q.tempId === question.tempId || q.id === question.id
-            )
-            if (index !== -1 && result?.data) {
-              questions.value[index] = {
-                ...result.data,
-                isNew: false,
-                isExpanded: question.isExpanded,
-                isEditing: question.isEditing,
-                options: (result.data as any).options || [],
-              }
-            }
-            
-            // Manual cache update
-            queryClient.setQueryData(
-              ['event-questions', { event__event_id: eventIntId.value }],
-              (old: any) => {
-                if (!old?.data?.results) return old
-                return {
-                  ...old,
-                  data: {
-                    ...old.data,
-                    results: [...(old.data.results || []), result]
-                  }
-                }
-              }
-            )
-            
-            return result
-          }
-        )
+        // CREATE new question via WebSocket
+        console.log('[FormBuilder] Creating question via WebSocket:', question)
         
-        question.operationId = operationId
+        // Prepare options for nested creation
+        const optionsPayload = (question.options || []).map((opt, idx) => {
+          if (typeof opt === 'string') {
+            return {
+              option_text: opt,
+              order: idx
+            } as any
+          }
+          return {
+            option_text: opt.option_text || opt,
+            order: idx
+          } as any
+        })
+        
+        const result = await ws.createQuestion({
+          question_title: question.question_title!,
+          question_body: question.question_body || '',
+          question_type: question.question_type as any,
+          event: eventIntId.value!,
+          order: question.order ?? questions.value.length,
+          required: question.required || false,
+          options: optionsPayload,
+        })
+        
+        console.log('[FormBuilder] Question created:', result)
+        
+        // Update local state with server response (will be confirmed by WebSocket broadcast)
+        if (questionIndex !== -1 && result?.question) {
+          questions.value[questionIndex] = {
+            ...result.question,
+            isNew: false,
+            isExpanded: question.isExpanded,
+            isEditing: question.isEditing,
+          }
+        }
+        
+        toast.add({
+          title: 'Question Created',
+          description: 'Question saved successfully',
+          color: 'green',
+          timeout: 2000,
+        })
       } else {
-        // UPDATE existing question with optimistic update
-        const operationId = optimistic.addOperation(
-          'update',
-          question,
-          originalQuestion,
-          async () => {
-            // Prepare options payload (only id, option_text, order)
-            const optionsPayload = (question.options || []).map((opt, idx) => {
-              if (typeof opt === 'string') {
-                return {
-                  option_text: opt,
-                  order: idx
-                }
-              }
-              // Only include id if it exists (for updates)
-              const payload: any = {
-                option_text: opt.option_text || opt,
-                order: idx
-              }
-              if (opt.id) {
-                payload.id = opt.id
-              }
-              return payload
-            })
-            
-            await updateMutation.mutateAsync({
-              questionId: question.id as string,
-              body: {
-                question_title: question.question_title,
-                question_body: question.question_body,
-                question_type: question.question_type as any,
-                order: question.order,
-                required: question.required,
-                options: optionsPayload as any,
-              } as any,
-            })
-            
-            // Manual cache update
-            queryClient.setQueryData(
-              ['event-questions', { event__event_id: eventIntId.value }],
-              (old: any) => {
-                if (!old?.data?.results) return old
-                return {
-                  ...old,
-                  data: {
-                    ...old.data,
-                    results: old.data.results.map((q: any) =>
-                      q.id === question.id ? { ...q, options: optionsPayload } : q
-                    )
-                  }
-                }
-              }
-            )
-            
-            // Mark as no longer new after successful update
-            const index = questions.value.findIndex(q => q.id === question.id)
-            if (index !== -1) {
-              questions.value[index].isNew = false
+        // UPDATE existing question via WebSocket
+        console.log('[FormBuilder] Updating question via WebSocket:', question)
+        
+        // Prepare options payload
+        const optionsPayload = (question.options || []).map((opt, idx) => {
+          if (typeof opt === 'string') {
+            return {
+              option_text: opt,
+              order: idx
             }
           }
-        )
+          const payload: any = {
+            option_text: opt.option_text || opt,
+            order: idx
+          }
+          if (opt.id) {
+            payload.id = opt.id
+          }
+          return payload
+        })
         
-        question.operationId = operationId
+        const result = await ws.updateQuestion(question.id as string, {
+          question_title: question.question_title,
+          question_body: question.question_body,
+          question_type: question.question_type as any,
+          order: question.order,
+          required: question.required,
+          options: optionsPayload as any,
+        })
+        
+        console.log('[FormBuilder] Question updated:', result)
+        
+        // Mark as no longer new after successful update
+        if (questionIndex !== -1) {
+          questions.value[questionIndex].isNew = false
+        }
       }
+      
+      hasUnsavedChanges.value = false
     } catch (error: unknown) {
-      console.error('Save question error:', error)
+      console.error('[FormBuilder] Save question error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      
+      // Rollback optimistic update on error
+      if (questionIndex !== -1) {
+        questions.value[questionIndex] = originalQuestion
+      }
+      
       toast.add({
         title: 'Save Failed',
         description: errorMessage,
         color: 'red',
+        timeout: 5000,
       })
     } finally {
       // Clear loading state
@@ -326,15 +288,22 @@ export const useRegistrationFormBuilder = (
   // Debounced save with 2 second delay
   const debouncedSave = useDebounceFn(saveQuestion, 2000)
   
-  // Save all questions order
+  // Save all questions order via WebSocket
   const saveQuestionsOrder = async () => {
+    // Check WebSocket connection
+    if (!ws.isConnected.value) {
+      toast.add({
+        title: 'Not Connected',
+        description: 'Cannot save order - WebSocket connection lost',
+        color: 'amber',
+      })
+      return
+    }
+    
     isSaving.value = true
+    
     try {
-      // Two-phase update to avoid unique constraint violations:
-      // Phase 1: Set all questions to temporary high orders (10000+)
-      // Phase 2: Set questions to their final orders (0, 1, 2...)
-      
-      const questionsToUpdate = questions.value.filter(q => {
+      const questionsToReorder = questions.value.filter(q => {
         const hasValidId = q.id && 
                           typeof q.id === 'string' && 
                           !q.id.startsWith('temp-') &&
@@ -342,23 +311,13 @@ export const useRegistrationFormBuilder = (
         return hasValidId
       })
       
-      // Phase 1: Move to temporary high positive orders (avoids conflicts with final positions)
-      const phase1Promises = questionsToUpdate.map((q, index) => {
-        return updateMutation.mutateAsync({
-          questionId: q.id as string,
-          body: { order: 10000 + index }, // High positive number to avoid conflicts
-        })
-      })
-      await Promise.all(phase1Promises)
+      console.log('[FormBuilder] Reordering questions via WebSocket:', questionsToReorder)
       
-      // Phase 2: Set final orders
-      const phase2Promises = questionsToUpdate.map((q, index) => {
-        return updateMutation.mutateAsync({
-          questionId: q.id as string,
-          body: { order: index },
-        })
-      })
-      await Promise.all(phase2Promises)
+      await ws.reorderQuestions(
+        questionsToReorder.map((q, index) => ({ id: q.id as string, order: index }))
+      )
+      
+      console.log('[FormBuilder] Questions reordered successfully')
       
       // Update local state
       questions.value.forEach((q, index) => {
@@ -368,11 +327,7 @@ export const useRegistrationFormBuilder = (
       hasUnsavedChanges.value = false
     } catch (error: any) {
       let errorMessage = 'An error occurred while saving order'
-      if (error?.data?.non_field_errors) {
-        errorMessage = Array.isArray(error.data.non_field_errors) 
-          ? error.data.non_field_errors[0] 
-          : error.data.non_field_errors
-      } else if (error?.message) {
+      if (error?.message) {
         errorMessage = error.message
       }
       
@@ -380,6 +335,7 @@ export const useRegistrationFormBuilder = (
         title: 'Failed to save order',
         description: errorMessage,
         color: 'red',
+        timeout: 5000,
       })
     } finally {
       isSaving.value = false
@@ -522,7 +478,7 @@ export const useRegistrationFormBuilder = (
     })
   }
   
-  // Delete question
+  // Delete question via WebSocket
   const deleteQuestion = async (question: QuestionDraft) => {
     addToHistory()
     
@@ -540,14 +496,31 @@ export const useRegistrationFormBuilder = (
       toast.add({
         title: 'Question removed',
         color: 'green',
+        timeout: 2000,
       })
       return
     }
     
+    // Check WebSocket connection
+    if (!ws.isConnected.value) {
+      toast.add({
+        title: 'Not Connected',
+        description: 'Cannot delete - WebSocket connection lost',
+        color: 'amber',
+      })
+      // Revert history
+      undo()
+      return
+    }
+    
     try {
-      await deleteMutation.mutateAsync(question.id as string)
+      console.log('[FormBuilder] Deleting question via WebSocket:', question.id)
       
-      // Remove from local state
+      await ws.deleteQuestion(question.id as string)
+      
+      console.log('[FormBuilder] Question deleted successfully')
+      
+      // Remove from local state (will be confirmed by WebSocket broadcast)
       const index = questions.value.findIndex(q => q.id === question.id)
       if (index !== -1) {
         questions.value.splice(index, 1)
@@ -564,13 +537,18 @@ export const useRegistrationFormBuilder = (
       toast.add({
         title: 'Question deleted',
         color: 'green',
+        timeout: 2000,
       })
     } catch (error) {
+      console.error('[FormBuilder] Delete failed:', error)
+      
       toast.add({
         title: 'Failed to delete question',
         description: error instanceof Error ? error.message : 'An error occurred',
         color: 'red',
+        timeout: 5000,
       })
+      
       // Revert history on error
       undo()
     }
@@ -733,6 +711,25 @@ export const useRegistrationFormBuilder = (
     window.removeEventListener('keydown', handleKeyboardShortcut)
   })
   
+  // Show warning if disconnected
+  watch(() => ws.isConnected.value, (connected, wasConnected) => {
+    if (wasConnected && !connected) {
+      toast.add({
+        title: 'Connection Lost',
+        description: 'Real-time updates paused. Waiting for reconnection...',
+        color: 'amber',
+        timeout: 5000,
+      })
+    } else if (!wasConnected && connected) {
+      toast.add({
+        title: 'Reconnected',
+        description: 'Real-time updates restored',
+        color: 'green',
+        timeout: 3000,
+      })
+    }
+  })
+  
   return {
     // State
     questions,
@@ -743,8 +740,9 @@ export const useRegistrationFormBuilder = (
     questionTemplates,
     questionLoadingStates: readonly(questionLoadingStates),
     
-    // Optimistic updates
-    optimistic,
+    // Connection state
+    isConnected: ws.isConnected,
+    isConnecting: ws.isConnecting,
     
     // Undo/Redo
     canUndo: computed(() => undoStack.value.length > 0),

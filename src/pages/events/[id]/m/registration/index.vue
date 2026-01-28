@@ -130,12 +130,25 @@
         </div>
 
         <div v-else class="space-y-8">
-          <draggable
+          <div class="relative">
+            <!-- Reordering Overlay -->
+            <div 
+              v-if="isReordering" 
+              class="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50 rounded-lg"
+            >
+              <div class="bg-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 border border-gray-200">
+                <UIcon name="i-heroicons-arrow-path" class="w-6 h-6 text-blue-600 animate-spin" />
+                <span class="text-lg font-medium text-gray-900">Reordering questions...</span>
+              </div>
+            </div>
+            
+            <draggable
             v-model="questions"
             item-key="id"
             handle=".drag-handle"
             :animation="200"
             ghost-class="opacity-50"
+            :disabled="isReordering"
             @end="onDragEnd"
           >
             <template #item="{ element: question, index }">
@@ -415,6 +428,7 @@
               </UCard>
             </template>
           </draggable>
+          </div>
 
           <!-- Empty State -->
           <UCard v-if="questions.length === 0" class="text-center py-16">
@@ -433,7 +447,7 @@
                   label="Add Question"
                   icon="i-heroicons-plus"
                   size="lg"
-                  @click="addQuestion()"
+                  @click="addQuestionWithLoading()"
                 />
                 <UDropdown
                   :items="templateMenuItems"
@@ -458,7 +472,7 @@
               label="Add Question"
               variant="outline"
               size="lg"
-              @click="addQuestion()"
+              @click="addQuestionWithLoading()"
             />
             
             <UDropdown
@@ -631,6 +645,10 @@ const route = useRoute()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
 
+// Reordering state
+const isReordering = ref(false)
+let reorderTimeout: ReturnType<typeof setTimeout> | null = null
+
 // Fetch event data
 const { data: event } = useEvent(id)
 
@@ -641,7 +659,10 @@ const eventIntId = computed(() => event.value?.data?.id)
 const eventIdFilter = { event__event_id: route.params.id as string }
 const { data: questionsData, isLoading: questionsLoading } = useEventQuestions(eventIdFilter)
 
-// Initialize form builder with all Google Forms features
+// Initialize WebSocket connection FIRST (needed by form builder)
+const ws = useEventWebSocket(id)
+
+// Initialize form builder with WebSocket instance
 const {
   questions,
   selectedQuestion,
@@ -650,7 +671,8 @@ const {
   hasUnsavedChanges,
   questionTemplates,
   questionLoadingStates,
-  optimistic,
+  isConnected,
+  isConnecting,
   canUndo,
   canRedo,
   undo,
@@ -663,10 +685,10 @@ const {
   collapseAll,
   expandAll,
   saveAll,
-} = useRegistrationFormBuilder(eventIntId, focusedFields)
+  saveQuestionsOrder,
+} = useRegistrationFormBuilder(eventIntId, ws, focusedFields)
 
-// Initialize WebSocket connection - pass questions ref to prevent race conditions
-const ws = useEventWebSocket(id)
+// Initialize question sync for real-time updates
 const questionSync = useQuestionSync(id, ws, questions as Ref<EventQuestion[]>)
 
 // Unwrap activeUsers for template use
@@ -825,7 +847,7 @@ const templateMenuItems = computed(() => {
   const templateItems = questionTemplates.map(template => ({
     label: template.name,
     icon: 'i-heroicons-sparkles',
-    click: () => addQuestion(template),
+    click: () => addQuestionWithLoading(template),
   }))
   
   if (templateItems.length > 0) {
@@ -835,12 +857,78 @@ const templateMenuItems = computed(() => {
   return items
 })
 
-// Drag end handler - auto-save new order
-const onDragEnd = () => {
+// Wrapper function for adding questions with loading state
+const addQuestionWithLoading = async (template?: any) => {
+  if (isReordering.value) return
+  
+  isReordering.value = true
+  const startTime = Date.now()
+  
+  try {
+    await addQuestion(template)
+  } finally {
+    const elapsed = Date.now() - startTime
+    const remaining = Math.max(0, 1000 - elapsed)
+    
+    setTimeout(() => {
+      isReordering.value = false
+    }, remaining)
+  }
+}
+
+// Wrapper function for deleting questions with loading state
+const deleteQuestionWithLoading = async (question: any) => {
+  if (isReordering.value) return
+  
+  isReordering.value = true
+  const startTime = Date.now()
+  
+  try {
+    await deleteQuestion(question)
+  } finally {
+    const elapsed = Date.now() - startTime
+    const remaining = Math.max(0, 1000 - elapsed)
+    
+    setTimeout(() => {
+      isReordering.value = false
+    }, remaining)
+  }
+}
+
+// Drag end handler - auto-save new order with minimum delay
+const onDragEnd = async () => {
+  // Prevent spam by ignoring if already reordering
+  if (isReordering.value) {
+    return
+  }
+  
+  isReordering.value = true
+  
+  // Clear any existing timeout
+  if (reorderTimeout) {
+    clearTimeout(reorderTimeout)
+  }
+  
+  // Update orders
   questions.value.forEach((q: any, index: number) => {
     q.order = index
   })
-  saveAll()
+  
+  // Minimum 1 second delay to prevent spam and hide jitter
+  const startTime = Date.now()
+  
+  try {
+    // ONLY save order using two-phase approach, don't call saveAll()
+    // This prevents conflicting PATCH requests
+    await saveQuestionsOrder()
+  } finally {
+    const elapsed = Date.now() - startTime
+    const remaining = Math.max(0, 1000 - elapsed)
+    
+    reorderTimeout = setTimeout(() => {
+      isReordering.value = false
+    }, remaining)
+  }
 }
 
 // Confirm delete with user using SweetAlert2
@@ -857,7 +945,7 @@ const confirmDelete = async (question: any) => {
   })
   
   if (result.isConfirmed) {
-    deleteQuestion(question)
+    await deleteQuestionWithLoading(question)
   }
 }
 
