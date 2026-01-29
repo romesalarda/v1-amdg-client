@@ -140,7 +140,7 @@ export function useVerifyOrganisationMembershipWithCode() {
 
   return useMutation({
     mutationFn: ({ membershipId, body }: { membershipId: number; body: OrganisationsMembershipsVerifyWithCodeCreateData['body'] }) =>
-      organisationsMembershipsVerifyWithCodeCreate({ path: { id: membershipId }, body }),
+      organisationsMembershipsVerifyWithCodeCreate({ path: { id: membershipId }, body}),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

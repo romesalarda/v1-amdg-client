@@ -100,6 +100,16 @@
                 />
               </UTooltip>
               
+              <UTooltip text="Validate Questions">
+                <UButton
+                  icon="i-heroicons-check-circle"
+                  variant="ghost"
+                  size="sm"
+                  color="green"
+                  @click="validateAll"
+                />
+              </UTooltip>
+              
               <UTooltip text="Collapse All">
                 <UButton
                   icon="i-heroicons-chevron-up-down"
@@ -160,6 +170,7 @@
                   'ring-2 ring-blue-500': selectedQuestion?.id === question.id || selectedQuestion?.tempId === question.tempId,
                   'border-l-4 border-l-blue-500': question.isExpanded,
                   'ring-2 ring-amber-500': questionSync.conflictingQuestions.value.has(question.id),
+                  'ring-2 ring-red-400 bg-red-50/30': questionValidationErrors.get(question.id || question.tempId || ''),
                 }"
               >
                 <!-- Loading Overlay -->
@@ -240,19 +251,30 @@
                           variant="soft"
                           size="xs"
                         />
+                        <UBadge
+                          v-if="questionValidationErrors.get(question.id || question.tempId || '')"
+                          label="Has Errors"
+                          color="red"
+                          variant="solid"
+                          size="xs"
+                          class="animate-pulse"
+                        />
                       </div>
 
                       <!-- Editable Title -->
                       <div v-if="question.isExpanded && !previewMode">
-                        <UInput
-                          v-model="question.question_title"
-                          placeholder="Question title"
-                          size="lg"
-                          variant="outline"
-                          class="font-semibold"
-                          @focus="markEditing(question.id); focusedFields.add(`${question.id}-title`)"
-                          @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-title`); updateQuestion(question, { question_title: question.question_title })"
-                        />
+                        <UFormGroup :error="getFieldError(question, 'question_title')">
+                          <UInput
+                            v-model="question.question_title"
+                            placeholder="Question title"
+                            size="lg"
+                            variant="outline"
+                            class="font-semibold"
+                            :class="{ 'border-red-500': getFieldError(question, 'question_title') }"
+                            @focus="markEditing(question.id); focusedFields.add(`${question.id}-title`)"
+                            @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-title`); updateQuestion(question, { question_title: question.question_title })"
+                          />
+                        </UFormGroup>
                       </div>
                       <h3
                         v-else
@@ -265,17 +287,21 @@
 
                       <!-- Editable Description -->
                       <div v-if="question.isExpanded && !previewMode">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">
-                          Description <span class="text-red-500">*</span>
-                        </label>
-                        <UTextarea
-                          v-model="question.question_body"
-                          placeholder="Enter question description"
-                          :rows="2"
-                          variant="outline"
-                          @focus="markEditing(question.id); focusedFields.add(`${question.id}-body`)"
-                          @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-body`); updateQuestion(question, { question_body: question.question_body })"
-                        />
+                        <UFormGroup 
+                          label="Description" 
+                          required
+                          :error="getFieldError(question, 'question_body')"
+                        >
+                          <UTextarea
+                            v-model="question.question_body"
+                            placeholder="Enter question description"
+                            :rows="2"
+                            variant="outline"
+                            :class="{ 'border-red-500': getFieldError(question, 'question_body') }"
+                            @focus="markEditing(question.id); focusedFields.add(`${question.id}-body`)"
+                            @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-body`); updateQuestion(question, { question_body: question.question_body })"
+                          />
+                        </UFormGroup>
                       </div>
                       <p
                         v-else-if="question.question_body"
@@ -294,7 +320,16 @@
                               :options="questionTypes"
                               value-attribute="value"
                               size="sm"
-                              @update:model-value="updateQuestion(question, { question_type: typeof $event === 'string' ? $event : $event?.value })"
+                              @update:model-value="(val) => {
+                                const newType = typeof val === 'string' ? val : val?.value
+                                const changes: any = { question_type: newType }
+                                // Set defaults for slider when changing to slider type
+                                if (newType === 'slider' && (question.min_value === undefined || question.max_value === undefined)) {
+                                  changes.min_value = question.min_value ?? 0
+                                  changes.max_value = question.max_value ?? 10
+                                }
+                                updateQuestion(question, changes)
+                              }"
                             />
                           </UFormGroup>
                           
@@ -305,6 +340,37 @@
                               @update:model-value="updateQuestion(question, { required: $event })"
                             />
                           </div>
+                        </div>
+
+                        <!-- Slider Range Settings -->
+                        <div v-if="!previewMode && question.question_type === 'slider'" class="grid grid-cols-2 gap-3">
+                          <UFormGroup 
+                            label="Minimum Value" 
+                            size="sm"
+                            :error="getFieldError(question, 'min_value')"
+                          >
+                            <UInput
+                              :model-value="question.min_value ?? 0"
+                              type="number"
+                              placeholder="0"
+                              :class="{ 'border-red-500': getFieldError(question, 'min_value') }"
+                              @update:model-value="updateQuestion(question, { min_value: Number($event) })"
+                            />
+                          </UFormGroup>
+                          
+                          <UFormGroup 
+                            label="Maximum Value" 
+                            size="sm"
+                            :error="getFieldError(question, 'max_value')"
+                          >
+                            <UInput
+                              :model-value="question.max_value ?? 10"
+                              type="number"
+                              placeholder="10"
+                              :class="{ 'border-red-500': getFieldError(question, 'max_value') }"
+                              @update:model-value="updateQuestion(question, { max_value: Number($event) })"
+                            />
+                          </UFormGroup>
                         </div>
 
                         <!-- Question Preview/Options -->
@@ -323,6 +389,12 @@
                             <!-- Multiple/Single Choice Options -->
                             <div v-else-if="['multiple_choice', 'single_choice'].includes(question.question_type || '')" class="space-y-2">
                               <div v-if="!previewMode" class="space-y-2">
+                                <!-- Options Error Message -->
+                                <div v-if="getFieldError(question, 'options')" class="text-sm text-red-600 flex items-center gap-1">
+                                  <UIcon name="i-heroicons-exclamation-circle" class="w-4 h-4" />
+                                  {{ getFieldError(question, 'options') }}
+                                </div>
+                                
                                 <div
                                   v-for="(option, optIndex) in (question.options || [])"
                                   :key="`${question.id || question.tempId}-option-${optIndex}-${typeof option === 'string' ? option : option.id || option.option_text}`"
@@ -336,6 +408,7 @@
                                     :model-value="typeof option === 'string' ? option : option.option_text"
                                     placeholder="Option text"
                                     class="flex-1"
+                                    :class="{ 'border-red-500': getFieldError(question, 'options') }"
                                     @focus="markEditing(question.id); focusedFields.add(`${question.id}-option-${optIndex}`)"
                                     @blur="unmarkEditing(question.id); focusedFields.delete(`${question.id}-option-${optIndex}`); updateQuestionOption(question, optIndex, ($event.target as HTMLInputElement).value)"
                                   />
@@ -380,10 +453,16 @@
 
                             <!-- Slider Preview -->
                             <div v-else-if="question.question_type === 'slider'" class="text-sm text-gray-600">
-                              <input type="range" class="w-full" min="0" max="10" disabled />
+                              <input
+                                type="range"
+                                class="w-full"
+                                :min="question.min_value ?? 0"
+                                :max="question.max_value ?? 10"
+                                disabled
+                              />
                               <div class="flex justify-between text-xs text-gray-500 mt-1">
-                                <span>0</span>
-                                <span>10</span>
+                                <span>{{ question.min_value ?? 0 }}</span>
+                                <span>{{ question.max_value ?? 10 }}</span>
                               </div>
                             </div>
                           </div>
@@ -671,10 +750,15 @@ const {
   hasUnsavedChanges,
   questionTemplates,
   questionLoadingStates,
+  questionValidationErrors,
   isConnected,
   isConnecting,
   canUndo,
   canRedo,
+  validateQuestion,
+  validateAllQuestions,
+  getQuestionFieldErrors,
+  getFieldError,
   undo,
   redo,
   addQuestion,
@@ -1029,6 +1113,30 @@ const getQuestionTypeDescription = (type: string) => {
 
 const formatQuestionType = (type: string) => {
   return questionTypes.find(t => t.value === type)?.label || type
+}
+
+// Validate all questions and show results
+const validateAll = () => {
+  const validation = validateAllQuestions()
+  
+  if (validation.success) {
+    toast.add({
+      title: 'Validation Passed',
+      description: 'All questions are valid!',
+      color: 'green',
+      timeout: 3000,
+    })
+  } else {
+    Swal.fire({
+      title: 'Validation Errors',
+      html: `<div class="text-left space-y-2">
+        ${validation.errors?.map(err => `<p class="text-sm text-red-600">• ${err}</p>`).join('') || 'Unknown errors'}
+      </div>`,
+      icon: 'error',
+      confirmButtonText: 'Fix Issues',
+      confirmButtonColor: '#ef4444',
+    })
+  }
 }
 </script>
 

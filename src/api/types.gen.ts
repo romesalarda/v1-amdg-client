@@ -5599,7 +5599,7 @@ export type EventQuestionAnswerRequest = {
 
 export type EventQuestionOption = {
     readonly id: number;
-    question: string;
+    readonly question: string;
     option_text: string;
     order?: number;
     readonly created_at: string;
@@ -5620,7 +5620,6 @@ export type EventQuestionOption = {
 };
 
 export type EventQuestionOptionRequest = {
-    question: string;
     option_text: string;
     order?: number;
 };
@@ -9839,7 +9838,6 @@ export type PatchedEventQuestionAnswerRequest = {
 };
 
 export type PatchedEventQuestionOptionRequest = {
-    question?: string;
     option_text?: string;
     order?: number;
 };
@@ -15367,7 +15365,6 @@ export type EventQuestionAnswerRequestWritable = {
 };
 
 export type EventQuestionOptionWritable = {
-    question: string;
     option_text: string;
     order?: number;
 };
@@ -17769,6 +17766,15 @@ export type UserDetailWritable = {
 export type UserOrganisationMembershipCreateUpdateWritable = {
     organisation: number;
     user: number;
+};
+
+/**
+ * Create/Update serializer for UserOrganisationMembership.
+ */
+export type UserOrganisationMembershipCreateUpdateRequestWritable = {
+    organisation: number;
+    user: number;
+    access_code?: string;
 };
 
 /**
@@ -28711,7 +28717,7 @@ export type OrganisationsMembershipsListResponses = {
 export type OrganisationsMembershipsListResponse = OrganisationsMembershipsListResponses[keyof OrganisationsMembershipsListResponses];
 
 export type OrganisationsMembershipsCreateData = {
-    body: UserOrganisationMembershipCreateUpdateRequest;
+    body: UserOrganisationMembershipCreateUpdateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/organisations/memberships/';

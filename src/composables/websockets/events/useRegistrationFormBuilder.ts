@@ -2,6 +2,8 @@ import type { EventQuestion, EventQuestionOption } from '~/api/types.gen'
 import { useDebounceFn } from '@vueuse/core'
 import { nextTick } from 'vue'
 import type { useEventWebSocket } from './useEventWebSocket'
+import { eventQuestionSchema, eventQuestionsArraySchema } from '~/schemas/events/registration'
+import type { ZodError } from 'zod'
 
 interface QuestionDraft {
   id?: string  // UUID from backend
@@ -23,6 +25,15 @@ interface UndoState {
   timestamp: number
 }
 
+interface QuestionValidationErrors {
+  question_title?: string
+  question_body?: string
+  question_type?: string
+  options?: string
+  min_value?: string
+  max_value?: string
+}
+
 export const useRegistrationFormBuilder = (
   eventIntId: Ref<number | undefined>,
   ws: ReturnType<typeof useEventWebSocket>,
@@ -33,6 +44,9 @@ export const useRegistrationFormBuilder = (
   
   // Per-question loading states
   const questionLoadingStates = ref<Map<string, boolean>>(new Map())
+  
+  // Per-question validation errors
+  const questionValidationErrors = ref<Map<string, QuestionValidationErrors>>(new Map())
   
   // State
   const questions = ref<QuestionDraft[]>([])
@@ -95,6 +109,94 @@ export const useRegistrationFormBuilder = (
     },
   ]
 
+  // Validate single question using Zod schema
+  const validateQuestion = (question: QuestionDraft): { success: boolean; errors?: string[] } => {
+    try {
+      eventQuestionSchema.parse(question)
+      return { success: true }
+    } catch (error) {
+      if (error && typeof error === 'object' && 'errors' in error) {
+        const zodError = error as ZodError
+        const errors = zodError.errors.map((err) => {
+          const field = err.path.join('.')
+          return field ? `${field}: ${err.message}` : err.message
+        })
+        return { success: false, errors }
+      }
+      return { success: false, errors: ['Validation failed'] }
+    }
+  }
+
+
+  // Get errors for a specific field of a question
+  const getFieldError = (question: QuestionDraft, field: keyof QuestionValidationErrors): string | undefined => {
+    const questionKey = question.id || question.tempId || 'unknown'
+    const errors = questionValidationErrors.value.get(questionKey)
+    
+    // Filter out errors that don't apply to the current question type
+    if (errors && errors[field]) {
+      // min_value and max_value errors only apply to slider questions
+      if ((field === 'min_value' || field === 'max_value') && question.question_type !== 'slider') {
+        return undefined
+      }
+      // options errors only apply to choice questions
+      if (field === 'options' && !['multiple_choice', 'single_choice'].includes(question.question_type || '')) {
+        return undefined
+      }
+      return errors[field]
+    }
+    
+    return undefined
+  }
+
+  // Get field-level validation errors for a specific question
+  const getQuestionFieldErrors = (question: QuestionDraft): QuestionValidationErrors => {
+    const questionKey = question.id || question.tempId || 'unknown'
+    
+    try {
+      eventQuestionSchema.parse(question)
+      // Clear errors if validation passes
+      questionValidationErrors.value.delete(questionKey)
+      return {}
+    } catch (error) {
+      if (error && typeof error === 'object' && 'errors' in error) {
+        const zodError = error as ZodError
+        const fieldErrors: QuestionValidationErrors = {}
+        
+        zodError.errors.forEach((err) => {
+          const field = err.path[0] as string
+          if (field && !fieldErrors[field as keyof QuestionValidationErrors]) {
+            fieldErrors[field as keyof QuestionValidationErrors] = err.message
+          }
+        })
+        
+        // Store errors for this question
+        questionValidationErrors.value.set(questionKey, fieldErrors)
+        return fieldErrors
+      }
+    }
+    
+    return {}
+  }
+
+  // Validate all questions for duplicate titles
+  const validateAllQuestions = (): { success: boolean; errors?: string[] } => {
+    try {
+      eventQuestionsArraySchema.parse(questions.value)
+      return { success: true }
+    } catch (error) {
+      if (error && typeof error === 'object' && 'errors' in error) {
+        const zodError = error as ZodError
+        const errors = zodError.errors.map((err) => {
+          const field = err.path.join('.')
+          return field ? `Question ${parseInt(field) + 1}: ${err.message}` : err.message
+        })
+        return { success: false, errors }
+      }
+      return { success: false, errors: ['Validation failed'] }
+    }
+  }
+
   // Normalize options to EventQuestionOption format
   const normalizeOptions = (options: any[] | undefined): EventQuestionOption[] => {
     if (!options) return []
@@ -112,21 +214,26 @@ export const useRegistrationFormBuilder = (
   
   // Save question to backend via WebSocket (debounced)
   const saveQuestion = async (question: QuestionDraft) => {
-    // Validate required fields
-    if (!question.question_title || !question.question_type) {
+    // Validate using Zod schema and populate field errors
+    const fieldErrors = getQuestionFieldErrors(question)
+    const validation = validateQuestion(question)
+    
+    if (!validation.success) {
       toast.add({
         title: 'Validation Error',
-        description: 'Question title and type are required',
+        description: validation.errors?.[0] || 'Please check the form',
         color: 'red',
+        timeout: 5000,
       })
       return
     }
-    
-    if (!question.question_body || question.question_body.trim().length === 0) {
+
+    if (!question.question_type) {
       toast.add({
-        title: 'Description Required',
-        description: 'Please add a description for this question',
+        title: 'Validation Error',
+        description: 'Question type is required',
         color: 'red',
+        timeout: 5000,
       })
       return
     }
@@ -141,12 +248,23 @@ export const useRegistrationFormBuilder = (
       }
     }
     
+    // Ensure slider questions have min_value and max_value
+    if (question.question_type === 'slider') {
+      if (question.min_value === undefined || question.min_value === null) {
+        question.min_value = 0
+      }
+      if (question.max_value === undefined || question.max_value === null) {
+        question.max_value = 10
+      }
+    }
+    
     // Validate eventId
     if (!eventIntId.value) {
       toast.add({
         title: 'Event not loaded',
         description: 'Cannot save question - event data not available',
         color: 'red',
+        timeout: 5000,
       })
       return
     }
@@ -195,7 +313,7 @@ export const useRegistrationFormBuilder = (
           } as any
         })
         
-        const result = await ws.createQuestion({
+        const createPayload: any = {
           question_title: question.question_title!,
           question_body: question.question_body || '',
           question_type: question.question_type as any,
@@ -203,7 +321,15 @@ export const useRegistrationFormBuilder = (
           order: question.order ?? questions.value.length,
           required: question.required || false,
           options: optionsPayload,
-        })
+        }
+        
+        // Include min_value and max_value for slider questions
+        if (question.question_type === 'slider') {
+          createPayload.min_value = question.min_value
+          createPayload.max_value = question.max_value
+        }
+        
+        const result = await ws.createQuestion(createPayload)
         
         console.log('[FormBuilder] Question created:', result)
         
@@ -245,14 +371,22 @@ export const useRegistrationFormBuilder = (
           return payload
         })
         
-        const result = await ws.updateQuestion(question.id as string, {
+        const updatePayload: any = {
           question_title: question.question_title,
           question_body: question.question_body,
           question_type: question.question_type as any,
           order: question.order,
           required: question.required,
           options: optionsPayload as any,
-        })
+        }
+        
+        // Include min_value and max_value for slider questions
+        if (question.question_type === 'slider') {
+          updatePayload.min_value = question.min_value
+          updatePayload.max_value = question.max_value
+        }
+        
+        const result = await ws.updateQuestion(question.id as string, updatePayload)
         
         console.log('[FormBuilder] Question updated:', result)
         
@@ -413,17 +547,24 @@ export const useRegistrationFormBuilder = (
     addToHistory()
     
     const tempId = `temp-${Date.now()}`
+    const questionType = template?.question_type || 'short_answer'
     const newQuestion: QuestionDraft = {
       tempId,
       question_title: template?.question_title || 'Untitled Question',
       question_body: template?.question_body || '',
-      question_type: template?.question_type || 'short_answer',
+      question_type: questionType,
       required: template?.required || false,
       order: questions.value.length,
       options: template?.options || [],
       isNew: true,
       isExpanded: true,
       isEditing: true,
+    }
+    
+    // Set defaults for slider questions
+    if (questionType === 'slider') {
+      newQuestion.min_value = template?.min_value ?? 0
+      newQuestion.max_value = template?.max_value ?? 10
     }
     
     questions.value.push(newQuestion)
@@ -565,6 +706,9 @@ export const useRegistrationFormBuilder = (
     // Apply changes optimistically
     Object.assign(questions.value[index], changes)
     
+    // Validate and update field errors
+    getQuestionFieldErrors(questions.value[index])
+    
     hasUnsavedChanges.value = true
     
     // If new question (no server ID yet), don't call API
@@ -621,6 +765,18 @@ export const useRegistrationFormBuilder = (
   
   // Manual save all
   const saveAll = async () => {
+    // First validate all questions for duplicates
+    const validation = validateAllQuestions()
+    if (!validation.success) {
+      toast.add({
+        title: 'Validation Error',
+        description: validation.errors?.[0] || 'Please check all questions',
+        color: 'red',
+        timeout: 7000,
+      })
+      return
+    }
+
     isSaving.value = true
     let hasErrors = false
     
@@ -739,10 +895,17 @@ export const useRegistrationFormBuilder = (
     hasUnsavedChanges,
     questionTemplates,
     questionLoadingStates: readonly(questionLoadingStates),
+    questionValidationErrors: readonly(questionValidationErrors),
     
     // Connection state
     isConnected: ws.isConnected,
     isConnecting: ws.isConnecting,
+    
+    // Validation
+    validateQuestion,
+    validateAllQuestions,
+    getQuestionFieldErrors,
+    getFieldError,
     
     // Undo/Redo
     canUndo: computed(() => undoStack.value.length > 0),

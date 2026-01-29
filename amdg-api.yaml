@@ -35019,6 +35019,7 @@ components:
         question:
           type: string
           format: uuid
+          readOnly: true
         option_text:
           type: string
           maxLength: 255
@@ -35060,9 +35061,6 @@ components:
     EventQuestionOptionRequest:
       type: object
       properties:
-        question:
-          type: string
-          format: uuid
         option_text:
           type: string
           minLength: 1
@@ -35074,7 +35072,6 @@ components:
           default: 0
       required:
       - option_text
-      - question
     EventQuestionRequest:
       type: object
       description: |-
@@ -44178,9 +44175,6 @@ components:
     PatchedEventQuestionOptionRequest:
       type: object
       properties:
-        question:
-          type: string
-          format: uuid
         option_text:
           type: string
           minLength: 1
@@ -49480,6 +49474,9 @@ components:
           type: integer
         user:
           type: integer
+        access_code:
+          type: string
+          writeOnly: true
       required:
       - organisation
       - user

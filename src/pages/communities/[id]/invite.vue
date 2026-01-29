@@ -78,23 +78,27 @@ const onSubmit = handleSubmit((values) => {
   if (!organisation.value) return
 
   // If user already has membership but not verified, just verify it
-  if (existingMembership.value && !isVerified.value) {
-    verifyWithCode(existingMembership.value.id, values.code)
-    return
-  }
+  // if (existingMembership.value && !isVerified.value) {
+  //   verifyWithCode(existingMembership.value.id, values.code)
+  //   return
+  // }
 
   // If no membership, create one first then verify
   if (!isMember.value) {
     createMembership({
       organisation: Number(organisationId.value),
       user: authStore.user!.id,
+      access_code: values.code,
     }, {
       onSuccess: (response: any) => { // TODO: update schema to remove any
         const membershipId = response.data?.id
         if (membershipId) {
-          verifyWithCode(membershipId, values.code)
+          $notyf?.success('Successfully joined the community!')
+          setTimeout(() => {
+            navigateTo(`/communities/${organisationId.value}`)
+          }, 1500)
         } else {
-          $notyf?.error('Failed to create membership')
+          $notyf?.error('Your access code is invalid or has expired')
         }
       },
       onError: (error: any) => {
@@ -104,24 +108,6 @@ const onSubmit = handleSubmit((values) => {
   }
 })
 
-const verifyWithCode = (membershipId: number | string, acceptanceCode: string) => {
-  verifyMembership({
-    membershipId: Number(membershipId),
-    body: {
-      code: acceptanceCode,
-    }   
-  }, {
-    onSuccess: () => {
-      $notyf?.success('Successfully joined the community!')
-      setTimeout(() => {
-        navigateTo(`/communities/${organisationId.value}`)
-      }, 1500)
-    },
-    onError: (error: any) => {
-      $notyf?.error(error?.body?.error || error?.message || 'Invalid or expired acceptance code')
-    }
-  })
-}
 </script>
 
 <template>
