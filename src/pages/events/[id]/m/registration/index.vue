@@ -95,6 +95,7 @@
                 <UButton
                   :icon="previewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
                   :variant="previewMode ? 'solid' : 'ghost'"
+                  :disabled="readOnly"
                   size="sm"
                   @click="togglePreviewMode"
                 />
@@ -107,6 +108,7 @@
                   size="sm"
                   color="green"
                   @click="validateAll"
+                  :disabled="readOnly"
                 />
               </UTooltip>
               
@@ -116,6 +118,7 @@
                   variant="ghost"
                   size="sm"
                   @click="collapseAll"
+                  :disabled="readOnly"
                 />
               </UTooltip>
               
@@ -469,10 +472,9 @@
                         </div>
                       </div>
                     </div>
-
                     <!-- Action Buttons -->
                     <div v-if="!previewMode" class="flex items-start gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <UTooltip text="Expand/Collapse">
+                      <UTooltip text="Expand/Collapse" v-if="canEditQuestions">
                         <UButton
                           :icon="question.isExpanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
                           variant="ghost"
@@ -482,7 +484,7 @@
                         />
                       </UTooltip>
                       
-                      <UTooltip text="Duplicate (Ctrl+D)">
+                      <UTooltip text="Duplicate (Ctrl+D)" v-if="canEditQuestions">
                         <UButton
                           icon="i-heroicons-document-duplicate"
                           variant="ghost"
@@ -492,7 +494,7 @@
                         />
                       </UTooltip>
                       
-                      <UTooltip text="Delete (Del)">
+                      <UTooltip text="Delete (Del)" v-if="canDeleteQuestions">
                         <UButton
                           icon="i-heroicons-trash"
                           variant="ghost"
@@ -544,7 +546,7 @@
           </UCard>
 
           <!-- Add Question Button -->
-          <div v-else class="flex items-center gap-3 flex-wrap">
+          <div v-else-if="canCreatedQuestions" class="flex items-center gap-3 flex-wrap">
             <UButton
               class="flex-1 min-w-[200px]"
               icon="i-heroicons-plus"
@@ -701,10 +703,14 @@ import type { EventQuestion } from '~/api/types.gen'
 import { eventQuestionsRetrieve } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { useRegistrationFormBuilder } from '~/composables/websockets/events/useRegistrationFormBuilder'
 import { useEventWebSocket } from '~/composables/websockets/events/useEventWebSocket'
 import { useQuestionSync } from '~/composables/websockets/events/useQuestionSync'
+import { useCurrentUserEventPermissions } from '~/composables/permissions'
+
+import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+
+
 import draggable from 'vuedraggable'
 import Swal from 'sweetalert2'
 
@@ -716,13 +722,26 @@ definePageMeta({
   middleware: ['auth', 'event-permission'],
   eventPermission: {
     category: 'REGISTRATION',
-    action: 'write'
+    action: 'read'
   }
 })
 
+
+
 const route = useRoute()
-const id = computed(() => String(route.params.id))
 const toast = useToast()
+
+const id = computed(() => String(route.params.id))
+const { can } = useCurrentUserEventPermissions(id, {
+  refetchInterval: 30000,
+  refetchOnWindowFocus: true,
+  staleTime: 15000
+})
+
+const canEditQuestions = computed(() => can('REGISTRATION', 'update').value.allowed)
+const canDeleteQuestions = computed(() => can('REGISTRATION', 'delete').value.allowed)
+const canCreatedQuestions = computed(() => can('REGISTRATION', 'create').value.allowed)
+const readOnly = computed(() => !canEditQuestions.value && !canDeleteQuestions.value && !canCreatedQuestions.value)
 
 // Reordering state
 const isReordering = ref(false)
@@ -778,6 +797,14 @@ const questionSync = useQuestionSync(id, ws, questions as Ref<EventQuestion[]>)
 // Unwrap activeUsers for template use
 const activeUsers = computed(() => questionSync.activeUsers.value)
 
+onMounted(() => {
+  // set preview mode locked to true if readOnly
+  if (readOnly.value) {
+    previewMode.value = true
+    expandAll()
+  }
+})
+
 // Handle preview mode toggle with unsaved changes warning
 const togglePreviewMode = async () => {
   if (!previewMode.value && hasUnsavedChanges.value) {
@@ -824,7 +851,7 @@ const handleQuestionCardClick = (question: any, event: MouseEvent) => {
 }
 
 // Sync API data with local state (only on initial load)
-watch(questionsData, (newData) => {
+watch(questionsData, async (newData: any) => {
   if (newData?.data?.results && questions.value.length === 0) {
     const initialQuestions = newData.data.results.map((q: any) => ({
       ...q,
@@ -833,7 +860,6 @@ watch(questionsData, (newData) => {
       isNew: false,
     }))
     questions.value = initialQuestions
-    // No need to sync with questionSync - it uses the same ref now
   }
 }, { immediate: true })
 

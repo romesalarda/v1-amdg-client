@@ -103,7 +103,7 @@ export function useDeleteEventStaff() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (staffId: number) => eventStaffDestroy({ path: { staff_id: String(staffId) } }),
+    mutationFn: (staffId: String) => eventStaffDestroy({ path: { staff_id: String(staffId) } }),
     onSuccess: (_, staffId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

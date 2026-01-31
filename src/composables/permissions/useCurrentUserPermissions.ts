@@ -23,6 +23,33 @@ import {
   getPermissionSummary,
 } from './eventPermissionHelpers'
 
+export interface PermissionRefreshOptions {
+  /**
+   * Time in milliseconds before data is considered stale
+   * @default 300000 (5 minutes)
+   */
+  staleTime?: number
+
+  /**
+   * Automatically refetch when window regains focus
+   * @default true
+   */
+  refetchOnWindowFocus?: boolean
+
+  /**
+   * Automatically refetch at a regular interval (in milliseconds)
+   * Set to false or 0 to disable
+   * @default false
+   */
+  refetchInterval?: number | false
+
+  /**
+   * Continue refetching in background even when window is not focused
+   * @default false
+   */
+  refetchIntervalInBackground?: boolean
+}
+
 /**
  * Get current user's permissions for an event with helper methods
  * 
@@ -31,11 +58,14 @@ import {
  * for common permission checks.
  * 
  * @param eventId - The event ID to check permissions for
+ * @param options - Configuration options for caching and auto-refresh behavior
  * 
  * @example
  * ```vue
  * <script setup>
  * const eventId = ref('event-123')
+ * 
+ * // Basic usage with defaults
  * const {
  *   permissions,
  *   isLoading,
@@ -47,7 +77,18 @@ import {
  *   isAdmin,
  *   isCreator,
  *   isStaffMember,
+ *   refresh,
  * } = useCurrentUserEventPermissions(eventId)
+ * 
+ * // With auto-refresh options
+ * const permissions = useCurrentUserEventPermissions(eventId, {
+ *   refetchOnWindowFocus: true,  // Refresh when tab gains focus
+ *   refetchInterval: 60000,      // Refresh every minute
+ *   staleTime: 30000,            // Consider stale after 30 seconds
+ * })
+ * 
+ * // Manual refresh
+ * await refresh()
  * 
  * // Use in template
  * if (can('REGISTRATION', 'create').allowed) {
@@ -56,29 +97,68 @@ import {
  * </script>
  * ```
  */
-export function useCurrentUserEventPermissions(eventId: MaybeRefOrGetter<string>) {
+export function useCurrentUserEventPermissions(
+  eventId: MaybeRefOrGetter<string>,
+  options: PermissionRefreshOptions = {}
+) {
+  const {
+    staleTime = 5 * 60 * 1000, // 5 minutes default
+    refetchOnWindowFocus = true,
+    refetchInterval = false,
+    refetchIntervalInBackground = false,
+  } = options
+
   // Fetch event detail to get user_permissions
+  // Use dedicated query key to avoid cache conflicts with useEvent composable
   const {
     data: eventData,
     isLoading,
     error,
     refetch,
   } = useQuery({
-    queryKey: ['events', 'detail', eventId] as const,
+    queryKey: ['eventPermissions', 'userPermissions', eventId] as const,
     queryFn: async () => {
       const id = toValue(eventId)
       const response = await eventListRetrieve({
         path: { event_id: id },
       })
+      
+      // CRITICAL: Validate that user_permissions exists
+      // If it's missing, throw error to trigger retry and prevent bad data from replacing good cache
+      if (!response.data?.user_permissions) {
+        console.error('[Permissions] API response missing user_permissions - triggering retry:', response.data)
+        throw new Error('API response missing user_permissions field')
+      }
+      
+      console.log('[Permissions] Successfully loaded permissions:', response.data.user_permissions)
       return response.data
     },
     enabled: () => !!toValue(eventId),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime,
+    refetchOnWindowFocus,
+    refetchInterval,
+    refetchIntervalInBackground,
+    // Keep previous data while refetching to avoid "No permissions available"
+    placeholderData: (previousData) => previousData,
+    // Retry on failure (including when user_permissions is missing)
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   })
+  
 
   // Extract user_permissions from event data
   const permissions = computed<UserEventPermissions | null>(() => {
-    if (!eventData.value?.user_permissions) return null
+    if (!eventData.value?.user_permissions) {
+      console.warn('[Permissions] No permissions in eventData:', {
+        hasEventData: !!eventData.value,
+        hasUserPermissions: !!eventData.value?.user_permissions,
+        isLoading: isLoading.value,
+        hasError: !!error.value,
+      })
+      console.log(eventData.value);
+      
+      return null
+    }
     
     // Transform to match our UserEventPermissions interface
     return {
@@ -155,12 +235,21 @@ export function useCurrentUserEventPermissions(eventId: MaybeRefOrGetter<string>
     )
   })
 
+  /**
+   * Manually refresh permissions from the server
+   * Useful when you know permissions have changed and need immediate update
+   */
+  const refresh = async () => {
+    return await refetch()
+  }
+
   return {
     // Raw data
     permissions,
     isLoading,
     error,
     refetch,
+    refresh,
 
     // Quick access properties
     isAdmin,

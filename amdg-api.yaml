@@ -23379,6 +23379,11 @@ paths:
         schema:
           type: string
         description: Order results by field (prefix with - for descending)
+      - in: query
+        name: organisation
+        schema:
+          type: string
+        description: Filter by organisation name (case-insensitive partial match)
       - name: page
         required: false
         in: query
@@ -38471,6 +38476,15 @@ components:
           type: string
           description: Get full name of the user who sent the invite.
           readOnly: true
+        permission_template:
+          type: string
+          nullable: true
+          description: Code of the permission template to apply when invite is accepted
+          maxLength: 50
+        permission_template_name:
+          type: string
+          description: Get the name of the permission template if one is set.
+          readOnly: true
         accepted:
           type: boolean
         accepted_at:
@@ -38530,6 +38544,7 @@ components:
       - invited_by_email
       - invited_by_name
       - is_valid
+      - permission_template_name
       - target_user
       - target_user_email
       - target_user_name
@@ -38621,6 +38636,11 @@ components:
         target_user:
           type: integer
           nullable: true
+        permission_template:
+          type: string
+          nullable: true
+          description: Code of the permission template to apply when invite is accepted
+          maxLength: 50
         accepted:
           type: boolean
         expires_at:
@@ -45584,6 +45604,11 @@ components:
         target_user:
           type: integer
           nullable: true
+        permission_template:
+          type: string
+          nullable: true
+          description: Code of the permission template to apply when invite is accepted
+          maxLength: 50
         accepted:
           type: boolean
         expires_at:

@@ -10,55 +10,35 @@
               <div>
                 <h2 class="text-xl font-bold text-gray-900">Event Staff</h2>
                 <p class="text-sm text-gray-600 mt-1">
-                  Manage staff members and their roles for this event
+                  Manage staff members and their permissions for this event
                 </p>
               </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Staff"
-                @click="showAddModal = true"
-              />
+              <div class="flex gap-2">
+                <UButton
+                  icon="i-heroicons-envelope"
+                  label="Send Invite"
+                  @click="showInviteModal = true"
+                />
+              </div>
             </div>
           </template>
 
           <div v-if="staffLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-16" />
+            <USkeleton v-for="i in 3" :key="i" class="h-20" />
           </div>
 
           <div v-else-if="staffList.length" class="space-y-3">
-            <div
+            <UserStaffCard
               v-for="staff in staffList"
               :key="staff.staff_id"
-              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <div class="flex items-center gap-4">
-                <div
-                  class="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center"
-                >
-                  <span class="text-sm font-semibold text-primary-600">
-                    {{ staff.user_email?.[0]?.toUpperCase() || '?' }}
-                  </span>
-                </div>
-                <div>
-                  <div class="font-semibold text-gray-900">
-                    {{ staff.user_email }}
-                  </div>
-                  <div class="text-sm text-gray-600">
-                    Staff ID: {{ staff.staff_id }}
-                  </div>
-                </div>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <UButton
-                  icon="i-heroicons-trash"
-                  color="red"
-                  variant="ghost"
-                  size="sm"
-                  @click="removeStaff(staff.staff_id)"
-                />
-              </div>
-            </div>
+              :staff="staff"
+              :permissions="getStaffPermissions(staff.user!)"
+              :canUpdateStaff="canUpdateStaff"
+              :canDeleteStaff="canDeleteStaff"
+              @remove="removeStaff(staff.staff_id)"
+              @update-permissions="handleUpdatePermissions(staff, $event)"
+              
+            />
           </div>
 
           <div v-else class="text-center py-12">
@@ -67,58 +47,9 @@
             </div>
             <p class="text-gray-600 mb-4">No staff members yet</p>
             <UButton
-              label="Add First Staff Member"
-              @click="showAddModal = true"
+              label="Send First Invite"
+              @click="showInviteModal = true"
             />
-          </div>
-        </UCard>
-
-        <!-- Roles List -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold">Staff Roles</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Define roles that can be assigned to staff members
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Role"
-                @click="showAddRoleModal = true"
-              />
-            </div>
-          </template>
-
-          <div v-if="rolesLoading" class="space-y-3">
-            <USkeleton v-for="i in 2" :key="i" class="h-12" />
-          </div>
-
-          <div v-else-if="rolesList.length" class="space-y-3">
-            <div
-              v-for="role in rolesList"
-              :key="role.id"
-              class="flex items-center justify-between p-3 border border-gray-200 rounded-lg"
-            >
-              <div>
-                <div class="font-semibold">{{ role.name }}</div>
-                <div v-if="role.description" class="text-sm text-gray-600">
-                  {{ role.description }}
-                </div>
-              </div>
-              <UButton
-                icon="i-heroicons-trash"
-                color="red"
-                variant="ghost"
-                size="sm"
-                @click="removeRole(role.id)"
-              />
-            </div>
-          </div>
-
-          <div v-else class="text-center py-8 text-gray-600">
-            No roles defined
           </div>
         </UCard>
       </div>
@@ -165,125 +96,43 @@
       </div>
     </div>
 
-    <!-- Add Staff Modal -->
-    <UModal v-model="showAddModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">Add Staff Member</h3>
-        </template>
+    <!-- Advanced Invite Modal -->
+    <AdvancedInviteModal
+      v-if="event?.data"
+      v-model="showInviteModal"
+      :event-id="event?.data.id"
+      :users-list="usersList"
+      :roles-list="rolesList"
+      @invite-sent="handleInviteSent"
+    />
 
-        <form @submit="onAddStaff" class="space-y-4">
-          <UFormGroup label="User" name="user" required>
-            <USelectMenu
-              v-model="selectedUser"
-              :options="usersList"
-              searchable
-              :search-attributes="['email', 'first_name', 'last_name']"
-              placeholder="Search for a user..."
-              value-attribute="id"
-              @update:query="userSearch = $event"
-            >
-              <template #label>
-                <span v-if="selectedUser" class="truncate">
-                  {{ selectedUser.email }}
-                  <span v-if="selectedUser.first_name || selectedUser.last_name" class="text-gray-500">
-                    ({{ selectedUser.first_name }} {{ selectedUser.last_name }})
-                  </span>
-                </span>
-              </template>
-              <template #option="{ option }">
-                <div class="flex flex-col">
-                  <span class="font-medium">{{ option.email }}</span>
-                  <span v-if="option.first_name || option.last_name" class="text-sm text-gray-500">
-                    {{ option.first_name }} {{ option.last_name }}
-                  </span>
-                </div>
-              </template>
-            </USelectMenu>
-          </UFormGroup>
-
-          <UFormGroup label="Role" name="role">
-            <USelectMenu
-              v-model="addStaffForm.role as any"
-              :options="rolesList"
-              option-attribute="name"
-              value-attribute="id"
-              placeholder="Select a role (optional)"
-              nullable
-            />
-          </UFormGroup>
-
-          <div class="flex justify-end gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
-              @click="showAddModal = false"
-            />
-            <UButton
-              label="Add Staff"
-              type="submit"
-              :loading="addStaffMutation.isPending.value"
-            />
-          </div>
-        </form>
-      </UCard>
-    </UModal>
-
-    <!-- Add Role Modal -->
-    <UModal v-model="showAddRoleModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">Add Staff Role</h3>
-        </template>
-
-        <form @submit="onAddRole" class="space-y-4">
-          <UFormGroup label="Role Name" name="name" required>
-            <UInput
-              v-model="addRoleForm.name"
-              placeholder="e.g. Coordinator, Volunteer"
-            />
-          </UFormGroup>
-
-          <UFormGroup label="Description" name="description">
-            <UTextarea
-              v-model="addRoleForm.description"
-              placeholder="Role responsibilities..."
-              :rows="3"
-            />
-          </UFormGroup>
-
-          <div class="flex justify-end gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
-              @click="showAddRoleModal = false"
-            />
-            <UButton
-              label="Create Role"
-              type="submit"
-              :loading="addRoleMutation.isPending.value"
-            />
-          </div>
-        </form>
-      </UCard>
-    </UModal>
+  
   </EventsManagementLayout>
 </template>
 
 <script setup lang="ts">
 import { useEvent } from '~/composables/resources/events/events'
-import { useEventStaff, useCreateEventStaff, useDeleteEventStaff } from '~/composables/resources/events/eventStaff'
+import { useEventStaff, useDeleteEventStaff } from '~/composables/resources/events/eventStaff'
 import { useEventRoles, useCreateEventRole, useDeleteEventRole } from '~/composables/resources/events/eventRoles'
+import { useEventPermissions } from '~/composables/resources/events/eventPermissions'
+import { useEventPermissionAssignments, useCreateEventPermissionAssignment, useDeleteEventPermissionAssignment } from '~/composables/resources/events/eventPermissionAssignments'
+import { useCreateEventStaffInvite } from '~/composables/resources/events/eventStaffInvites'
+import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { useUsers } from '~/composables/resources/user/users'
-import EventsManagementLayout from "~/components/events/EventManagementLayout.vue"
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
+
+import EventsManagementLayout from "~/components/events/EventManagementLayout.vue"
+import UserStaffCard from '~/components/staff/UserStaffCard.vue'
+import AdvancedInviteModal from '~/components/staff/AdvancedInviteModal.vue'
+import type { EventPermissionAssignment } from '~/api/types.gen'
+import type { CRUDAction } from '~/types/permissions'
 
 
 definePageMeta({
   layout: false,
   middleware: ['auth', 'event-permission'],
   eventPermission: {
-    category: 'STAFF',
+    category: 'STAFF_MANAGEMENT',
     action: 'read'
   }
 })
@@ -291,6 +140,15 @@ definePageMeta({
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
+
+const { can } = useCurrentUserEventPermissions(id, {
+  refetchInterval: 30000,
+  refetchOnWindowFocus: true,
+  staleTime: 15000
+})
+
+const canUpdateStaff = computed(() => can('STAFF_MANAGEMENT', 'update').value.allowed)
+const canDeleteStaff = computed(() => can('STAFF_MANAGEMENT', 'delete').value.allowed)
 
 // Fetch event data
 const { data: event } = useEvent(id)
@@ -303,55 +161,114 @@ const { data: rolesData, isLoading: rolesLoading, refetch: refetchRoles } = useE
 const staffList = computed(() => staffData.value?.data?.results || [])
 const rolesList = computed(() => rolesData.value?.data?.results || [])
 
-// User search for adding staff
+// Fetch permissions
+const { data: permissionsData } = useEventPermissions()
+const permissionsList = computed(() => permissionsData.value?.data?.results || [])
+
+// Fetch permission assignments
+const permissionsFilter = computed(() => ({ event: event.value?.data?.id }))
+const { data: permissionAssignmentsData, refetch: refetchPermissions } = useEventPermissionAssignments(permissionsFilter)
+const permissionAssignments = computed(() => permissionAssignmentsData.value?.data?.results || [])
+
+const { data: organisationData } = useOrganisation(event.value?.data?.organisation || 0 )
+// User search for invite modal
 const userSearch = ref('')
 const usersParams = computed(() => ({
   search: userSearch.value || undefined,
+  organisation: organisationData.value?.data?.title,
 }))
 const { data: usersData } = useUsers(usersParams)
 const usersList = computed(() => usersData.value?.data?.results || [])
-const selectedUser = ref<any>(null)
 
 // Modals
-const showAddModal = ref(false)
+const showInviteModal = ref(false)
 const showAddRoleModal = ref(false)
 
-// Add staff form
-const addStaffForm = reactive({
-  role: null as number | null,
-})
+// Get permissions for a specific staff member
+const getStaffPermissions = (userId: number): EventPermissionAssignment[] => {
+  return permissionAssignments.value.filter(p => p.user === userId)
+}
 
-const addStaffMutation = useCreateEventStaff()
+// Handle invite sent
+const createInviteMutation = useCreateEventStaffInvite()
 
-const onAddStaff = async (e: Event) => {
-  e.preventDefault()
-
-  if (!selectedUser.value) {
-    toast.add({
-      title: 'Please select a user',
-      color: 'red',
-    })
-    return
-  }
-
+const handleInviteSent = async (inviteData: any) => {
   try {
-    await addStaffMutation.mutateAsync({
-      user: selectedUser.value.id,
-      event: Number(route.params.id),
+    // Create the invite
+    await createInviteMutation.mutateAsync({
+      eventId: String(route.params.id),
+      body: {
+        target_user: inviteData.userId,
+        expires_at: inviteData.expiryDate || undefined,
+      }
     })
 
     toast.add({
-      title: 'Staff member added',
+      title: 'Invite sent',
+      description: 'Staff invitation has been sent successfully',
       color: 'green',
     })
 
-    showAddModal.value = false
-    selectedUser.value = null
-    addStaffForm.role = null
+    showInviteModal.value = false
     refetchStaff()
   } catch (error) {
     toast.add({
-      title: 'Failed to add staff member',
+      title: 'Failed to send invite',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+// Handle permission updates
+const createPermissionMutation = useCreateEventPermissionAssignment()
+const deletePermissionMutation = useDeleteEventPermissionAssignment()
+
+const handleUpdatePermissions = async (staff: any, permissions: Record<string, CRUDAction[]>) => {
+  try {
+    // Get current permissions for this user
+    const currentPermissions = getStaffPermissions(staff.user!)
+
+    console.log("permissinons to update", permissionAssignments.value);
+    
+    
+    // Delete existing permissions
+    for (const perm of currentPermissions) {
+      await deletePermissionMutation.mutateAsync(perm.id)
+    }
+    
+    // Create new permissions
+    for (const [category, actions] of Object.entries(permissions)) {
+      // Find the permission by category
+      const permission = permissionsList.value.find(p => p.category === category)
+      if (!permission) continue
+
+      const event_pk = event.value?.data.id
+      console.log("event pk ", event_pk);
+      
+      if (!event_pk) continue
+      
+      // Create permission assignment
+      await createPermissionMutation.mutateAsync({
+        event: event_pk,
+        user: staff.user!,
+        permission: permission.id,
+        read_only: actions.includes('read') && actions.length === 1,
+        allow_create: actions.includes('create'),
+        allow_update: actions.includes('update'),
+        allow_delete: actions.includes('delete'),
+      })
+    }
+
+    toast.add({
+      title: 'Permissions updated',
+      color: 'green',
+    })
+
+    refetchPermissions()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update permissions',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'red',
     })
@@ -362,11 +279,10 @@ const onAddStaff = async (e: Event) => {
 const removeStaffMutation = useDeleteEventStaff()
 
 const removeStaff = async (staffId: string) => {
-  if (!confirm('Remove this staff member?')) return
+  if (!confirm('Remove this staff member? This will also remove all their permissions.')) return
 
   try {
-    // Convert string staff_id to number for mutation
-    await removeStaffMutation.mutateAsync(parseInt(staffId))
+    await removeStaffMutation.mutateAsync(staffId)
 
     toast.add({
       title: 'Staff member removed',
@@ -374,6 +290,7 @@ const removeStaff = async (staffId: string) => {
     })
 
     refetchStaff()
+    refetchPermissions()
   } catch (error) {
     toast.add({
       title: 'Failed to remove staff member',

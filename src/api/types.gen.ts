@@ -7326,6 +7326,14 @@ export type EventStaffInvite = {
      * Get full name of the user who sent the invite.
      */
     readonly invited_by_name: string;
+    /**
+     * Code of the permission template to apply when invite is accepted
+     */
+    permission_template?: string | null;
+    /**
+     * Get the name of the permission template if one is set.
+     */
+    readonly permission_template_name: string;
     accepted?: boolean;
     readonly accepted_at: string | null;
     expires_at?: string | null;
@@ -7402,6 +7410,10 @@ export type EventStaffInviteList = {
  */
 export type EventStaffInviteRequest = {
     target_user: number | null;
+    /**
+     * Code of the permission template to apply when invite is accepted
+     */
+    permission_template?: string | null;
     accepted?: boolean;
     expires_at?: string | null;
     is_active?: boolean;
@@ -10569,6 +10581,10 @@ export type PatchedEventStaffAvailabilityRequest = {
  */
 export type PatchedEventStaffInviteRequest = {
     target_user?: number | null;
+    /**
+     * Code of the permission template to apply when invite is accepted
+     */
+    permission_template?: string | null;
     accepted?: boolean;
     expires_at?: string | null;
     is_active?: boolean;
@@ -16095,6 +16111,10 @@ export type EventStaffAvailabilityWritable = {
  */
 export type EventStaffInviteWritable = {
     target_user: number | null;
+    /**
+     * Code of the permission template to apply when invite is accepted
+     */
+    permission_template?: string | null;
     accepted?: boolean;
     expires_at?: string | null;
     is_active?: boolean;
@@ -32191,6 +32211,10 @@ export type UsersListData = {
          * Order results by field (prefix with - for descending)
          */
         ordering?: string;
+        /**
+         * Filter by organisation name (case-insensitive partial match)
+         */
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */

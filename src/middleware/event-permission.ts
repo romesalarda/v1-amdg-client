@@ -67,6 +67,9 @@ interface EventPermissionMeta {
 export default defineNuxtRouteMiddleware(async (to) => {
   // Get event permission configuration from route meta
   const permissionMeta = to.meta.eventPermission as EventPermissionMeta | undefined
+  
+  console.log(permissionMeta);
+  
 
   if (!permissionMeta) {
     // No permission check configured for this route
@@ -103,6 +106,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     const permissions = eventData?.user_permissions as UserEventPermissions | undefined
+
+    console.log(eventData);
+    
 
     if (!permissions) {
       console.error('[event-permission] No user_permissions found in event data')
