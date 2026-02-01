@@ -5726,6 +5726,132 @@ paths:
           description: Permission denied
         '404':
           description: User not found
+  /api/event/list/{event_id}/apply-availability-template/:
+    post:
+      operationId: event_list_apply_availability_template_create
+      description: Apply an availability window template to the event. This will create
+        multiple availability windows based on the template configuration. Each window's
+        dates are calculated using offsets from the event start date. This is a convenient
+        way to set up standard availability windows (registration, payment, refunds,
+        etc.) without manually creating each one.
+      summary: Apply Template to Event
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: event_type
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: organisation
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          x-spec-enum-id: 82b35cdc75bb5a03
+          enum:
+          - ARCHIVED
+          - CANCELLED
+          - CLOSED
+          - COMPLETED
+          - DELETED
+          - DRAFTING
+          - IN_PROGRESS
+          - OPEN
+          - POSTPONED
+          - PUBLISHED
+        description: |-
+          * `DRAFTING` - Drafting
+          * `PUBLISHED` - Published
+          * `OPEN` - Open for Registration
+          * `CLOSED` - Closed
+          * `IN_PROGRESS` - In Progress
+          * `COMPLETED` - Completed
+          * `DELETED` - Deleted
+          * `CANCELLED` - Cancelled
+          * `POSTPONED` - Postponed
+          * `ARCHIVED` - Archived
+      tags:
+      - Events
+      - Availability Windows
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                template_id:
+                  type: string
+                  format: uuid
+                  description: UUID of the template to apply
+              required:
+              - template_id
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAvailabilityWindowList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '404':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/event/list/{event_id}/assign-permission/:
     post:
       operationId: event_list_assign_permission_create
@@ -6401,6 +6527,62 @@ paths:
           description: Permission denied
         '404':
           description: Assignment not found
+  /api/event/list/{event_id}/save-windows-as-template/:
+    post:
+      operationId: event_list_save_windows_as_template_create
+      description: Save the current event's availability windows as a reusable template.
+        The template will be associated with your organization and can be applied
+        to future events. Window dates are converted to offsets from event start date
+        for reusability.
+      summary: Save Current Windows as Template
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Events
+      - Availability Windows
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Name for the template
+                description:
+                  type: string
+                  description: Optional description of the template
+              required:
+              - name
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityWindowTemplate'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
   /api/event/list/{event_id}/settings/:
     get:
       operationId: event_list_settings_retrieve
@@ -7089,6 +7271,110 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedEventStaffList'
           description: ''
+  /api/event/list/{event_id}/update-availability-window/:
+    put:
+      operationId: event_list_update_availability_window_update
+      description: Update an existing availability window for the event. Allows partial
+        updates (PATCH) or full updates (PUT) of availability window properties. Only
+        event creators, staff, and superusers can update availability windows. The
+        window_id can be provided as a query parameter or in the request body as 'availability_id'.
+        Validates that the window belongs to this event before updating.
+      summary: Update Availability Window
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: window_id
+        schema:
+          type: string
+          format: uuid
+        description: Availability window ID to update (UUID). Can also be provided
+          in request body as availability_id.
+      tags:
+      - Events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityWindowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AvailabilityWindowRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AvailabilityWindowRequest'
+        required: true
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityWindow'
+          description: ''
+        '400':
+          description: Invalid data or missing window_id
+        '403':
+          description: Permission denied
+        '404':
+          description: Window not found for this event
+    patch:
+      operationId: event_list_update_availability_window_partial_update
+      description: Update an existing availability window for the event. Allows partial
+        updates (PATCH) or full updates (PUT) of availability window properties. Only
+        event creators, staff, and superusers can update availability windows. The
+        window_id can be provided as a query parameter or in the request body as 'availability_id'.
+        Validates that the window belongs to this event before updating.
+      summary: Update Availability Window
+      parameters:
+      - in: path
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: query
+        name: window_id
+        schema:
+          type: string
+          format: uuid
+        description: Availability window ID to update (UUID). Can also be provided
+          in request body as availability_id.
+      tags:
+      - Events
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAvailabilityWindowRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAvailabilityWindowRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAvailabilityWindowRequest'
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AvailabilityWindow'
+          description: ''
+        '400':
+          description: Invalid data or missing window_id
+        '403':
+          description: Permission denied
+        '404':
+          description: Window not found for this event
   /api/event/list/{event_id}/ws-token/:
     post:
       operationId: event_list_ws_token_create
@@ -7152,6 +7438,93 @@ paths:
           description: Permission denied - user does not have access to this event
         '404':
           description: Event not found
+  /api/event/list/availability-templates/:
+    get:
+      operationId: event_list_availability_templates_list
+      description: Retrieve all available templates for creating availability windows.
+        Includes both system-defined predefined templates and custom templates created
+        by the user's organization. Templates contain configurations for creating
+        multiple availability windows with predefined offsets from the event date.
+      summary: List Availability Window Templates
+      parameters:
+      - in: query
+        name: event_id
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: event_type
+        schema:
+          type: integer
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: organisation
+        schema:
+          type: integer
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: status
+        schema:
+          type: string
+          x-spec-enum-id: 82b35cdc75bb5a03
+          enum:
+          - ARCHIVED
+          - CANCELLED
+          - CLOSED
+          - COMPLETED
+          - DELETED
+          - DRAFTING
+          - IN_PROGRESS
+          - OPEN
+          - POSTPONED
+          - PUBLISHED
+        description: |-
+          * `DRAFTING` - Drafting
+          * `PUBLISHED` - Published
+          * `OPEN` - Open for Registration
+          * `CLOSED` - Closed
+          * `IN_PROGRESS` - In Progress
+          * `COMPLETED` - Completed
+          * `DELETED` - Deleted
+          * `CANCELLED` - Cancelled
+          * `POSTPONED` - Postponed
+          * `ARCHIVED` - Archived
+      tags:
+      - Events
+      - Availability Windows
+      security:
+      - jwtCookieAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAvailabilityWindowTemplateList'
+          description: ''
   /api/event/list/ongoing/:
     get:
       operationId: event_list_ongoing_list
@@ -25952,6 +26325,64 @@ components:
       required:
       - name
       - timezone
+    AvailabilityWindowTemplate:
+      type: object
+      description: Serializer for AvailabilityWindowTemplate model.
+      properties:
+        template_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          description: Name of the template
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          description: Optional description of what this template provides
+        is_predefined:
+          type: boolean
+          default: false
+          description: Whether this is a system-defined template
+        organisation:
+          type: integer
+          nullable: true
+          description: Organization that owns this custom template (null for predefined)
+        organisation_name:
+          type: string
+          readOnly: true
+        windows_config:
+          description: JSON configuration for availability windows in this template
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_by_email:
+          type: string
+          format: email
+          readOnly: true
+        windows_count:
+          type: integer
+          description: Get the number of windows in this template.
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - created_by
+      - created_by_email
+      - name
+      - organisation_name
+      - template_id
+      - updated_at
+      - windows_count
     BookingCreate:
       type: object
       description: Create serializer for Booking with validation.
@@ -41169,6 +41600,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AvailabilityWindow'
+    PaginatedAvailabilityWindowTemplateList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailabilityWindowTemplate'
     PaginatedBookingIntentListList:
       type: object
       required:
@@ -43029,6 +43483,67 @@ components:
           x-spec-enum-id: faee2500e3d6bafe
         area_from:
           type: integer
+          nullable: true
+    PatchedAvailabilityWindowRequest:
+      type: object
+      description: |-
+        Serializer for AvailabilityWindow model.
+
+        Note: target_type and target_id are internal fields used for generic relations.
+        They are not exposed via API for security and should only be set internally.
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: Name of the availability window
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          description: Optional description of the window
+        availability_type:
+          enum:
+          - REFUND_WINDOW
+          - REGISTRATION_WINDOW
+          - MERCHANDISE_WINDOW
+          - DONATION_WINDOW
+          - PAYMENT_WINDOW
+          - PRODUCT_WINDOW
+          - DISCOUNT_WINDOW
+          - RESOURCE_WINDOW
+          - PAYMENT_PACKAGE_WINDOW
+          type: string
+          x-spec-enum-id: bbecb13f88adbf3c
+          description: |-
+            Type of availability window
+
+            * `REFUND_WINDOW` - Refund Window
+            * `REGISTRATION_WINDOW` - Registration Window
+            * `MERCHANDISE_WINDOW` - Merchandise Window
+            * `DONATION_WINDOW` - Donation Window
+            * `PAYMENT_WINDOW` - Payment Window
+            * `PRODUCT_WINDOW` - Product Window
+            * `DISCOUNT_WINDOW` - Discount Window
+            * `RESOURCE_WINDOW` - Resource Window
+            * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+        available_from:
+          type: string
+          format: date-time
+          description: Start datetime of availability
+        available_to:
+          type: string
+          format: date-time
+          description: End datetime of availability
+        timezone:
+          type: string
+          minLength: 1
+        target_type:
+          type: integer
+          writeOnly: true
+          nullable: true
+        target_id:
+          type: integer
+          writeOnly: true
           nullable: true
     PatchedBookingIntentUpdateRequest:
       type: object

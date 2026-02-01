@@ -229,3 +229,41 @@ export function formatCompactDateTime(dateString: string | undefined): string {
     return dateString;
   }
 }
+
+/**
+ * Format a date range compactly
+ * @param from - Start datetime ISO string
+ * @param to - End datetime ISO string  
+ * @param timezone - Timezone string
+ * @returns Formatted range like "Jan 15 - Jan 20, 2026"
+ */
+export function formatDateRange(from: string, to: string, timezone: string = 'UTC'): string {
+  try {
+    const dtFrom = DateTime.fromISO(from, { zone: timezone });
+    const dtTo = DateTime.fromISO(to, { zone: timezone });
+    
+    if (!dtFrom.isValid || !dtTo.isValid) {
+      return '';
+    }
+    
+    // Same day
+    if (dtFrom.hasSame(dtTo, 'day')) {
+      return dtFrom.toFormat('MMM d, yyyy');
+    }
+    
+    // Same month and year
+    if (dtFrom.hasSame(dtTo, 'month') && dtFrom.hasSame(dtTo, 'year')) {
+      return `${dtFrom.toFormat('MMM d')} - ${dtTo.toFormat('d, yyyy')}`;
+    }
+    
+    // Same year
+    if (dtFrom.hasSame(dtTo, 'year')) {
+      return `${dtFrom.toFormat('MMM d')} - ${dtTo.toFormat('MMM d, yyyy')}`;
+    }
+    
+    // Different years
+    return `${dtFrom.toFormat('MMM d, yyyy')} - ${dtTo.toFormat('MMM d, yyyy')}`;
+  } catch {
+    return '';
+  }
+}

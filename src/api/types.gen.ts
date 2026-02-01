@@ -1022,6 +1022,42 @@ export type AvailabilityWindowRequest = {
 };
 
 /**
+ * Serializer for AvailabilityWindowTemplate model.
+ */
+export type AvailabilityWindowTemplate = {
+    readonly template_id: string;
+    /**
+     * Name of the template
+     */
+    name: string;
+    /**
+     * Optional description of what this template provides
+     */
+    description?: string | null;
+    /**
+     * Whether this is a system-defined template
+     */
+    is_predefined?: boolean;
+    /**
+     * Organization that owns this custom template (null for predefined)
+     */
+    organisation?: number | null;
+    readonly organisation_name: string;
+    /**
+     * JSON configuration for availability windows in this template
+     */
+    windows_config?: unknown;
+    readonly created_by: number | null;
+    readonly created_by_email: string;
+    /**
+     * Get the number of windows in this template.
+     */
+    readonly windows_count: number;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+/**
  * Create serializer for Booking with validation.
  */
 export type BookingCreate = {
@@ -8580,6 +8616,13 @@ export type PaginatedAvailabilityWindowList = {
     results: Array<AvailabilityWindow>;
 };
 
+export type PaginatedAvailabilityWindowTemplateList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<AvailabilityWindowTemplate>;
+};
+
 export type PaginatedBookingIntentListList = {
     count: number;
     next?: string | null;
@@ -9229,6 +9272,46 @@ export type PatchedAttendeeUpdateRequest = {
      */
     relationship_to_user?: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
     area_from?: number | null;
+};
+
+/**
+ * Serializer for AvailabilityWindow model.
+ *
+ * Note: target_type and target_id are internal fields used for generic relations.
+ * They are not exposed via API for security and should only be set internally.
+ */
+export type PatchedAvailabilityWindowRequest = {
+    /**
+     * Name of the availability window
+     */
+    name?: string;
+    /**
+     * Optional description of the window
+     */
+    description?: string | null;
+    /**
+     * Type of availability window
+     *
+     * * `REFUND_WINDOW` - Refund Window
+     * * `REGISTRATION_WINDOW` - Registration Window
+     * * `MERCHANDISE_WINDOW` - Merchandise Window
+     * * `DONATION_WINDOW` - Donation Window
+     * * `PAYMENT_WINDOW` - Payment Window
+     * * `PRODUCT_WINDOW` - Product Window
+     * * `DISCOUNT_WINDOW` - Discount Window
+     * * `RESOURCE_WINDOW` - Resource Window
+     * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     */
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    /**
+     * Start datetime of availability
+     */
+    available_from?: string;
+    /**
+     * End datetime of availability
+     */
+    available_to?: string;
+    timezone?: string;
 };
 
 /**
@@ -13496,6 +13579,32 @@ export type AvailabilityWindowRequestWritable = {
 };
 
 /**
+ * Serializer for AvailabilityWindowTemplate model.
+ */
+export type AvailabilityWindowTemplateWritable = {
+    /**
+     * Name of the template
+     */
+    name: string;
+    /**
+     * Optional description of what this template provides
+     */
+    description?: string | null;
+    /**
+     * Whether this is a system-defined template
+     */
+    is_predefined?: boolean;
+    /**
+     * Organization that owns this custom template (null for predefined)
+     */
+    organisation?: number | null;
+    /**
+     * JSON configuration for availability windows in this template
+     */
+    windows_config?: unknown;
+};
+
+/**
  * Create serializer for Booking with validation.
  */
 export type BookingCreateWritable = {
@@ -16533,6 +16642,13 @@ export type PaginatedAvailabilityWindowListWritable = {
     results: Array<AvailabilityWindowWritable>;
 };
 
+export type PaginatedAvailabilityWindowTemplateListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<AvailabilityWindowTemplateWritable>;
+};
+
 export type PaginatedBookingIntentListListWritable = {
     count: number;
     next?: string | null;
@@ -17007,6 +17123,48 @@ export type PaginatedVenueMetadataListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<VenueMetadataWritable>;
+};
+
+/**
+ * Serializer for AvailabilityWindow model.
+ *
+ * Note: target_type and target_id are internal fields used for generic relations.
+ * They are not exposed via API for security and should only be set internally.
+ */
+export type PatchedAvailabilityWindowRequestWritable = {
+    /**
+     * Name of the availability window
+     */
+    name?: string;
+    /**
+     * Optional description of the window
+     */
+    description?: string | null;
+    /**
+     * Type of availability window
+     *
+     * * `REFUND_WINDOW` - Refund Window
+     * * `REGISTRATION_WINDOW` - Registration Window
+     * * `MERCHANDISE_WINDOW` - Merchandise Window
+     * * `DONATION_WINDOW` - Donation Window
+     * * `PAYMENT_WINDOW` - Payment Window
+     * * `PRODUCT_WINDOW` - Product Window
+     * * `DISCOUNT_WINDOW` - Discount Window
+     * * `RESOURCE_WINDOW` - Resource Window
+     * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     */
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    /**
+     * Start datetime of availability
+     */
+    available_from?: string;
+    /**
+     * End datetime of availability
+     */
+    available_to?: string;
+    timezone?: string;
+    target_type?: number | null;
+    target_id?: number | null;
 };
 
 /**
@@ -21284,6 +21442,73 @@ export type EventListAddStaffCreateResponses = {
 
 export type EventListAddStaffCreateResponse = EventListAddStaffCreateResponses[keyof EventListAddStaffCreateResponses];
 
+export type EventListApplyAvailabilityTemplateCreateData = {
+    body?: {
+        /**
+         * UUID of the template to apply
+         */
+        template_id: string;
+    };
+    path: {
+        event_id: string;
+    };
+    query?: {
+        event_id?: string;
+        event_type?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        organisation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * * `DRAFTING` - Drafting
+         * * `PUBLISHED` - Published
+         * * `OPEN` - Open for Registration
+         * * `CLOSED` - Closed
+         * * `IN_PROGRESS` - In Progress
+         * * `COMPLETED` - Completed
+         * * `DELETED` - Deleted
+         * * `CANCELLED` - Cancelled
+         * * `POSTPONED` - Postponed
+         * * `ARCHIVED` - Archived
+         */
+        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+    };
+    url: '/api/event/list/{event_id}/apply-availability-template/';
+};
+
+export type EventListApplyAvailabilityTemplateCreateErrors = {
+    400: {
+        [key: string]: unknown;
+    };
+    403: {
+        [key: string]: unknown;
+    };
+    404: {
+        [key: string]: unknown;
+    };
+};
+
+export type EventListApplyAvailabilityTemplateCreateError = EventListApplyAvailabilityTemplateCreateErrors[keyof EventListApplyAvailabilityTemplateCreateErrors];
+
+export type EventListApplyAvailabilityTemplateCreateResponses = {
+    201: PaginatedAvailabilityWindowList;
+};
+
+export type EventListApplyAvailabilityTemplateCreateResponse = EventListApplyAvailabilityTemplateCreateResponses[keyof EventListApplyAvailabilityTemplateCreateResponses];
+
 export type EventListAssignPermissionCreateData = {
     body?: {
         /**
@@ -21771,6 +21996,41 @@ export type EventListRevokePermissionDestroyResponses = {
 
 export type EventListRevokePermissionDestroyResponse = EventListRevokePermissionDestroyResponses[keyof EventListRevokePermissionDestroyResponses];
 
+export type EventListSaveWindowsAsTemplateCreateData = {
+    body?: {
+        /**
+         * Name for the template
+         */
+        name: string;
+        /**
+         * Optional description of the template
+         */
+        description?: string;
+    };
+    path: {
+        event_id: string;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/save-windows-as-template/';
+};
+
+export type EventListSaveWindowsAsTemplateCreateErrors = {
+    400: {
+        [key: string]: unknown;
+    };
+    403: {
+        [key: string]: unknown;
+    };
+};
+
+export type EventListSaveWindowsAsTemplateCreateError = EventListSaveWindowsAsTemplateCreateErrors[keyof EventListSaveWindowsAsTemplateCreateErrors];
+
+export type EventListSaveWindowsAsTemplateCreateResponses = {
+    201: AvailabilityWindowTemplate;
+};
+
+export type EventListSaveWindowsAsTemplateCreateResponse = EventListSaveWindowsAsTemplateCreateResponses[keyof EventListSaveWindowsAsTemplateCreateResponses];
+
 export type EventListSettingsRetrieveData = {
     body?: never;
     path: {
@@ -22215,6 +22475,76 @@ export type EventListStaffListListResponses = {
 
 export type EventListStaffListListResponse = EventListStaffListListResponses[keyof EventListStaffListListResponses];
 
+export type EventListUpdateAvailabilityWindowPartialUpdateData = {
+    body?: PatchedAvailabilityWindowRequestWritable;
+    path: {
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Availability window ID to update (UUID). Can also be provided in request body as availability_id.
+         */
+        window_id?: string;
+    };
+    url: '/api/event/list/{event_id}/update-availability-window/';
+};
+
+export type EventListUpdateAvailabilityWindowPartialUpdateErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found for this event
+     */
+    404: unknown;
+};
+
+export type EventListUpdateAvailabilityWindowPartialUpdateResponses = {
+    200: AvailabilityWindow;
+};
+
+export type EventListUpdateAvailabilityWindowPartialUpdateResponse = EventListUpdateAvailabilityWindowPartialUpdateResponses[keyof EventListUpdateAvailabilityWindowPartialUpdateResponses];
+
+export type EventListUpdateAvailabilityWindowUpdateData = {
+    body: AvailabilityWindowRequestWritable;
+    path: {
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Availability window ID to update (UUID). Can also be provided in request body as availability_id.
+         */
+        window_id?: string;
+    };
+    url: '/api/event/list/{event_id}/update-availability-window/';
+};
+
+export type EventListUpdateAvailabilityWindowUpdateErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found for this event
+     */
+    404: unknown;
+};
+
+export type EventListUpdateAvailabilityWindowUpdateResponses = {
+    200: AvailabilityWindow;
+};
+
+export type EventListUpdateAvailabilityWindowUpdateResponse = EventListUpdateAvailabilityWindowUpdateResponses[keyof EventListUpdateAvailabilityWindowUpdateResponses];
+
 export type EventListWsTokenCreateData = {
     body: EventDetailRequest;
     path: {
@@ -22256,6 +22586,52 @@ export type EventListWsTokenCreateResponses = {
 };
 
 export type EventListWsTokenCreateResponse = EventListWsTokenCreateResponses[keyof EventListWsTokenCreateResponses];
+
+export type EventListAvailabilityTemplatesListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        event_id?: string;
+        event_type?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        organisation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * * `DRAFTING` - Drafting
+         * * `PUBLISHED` - Published
+         * * `OPEN` - Open for Registration
+         * * `CLOSED` - Closed
+         * * `IN_PROGRESS` - In Progress
+         * * `COMPLETED` - Completed
+         * * `DELETED` - Deleted
+         * * `CANCELLED` - Cancelled
+         * * `POSTPONED` - Postponed
+         * * `ARCHIVED` - Archived
+         */
+        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+    };
+    url: '/api/event/list/availability-templates/';
+};
+
+export type EventListAvailabilityTemplatesListResponses = {
+    200: PaginatedAvailabilityWindowTemplateList;
+};
+
+export type EventListAvailabilityTemplatesListResponse = EventListAvailabilityTemplatesListResponses[keyof EventListAvailabilityTemplatesListResponses];
 
 export type EventListOngoingListData = {
     body?: never;
