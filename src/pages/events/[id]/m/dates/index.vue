@@ -40,17 +40,60 @@
     <!-- Content -->
     <template v-else>
       <!-- Empty State -->
-      <div v-if="!windows || windows.length === 0" class="text-center py-12">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
-          <UIcon name="i-heroicons-calendar" class="text-3xl text-gray-400" />
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">No availability windows yet</h3>
-        <p class="text-gray-600 mb-6">
-          Get started by creating your first availability window to control when features are accessible.
-        </p>
-        <UButton icon="i-heroicons-plus" @click="openCreateModal">
-          Create First Window
-        </UButton>
+      <div v-if="!windows || windows.length === 0" class="space-y-6">
+        <!-- Empty State Card -->
+        <UCard>
+          <div class="text-center py-12">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full mb-6">
+              <UIcon name="i-heroicons-calendar" class="text-4xl text-indigo-600" />
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No availability windows yet</h3>
+            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+              Get started by creating your first availability window or applying a template to control when features are accessible.
+            </p>
+            <div class="flex items-center justify-center gap-3">
+              <UButton 
+                icon="i-heroicons-plus" 
+                @click="openCreateModal"
+                size="lg"
+              >
+                Create Window
+              </UButton>
+              <UButton 
+                icon="i-heroicons-rectangle-stack" 
+                variant="outline"
+                @click="showTemplateSelector = !showTemplateSelector"
+                size="lg"
+              >
+                {{ showTemplateSelector ? 'Hide' : 'Use' }} Template
+              </UButton>
+            </div>
+          </div>
+        </UCard>
+        
+        <!-- Template Selector (Collapsible) -->
+        <UCard v-if="showTemplateSelector" class="border-2 border-indigo-200 bg-indigo-50/30">
+          <template #header>
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-heroicons-rectangle-stack" class="text-indigo-600" />
+                <h3 class="font-semibold text-gray-900">Apply Template</h3>
+              </div>
+              <UButton 
+                icon="i-heroicons-x-mark" 
+                variant="ghost" 
+                size="xs"
+                @click="showTemplateSelector = false"
+              />
+            </div>
+          </template>
+          <AvailabilityTemplateSelector
+            :event-id="eventId"
+            :has-windows="windows.length > 0"
+            :window-count="windows.length"
+            @template-applied="handleTemplateApplied"
+          />
+        </UCard>
       </div>
 
       <!-- Windows Content -->
@@ -63,12 +106,44 @@
           @template-applied="handleTemplateApplied"
         />
 
-        <!-- Timeline Visualization -->
+        <!-- Timeline/Calendar Visualization -->
         <UCard>
           <template #header>
-            <h2 class="text-lg font-semibold">Timeline View</h2>
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold">Visualization</h2>
+              <div class="flex items-center gap-2">
+                <UButton
+                  :variant="viewMode === 'timeline' ? 'solid' : 'ghost'"
+                  color="gray"
+                  size="sm"
+                  icon="i-heroicons-chart-bar"
+                  @click="viewMode = 'timeline'"
+                >
+                  Timeline
+                </UButton>
+                <UButton
+                  :variant="viewMode === 'calendar' ? 'solid' : 'ghost'"
+                  color="gray"
+                  size="sm"
+                  icon="i-heroicons-calendar"
+                  @click="viewMode = 'calendar'"
+                >
+                  Calendar
+                </UButton>
+              </div>
+            </div>
           </template>
           <AvailabilityWindowsTimeline
+            v-if="viewMode === 'timeline'"
+            :windows="windows"
+            :timezone="eventTimezone"
+            :event-start="event?.data?.start_datetime"
+            :event-end="event?.data?.end_datetime"
+            :event-title="event?.data?.title"
+            @window-click="handleWindowClick"
+          />
+          <AvailabilityWindowsCalendar
+            v-else
             :windows="windows"
             :timezone="eventTimezone"
             :event-start="event?.data?.start_datetime"
@@ -110,7 +185,7 @@
                       {{ getStatusLabel(window) }}
                     </UBadge>
                     <UBadge
-                      :color="(getTypeColor(window.availability_type) as any)"
+                      :color="(getTypeBadgeColor(window.availability_type) as any)"
                       variant="subtle"
                       size="xs"
                     >
@@ -178,7 +253,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import type { AvailabilityWindow } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
@@ -187,14 +262,26 @@ import {
   useDeleteAvailabilityWindow,
 } from '~/composables/resources/events/availability-windows'
 import { formatDateRange, formatTime } from '~/utils/time'
-import { AVAILABILITY_TYPES } from '~/schemas/events/availability'
+import { 
+  getStatusLabel, 
+  getStatusColor, 
+  getTypeLabel, 
+  getTypeBadgeColor 
+} from '~/utils/format/availability-windows'
 import AvailabilityWindowsTimeline from '~/components/events/AvailabilityWindowsTimeline.vue'
+import AvailabilityWindowsCalendar from '~/components/events/AvailabilityWindowsCalendar.vue'
 import AvailabilityWindowFormModal from '~/components/events/AvailabilityWindowFormModal.vue'
 import AvailabilityTemplateSelector from '~/components/events/AvailabilityTemplateSelector.vue'
 import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
 
 const route = useRoute()
 const { $notyf } = useNuxtApp()
+
+// View mode toggle
+const viewMode = ref<'timeline' | 'calendar'>('timeline')
+
+// Template selector visibility for empty state
+const showTemplateSelector = ref(false)
 
 // Get event ID from route
 const eventId = computed(() => String(route.params.id))
@@ -207,6 +294,7 @@ const {
   data: windowsData,
   isLoading: isLoadingWindows,
   error: windowsError,
+  refetch: refetchWindows,
 } = useAvailabilityWindows(eventId)
 
 const windows = computed(() => windowsData.value?.data?.results || [])
@@ -251,6 +339,10 @@ function handleSuccess() {
 // Handle template applied
 function handleTemplateApplied() {
   $notyf.success('Template applied successfully! Windows have been created.')
+  // Refetch windows to show the newly created ones
+  refetchWindows()
+  // Hide template selector after successful application
+  showTemplateSelector.value = false
 }
 
 // Delete mutation
@@ -273,53 +365,5 @@ async function handleDelete(window: AvailabilityWindow) {
     console.error('Failed to delete availability window:', error)
     $notyf.error(error?.message || 'Failed to delete availability window. Please try again.')
   }
-}
-
-// Helper functions
-function getStatusLabel(window: AvailabilityWindow): string {
-  if (window.is_active) return 'Active'
-  
-  const now = new Date()
-  const start = new Date(window.available_from || '')
-  const end = new Date(window.available_to || '')
-  
-  if (now < start) return 'Upcoming'
-  if (now > end) return 'Ended'
-  
-  return 'Active'
-}
-
-function getStatusColor(window: AvailabilityWindow): string {
-  if (window.is_active) return 'green'
-  
-  const now = new Date()
-  const start = new Date(window.available_from || '')
-  const end = new Date(window.available_to || '')
-  
-  if (now < start) return 'blue'
-  if (now > end) return 'gray'
-  
-  return 'green'
-}
-
-function getTypeLabel(type?: string): string {
-  const typeOption = AVAILABILITY_TYPES.find(t => t.value === type)
-  return typeOption?.label || type || 'Unknown'
-}
-
-function getTypeColor(type?: string): string {
-  const colorMap: Record<string, string> = {
-    'REFUND_WINDOW': 'red',
-    'REGISTRATION_WINDOW': 'blue',
-    'MERCHANDISE_WINDOW': 'purple',
-    'DONATION_WINDOW': 'yellow',
-    'PAYMENT_WINDOW': 'green',
-    'PRODUCT_WINDOW': 'indigo',
-    'DISCOUNT_WINDOW': 'pink',
-    'RESOURCE_WINDOW': 'teal',
-    'PAYMENT_PACKAGE_WINDOW': 'orange',
-  }
-  
-  return colorMap[type || ''] || 'gray'
 }
 </script>

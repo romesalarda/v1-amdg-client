@@ -9315,6 +9315,32 @@ export type PatchedAvailabilityWindowRequest = {
 };
 
 /**
+ * Serializer for AvailabilityWindowTemplate model.
+ */
+export type PatchedAvailabilityWindowTemplateRequest = {
+    /**
+     * Name of the template
+     */
+    name?: string;
+    /**
+     * Optional description of what this template provides
+     */
+    description?: string | null;
+    /**
+     * Whether this is a system-defined template
+     */
+    is_predefined?: boolean;
+    /**
+     * Organization that owns this custom template (null for predefined)
+     */
+    organisation?: number | null;
+    /**
+     * JSON configuration for availability windows in this template
+     */
+    windows_config?: unknown;
+};
+
+/**
  * Update serializer for BookingIntent (limited fields).
  */
 export type PatchedBookingIntentUpdateRequest = {
@@ -21761,6 +21787,40 @@ export type EventListLandingImagesListResponses = {
 
 export type EventListLandingImagesListResponse = EventListLandingImagesListResponses[keyof EventListLandingImagesListResponses];
 
+export type EventListPreviewTemplateApplicationRetrieveData = {
+    body?: never;
+    path: {
+        event_id: string;
+    };
+    query: {
+        /**
+         * ID of the template to preview
+         */
+        template_id: string;
+    };
+    url: '/api/event/list/{event_id}/preview-template-application/';
+};
+
+export type EventListPreviewTemplateApplicationRetrieveErrors = {
+    /**
+     * Event or template not found
+     */
+    404: unknown;
+};
+
+export type EventListPreviewTemplateApplicationRetrieveResponses = {
+    /**
+     * Preview data with windows and conflicts
+     */
+    200: {
+        windows?: Array<unknown>;
+        conflicts?: Array<unknown>;
+        has_conflicts?: boolean;
+    };
+};
+
+export type EventListPreviewTemplateApplicationRetrieveResponse = EventListPreviewTemplateApplicationRetrieveResponses[keyof EventListPreviewTemplateApplicationRetrieveResponses];
+
 export type EventListRemoveAvailabilityWindowDestroyData = {
     body?: never;
     path: {
@@ -22632,6 +22692,80 @@ export type EventListAvailabilityTemplatesListResponses = {
 };
 
 export type EventListAvailabilityTemplatesListResponse = EventListAvailabilityTemplatesListResponses[keyof EventListAvailabilityTemplatesListResponses];
+
+export type EventListAvailabilityTemplatesManageDestroyData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * UUID of the template to update or delete
+         */
+        template_id: string;
+    };
+    url: '/api/event/list/availability-templates/manage/';
+};
+
+export type EventListAvailabilityTemplatesManageDestroyErrors = {
+    /**
+     * Missing or invalid template_id
+     */
+    400: unknown;
+    /**
+     * Permission denied - not the creator or template is predefined
+     */
+    403: unknown;
+    /**
+     * Template not found
+     */
+    404: unknown;
+};
+
+export type EventListAvailabilityTemplatesManageDestroyResponses = {
+    200: AvailabilityWindowTemplate;
+    /**
+     * Template deleted successfully
+     */
+    204: unknown;
+};
+
+export type EventListAvailabilityTemplatesManageDestroyResponse = EventListAvailabilityTemplatesManageDestroyResponses[keyof EventListAvailabilityTemplatesManageDestroyResponses];
+
+export type EventListAvailabilityTemplatesManagePartialUpdateData = {
+    body?: PatchedAvailabilityWindowTemplateRequest;
+    path?: never;
+    query: {
+        /**
+         * UUID of the template to update or delete
+         */
+        template_id: string;
+    };
+    url: '/api/event/list/availability-templates/manage/';
+};
+
+export type EventListAvailabilityTemplatesManagePartialUpdateErrors = {
+    /**
+     * Missing or invalid template_id
+     */
+    400: unknown;
+    /**
+     * Permission denied - not the creator or template is predefined
+     */
+    403: unknown;
+    /**
+     * Template not found
+     */
+    404: unknown;
+};
+
+export type EventListAvailabilityTemplatesManagePartialUpdateResponses = {
+    200: AvailabilityWindowTemplate;
+    /**
+     * Template deleted successfully
+     */
+    204: unknown;
+};
+
+export type EventListAvailabilityTemplatesManagePartialUpdateResponse = EventListAvailabilityTemplatesManagePartialUpdateResponses[keyof EventListAvailabilityTemplatesManagePartialUpdateResponses];
 
 export type EventListOngoingListData = {
     body?: never;

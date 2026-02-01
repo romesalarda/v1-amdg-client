@@ -34,8 +34,27 @@
         :class="{ 'template-card--applying': isApplying && selectedTemplateId === template.template_id }"
       >
         <div class="template-card__header">
-          <h4>{{ template.name }}</h4>
-          <span v-if="template.is_predefined" class="badge badge-primary">System</span>
+          <div class="template-card__title-section">
+            <h4>{{ template.name }}</h4>
+            <span v-if="template.is_predefined" class="badge badge-primary">System</span>
+          </div>
+          <!-- Actions for user's own templates -->
+          <div v-if="!template.is_predefined && isOwnedByUser(template)" class="template-card__actions">
+            <button
+              @click.stop="startEditTemplate(template)"
+              class="btn-icon"
+              title="Edit template"
+            >
+              ✏️
+            </button>
+            <button
+              @click.stop="confirmDeleteTemplate(template)"
+              class="btn-icon btn-icon--danger"
+              title="Delete template"
+            >
+              🗑️
+            </button>
+          </div>
         </div>
         
         <p v-if="template.description" class="template-card__description">
@@ -57,11 +76,13 @@
         </div>
 
         <button
-          @click="applyTemplate(template.template_id)"
-          :disabled="isApplying"
+          @click="previewAndApplyTemplate(template.template_id)"
+          :disabled="isApplying || isPreviewing"
           class="btn btn-primary btn-block"
         >
-          {{ isApplying && selectedTemplateId === template.template_id ? 'Applying...' : 'Apply Template' }}
+          {{ isPreviewing && selectedTemplateId === template.template_id ? 'Loading Preview...' : 
+             isApplying && selectedTemplateId === template.template_id ? 'Applying...' : 
+             'Preview & Apply' }}
         </button>
       </div>
     </div>
@@ -124,12 +145,78 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit Template Modal -->
+    <div v-if="showEditModal" class="modal-overlay" @click.self="showEditModal = false">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Edit Template</h3>
+          <button @click="showEditModal = false" class="btn-close">&times;</button>
+        </div>
+
+        <form @submit.prevent="updateTemplate" class="modal-body">
+          <div class="alert alert-warning">
+            <strong>⚠️ Note:</strong> You can only edit the name and description. Window configurations are immutable.
+          </div>
+
+          <div class="form-group">
+            <label for="edit-template-name">Template Name *</label>
+            <input
+              id="edit-template-name"
+              v-model="editTemplateName"
+              type="text"
+              class="form-control"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="edit-template-description">Description</label>
+            <textarea
+              id="edit-template-description"
+              v-model="editTemplateDescription"
+              class="form-control"
+              rows="3"
+            />
+          </div>
+        </form>
+
+        <div class="modal-footer">
+          <button
+            @click="showEditModal = false"
+            type="button"
+            class="btn btn-secondary"
+            :disabled="isUpdating"
+          >
+            Cancel
+          </button>
+          <button
+            @click="updateTemplate"
+            type="submit"
+            class="btn btn-primary"
+            :disabled="isUpdating || !editTemplateName.trim()"
+          >
+            {{ isUpdating ? 'Updating...' : 'Update Template' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { useAvailabilityTemplates, useApplyAvailabilityTemplate, useSaveWindowsAsTemplate } from '~/composables/resources/events/availability-templates'
+import { ref, computed } from 'vue'
+import Swal from 'sweetalert2'
+import { 
+  useAvailabilityTemplates, 
+  useApplyAvailabilityTemplate, 
+  useSaveWindowsAsTemplate,
+  useUpdateAvailabilityTemplate,
+  useDeleteAvailabilityTemplate,
+  usePreviewTemplateApplication
+} from '~/composables/resources/events/availability-templates'
+import { useMe } from '~/composables/resources/user/users'
+import type { AvailabilityWindowTemplate } from '~/api/types.gen'
 
 interface WindowConfig {
   availability_type: string
@@ -150,24 +237,178 @@ const emit = defineEmits<{
 }>()
 
 const { $notyf } = useNuxtApp()
+const { data: user } = useMe()
+
+// Check if template is owned by current user
+function isOwnedByUser(template: AvailabilityWindowTemplate): boolean {
+  return template.created_by === user.value?.data?.id
+}
 
 // Fetch templates
 const { data: templates, isLoading, error } = useAvailabilityTemplates()
 
-// Apply template
-const { mutateAsync: applyTemplateMutation, isPending: isApplying } = useApplyAvailabilityTemplate(props.eventId)
+// Preview template
+const { mutateAsync: previewTemplateMutation, isPending: isPreviewing } = usePreviewTemplateApplication(props.eventId)
 const selectedTemplateId = ref<string>()
 
-async function applyTemplate(templateId: string) {
+async function previewAndApplyTemplate(templateId: string) {
   selectedTemplateId.value = templateId
+  
   try {
-    await applyTemplateMutation(templateId)
+    // First, get the preview with conflicts
+    const preview = await previewTemplateMutation(templateId)
+    
+    if (!preview) {
+      $notyf.error('Failed to get template preview')
+      selectedTemplateId.value = undefined
+      return
+    }
+    
+    // If there are conflicts, show warning with SweetAlert
+    if (preview.has_conflicts && preview.conflicts && preview.conflicts.length > 0) {
+      const conflictList = preview.conflicts
+        .map((c: any) => {
+          const severity = c.severity === 'high' ? '🔴' : '🟡'
+          return `${severity} ${c.message}`
+        })
+        .join('<br>')
+      
+      const result = await Swal.fire({
+        title: 'Conflicts Detected',
+        html: `
+          <div style="text-align: left;">
+            <p><strong>${preview.conflicts.length} conflict(s) detected</strong></p>
+            <div style="margin-top: 1rem; padding: 1rem; background: #fff3cd; border-radius: 4px; font-size: 0.9rem;">
+              ${conflictList}
+            </div>
+            <p style="margin-top: 1rem; font-size: 0.9rem; color: #666;">
+              This template will create ${preview.windows?.length || 0} window(s). Overlapping windows may cause confusion for users.
+            </p>
+          </div>
+        `,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Apply Anyway',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#d33',
+      })
+      
+      if (!result.isConfirmed) {
+        selectedTemplateId.value = undefined
+        return
+      }
+    } else {
+      // No conflicts, show success preview
+      const windowList = preview.windows
+        ?.map((w: any) => `✓ ${w.name}`)
+        .join('<br>')
+      
+      const result = await Swal.fire({
+        title: 'Preview',
+        html: `
+          <div style="text-align: left;">
+            <p>This template will create <strong>${preview.windows?.length} window(s)</strong> with no conflicts:</p>
+            <div style="margin-top: 1rem; padding: 1rem; background: #d4edda; border-radius: 4px; font-size: 0.9rem;">
+              ${windowList}
+            </div>
+          </div>
+        `,
+        icon: 'info',
+        showCancelButton: true,
+        confirmButtonText: 'Apply Template',
+        cancelButtonText: 'Cancel',
+      })
+      
+      if (!result.isConfirmed) {
+        selectedTemplateId.value = undefined
+        return
+      }
+    }
+    
+    // Apply the template
+    await applyTemplate(templateId)
+  } catch (err: any) {
+    $notyf.error(err.response?.data?.detail || 'Failed to preview template')
+    selectedTemplateId.value = undefined
+  }
+}
+
+// Apply template
+const { mutateAsync: applyTemplateMutation, isPending: isApplying } = useApplyAvailabilityTemplate(props.eventId)
+
+async function applyTemplate(templateId: string) {
+  try {
+    const response = await applyTemplateMutation(templateId)
     $notyf.success('Template applied successfully')
     emit('templateApplied')
   } catch (err: any) {
     $notyf.error(err.response?.data?.detail || 'Failed to apply template')
   } finally {
     selectedTemplateId.value = undefined
+  }
+}
+
+// Edit template
+const showEditModal = ref(false)
+const editingTemplate = ref<AvailabilityWindowTemplate | null>(null)
+const editTemplateName = ref('')
+const editTemplateDescription = ref('')
+const { mutateAsync: updateTemplateMutation, isPending: isUpdating } = useUpdateAvailabilityTemplate()
+
+function startEditTemplate(template: AvailabilityWindowTemplate) {
+  editingTemplate.value = template
+  editTemplateName.value = template.name
+  editTemplateDescription.value = template.description || ''
+  showEditModal.value = true
+}
+
+async function updateTemplate() {
+  if (!editTemplateName.value.trim() || !editingTemplate.value) return
+
+  try {
+    await updateTemplateMutation({
+      templateId: editingTemplate.value.template_id,
+      data: {
+        name: editTemplateName.value.trim(),
+        description: editTemplateDescription.value.trim() || undefined,
+      },
+    })
+    $notyf.success('Template updated successfully')
+    showEditModal.value = false
+    editingTemplate.value = null
+    editTemplateName.value = ''
+    editTemplateDescription.value = ''
+  } catch (err: any) {
+    $notyf.error(err.response?.data?.detail || 'Failed to update template')
+  }
+}
+
+// Delete template
+const { mutateAsync: deleteTemplateMutation, isPending: isDeleting } = useDeleteAvailabilityTemplate()
+
+async function confirmDeleteTemplate(template: AvailabilityWindowTemplate) {
+  const result = await Swal.fire({
+    title: 'Delete Template?',
+    html: `
+      <p>Are you sure you want to delete <strong>"${template.name}"</strong>?</p>
+      <p style="color: #dc3545; font-size: 0.9rem; margin-top: 1rem;">
+        ⚠️ This action cannot be undone.
+      </p>
+    `,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc3545',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await deleteTemplateMutation(template.template_id)
+    $notyf.success('Template deleted successfully')
+  } catch (err: any) {
+    $notyf.error(err.response?.data?.detail || 'Failed to delete template')
   }
 }
 
@@ -276,10 +517,41 @@ function formatOffset(days: number): string {
   margin-bottom: 0.75rem;
 }
 
+.template-card__title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
 .template-card__header h4 {
   margin: 0;
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.template-card__actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  transition: background-color 0.2s;
+}
+
+.btn-icon:hover {
+  background-color: #f8f9fa;
+}
+
+.btn-icon--danger:hover {
+  background-color: #fee;
+  color: #dc3545;
 }
 
 .template-card__description {
@@ -466,6 +738,12 @@ function formatOffset(days: number): string {
   background-color: #cfe2ff;
   border: 1px solid #b6d4fe;
   color: #084298;
+}
+
+.alert-warning {
+  background-color: #fff3cd;
+  border: 1px solid #ffd966;
+  color: #856404;
 }
 
 .text-muted {

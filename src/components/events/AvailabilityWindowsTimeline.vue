@@ -142,6 +142,7 @@ import { computed } from 'vue'
 import type { AvailabilityWindow } from '~/api/types.gen'
 import { formatDateTime, formatDate, formatDateRange } from '~/utils/time'
 import { AVAILABILITY_TYPES } from '~/schemas/events/availability'
+import { getWindowColorClass, getTypeLabel } from '~/utils/format/availability-windows'
 
 interface Props {
   windows: AvailabilityWindow[]
@@ -235,29 +236,6 @@ function getWindowStyle(window: AvailabilityWindow) {
     marginLeft: `${left}%`,
     width: `${width}%`,
   }
-}
-
-// Get color class based on window type
-function getWindowColorClass(type?: string) {
-  const colorMap: Record<string, string> = {
-    'REFUND_WINDOW': 'bg-red-500 hover:bg-red-600',
-    'REGISTRATION_WINDOW': 'bg-blue-500 hover:bg-blue-600',
-    'MERCHANDISE_WINDOW': 'bg-purple-500 hover:bg-purple-600',
-    'DONATION_WINDOW': 'bg-yellow-500 hover:bg-yellow-600',
-    'PAYMENT_WINDOW': 'bg-green-500 hover:bg-green-600',
-    'PRODUCT_WINDOW': 'bg-indigo-500 hover:bg-indigo-600',
-    'DISCOUNT_WINDOW': 'bg-pink-500 hover:bg-pink-600',
-    'RESOURCE_WINDOW': 'bg-teal-500 hover:bg-teal-600',
-    'PAYMENT_PACKAGE_WINDOW': 'bg-orange-500 hover:bg-orange-600',
-  }
-  
-  return colorMap[type || ''] || 'bg-gray-500 hover:bg-gray-600'
-}
-
-// Get readable label for window type
-function getTypeLabel(type?: string) {
-  const typeOption = AVAILABILITY_TYPES.find(t => t.value === type)
-  return typeOption?.label || type || 'Unknown'
 }
 
 // Intelligent warnings for overlaps and logical inconsistencies
