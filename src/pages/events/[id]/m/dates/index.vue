@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="eventId" :event="event?.data">
+  <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="space-y-6">
       <!-- Page Header -->
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -249,7 +249,7 @@
       @success="handleSuccess"
     />
     </div>
-  </EventsManagementLayout>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -272,7 +272,11 @@ import AvailabilityWindowsTimeline from '~/components/events/AvailabilityWindows
 import AvailabilityWindowsCalendar from '~/components/events/AvailabilityWindowsCalendar.vue'
 import AvailabilityWindowFormModal from '~/components/events/AvailabilityWindowFormModal.vue'
 import AvailabilityTemplateSelector from '~/components/events/AvailabilityTemplateSelector.vue'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+
+definePageMeta({
+  layout: false,
+})
 
 const route = useRoute()
 const { $notyf } = useNuxtApp()

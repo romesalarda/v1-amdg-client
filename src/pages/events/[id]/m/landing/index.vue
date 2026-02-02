@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="id" :event="event">
+  <EventManagementLayout :event-id="id" :event="event">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3 space-y-6">
@@ -201,7 +201,7 @@
         </form>
       </UCard>
     </UModal>
-  </EventsManagementLayout>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -209,7 +209,7 @@ import { useEvent } from '~/composables/resources/events/events'
 import { useEventLandingImages, useAddEventLandingImage } from '~/composables/resources/events/eventLandingImages'
 import { useRemoveEventResource } from '~/composables/resources/events/eventResources'
 import { resolveImageUrl, onImageError } from '~/utils/image'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 
 definePageMeta({
   layout: false,

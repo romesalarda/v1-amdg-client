@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="id" :event="event">
+  <EventManagementLayout :event-id="id" :event="event">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3">
@@ -196,7 +196,7 @@
         </div>
       </div>
     </div>
-  </EventsManagementLayout>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -205,7 +205,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useEvent, useUpdateEvent } from '~/composables/resources/events/events'
 import { formatCompactDateTime } from '~/utils/time'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 
 definePageMeta({
   layout: false,

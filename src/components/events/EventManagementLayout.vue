@@ -1,4 +1,5 @@
 <template>
+  <Navbar />
   <div class="min-h-screen bg-gray-50">
     <div class="bg-white border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -103,13 +104,15 @@
       <slot />
     </div>
   </div>
+  <Footer />
 </template>
 
 <script setup lang="ts">
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { formatDateTime } from '~/utils/time'
+import Navbar from '~/components/common/Navbar.vue'
+import Footer from '~/components/common/Footer.vue'
 import type { EventDetail } from '~/api/types.gen'
-import Navbar from '../common/Navbar.vue';
 
 const props = defineProps<{
   eventId: string | number

@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="id" :event="event">
+  <EventManagementLayout :event-id="id" :event="event">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3 space-y-6">
@@ -293,7 +293,7 @@
         </div>
       </div>
     </div>
-  </EventsManagementLayout>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -307,7 +307,7 @@ import { useEventRoles } from '~/composables/resources/events/eventRoles'
 import { useEventResources } from '~/composables/resources/events/eventResources'
 import { useEventLandingImages } from '~/composables/resources/events/eventLandingImages'
 import { formatDate, formatCompactDateTime } from '~/utils/time'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 
 definePageMeta({
   layout: false,

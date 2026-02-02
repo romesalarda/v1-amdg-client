@@ -1315,6 +1315,7 @@ export type BookingPackageDetail = {
     readonly event_name: string;
     ticket_type: number;
     readonly ticket_type_title: string;
+    description?: string | null;
     readonly base_amount: string;
     readonly base_amount_currency: string;
     /**
@@ -1336,7 +1337,6 @@ export type BookingPackageDetail = {
         created_by?: string;
         rules?: string;
     };
-    description?: string | null;
     readonly updated_at: string;
     readonly rules: Array<BookingPackageRule>;
     /**
@@ -1355,6 +1355,7 @@ export type BookingPackageList = {
     readonly event_name: string;
     ticket_type: number;
     readonly ticket_type_title: string;
+    description?: string | null;
     readonly base_amount: string;
     readonly base_amount_currency: string;
     /**
@@ -3240,17 +3241,6 @@ export type DiscountDetail = {
      * Human-readable discount value
      */
     readonly discount_value: string;
-    active?: boolean;
-    created_by?: number | null;
-    readonly created_by_name: string | null;
-    readonly created_at: string;
-    /**
-     *  links
-     */
-    readonly _links: {
-        self?: string;
-        target?: string;
-    };
     description?: string | null;
     /**
      * Percentage discount to apply (e.g. 10 for 10% off).
@@ -3260,7 +3250,25 @@ export type DiscountDetail = {
      * Fixed amount discount to apply.
      */
     amount?: string | null;
+    /**
+     * Target booking package if applicable
+     */
+    readonly target_package: {
+        id?: number;
+        name?: string;
+    } | null;
+    active?: boolean;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    readonly created_at: string;
     readonly rules: Array<DiscountRule>;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        target?: string;
+    };
     readonly updated_at: string;
 };
 
@@ -3280,10 +3288,27 @@ export type DiscountList = {
      * Human-readable discount value
      */
     readonly discount_value: string;
+    description?: string | null;
+    /**
+     * Percentage discount to apply (e.g. 10 for 10% off).
+     */
+    percentage?: string | null;
+    /**
+     * Fixed amount discount to apply.
+     */
+    amount?: string | null;
+    /**
+     * Target booking package if applicable
+     */
+    readonly target_package: {
+        id?: number;
+        name?: string;
+    } | null;
     active?: boolean;
     created_by?: number | null;
     readonly created_by_name: string | null;
     readonly created_at: string;
+    readonly rules: Array<DiscountRule>;
     /**
      *  links
      */
@@ -3669,6 +3694,11 @@ export type EventAlternativeSigninDetail = {
     readonly event_name: string;
     is_active?: boolean;
     /**
+     * A regex pattern to match the identifier format.
+     */
+    format_match?: string | null;
+    description?: string;
+    /**
      * * `pending` - Pending
      * * `verified` - Verified
      * * `rejected` - Rejected
@@ -3688,11 +3718,6 @@ export type EventAlternativeSigninDetail = {
         self?: string;
         event?: string;
     };
-    description?: string;
-    /**
-     * A regex pattern to match the identifier format.
-     */
-    format_match?: string | null;
     verified_by?: number | null;
     readonly verified_by_name: string | null;
     verified_updated_at?: string | null;
@@ -3712,6 +3737,11 @@ export type EventAlternativeSigninList = {
     event: number;
     readonly event_name: string;
     is_active?: boolean;
+    /**
+     * A regex pattern to match the identifier format.
+     */
+    format_match?: string | null;
+    description?: string;
     /**
      * * `pending` - Pending
      * * `verified` - Verified
@@ -13708,13 +13738,13 @@ export type BookingPackageDetailWritable = {
     name: string;
     event: number;
     ticket_type: number;
+    description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
     is_active?: boolean;
     created_by?: number | null;
-    description?: string | null;
 };
 
 /**
@@ -13724,6 +13754,7 @@ export type BookingPackageListWritable = {
     name: string;
     event: number;
     ticket_type: number;
+    description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -14521,8 +14552,6 @@ export type DiscountDetailWritable = {
      * * `FIXED` - Fixed amount
      */
     discount_type?: 'PERCENTAGE' | 'FIXED';
-    active?: boolean;
-    created_by?: number | null;
     description?: string | null;
     /**
      * Percentage discount to apply (e.g. 10 for 10% off).
@@ -14532,6 +14561,8 @@ export type DiscountDetailWritable = {
      * Fixed amount discount to apply.
      */
     amount?: string | null;
+    active?: boolean;
+    created_by?: number | null;
 };
 
 /**
@@ -14544,6 +14575,15 @@ export type DiscountListWritable = {
      * * `FIXED` - Fixed amount
      */
     discount_type?: 'PERCENTAGE' | 'FIXED';
+    description?: string | null;
+    /**
+     * Percentage discount to apply (e.g. 10 for 10% off).
+     */
+    percentage?: string | null;
+    /**
+     * Fixed amount discount to apply.
+     */
+    amount?: string | null;
     active?: boolean;
     created_by?: number | null;
 };
@@ -14643,6 +14683,11 @@ export type EventAlternativeSigninDetailWritable = {
     event: number;
     is_active?: boolean;
     /**
+     * A regex pattern to match the identifier format.
+     */
+    format_match?: string | null;
+    description?: string;
+    /**
      * * `pending` - Pending
      * * `verified` - Verified
      * * `rejected` - Rejected
@@ -14653,11 +14698,6 @@ export type EventAlternativeSigninDetailWritable = {
      * Max Uses Per Sign-in
      */
     max_uses_per_signin?: number | null;
-    description?: string;
-    /**
-     * A regex pattern to match the identifier format.
-     */
-    format_match?: string | null;
     verified_by?: number | null;
     verified_updated_at?: string | null;
     processed_by?: number | null;
@@ -14672,6 +14712,11 @@ export type EventAlternativeSigninListWritable = {
     title: string;
     event: number;
     is_active?: boolean;
+    /**
+     * A regex pattern to match the identifier format.
+     */
+    format_match?: string | null;
+    description?: string;
     /**
      * * `pending` - Pending
      * * `verified` - Verified
@@ -20243,6 +20288,55 @@ export type BookingsPackagesUpdateResponses = {
 };
 
 export type BookingsPackagesUpdateResponse = BookingsPackagesUpdateResponses[keyof BookingsPackagesUpdateResponses];
+
+export type BookingsPackageAddDiscountData = {
+    body?: {
+        /**
+         * Discount name
+         */
+        name: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        discount_type: 'PERCENTAGE' | 'FIXED';
+        /**
+         * Percentage value (0-100) for percentage discounts
+         */
+        percentage?: string;
+        /**
+         * Fixed amount for fixed discounts
+         */
+        amount?: string;
+        active?: boolean;
+    };
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/discounts/';
+};
+
+export type BookingsPackageAddDiscountErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type BookingsPackageAddDiscountResponses = {
+    /**
+     * Discount created successfully
+     */
+    201: unknown;
+};
 
 export type BookingsPackageRulesListData = {
     body?: never;
@@ -29684,13 +29778,21 @@ export type PaymentsDiscountRulesListData = {
          */
         active?: boolean;
         /**
-         * Filter by discount ID
+         * Filter rules by discount ID
          */
         discount?: number;
         /**
          * Filter by discount UUID
          */
         discount__discount_id?: string;
+        /**
+         * Filter rules by event ID (shows rules for discounts in this event)
+         */
+        event?: number;
+        /**
+         * Filter rules by event UUID
+         */
+        event__event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -29705,18 +29807,8 @@ export type PaymentsDiscountRulesListData = {
         page_size?: number;
         /**
          * Filter by rule type
-         *
-         * * `IS_EVENT_STAFF` - Is Event Staff
-         * * `IS_AGE_LT` - Is Age Less Than
-         * * `IS_AGE_GT` - Is Age Greater Than
-         * * `ORGANISATION_MATCHES` - Organisation Matches
-         * * `VALUE_MATCHES` - Value Matches
-         * * `EVENT_STAFF_ROLE_MATCHES` - Event Staff Role Matches
-         * * `NAME_MATCHES` - Name Matches
-         * * `LOCATION_MATCHES` - Location Matches
-         * * `CODE_MATCHES` - Code Matches
          */
-        rule_type?: Array<'CODE_MATCHES' | 'EVENT_STAFF_ROLE_MATCHES' | 'IS_AGE_GT' | 'IS_AGE_LT' | 'IS_EVENT_STAFF' | 'LOCATION_MATCHES' | 'NAME_MATCHES' | 'ORGANISATION_MATCHES' | 'VALUE_MATCHES'>;
+        rule_type?: string;
         /**
          * A search term.
          */
@@ -29840,12 +29932,17 @@ export type PaymentsDiscountsListData = {
          */
         created_before?: string;
         /**
-         * Filter by discount type
-         *
-         * * `PERCENTAGE` - Percentage
-         * * `FIXED` - Fixed amount
+         * Filter by discount type (PERCENTAGE or FIXED)
          */
-        discount_type?: 'FIXED' | 'PERCENTAGE';
+        discount_type?: string;
+        /**
+         * Filter discounts by event ID (shows discounts for objects within this event)
+         */
+        event?: number;
+        /**
+         * Filter discounts by event UUID
+         */
+        event__event_id?: string;
         /**
          * Maximum fixed amount
          */

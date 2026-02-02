@@ -103,7 +103,7 @@ export function useDeletePaymentDiscount() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (discountId: number) => paymentsDiscountsDestroy({ path: { discount_id: String(discountId) } }),
+    mutationFn: (discountId: string) => paymentsDiscountsDestroy({ path: { discount_id: String(discountId) } }),
     onSuccess: (_, discountId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

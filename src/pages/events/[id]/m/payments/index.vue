@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="id" :event="event?.data">
+  <EventManagementLayout :event-id="id" :event="event?.data">
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3 space-y-6">
@@ -304,7 +304,7 @@
         </template>
       </UCard>
     </UModal>
-  </EventsManagementLayout>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -317,7 +317,7 @@ import {
   useDeletePaymentMethod 
 } from '~/composables/resources/payments/paymentMethods'
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
 
 definePageMeta({

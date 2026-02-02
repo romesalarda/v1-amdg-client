@@ -1,5 +1,5 @@
 <template>
-  <EventsManagementLayout :event-id="id" :event="event?.data">
+  <EventManagementLayout :event-id="id" :event="event?.data">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content (2/3) -->
       <div class="lg:col-span-2 space-y-6">
@@ -36,7 +36,7 @@
                   <div class="flex items-center gap-2 mb-2">
                     <h3 class="font-semibold text-gray-900">{{ ticketType.title }}</h3>
                     <UBadge
-                      :label="ticketType.scope"
+                      :label="ticketType.scope?.replace(/_/g, ' ')"
                       :color="ticketType.scope === 'FULL_EVENT' ? 'blue' : ticketType.scope === 'SINGLE_DAY' ? 'purple' : ticketType.scope === 'WORKSHOP_ONLY' ? 'orange' : 'gray'"
                       variant="subtle"
                       size="xs"
@@ -77,6 +77,109 @@
 
           <div v-else class="text-center py-8 text-gray-600">
             <p>No ticket types yet. Create one to get started.</p>
+          </div>
+        </UCard>
+
+        <!-- Discounts Section -->
+        <UCard>
+          <template #header>
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="text-xl font-bold text-gray-900">Discounts</h2>
+                <p class="text-sm text-gray-600 mt-1">
+                  Configure discount codes and eligibility rules
+                </p>
+              </div>
+              <UButton
+                icon="i-heroicons-plus"
+                label="Add Discount"
+                @click="openDiscountModal()"
+                :disabled="!packages.length"
+              />
+            </div>
+          </template>
+
+          <div v-if="discountsLoading" class="space-y-3">
+            <USkeleton v-for="i in 3" :key="i" class="h-28" />
+          </div>
+
+          <div v-else-if="discounts.length" class="space-y-3">
+            <div
+              v-for="discount in discounts"
+              :key="discount.id"
+              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2 mb-2">
+                    <h3 class="font-semibold text-gray-900">{{ discount.name }}</h3>
+                    <UBadge
+                      :label="discount.discount_type === 'PERCENTAGE' ? `${(discount as any).percentage}%` : `$${formatAmount((discount as any).amount || 0)}`"
+                      :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'green'"
+                      variant="subtle"
+                      size="xs"
+                    />
+                    <UBadge
+                      v-if="discount.target_package"
+                      :label="discount.target_package.name"
+                      color="purple"
+                      variant="subtle"
+                      size="xs"
+                      icon="i-heroicons-cube"
+                    />
+                    <UBadge
+                      v-if="!discount.active"
+                      label="Inactive"
+                      color="gray"
+                      variant="subtle"
+                      size="xs"
+                    />
+                  </div>
+                  <div class="text-sm text-gray-600 space-y-1">
+                    <p v-if="discount.description">{{ discount.description }}</p>
+                    <div v-if="discount.rules && discount.rules.length > 0" class="mt-2">
+                      <details class="cursor-pointer">
+                        <summary class="font-medium text-primary-600 hover:text-primary-700">
+                          {{ discount.rules.length }} eligibility rule{{ discount.rules.length !== 1 ? 's' : '' }}
+                        </summary>
+                        <ul class="mt-2 ml-4 space-y-1 list-disc">
+                          <li v-for="rule in discount.rules" :key="rule.rule_id" class="text-xs">
+                            {{ rule.name }}
+                            <span v-if="!rule.active" class="text-gray-400">(inactive)</span>
+                          </li>
+                        </ul>
+                      </details>
+                    </div>
+                    <p v-else class="text-xs text-gray-400 mt-2">No eligibility rules - available to all</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <UToggle
+                    :model-value="discount.active"
+                    @update:model-value="toggleDiscountStatus(discount.id, $event)"
+                  />
+                  <UButton
+                    icon="i-heroicons-pencil"
+                    color="gray"
+                    variant="ghost"
+                    size="sm"
+                    @click="openDiscountModal(discount)"
+                  />
+                  <UButton
+                    icon="i-heroicons-trash"
+                    color="red"
+                    variant="ghost"
+                    size="sm"
+                    @click="removeDiscount(discount.discount_id)"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div v-else class="text-center py-8 text-gray-600">
+            <p>No discounts configured yet</p>
+            <p class="text-xs mt-2">Create discounts with eligibility rules for your event</p>
           </div>
         </UCard>
 
@@ -245,6 +348,10 @@
               <div class="text-2xl font-bold text-green-600">{{ activePackagesCount }}</div>
               <div class="text-sm text-gray-600">Active Packages</div>
             </div>
+            <div>
+              <div class="text-2xl font-bold text-blue-600">{{ discounts.length }}</div>
+              <div class="text-sm text-gray-600">Configured Discounts</div>
+            </div>
           </div>
         </UCard>
 
@@ -386,7 +493,28 @@
         </form>
       </UCard>
     </UModal>
-  </EventsManagementLayout>
+
+    <!-- Add/Edit Discount Modal -->
+    <UModal v-model="showDiscountModal" size="xl">
+      <UCard>
+        <template #header>
+          <h3 class="text-lg font-semibold">
+            {{ editingDiscount ? 'Edit Discount' : 'Add Discount' }}
+          </h3>
+        </template>
+
+        <DiscountForm
+          :model-value="editingDiscount"
+          :event-id="Number(id)"
+          :is-loading="discountMutationLoading"
+          :packages="packages"
+          :selected-package-id="selectedPackageForDiscount"
+          @submit="handleDiscountSubmit"
+          @cancel="closeDiscountModal"
+        />
+      </UCard>
+    </UModal>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -409,9 +537,21 @@ import {
   usePartialUpdateBookingAlternativeSignin,
   useDeleteBookingAlternativeSignin 
 } from '~/composables/resources/booking/bookingAlternativeSignins'
-import EventsManagementLayout from '~/components/events/EventManagementLayout.vue'
+import { 
+  usePaymentDiscounts,
+  useUpdatePaymentDiscount,
+  usePartialUpdatePaymentDiscount,
+  useDeletePaymentDiscount,
+} from '~/composables/resources/payments/paymentDiscounts'
+import { useCreateBookingPackageDiscount } from '~/composables/resources/booking/bookingPackageDiscounts'
+import { 
+  useCreatePaymentDiscountRule,
+  useDeletePaymentDiscountRule,
+} from '~/composables/resources/payments/paymentDiscountRules'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import TicketTypeForm from '~/components/events/forms/TicketTypeForm.vue'
 import BookingPackageForm from '~/components/events/forms/BookingPackageForm.vue'
+import DiscountForm from '~/components/events/forms/DiscountForm.vue'
 
 definePageMeta({
   layout: false,
@@ -433,9 +573,13 @@ const { data: ticketTypesData, isLoading: ticketTypesLoading, refetch: refetchTi
 const { data: packagesData, isLoading: packagesLoading, refetch: refetchPackages } = useBookingPackages(eventIdFilter)
 const { data: signInsData, isLoading: signInsLoading, refetch: refetchSignIns } = useBookingAlternativeSignins(eventIdFilter)
 
+// Fetch discounts for this event using the same event filter
+const { data: discountsData, isLoading: discountsLoading, refetch: refetchDiscounts } = usePaymentDiscounts(eventIdFilter)
+
 const ticketTypes = computed(() => ticketTypesData.value?.data?.results || [])
 const packages = computed(() => packagesData.value?.data?.results || [])
 const signIns = computed(() => signInsData.value?.data?.results || [])
+const discounts = computed(() => discountsData.value?.data?.results || [])
 
 const activePackagesCount = computed(() => packages.value.filter((p: any) => p.is_active).length)
 
@@ -570,7 +714,7 @@ const handlePackageSubmit = async (data: any) => {
     } else {
       await createPackageMutation.mutateAsync({
         ...data,
-        event: Number(route.params.id),
+        event: Number(event.value?.data.id),
       })
       toast.add({
         title: 'Package created',
@@ -622,6 +766,183 @@ const removePackage = async (packageId: number) => {
   } catch (error) {
     toast.add({
       title: 'Failed to remove package',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+// Discount Modal & CRUD
+const showDiscountModal = ref(false)
+const editingDiscount = ref<any>(null)
+const selectedPackageForDiscount = ref<number | null>(null)
+
+const createDiscountMutation = useCreateBookingPackageDiscount()
+const updateDiscountMutation = usePartialUpdatePaymentDiscount()
+const deleteDiscountMutation = useDeletePaymentDiscount()
+const createDiscountRuleMutation = useCreatePaymentDiscountRule()
+const deleteDiscountRuleMutation = useDeletePaymentDiscountRule()
+
+const discountMutationLoading = computed(() => 
+  createDiscountMutation.isPending.value || updateDiscountMutation.isPending.value
+)
+
+const openDiscountModal = (discount?: any, packageId?: number) => {
+  editingDiscount.value = discount || null
+  selectedPackageForDiscount.value = packageId || null
+  showDiscountModal.value = true
+}
+
+const closeDiscountModal = () => {
+  showDiscountModal.value = false
+  editingDiscount.value = null
+  selectedPackageForDiscount.value = null
+}
+
+const handleDiscountSubmit = async (data: any) => {
+  try {
+    console.log(data);
+    console.log(selectedPackageForDiscount.value);
+    console.log(editingDiscount.value);
+    
+    const discountData = {
+      name: data.name,
+      description: data.description || undefined,
+      discount_type: data.discount_type,
+      percentage: data.discount_type === 'PERCENTAGE' ? data.percentage : undefined,
+      amount: data.discount_type === 'FIXED' ? data.amount : undefined,
+      active: data.active,
+    }
+
+    let discountId: number
+
+    if (editingDiscount.value) {
+      // Update existing discount
+      const result = await updateDiscountMutation.mutateAsync({
+        discountId: editingDiscount.value.discount_id,
+        body: discountData,
+      })
+      discountId = editingDiscount.value.discount_id
+
+      // Smart rule diffing: only modify what changed
+      const existingRules = editingDiscount.value.rules || []
+      const newRules = data.rules || []
+      
+      // Since rules don't have IDs in the form (they're created fresh),
+      // we'll use a simple strategy: delete all and recreate
+      // This is simpler than trying to match rules by content
+      // Future enhancement: Add rule IDs to form to enable smart diffing
+      const deletePromises = existingRules.map((rule: any) =>
+        deleteDiscountRuleMutation.mutateAsync(rule.rule_id)
+      )
+      
+      try {
+        await Promise.allSettled(deletePromises)
+      } catch (error) {
+        console.error('Error deleting rules:', error)
+        // Continue with creation even if deletion fails
+      }
+
+      toast.add({
+        title: 'Discount updated',
+        color: 'green',
+      })
+    } else {
+      // Create new discount - must have a package selected
+      const packageId = data.packageId || selectedPackageForDiscount.value
+      if (!packageId) {
+        toast.add({
+          title: 'Please select a booking package',
+          color: 'orange',
+        })
+        return
+      }
+
+      // Use the new package-specific endpoint
+      const result = await createDiscountMutation.mutateAsync({
+        packageId,
+        discount: discountData
+      })
+      discountId = (result.data as any)?.id
+
+      toast.add({
+        title: 'Discount created',
+        color: 'green',
+      })
+    }
+
+    // Create rules if any
+    if (data.rules && data.rules.length > 0) {
+      const createRulePromises = data.rules.map((rule: any) =>
+        createDiscountRuleMutation.mutateAsync({
+          rule_type: rule.rule_type,
+          name: rule.name,
+          description: rule.description || undefined,
+          value: rule.value || undefined,
+          active: rule.active ?? true,
+          discount: discountId,
+        })
+      )
+
+      try {
+        const results = await Promise.allSettled(createRulePromises)
+        const failed = results.filter((r: any) => r.status === 'rejected').length
+        if (failed > 0) {
+          toast.add({
+            title: `Warning: ${failed} rule(s) failed to create`,
+            color: 'orange',
+          })
+        }
+      } catch (error) {
+        // Individual failures already handled by Promise.allSettled
+        console.error('Error creating rules:', error)
+      }
+    }
+
+    closeDiscountModal()
+    refetchDiscounts()
+  } catch (error) {
+    toast.add({
+      title: editingDiscount.value ? 'Failed to update discount' : 'Failed to create discount',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const toggleDiscountStatus = async (discountId: number, isActive: boolean) => {
+  try {
+    await updateDiscountMutation.mutateAsync({
+      discountId,
+      body: { active: isActive },
+    })
+    toast.add({
+      title: 'Status updated',
+      color: 'green',
+    })
+    refetchDiscounts()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update status',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const removeDiscount = async (discountId: string) => {
+  if (!confirm('Remove this discount? This will also delete all associated rules.')) return
+
+  try {
+    await deleteDiscountMutation.mutateAsync(discountId)
+    toast.add({
+      title: 'Discount removed',
+      color: 'green',
+    })
+    refetchDiscounts()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to remove discount',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'red',
     })
@@ -815,7 +1136,8 @@ const formatAmount = (amount: string | number) => {
 
 const getTicketTypeName = (ticketTypeId: number) => {
   const ticketType = ticketTypes.value.find((t: any) => t.id === ticketTypeId)
-  return ticketType?.title || 'Unknown'
+  // filter any _
+  return ticketType?.title.replace(/_/g, ' ') || 'Unknown'
 }
 
 const getPatternLabel = (formatMatch: string | null): string => {
