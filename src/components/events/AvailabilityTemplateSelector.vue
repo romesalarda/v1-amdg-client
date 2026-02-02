@@ -45,14 +45,14 @@
               class="btn-icon"
               title="Edit template"
             >
-              ✏️
+              Edit
             </button>
             <button
               @click.stop="confirmDeleteTemplate(template)"
               class="btn-icon btn-icon--danger"
               title="Delete template"
             >
-              🗑️
+              Delete
             </button>
           </div>
         </div>

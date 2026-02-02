@@ -135,6 +135,11 @@ const tabs = [
     icon: 'i-heroicons-photo',
   },
   {
+    path: 'booking',
+    label: 'Booking & Tickets',
+    icon: 'i-heroicons-ticket',
+  },
+  {
     path: 'dates',
     label: 'Dates & Windows',
     icon: 'i-heroicons-calendar-days',

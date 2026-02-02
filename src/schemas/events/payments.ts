@@ -3,7 +3,7 @@ import { z } from 'zod'
 export const bookingPackageSchema = z.object({
   name: z.string().min(1, 'Package name is required'),
   description: z.string().optional(),
-  base_amount: z.string().min(1, 'Base amount is required'),
+  base_amount: z.coerce.string().min(1, 'Base amount is required'),
   ticket_type: z.number({ required_error: 'Ticket type is required' }),
   capacity: z.string().optional(),
   is_default: z.boolean().default(false),

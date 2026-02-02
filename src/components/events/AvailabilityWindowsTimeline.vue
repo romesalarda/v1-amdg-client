@@ -213,7 +213,7 @@ function getEventStyle() {
   const eventDuration = new Date(props.eventEnd).getTime() - new Date(props.eventStart).getTime()
   
   const left = (eventStartTime / totalRange) * 100
-  const width = (eventDuration / totalRange) * 100
+  const width = (eventDuration / totalRange) * 500
   
   return {
     marginLeft: `${left}%`,
