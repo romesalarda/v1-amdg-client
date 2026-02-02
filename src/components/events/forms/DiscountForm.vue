@@ -416,6 +416,7 @@ const onSubmit = handleSubmit((values) => {
     name: values.name,
     description: values.description || undefined,
     packageId: values.packageId,
+    discount_name: values.name,
     discount_type: values.discount_type,
     active: values.active,
   }

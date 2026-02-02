@@ -25,13 +25,13 @@ export const discountRuleSchema = z.object({
   rule_type: discountRuleTypeEnum,
   name: z.string().min(1, 'Rule name is required'),
   description: z.string().nullable().optional(),
-  value: z.string().optional(),
+  value: z.string().nullable().optional(),
   active: z.boolean().default(true),
 }).refine(
   (data) => {
     // Value is required for all rule types except IS_EVENT_STAFF
     if (data.rule_type !== 'IS_EVENT_STAFF') {
-      return data.value !== undefined && data.value.length > 0
+      return data.value !== undefined && data.value !== null && data.value.length > 0
     }
     return true
   },

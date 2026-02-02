@@ -800,11 +800,7 @@ const closeDiscountModal = () => {
 }
 
 const handleDiscountSubmit = async (data: any) => {
-  try {
-    console.log(data);
-    console.log(selectedPackageForDiscount.value);
-    console.log(editingDiscount.value);
-    
+  try {    
     const discountData = {
       name: data.name,
       description: data.description || undefined,
@@ -822,7 +818,7 @@ const handleDiscountSubmit = async (data: any) => {
         discountId: editingDiscount.value.discount_id,
         body: discountData,
       })
-      discountId = editingDiscount.value.discount_id
+      discountId = editingDiscount.value.id
 
       // Smart rule diffing: only modify what changed
       const existingRules = editingDiscount.value.rules || []
