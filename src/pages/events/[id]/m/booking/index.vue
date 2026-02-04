@@ -156,7 +156,7 @@
                 <div class="flex items-center gap-2">
                   <UToggle
                     :model-value="discount.active"
-                    @update:model-value="toggleDiscountStatus(discount.id, $event)"
+                    @update:model-value="toggleDiscountStatus(discount.discount_id, $event)"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
@@ -224,7 +224,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                       <span class="font-medium">Price:</span>
-                      <span class="text-primary-600 font-semibold">${{ formatAmount(pkg.base_amount) }}</span>
+                      <span class="text-primary-600 font-semibold">{{ formatAmount(pkg.base_amount, pkg.base_amount_currency) }}</span>
                     </div>
                   </div>
                 </div>
@@ -906,7 +906,7 @@ const handleDiscountSubmit = async (data: any) => {
   }
 }
 
-const toggleDiscountStatus = async (discountId: number, isActive: boolean) => {
+const toggleDiscountStatus = async (discountId: string, isActive: boolean) => {
   try {
     await updateDiscountMutation.mutateAsync({
       discountId,
@@ -1126,8 +1126,11 @@ const formatDate = (date: string | null) => {
   })
 }
 
-const formatAmount = (amount: string | number) => {
-  return Number(amount).toFixed(2)
+const formatAmount = (amount: string | number, currency?: string) => {
+  return new Intl.NumberFormat('en-US', { 
+    style: 'currency', 
+    currency: currency || 'USD' 
+  }).format(Number(amount))
 }
 
 const getTicketTypeName = (ticketTypeId: number) => {

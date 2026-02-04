@@ -85,7 +85,7 @@ export function usePartialUpdatePaymentDiscount() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ discountId, body }: { discountId: number; body?: PaymentsDiscountsPartialUpdateData['body'] }) =>
+    mutationFn: ({ discountId, body }: { discountId: string; body?: PaymentsDiscountsPartialUpdateData['body'] }) =>
       paymentsDiscountsPartialUpdate({ path: { discount_id: String(discountId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })

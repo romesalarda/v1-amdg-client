@@ -1,25 +1,31 @@
 <template>
-  <nav class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+  <nav class="sticky top-0 z-50 bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
+    <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
       <!-- Logo/Brand -->
       <div class="flex items-center">
-        <NuxtLink to="/" class="flex items-center gap-2 no-underline">
-          <span class="text-2xl font-bold text-gray-900 tracking-tight">AMDG</span>
+        <NuxtLink to="/" class="flex items-center gap-3 no-underline">
+          <!-- <div class="size-10 flex items-center justify-center border border-primary text-primary rounded-sm bg-navy-accent/50">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+          </div> -->
+          <span class="text-2xl font-bold tracking-widest gold-gradient-text">AMDG</span>
         </NuxtLink>
       </div>
 
       <!-- Navigation Links -->
       <div class="hidden md:flex items-center gap-8 flex-1 justify-center">
-        <NuxtLink to="/" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
+        <NuxtLink to="/" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
           Home
         </NuxtLink>
-        <NuxtLink to="/events" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
+        <NuxtLink to="/events" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
           Events
         </NuxtLink>
-        <NuxtLink to="/communities" class="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors py-2 relative no-underline">
+        <NuxtLink to="/communities" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
           Communities
         </NuxtLink>
-        <NuxtLink v-if="userData && profileData" to="/my-dashboard" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors no-underline shadow-sm">
+        <NuxtLink v-if="userData && profileData" to="/my-dashboard" class="bg-primary hover:bg-primary-500/90 px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(236,200,19,0.25)] no-underline">
           My Dashboard
         </NuxtLink>
       </div>
@@ -32,7 +38,7 @@
         
         <template v-else-if="userData && profileData">
           <div
-            class="flex items-center gap-3 px-4 py-2 rounded-full cursor-pointer transition-all border border-transparent hover:bg-gray-50 hover:border-gray-200"
+            class="flex items-center gap-3 px-4 py-2 rounded-sm cursor-pointer transition-all border border-primary/20 hover:bg-navy-accent/50 hover:border-primary/40"
             @click="toggleDropdown"
           >
             <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
@@ -43,15 +49,15 @@
                 class="w-full h-full object-cover"
                 @error="(e) => onImageError(e)"
               />
-              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-semibold text-sm">
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-background-dark font-semibold text-sm">
                 {{ getInitials(userData.data?.display_name) }}
               </div>
             </div>
-            <span class="hidden md:block text-sm font-medium text-gray-900 max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
+            <span class="hidden md:block text-sm font-medium text-white max-w-[150px] overflow-hidden text-ellipsis whitespace-nowrap">
               {{ userData.data?.display_name }}
             </span>
             <svg
-              class="w-4 h-4 text-gray-600 transition-transform flex-shrink-0"
+              class="w-4 h-4 text-primary transition-transform flex-shrink-0"
               :class="{ 'rotate-180': isDropdownOpen }"
               viewBox="0 0 16 16"
               fill="none"
@@ -76,9 +82,9 @@
             leave-from-class="opacity-100 translate-y-0"
             leave-to-class="opacity-0 -translate-y-2"
           >
-            <div v-if="isDropdownOpen" class="absolute top-full right-0 mt-2 min-w-[200px] bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50">
-              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors no-underline" @click="closeDropdown">
-                <svg class="w-4 h-4 text-gray-500" viewBox="0 0 16 16" fill="none">
+            <div v-if="isDropdownOpen" class="absolute top-full right-0 mt-2 min-w-[200px] bg-navy-accent border border-primary/30 rounded-sm shadow-xl overflow-hidden z-50">
+              <NuxtLink to="/profile" class="flex items-center gap-3 px-4 py-3 text-white text-sm font-medium hover:bg-primary/10 transition-colors no-underline" @click="closeDropdown">
+                <svg class="w-4 h-4 text-primary" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M8 8C10.21 8 12 6.21 12 4C12 1.79 10.21 0 8 0C5.79 0 4 1.79 4 4C4 6.21 5.79 8 8 8ZM8 10C5.33 10 0 11.34 0 14V16H16V14C16 11.34 10.67 10 8 10Z"
                     fill="currentColor"
@@ -86,8 +92,8 @@
                 </svg>
                 Profile
               </NuxtLink>
-              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors no-underline" @click="closeDropdown">
-                <svg class="w-4 h-4 text-gray-500" viewBox="0 0 16 16" fill="none">
+              <NuxtLink to="/settings" class="flex items-center gap-3 px-4 py-3 text-white text-sm font-medium hover:bg-primary/10 transition-colors no-underline" @click="closeDropdown">
+                <svg class="w-4 h-4 text-primary" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M8 10C9.10457 10 10 9.10457 10 8C10 6.89543 9.10457 6 8 6C6.89543 6 6 6.89543 6 8C6 9.10457 6.89543 10 8 10Z"
                     fill="currentColor"
@@ -99,8 +105,8 @@
                 </svg>
                 Settings
               </NuxtLink>
-              <button class="flex items-center gap-3 px-4 py-3 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors w-full text-left border-0 bg-transparent cursor-pointer" @click="handleLogout">
-                <svg class="w-4 h-4 text-gray-500" viewBox="0 0 16 16" fill="none">
+              <button class="flex items-center gap-3 px-4 py-3 text-white text-sm font-medium hover:bg-primary/10 transition-colors w-full text-left border-0 bg-transparent cursor-pointer" @click="handleLogout">
+                <svg class="w-4 h-4 text-primary" viewBox="0 0 16 16" fill="none">
                   <path
                     d="M6 14H3C2.73478 14 2.48043 13.8946 2.29289 13.7071C2.10536 13.5196 2 13.2652 2 13V3C2 2.73478 2.10536 2.48043 2.29289 2.29289C2.48043 2.10536 2.73478 2 3 2H6M11 11L14 8M14 8L11 5M14 8H6"
                     stroke="currentColor"
@@ -117,10 +123,10 @@
 
         <template v-else>
           <div class="flex items-center gap-3">
-            <NuxtLink to="/login" class="px-4 py-2 text-sm font-medium text-gray-700 bg-transparent border border-gray-300 rounded-md hover:bg-gray-50 hover:border-gray-400 transition-all no-underline">
+            <NuxtLink to="/login" class="px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-white bg-transparent border border-primary/50 rounded-sm hover:bg-primary/10 transition-all no-underline">
               Login
             </NuxtLink>
-            <NuxtLink to="/register" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-all no-underline">
+            <NuxtLink to="/register" class="bg-primary hover:bg-primary/90 text-background-dark px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(236,200,19,0.25)] no-underline">
               Sign Up
             </NuxtLink>
           </div>
@@ -129,6 +135,15 @@
     </div>
   </nav>
 </template>
+
+<style scoped>
+.gold-gradient-text {
+  background: linear-gradient(to bottom, #fceabb 0%, #ecc813 50%, #c49300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'

@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-blue-400 transition-all duration-200 shadow-sm">
+  <div class="bg-navy-accent-600 border border-primary-500/20 rounded-sm overflow-hidden hover:shadow-lg hover:border-primary-500/60 transition-all duration-200 shadow-sm">
     <div class="flex gap-0">
       <!-- Event Image -->
       <NuxtLink 
         :to="linkTo" 
         class="relative w-32 sm:w-40 flex-shrink-0 group overflow-hidden"
       >
-        <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-blue-600/20">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-background-dark-600/60">
           <img
             v-if="event.main_landing_image?.image"
             :src="resolveImageUrl(event.main_landing_image.image)"
@@ -15,7 +15,7 @@
             @error="onImageError"
           />
           <div v-else class="w-full h-full flex items-center justify-center">
-            <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 text-white/60" />
+            <UIcon name="i-heroicons-calendar-days" class="w-12 h-12 text-primary-500/60" />
           </div>
         </div>
         <!-- Overlay for better text contrast -->
@@ -31,98 +31,96 @@
           <div class="space-y-2.5">
             <!-- Title Row with Status and Badges -->
             <div class="flex items-start gap-2 flex-wrap">
-              <h3 class="text-base sm:text-lg font-bold text-gray-900 group-hover:text-blue-600 transition-colors flex-1 min-w-0 line-clamp-2">
+              <h3 class="text-base sm:text-lg font-bold text-white group-hover:text-primary-500 transition-colors flex-1 min-w-0 line-clamp-2">
                 {{ event.title }}
               </h3>
               <div class="flex items-center gap-1.5 flex-shrink-0">
-                <UBadge 
+                <span 
                   v-if="isStaff"
-                  color="purple"
-                  size="xs"
-                  class="flex items-center gap-1"
+                  class="bg-purple-500/20 text-purple-400 border border-purple-400/40 text-[10px] px-2 py-0.5 font-black uppercase flex items-center gap-1"
                 >
                   <UIcon name="i-heroicons-shield-check" class="w-3 h-3" />
                   <span class="hidden sm:inline">Staff</span>
-                </UBadge>
-                <UBadge 
-                  :color="getStatusColor(event.status)" 
-                  :label="event.status_display"
-                  size="xs"
-                />
+                </span>
+                <span 
+                  :class="getStatusClass(event.status)" 
+                  class="text-[10px] px-2 py-0.5 font-black uppercase"
+                >
+                  {{ event.status_display }}
+                </span>
               </div>
             </div>
 
             <!-- Meta Information -->
-            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-gray-600">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs sm:text-sm text-primary-500/70 font-mono">
               <!-- Date -->
-              <div class="flex items-center gap-1.5 font-medium">
-                <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500" />
+              <div class="flex items-center gap-1.5">
+                <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{{ formatDateTimeCompact(event.start_datetime, event.timezone) }}</span>
               </div>
               
               <!-- Event Type -->
               <div v-if="event.event_type_name" class="flex items-center gap-1.5">
-                <UIcon name="i-heroicons-tag" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
+                <UIcon name="i-heroicons-tag" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span>{{ event.event_type_name }}</span>
               </div>
               
               <!-- Organization -->
               <div v-if="event.organisation_name" class="flex items-center gap-1.5">
-                <UIcon name="i-heroicons-building-office" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-400" />
+                <UIcon name="i-heroicons-building-office" class="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 <span class="truncate">{{ event.organisation_name }}</span>
               </div>
             </div>
 
             <!-- Description -->
-            <p v-if="event.short_description" class="text-sm text-gray-600 line-clamp-3 leading-relaxed">
+            <p v-if="event.short_description" class="text-sm text-white/50 line-clamp-3 leading-relaxed">
               {{ event.short_description }}
             </p>
           </div>
         </NuxtLink>
 
         <!-- Action Buttons -->
-        <div class="flex flex-col gap-2 px-3 sm:px-4 py-4 sm:py-5 border-l border-gray-100">
+        <div class="flex flex-col gap-2 px-3 sm:px-4 py-4 sm:py-5 border-l border-primary-500/10">
           <!-- Manage Event Button (if staff) -->
-          <UButton
+          <button
             v-if="isStaff"
-            size="sm"
-            color="purple"
-            icon="i-heroicons-cog-6-tooth"
-            :to="`/events/${event.event_id}/m/dashboard`"
-            @click.stop
-            class="whitespace-nowrap"
+            @click.stop="navigateTo(`/events/${event.event_id}/m/dashboard`)"
+            class="bg-purple-500/20 text-purple-400 border border-purple-400/40 px-3 py-2 text-xs font-black uppercase rounded-sm hover:bg-purple-500/30 transition-all whitespace-nowrap"
           >
             <span class="hidden sm:inline">Manage</span>
             <span class="sm:hidden">Edit</span>
-          </UButton>
+          </button>
 
-          <!-- Accept Invite Button (if pending invite) -->
-          <UButton
-            v-if="hasPendingInvite"
-            size="sm"
-            color="primary"
-            icon="i-heroicons-user-plus"
-            :loading="isAccepting"
-            @click.stop="handleAcceptInvite"
-            class="whitespace-nowrap"
-          >
-            <span class="hidden sm:inline">Accept</span>
-            <UIcon v-if="!isAccepting" name="i-heroicons-check" class="sm:hidden w-4 h-4" />
-          </UButton>
-
-          <!-- View Event Button -->
-          <UButton
-            v-if="!isStaff && !hasPendingInvite"
-            size="sm"
-            variant="outline"
-            icon="i-heroicons-arrow-right"
-            :to="linkTo"
-            @click.stop
-            class="whitespace-nowrap"
+          <!-- View Event Button (if staff) -->
+          <button
+            v-if="isStaff"
+            @click.stop="navigateTo(linkTo)"
+            class="border border-primary-500/50 text-primary-500 px-3 py-2 text-xs font-black uppercase rounded-sm hover:bg-primary-500/10 transition-all whitespace-nowrap"
           >
             <span class="hidden sm:inline">View</span>
             <UIcon name="i-heroicons-eye" class="sm:hidden w-4 h-4" />
-          </UButton>
+          </button>
+
+          <!-- Accept Invite Button (if pending invite) -->
+          <button
+            v-if="hasPendingInvite"
+            @click.stop="handleAcceptInvite"
+            :disabled="isAccepting"
+            class="bg-primary-500 text-background-dark-600 px-3 py-2 text-xs font-black uppercase rounded-sm hover:brightness-110 transition-all whitespace-nowrap disabled:opacity-50"
+          >
+            <span class="hidden sm:inline">{{ isAccepting ? 'Accepting...' : 'Accept' }}</span>
+            <UIcon v-if="!isAccepting" name="i-heroicons-check" class="sm:hidden w-4 h-4" />
+          </button>
+
+          <!-- View Event Button (if not staff and no pending invite) -->
+          <button
+            v-if="!isStaff && !hasPendingInvite"
+            @click.stop="navigateTo(linkTo)"
+            class="border border-primary-500/50 text-primary-500 px-3 py-2 text-xs font-black uppercase rounded-sm hover:bg-primary-500/10 transition-all whitespace-nowrap"
+          >
+            <span class="hidden sm:inline">View</span>
+            <UIcon name="i-heroicons-eye" class="sm:hidden w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
@@ -227,5 +225,26 @@ const getStatusColor = (status?: string): 'gray' | 'blue' | 'green' | 'orange' |
     'ARCHIVED': 'gray',
   } as const
   return (colors[status as keyof typeof colors] || 'gray') as 'gray' | 'blue' | 'green' | 'orange' | 'purple' | 'red' | 'yellow'
+}
+
+const getStatusClass = (status?: string) => {
+  switch (status?.toUpperCase()) {
+    case 'OPEN':
+    case 'PUBLISHED':
+      return 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/40'
+    case 'DRAFTING':
+      return 'bg-amber-500/20 text-amber-400 border border-amber-400/40'
+    case 'CANCELLED':
+    case 'DELETED':
+      return 'bg-red-500/20 text-red-400 border border-red-400/40'
+    case 'CLOSED':
+      return 'bg-orange-500/20 text-orange-400 border border-orange-400/40'
+    case 'IN_PROGRESS':
+      return 'bg-purple-500/20 text-purple-400 border border-purple-400/40'
+    case 'POSTPONED':
+      return 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/40'
+    default:
+      return 'bg-gray-500/20 text-gray-400 border border-gray-400/40'
+  }
 }
 </script>

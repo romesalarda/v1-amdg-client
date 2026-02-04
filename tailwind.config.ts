@@ -1,0 +1,56 @@
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
+
+export default <Partial<Config>>{
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#fef9e7',
+          100: '#fdf2c3',
+          200: '#fce89b',
+          300: '#fade73',
+          400: '#f6d445',
+          500: '#ecc813', // Main gold
+          600: '#d4b311',
+          700: '#b8990e',
+          800: '#9c800c',
+          900: '#7a6309',
+          950: '#4d3e06',
+          DEFAULT: '#ecc813'
+        },
+        'background-dark': {
+          DEFAULT: '#0a192f',
+          50: '#e6e9ed',
+          100: '#b8c2d1',
+          200: '#8a9bb5',
+          300: '#5c7499',
+          400: '#2e4d7d',
+          500: '#1a3051',
+          600: '#0a192f', // Main dark navy
+          700: '#081425',
+          800: '#060f1b',
+          900: '#040a11'
+        },
+        'navy-accent': {
+          DEFAULT: '#112240',
+          50: '#e7eaf0',
+          100: '#bec6d6',
+          200: '#95a2bc',
+          300: '#6c7ea2',
+          400: '#435a88',
+          500: '#2a3c5e',
+          600: '#112240', // Main navy accent
+          700: '#0d1a33',
+          800: '#091226',
+          900: '#050a19'
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        serif: ['Merriweather', ...defaultTheme.fontFamily.serif],
+        display: ['Newsreader', 'serif']
+      }
+    }
+  }
+}

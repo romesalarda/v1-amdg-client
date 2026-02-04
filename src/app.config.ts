@@ -1,6 +1,6 @@
 export default defineAppConfig({
   ui: {
-    primary: 'blue',
+    primary: 'primary',
     gray: 'cool',
     strategy: 'override',
     // Input components - light, readable backgrounds

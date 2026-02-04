@@ -104,9 +104,7 @@ const isSubmitting = ref(false)
 
 // Currency options
 const currencyOptions = [
-  { label: 'GBP (£)', value: 'GBP' },
-  { label: 'USD ($)', value: 'USD' },
-  { label: 'EUR (€)', value: 'EUR' },
+  "GBP", "USD", "EUR"
 ]
 
 // Compute the selected ticket type title for display
