@@ -1,85 +1,219 @@
 <template>
-  <div 
-    class="group cursor-pointer"
-    @click="navigateTo(linkTo)"
+  <NuxtLink 
+    :to="linkTo" 
+    class="group relative block"
   >
-    <div class="relative rounded-sm border border-primary-500/20 bg-navy-accent-600/30 overflow-hidden transition-all hover:border-primary-500/60 p-6">
-      <div class="flex justify-between items-start mb-4">
-        <div class="flex items-center gap-3">
+    <div class="border border-primary/20 bg-background-dark/80 overflow-hidden hover:border-primary/50 transition-all duration-300">
+      <!-- Event Image -->
+      <div class="relative aspect-[16/10] overflow-hidden bg-navy-accent/40">
+        <img
+          v-if="event.main_landing_image?.image"
+          :src="resolveImageUrl(event.main_landing_image.image)"
+          :alt="event.title"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          @error="onImageError"
+        />
+        <div v-else class="w-full h-full flex items-center justify-center">
+          <UIcon name="i-heroicons-calendar-days" class="w-20 h-20 text-primary/20" />
+        </div>
+        
+        <!-- Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/50 to-transparent opacity-60"></div>
+        
+        <!-- Status Badge -->
+        <!-- <div class="absolute top-2 right-2">
           <span 
-            :class="[
-              'text-[10px] px-2 py-0.5 font-black uppercase',
-              badgeClass
-            ]"
+            :class="getStatusClass(event.status)" 
+            class="text-[9px] px-2 py-1 font-bold uppercase tracking-wide backdrop-blur-sm"
           >
-            {{ badge }}
+            {{ event.status_display }}
           </span>
-          <span class="text-primary-500/40 font-mono text-[10px]">{{ referenceNumber }}</span>
+        </div> -->
+
+        <!-- Staff Badge -->
+        <div v-if="isStaff" class="absolute top-2 left-2">
+          <span class="bg-purple-500/30 text-purple-300 border border-purple-400/60 text-[9px] px-2 py-1 font-bold uppercase tracking-wide backdrop-blur-sm flex items-center gap-1">
+            <UIcon name="i-heroicons-shield-check" class="w-3 h-3" />
+            Staff
+          </span>
         </div>
-        <div class="flex items-center gap-2 text-[10px] text-primary-500/70 font-mono">
-          <UIcon name="i-heroicons-calendar" class="text-xs" />
-          {{ formattedDate }}
+
+        <!-- Date Badge - Bottom Left -->
+        <div class="absolute bottom-2 left-2">
+          <div class="bg-background-dark/95 border border-primary/40 px-2 py-1 backdrop-blur-sm">
+            <div class="flex items-center gap-1.5">
+              <UIcon name="i-heroicons-clock" class="w-3 h-3 text-primary" />
+              <span class="text-white text-[10px] font-mono uppercase tracking-wide">
+                {{ formatDateShort(event.start_datetime) }}
+              </span>
+            </div>
+          </div>
         </div>
-      </div>
-      
-      <h3 class="text-white font-bold text-xl mb-2 leading-tight group-hover:text-primary-500 transition-colors">
-        {{ event.name || event.title }}
-      </h3>
-      <p class="text-white/50 text-sm mb-4 line-clamp-2">
-        {{ event.description || event.short_description || 'No description provided' }}
-      </p>
-      
-      <div class="flex items-center gap-4 text-[10px] text-primary-500/70 font-mono flex-wrap">
-        <div class="flex items-center gap-1" v-if="event.organisation_name">
-          <UIcon name="i-heroicons-building-office" class="text-xs" />
-          {{ event.organisation_name }}
-        </div>
-        <div class="flex items-center gap-1" v-if="event.location">
-          <UIcon name="i-heroicons-map-pin" class="text-xs" />
-          {{ event.location }}
-        </div>
-        <slot name="meta"></slot>
       </div>
 
-      <!-- Action slot for custom buttons -->
-      <div v-if="$slots.actions" class="mt-4 pt-4 border-t border-primary-500/10">
-        <slot name="actions"></slot>
+      <!-- Content Section -->
+      <div class="p-3 space-y-2">
+        <!-- Title -->
+        <h3 class="text-base font-bold text-white group-hover:text-primary transition-colors line-clamp-2 leading-tight">
+          {{ event.title }}
+        </h3>
+
+        <!-- Meta Information -->
+        <div class="flex items-center gap-3 text-[10px] font-mono text-white/50">
+          <!-- Organization -->
+          <div v-if="event.organisation_name" class="flex items-center gap-1.5 truncate">
+            <UIcon name="i-heroicons-building-office" class="w-3 h-3 flex-shrink-0" />
+            <span class="truncate">{{ event.organisation_name }}</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div v-if="isStaff || hasPendingInvite" class="pt-2 border-t border-primary/10 flex gap-2">
+          <!-- Manage Button (if staff) -->
+          <button
+            v-if="isStaff"
+            @click.prevent.stop="navigateTo(`/events/${event.event_id}/m/dashboard`)"
+            class="flex-1 bg-purple-500/20 text-purple-400 border border-purple-400/40 px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide hover:bg-purple-500/30 transition-all"
+          >
+            Manage
+          </button>
+
+          <!-- Accept Invite Button -->
+          <button
+            v-if="hasPendingInvite"
+            @click.prevent.stop="handleAcceptInvite"
+            :disabled="isAccepting"
+            class="flex-1 bg-primary text-background-dark px-2 py-1.5 text-[10px] font-bold uppercase tracking-wide hover:scale-105 transition-transform disabled:opacity-50"
+          >
+            {{ isAccepting ? 'Accepting...' : 'Accept' }}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup lang="ts">
 import type { EventList } from '~/api/types.gen'
-import { formatDate } from '~/utils/time'
+import { resolveImageUrl, onImageError } from '~/utils/image'
+import { useEventStaff } from '~/composables/resources/events/eventStaff'
+import { useMyEventStaffInvitesForEvent, useAcceptEventStaffInvite } from '~/composables/resources/events/eventStaffInvites'
+import { useAuthStore } from '~/stores/auth'
 
-const props = withDefaults(defineProps<{
-  event: EventList | any
-  badge?: string
-  badgeVariant?: 'live' | 'staff' | 'discover' | 'drafting'
-  referenceNumber?: string
+const props = defineProps<{
+  event: EventList
   linkTo?: string
-}>(), {
-  badge: 'LIVE',
-  badgeVariant: 'live'
-})
+  showStaffControls?: boolean
+}>()
+
+const authStore = useAuthStore()
+const { $notyf } = useNuxtApp()
 
 const linkTo = computed(() => {
   if (props.linkTo) return props.linkTo
-  return `/events/${props.event.event_id || props.event.id}`
+  return `/events/${props.event.event_id}`
 })
 
-const badgeClass = computed(() => {
-  const variants = {
-    live: 'bg-primary-500 text-background-dark-600',
-    staff: 'bg-purple-500/20 text-purple-400 border border-purple-400/40',
-    discover: 'bg-primary-500/20 text-primary-500 border border-primary-500/40',
-    drafting: 'bg-white/10 text-white/60 border border-white/20'
+// Format date utilities
+const formatDateShort = (dateString: string) => {
+  const date = new Date(dateString)
+  const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day = date.getDate()
+  return `${month} ${day}`
+}
+
+const formatDateTime = (dateString: string, timezone?: string) => {
+  const date = new Date(dateString)
+  const formatted = date.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric',
+    year: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true
+  })
+  return formatted
+}
+
+// Check if user is staff member for this event
+const { data: staffData } = useEventStaff(
+  computed(() => props.showStaffControls !== false ? {
+    event: props.event.id,
+    user: authStore.user?.id,
+  } : undefined)
+)
+
+const isStaff = computed(() => {
+  if (props.showStaffControls === false) return false
+  const staffMembers = staffData.value?.data?.results || []
+  return staffMembers.length > 0
+})
+
+// Check if user has pending invites for this event
+const { data: invitesData } = useMyEventStaffInvitesForEvent(
+  computed(() => props.event.event_id),
+  computed(() => props.showStaffControls !== false ? {
+    is_valid: true,
+    accepted: false,
+  } : undefined)
+)
+
+const hasPendingInvite = computed(() => {
+  if (props.showStaffControls === false) return false
+  const invites = invitesData.value?.data?.results || []
+  return invites.length > 0
+})
+
+const pendingInvite = computed(() => {
+  const invites = invitesData.value?.data?.results || []
+  return invites[0]
+})
+
+// Accept invite
+const isAccepting = ref(false)
+const { mutate: acceptInvite } = useAcceptEventStaffInvite()
+
+const handleAcceptInvite = () => {
+  if (!pendingInvite.value) return
+  
+  isAccepting.value = true
+  
+  acceptInvite(
+    { 
+      eventId: props.event.event_id, 
+      inviteId: pendingInvite.value.id 
+    },
+    {
+      onSuccess: () => {
+        $notyf?.success('Staff invitation accepted! You are now a staff member.')
+        isAccepting.value = false
+      },
+      onError: (error: any) => {
+        $notyf?.error(error?.body?.error || error?.message || 'Failed to accept invitation')
+        isAccepting.value = false
+      }
+    }
+  )
+}
+
+const getStatusClass = (status?: string) => {
+  switch (status?.toUpperCase()) {
+    case 'OPEN':
+    case 'PUBLISHED':
+      return 'bg-emerald-500/30 text-emerald-300 border border-emerald-400/60'
+    case 'DRAFTING':
+      return 'bg-amber-500/30 text-amber-300 border border-amber-400/60'
+    case 'CANCELLED':
+    case 'DELETED':
+      return 'bg-red-500/30 text-red-300 border border-red-400/60'
+    case 'CLOSED':
+      return 'bg-orange-500/30 text-orange-300 border border-orange-400/60'
+    case 'IN_PROGRESS':
+      return 'bg-purple-500/30 text-purple-300 border border-purple-400/60'
+    case 'POSTPONED':
+      return 'bg-yellow-500/30 text-yellow-300 border border-yellow-400/60'
+    default:
+      return 'bg-gray-500/30 text-gray-300 border border-gray-400/60'
   }
-  return variants[props.badgeVariant] || variants.live
-})
-
-const formattedDate = computed(() => {
-  return formatDate(props.event.start_datetime, 'MMM dd, yyyy').toUpperCase()
-})
+}
 </script>

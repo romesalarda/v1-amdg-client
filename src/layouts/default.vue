@@ -22,8 +22,8 @@ import Footer from '~/components/common/Footer.vue'
 <style>
 .blueprint-grid {
   background-image: 
-    linear-gradient(to right, rgba(236, 200, 19, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(236, 200, 19, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(236, 200, 19, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(236, 200, 19, 0.05) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 </style>

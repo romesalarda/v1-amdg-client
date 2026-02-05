@@ -16,18 +16,19 @@
 
       <!-- Navigation Links -->
       <div class="hidden md:flex items-center gap-8 flex-1 justify-center">
-        <NuxtLink to="/" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
+        <!-- <NuxtLink to="/" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
           Home
-        </NuxtLink>
+        </NuxtLink> -->
         <NuxtLink to="/events" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
           Events
-        </NuxtLink>
-        <NuxtLink to="/communities" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
-          Communities
         </NuxtLink>
         <NuxtLink v-if="userData && profileData" to="/my-dashboard" class="bg-primary hover:bg-primary-500/90 px-6 py-2.5 rounded-sm text-xs font-bold uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(236,200,19,0.25)] no-underline">
           My Dashboard
         </NuxtLink>
+        <NuxtLink to="/communities" class="text-sm font-medium uppercase tracking-[0.2em] text-white/80 hover:text-primary transition-colors py-2 relative no-underline">
+          Communities
+        </NuxtLink>
+      
       </div>
 
       <!-- User Section -->
@@ -38,7 +39,7 @@
         
         <template v-else-if="userData && profileData">
           <div
-            class="flex items-center gap-3 px-4 py-2 rounded-sm cursor-pointer transition-all border border-primary/20 hover:bg-navy-accent/50 hover:border-primary/40"
+            class="flex items-center gap-3 px-4 py-2 rounded-sm cursor-pointer transition-all hover:bg-navy-accent/50 hover:border-primary/40"
             @click="toggleDropdown"
           >
             <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">

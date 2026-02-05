@@ -10,15 +10,27 @@
           </div>
           <div class="flex flex-col">
             <h1 class="text-white text-lg font-bold leading-none tracking-tight font-display">AMDG BLUEPRINT</h1>
-            <p class="text-primary text-[10px] font-medium tracking-[0.2em] uppercase">Dashboard V3.0</p>
+            <p class="text-primary text-[10px] font-medium tracking-[0.2em] uppercase">Dashboard V1.0</p>
           </div>
         </div>
 
         <!-- Profile Summary -->
         <div class="flex flex-col gap-4">
           <div class="flex items-center gap-4 p-4 rounded-sm bg-navy-accent/50 border border-primary/20">
-            <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-yellow-600 flex items-center justify-center text-background-dark font-bold text-xl shadow-md">
+            <!-- <div class="w-14 h-14 rounded-full bg-navy-accent flex items-center justify-center font-bold text-xl shadow-md">
               {{ userInitials }}
+            </div> -->
+            <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+              <img
+                v-if="profileData?.profile_picture_url"
+                :src="resolveImageUrl(profileData.profile_picture_url)"
+                :alt="`${userData?.display_name}'s profile`"
+                class="w-full h-full object-cover"
+                @error="(e) => onImageError(e)"
+              />
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-background-dark font-semibold text-sm">
+                {{ getInitials(userData?.display_name) }}
+              </div>
             </div>
             <div class="flex flex-col">
               <h3 class="font-bold text-white">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</h3>
@@ -39,14 +51,14 @@
               class="flex items-center gap-4 px-4 py-3 rounded-sm hover:bg-white/5 text-white/70 hover:text-primary transition-all"
             >
               <UIcon name="i-heroicons-magnifying-glass" class="text-xl" />
-              <span class="text-sm font-medium">Active Projects</span>
+              <span class="text-sm font-medium">Find Events</span>
             </NuxtLink>
             <NuxtLink 
               to="/communities"
               class="flex items-center gap-4 px-4 py-3 rounded-sm hover:bg-white/5 text-white/70 hover:text-primary transition-all"
             >
               <UIcon name="i-heroicons-user-group" class="text-xl" />
-              <span class="text-sm font-medium">Community Map</span>
+              <span class="text-sm font-medium">Communities</span>
             </NuxtLink>
             <div class="my-4 border-t border-primary/10"></div>
             <NuxtLink 
@@ -56,6 +68,15 @@
               <UIcon name="i-heroicons-cog-6-tooth" class="text-xl" />
               <span class="text-sm font-medium">Settings</span>
             </NuxtLink>
+            <div v-if="isController">
+            <button
+              @click="navigateTo('/events/create')"
+              class="w-full py-4 bg-primary text-background-dark text-xs font-black tracking-widest uppercase rounded-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+            >
+              <UIcon name="i-heroicons-plus-circle" class="text-sm" />
+              Create Event
+            </button>
+          </div>
           </nav>
         </div>
 
@@ -110,20 +131,12 @@
         </div>
 
         <!-- Create Event Button (Only for Controllers) -->
-        <div v-if="isController" class="mt-auto">
-          <button
-            @click="navigateTo('/events/create')"
-            class="w-full py-4 bg-primary text-background-dark text-xs font-black tracking-widest uppercase rounded-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
-          >
-            <UIcon name="i-heroicons-plus-circle" class="text-sm" />
-            New Schematic
-          </button>
-        </div>
+        
       </aside>
 
       <!-- Main Content -->
       <main class="flex-1 blueprint-grid">
-        <div class="p-2">
+        <div class="px-12">
           <!-- Hero Section with Technical Annotations -->
           <div class="relative max-w-6xl mx-auto mt-4">
             <!-- Technical Header Info -->
@@ -133,7 +146,7 @@
             </div>
 
             <div class="relative group">
-              <div class="aspect-[21/9] w-full bg-cover bg-center rounded-sm overflow-hidden border border-primary/30 relative" 
+              <div class="aspect-[30/9] w-full bg-cover bg-center rounded-sm overflow-hidden border border-primary/30 relative" 
                    style="background-image: linear-gradient(rgba(10, 25, 47, 0.7), rgba(10, 25, 47, 0.7)), url('https://images.unsplash.com/photo-1520069853743-c3b52c6c8dcb?w=1200');">
                 <!-- Hero Content -->
                 <div class="absolute inset-0 flex flex-col justify-center px-20">
@@ -141,18 +154,10 @@
                   <h1 class="text-white text-6xl font-black leading-tight tracking-tighter mb-6 max-w-2xl font-display">
                     Welcome, <span class="text-primary italic">{{ authStore.user?.first_name }}</span>
                   </h1>
-                  <p class="text-white/60 text-lg max-w-xl font-light leading-relaxed mb-8">
+                  <p class="text-white/60 text-lg max-w-xl font-light leading-relaxed mb-2">
                     You have <span class="text-primary font-bold">{{ upcomingEventsCount }} upcoming {{ upcomingEventsCount === 1 ? 'event' : 'events' }}</span> this week. 
                     "Ad maiorem Dei gloriam"—all for the greater glory of God.
                   </p>
-                  <div class="flex gap-4">
-                    <button @click="navigateTo('/events')" class="bg-primary text-background-dark px-8 py-4 text-sm font-black uppercase tracking-widest rounded-sm transition-transform active:scale-95 shadow-lg shadow-primary/20">
-                      View Schematics
-                    </button>
-                    <button @click="navigateTo('/communities')" class="border border-primary text-primary px-8 py-4 text-sm font-black uppercase tracking-widest rounded-sm hover:bg-primary/10 transition-all">
-                      Community Map
-                    </button>
-                  </div>
                 </div>
 
                 <!-- Decorative Blueprint Lines -->
@@ -171,7 +176,7 @@
           </div>
 
           <!-- My Upcoming Events Section -->
-          <section v-if="myUpcomingEvents.length > 0" class="max-w-6xl mx-auto mt-16">
+          <section v-if="myUpcomingEvents.length > 0" class="max-w-6xl mx-auto mt-10">
             <div class="flex items-center justify-between mb-6">
               <div>
                 <h2 class="text-white text-3xl font-bold tracking-tight mb-1 font-display">My Projects // <span class="text-primary">Stage: Active</span></h2>
@@ -192,6 +197,7 @@
                 v-for="(event, index) in myUpcomingEvents" 
                 :key="event.event_id"
                 class="group cursor-pointer"
+                @click="router.push(`/events/${event.event_id}/`)"
               >
                 <div class="relative rounded-sm border border-primary/20 bg-navy-accent/30 overflow-hidden transition-all hover:border-primary/60 p-6">
                   <div class="flex justify-between items-start mb-4">
@@ -386,7 +392,7 @@ import { useOrganisationControls } from '~/composables/resources/organisation/or
 import { useEventStaff } from '~/composables/resources/events/eventStaff'
 import { useAuthStore } from '~/stores/auth'
 import { DateTime } from 'luxon'
-import type { EventList } from '~/api/types.gen'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 
 definePageMeta({
   middleware: 'auth'
@@ -395,6 +401,9 @@ definePageMeta({
 const router = useRouter()
 
 const authStore = useAuthStore()
+
+const userData = computed(() => authStore.user)
+const profileData = computed(() => authStore.user?.profile)
 
 // User initials for avatar
 const userInitials = computed(() => {

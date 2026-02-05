@@ -1,108 +1,84 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
+  <div class="min-h-screen">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-b from-primary to-blue-900 text-white">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div class="text-center max-w-3xl mx-auto">
-          <h1 class="text-4xl md:text-6xl font-black mb-6">
-            Discover Events
-          </h1>
-          <p class="text-xl md:text-2xl text-blue-100 mb-8">
-            Join transformative gatherings, conferences, and spiritual experiences
-          </p>
-          
-          <!-- Search Bar -->
-          <div class="relative max-w-2xl mx-auto">
-            <UInput
-              v-model="searchQuery"
-              size="xl"
-              placeholder="Search events by name, type, or organization..."
-              icon="i-heroicons-magnifying-glass"
-              :ui="{ icon: { trailing: { pointer: '' } } }"
-            >
-              <template #trailing>
-                <UButton
-                  v-if="searchQuery"
-                  color="gray"
-                  variant="link"
-                  icon="i-heroicons-x-mark-20-solid"
-                  :padded="false"
-                  @click="searchQuery = ''"
-                />
-              </template>
-            </UInput>
-          </div>
+    <section class="max-w-8xl mx-auto px-6 lg:px-10 py-8">
+      <div class="text-center mb-6">
+        <div class="mb-3 flex justify-center items-center gap-4 opacity-40">
+          <div class="h-[1px] w-12 bg-primary"></div>
+          <span class="text-[10px] uppercase tracking-[0.5em] text-primary">Event Registry</span>
+          <div class="h-[1px] w-12 bg-primary"></div>
+        </div>
+
+        <h1 class="text-white font-light text-3xl md:text-5xl leading-tight">
+          Discover <span class="gold-gradient-text italic font-black glow-gold">Events</span>
+        </h1>
+      </div>
+      
+      <!-- Partial width 50% -->
+      <div class="flex gap-2 w-10/12 mx-auto mb-8">
+        <div class="flex-1 relative">
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search events..."
+            class="w-full h-10 px-4 pl-10 bg-navy-accent/60 border border-primary/30 text-white placeholder-white/60 focus:outline-none focus:border-primary/60 transition-colors"
+          />
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        <div class="w-48">
+          <select
+            v-model="selectedFilter"
+            class="w-full h-10 px-4 bg-navy-accent/60 border border-primary/30 text-white focus:outline-none focus:border-primary/60 transition-colors"
+          >
+            <option value="all">All Events</option>
+            <option value="open">Open for Registration</option>
+            <option value="published">Published</option>
+            <option value="in_progress">In Progress</option>
+          </select>
+        </div>
+        <div class="w-48">
+          <select
+            v-model="selectedSort"
+            class="w-full h-10 px-4 bg-navy-accent/60 border border-primary/30 text-white focus:outline-none focus:border-primary/60 transition-colors"
+          >
+            <option value="date">Date (Earliest First)</option>
+            <option value="date_desc">Date (Latest First)</option>
+            <option value="name">Name (A-Z)</option>
+            <option value="name_desc">Name (Z-A)</option>
+          </select>
+        </div>
+        <div class="flex items-center px-3">
+          <span class="text-xs text-primary/60 font-mono uppercase tracking-wider whitespace-nowrap">
+            {{ filteredEvents.length }} {{ filteredEvents.length === 1 ? 'event' : 'events' }}
+          </span>
         </div>
       </div>
-    </div>
+    </section>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <!-- Filters and Sort -->
-      <div class="flex flex-col sm:flex-row gap-4 mb-8">
-        <div class="flex-1">
-          <USelectMenu
-            v-model="selectedFilter"
-            :options="filterOptions"
-            placeholder="Filter events"
-            size="lg"
-          />
-        </div>
-        <div class="sm:w-64">
-          <USelectMenu
-            v-model="selectedSort"
-            :options="sortOptions"
-            placeholder="Sort by"
-            size="lg"
-          />
-        </div>
-      </div>
+    <div class="max-w-8xl mx-auto px-6 lg:px-10 py-4">
 
-      <!-- My Organizations' Events Section -->
-      <div v-if="authStore.isAuthenticated && myOrganizationEvents.length > 0" class="mb-12">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">Events from Your Communities</h2>
-            <p class="text-gray-600 mt-1">Upcoming events from organizations you're a member of</p>
-          </div>
-          <UBadge size="lg" color="primary">
-            {{ myOrganizationEvents.length }}
-          </UBadge>
-        </div>
-        
-        <div v-if="isLoadingMyEvents" class="flex flex-col gap-4">
-          <USkeleton v-for="i in 3" :key="i" class="h-48 w-full" />
-        </div>
-        <div v-else class="flex flex-col gap-4">
-          <EventListItem 
-            v-for="event in myOrganizationEvents" 
-            :key="event.event_id" 
-            :event="event" 
-          />
-        </div>
-      </div>
-
-      <!-- All Upcoming Events Section -->
+      <!-- All Events Section -->
       <div>
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h2 class="text-2xl font-bold text-gray-900">
-              {{ searchQuery ? 'Search Results' : 'All Upcoming Events' }}
-            </h2>
-            <p class="text-gray-600 mt-1">
-              {{ filteredEvents.length }} {{ filteredEvents.length === 1 ? 'event' : 'events' }} available
-            </p>
-          </div>
-        </div>
-        
         <!-- Loading State -->
-        <div v-if="isLoadingEvents" class="flex flex-col gap-4">
-          <USkeleton v-for="i in 6" :key="i" class="h-48 w-full" />
+        <div v-if="isLoadingEvents" class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3">
+          <USkeleton v-for="i in 6" :key="i" class="h-80 w-full" />
         </div>
         
         <!-- Events Grid -->
-        <div v-else-if="filteredEvents.length > 0" class="flex flex-col gap-4">
-          <EventListItem 
+        <div v-else-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-3">
+          <EventBlueprintCard 
             v-for="event in paginatedEvents" 
             :key="event.event_id" 
             :event="event" 
@@ -111,16 +87,22 @@
         
         <!-- Empty State -->
         <div v-else class="text-center py-20">
-          <UIcon name="i-heroicons-calendar-days" class="w-20 h-20 mx-auto text-gray-400 mb-4" />
-          <h3 class="text-xl font-semibold text-gray-900 mb-2">
-            {{ searchQuery ? 'No events found' : 'No upcoming events' }}
-          </h3>
-          <p class="text-gray-600 mb-6">
-            {{ searchQuery ? 'Try adjusting your search terms' : 'Check back later for new events' }}
-          </p>
-          <UButton v-if="searchQuery" @click="searchQuery = ''">
-            Clear Search
-          </UButton>
+          <div class="architectural-border p-12 bg-background-dark/40 max-w-2xl mx-auto">
+            <UIcon name="i-heroicons-calendar-days" class="w-20 h-20 mx-auto text-primary/40 mb-6" />
+            <h3 class="text-2xl font-bold text-white mb-3 uppercase tracking-wide">
+              {{ searchQuery ? 'No events found' : 'No upcoming events' }}
+            </h3>
+            <p class="text-white/60 mb-8">
+              {{ searchQuery ? 'Try adjusting your search terms' : 'Check back later for new events' }}
+            </p>
+            <UButton 
+              v-if="searchQuery" 
+              @click="searchQuery = ''"
+              class="bg-primary text-background-dark px-8 py-3 font-bold uppercase tracking-widest text-sm"
+            >
+              Clear Search
+            </UButton>
+          </div>
         </div>
 
         <!-- Pagination -->
@@ -134,20 +116,33 @@
       </div>
 
       <!-- Call to Action -->
-      <div v-if="!authStore.isAuthenticated" class="mt-16 bg-gradient-to-br from-primary/10 to-blue-50 rounded-2xl p-8 md:p-12 text-center">
-        <h3 class="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-          Join Your Faith Community
-        </h3>
-        <p class="text-lg text-gray-700 mb-6 max-w-2xl mx-auto">
-          Sign in to see personalized events from your organizations and get early access to registration
-        </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <UButton size="lg" to="/login" color="primary">
-            Sign In
-          </UButton>
-          <UButton size="lg" to="/register" variant="outline" color="gray">
-            Create Account
-          </UButton>
+      <div v-if="!authStore.isAuthenticated" class="mt-16">
+        <div class="architectural-border p-12 bg-background-dark/60 text-center max-w-3xl mx-auto">
+          <div class="mb-6 inline-block border border-primary/60 px-4 py-2">
+            <span class="text-[10px] uppercase tracking-[0.3em] text-primary font-mono">Access Required</span>
+          </div>
+          <h3 class="text-3xl font-bold text-white mb-4 uppercase tracking-wide">
+            Join Your Faith Community
+          </h3>
+          <p class="text-lg text-white/60 mb-8 max-w-2xl mx-auto leading-relaxed">
+            Sign in to see personalized events from your organizations and get early access to registration
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <UButton 
+              size="lg" 
+              to="/login"
+              class="bg-primary text-background-dark px-10 py-4 font-bold uppercase tracking-widest text-sm hover:scale-105 transition-transform"
+            >
+              Sign In
+            </UButton>
+            <UButton 
+              size="lg" 
+              to="/register"
+              class="border border-primary/20 text-white px-10 py-4 font-bold uppercase tracking-widest text-sm hover:border-primary transition-colors"
+            >
+              Create Account
+            </UButton>
+          </div>
         </div>
       </div>
     </div>
@@ -158,7 +153,7 @@
 import { useUpcomingEvents } from '~/composables/resources/events/events'
 import { useOrganisationMemberships } from '~/composables/resources/organisation/organisationMemberships'
 import { useAuthStore } from '~/stores/auth'
-import EventListItem from '~/components/events/display/EventListItem.vue'
+import EventBlueprintCard from '~/components/events/display/EventBlueprintCard.vue'
 
 definePageMeta({
   layout: 'default',
@@ -280,3 +275,11 @@ useHead({
   ]
 })
 </script>
+<style scoped>
+.gold-gradient-text {
+  background: linear-gradient(to bottom, #fceabb 0%, #ecc813 50%, #c49300 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+</style>
