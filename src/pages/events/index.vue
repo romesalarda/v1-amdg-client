@@ -15,7 +15,7 @@
       </div>
       
       <!-- Partial width 50% -->
-      <div class="flex gap-2 w-10/12 mx-auto mb-8">
+      <div class="flex gap-2 w-10/12 mx-auto mb-2">
         <div class="flex-1 relative">
           <input
             v-model="searchQuery"
@@ -67,7 +67,7 @@
     </section>
 
     <!-- Main Content -->
-    <div class="max-w-8xl mx-auto px-6 lg:px-10 py-4">
+    <div class="max-w-8xl mx-auto px-6 lg:px-10 pb-10">
 
       <!-- All Events Section -->
       <div>

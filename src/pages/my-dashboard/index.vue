@@ -44,7 +44,7 @@
               class="flex items-center gap-4 px-4 py-3 rounded-sm bg-primary text-background-dark font-bold group transition-all"
             >
               <UIcon name="i-heroicons-squares-2x2" class="text-xl" />
-              <span class="text-sm">Blueprint Home</span>
+              <span class="text-sm">Dashboard</span>
             </NuxtLink>
             <NuxtLink 
               to="/events"
@@ -60,7 +60,6 @@
               <UIcon name="i-heroicons-user-group" class="text-xl" />
               <span class="text-sm font-medium">Communities</span>
             </NuxtLink>
-            <div class="my-4 border-t border-primary/10"></div>
             <NuxtLink 
               to="/settings"
               class="flex items-center gap-4 px-4 py-3 rounded-sm hover:bg-white/5 text-white/70 hover:text-primary transition-all"
@@ -68,15 +67,17 @@
               <UIcon name="i-heroicons-cog-6-tooth" class="text-xl" />
               <span class="text-sm font-medium">Settings</span>
             </NuxtLink>
+            <div class="my-4 border-t border-primary/10"></div>
+
             <div v-if="isController">
-            <button
-              @click="navigateTo('/events/create')"
-              class="w-full py-4 bg-primary text-background-dark text-xs font-black tracking-widest uppercase rounded-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
-            >
-              <UIcon name="i-heroicons-plus-circle" class="text-sm" />
-              Create Event
-            </button>
-          </div>
+              <button
+                @click="navigateTo('/events/create')"
+                class="w-full py-4 bg-primary text-background-dark text-xs font-black tracking-widest uppercase rounded-sm hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+              >
+                <UIcon name="i-heroicons-plus-circle" class="text-sm" />
+                Create Event
+              </button>
+            </div>
           </nav>
         </div>
 
@@ -179,7 +180,7 @@
           <section v-if="myUpcomingEvents.length > 0" class="max-w-6xl mx-auto mt-10">
             <div class="flex items-center justify-between mb-6">
               <div>
-                <h2 class="text-white text-3xl font-bold tracking-tight mb-1 font-display">My Projects // <span class="text-primary">Stage: Active</span></h2>
+                <h2 class="text-white text-3xl font-bold tracking-tight mb-1 font-display">Upcoming events // <span class="text-primary">Stage: Incoming</span></h2>
                 <p class="text-primary/60 text-xs font-mono tracking-wider">ACTIVE_RESOURCES_ALLOCATED: {{ myUpcomingEvents.length.toString().padStart(2, '0') }}</p>
               </div>
               <div class="flex gap-2 items-center">
@@ -202,7 +203,7 @@
                 <div class="relative rounded-sm border border-primary/20 bg-navy-accent/30 overflow-hidden transition-all hover:border-primary/60 p-6">
                   <div class="flex justify-between items-start mb-4">
                     <div class="flex items-center gap-3">
-                      <span class="bg-primary text-background-dark text-[10px] px-2 py-0.5 font-black uppercase">LIVE</span>
+                      <span class="bg-primary text-background-dark text-[10px] px-2 py-0.5 font-black uppercase">UPCOMING</span>
                       <span class="text-primary/40 font-mono text-[10px]">#{{ (index + 1).toString().padStart(3, '0') }}-2024</span>
                     </div>
                     <div class="flex items-center gap-2 text-[10px] text-primary/60 font-mono">

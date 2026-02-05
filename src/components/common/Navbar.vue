@@ -1,6 +1,6 @@
 <template>
   <nav class="sticky top-0 z-50 bg-background-dark/90 backdrop-blur-md border-b border-primary/20">
-    <div class="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto p-2 lg:px-10 flex items-center justify-between">
       <!-- Logo/Brand -->
       <div class="flex items-center">
         <NuxtLink to="/" class="flex items-center gap-3 no-underline">

@@ -5,7 +5,7 @@
   >
     <div class="border border-primary/20 bg-background-dark/80 overflow-hidden hover:border-primary/50 transition-all duration-300">
       <!-- Event Image -->
-      <div class="relative aspect-[16/10] overflow-hidden bg-navy-accent/40">
+      <div class="relative aspect-[19/10] overflow-hidden bg-navy-accent/40">
         <img
           v-if="event.main_landing_image?.image"
           :src="resolveImageUrl(event.main_landing_image.image)"
