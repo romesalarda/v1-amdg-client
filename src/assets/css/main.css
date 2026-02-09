@@ -148,4 +148,82 @@
   .glow-gold {
     text-shadow: 0 0 15px rgba(236, 200, 19, 0.6);
   }
+  
+  /* Dark Form Group Styling */
+  .form-group-dark label {
+    color: white !important;
+  }
+  
+  .form-group-dark input,
+  .form-group-dark textarea,
+  .form-group-dark select {
+    background-color: rgba(10, 25, 47, 0.8) !important;
+    border-color: rgba(236, 200, 19, 0.3) !important;
+    color: white !important;
+    width: 100%;
+  }
+  
+  .form-group-dark button {
+    color: white !important;
+  }
+  
+  .form-group-dark input::placeholder,
+  .form-group-dark textarea::placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+  
+  .form-group-dark input:focus,
+  .form-group-dark textarea:focus,
+  .form-group-dark select:focus {
+    border-color: rgba(236, 200, 19, 0.6) !important;
+    outline: none !important;
+    ring: 0 !important;
+  }
+  
+  /* Force full width on form elements */
+  .form-group-dark > div,
+  .form-group-dark > div > div {
+    width: 100% !important;
+  }
+  
+  /* USelectMenu specific styling */
+  .form-group-dark [role="button"],
+  .form-group-dark button[type="button"] {
+    background-color: rgba(10, 25, 47, 0.8) !important;
+    border-color: rgba(236, 200, 19, 0.3) !important;
+    color: white !important;
+    width: 100% !important;
+  }
+  
+  .form-group-dark [role="button"]:hover,
+  .form-group-dark button[type="button"]:hover {
+    border-color: rgba(236, 200, 19, 0.6) !important;
+  }
+  
+  .form-group-dark [role="button"] span,
+  .form-group-dark button[type="button"] span {
+    color: white !important;
+  }
+  
+  .form-group-dark svg {
+    color: white !important;
+  }
+
+  
+  /* Calendar picker icons and controls */
+  .form-group-dark input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
+    cursor: pointer;
+  }
+  
+  .form-group-dark input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
+  
+  .form-group-dark input[type="number"]::-webkit-inner-spin-button,
+  .form-group-dark input[type="number"]::-webkit-outer-spin-button {
+    filter: invert(1);
+    opacity: 0.7;
+  }
 }

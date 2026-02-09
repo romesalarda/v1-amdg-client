@@ -1,7 +1,7 @@
 <template>
   <Navbar />
-  <div class="min-h-screen bg-gray-50">
-    <div class="bg-white border-b border-gray-200">
+  <div class="min-h-screen bg-background-dark">
+    <div class="bg-navy-accent/80 border-b border-primary/30">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Event Info & Back Button -->
         <div class="flex items-start justify-between mb-6">
@@ -20,15 +20,15 @@
             </div>
             <div
               v-else
-              class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0"
+              class="w-16 h-16 rounded-lg bg-navy-accent border border-primary/40 flex items-center justify-center flex-shrink-0"
             >
-              <UIcon name="i-heroicons-calendar" class="w-8 h-8 text-white" />
+              <UIcon name="i-heroicons-calendar" class="w-8 h-8 text-primary" />
             </div>
 
             <!-- Event Details -->
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-1">
-                <h1 class="text-2xl font-bold text-gray-900 truncate">
+                <h1 class="text-2xl font-bold text-white truncate">
                   {{ event?.title || 'Loading...' }}
                 </h1>
                 <UBadge
@@ -40,10 +40,10 @@
                   {{ event.status_display }}
                 </UBadge>
               </div>
-              <p class="text-sm text-gray-600">
+              <p class="text-sm text-white/70">
                 Event Management Dashboard
               </p>
-              <div v-if="event" class="flex items-center gap-4 mt-2 text-xs text-gray-500">
+              <div v-if="event" class="flex items-center gap-4 mt-2 text-xs text-white/60">
                 <span class="flex items-center gap-1">
                   <UIcon name="i-heroicons-calendar" class="w-3.5 h-3.5" />
                   {{ formatDateTime(event.start_datetime) }}
@@ -86,10 +86,10 @@
             :key="tab.path"
             :to="`/events/${eventId}/m/${tab.path}`"
             :class="[
-              'flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors whitespace-nowrap',
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap',
               isActive(tab.path)
-                ? 'bg-white text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
+                ? 'bg-background-dark text-primary border-b-2 border-primary'
+                : 'text-white/70 hover:text-white hover:bg-navy-accent/60',
             ]"
           >
             <UIcon :name="tab.icon" class="w-4 h-4" />

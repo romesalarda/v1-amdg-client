@@ -3,11 +3,11 @@
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
       <!-- Main Content (3/4) -->
       <div class="lg:col-span-3">
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+        <div class="bg-navy-accent/60 border border-primary/30">
           <!-- Header -->
-          <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Event Information</h2>
-            <p class="text-sm text-gray-600 mt-1">
+          <div class="px-6 py-4 border-b border-primary/20">
+            <h2 class="text-lg font-semibold text-white">Event Information</h2>
+            <p class="text-sm text-white/70 mt-1">
               Update your event details and information
             </p>
           </div>
@@ -16,136 +16,216 @@
           <form @submit="onSubmit" class="p-6 space-y-6">
             <!-- Basic Information -->
             <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-900">Basic Information</h3>
+              <h3 class="text-sm font-semibold text-white">Basic Information</h3>
               
-              <UFormGroup label="Event Title" name="title" required>
-                <UInput v-model="title" placeholder="Enter event title" size="lg" />
-                <span v-if="errors.title" class="text-xs text-red-600">{{ errors.title }}</span>
+              <UFormGroup label="Event Title" name="title" required class="form-group-dark">
+                <UInput 
+                  v-model="title" 
+                  placeholder="Enter event title" 
+                  size="lg" 
+                  class="input-dark"
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
+                <span v-if="errors.title" class="text-xs text-red-400">{{ errors.title }}</span>
               </UFormGroup>
 
-              <UFormGroup label="Display Code" name="display_code" required>
-                <UInput v-model="display_code" placeholder="e.g., CONF2026" />
-                <span v-if="errors.display_code" class="text-xs text-red-600">{{ errors.display_code }}</span>
+              <UFormGroup label="Display Code" name="display_code" required class="form-group-dark">
+                <UInput 
+                  v-model="display_code" 
+                  placeholder="e.g., CONF2026" 
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
+                <span v-if="errors.display_code" class="text-xs text-red-400">{{ errors.display_code }}</span>
               </UFormGroup>
 
-              <UFormGroup label="Event Status" name="status" required>
+              <UFormGroup label="Event Status" name="status" required class="form-group-dark">
                 <USelectMenu
                   v-model="status"
                   :options="statusOptions"
                   value-attribute="value"
                   option-attribute="label"
+                  class="w-full"
+                  :ui="{
+                    width: 'w-full',
+                    base: 'w-full',
+                    trigger: 'bg-background-dark/80 border-primary/30 text-white hover:border-primary/60 w-full',
+                    label: 'text-white',
+                    // leading: 'text-white',
+                    // trailing: 'text-white',
+                    placeholder: 'text-white/50'
+                  }"
+                  :ui-menu="{ 
+                    background: 'bg-navy-accent', 
+                    ring: 'ring-primary/30',
+                    option: { 
+                      base: 'text-white',
+                      active: 'bg-primary/20 text-white',
+                      selected: 'bg-primary/30 text-white',
+                      // selectedIcon: 'text-primary'
+                    }
+                  }"
                 />
-                <span v-if="errors.status" class="text-xs text-red-600">{{ errors.status }}</span>
+                <span v-if="errors.status" class="text-xs text-red-400">{{ errors.status }}</span>
               </UFormGroup>
 
-              <UFormGroup label="Short Description" name="short_description">
+              <UFormGroup label="Short Description" name="short_description" class="form-group-dark">
                 <UTextarea
                   v-model="short_description"
                   placeholder="Brief description of your event"
                   :rows="3"
                   :maxlength="255"
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
                 />
-                <span v-if="errors.short_description" class="text-xs text-red-600">{{ errors.short_description }}</span>
+                <span v-if="errors.short_description" class="text-xs text-red-400">{{ errors.short_description }}</span>
               </UFormGroup>
 
-              <UFormGroup label="Long Description" name="long_description">
+              <UFormGroup label="Long Description" name="long_description" class="form-group-dark">
                 <UTextarea
                   v-model="long_description"
                   placeholder="Detailed description of your event"
                   :rows="6"
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
                 />
-                <span v-if="errors.long_description" class="text-xs text-red-600">{{ errors.long_description }}</span>
+                <span v-if="errors.long_description" class="text-xs text-red-400">{{ errors.long_description }}</span>
               </UFormGroup>
             </div>
 
             <!-- Event Details -->
-            <div class="space-y-4 pt-6 border-t border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-900">Event Details</h3>
+            <div class="space-y-4 pt-6 border-t border-primary/20">
+              <h3 class="text-sm font-semibold text-white">Event Details</h3>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UFormGroup label="Start Date & Time" name="start_datetime" required>
-                  <UInput v-model="start_datetime" type="datetime-local" />
-                  <span v-if="errors.start_datetime" class="text-xs text-red-600">{{ errors.start_datetime }}</span>
+                <UFormGroup label="Start Date & Time" name="start_datetime" required class="form-group-dark">
+                  <UInput 
+                    v-model="start_datetime" 
+                    type="datetime-local" 
+                    :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                  />
+                  <span v-if="errors.start_datetime" class="text-xs text-red-400">{{ errors.start_datetime }}</span>
                 </UFormGroup>
 
-                <UFormGroup label="End Date & Time" name="end_datetime" required>
-                  <UInput v-model="end_datetime" type="datetime-local" />
-                  <span v-if="errors.end_datetime" class="text-xs text-red-600">{{ errors.end_datetime }}</span>
+                <UFormGroup label="End Date & Time" name="end_datetime" required class="form-group-dark">
+                  <UInput 
+                    v-model="end_datetime" 
+                    type="datetime-local" 
+                    :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                  />
+                  <span v-if="errors.end_datetime" class="text-xs text-red-400">{{ errors.end_datetime }}</span>
                 </UFormGroup>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <UFormGroup label="Expected Attendance" name="expected_attendance">
+                <UFormGroup label="Expected Attendance" name="expected_attendance" class="form-group-dark">
                   <UInput 
                     :model-value="expected_attendance ?? ''"
                     @update:model-value="expected_attendance = $event ? Number($event) : undefined"
                     type="number" 
                     min="0" 
                     placeholder="0" 
+                    :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
                   />
-                  <span v-if="errors.expected_attendance" class="text-xs text-red-600">{{ errors.expected_attendance }}</span>
+                  <span v-if="errors.expected_attendance" class="text-xs text-red-400">{{ errors.expected_attendance }}</span>
                 </UFormGroup>
 
-                <UFormGroup label="Maximum Attendance" name="maximum_attendance">
+                <UFormGroup label="Maximum Attendance" name="maximum_attendance" class="form-group-dark">
                   <UInput 
                     :model-value="maximum_attendance ?? ''"
                     @update:model-value="maximum_attendance = $event ? Number($event) : undefined"
                     type="number" 
                     min="0" 
                     placeholder="0" 
+                    :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
                   />
-                  <span v-if="errors.maximum_attendance" class="text-xs text-red-600">{{ errors.maximum_attendance }}</span>
+                  <span v-if="errors.maximum_attendance" class="text-xs text-red-400">{{ errors.maximum_attendance }}</span>
                 </UFormGroup>
               </div>
 
-              <UFormGroup label="Timezone" name="timezone" required>
+              <UFormGroup label="Timezone" name="timezone" required class="form-group-dark">
                 <USelectMenu
                   v-model="timezone"
                   :options="timezoneOptions"
                   searchable
                   placeholder="Select timezone"
+                  class="w-full"
+                  :ui="{
+                    width: 'w-full',
+                    base: 'w-full',
+                    trigger: 'bg-background-dark/80 border-primary/30 text-white hover:border-primary/60 w-full',
+                    label: 'text-white',
+                    // leading: 'text-white',
+                    // trailing: 'text-white',
+                    placeholder: 'text-white/50'
+                  }"
+                  :ui-menu="{ 
+                    background: 'bg-navy-accent', 
+                    ring: 'ring-primary/30',
+                    option: { 
+                      base: 'text-white',
+                      active: 'bg-primary/20 text-white',
+                      selected: 'bg-primary/30 text-white',
+                      // selectedIcon: 'text-primary'
+                    }
+                  }"
                 />
-                <span v-if="errors.timezone" class="text-xs text-red-600">{{ errors.timezone }}</span>
+                <span v-if="errors.timezone" class="text-xs text-red-400">{{ errors.timezone }}</span>
               </UFormGroup>
             </div>
 
             <!-- Additional Information -->
-            <div class="space-y-4 pt-6 border-t border-gray-200">
-              <h3 class="text-sm font-semibold text-gray-900">Additional Information</h3>
+            <div class="space-y-4 pt-6 border-t border-primary/20">
+              <h3 class="text-sm font-semibold text-white">Additional Information</h3>
               
-              <UFormGroup label="Theme" name="theme">
-                <UInput v-model="theme" placeholder="Event theme" />
+              <UFormGroup label="Theme" name="theme" class="form-group-dark">
+                <UInput 
+                  v-model="theme" 
+                  placeholder="Event theme" 
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
               </UFormGroup>
 
-              <UFormGroup label="Anchor Verse" name="anchor_verse">
-                <UTextarea v-model="anchor_verse" placeholder="Scripture reference or verse" :rows="2" />
+              <UFormGroup label="Anchor Verse" name="anchor_verse" class="form-group-dark">
+                <UTextarea 
+                  v-model="anchor_verse" 
+                  placeholder="Scripture reference or verse" 
+                  :rows="2" 
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
               </UFormGroup>
 
-              <UFormGroup label="What to Bring" name="what_to_bring">
-                <UTextarea v-model="what_to_bring" placeholder="List items participants should bring" :rows="4" />
+              <UFormGroup label="What to Bring" name="what_to_bring" class="form-group-dark">
+                <UTextarea 
+                  v-model="what_to_bring" 
+                  placeholder="List items participants should bring" 
+                  :rows="4" 
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
               </UFormGroup>
 
-              <UFormGroup label="Important Information" name="important_information">
-                <UTextarea v-model="important_information" placeholder="Critical information for participants" :rows="4" />
+              <UFormGroup label="Important Information" name="important_information" class="form-group-dark">
+                <UTextarea 
+                  v-model="important_information" 
+                  placeholder="Critical information for participants" 
+                  :rows="4" 
+                  :ui="{ base: 'bg-background-dark/80 border-primary/30 text-white placeholder-white/50 focus:border-primary/60' }"
+                />
               </UFormGroup>
             </div>
 
             <!-- Actions -->
-            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-200">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-primary/20">
               <UButton
                 type="button"
-                variant="outline"
-                color="gray"
                 @click="resetForm"
                 :disabled="isSubmitting"
+                :ui="{ base: 'bg-navy-accent border border-primary/40 text-white hover:bg-navy-accent/80 hover:border-primary/60' }"
               >
                 Reset
               </UButton>
               <UButton
                 type="submit"
-                color="blue"
                 :loading="isSubmitting"
                 :disabled="isSubmitting"
+                :ui="{ base: 'bg-primary text-background-dark hover:bg-primary/90 font-bold' }"
               >
                 Save Changes
               </UButton>
@@ -157,35 +237,35 @@
       <!-- Sidebar (1/4) -->
       <div class="lg:col-span-1 space-y-6">
         <!-- Quick Info -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4">Quick Info</h3>
+        <div class="bg-navy-accent/60 border border-primary/30 p-6">
+          <h3 class="text-sm font-semibold text-white mb-4">Quick Info</h3>
           <div class="space-y-3 text-sm">
             <div>
-              <p class="text-gray-600">Event ID</p>
-              <p class="font-medium text-gray-900 font-mono">{{ event?.event_id || '-' }}</p>
+              <p class="text-white/60">Event ID</p>
+              <p class="font-medium text-primary font-mono">{{ event?.event_id || '-' }}</p>
             </div>
             <div>
-              <p class="text-gray-600">Created</p>
-              <p class="font-medium text-gray-900">{{ event?.created_at ? formatCompactDateTime(event.created_at) : '-' }}</p>
+              <p class="text-white/60">Created</p>
+              <p class="font-medium text-white">{{ event?.created_at ? formatCompactDateTime(event.created_at) : '-' }}</p>
             </div>
             <div>
-              <p class="text-gray-600">Last Updated</p>
-              <p class="font-medium text-gray-900">{{ event?.updated_at ? formatCompactDateTime(event.updated_at) : '-' }}</p>
+              <p class="text-white/60">Last Updated</p>
+              <p class="font-medium text-white">{{ event?.updated_at ? formatCompactDateTime(event.updated_at) : '-' }}</p>
             </div>
             <div>
-              <p class="text-gray-600">Current Registrations</p>
-              <p class="font-medium text-gray-900">{{ event?.number_of_attendees || 0 }}</p>
+              <p class="text-white/60">Current Registrations</p>
+              <p class="font-medium text-white">{{ event?.number_of_attendees || 0 }}</p>
             </div>
           </div>
         </div>
 
         <!-- Tips -->
-        <div class="bg-blue-50 rounded-lg border border-blue-200 p-6">
+        <div class="bg-primary/10 border border-primary/30 p-6">
           <div class="flex items-start gap-2">
-            <UIcon name="i-heroicons-light-bulb" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <UIcon name="i-heroicons-light-bulb" class="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
             <div>
-              <h3 class="text-sm font-semibold text-blue-900 mb-2">Tips</h3>
-              <ul class="text-xs text-blue-800 space-y-1.5">
+              <h3 class="text-sm font-semibold text-primary mb-2">Tips</h3>
+              <ul class="text-xs text-white/80 space-y-1.5">
                 <li>• Keep your title clear and descriptive</li>
                 <li>• Set realistic attendance expectations</li>
                 <li>• Update status as your event progresses</li>
