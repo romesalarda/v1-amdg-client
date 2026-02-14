@@ -44,13 +44,34 @@ export default <Partial<Config>>{
           700: '#0d1a33',
           800: '#091226',
           900: '#050a19'
+        },
+        'deep-navy': '#0a192f', // Alias for background-dark
+        'mist-blue': '#f0f4f8', // Light blue/gray for search bar
+        blue: {
+          300: '#93c5fd',
+          400: '#60a5fa',
+          500: '#3b82f6',
         }
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
-        serif: ['Merriweather', ...defaultTheme.fontFamily.serif],
-        display: ['Newsreader', 'serif']
-      }
+      },
+      maxWidth: {
+        '8xl': '90rem',
+      },
+      letterSpacing: {
+        'widest': '0.3em',
+        'ultra-wide': '0.4em',
+      },
+      animation: {
+        'shimmer': 'shimmer 1.5s infinite',
+      },
+      keyframes: {
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
     }
   }
 }

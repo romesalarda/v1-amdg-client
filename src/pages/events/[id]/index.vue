@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-background-dark">
+  <div class="min-h-screen bg-white">
     <!-- Loading State -->
     <div v-if="isLoading" class="w-full">
       <USkeleton class="h-screen w-full" />
@@ -8,7 +8,7 @@
     <!-- Event Content -->
     <div v-else-if="event">
       <!-- Full-Width Hero Section with Landing Image -->
-      <div class="relative h-[400px] md:h-[500px] w-full overflow-hidden">
+      <div class="relative h-[450px] md:h-[550px] w-full overflow-hidden">
         <!-- Background Image -->
         <div class="absolute inset-0">
           <img
@@ -19,54 +19,29 @@
             @error="(e) => onImageError(e)"
           />
           <!-- Placeholder gradient when no image -->
-          <div v-else class="w-full h-full bg-gradient-to-br from-primary/20 to-navy-accent"></div>
+          <div v-else class="w-full h-full bg-gradient-to-br from-blue-400/20 to-deep-navy"></div>
         </div>
         
-        <!-- Navy overlay with blueprint effect -->
-        <div class="absolute inset-0 bg-gradient-to-t from-background-dark via-background-dark/70 to-transparent"></div>
-        
-        <!-- Blueprint grid overlay -->
-        <div class="absolute inset-0 opacity-30" style="background-image: radial-gradient(rgba(236, 200, 19, 0.15) 1px, transparent 1px); background-size: 30px 30px;"></div>
+        <!-- Navy overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-deep-navy via-deep-navy/30 to-transparent"></div>
         
         <!-- Content Overlay -->
         <div class="absolute inset-0 flex items-end">
-          <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-            <!-- Technical Header Annotations -->
-            <div class="flex items-center gap-4 mb-6 text-[10px] font-mono text-primary/60 uppercase tracking-wider">
-              <span>EVENT_ID: {{ event.event_id }}</span>
-              <span class="w-px h-3 bg-primary/40"></span>
-              <span>TYPE: {{ event.event_type_details?.title || 'General' }}</span>
-              <span class="w-px h-3 bg-primary/40"></span>
-              <span>STATUS: {{ event.status_display }}</span>
-            </div>
+          <div class="w-full max-container-fluid pb-16">
+            <!-- Event Badge -->
+            <span class="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-md text-white border border-white/20 text-[10px] font-black rounded-full mb-4 uppercase tracking-[0.3em]">
+              {{ event.event_type_details?.title || 'Event' }}
+            </span>
 
             <!-- Main Title -->
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl leading-none mb-6 font-display">
-              <span class="gold-gradient-text">
-                {{ event.title }}
-              </span>
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl leading-[0.9] tracking-tighter mb-6 uppercase">
+              {{ event.title }}
             </h1>
 
             <!-- Description -->
-            <p v-if="event.short_description" class="text-xl md:text-2xl text-white/90 font-medium max-w-3xl mb-8">
+            <p v-if="event.short_description" class="text-xl md:text-2xl text-white/90 font-medium max-w-3xl leading-relaxed">
               {{ event.short_description }}
             </p>
-
-            <!-- Quick Stats Bar -->
-            <div class="flex flex-wrap gap-6 text-primary">
-              <div class="flex items-center gap-2">
-                <UIcon name="i-heroicons-calendar-days" class="w-5 h-5" />
-                <span class="font-bold">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <UIcon name="i-heroicons-clock" class="w-5 h-5" />
-                <span class="font-bold">{{ formatTime(event.start_datetime, event.timezone) }}</span>
-              </div>
-              <div v-if="primaryVenue" class="flex items-center gap-2">
-                <UIcon name="i-heroicons-map-pin" class="w-5 h-5" />
-                <span class="font-bold">{{ primaryVenue.venue_name }}</span>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -74,64 +49,66 @@
         <div class="absolute top-6 left-6">
           <button
             @click="navigateTo('/events')"
-            class="flex items-center gap-2 px-4 py-2 bg-navy-accent/80 backdrop-blur-sm border border-primary/30 rounded-sm text-primary hover:bg-navy-accent hover:border-primary/60 transition-all font-bold text-sm uppercase"
+            class="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest"
           >
-            <UIcon name="i-heroicons-arrow-left" class="w-4 h-4" />
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
             <span class="hidden sm:inline">Back to Events</span>
           </button>
         </div>
       </div>
 
       <!-- Sticky Floating Info Bar -->
-      <div class="sticky top-20 z-40 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-25 mb-16">
-        <div class="bg-navy-accent/95 backdrop-blur-xl border border-primary/30 rounded-xl shadow-2xl overflow-hidden">
-          <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-primary/20">
+      <div class="relative z-20 bg-white border-b border-deep-navy/10 shadow-lg">
+        <div class="max-container-fluid">
+          <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-deep-navy/10">
             <!-- Date -->
-            <div class="flex items-center gap-2.5 p-3 lg:p-4">
-              <div class="w-9 h-9 rounded-sm bg-primary/20 border border-primary/40 flex items-center justify-center flex-shrink-0">
-                <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-primary" />
-              </div>
+            <div class="flex items-center gap-4 p-6">
+              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
               <div class="min-w-0">
-                <h3 class="text-[9px] font-black text-primary/50 uppercase tracking-wider mb-0.5">Date</h3>
-                <p class="text-white font-bold text-sm lg:text-base truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }}</p>
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
+                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 
             <!-- Time -->
-            <div class="flex items-center gap-2.5 p-3 lg:p-4">
-              <div class="w-9 h-9 rounded-sm bg-primary/20 border border-primary/40 flex items-center justify-center flex-shrink-0">
-                <UIcon name="i-heroicons-clock" class="w-4 h-4 text-primary" />
-              </div>
+            <div class="flex items-center gap-4 p-6">
+              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <div class="min-w-0">
-                <h3 class="text-[9px] font-black text-primary/50 uppercase tracking-wider mb-0.5">Time</h3>
-                <p class="text-white font-bold text-sm lg:text-base truncate">
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Time</p>
+                <p class="font-black text-deep-navy truncate">
                   {{ formatTime(event.start_datetime, event.timezone) }}
                 </p>
               </div>
             </div>
 
             <!-- Location -->
-            <div class="flex items-center gap-2.5 p-3 lg:p-4">
-              <div class="w-9 h-9 rounded-sm bg-primary/20 border border-primary/40 flex items-center justify-center flex-shrink-0">
-                <UIcon name="i-heroicons-map-pin" class="w-4 h-4 text-primary" />
-              </div>
+            <div class="flex items-center gap-4 p-6">
+              <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
               <div class="min-w-0">
-                <h3 class="text-[9px] font-black text-primary/50 uppercase tracking-wider mb-0.5">Location</h3>
-                <p class="text-white font-bold text-sm lg:text-base truncate">
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
+                <p class="font-black text-deep-navy truncate">
                   {{ primaryVenue?.venue_name || event.organisation_name || 'TBA' }}
                 </p>
               </div>
             </div>
 
-            <!-- Capacity -->
-            <div class="flex items-center gap-2.5 p-3 lg:p-4">
-              <div class="w-9 h-9 rounded-sm bg-primary/20 border border-primary/40 flex items-center justify-center flex-shrink-0">
-                <UIcon name="i-heroicons-users" class="w-4 h-4 text-primary" />
-              </div>
+            <!-- Cost -->
+            <div class="flex items-center gap-4 p-6">
+              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
               <div class="min-w-0">
-                <h3 class="text-[9px] font-black text-primary/50 uppercase tracking-wider mb-0.5">Capacity</h3>
-                <p class="text-white font-bold text-sm lg:text-base truncate">
-                  {{ event.maximum_attendance ? `${event.maximum_attendance.toLocaleString()}` : 'Unlimited' }}
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Cost</p>
+                <p class="font-black text-deep-navy truncate">
+                  {{ event.maximum_attendance ? `${event.maximum_attendance.toLocaleString()} Cap` : 'Free Entry' }}
                 </p>
               </div>
             </div>
@@ -139,74 +116,78 @@
         </div>
       </div>
 
-      <!-- Main Content Container (max-w-7xl) -->
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
+      <!-- Main Content Container -->
+      <div class="max-container-fluid py-12 mb-20">
 
         <!-- Content Grid: 2/3 Main + 1/3 Sidebar -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Main Content (2/3) -->
           <div class="lg:col-span-2 space-y-6">
+            <!-- Theme & Verse -->
+            <div v-if="event.theme || event.anchor_verse" class="bg-gradient-to-br from-blue-50 to-white border border-blue-200 rounded-2xl p-8 shadow-drawn">
+              <h3 v-if="event.theme" class="text-2xl font-black text-blue-600 mb-4 uppercase tracking-tight">
+                Theme: {{ event.theme }}
+              </h3>
+              <blockquote v-if="event.anchor_verse" class="border-l-4 border-blue-500 pl-6 italic text-deep-navy/90 text-lg leading-relaxed">
+                "{{ event.anchor_verse }}"
+              </blockquote>
+            </div>
             <!-- About Section -->
-            <div class="bg-navy-accent border border-primary/20 rounded-sm p-8">
-              <div class="flex items-center gap-3 mb-6">
-                <div class="w-1 h-8 bg-primary"></div>
-                <h2 class="text-2xl font-bold text-white font-display">About the Event</h2>
-              </div>
-              <div class="text-white/80 text-base leading-relaxed whitespace-pre-line">
+            <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
+              <h2 class="text-2xl font-black text-deep-navy mb-6 flex items-center gap-3 uppercase tracking-tight">
+                <div class="w-1.5 h-8 bg-blue-500 rounded-full"></div>
+                About the Event
+              </h2>
+              <div class="text-deep-navy/80 text-base leading-relaxed whitespace-pre-line">
                 {{ event.long_description || event.short_description || 'No description available.' }}
               </div>
             </div>
 
-            <!-- Theme & Verse -->
-            <div v-if="event.theme || event.anchor_verse" class="bg-gradient-to-br from-primary/10 to-navy-accent/50 border border-primary/30 rounded-sm p-8">
-              <h3 v-if="event.theme" class="text-2xl font-bold text-primary mb-4 font-display">
-                Theme: {{ event.theme }}
-              </h3>
-              <blockquote v-if="event.anchor_verse" class="border-l-4 border-primary pl-6 italic text-white/90 text-lg">
-                "{{ event.anchor_verse }}"
-              </blockquote>
-            </div>
+            
 
-            <!-- What to Bring -->
-            <div v-if="event.what_to_bring" class="bg-navy-accent/30 border border-primary/20 rounded-sm p-8">
-              <h2 class="text-xl font-bold text-white mb-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-sm bg-primary flex items-center justify-center">
-                  <UIcon name="i-heroicons-backpack" class="w-5 h-5 text-background-dark" />
-                </div>
-                What to Bring
-              </h2>
-              <p class="text-white/80 whitespace-pre-line leading-relaxed">{{ event.what_to_bring }}</p>
-            </div>
+            <!-- What to Bring & Important Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- What to Bring -->
+              <div v-if="event.what_to_bring" class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
+                <h2 class="text-xl font-black text-deep-navy mb-6 flex items-center gap-3 uppercase tracking-tight">
+                  <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                  What to Bring
+                </h2>
+                <p class="text-deep-navy/70 whitespace-pre-line leading-relaxed">{{ event.what_to_bring }}</p>
+              </div>
 
-            <!-- Important Information -->
-            <div v-if="event.important_information" class="bg-amber-500/10 border border-amber-500/30 rounded-sm p-8">
-              <h2 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-3">
-                <div class="w-10 h-10 rounded-sm bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-                  <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-amber-400" />
-                </div>
-                Important Information
-              </h2>
-              <p class="text-amber-200/90 whitespace-pre-line leading-relaxed">{{ event.important_information }}</p>
+              <!-- Important Information -->
+              <div v-if="event.important_information" class="bg-amber-50 border border-amber-200 rounded-2xl p-8 shadow-drawn">
+                <h2 class="text-xl font-black text-amber-600 mb-6 flex items-center gap-3 uppercase tracking-tight">
+                  <svg class="w-6 h-6 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                  Important Info
+                </h2>
+                <p class="text-amber-900/80 whitespace-pre-line leading-relaxed">{{ event.important_information }}</p>
+              </div>
             </div>
 
             <!-- Venue Location -->
-            <div v-if="primaryVenue" class="bg-navy-accent border border-primary/20 rounded-sm overflow-hidden">
+            <div v-if="primaryVenue" class="bg-white border border-deep-navy/10 rounded-2xl overflow-hidden shadow-drawn">
               <div class="p-8">
-                <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-sm bg-primary flex items-center justify-center">
-                    <UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-background-dark" />
-                  </div>
-                  Event Location
+                <h2 class="text-xl font-black text-deep-navy mb-6 flex items-center gap-3 uppercase tracking-tight">
+                  <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  Venue Location
                 </h2>
                 <div class="space-y-2">
-                  <h3 class="text-xl font-bold text-white">{{ primaryVenue.venue_name }}</h3>
-                  <p v-if="primaryVenue.venue_address" class="text-primary/70 font-mono text-sm">{{ primaryVenue.venue_address }}</p>
-                  <p v-if="primaryVenue.venue_city" class="text-primary/70 font-mono text-sm">{{ primaryVenue.venue_city }}</p>
+                  <h3 class="text-xl font-black text-deep-navy">{{ primaryVenue.venue_name }}</h3>
+                  <p v-if="primaryVenue.venue_address" class="text-deep-navy/60 text-sm">{{ primaryVenue.venue_address }}</p>
+                  <p v-if="primaryVenue.venue_city" class="text-deep-navy/60 text-sm">{{ primaryVenue.venue_city }}</p>
                 </div>
               </div>
               
               <!-- Map Section -->
-              <div v-if="primaryVenue.venue_address" class="h-64 bg-navy-accent relative border-t border-primary/20">
+              <div v-if="primaryVenue.venue_address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10">
                 <iframe
                   :src="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.venue_address + ' ' + (primaryVenue.venue_city || ''))}&output=embed`"
                   class="w-full h-full border-0"
@@ -220,89 +201,96 @@
           <!-- Sidebar (1/3) -->
           <div class="space-y-6">
             <!-- Countdown Timer Card -->
-            <div class="sticky top-24 space-y-6">
-              <div class="rounded-sm bg-navy-accent border border-primary/30 p-8 shadow-2xl relative overflow-hidden">
-                <!-- Blueprint grid overlay -->
-                <div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(rgba(236, 200, 19, 0.15) 1px, transparent 1px); background-size: 20px 20px;"></div>
+            <div class="space-y-6">
+              <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
+                <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-center text-white/50">
+                  {{ countdown.isExpired ? 'Event Started' : 'Registration Ends In' }}
+                </p>
                 
-                <!-- Gold accent bar at top -->
-                <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent"></div>
-                
-                <div class="relative z-10">
-                  <div class="flex items-center justify-between mb-2">
-                    <h3 class="font-black text-primary/70 uppercase tracking-widest text-[10px]">
-                      {{ countdown.isExpired ? 'Event Started' : 'Registration Closing' }}
-                    </h3>
-                    <span class="bg-primary/20 border border-primary/40 text-[10px] font-black text-primary px-2 py-1 rounded-sm">
-                      {{ formatDate(event.start_datetime, 'MMM d').toUpperCase() }}
-                    </span>
+                <!-- Countdown Display -->
+                <div v-if="!countdown.isExpired" class="flex items-center justify-center gap-6">
+                  <div class="text-center">
+                    <p class="text-4xl font-black">{{ String(countdown.days).padStart(2, '0') }}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Days</p>
                   </div>
-                  
-                  <h2 class="text-3xl font-black mb-8 font-display text-white">
-                    {{ countdown.isExpired ? 'Happening Now!' : 'Time Remaining' }}
-                  </h2>
-                  
-                  <!-- Countdown Display -->
-                  <div v-if="!countdown.isExpired" class="grid grid-cols-4 gap-3 mb-8">
-                    <div class="flex flex-col items-center p-3 bg-background-dark/60 rounded-sm border border-primary/30">
-                      <span class="text-3xl font-black text-primary">{{ String(countdown.days).padStart(2, '0') }}</span>
-                      <span class="text-[10px] uppercase font-black text-primary/50">Days</span>
-                    </div>
-                    <div class="flex flex-col items-center p-3 bg-background-dark/60 rounded-sm border border-primary/30">
-                      <span class="text-3xl font-black text-primary">{{ String(countdown.hours).padStart(2, '0') }}</span>
-                      <span class="text-[10px] uppercase font-black text-primary/50">Hrs</span>
-                    </div>
-                    <div class="flex flex-col items-center p-3 bg-background-dark/60 rounded-sm border border-primary/30">
-                      <span class="text-3xl font-black text-primary">{{ String(countdown.minutes).padStart(2, '0') }}</span>
-                      <span class="text-[10px] uppercase font-black text-primary/50">Mins</span>
-                    </div>
-                    <div class="flex flex-col items-center p-3 bg-background-dark/60 rounded-sm border border-primary/30">
-                      <span class="text-3xl font-black text-primary animate-pulse">{{ String(countdown.seconds).padStart(2, '0') }}</span>
-                      <span class="text-[10px] uppercase font-black text-primary/50">Secs</span>
-                    </div>
+                  <div class="w-px h-8 bg-white/10"></div>
+                  <div class="text-center">
+                    <p class="text-4xl font-black">{{ String(countdown.hours).padStart(2, '0') }}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Hrs</p>
                   </div>
-                  
-                  <!-- Registration Button -->
-                  <button
-                    :disabled="countdown.isExpired || event.status !== 'OPEN'"
-                    class="w-full bg-primary text-background-dark font-black text-sm uppercase py-4 rounded-sm hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl"
-                  >
-                    {{ countdown.isExpired ? 'Registration Closed' : 'Register Now' }}
-                    <UIcon v-if="!countdown.isExpired" name="i-heroicons-arrow-right" class="inline w-5 h-5 ml-2" />
-                  </button>
-                  
-                  <p v-if="event.can_participants_register && !countdown.isExpired" class="mt-4 text-xs text-white/60 text-center font-mono">
-                    {{ event.number_of_attendees }} REGISTERED
-                    <span v-if="event.maximum_attendance" class="block">
-                      {{ event.maximum_attendance - event.number_of_attendees }} SPOTS REMAINING
-                    </span>
-                  </p>
+                  <div class="w-px h-8 bg-white/10"></div>
+                  <div class="text-center">
+                    <p class="text-4xl font-black">{{ String(countdown.minutes).padStart(2, '0') }}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Mins</p>
+                  </div>
+                  <div class="w-px h-8 bg-white/10"></div>
+                  <div class="text-center">
+                    <p class="text-4xl font-black animate-pulse">{{ String(countdown.seconds).padStart(2, '0') }}</p>
+                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Secs</p>
+                  </div>
                 </div>
+                
+                <h2 v-if="countdown.isExpired" class="text-3xl font-black text-center">
+                  Happening Now!
+                </h2>
               </div>
 
-              <!-- Status Badge -->
-              <div class="bg-navy-accent/30 border border-primary/20 rounded-sm p-5">
-                <div class="flex items-center justify-between">
-                  <span class="text-sm font-bold text-primary/60 uppercase text-[10px] tracking-wider">Event Status</span>
-                  <span 
-                    :class="getStatusClass(event.status)" 
-                    class="text-[10px] px-3 py-1.5 font-black uppercase"
-                  >
-                    {{ event.status_display }}
-                  </span>
+              <!-- Registration Card -->
+              <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
+                <!-- Registration Button -->
+                <button
+                  :disabled="countdown.isExpired || event.status !== 'OPEN'"
+                  class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  </svg>
+                  {{ countdown.isExpired ? 'Registration Closed' : 'Register Now' }}
+                </button>
+                
+                <!-- Capacity Status -->
+                <div v-if="event.maximum_attendance && !countdown.isExpired" class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
+                  <div class="flex justify-between items-center text-xs font-black mb-3">
+                    <span class="text-deep-navy uppercase tracking-wider">Capacity Status</span>
+                    <span class="text-blue-600">{{ event.maximum_attendance - event.number_of_attendees }} Spots Left</span>
+                  </div>
+                  <div class="w-full bg-deep-navy/5 h-3 rounded-full overflow-hidden border border-deep-navy/10">
+                    <div 
+                      class="bg-blue-500 h-full rounded-full transition-all"
+                      :style="{ width: `${(event.number_of_attendees / event.maximum_attendance) * 100}%` }"
+                    ></div>
+                  </div>
                 </div>
               </div>
 
               <!-- Quick Actions -->
-              <div class="bg-navy-accent/30 border border-primary/20 rounded-sm p-5 space-y-3">
-                <button class="w-full flex items-center justify-center gap-2 py-3 border border-primary/50 text-primary rounded-sm hover:bg-primary/10 transition-all font-bold text-sm uppercase">
-                  <UIcon name="i-heroicons-calendar-plus" class="w-5 h-5" />
+              <div class="bg-white border border-deep-navy/10 rounded-2xl p-6 shadow-drawn space-y-3">
+                <p class="text-xs font-black uppercase tracking-widest mb-4 text-deep-navy/40">Quick Actions</p>
+                <button class="w-full flex items-center justify-center gap-2 py-3 border-2 border-deep-navy text-deep-navy rounded-xl hover:bg-deep-navy hover:text-white transition-all font-black text-sm uppercase tracking-wider">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
                   Add to Calendar
                 </button>
-                <button class="w-full flex items-center justify-center gap-2 py-3 border border-primary/50 text-primary rounded-sm hover:bg-primary/10 transition-all font-bold text-sm uppercase">
-                  <UIcon name="i-heroicons-share" class="w-5 h-5" />
+                <button class="w-full flex items-center justify-center gap-2 py-3 border-2 border-deep-navy text-deep-navy rounded-xl hover:bg-deep-navy hover:text-white transition-all font-black text-sm uppercase tracking-wider">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
                   Share Event
                 </button>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="bg-white border border-deep-navy/10 rounded-2xl p-5 shadow-drawn">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-black text-deep-navy/60 uppercase text-[10px] tracking-wider">Event Status</span>
+                  <span 
+                    :class="getStatusClass(event.status)" 
+                    class="text-[10px] px-3 py-1.5 font-black uppercase rounded-full"
+                  >
+                    {{ event.status_display }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -311,14 +299,16 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="isError" class="min-h-screen flex items-center justify-center bg-background-dark px-4">
+    <div v-else-if="isError" class="min-h-screen flex items-center justify-center bg-white px-4">
       <div class="text-center max-w-md">
-        <UIcon name="i-heroicons-exclamation-circle" class="mx-auto w-20 h-20 text-red-400 mb-6" />
-        <h3 class="text-2xl font-bold text-white mb-3">Failed to load event</h3>
-        <p class="text-white/60 mb-8">Please try again later.</p>
+        <svg class="mx-auto w-20 h-20 text-red-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-2xl font-black text-deep-navy mb-3 uppercase tracking-tight">Failed to load event</h3>
+        <p class="text-deep-navy/60 mb-8">Please try again later.</p>
         <button
           @click="navigateTo('/events')"
-          class="bg-primary text-background-dark px-8 py-3 rounded-sm font-black uppercase text-sm hover:brightness-110 transition-all"
+          class="bg-deep-navy text-white px-8 py-3 rounded-xl font-black uppercase text-sm hover:bg-deep-navy/90 transition-all"
         >
           Browse Events
         </button>
@@ -326,14 +316,16 @@
     </div>
 
     <!-- Not Found -->
-    <div v-else class="min-h-screen flex items-center justify-center bg-background-dark px-4">
+    <div v-else class="min-h-screen flex items-center justify-center bg-white px-4">
       <div class="text-center max-w-md">
-        <UIcon name="i-heroicons-calendar-x" class="mx-auto w-20 h-20 text-primary/40 mb-6" />
-        <h3 class="text-2xl font-bold text-white mb-3">Event not found</h3>
-        <p class="text-white/60 mb-8">The event you're looking for doesn't exist or has been removed.</p>
+        <svg class="mx-auto w-20 h-20 text-deep-navy/40 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <h3 class="text-2xl font-black text-deep-navy mb-3 uppercase tracking-tight">Event not found</h3>
+        <p class="text-deep-navy/60 mb-8">The event you're looking for doesn't exist or has been removed.</p>
         <button
           @click="navigateTo('/events')"
-          class="bg-primary text-background-dark px-8 py-3 rounded-sm font-black uppercase text-sm hover:brightness-110 transition-all"
+          class="bg-deep-navy text-white px-8 py-3 rounded-xl font-black uppercase text-sm hover:bg-deep-navy/90 transition-all"
         >
           Browse Events
         </button>
@@ -377,20 +369,20 @@ const getStatusClass = (status?: string) => {
   switch (status?.toUpperCase()) {
     case 'OPEN':
     case 'PUBLISHED':
-      return 'bg-emerald-500/20 text-emerald-400 border border-emerald-400/40'
+      return 'bg-emerald-500/20 text-emerald-600 border border-emerald-500/40'
     case 'DRAFTING':
-      return 'bg-amber-500/20 text-amber-400 border border-amber-400/40'
+      return 'bg-amber-500/20 text-amber-600 border border-amber-500/40'
     case 'CANCELLED':
     case 'DELETED':
-      return 'bg-red-500/20 text-red-400 border border-red-400/40'
+      return 'bg-red-500/20 text-red-600 border border-red-500/40'
     case 'CLOSED':
-      return 'bg-orange-500/20 text-orange-400 border border-orange-400/40'
+      return 'bg-orange-500/20 text-orange-600 border border-orange-500/40'
     case 'IN_PROGRESS':
-      return 'bg-purple-500/20 text-purple-400 border border-purple-400/40'
+      return 'bg-purple-500/20 text-purple-600 border border-purple-500/40'
     case 'POSTPONED':
-      return 'bg-yellow-500/20 text-yellow-400 border border-yellow-400/40'
+      return 'bg-yellow-500/20 text-yellow-600 border border-yellow-500/40'
     default:
-      return 'bg-gray-500/20 text-gray-400 border border-gray-400/40'
+      return 'bg-gray-500/20 text-gray-600 border border-gray-500/40'
   }
 }
 
@@ -406,12 +398,12 @@ useHead({
 })
 </script>
 
-<style>
-.blueprint-grid {
-  background-image: 
+<style scoped>
+.shadow-drawn {
+  box-shadow: 6px 6px 0px 0px rgba(10, 25, 47, 0.25);
+}
 
-    linear-gradient(to right, rgba(236, 200, 19, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(236, 200, 19, 0.08) 1px, transparent 1px);
-  background-size: 40px 40px;
+.shadow-drawn-dark {
+  box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
 }
 </style>

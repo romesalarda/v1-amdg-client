@@ -9,6 +9,12 @@
     --color-navy-accent: 17 34 64;
   }
   
+  body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
   /* Ensure dark mode uses our colors */
   .dark {
     --color-primary: 236 200 19;
@@ -177,7 +183,7 @@
   .form-group-dark select:focus {
     border-color: rgba(236, 200, 19, 0.6) !important;
     outline: none !important;
-    ring: 0 !important;
+    /* ring: 0 !important; */
   }
   
   /* Force full width on form elements */
@@ -225,5 +231,48 @@
   .form-group-dark input[type="number"]::-webkit-outer-spin-button {
     filter: invert(1);
     opacity: 0.7;
+  }
+
+  /* Max container fluid utility */
+  .max-container-fluid {
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  /* Scrollbar hide utility */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Button solid navy utility */
+  .btn-solid-navy {
+    background-color: white;
+    color: #0a192f;
+    font-weight: 900;
+    transition: all 0.3s ease;
+  }
+
+  .btn-solid-navy:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 25px rgba(255, 255, 255, 0.3);
+  }
+
+  /* Shadow drawn effect */
+  .shadow-drawn {
+    box-shadow: 6px 6px 0px 0px rgba(10, 25, 47, 0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .shadow-drawn-hover:hover {
+    box-shadow: 10px 10px 0px 0px rgba(10, 25, 47, 0.4);
+    transform: translate(-2px, -2px);
   }
 }
