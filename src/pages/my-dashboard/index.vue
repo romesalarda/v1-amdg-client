@@ -15,7 +15,7 @@
         <div class="max-w-screen-xl mx-auto w-full px-6 grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           <div>
             <div class="flex items-center gap-3 mb-6">
-              <span class="bg-blue-500/20 text-blue-400 border border-blue-400/30 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.1em] uppercase">Active Engagement</span>
+              <span class="bg-blue-500/20 text-blue-400 border border-blue-400/30 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.1em] uppercase">Upcoming</span>
             </div>
             <h1 class="text-4xl md:text-5xl font-black leading-tight text-white mb-4">{{ featuredEvent.title }}</h1>
             <div class="flex items-center gap-4">
@@ -31,9 +31,9 @@
           <!-- Countdown Timer -->
           <div class="flex justify-center lg:justify-end">
             <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white w-full max-w-sm flex flex-col items-center">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-8 opacity-50 flex items-center gap-2">
+              <!-- <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-8 opacity-50 flex items-center gap-2">
                 <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> Commencing In
-              </p>
+              </p> -->
               <div class="flex items-center justify-center gap-4 w-full">
                 <div class="text-center flex-1">
                   <p class="text-3xl lg:text-4xl font-black">{{ countdown.days }}</p>

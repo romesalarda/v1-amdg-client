@@ -46,7 +46,7 @@
         </div>
 
         <!-- Back button overlay -->
-        <div class="absolute top-6 left-6">
+        <!-- <div class="absolute top-6 left-6">
           <button
             @click="navigateTo('/events')"
             class="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest"
@@ -56,7 +56,7 @@
             </svg>
             <span class="hidden sm:inline">Back to Events</span>
           </button>
-        </div>
+        </div> -->
       </div>
 
       <!-- Sticky Floating Info Bar -->

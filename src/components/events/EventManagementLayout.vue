@@ -1,7 +1,7 @@
 <template>
   <Navbar />
-  <div class="min-h-screen bg-background-dark">
-    <div class="bg-navy-accent/80 border-b border-primary/30">
+  <div class="min-h-screen bg-mist-blue">
+    <div class="bg-deep-navy border-b border-white/10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <!-- Event Info & Back Button -->
         <div class="flex items-start justify-between mb-6">
@@ -20,9 +20,9 @@
             </div>
             <div
               v-else
-              class="w-16 h-16 rounded-lg bg-navy-accent border border-primary/40 flex items-center justify-center flex-shrink-0"
+              class="w-16 h-16 rounded-lg bg-deep-navy/50 border border-blue-500/40 flex items-center justify-center flex-shrink-0"
             >
-              <UIcon name="i-heroicons-calendar" class="w-8 h-8 text-primary" />
+              <UIcon name="i-heroicons-calendar" class="w-8 h-8 text-blue-500" />
             </div>
 
             <!-- Event Details -->
@@ -86,10 +86,10 @@
             :key="tab.path"
             :to="`/events/${eventId}/m/${tab.path}`"
             :class="[
-              'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap',
+              'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap rounded-t-lg',
               isActive(tab.path)
-                ? 'bg-background-dark text-primary border-b-2 border-primary'
-                : 'text-white/70 hover:text-white hover:bg-navy-accent/60',
+                ? 'bg-mist-blue text-blue-600 border-b-2 border-blue-500'
+                : 'text-white/70 hover:text-white hover:bg-white/5',
             ]"
           >
             <UIcon :name="tab.icon" class="w-4 h-4" />

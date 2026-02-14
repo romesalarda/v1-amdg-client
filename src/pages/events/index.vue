@@ -147,7 +147,7 @@
     </section>
 
     <!-- Upcoming Events Section -->
-    <div class="max-container-fluid pt-16 pb-24 w-full">
+    <div ref="eventsSection" class="max-container-fluid pt-16 pb-24 w-full">
       <!-- Section Header -->
       <div class="mb-14 flex flex-col md:flex-row md:justify-between md:items-end space-y-6 md:space-y-0">
         <div>
@@ -401,6 +401,8 @@ definePageMeta({
 })
 
 const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
 // Search and filter state
 const searchQuery = ref('')
@@ -409,6 +411,10 @@ const selectedSort = ref('date')
 const selectedLocation = ref('all')
 const currentPage = ref(1)
 const itemsPerPage = 12
+
+// Refs for scrolling
+const eventsSection = ref<HTMLElement | null>(null)
+const hasScrolledToEvents = ref(false)
 
 // Fetch upcoming events
 const { data: eventsData, isLoading: isLoadingEvents } = useUpcomingEvents()
@@ -495,6 +501,44 @@ const paginatedEvents = computed(() => {
 // Reset to page 1 when filters change
 watch([searchQuery, selectedFilter, selectedSort], () => {
   currentPage.value = 1
+})
+
+// Initialize search from URL parameter
+onMounted(() => {
+  if (route.query.search && typeof route.query.search === 'string') {
+    searchQuery.value = route.query.search
+    hasScrolledToEvents.value = true // Don't auto-scroll on initial load with URL param
+  }
+})
+
+// Update URL when search query changes
+watch(searchQuery, (newQuery) => {
+  // Update URL with search parameter
+  const query = { ...route.query }
+  if (newQuery) {
+    query.search = newQuery
+  } else {
+    delete query.search
+  }
+  router.replace({ query })
+})
+
+// Auto-scroll to events section when user starts typing
+watch(searchQuery, (newQuery, oldQuery) => {
+  if (newQuery && !hasScrolledToEvents.value && eventsSection.value) {
+    // User started typing, scroll to events section
+    hasScrolledToEvents.value = true
+    
+    nextTick(() => {
+      eventsSection.value?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      })
+    })
+  } else if (!newQuery) {
+    // Reset scroll flag when search is cleared
+    hasScrolledToEvents.value = false
+  }
 })
 
 // Set page metadata
