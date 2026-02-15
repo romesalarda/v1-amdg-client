@@ -6,6 +6,19 @@ export default <Partial<Config>>{
     extend: {
       colors: {
         primary: {
+          50: '#e6e9ed',
+          100: '#ccd2db',
+          200: '#99a6b7',
+          300: '#667993',
+          400: '#334d6f',
+          500: '#002147', // Main navy blue (matches code.html)
+          600: '#001e40',
+          700: '#001a38',
+          800: '#001630',
+          900: '#001228',
+          DEFAULT: '#002147'
+        },
+        gold: {
           50: '#fef9e7',
           100: '#fdf2c3',
           200: '#fce89b',

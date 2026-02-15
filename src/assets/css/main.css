@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --color-primary: 236 200 19;
+    --color-primary: 0 33 71;
     --color-background-dark: 10 25 47;
     --color-navy-accent: 17 34 64;
   }
@@ -17,7 +19,7 @@
   
   /* Ensure dark mode uses our colors */
   .dark {
-    --color-primary: 236 200 19;
+    --color-primary: 0 33 71;
     --color-background-dark: 10 25 47;
     --color-navy-accent: 17 34 64;
   }
@@ -27,17 +29,17 @@
 @layer utilities {
   .bg-primary,
   .bg-primary-500 {
-    background-color: #ecc813 !important;
+    background-color: #002147 !important;
   }
   
   .text-primary,
   .text-primary-500 {
-    color: #ecc813 !important;
+    color: #002147 !important;
   }
   
   .border-primary,
   .border-primary-500 {
-    border-color: #ecc813 !important;
+    border-color: #002147 !important;
   }
   
   .bg-background-dark,
@@ -60,36 +62,36 @@
   }
   
   .border-primary-500\/20 {
-    border-color: rgba(236, 200, 19, 0.2) !important;
+    border-color: rgba(0, 33, 71, 0.2) !important;
   }
   
   .border-primary-500\/50 {
-    border-color: rgba(236, 200, 19, 0.5) !important;
+    border-color: rgba(0, 33, 71, 0.5) !important;
   }
   
   .border-primary-500\/60 {
-    border-color: rgba(236, 200, 19, 0.6) !important;
+    border-color: rgba(0, 33, 71, 0.6) !important;
   }
   
   .hover\:border-primary-500\/60:hover {
-    border-color: rgba(236, 200, 19, 0.6) !important;
+    border-color: rgba(0, 33, 71, 0.6) !important;
   }
   
   .text-primary-500\/40 {
-    color: rgba(236, 200, 19, 0.4) !important;
+    color: rgba(0, 33, 71, 0.4) !important;
   }
   
   .text-primary-500\/60 {
-    color: rgba(236, 200, 19, 0.6) !important;
+    color: rgba(0, 33, 71, 0.6) !important;
   }
   
   .text-primary-500\/70 {
-    color: rgba(236, 200, 19, 0.7) !important;
+    color: rgba(0, 33, 71, 0.7) !important;
   }
   
   .from-primary-500\/20 {
-    --tw-gradient-from: rgba(236, 200, 19, 0.2) !important;
-    --tw-gradient-to: rgba(236, 200, 19, 0) !important;
+    --tw-gradient-from: rgba(0, 33, 71, 0.2) !important;
+    --tw-gradient-to: rgba(0, 33, 71, 0) !important;
     --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
   }
   
@@ -98,16 +100,16 @@
   }
   
   .hover\:bg-primary-500\/10:hover {
-    background-color: rgba(236, 200, 19, 0.1) !important;
+    background-color: rgba(0, 33, 71, 0.1) !important;
   }
   
   .border-primary-500\/10 {
-    border-color: rgba(236, 200, 19, 0.1) !important;
+    border-color: rgba(0, 33, 71, 0.1) !important;
   }
   
-  /* Gold gradient text utility */
-  .gold-gradient-text {
-    background: linear-gradient(to right, #ecc813, #f6d445, #ecc813);
+  /* Navy gradient text utility */
+  .navy-gradient-text {
+    background: linear-gradient(to right, #002147, #334d6f, #002147);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -116,14 +118,14 @@
   /* Blueprint Grid Pattern */
   .blueprint-bg {
     background-image: 
-      linear-gradient(to right, rgba(236, 200, 19, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(236, 200, 19, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(0, 33, 71, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(0, 33, 71, 0.05) 1px, transparent 1px);
     background-size: 40px 40px;
   }
   
   /* Architectural Border with Corner Details */
   .architectural-border {
-    border: 1px solid rgba(236, 200, 19, 0.3);
+    border: 1px solid rgba(0, 33, 71, 0.3);
     position: relative;
   }
   
@@ -133,7 +135,7 @@
     position: absolute;
     width: 20px;
     height: 20px;
-    border: 1px solid #ecc813;
+    border: 1px solid #002147;
   }
   
   .architectural-border::before {
@@ -150,9 +152,9 @@
     border-top: none;
   }
   
-  /* Gold Glow Effect */
-  .glow-gold {
-    text-shadow: 0 0 15px rgba(236, 200, 19, 0.6);
+  /* Navy Glow Effect */
+  .glow-navy {
+    text-shadow: 0 0 15px rgba(0, 33, 71, 0.6);
   }
   
   /* Dark Form Group Styling */
@@ -164,7 +166,7 @@
   .form-group-dark textarea,
   .form-group-dark select {
     background-color: rgba(10, 25, 47, 0.8) !important;
-    border-color: rgba(236, 200, 19, 0.3) !important;
+    border-color: rgba(0, 33, 71, 0.3) !important;
     color: white !important;
     width: 100%;
   }
@@ -181,7 +183,7 @@
   .form-group-dark input:focus,
   .form-group-dark textarea:focus,
   .form-group-dark select:focus {
-    border-color: rgba(236, 200, 19, 0.6) !important;
+    border-color: rgba(0, 33, 71, 0.6) !important;
     outline: none !important;
     /* ring: 0 !important; */
   }
@@ -196,14 +198,14 @@
   .form-group-dark [role="button"],
   .form-group-dark button[type="button"] {
     background-color: rgba(10, 25, 47, 0.8) !important;
-    border-color: rgba(236, 200, 19, 0.3) !important;
+    border-color: rgba(0, 33, 71, 0.3) !important;
     color: white !important;
     width: 100% !important;
   }
   
   .form-group-dark [role="button"]:hover,
   .form-group-dark button[type="button"]:hover {
-    border-color: rgba(236, 200, 19, 0.6) !important;
+    border-color: rgba(0, 33, 71, 0.6) !important;
   }
   
   .form-group-dark [role="button"] span,
@@ -274,5 +276,31 @@
   .shadow-drawn-hover:hover {
     box-shadow: 10px 10px 0px 0px rgba(10, 25, 47, 0.4);
     transform: translate(-2px, -2px);
+  }
+
+  /* Custom shadow - AMDG style */
+  .custom-shadow {
+    box-shadow: 4px 4px 0px 0px #002147;
+  }
+  
+  .dark .custom-shadow {
+    box-shadow: 4px 4px 0px 0px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Material Symbols styling */
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -webkit-font-feature-settings: 'liga';
+    -webkit-font-smoothing: antialiased;
   }
 }
