@@ -199,7 +199,9 @@
                   Expected Attendance
                 </label>
                 <input 
-                  :value="expected_attendance ?? ''"
+                  :disabled="!isEditMode"
+
+                  v-model="expected_attendance"
                   type="number" 
                   min="0" 
                   placeholder="0" 
@@ -213,7 +215,8 @@
                   Maximum Attendance
                 </label>
                 <input 
-                  :value="maximum_attendance ?? ''"
+                  :disabled="!isEditMode"
+                  v-model="maximum_attendance"
                   type="number" 
                   min="0" 
                   placeholder="0" 

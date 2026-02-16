@@ -1,144 +1,165 @@
 <template>
-  <form @submit="onSubmit" class="space-y-4">
-    <UFormGroup label="Title" name="title" required :error="errors.title">
-      <UInput
+  <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="ticket-title">
+        Title <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="ticket-title"
         v-model="title"
         v-bind="titleAttrs"
+        type="text"
         placeholder="e.g. General Admission, VIP, Early Bird"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
-    </UFormGroup>
+      <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>
+    </div>
 
-    <UFormGroup label="Scope" name="scope" required :error="errors.scope">
-      <div class="space-y-2">
-        <URadio
-          v-model="scope"
-          v-bind="scopeAttrs"
-          value="FULL_EVENT"
-          label="Full Event"
-          :ui="{ wrapper: 'flex items-start' }"
-        >
-          <template #label>
-            <div>
-              <div class="font-medium">Full Event</div>
-              <div class="text-sm text-gray-500">Valid for entire event duration</div>
-            </div>
-          </template>
-        </URadio>
-        
-        <URadio
-          v-model="scope"
-          v-bind="scopeAttrs"
-          value="SINGLE_DAY"
-          label="Single Day"
-          :ui="{ wrapper: 'flex items-start' }"
-        >
-          <template #label>
-            <div>
-              <div class="font-medium">Single Day</div>
-              <div class="text-sm text-gray-500">Valid for a single day only</div>
-            </div>
-          </template>
-        </URadio>
-        
-        <URadio
-          v-model="scope"
-          v-bind="scopeAttrs"
-          value="CUSTOM_RANGE"
-          label="Custom Range"
-          :ui="{ wrapper: 'flex items-start' }"
-        >
-          <template #label>
-            <div>
-              <div class="font-medium">Custom Range</div>
-              <div class="text-sm text-gray-500">Custom date range</div>
-            </div>
-          </template>
-        </URadio>
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600">
+        Scope <span class="text-red-500">*</span>
+      </label>
+      <div class="space-y-3">
+        <label class="flex items-start gap-3 rounded-xl border border-navy-200 bg-white p-3 hover:border-primary">
+          <input
+            v-model="scope"
+            v-bind="scopeAttrs"
+            type="radio"
+            value="FULL_EVENT"
+            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
+          />
+          <span>
+            <span class="block font-medium text-primary">Full Event</span>
+            <span class="block text-sm text-primary-500/60">Valid for entire event duration</span>
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3 rounded-xl border border-navy-200 bg-white p-3 hover:border-primary">
+          <input
+            v-model="scope"
+            v-bind="scopeAttrs"
+            type="radio"
+            value="SINGLE_DAY"
+            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
+          />
+          <span>
+            <span class="block font-medium text-primary">Single Day</span>
+            <span class="block text-sm text-primary-500/60">Valid for a single day only</span>
+          </span>
+        </label>
+
+        <label class="flex items-start gap-3 rounded-xl border border-navy-200 bg-white p-3 hover:border-primary">
+          <input
+            v-model="scope"
+            v-bind="scopeAttrs"
+            type="radio"
+            value="CUSTOM_RANGE"
+            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
+          />
+          <span>
+            <span class="block font-medium text-primary">Custom Range</span>
+            <span class="block text-sm text-primary-500/60">Custom date range</span>
+          </span>
+        </label>
       </div>
-    </UFormGroup>
+      <p v-if="errors.scope" class="text-xs text-red-500">{{ errors.scope }}</p>
+    </div>
 
     <div v-if="eventDays.length > 1" class="space-y-2">
-      <label class="block text-sm font-medium text-gray-700">Quick Date Presets</label>
+      <label class="block text-sm font-medium text-background-dark-600">Quick Date Presets</label>
       <div class="flex flex-wrap gap-2">
-        <UButton
+        <button
           v-for="(day, index) in eventDays"
           :key="index"
-          size="xs"
-          variant="soft"
-          color="gray"
-          @click="setDatePreset(index)"
           type="button"
+          class="rounded-lg border border-primary bg-white px-3 py-1 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+          @click="setDatePreset(index)"
         >
           Day {{ index + 1 }} ({{ formatDateShort(day) }})
-        </UButton>
-        <UButton
-          size="xs"
-          variant="soft"
-          color="primary"
-          @click="setFullEventDates"
+        </button>
+        <button
           type="button"
+          class="rounded-lg bg-primary px-3 py-1 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600"
+          @click="setFullEventDates"
         >
           Full Event
-        </UButton>
+        </button>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <UFormGroup label="Valid From" name="valid_from" :error="errors.valid_from">
-        <UInput
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="valid-from">Valid From</label>
+        <input
+          id="valid-from"
           v-model="valid_from"
           v-bind="valid_fromAttrs"
           type="datetime-local"
           :min="minDate"
           :max="maxDate"
+          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
-      </UFormGroup>
+        <p v-if="errors.valid_from" class="text-xs text-red-500">{{ errors.valid_from }}</p>
+      </div>
 
-      <UFormGroup label="Valid Until" name="valid_until" :error="errors.valid_until">
-        <UInput
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="valid-until">Valid Until</label>
+        <input
+          id="valid-until"
           v-model="valid_until"
           v-bind="valid_untilAttrs"
           type="datetime-local"
           :min="minDate"
           :max="maxDate"
+          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
-      </UFormGroup>
+        <p v-if="errors.valid_until" class="text-xs text-red-500">{{ errors.valid_until }}</p>
+      </div>
     </div>
 
-    <UFormGroup label="Max Entries" name="max_entries" :error="errors.max_entries">
-      <UInput
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="max-entries">Max Entries</label>
+      <input
+        id="max-entries"
         v-model="max_entries"
         v-bind="max_entriesAttrs"
         type="number"
         min="1"
         placeholder="Leave empty for unlimited"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
-    </UFormGroup>
+      <p v-if="errors.max_entries" class="text-xs text-red-500">{{ errors.max_entries }}</p>
+    </div>
 
-    <UFormGroup name="is_active">
-      <UToggle
-        v-model="is_active"
-        v-bind="is_activeAttrs"
-      >
-        <template #label>
-          <span class="text-sm font-medium text-gray-700">Active</span>
-        </template>
-      </UToggle>
-    </UFormGroup>
+    <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
+      <span class="text-sm font-medium text-background-dark-600">Active</span>
+      <span class="relative inline-flex h-6 w-11 items-center">
+        <input
+          v-model="is_active"
+          v-bind="is_activeAttrs"
+          type="checkbox"
+          class="peer sr-only"
+        />
+        <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
+        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+      </span>
+    </label>
 
     <div class="flex justify-end gap-2 pt-4">
-      <UButton
-        label="Cancel"
-        variant="ghost"
-        color="gray"
-        @click="emit('cancel')"
+      <button
         type="button"
-      />
-      <UButton
-        :label="modelValue ? 'Update Ticket Type' : 'Create Ticket Type'"
+        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+        @click="emit('cancel')"
+      >
+        Cancel
+      </button>
+      <button
         type="submit"
-        :loading="isSubmitting"
-      />
+        :disabled="isSubmitting"
+        class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
+      >
+        {{ modelValue ? 'Update Ticket Type' : 'Create Ticket Type' }}
+      </button>
     </div>
   </form>
 </template>

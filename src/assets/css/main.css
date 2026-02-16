@@ -16,6 +16,17 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
+  input,
+  textarea,
+  select {
+    color: #0a192f;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: rgba(10, 25, 47, 0.5);
+  }
   
   /* Ensure dark mode uses our colors */
   .dark {

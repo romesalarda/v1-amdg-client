@@ -1,128 +1,190 @@
 <template>
-  <form @submit="onSubmit" class="space-y-4">
-    <UFormGroup label="Title" name="title" required :error="errors.title">
-      <UInput 
-        v-model="title" 
-        v-bind="titleAttrs" 
-        placeholder="e.g. Credit Card, Bank Transfer, Cash on Site" 
+  <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="payment-title">
+        Title <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="payment-title"
+        v-model="title"
+        v-bind="titleAttrs"
+        type="text"
+        placeholder="e.g. Credit Card, Bank Transfer, Cash on Site"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
-    </UFormGroup>
+      <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>
+    </div>
 
-    <UFormGroup label="Description" name="description" :error="errors.description">
-      <UTextarea
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="payment-description">
+        Description
+      </label>
+      <textarea
+        id="payment-description"
         v-model="description"
         v-bind="descriptionAttrs"
         placeholder="Additional details about this payment method..."
-        :rows="2"
-      />
-    </UFormGroup>
+        rows="2"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+      ></textarea>
+      <p v-if="errors.description" class="text-xs text-red-500">{{ errors.description }}</p>
+    </div>
 
-    <UFormGroup label="Payment Method Type" name="method_type" required :error="errors.method_type">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600">
+        Payment Method Type <span class="text-red-500">*</span>
+      </label>
       <div class="space-y-3">
-        <div
+        <label
           v-for="methodType in methodTypes"
           :key="methodType.value"
-          class="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-          :class="{ 'border-primary-500 bg-primary-50': method_type === methodType.value }"
+          class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg hover:bg-mist-blue/50 transition-colors cursor-pointer"
+          :class="{ 'border-primary bg-mist-blue/60': method_type === methodType.value }"
         >
-          <URadio
+          <input
             v-model="method_type"
             v-bind="method_typeAttrs"
+            type="radio"
             :value="methodType.value"
-            :label="methodType.label"
+            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
           />
-          <div class="flex-1 pt-0.5">
-            <p class="text-sm text-gray-600">{{ methodType.description }}</p>
+          <div class="flex-1">
+            <span class="block font-medium text-primary">{{ methodType.label }}</span>
+            <p class="text-sm text-primary-500/60">{{ methodType.description }}</p>
           </div>
-        </div>
+        </label>
       </div>
-    </UFormGroup>
+      <p v-if="errors.method_type" class="text-xs text-red-500">{{ errors.method_type }}</p>
+    </div>
 
     <!-- Bank Transfer Fields -->
     <template v-if="method_type === 'BANK_TRANSFER'">
-      <div class="space-y-4 p-4 bg-gray-50 rounded-lg">
-        <h4 class="font-semibold text-sm">Bank Account Details</h4>
+      <div class="space-y-4 p-4 bg-mist-blue/40 rounded-lg">
+        <h4 class="font-semibold text-sm text-background-dark-600">Bank Account Details</h4>
         
-        <UFormGroup label="Account Name" name="provided_details.account_name" required :error="errors['provided_details.account_name']">
-          <UInput
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-background-dark-600" for="account-name">
+            Account Name <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="account-name"
             v-model="accountName"
             v-bind="accountNameAttrs"
+            type="text"
             placeholder="Account holder name"
+            class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-        </UFormGroup>
+          <p v-if="errors['provided_details.account_name']" class="text-xs text-red-500">
+            {{ errors['provided_details.account_name'] }}
+          </p>
+        </div>
 
-        <UFormGroup label="Sort Code" name="provided_details.sort_code" required :error="errors['provided_details.sort_code']">
-          <UInput
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-background-dark-600" for="sort-code">
+            Sort Code <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="sort-code"
             v-model="sortCode"
             v-bind="sortCodeAttrs"
+            type="text"
             placeholder="12-34-56"
+            class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-        </UFormGroup>
+          <p v-if="errors['provided_details.sort_code']" class="text-xs text-red-500">
+            {{ errors['provided_details.sort_code'] }}
+          </p>
+        </div>
 
-        <UFormGroup label="Account Number" name="provided_details.account_number" required :error="errors['provided_details.account_number']">
-          <UInput
+        <div class="space-y-2">
+          <label class="block text-sm font-medium text-background-dark-600" for="account-number">
+            Account Number <span class="text-red-500">*</span>
+          </label>
+          <input
+            id="account-number"
             v-model="accountNumber"
             v-bind="accountNumberAttrs"
+            type="text"
             placeholder="12345678"
+            class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-        </UFormGroup>
+          <p v-if="errors['provided_details.account_number']" class="text-xs text-red-500">
+            {{ errors['provided_details.account_number'] }}
+          </p>
+        </div>
       </div>
     </template>
 
     <!-- Stripe Fields -->
     <template v-if="method_type === 'STRIPE'">
-      <div class="space-y-4 p-4 bg-gray-50 rounded-lg">
-        <h4 class="font-semibold text-sm">Stripe Configuration</h4>
+      <div class="space-y-4 p-4 bg-mist-blue/40 rounded-lg">
+        <h4 class="font-semibold text-sm text-background-dark-600">Stripe Configuration</h4>
         
-        <UFormGroup name="use_platform_account">
-          <UCheckbox
+        <label class="flex items-center gap-2">
+          <input
             v-model="usePlatformAccount"
             v-bind="usePlatformAccountAttrs"
-            label="Use platform Stripe account"
+            type="checkbox"
+            class="h-4 w-4 rounded border-gray-300 accent-[rgb(0,33,71)]"
           />
-        </UFormGroup>
+          <span class="text-sm text-background-dark-600">Use platform Stripe account</span>
+        </label>
 
-        <UFormGroup 
-          v-if="!usePlatformAccount" 
-          label="Stripe Account ID" 
-          name="stripe_account_id" 
-          :error="errors.stripe_account_id"
-        >
-          <UInput
+        <div v-if="!usePlatformAccount" class="space-y-2">
+          <label class="block text-sm font-medium text-background-dark-600" for="stripe-account-id">
+            Stripe Account ID
+          </label>
+          <input
+            id="stripe-account-id"
             v-model="stripeAccountId"
             v-bind="stripeAccountIdAttrs"
+            type="text"
             placeholder="acct_xxxxxxxxxxxxx"
+            class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
           />
-        </UFormGroup>
+          <p v-if="errors.stripe_account_id" class="text-xs text-red-500">
+            {{ errors.stripe_account_id }}
+          </p>
+        </div>
       </div>
     </template>
 
     <!-- Cash Fields (no extra fields needed) -->
     <template v-if="method_type === 'CASH'">
-      <div class="p-4 bg-gray-50 rounded-lg">
-        <p class="text-sm text-gray-600">No additional configuration required for cash payments.</p>
+      <div class="p-4 bg-mist-blue/40 rounded-lg">
+        <p class="text-sm text-primary-500/60">No additional configuration required for cash payments.</p>
       </div>
     </template>
 
-    <UFormGroup name="is_active">
-      <UCheckbox
-        v-model="isActive"
-        v-bind="isActiveAttrs"
-        label="Active payment method"
-      />
-    </UFormGroup>
+    <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
+      <span class="text-sm font-medium text-background-dark-600">Active payment method</span>
+      <span class="relative inline-flex h-6 w-11 items-center">
+        <input
+          v-model="isActive"
+          v-bind="isActiveAttrs"
+          type="checkbox"
+          class="peer sr-only"
+        />
+        <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
+        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+      </span>
+    </label>
 
     <div class="flex justify-end gap-2 pt-2">
-      <UButton
-        label="Cancel"
-        variant="ghost"
+      <button
+        type="button"
+        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
         @click="$emit('cancel')"
-      />
-      <UButton
-        label="Save Payment Method"
+      >
+        Cancel
+      </button>
+      <button
         type="submit"
-        :loading="isLoading"
-      />
+        :disabled="isLoading"
+        class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
+      >
+        Save Payment Method
+      </button>
     </div>
   </form>
 </template>

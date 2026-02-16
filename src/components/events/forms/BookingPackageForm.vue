@@ -1,83 +1,118 @@
 <template>
-  <form @submit="onSubmit" class="space-y-4">
-    <UFormGroup label="Package Name" name="name" required :error="errors.name">
-      <UInput
+  <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="package-name">
+        Package Name <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="package-name"
         v-model="name"
         v-bind="nameAttrs"
+        type="text"
         placeholder="e.g. Early Bird, VIP, Standard"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
-    </UFormGroup>
+      <p v-if="errors.name" class="text-xs text-red-500">{{ errors.name }}</p>
+    </div>
 
-    <UFormGroup label="Description" name="description" :error="errors.description">
-      <UTextarea
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="package-description">
+        Description
+      </label>
+      <textarea
+        id="package-description"
         v-model="description"
         v-bind="descriptionAttrs"
         placeholder="What's included in this package..."
-        :rows="3"
-      />
-    </UFormGroup>
+        rows="3"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+      ></textarea>
+      <p v-if="errors.description" class="text-xs text-red-500">{{ errors.description }}</p>
+    </div>
 
-    <UFormGroup label="Ticket Type" name="ticket_type" required :error="errors.ticket_type">
-      <USelectMenu
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="ticket-type">
+        Ticket Type <span class="text-red-500">*</span>
+      </label>
+      <select
+        id="ticket-type"
         v-model="ticket_type"
         v-bind="ticket_typeAttrs"
-        :options="ticketTypes"
-        option-attribute="title"
-        value-attribute="id"
-        placeholder="Select ticket type"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       >
-        <template #label>
-          {{ selectedTicketTypeTitle || 'Select ticket type' }}
-        </template>
-      </USelectMenu>
-    </UFormGroup>
+        <option value="" disabled>Select ticket type</option>
+        <option v-for="ticket in ticketTypes" :key="ticket.id" :value="ticket.id">
+          {{ ticket.title }}
+        </option>
+      </select>
+      <p v-if="errors.ticket_type" class="text-xs text-red-500">{{ errors.ticket_type }}</p>
+    </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <UFormGroup label="Base Amount" name="base_amount" required :error="errors.base_amount" class="sm:col-span-2">
-        <UInput
+      <div class="sm:col-span-2 space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="base-amount">
+          Base Amount <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="base-amount"
           v-model="base_amount"
           v-bind="base_amountAttrs"
           type="number"
           step="0.01"
           min="0"
           placeholder="0.00"
+          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
-      </UFormGroup>
+        <p v-if="errors.base_amount" class="text-xs text-red-500">{{ errors.base_amount }}</p>
+      </div>
 
-      <UFormGroup label="Currency" name="base_amount_currency" required :error="errors.base_amount_currency">
-        <USelectMenu
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="currency">
+          Currency <span class="text-red-500">*</span>
+        </label>
+        <select
+          id="currency"
           v-model="base_amount_currency"
           v-bind="base_amount_currencyAttrs"
-          :options="currencyOptions"
-          placeholder="Currency"
-        />
-      </UFormGroup>
+          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option v-for="currency in currencyOptions" :key="currency" :value="currency">
+            {{ currency }}
+          </option>
+        </select>
+        <p v-if="errors.base_amount_currency" class="text-xs text-red-500">{{ errors.base_amount_currency }}</p>
+      </div>
     </div>
 
-    <UFormGroup label="Is Active" name="is_active">
-      <UToggle
-        v-model="is_active"
-        v-bind="is_activeAttrs"
-      >
-        <template #label>
-          <span class="text-sm font-medium text-gray-700">Active</span>
-        </template>
-      </UToggle>
-    </UFormGroup>
+    <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
+      <span class="text-sm font-medium text-background-dark-600">Active</span>
+      <span class="relative inline-flex h-6 w-11 items-center">
+        <input
+          v-model="is_active"
+          v-bind="is_activeAttrs"
+          type="checkbox"
+          class="peer sr-only"
+        />
+        <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
+        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+      </span>
+    </label>
 
     <div class="flex justify-end gap-2 pt-4">
-      <UButton
-        label="Cancel"
-        variant="ghost"
-        color="gray"
-        @click="emit('cancel')"
+      <button
         type="button"
-      />
-      <UButton
-        :label="modelValue ? 'Update Package' : 'Create Package'"
+        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+        @click="emit('cancel')"
+      >
+        Cancel
+      </button>
+      <button
         type="submit"
-        :loading="isSubmitting"
-      />
+        :disabled="isSubmitting"
+        class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
+      >
+        {{ modelValue ? 'Update Package' : 'Create Package' }}
+      </button>
     </div>
   </form>
 </template>
@@ -106,13 +141,6 @@ const isSubmitting = ref(false)
 const currencyOptions = [
   "GBP", "USD", "EUR"
 ]
-
-// Compute the selected ticket type title for display
-const selectedTicketTypeTitle = computed(() => {
-  if (!ticket_type.value) return ''
-  const ticketType = props.ticketTypes.find(t => t.id === ticket_type.value)
-  return ticketType?.title || ''
-})
 
 const { handleSubmit, errors, defineField, setValues } = useForm({
   validationSchema: toTypedSchema(bookingPackageSchema),

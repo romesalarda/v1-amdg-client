@@ -29,7 +29,8 @@
     <!-- Center text -->
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="text-center">
-        <div class="text-2xl font-black text-gray-900">{{ percentage }}%</div>
+        <!-- ensure to 2.dp -->
+        <div class="text-2xl font-black text-gray-900">{{ percentage.toFixed(2) }}%</div>
         <div v-if="subtitle" class="text-xs text-gray-500 font-medium">{{ subtitle }}</div>
       </div>
     </div>

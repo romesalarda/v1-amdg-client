@@ -4,22 +4,22 @@
       <!-- Main Content (2/3) -->
       <div class="lg:col-span-2 space-y-6">
         <!-- Ticket Types Section -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Ticket Types</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Define ticket categories with scopes and validity periods
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Ticket Type"
-                @click="openTicketTypeModal()"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">confirmation_number</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Ticket Types</h2>
+              <p class="text-sm text-navy-600 mt-1">Define ticket categories with scopes and validity periods</p>
             </div>
-          </template>
+            <UButton
+              icon="i-heroicons-plus"
+              size="sm"
+              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
+              @click="openTicketTypeModal()"
+            >
+              Add Ticket Type
+            </UButton>
+          </div>
 
           <div v-if="ticketTypesLoading" class="space-y-3">
             <USkeleton v-for="i in 3" :key="i" class="h-24" />
@@ -29,12 +29,12 @@
             <div
               v-for="ticketType in ticketTypes"
               :key="ticketType.id"
-              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-gray-900">{{ ticketType.title }}</h3>
+                    <h3 class="font-semibold text-navy-900">{{ ticketType.title }}</h3>
                     <UBadge
                       :label="ticketType.scope?.replace(/_/g, ' ')"
                       :color="ticketType.scope === 'FULL_EVENT' ? 'blue' : ticketType.scope === 'SINGLE_DAY' ? 'purple' : ticketType.scope === 'WORKSHOP_ONLY' ? 'orange' : 'gray'"
@@ -42,7 +42,7 @@
                       size="xs"
                     />
                   </div>
-                  <div class="text-sm text-gray-600 space-y-1">
+                  <div class="text-sm text-navy-600 space-y-1">
                     <div v-if="ticketType.valid_from || ticketType.valid_until" class="flex items-center gap-2">
                       <span class="font-medium">Valid:</span>
                       <span>
@@ -54,20 +54,19 @@
                 <div class="flex items-center gap-2">
                   <UToggle
                     :model-value="ticketType.is_active"
+                    color="green"
                     @update:model-value="toggleTicketTypeStatus(ticketType.id, $event)"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openTicketTypeModal(ticketType)"
                   />
                   <UButton
                     icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removeTicketType(ticketType.id)"
                   />
                 </div>
@@ -75,29 +74,29 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-600">
+          <div v-else class="text-center py-8 text-navy-600">
             <p>No ticket types yet. Create one to get started.</p>
           </div>
-        </UCard>
+        </section>
 
         <!-- Discounts Section -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Discounts</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Configure discount codes and eligibility rules
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Discount"
-                @click="openDiscountModal()"
-                :disabled="!packages.length"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">percent</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discounts</h2>
+              <p class="text-sm text-navy-600 mt-1">Configure discount codes and eligibility rules</p>
             </div>
-          </template>
+            <UButton
+              icon="i-heroicons-plus"
+              size="sm"
+              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
+              @click="openDiscountModal()"
+              :disabled="!packages.length"
+            >
+              Add Discount
+            </UButton>
+          </div>
 
           <div v-if="discountsLoading" class="space-y-3">
             <USkeleton v-for="i in 3" :key="i" class="h-28" />
@@ -107,12 +106,12 @@
             <div
               v-for="discount in discounts"
               :key="discount.id"
-              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-gray-900">{{ discount.name }}</h3>
+                    <h3 class="font-semibold text-navy-900">{{ discount.name }}</h3>
                     <UBadge
                       :label="discount.discount_type === 'PERCENTAGE' ? `${(discount as any).percentage}%` : `$${formatAmount((discount as any).amount || 0)}`"
                       :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'green'"
@@ -135,41 +134,40 @@
                       size="xs"
                     />
                   </div>
-                  <div class="text-sm text-gray-600 space-y-1">
+                  <div class="text-sm text-navy-600 space-y-1">
                     <p v-if="discount.description">{{ discount.description }}</p>
                     <div v-if="discount.rules && discount.rules.length > 0" class="mt-2">
                       <details class="cursor-pointer">
-                        <summary class="font-medium text-primary-600 hover:text-primary-700">
+                        <summary class="font-medium text-primary hover:text-navy-700">
                           {{ discount.rules.length }} eligibility rule{{ discount.rules.length !== 1 ? 's' : '' }}
                         </summary>
                         <ul class="mt-2 ml-4 space-y-1 list-disc">
                           <li v-for="rule in discount.rules" :key="rule.rule_id" class="text-xs">
                             {{ rule.name }}
-                            <span v-if="!rule.active" class="text-gray-400">(inactive)</span>
+                            <span v-if="!rule.active" class="text-navy-400">(inactive)</span>
                           </li>
                         </ul>
                       </details>
                     </div>
-                    <p v-else class="text-xs text-gray-400 mt-2">No eligibility rules - available to all</p>
+                    <p v-else class="text-xs text-navy-400 mt-2">No eligibility rules - available to all</p>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
                   <UToggle
                     :model-value="discount.active"
+                    color="green"
                     @update:model-value="toggleDiscountStatus(discount.discount_id, $event)"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openDiscountModal(discount)"
                   />
                   <UButton
                     icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removeDiscount(discount.discount_id)"
                   />
                 </div>
@@ -177,30 +175,30 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-600">
+          <div v-else class="text-center py-8 text-navy-600">
             <p>No discounts configured yet</p>
-            <p class="text-xs mt-2">Create discounts with eligibility rules for your event</p>
+            <p class="text-xs mt-2 text-navy-400">Create discounts with eligibility rules for your event</p>
           </div>
-        </UCard>
+        </section>
 
         <!-- Booking Packages Section -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Booking Packages</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Create pricing packages linked to ticket types
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Package"
-                @click="openPackageModal()"
-                :disabled="!ticketTypes.length"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">inventory_2</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Booking Packages</h2>
+              <p class="text-sm text-navy-600 mt-1">Create pricing packages linked to ticket types</p>
             </div>
-          </template>
+            <UButton
+              icon="i-heroicons-plus"
+              size="sm"
+              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
+              @click="openPackageModal()"
+              :disabled="!ticketTypes.length"
+            >
+              Add Package
+            </UButton>
+          </div>
 
           <div v-if="packagesLoading" class="space-y-3">
             <USkeleton v-for="i in 3" :key="i" class="h-28" />
@@ -210,41 +208,40 @@
             <div
               v-for="pkg in packages"
               :key="pkg.id"
-              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
                   <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-gray-900">{{ pkg.name }}</h3>
+                    <h3 class="font-semibold text-navy-900">{{ pkg.name }}</h3>
                   </div>
-                  <div class="text-sm text-gray-600 space-y-1">
+                  <div class="text-sm text-navy-600 space-y-1">
                     <div class="flex items-center gap-2">
                       <span class="font-medium">Ticket Type:</span>
                       <span>{{ getTicketTypeName(pkg.ticket_type) }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                       <span class="font-medium">Price:</span>
-                      <span class="text-primary-600 font-semibold">{{ formatAmount(pkg.base_amount, pkg.base_amount_currency) }}</span>
+                      <span class="text-primary font-semibold">{{ formatAmount(pkg.base_amount, pkg.base_amount_currency) }}</span>
                     </div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2">
                   <UToggle
                     :model-value="pkg.is_active"
+                    color="green"
                     @update:model-value="togglePackageStatus(pkg.id, $event)"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openPackageModal(pkg)"
                   />
                   <UButton
                     icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removePackage(pkg.id)"
                   />
                 </div>
@@ -252,29 +249,29 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-600">
+          <div v-else class="text-center py-8 text-navy-600">
             <p v-if="!ticketTypes.length">Create ticket types first before adding packages</p>
             <p v-else>No packages yet. Create one to get started.</p>
           </div>
-        </UCard>
+        </section>
 
         <!-- Alternative Sign-ins Section -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Alternative Sign-ins</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Configure additional check-in methods for attendees
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Method"
-                @click="openSignInModal()"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">login</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Alternative Sign-ins</h2>
+              <p class="text-sm text-navy-600 mt-1">Configure additional check-in methods for attendees</p>
             </div>
-          </template>
+            <UButton
+              icon="i-heroicons-plus"
+              size="sm"
+              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
+              @click="openSignInModal()"
+            >
+              Add Method
+            </UButton>
+          </div>
 
           <div v-if="signInsLoading" class="space-y-3">
             <USkeleton v-for="i in 2" :key="i" class="h-16" />
@@ -284,19 +281,19 @@
             <div
               v-for="signIn in signIns"
               :key="signIn.id"
-              class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="p-3 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <h3 class="font-semibold text-gray-900">{{ signIn.title }}</h3>
-                  <p v-if="(signIn as any).description" class="text-sm text-gray-600 mt-1">
+                  <h3 class="font-semibold text-navy-900">{{ signIn.title }}</h3>
+                  <p v-if="(signIn as any).description" class="text-sm text-navy-600 mt-1">
                     {{ (signIn as any).description }}
                   </p>
                   <div v-if="(signIn as any).format_match" class="mt-2 flex items-center gap-2">
                     <UBadge color="blue" variant="subtle" size="xs">
                       Pattern: {{ getPatternLabel((signIn as any).format_match) }}
                     </UBadge>
-                    <span v-if="signIn.max_uses_per_signin" class="text-xs text-gray-500">
+                    <span v-if="signIn.max_uses_per_signin" class="text-xs text-navy-500">
                       Max uses: {{ signIn.max_uses_per_signin }}
                     </span>
                   </div>
@@ -304,16 +301,14 @@
                 <div class="flex items-center gap-2">
                   <UButton
                     icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openSignInModal(signIn)"
                   />
                   <UButton
                     icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
+                    size="xs"
+                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removeSignIn(signIn.id)"
                   />
                 </div>
@@ -321,46 +316,50 @@
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-600">
+          <div v-else class="text-center py-8 text-navy-600">
             <p>No alternative sign-in methods configured</p>
-            <p class="text-xs mt-2">Add methods like QR codes, RFID, etc.</p>
+            <p class="text-xs mt-2 text-navy-400">Add methods like QR codes, RFID, etc.</p>
           </div>
-        </UCard>
+        </section>
       </div>
 
       <!-- Sidebar (1/3) -->
       <div class="space-y-6">
         <!-- Booking Status Card -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Booking Status</h3>
-          </template>
-          <div class="space-y-4">
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="bg-primary px-6 py-4">
+            <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">dashboard</span>
+              Booking Status
+            </h3>
+          </div>
+          <div class="p-6 space-y-4">
             <div>
-              <div class="text-2xl font-bold text-gray-900">{{ ticketTypes.length }}</div>
-              <div class="text-sm text-gray-600">Total Ticket Types</div>
+              <div class="text-2xl font-bold text-navy-900">{{ ticketTypes.length }}</div>
+              <div class="text-sm text-navy-600">Total Ticket Types</div>
             </div>
             <div>
-              <div class="text-2xl font-bold text-gray-900">{{ packages.length }}</div>
-              <div class="text-sm text-gray-600">Total Packages</div>
+              <div class="text-2xl font-bold text-navy-900">{{ packages.length }}</div>
+              <div class="text-sm text-navy-600">Total Packages</div>
             </div>
             <div>
               <div class="text-2xl font-bold text-green-600">{{ activePackagesCount }}</div>
-              <div class="text-sm text-gray-600">Active Packages</div>
+              <div class="text-sm text-navy-600">Active Packages</div>
             </div>
             <div>
               <div class="text-2xl font-bold text-blue-600">{{ discounts.length }}</div>
-              <div class="text-sm text-gray-600">Configured Discounts</div>
+              <div class="text-sm text-navy-600">Configured Discounts</div>
             </div>
           </div>
-        </UCard>
+        </section>
 
         <!-- Help Card -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Setup Tips</h3>
-          </template>
-          <div class="text-sm space-y-3 text-gray-600">
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
+            <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Setup Tips</h3>
+          </div>
+          <div class="p-6 text-sm space-y-3 text-navy-600">
             <p>
               <strong>Ticket Types</strong> define the scope and validity of tickets (full event, single day, or custom range).
             </p>
@@ -371,18 +370,19 @@
               <strong>Alternative Sign-ins</strong> provide additional ways for attendees to check in (QR codes, RFID cards, etc.).
             </p>
           </div>
-        </UCard>
+        </section>
       </div>
     </div>
 
     <!-- Add/Edit Ticket Type Modal -->
     <UModal v-model="showTicketTypeModal" size="lg">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary">confirmation_number</span>
+          <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
             {{ editingTicketType ? 'Edit Ticket Type' : 'Add Ticket Type' }}
           </h3>
-        </template>
+        </div>
 
         <TicketTypeForm
           :model-value="editingTicketType"
@@ -391,17 +391,18 @@
           @submit="handleTicketTypeSubmit"
           @cancel="closeTicketTypeModal"
         />
-      </UCard>
+      </div>
     </UModal>
 
     <!-- Add/Edit Package Modal -->
     <UModal v-model="showPackageModal" size="xl">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary">inventory_2</span>
+          <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
             {{ editingPackage ? 'Edit Booking Package' : 'Add Booking Package' }}
           </h3>
-        </template>
+        </div>
 
         <BookingPackageForm
           :model-value="editingPackage"
@@ -410,98 +411,126 @@
           @submit="handlePackageSubmit"
           @cancel="closePackageModal"
         />
-      </UCard>
+      </div>
     </UModal>
 
     <!-- Add/Edit Alternative Sign-in Modal -->
     <UModal v-model="showSignInModal" size="lg">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary">login</span>
+          <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
             {{ editingSignIn ? 'Edit Sign-in Method' : 'Add Sign-in Method' }}
           </h3>
-        </template>
+        </div>
 
-        <form @submit="onSubmitSignIn" class="space-y-4">
-          <UFormGroup label="Method Name" name="title" required>
-            <UInput
+        <form @submit="onSubmitSignIn" class="space-y-4 text-background-dark-600">
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="signin-title">
+              Method Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="signin-title"
               v-model="signInForm.title"
+              type="text"
               placeholder="e.g. Community ID, RFID Card, QR Code"
+              required
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
-          </UFormGroup>
+          </div>
 
-          <UFormGroup label="Description" name="description">
-            <UTextarea
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="signin-description">
+              Description
+            </label>
+            <textarea
+              id="signin-description"
               v-model="signInForm.description"
               placeholder="Describe how this sign-in method works..."
-              :rows="3"
-            />
-          </UFormGroup>
+              rows="3"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            ></textarea>
+          </div>
 
-          <UFormGroup label="ID Format Pattern (Optional)" name="format_match">
-            <div class="space-y-2">
-              <USelectMenu
-                v-model="signInForm.patternType"
-                :options="patternOptions"
-                value-attribute="value"
-                option-attribute="label"
-                placeholder="Select a pattern type"
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="format-pattern">
+              ID Format Pattern (Optional)
+            </label>
+            <select
+              id="format-pattern"
+              v-model="signInForm.patternType"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            >
+              <option v-for="option in patternOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            
+            <div v-if="signInForm.patternType === 'custom'" class="p-3 bg-mist-blue/40 rounded-lg space-y-2">
+              <input
+                v-model="signInForm.format_match"
+                type="text"
+                placeholder="Enter custom regex pattern"
+                class="w-full rounded-lg border border-primary-500/20 bg-white px-3 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
               />
-              
-              <div v-if="signInForm.patternType === 'custom'" class="p-3 bg-gray-50 rounded-lg">
-                <UInput
-                  v-model="signInForm.format_match"
-                  placeholder="Enter custom regex pattern"
-                />
-                <p class="text-xs text-gray-500 mt-1">
-                  Advanced: Enter a regular expression pattern
-                </p>
-              </div>
-              
-              <div v-else-if="signInForm.patternType && signInForm.patternType !== 'none'" class="p-3 bg-gray-50 rounded-lg">
-                <p class="text-sm text-gray-700">
-                  <strong>Pattern:</strong> {{ patternExamples[signInForm.patternType]?.example }}
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                  {{ patternExamples[signInForm.patternType]?.description }}
-                </p>
-              </div>
+              <p class="text-xs text-primary-500/60">
+                Advanced: Enter a regular expression pattern
+              </p>
             </div>
-          </UFormGroup>
+            
+            <div v-else-if="signInForm.patternType && signInForm.patternType !== 'none'" class="p-3 bg-mist-blue/40 rounded-lg">
+              <p class="text-sm text-background-dark-600">
+                <strong>Pattern:</strong> <span class="font-mono text-primary">{{ (patternExamples as Record<string, any>)[signInForm.patternType]?.example }}</span>
+              </p>
+              <p class="text-xs text-primary-500/60 mt-1">
+                {{ (patternExamples as Record<string, any>)[signInForm.patternType]?.description }}
+              </p>
+            </div>
+          </div>
 
-          <UFormGroup label="Max Uses Per Sign-in (Optional)" name="max_uses">
-            <UInput
+          <div class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="max-uses">
+              Max Uses Per Sign-in (Optional)
+            </label>
+            <input
+              id="max-uses"
               v-model="signInForm.max_uses_per_signin"
               type="number"
               min="1"
               placeholder="Leave empty for unlimited"
-            />
-          </UFormGroup>
-
-          <div class="flex justify-end gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
-              @click="closeSignInModal"
-            />
-            <UButton
-              :label="editingSignIn ? 'Update Method' : 'Create Method'"
-              type="submit"
-              :loading="signInMutationLoading"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
           </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button
+              type="button"
+              class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+              @click="closeSignInModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="signInMutationLoading"
+              class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
+            >
+              {{ editingSignIn ? 'Update Method' : 'Create Method' }}
+            </button>
+          </div>
         </form>
-      </UCard>
+      </div>
     </UModal>
 
     <!-- Add/Edit Discount Modal -->
     <UModal v-model="showDiscountModal" size="xl">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary">percent</span>
+          <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
             {{ editingDiscount ? 'Edit Discount' : 'Add Discount' }}
           </h3>
-        </template>
+        </div>
 
         <DiscountForm
           :model-value="editingDiscount"
@@ -512,7 +541,7 @@
           @submit="handleDiscountSubmit"
           @cancel="closeDiscountModal"
         />
-      </UCard>
+      </div>
     </UModal>
   </EventManagementLayout>
 </template>

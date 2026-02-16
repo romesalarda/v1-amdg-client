@@ -1,157 +1,179 @@
 <template>
-  <form @submit="onSubmit" class="space-y-4">
+  <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
     <!-- Basic Information -->
-    <UFormGroup label="Discount Name" name="name" required :error="errors.name">
-      <UInput 
-        v-model="name" 
-        v-bind="nameAttrs" 
-        placeholder="e.g. Early Bird, Student Discount, Senior Rate" 
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="discount-name">
+        Discount Name <span class="text-red-500">*</span>
+      </label>
+      <input
+        id="discount-name"
+        v-model="name"
+        v-bind="nameAttrs"
+        type="text"
+        placeholder="e.g. Early Bird, Student Discount, Senior Rate"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
-    </UFormGroup>
+      <p v-if="errors.name" class="text-xs text-red-500">{{ errors.name }}</p>
+    </div>
 
-    <UFormGroup label="Description" name="description" :error="errors.description">
-      <UTextarea
-        :model-value="description ?? ''"
-        @update:model-value="(value) => description = value"
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="discount-description">
+        Description
+      </label>
+      <textarea
+        id="discount-description"
+        v-model="description"
+        v-bind="descriptionAttrs"
         placeholder="Additional details about this discount..."
-        :rows="2"
-      />
-    </UFormGroup>
+        rows="2"
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+      ></textarea>
+      <p v-if="errors.description" class="text-xs text-red-500">{{ errors.description }}</p>
+    </div>
 
     <!-- Package Selector (for new discounts only) -->
-    <UFormGroup 
-      v-if="!modelValue"
-      label="Booking Package" 
-      name="packageId" 
-      required 
-      :error="errors.packageId"
-    >
-      <USelectMenu
+    <div v-if="!modelValue" class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600" for="discount-package">
+        Booking Package <span class="text-red-500">*</span>
+      </label>
+      <select
+        id="discount-package"
         v-model="packageId"
         v-bind="packageIdAttrs"
-        :options="packageOptions"
-        value-attribute="value"
-        option-attribute="label"
-        placeholder="Select a booking package"
         :disabled="packages.length === 0"
-      />
-      <template #help>
-        <span v-if="packages.length === 0" class="text-xs text-orange-500">
-          Create a booking package first before adding discounts
-        </span>
-        <span v-else class="text-xs text-gray-500">
-          This discount will apply to the selected booking package
-        </span>
-      </template>
-    </UFormGroup>
+        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+      >
+        <option value="" disabled>Select a booking package</option>
+        <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">
+          {{ pkg.name }} - ${{ Number(pkg.base_amount).toFixed(2) }}
+        </option>
+      </select>
+      <p v-if="packages.length === 0" class="text-xs text-orange-500">
+        Create a booking package first before adding discounts
+      </p>
+      <p v-else class="text-xs text-primary-500/60">
+        This discount will apply to the selected booking package
+      </p>
+      <p v-if="errors.packageId" class="text-xs text-red-500">{{ errors.packageId }}</p>
+    </div>
 
     <!-- Package Display (for existing discounts) -->
-    <UFormGroup 
-      v-else-if="modelValue?.target_package"
-      label="Linked to Package" 
-    >
-      <div class="flex items-center gap-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-        <UIcon name="i-heroicons-cube" class="w-5 h-5 text-gray-500" />
-        <span class="font-medium text-gray-900">{{ modelValue.target_package.name }}</span>
-        <UBadge color="gray" variant="subtle" size="xs" class="ml-auto">Package</UBadge>
+    <div v-else-if="modelValue?.target_package" class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600">
+        Linked to Package
+      </label>
+      <div class="flex items-center gap-2 p-3 bg-mist-blue/40 rounded-lg border border-primary-500/20">
+        <span class="inline-block w-5 h-5 text-primary-500/60">📦</span>
+        <span class="font-medium text-background-dark-600">{{ modelValue.target_package.name }}</span>
+        <span class="ml-auto text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Package</span>
       </div>
-      <template #help>
-        <span class="text-xs text-gray-500">
-          Package association cannot be changed after creation
-        </span>
-      </template>
-    </UFormGroup>
+      <p class="text-xs text-primary-500/60">
+        Package association cannot be changed after creation
+      </p>
+    </div>
 
     <!-- Discount Type Selection -->
-    <UFormGroup label="Discount Type" name="discount_type" required :error="errors.discount_type">
+    <div class="space-y-2">
+      <label class="block text-sm font-medium text-background-dark-600">
+        Discount Type <span class="text-red-500">*</span>
+      </label>
       <div class="space-y-3">
-        <div
+        <label
           v-for="type in discountTypes"
           :key="type.value"
-          class="flex items-start gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors"
-          :class="{ 'border-primary-500 bg-primary-50': discount_type === type.value }"
+          class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg hover:bg-mist-blue/50 transition-colors cursor-pointer"
+          :class="{ 'border-primary bg-mist-blue/60': discount_type === type.value }"
         >
-          <URadio
+          <input
             v-model="discount_type"
             v-bind="discount_typeAttrs"
+            type="radio"
             :value="type.value"
-            :label="type.label"
+            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
           />
-          <div class="flex-1 pt-0.5">
-            <p class="text-sm text-gray-600">{{ type.description }}</p>
+          <div class="flex-1">
+            <span class="block font-medium text-primary">{{ type.label }}</span>
+            <p class="text-sm text-primary-500/60">{{ type.description }}</p>
           </div>
-        </div>
+        </label>
       </div>
-    </UFormGroup>
+      <p v-if="errors.discount_type" class="text-xs text-red-500">{{ errors.discount_type }}</p>
+    </div>
 
     <!-- Conditional Amount/Percentage Fields -->
     <template v-if="discount_type === 'PERCENTAGE'">
-      <div class="p-4 bg-gray-50 rounded-lg">
-        <UFormGroup label="Percentage" name="percentage" required :error="errors.percentage">
-          <UInput
+      <div class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="discount-percentage">
+          Percentage <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            id="discount-percentage"
             v-model="percentage"
             v-bind="percentageAttrs"
             type="text"
             inputmode="decimal"
             placeholder="e.g. 10 for 10% off"
-          >
-            <template #trailing>
-              <span class="text-gray-500">%</span>
-            </template>
-          </UInput>
-          <template #help>
-            <span class="text-xs text-gray-500">Enter a value between 0 and 100</span>
-          </template>
-        </UFormGroup>
+            class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+          <span class="text-primary-500/60">%</span>
+        </div>
+        <p class="text-xs text-primary-500/60">Enter a value between 0 and 100</p>
+        <p v-if="errors.percentage" class="text-xs text-red-500">{{ errors.percentage }}</p>
       </div>
     </template>
 
     <template v-if="discount_type === 'FIXED'">
-      <div class="p-4 bg-gray-50 rounded-lg">
-        <UFormGroup label="Fixed Amount" name="amount" required :error="errors.amount">
-          <UInput
+      <div class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
+        <label class="block text-sm font-medium text-background-dark-600" for="discount-amount">
+          Fixed Amount <span class="text-red-500">*</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <span class="text-primary-500/60">$</span>
+          <input
+            id="discount-amount"
             v-model="amount"
             v-bind="amountAttrs"
             type="text"
             inputmode="decimal"
             placeholder="e.g. 50.00"
-          >
-            <template #leading>
-              <span class="text-gray-500">$</span>
-            </template>
-          </UInput>
-          <template #help>
-            <span class="text-xs text-gray-500">Enter the fixed discount amount</span>
-          </template>
-        </UFormGroup>
+            class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+        <p class="text-xs text-primary-500/60">Enter the fixed discount amount</p>
+        <p v-if="errors.amount" class="text-xs text-red-500">{{ errors.amount }}</p>
       </div>
     </template>
 
     <!-- Active Toggle -->
-    <UFormGroup name="active">
-      <UCheckbox
-        v-model="active"
-        v-bind="activeAttrs"
-        label="Active discount"
-      />
-    </UFormGroup>
+    <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
+      <span class="text-sm font-medium text-background-dark-600">Active discount</span>
+      <span class="relative inline-flex h-6 w-11 items-center">
+        <input
+          v-model="active"
+          v-bind="activeAttrs"
+          type="checkbox"
+          class="peer sr-only"
+        />
+        <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
+        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+      </span>
+    </label>
 
     <!-- Rules Section -->
-    <UDivider class="my-6" />
-    
-    <div class="space-y-4">
+    <div class="border-t border-primary-500/20 py-6 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <h4 class="font-semibold text-gray-900">Eligibility Rules</h4>
-          <p class="text-sm text-gray-600 mt-1">Define conditions for who can use this discount</p>
+          <h4 class="font-semibold text-background-dark-600">Eligibility Rules</h4>
+          <p class="text-sm text-primary-500/60 mt-1">Define conditions for who can use this discount</p>
         </div>
-        <UButton
-          icon="i-heroicons-plus"
-          label="Add Rule"
-          size="sm"
-          variant="outline"
+        <button
+          type="button"
+          class="bg-white border border-primary text-primary rounded-xl text-[11px] font-black uppercase tracking-widest px-3 py-2 hover:bg-primary hover:text-white transition-all"
           @click="addRule"
-        />
+        >
+          + Add Rule
+        </button>
       </div>
 
       <!-- Rules List -->
@@ -159,114 +181,132 @@
         <div
           v-for="(rule, index) in rules"
           :key="index"
-          class="p-4 border border-gray-200 rounded-lg bg-white"
+          class="p-4 border border-primary-500/20 rounded-lg bg-white space-y-3"
         >
-          <div class="flex items-start gap-3">
+          <div class="flex items-start justify-between gap-3">
             <div class="flex-1 space-y-3">
-              <UFormGroup 
-                :label="`Rule ${index + 1} - Type`" 
-                :name="`rules.${index}.rule_type`" 
-                :error="(errors as any)[`rules.${index}.rule_type`]"
-                required
-              >
-                <USelectMenu
+              <!-- Rule Type Dropdown -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-background-dark-600">
+                  Rule {{ index + 1 }} - Type <span class="text-red-500">*</span>
+                </label>
+                <select
                   :model-value="rule.value.rule_type"
-                  @update:model-value="(value) => updateRuleField(index, 'rule_type', value)"
-                  :options="ruleTypeOptions"
-                  value-attribute="value"
-                  option-attribute="label"
-                  placeholder="Select rule type"
-                />
-                <template #help>
-                  <span v-if="rule.value.rule_type" class="text-xs text-gray-500">
-                    {{ getRuleTypeDescription(rule.value.rule_type) }}
-                  </span>
-                </template>
-              </UFormGroup>
+                  @update:model-value="(value: any) => updateRuleField(index, 'rule_type', value)"
+                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="" disabled>Select rule type</option>
+                  <option v-for="opt in ruleTypeOptions" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </option>
+                </select>
+                <p v-if="(errors as any)[`rules.${index}.rule_type`]" class="text-xs text-red-500">
+                  {{ (errors as any)[`rules.${index}.rule_type`] }}
+                </p>
+                <p v-if="rule.value.rule_type" class="text-xs text-primary-500/60">
+                  {{ getRuleTypeDescription(rule.value.rule_type) }}
+                </p>
+              </div>
 
-              <UFormGroup 
-                label="Rule Name" 
-                :name="`rules.${index}.name`"
-                :error="(errors as any)[`rules.${index}.name`]"
-                required
-              >
-                <UInput
+              <!-- Rule Name -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-background-dark-600">
+                  Rule Name <span class="text-red-500">*</span>
+                </label>
+                <input
                   :model-value="rule.value.name"
-                  @update:model-value="(value) => updateRuleField(index, 'name', value)"
+                  @update:model-value="(value: any) => updateRuleField(index, 'name', value)"
+                  type="text"
                   placeholder="e.g. Student ID Required, Senior Discount"
+                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </UFormGroup>
+                <p v-if="(errors as any)[`rules.${index}.name`]" class="text-xs text-red-500">
+                  {{ (errors as any)[`rules.${index}.name`] }}
+                </p>
+              </div>
 
-              <UFormGroup 
-                label="Rule Description" 
-                :name="`rules.${index}.description`"
-                :error="(errors as any)[`rules.${index}.description`]"
-              >
-                <UTextarea
+              <!-- Rule Description -->
+              <div class="space-y-2">
+                <label class="block text-sm font-medium text-background-dark-600">
+                  Rule Description
+                </label>
+                <textarea
                   :model-value="rule.value.description"
-                  @update:model-value="(value) => updateRuleField(index, 'description', value)"
+                  @update:model-value="(value: any) => updateRuleField(index, 'description', value)"
                   placeholder="Optional description of this rule"
-                  :rows="2"
-                />
-              </UFormGroup>
+                  rows="2"
+                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                ></textarea>
+                <p v-if="(errors as any)[`rules.${index}.description`]" class="text-xs text-red-500">
+                  {{ (errors as any)[`rules.${index}.description`] }}
+                </p>
+              </div>
 
               <!-- Conditional Value Field -->
-              <UFormGroup 
-                v-if="ruleRequiresValue(rule.value.rule_type)"
-                label="Value" 
-                :name="`rules.${index}.value`"
-                :error="(errors as any)[`rules.${index}.value`]"
-                :required="ruleRequiresValue(rule.value.rule_type)"
-              >
-                <UInput
+              <div v-if="ruleRequiresValue(rule.value.rule_type)" class="space-y-2">
+                <label class="block text-sm font-medium text-background-dark-600">
+                  Value <span class="text-red-500">*</span>
+                </label>
+                <input
                   :model-value="rule.value.value"
-                  @update:model-value="(value) => updateRuleField(index, 'value', value)"
+                  @update:model-value="(value: any) => updateRuleField(index, 'value', value)"
                   :placeholder="getRuleValuePlaceholder(rule.value.rule_type)"
                   type="text"
                   :inputmode="isAgeRule(rule.value.rule_type) ? 'numeric' : 'text'"
+                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </UFormGroup>
+                <p v-if="(errors as any)[`rules.${index}.value`]" class="text-xs text-red-500">
+                  {{ (errors as any)[`rules.${index}.value`] }}
+                </p>
+              </div>
 
-              <UFormGroup :name="`rules.${index}.active`">
-                <UCheckbox
+              <!-- Active Rule Checkbox -->
+              <label class="flex items-center gap-2">
+                <input
                   :model-value="rule.value.active"
-                  @update:model-value="(value) => updateRuleField(index, 'active', value)"
-                  label="Active rule"
+                  @update:model-value="(value: any) => updateRuleField(index, 'active', value)"
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-gray-300 accent-[rgb(0,33,71)]"
                 />
-              </UFormGroup>
+                <span class="text-sm text-background-dark-600">Active rule</span>
+              </label>
             </div>
 
-            <UButton
-              icon="i-heroicons-trash"
-              color="red"
-              variant="ghost"
-              size="sm"
+            <!-- Delete Button -->
+            <button
+              type="button"
+              class="bg-white border border-red-200 text-red-600 rounded-lg p-2 hover:bg-red-50 transition-all flex-shrink-0 mt-1"
               @click="removeRule(index)"
-            />
+              title="Delete rule"
+            >
+              <span class="text-lg">🗑️</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div v-else class="text-center py-8 text-gray-500 border border-dashed rounded-lg">
+      <div v-else class="text-center py-8 text-primary-500/60 border border-dashed border-primary-500/20 rounded-lg">
         <p class="text-sm">No rules added yet</p>
         <p class="text-xs mt-1">Click "Add Rule" to create eligibility conditions</p>
       </div>
     </div>
 
     <!-- Form Actions -->
-    <UDivider class="my-6" />
-    
-    <div class="flex justify-end gap-2 pt-2">
-      <UButton
-        label="Cancel"
-        variant="ghost"
+    <div class="border-t border-primary-500/20 pt-6 flex justify-end gap-2">
+      <button
+        type="button"
+        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
         @click="$emit('cancel')"
-      />
-      <UButton
-        label="Save Discount"
+      >
+        Cancel
+      </button>
+      <button
         type="submit"
-        :loading="isLoading"
-      />
+        :disabled="isLoading"
+        class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
+      >
+        Save Discount
+      </button>
     </div>
   </form>
 </template>
@@ -349,14 +389,6 @@ const [discount_type, discount_typeAttrs] = defineField('discount_type')
 const [percentage, percentageAttrs] = defineField('percentage')
 const [amount, amountAttrs] = defineField('amount')
 const [active, activeAttrs] = defineField('active')
-
-// Package options for dropdown
-const packageOptions = computed(() => 
-  props.packages.map((pkg: any) => ({
-    value: pkg.id,
-    label: `${pkg.name} - $${Number(pkg.base_amount).toFixed(2)}`,
-  }))
-)
 
 // Field array for rules
 const { fields: rules, push: pushRule, remove: removeRule, update: updateRule } = useFieldArray<any>('rules')
