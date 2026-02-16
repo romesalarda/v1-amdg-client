@@ -15,6 +15,7 @@
               </div>
               <div class="flex gap-2">
                 <UButton
+                  v-if="canUpdateStaff"
                   icon="i-heroicons-envelope"
                   label="Send Invite"
                   @click="showInviteModal = true"

@@ -33,6 +33,7 @@
                 </div>
               </div>
             </div>
+            
 
             <div v-else-if="resourcesList.length" class="space-y-2">
               <div
@@ -256,6 +257,7 @@ const handleUpload = async () => {
         description: uploadForm.value.description,
         resource_type: uploadForm.value.resource_type,
         tag: uploadForm.value.tag,
+        image: uploadForm.value.file,
         file: uploadForm.value.file,
         public: uploadForm.value.public,
       },
