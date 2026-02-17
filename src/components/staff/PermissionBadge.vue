@@ -1,17 +1,16 @@
 <template>
-  <UTooltip :text="tooltipText" :popper="{ placement: 'top' }">
-    <UBadge
-      :color="badgeColor"
-      :variant="isCustom ? 'outline' : 'solid'"
-      size="sm"
-      class="cursor-help"
-    >
-      <div class="flex items-center gap-1">
-        <UIcon :name="iconName" class="h-3 w-3" />
-        <span>{{ displayText }}</span>
-      </div>
-    </UBadge>
-  </UTooltip>
+  <span
+    :title="tooltipText"
+    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold cursor-help"
+    :class="[
+      badgeColor === 'red' ? (isCustom ? 'bg-white text-red-600 ring-1 ring-red-400' : 'bg-red-100 text-red-700') : '',
+      badgeColor === 'yellow' ? (isCustom ? 'bg-white text-amber-600 ring-1 ring-amber-400' : 'bg-amber-100 text-amber-700') : '',
+      badgeColor === 'green' ? (isCustom ? 'bg-white text-green-600 ring-1 ring-green-400' : 'bg-green-100 text-green-700') : '',
+    ]"
+  >
+    <span class="material-symbols-outlined" style="font-size: 12px;">{{ iconName }}</span>
+    <span>{{ displayText }}</span>
+  </span>
 </template>
 
 <script setup lang="ts">
@@ -56,11 +55,11 @@ const iconName = computed(() => {
   const actionCount = props.actions.length
   
   if (actionCount === 4) {
-    return 'i-heroicons-shield-check'
+    return 'verified_user'
   } else if (actionCount >= 2) {
-    return 'i-heroicons-pencil-square'
+    return 'edit_square'
   } else {
-    return 'i-heroicons-eye'
+    return 'visibility'
   }
 })
 

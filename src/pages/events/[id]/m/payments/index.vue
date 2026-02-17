@@ -1,309 +1,359 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Main Content (3/4) -->
-      <div class="lg:col-span-3 space-y-6">
-        <!-- Payment Settings -->
-        <UCard>
-          <template #header>
-            <h2 class="text-xl font-bold text-gray-900">Payment Settings</h2>
-            <p class="text-sm text-gray-600 mt-1">
-              Configure payment options and features for this event
-            </p>
-          </template>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Main Content (8/12) -->
+      <div class="lg:col-span-8 space-y-8">
 
-          <div v-if="settingsLoading">
-            <USkeleton class="h-64" />
+        <!-- Payment Settings -->
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">credit_card</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Payment Settings</h2>
+              <p class="text-xs text-navy-400 mt-0.5">Configure payment options and features for this event</p>
+            </div>
           </div>
 
-          <form v-else @submit="onSaveSettings" class="space-y-6">
+          <div v-if="settingsLoading" class="space-y-4">
+            <div v-for="i in 4" :key="i" class="h-14 bg-mist-blue/60 rounded-xl animate-pulse" />
+          </div>
+
+          <form v-else @submit="onSaveSettings" class="space-y-4">
             <!-- Payment Features -->
-            <div class="space-y-4">
-              <h3 class="font-semibold">Payment Features</h3>
-              
-              <UFormGroup
-                name="payment_enabled"
-                help="Allow attendees to make payments for this event"
-              >
-                <UCheckbox
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex items-start gap-3 p-4 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
                   v-model="settingsForm.payment_enabled"
-                  label="Enable Payments"
+                  class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
-              </UFormGroup>
+                <div>
+                  <p class="text-sm font-semibold text-navy-900">Enable Payments</p>
+                  <p class="text-xs text-navy-400">Allow attendees to make payments for this event</p>
+                </div>
+              </label>
 
-              <UFormGroup
-                name="product_selling_enabled"
-                help="Allow selling of products (merchandise, materials, etc.)"
-              >
-                <UCheckbox
+              <label class="flex items-start gap-3 p-4 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
                   v-model="settingsForm.product_selling_enabled"
-                  label="Enable Product Selling"
+                  class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
-              </UFormGroup>
+                <div>
+                  <p class="text-sm font-semibold text-navy-900">Enable Product Selling</p>
+                  <p class="text-xs text-navy-400">Allow selling of products (merchandise, materials, etc.)</p>
+                </div>
+              </label>
 
-              <UFormGroup
-                name="donation_enabled"
-                help="Accept donations for this event"
-              >
-                <UCheckbox
+              <label class="flex items-start gap-3 p-4 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
                   v-model="settingsForm.donation_enabled"
-                  label="Enable Donations"
+                  class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
-              </UFormGroup>
+                <div>
+                  <p class="text-sm font-semibold text-navy-900">Enable Donations</p>
+                  <p class="text-xs text-navy-400">Accept donations for this event</p>
+                </div>
+              </label>
 
-              <UFormGroup
-                name="accepting_sponsorships_enabled"
-                help="Accept sponsorships from organizations or individuals"
-              >
-                <UCheckbox
+              <label class="flex items-start gap-3 p-4 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
                   v-model="settingsForm.accepting_sponsorships_enabled"
-                  label="Accept Sponsorships"
+                  class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
-              </UFormGroup>
+                <div>
+                  <p class="text-sm font-semibold text-navy-900">Accept Sponsorships</p>
+                  <p class="text-xs text-navy-400">Accept sponsorships from organizations or individuals</p>
+                </div>
+              </label>
             </div>
 
-            <div class="flex justify-end gap-2">
-              <UButton
-                label="Reset"
-                variant="ghost"
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                type="button"
                 @click="resetSettings"
-              />
-              <UButton
-                label="Save Changes"
+                class="px-4 py-2 text-sm font-semibold text-navy-600 hover:text-navy-900 hover:bg-mist-blue rounded-xl transition-colors"
+              >
+                Reset
+              </button>
+              <button
                 type="submit"
-                :loading="updateSettingsMutation.isPending.value"
-              />
+                class="px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
+                :disabled="updateSettingsMutation.isPending.value"
+              >
+                <span v-if="updateSettingsMutation.isPending.value" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                Save Changes
+              </button>
             </div>
           </form>
-        </UCard>
+        </section>
 
         <!-- Payment Methods -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Payment Methods</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Configure how attendees can pay for this event
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Payment Method"
-                @click="openPaymentMethodModal()"
-                :disabled="!settingsForm.payment_enabled"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">account_balance</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Payment Methods</h2>
+              <p class="text-xs text-navy-400 mt-0.5">Configure how attendees can pay for this event</p>
             </div>
-          </template>
+            <button
+              @click="openPaymentMethodModal()"
+              :disabled="!settingsForm.payment_enabled"
+              class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              Add Method
+            </button>
+          </div>
 
           <div v-if="paymentMethodsLoading" class="space-y-3">
-            <USkeleton v-for="i in 2" :key="i" class="h-16" />
+            <div v-for="i in 2" :key="i" class="h-16 bg-mist-blue/60 rounded-xl animate-pulse" />
           </div>
 
           <div v-else-if="paymentMethods.length" class="space-y-3">
             <div
               v-for="method in paymentMethods"
               :key="method.id"
-              class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
               <div class="flex items-start justify-between">
                 <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-gray-900">{{ method.title }}</h3>
-                    <UBadge
-                      :label="getMethodTypeLabel(method.method_type)"
-                      color="blue"
-                      variant="subtle"
-                      size="xs"
-                    />
+                  <div class="flex items-center gap-2 mb-1">
+                    <h3 class="text-sm font-semibold text-navy-900">{{ method.title }}</h3>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                      {{ getMethodTypeLabel(method.method_type) }}
+                    </span>
                   </div>
-                  <p v-if="(method as any).description" class="text-sm text-gray-600 mb-2">
+                  <p v-if="(method as any).description" class="text-xs text-navy-500 mb-2">
                     {{ (method as any).description }}
                   </p>
-                  <div v-if="method.method_type === 'BANK_TRANSFER' && (method as any).provided_details" class="text-xs text-gray-500 space-y-1">
+                  <div v-if="method.method_type === 'BANK_TRANSFER' && (method as any).provided_details" class="text-xs text-navy-400 space-y-0.5">
                     <div>Account: {{ (method as any).provided_details.account_name }}</div>
                     <div>Sort Code: {{ (method as any).provided_details.sort_code }}</div>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <UToggle
-                    :model-value="method.is_active"
-                    @update:model-value="toggleMethodStatus(method.id, $event)"
-                  />
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                <div class="flex items-center gap-2 ml-4">
+                  <!-- Toggle -->
+                  <button
+                    type="button"
+                    @click="toggleMethodStatus(method.method_id, !method.is_active)"
+                    class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    :class="method.is_active ? 'bg-primary' : 'bg-navy-200'"
+                  >
+                    <span
+                      class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      :class="method.is_active ? 'translate-x-4' : 'translate-x-0'"
+                    />
+                  </button>
+                  <button
                     @click="openPaymentMethodModal(method)"
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
-                    @click="removePaymentMethod(method.id)"
-                  />
+                    class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-mist-blue rounded-lg transition-colors"
+                    title="Edit"
+                  >
+                    <span class="material-symbols-outlined text-base">edit</span>
+                  </button>
+                  <button
+                    @click="removePaymentMethod(method.method_id)"
+                    class="p-1.5 text-navy-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Remove"
+                  >
+                    <span class="material-symbols-outlined text-base">delete</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
-          <div v-else class="text-center py-8 text-gray-600">
-            <p v-if="!settingsForm.payment_enabled">
-              Enable payments to configure payment methods
-            </p>
-            <p v-else>No payment methods configured</p>
-            <p class="text-xs mt-2">Add methods like Stripe, bank transfer, or cash</p>
+          <div v-else class="text-center py-10 text-navy-500">
+            <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">account_balance</span>
+            <p v-if="!settingsForm.payment_enabled" class="text-sm">Enable payments to configure payment methods</p>
+            <p v-else class="text-sm">No payment methods configured</p>
+            <p class="text-xs mt-1 text-navy-400">Add methods like Stripe, bank transfer, or cash</p>
           </div>
-        </UCard>
+        </section>
 
         <!-- Discount Codes -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Discount Codes</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Create promotional codes for discounted registration
-                </p>
-              </div>
-              <UButton
-                icon="i-heroicons-plus"
-                label="Add Discount"
-                @click="showDiscountModal = true"
-                :disabled="!settingsForm.payment_enabled"
-              />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">percent</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discount Codes</h2>
+              <p class="text-xs text-navy-400 mt-0.5">Create promotional codes for discounted registration</p>
             </div>
-          </template>
-
-          <div class="text-center py-8 text-gray-600">
-            <p v-if="!settingsForm.payment_enabled">
-              Enable payments to create discount codes
-            </p>
-            <p v-else>No discount codes configured</p>
-            <p class="text-xs mt-2">Feature coming soon</p>
+            <button
+              @click="showDiscountModal = true"
+              :disabled="!settingsForm.payment_enabled"
+              class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              Add Discount
+            </button>
           </div>
-        </UCard>
+
+          <div class="text-center py-10 text-navy-500">
+            <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">local_offer</span>
+            <p v-if="!settingsForm.payment_enabled" class="text-sm">Enable payments to create discount codes</p>
+            <p v-else class="text-sm">No discount codes configured</p>
+            <p class="text-xs mt-1 text-navy-400">Feature coming soon</p>
+          </div>
+        </section>
       </div>
 
-      <!-- Sidebar (1/4) -->
-      <div class="space-y-6">
+      <!-- Sidebar (4/12) -->
+      <div class="lg:col-span-4 space-y-6">
         <!-- Payment Status -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Payment Status</h3>
-          </template>
-          <div class="space-y-3">
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="bg-primary px-6 py-4">
+            <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">fact_check</span>
+              Payment Status
+            </h3>
+          </div>
+          <div class="p-6 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-sm">Payments</span>
-              <UBadge
-                :label="settingsForm.payment_enabled ? 'Enabled' : 'Disabled'"
-                :color="settingsForm.payment_enabled ? 'green' : 'gray'"
-              />
+              <span class="text-sm text-navy-600">Payments</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                :class="settingsForm.payment_enabled ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
+              >
+                {{ settingsForm.payment_enabled ? 'Enabled' : 'Disabled' }}
+              </span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm">Products</span>
-              <UBadge
-                :label="settingsForm.product_selling_enabled ? 'Enabled' : 'Disabled'"
-                :color="settingsForm.product_selling_enabled ? 'green' : 'gray'"
-              />
+              <span class="text-sm text-navy-600">Products</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                :class="settingsForm.product_selling_enabled ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
+              >
+                {{ settingsForm.product_selling_enabled ? 'Enabled' : 'Disabled' }}
+              </span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm">Donations</span>
-              <UBadge
-                :label="settingsForm.donation_enabled ? 'Enabled' : 'Disabled'"
-                :color="settingsForm.donation_enabled ? 'green' : 'gray'"
-              />
+              <span class="text-sm text-navy-600">Donations</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                :class="settingsForm.donation_enabled ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
+              >
+                {{ settingsForm.donation_enabled ? 'Enabled' : 'Disabled' }}
+              </span>
             </div>
             <div class="flex items-center justify-between">
-              <span class="text-sm">Sponsorships</span>
-              <UBadge
-                :label="settingsForm.accepting_sponsorships_enabled ? 'Enabled' : 'Disabled'"
-                :color="settingsForm.accepting_sponsorships_enabled ? 'green' : 'gray'"
-              />
+              <span class="text-sm text-navy-600">Sponsorships</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                :class="settingsForm.accepting_sponsorships_enabled ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
+              >
+                {{ settingsForm.accepting_sponsorships_enabled ? 'Enabled' : 'Disabled' }}
+              </span>
             </div>
           </div>
-        </UCard>
+        </section>
 
         <!-- Payment Methods Stats -->
-        <UCard v-if="settingsForm.payment_enabled">
-          <template #header>
-            <h3 class="font-semibold">Payment Methods</h3>
-          </template>
-          <div class="space-y-4">
-            <div>
-              <div class="text-2xl font-bold text-gray-900">{{ paymentMethods.length || 0 }}</div>
-              <div class="text-sm text-gray-600">Total Methods</div>
+        <section v-if="settingsForm.payment_enabled" class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
+            <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Method Stats</h3>
+          </div>
+          <div class="p-6 grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-3xl font-black text-navy-900">{{ paymentMethods.length || 0 }}</div>
+              <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Total</div>
             </div>
-            <div>
-              <div class="text-2xl font-bold text-green-600">{{ activePaymentMethodsCount }}</div>
-              <div class="text-sm text-gray-600">Active Methods</div>
+            <div class="text-center">
+              <div class="text-3xl font-black text-primary">{{ activePaymentMethodsCount }}</div>
+              <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Active</div>
             </div>
           </div>
-        </UCard>
+        </section>
 
         <!-- Help Card -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Payment Help</h3>
-          </template>
-          <div class="text-sm space-y-3 text-gray-600">
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
+            <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Setup Tips</h3>
+          </div>
+          <div class="p-6 text-sm space-y-3 text-navy-600">
             <p>
-              <strong>Payment Methods</strong> determine how attendees can pay for your event. Configure Stripe for online payments, bank transfers for manual verification, or cash for on-site payments.
+              <strong class="text-navy-800">Payment Methods</strong> determine how attendees can pay for your event. Configure Stripe for online payments, bank transfers for manual verification, or cash for on-site payments.
             </p>
             <p>
-              <strong>Discount Codes</strong> can be used to offer promotional pricing to specific attendees.
+              <strong class="text-navy-800">Discount Codes</strong> can be used to offer promotional pricing to specific attendees.
             </p>
             <p>
-              Enable <strong>Product Selling</strong> to sell merchandise or materials alongside registration.
+              Enable <strong class="text-navy-800">Product Selling</strong> to sell merchandise or materials alongside registration.
             </p>
           </div>
-        </UCard>
+        </section>
       </div>
     </div>
 
     <!-- Add/Edit Payment Method Modal -->
-    <UModal v-model="showPaymentMethodModal" size="lg">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">
-            {{ editingPaymentMethod ? 'Edit Payment Method' : 'Add Payment Method' }}
-          </h3>
-        </template>
-
-        <PaymentMethodForm
-          :model-value="editingPaymentMethod"
-          :event-id="Number(id)"
-          :is-loading="paymentMethodMutationLoading"
-          @submit="handlePaymentMethodSubmit"
-          @cancel="closePaymentMethodModal"
-        />
-      </UCard>
-    </UModal>
-
-    <!-- Add Discount Modal -->
-    <UModal v-model="showDiscountModal">
-      <UCard>
-        <template #header>
-          <h3 class="text-lg font-semibold">Add Discount Code</h3>
-        </template>
-
-        <div class="text-center py-8 text-gray-600">
-          <p>Discount code management coming soon</p>
-        </div>
-
-        <template #footer>
-          <div class="flex justify-end">
-            <UButton
-              label="Close"
-              variant="ghost"
-              @click="showDiscountModal = false"
+    <Teleport to="body">
+      <div v-if="showPaymentMethodModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closePaymentMethodModal" />
+        <div class="relative w-full max-w-lg bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="flex items-center gap-2 px-6 py-5 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">credit_card</span>
+            <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest flex-1">
+              {{ editingPaymentMethod ? 'Edit Payment Method' : 'Add Payment Method' }}
+            </h3>
+            <button
+              @click="closePaymentMethodModal"
+              class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-mist-blue rounded-lg transition-colors"
+            >
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+          <div class="p-6">
+            <PaymentMethodForm
+              :model-value="editingPaymentMethod"
+              :event-id="Number(id)"
+              :is-loading="paymentMethodMutationLoading"
+              @submit="handlePaymentMethodSubmit"
+              @cancel="closePaymentMethodModal"
             />
           </div>
-        </template>
-      </UCard>
-    </UModal>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- Add Discount Modal -->
+    <Teleport to="body">
+      <div v-if="showDiscountModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showDiscountModal = false" />
+        <div class="relative w-full max-w-md bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="flex items-center gap-2 px-6 py-5 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">local_offer</span>
+            <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest flex-1">
+              Add Discount Code
+            </h3>
+            <button
+              @click="showDiscountModal = false"
+              class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-mist-blue rounded-lg transition-colors"
+            >
+              <span class="material-symbols-outlined text-base">close</span>
+            </button>
+          </div>
+          <div class="p-6">
+            <div class="text-center py-8 text-navy-500">
+              <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">local_offer</span>
+              <p class="text-sm">Discount code management coming soon</p>
+            </div>
+            <div class="flex justify-end pt-2">
+              <button
+                @click="showDiscountModal = false"
+                class="px-4 py-2 text-sm font-semibold text-navy-600 hover:text-navy-900 hover:bg-mist-blue rounded-xl transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </EventManagementLayout>
 </template>
 
@@ -447,7 +497,7 @@ const handlePaymentMethodSubmit = async (data: any) => {
   }
 }
 
-const toggleMethodStatus = async (methodId: number, isActive: boolean) => {
+const toggleMethodStatus = async (methodId: string, isActive: boolean) => {
   try {
     await updatePaymentMethodMutation.mutateAsync({
       methodId,
@@ -467,7 +517,7 @@ const toggleMethodStatus = async (methodId: number, isActive: boolean) => {
   }
 }
 
-const removePaymentMethod = async (methodId: number) => {
+const removePaymentMethod = async (methodId: string) => {
   if (!confirm('Remove this payment method?')) return
 
   try {

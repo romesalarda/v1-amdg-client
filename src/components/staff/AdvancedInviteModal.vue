@@ -1,227 +1,263 @@
 <template>
-  <UModal v-model="isOpen" :ui="{ width: 'sm:max-w-4xl' }">
-    <UCard :ui="{ body: { base: 'bg-gray-50' } }">
-      <template #header>
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-lg font-semibold">Send Staff Invite</h3>
-            <p class="text-sm text-gray-600 mt-1">
-              Step {{ currentStep }} of {{ totalSteps }}
-            </p>
+  <Teleport to="body">
+    <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="close" />
+
+      <div class="relative w-full max-w-2xl bg-white border border-deep-navy/10 rounded-2xl shadow-drawn flex flex-col max-h-[90vh]">
+
+        <!-- Header -->
+        <div class="flex items-center gap-3 px-6 py-5 border-b border-[#e6e9ed] flex-shrink-0">
+          <span class="material-symbols-outlined text-primary">mail</span>
+          <div class="flex-1">
+            <h3 class="text-sm font-black text-primary uppercase tracking-widest">Send Staff Invite</h3>
+            <p class="text-xs text-[#607a96] mt-0.5">Step {{ currentStep }} of {{ totalSteps }} — {{ stepTitles[currentStep - 1] }}</p>
           </div>
-          <UButton
-            icon="i-heroicons-x-mark"
-            variant="ghost"
+          <button
             @click="close"
-            aria-label="Close"
-          />
-        </div>
-      </template>
-
-      <!-- Progress Indicator -->
-      <div class="mb-6">
-        <div class="flex items-center justify-between mb-2">
-          <div
-            v-for="step in totalSteps"
-            :key="step"
-            class="flex-1 h-2 rounded-full mx-1 transition-colors"
-            :class="step <= currentStep ? 'bg-primary-500' : 'bg-gray-200'"
-          />
-        </div>
-        <div class="text-sm text-gray-600 text-center">
-          {{ stepTitles[currentStep - 1] }}
-        </div>
-      </div>
-
-      <!-- Step 1: User Selection -->
-      <div v-if="currentStep === 1" class="space-y-4">
-        <UFormGroup label="Select User" required>
-          <USelectMenu
-            v-model="selectedUser"
-            :options="usersList"
-            searchable
-            :search-attributes="['email', 'first_name', 'last_name']"
-            placeholder="Search for a user..."
-            @update:query="userSearch = $event"
-            :ui="{ base: 'bg-white' }"
+            class="p-1.5 text-[#607a96] hover:text-[#1a2f4d] hover:bg-mist-blue rounded-lg transition-colors"
           >
-            <template #label>
-              <span v-if="selectedUser" class="truncate">
-                {{ selectedUser.email }}
-                <span v-if="selectedUser.first_name || selectedUser.last_name" class="text-gray-500">
-                  ({{ selectedUser.first_name }} {{ selectedUser.last_name }})
-                </span>
-              </span>
-            </template>
-            <template #option="{ option }">
-              <div class="flex flex-col">
-                <span class="font-medium">{{ option.email }}</span>
-                <span v-if="option.first_name || option.last_name" class="text-sm text-gray-500">
-                  {{ option.first_name }} {{ option.last_name }}
-                </span>
-              </div>
-            </template>
-          </USelectMenu>
-        </UFormGroup>
-
-        <div v-if="selectedUser" class="p-3 bg-blue-50 rounded-lg border border-blue-200">
-          <div class="flex items-center gap-2 text-sm text-blue-800">
-            <UIcon name="i-heroicons-information-circle" class="h-5 w-5" />
-            <span>Selected: <strong>{{ selectedUser.email }}</strong></span>
-          </div>
+            <span class="material-symbols-outlined text-base">close</span>
+          </button>
         </div>
-      </div>
 
-      <!-- Step 2: Role Assignment (Optional) -->
-      <div v-if="currentStep === 2" class="space-y-4">
-        <UFormGroup label="Assign Role (Optional)" description="Roles provide pre-configured permission sets">
-          <USelectMenu
-            :model-value="selectedRole ?? undefined"
-            @update:model-value="(val: any) => selectedRole = val"
-            :options="rolesList"
-            option-attribute="name"
-            value-attribute="id"
-            placeholder="Select a role..."
-            nullable
-            :ui="{ base: 'bg-white' }"
-          >
-            <template #option="{ option }">
-              <div class="flex flex-col">
-                <span class="font-medium">{{ option.name }}</span>
-                <span v-if="option.description" class="text-sm text-gray-500">
-                  {{ option.description }}
-                </span>
-              </div>
-            </template>
-          </USelectMenu>
-        </UFormGroup>
-
-        <div class="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-          <div class="flex items-start gap-2 text-sm text-indigo-900">
-            <UIcon name="i-heroicons-information-circle" class="h-5 w-5 flex-shrink-0 mt-0.5" />
-            <div>
-              <strong>Note:</strong> You can customize permissions in the next step, or skip role assignment to define custom permissions from scratch.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Step 3: Custom Permissions -->
-      <div v-if="currentStep === 3" class="space-y-4">
-        <div class="p-3 bg-white rounded-lg border border-gray-300">
-          <div class="text-sm text-gray-800 font-medium">
-            {{ selectedRole ? 'Customize permissions or use a template:' : 'Select a permission template or customize:' }}
+        <!-- Progress Bar -->
+        <div class="px-6 pt-4 flex-shrink-0">
+          <div class="flex gap-1.5">
+            <div
+              v-for="step in totalSteps"
+              :key="step"
+              class="flex-1 h-1.5 rounded-full transition-colors duration-300"
+              :class="step <= currentStep ? 'bg-primary' : 'bg-[#e6e9ed]'"
+            />
           </div>
         </div>
 
-        <PermissionPresetSelector
-          v-model="selectedTemplate"
-          @template-selected="handleTemplateSelect"
-        />
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-5">
 
-        <div class="bg-white rounded-lg border-2 border-gray-300 p-4 max-h-96 overflow-y-auto shadow-sm">
-          <div v-for="category in categories" :key="category" class="mb-5 last:mb-0">
-            <div class="font-semibold text-sm text-gray-900 mb-3 pb-2 border-b-2 border-gray-200 sticky top-0 bg-white">
-              {{ categoryLabels[category] }}
-            </div>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-              <label
-                v-for="action in actions"
-                :key="`${category}-${action}`"
-                class="flex items-center gap-2 text-sm cursor-pointer hover:bg-primary-50 p-2.5 rounded-md border border-gray-200 bg-gray-50 transition-colors"
-              >
-                <UCheckbox
-                  :model-value="isActionEnabled(category, action)"
-                  @update:model-value="toggleAction(category, action, $event)"
-                />
-                <span class="capitalize font-medium text-gray-700">{{ action }}</span>
+          <!-- Step 1: User Selection -->
+          <div v-if="currentStep === 1" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-black text-primary uppercase tracking-wider">
+                Select User <span class="text-red-500">*</span>
               </label>
+
+              <!-- Selected user display -->
+              <div v-if="selectedUser" class="flex items-center justify-between p-3 bg-primary/5 border border-primary/20 rounded-xl">
+                <div>
+                  <p class="text-sm font-semibold text-[#071427]">{{ selectedUser.email }}</p>
+                  <p v-if="selectedUser.first_name || selectedUser.last_name" class="text-xs text-[#607a96]">
+                    {{ selectedUser.first_name }} {{ selectedUser.last_name }}
+                  </p>
+                </div>
+                <button
+                  @click="selectedUser = null; userSearch = ''"
+                  class="p-1 text-[#607a96] hover:text-red-500 transition-colors"
+                >
+                  <span class="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+
+              <!-- Search input + results -->
+              <div v-else class="space-y-2">
+                <div class="relative">
+                  <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base text-[#607a96]">search</span>
+                  <input
+                    v-model="userSearch"
+                    type="text"
+                    placeholder="Search by email or name..."
+                    class="w-full pl-9 pr-4 py-3 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-[#071427] placeholder:text-[#8fa4bb] transition-all shadow-sm"
+                    autofocus
+                  />
+                </div>
+
+                <!-- Results list rendered inline (avoids overflow-hidden clipping) -->
+                <div
+                  v-if="userSearch.length > 0"
+                  class="rounded-xl border border-[#e6e9ed] bg-white shadow-sm overflow-hidden"
+                >
+                  <template v-if="filteredUsers.length">
+                    <button
+                      v-for="user in filteredUsers"
+                      :key="user.id"
+                      type="button"
+                      @click="selectedUser = user; userSearch = ''"
+                      class="w-full text-left px-4 py-3 hover:bg-mist-blue transition-colors border-b border-[#e6e9ed] last:border-0 flex items-center gap-3 bg-white"
+                    >
+                      <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <span class="text-xs font-black text-primary">
+                          {{ user.email?.substring(0, 2).toUpperCase() }}
+                        </span>
+                      </div>
+                      <div class="min-w-0">
+                        <p class="text-sm font-semibold text-[#071427] truncate">{{ user.email }}</p>
+                        <p v-if="user.first_name || user.last_name" class="text-xs text-[#607a96]">
+                          {{ user.first_name }} {{ user.last_name }}
+                        </p>
+                      </div>
+                    </button>
+                  </template>
+                  <div v-else class="px-4 py-4 text-sm text-[#607a96] text-center">
+                    <span class="material-symbols-outlined text-2xl text-[#bcc8d8] block mb-1">person_search</span>
+                    No users found for "{{ userSearch }}"
+                  </div>
+                </div>
+
+                <p v-if="!userSearch" class="text-xs text-[#607a96] px-1">Start typing to search users in your organisation</p>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Step 4: Invite Details -->
-      <div v-if="currentStep === 4" class="space-y-4">
-        <UFormGroup label="Expiry Date (Optional)" description="Leave empty for no expiration">
-          <UInput
-            v-model="expiryDate"
-            type="date"
-            :min="minDate"
-            :ui="{ base: 'bg-white' }"
-          />
-        </UFormGroup>
+          <!-- Step 2: Role Assignment -->
+          <div v-if="currentStep === 2" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-black text-primary uppercase tracking-wider">Assign Role (Optional)</label>
+              <p class="text-xs text-[#607a96]">Roles provide pre-configured permission sets</p>
+              <select
+                :value="selectedRole ?? ''"
+                @change="selectedRole = ($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null"
+                class="w-full px-4 py-3 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-[#071427] transition-all appearance-none"
+              >
+                <option value="">No role (custom permissions)</option>
+                <option v-for="role in rolesList" :key="role.id" :value="role.id">
+                  {{ role.name }}<template v-if="role.description"> — {{ role.description }}</template>
+                </option>
+              </select>
+            </div>
 
-        <div class="p-4 bg-white rounded-lg border-2 border-primary-200 shadow-sm">
-          <div class="font-semibold text-base text-gray-900 mb-4 pb-2 border-b border-gray-200">Summary</div>
-          
-          <div class="space-y-3 text-sm">
-            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span class="text-gray-700 font-medium">User:</span>
-              <span class="font-semibold text-gray-900">{{ selectedUser?.email }}</span>
-            </div>
-            
-            <div v-if="selectedRole" class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span class="text-gray-700 font-medium">Role:</span>
-              <span class="font-semibold text-gray-900">{{ getRoleName(selectedRole) }}</span>
-            </div>
-            
-            <div class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span class="text-gray-700 font-medium">Permissions:</span>
-              <span class="font-semibold text-primary-600">{{ permissionCount }} permission(s)</span>
-            </div>
-            
-            <div v-if="expiryDate" class="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span class="text-gray-700 font-medium">Expires:</span>
-              <span class="font-semibold text-gray-900">{{ formatDate(expiryDate) }}</span>
+            <div class="p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm text-[#1a2f4d] flex gap-2">
+              <span class="material-symbols-outlined text-base text-primary flex-shrink-0 mt-0.5">info</span>
+              <span>You can customize permissions in the next step, or skip role assignment to define custom permissions from scratch.</span>
             </div>
           </div>
-        </div>
 
-        <div v-if="permissionCount === 0" class="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
-          <div class="flex items-center gap-2 text-sm text-yellow-800">
-            <UIcon name="i-heroicons-exclamation-triangle" class="h-5 w-5" />
-            <span>Warning: No permissions selected. User will have limited access.</span>
+          <!-- Step 3: Permissions -->
+          <div v-if="currentStep === 3" class="space-y-4">
+            <PermissionPresetSelector
+              v-model="selectedTemplate"
+              @template-selected="handleTemplateSelect"
+            />
+
+            <div class="rounded-xl border border-[#e6e9ed] overflow-hidden max-h-96 overflow-y-auto">
+              <div v-for="category in categories" :key="category" class="border-b border-[#e6e9ed] last:border-0">
+                <div class="px-4 py-2.5 bg-mist-blue sticky top-0">
+                  <p class="text-xs font-black text-primary uppercase tracking-widest">{{ categoryLabels[category] }}</p>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-white">
+                  <label
+                    v-for="action in actions"
+                    :key="`${category}-${action}`"
+                    class="flex items-center gap-2 text-sm cursor-pointer hover:bg-mist-blue p-2.5 rounded-lg border border-[#e6e9ed] bg-white transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      :checked="isActionEnabled(category, action)"
+                      @change="toggleAction(category, action, ($event.target as HTMLInputElement).checked)"
+                      class="h-4 w-4 rounded border-[#bcc8d8] text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0"
+                    />
+                    <span class="capitalize font-medium text-[#1a2f4d]">{{ action }}</span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
 
-      <template #footer>
-        <div class="flex justify-between">
-          <UButton
+          <!-- Step 4: Review & Invite Details -->
+          <div v-if="currentStep === 4" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-black text-primary uppercase tracking-wider">Expiry Date (Optional)</label>
+              <p class="text-xs text-[#607a96]">Leave empty for no expiration</p>
+              <input
+                v-model="expiryDate"
+                type="date"
+                :min="minDate"
+                class="w-full px-4 py-3 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-[#071427] transition-all"
+              />
+            </div>
+
+            <!-- Summary -->
+            <div class="rounded-xl border-2 border-primary/20 overflow-hidden">
+              <div class="px-4 py-3 bg-primary/5 border-b border-primary/20">
+                <p class="text-xs font-black text-primary uppercase tracking-widest">Summary</p>
+              </div>
+              <div class="p-4 space-y-2">
+                <div class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
+                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">User</span>
+                  <span class="text-sm font-bold text-[#071427]">{{ selectedUser?.email }}</span>
+                </div>
+                <div v-if="selectedRole" class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
+                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Role</span>
+                  <span class="text-sm font-bold text-[#071427]">{{ getRoleName(selectedRole) }}</span>
+                </div>
+                <div class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
+                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Permissions</span>
+                  <span class="text-sm font-bold text-primary">{{ permissionCount }} permission(s)</span>
+                </div>
+                <div v-if="expiryDate" class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
+                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Expires</span>
+                  <span class="text-sm font-bold text-[#071427]">{{ formatDate(expiryDate) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="permissionCount === 0" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-2 text-sm text-amber-800">
+              <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5">warning</span>
+              <span>No permissions selected. This user will have very limited access.</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-between px-6 py-4 border-t border-[#e6e9ed] bg-white flex-shrink-0">
+          <button
             v-if="currentStep > 1"
-            label="Back"
-            variant="ghost"
+            type="button"
             @click="previousStep"
             :disabled="loading"
-          />
+            class="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold text-[#294160] hover:text-[#071427] hover:bg-mist-blue rounded-xl transition-colors disabled:opacity-40"
+          >
+            <span class="material-symbols-outlined text-base">arrow_back</span>
+            Back
+          </button>
           <div v-else />
-          
-          <div class="flex gap-2">
-            <UButton
-              label="Cancel"
-              variant="ghost"
+
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
               @click="close"
               :disabled="loading"
-            />
-            <UButton
+              class="px-4 py-2 text-sm font-semibold text-[#294160] hover:text-[#071427] hover:bg-mist-blue rounded-xl transition-colors disabled:opacity-40"
+            >
+              Cancel
+            </button>
+            <button
               v-if="currentStep < totalSteps"
-              label="Next"
+              type="button"
               @click="nextStep"
               :disabled="!canProceed"
-            />
-            <UButton
+              class="flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40"
+            >
+              Next
+              <span class="material-symbols-outlined text-base">arrow_forward</span>
+            </button>
+            <button
               v-else
-              label="Send Invite"
+              type="button"
               @click="sendInvite"
-              :loading="loading"
-              :disabled="!canSendInvite"
-            />
+              :disabled="!canSendInvite || loading"
+              class="flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40"
+            >
+              <span v-if="loading" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+              <span class="material-symbols-outlined text-base" v-else>send</span>
+              Send Invite
+            </button>
           </div>
         </div>
-      </template>
-    </UCard>
-  </UModal>
+
+      </div>
+    </div>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -269,6 +305,15 @@ const stepTitles = [
 // Step 1 data
 const userSearch = ref('')
 const selectedUser = ref<any>(null)
+
+const filteredUsers = computed(() => {
+  if (!userSearch.value) return []
+  const q = userSearch.value.toLowerCase()
+  return props.usersList.filter(u =>
+    u.email?.toLowerCase().includes(q) ||
+    `${u.first_name ?? ''} ${u.last_name ?? ''}`.toLowerCase().includes(q)
+  )
+})
 
 // Step 2 data
 const selectedRole = ref<number | null>(null)

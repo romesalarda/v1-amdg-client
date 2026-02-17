@@ -16,6 +16,8 @@
               size="sm"
               class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
               @click="openTicketTypeModal()"
+              v-if="canCreateRegistration"
+
             >
               Add Ticket Type
             </UButton>
@@ -56,18 +58,22 @@
                     :model-value="ticketType.is_active"
                     color="green"
                     @update:model-value="toggleTicketTypeStatus(ticketType.id, $event)"
+                    v-if="canUpdateRegistration"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
                     size="xs"
                     class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openTicketTypeModal(ticketType)"
+                    v-if="canUpdateRegistration"
+
                   />
                   <UButton
                     icon="i-heroicons-trash"
                     size="xs"
                     class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removeTicketType(ticketType.id)"
+                    v-if="canDeleteRegistration"
                   />
                 </div>
               </div>
@@ -93,6 +99,7 @@
               class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
               @click="openDiscountModal()"
               :disabled="!packages.length"
+              v-if="canCreateRegistration"
             >
               Add Discount
             </UButton>
@@ -195,6 +202,7 @@
               class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
               @click="openPackageModal()"
               :disabled="!ticketTypes.length"
+              v-if="canCreateRegistration"
             >
               Add Package
             </UButton>
@@ -231,18 +239,21 @@
                     :model-value="pkg.is_active"
                     color="green"
                     @update:model-value="togglePackageStatus(pkg.id, $event)"
+                    v-if="canUpdateRegistration"
                   />
                   <UButton
                     icon="i-heroicons-pencil"
                     size="xs"
                     class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
                     @click="openPackageModal(pkg)"
+                    v-if="canUpdateRegistration"
                   />
                   <UButton
                     icon="i-heroicons-trash"
                     size="xs"
                     class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
                     @click="removePackage(pkg.id)"
+                    v-if="canDeleteRegistration"
                   />
                 </div>
               </div>
@@ -268,6 +279,7 @@
               size="sm"
               class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
               @click="openSignInModal()"
+              v-if="canCreateRegistration"
             >
               Add Method
             </UButton>
@@ -582,6 +594,8 @@ import TicketTypeForm from '~/components/events/forms/TicketTypeForm.vue'
 import BookingPackageForm from '~/components/events/forms/BookingPackageForm.vue'
 import DiscountForm from '~/components/events/forms/DiscountForm.vue'
 
+import { useCurrentUserEventPermissions } from '~/composables/permissions'
+
 definePageMeta({
   layout: false,
 })
@@ -620,9 +634,15 @@ const createTicketTypeMutation = useCreateBookingTicketType()
 const updateTicketTypeMutation = usePartialUpdateBookingTicketType()
 const deleteTicketTypeMutation = useDeleteBookingTicketType()
 
-const ticketTypeMutationLoading = computed(() => 
-  createTicketTypeMutation.isPending.value || updateTicketTypeMutation.isPending.value
-)
+const { can } = useCurrentUserEventPermissions(id, {
+  refetchInterval: 30000,
+  refetchOnWindowFocus: true,
+  staleTime: 15000
+})
+
+const canUpdateRegistration = computed(() => can('REGISTRATION', 'update').value.allowed)
+const canDeleteRegistration = computed(() => can('REGISTRATION', 'delete').value.allowed)
+const canCreateRegistration = computed(() => can('REGISTRATION', 'create').value.allowed)
 
 const openTicketTypeModal = (ticketType?: any) => {
   editingTicketType.value = ticketType || null

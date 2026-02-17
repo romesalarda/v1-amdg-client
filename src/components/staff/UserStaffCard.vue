@@ -1,19 +1,19 @@
 <template>
-  <UCard class="hover:shadow-md transition-shadow">
+  <div class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors">
     <div class="flex items-start justify-between gap-4">
       <!-- Avatar & User Info -->
       <div class="flex items-center gap-3 flex-1 min-w-0">
-        <div class="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center flex-shrink-0">
-          <span class="text-lg font-semibold text-primary-600">
+        <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+          <span class="text-sm font-black text-primary">
             {{ userInitials }}
           </span>
         </div>
         
         <div class="flex-1 min-w-0">
-          <div class="font-semibold text-gray-900 truncate">
+          <div class="text-sm font-semibold text-navy-900 truncate">
             {{ staff.user_email }}
           </div>
-          <div class="text-sm text-gray-600">
+          <div class="text-xs text-navy-400">
             Staff ID: {{ staff.staff_id }}
           </div>
           <AuditTrailDisplay
@@ -24,24 +24,25 @@
       </div>
 
       <!-- Actions -->
-      <div class="flex items-center gap-2 flex-shrink-0">
-        <UButton
-          :icon="isExpanded ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
-          variant="ghost"
-          size="sm"
-          @click="toggleExpand"
+      <div class="flex items-center gap-1.5 flex-shrink-0">
+        <button
           v-if="canUpdateStaff"
+          @click="toggleExpand"
           :aria-label="isExpanded ? 'Collapse' : 'Expand'"
-        />
-        <UButton
-          icon="i-heroicons-trash"
-          color="red"
-          variant="ghost"
-          size="sm"
-          @click="$emit('remove')"
+          class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-white rounded-lg transition-colors"
+        >
+          <span class="material-symbols-outlined text-base">
+            {{ isExpanded ? 'expand_less' : 'expand_more' }}
+          </span>
+        </button>
+        <button
           v-if="canDeleteStaff"
+          @click="$emit('remove')"
           aria-label="Remove staff member"
-        />
+          class="p-1.5 text-navy-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        >
+          <span class="material-symbols-outlined text-base">delete</span>
+        </button>
       </div>
     </div>
 
@@ -55,22 +56,20 @@
         :is-custom="false"
         :permission-name="perm.permission_name"
       />
-      <UBadge
+      <span
         v-if="permissions.length > maxVisiblePermissions"
-        color="gray"
-        variant="soft"
-        size="sm"
+        class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-navy-100 text-navy-500"
       >
         +{{ permissions.length - maxVisiblePermissions }} more
-      </UBadge>
+      </span>
     </div>
 
-    <div v-else-if="!isExpanded && permissions.length === 0" class="mt-3 text-sm text-gray-500">
+    <div v-else-if="!isExpanded && permissions.length === 0" class="mt-3 text-xs text-navy-400 italic">
       No permissions assigned
     </div>
 
     <!-- Expanded View: Permission Editor -->
-    <div v-if="isExpanded" class="mt-4 border-t border-gray-200 pt-4">
+    <div v-if="isExpanded" class="mt-4 border-t border-deep-navy/10 pt-4">
       <InlinePermissionEditor
         :staff-id="staff.staff_id"
         :event-id="staff.event"
@@ -80,7 +79,7 @@
         @cancel="isExpanded = false"
       />
     </div>
-  </UCard>
+  </div>
 </template>
 
 <script setup lang="ts">

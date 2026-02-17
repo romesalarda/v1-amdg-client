@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+  <div class="space-y-4 p-4 bg-mist-blue/40 rounded-xl border border-deep-navy/10">
     <!-- Template Selector -->
     <PermissionPresetSelector
       v-model="selectedTemplate"
@@ -7,48 +7,58 @@
     />
 
     <!-- Permission Categories Grid -->
-    <div class="space-y-4">
-      <div v-for="category in categories" :key="category" class="bg-white rounded-lg p-3 border border-gray-200">
-        <div class="font-medium text-sm text-gray-700 mb-2">
-          {{ categoryLabels[category] }}
+    <div class="space-y-3">
+      <div v-for="category in categories" :key="category" class="rounded-xl overflow-hidden border border-deep-navy/10">
+        <div class="px-3 py-2 bg-white">
+          <p class="text-xs font-black text-primary uppercase tracking-wider">{{ categoryLabels[category] }}</p>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-mist-blue/30">
           <label
             v-for="action in actions"
             :key="`${category}-${action}`"
-            class="flex items-center gap-2 text-sm cursor-pointer hover:bg-gray-50 p-2 rounded"
+            class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-2 rounded-lg border border-deep-navy/10 bg-white/60 transition-colors"
+            :class="{ 'opacity-50 cursor-not-allowed': disabled }"
           >
-            <UCheckbox
-              :model-value="isActionEnabled(category, action)"
-              @update:model-value="toggleAction(category, action, $event)"
+            <input
+              type="checkbox"
+              :checked="isActionEnabled(category, action)"
+              @change="toggleAction(category, action, ($event.target as HTMLInputElement).checked)"
               :disabled="disabled"
+              class="h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0"
             />
-            <span class="capitalize">{{ action }}</span>
+            <span class="capitalize font-medium text-navy-700">{{ action }}</span>
           </label>
         </div>
       </div>
     </div>
 
-    <!-- Action Buttons -->
-    <div class="flex justify-end gap-2 pt-2">
-      <UButton
-        label="Cancel"
-        variant="ghost"
-        @click="$emit('cancel')"
-        :disabled="saving"
-      />
-      <UButton
-        label="Save Changes"
-        @click="handleSave"
-        :loading="saving"
-        :disabled="!hasChanges"
-      />
+    <!-- Validation Messages -->
+    <div v-if="validationMessage" class="flex items-center gap-1.5 text-xs" :class="validationClass">
+      <span class="material-symbols-outlined" style="font-size: 14px;">
+        {{ validationIcon === 'i-heroicons-exclamation-circle' ? 'error' : 'warning' }}
+      </span>
+      {{ validationMessage }}
     </div>
 
-    <!-- Validation Messages -->
-    <div v-if="validationMessage" class="text-sm" :class="validationClass">
-      <UIcon :name="validationIcon" class="inline h-4 w-4 mr-1" />
-      {{ validationMessage }}
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-2 pt-1">
+      <button
+        type="button"
+        @click="$emit('cancel')"
+        :disabled="saving"
+        class="px-4 py-2 text-sm font-semibold text-navy-600 hover:text-navy-900 hover:bg-white rounded-xl transition-colors disabled:opacity-40"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        @click="handleSave"
+        :disabled="!hasChanges || saving"
+        class="flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40"
+      >
+        <span v-if="saving" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+        Save Changes
+      </button>
     </div>
   </div>
 </template>

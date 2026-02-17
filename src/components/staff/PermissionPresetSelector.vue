@@ -1,26 +1,21 @@
 <template>
   <div class="space-y-3">
-    <UFormGroup label="Permission Template" name="template">
-      <USelectMenu
-        :model-value="selectedTemplate ?? undefined"
-        @update:model-value="handleTemplateChange"
-        :options="templateOptions"
-        placeholder="Select a permission template..."
-        value-attribute="key"
-        option-attribute="label"
-        nullable
+    <div class="space-y-1.5">
+      <label class="block text-xs font-black text-primary uppercase tracking-wider">Permission Template</label>
+      <select
+        :value="selectedTemplate ?? ''"
+        @change="handleTemplateChange(($event.target as HTMLSelectElement).value || null)"
+        class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all appearance-none"
       >
-        <template #option="{ option }">
-          <div class="flex flex-col">
-            <span class="font-medium">{{ option.label }}</span>
-            <span class="text-sm text-gray-500">{{ option.description }}</span>
-          </div>
-        </template>
-      </USelectMenu>
-    </UFormGroup>
+        <option value="">Select a permission template...</option>
+        <option v-for="opt in templateOptions" :key="opt.key" :value="opt.key">
+          {{ opt.label }} — {{ opt.description }}
+        </option>
+      </select>
+    </div>
 
-    <div v-if="selectedTemplate" class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-      <div class="text-sm font-medium text-gray-700 mb-2">
+    <div v-if="selectedTemplate" class="p-3 bg-mist-blue/60 rounded-xl border border-deep-navy/10">
+      <div class="text-xs font-black text-primary uppercase tracking-wider mb-2">
         Template includes:
       </div>
       <div class="flex flex-wrap gap-2">

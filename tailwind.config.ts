@@ -60,6 +60,19 @@ export default <Partial<Config>>{
         },
         'deep-navy': '#0a192f', // Alias for background-dark
         'mist-blue': '#f0f4f8', // Light blue/gray for search bar
+        // Navy scale — mirrors the primary brand palette, used across management UI components
+        // navy: {
+        //   50:  '#f0f4f8',
+        //   100: '#e6e9ed',
+        //   200: '#bcc8d8',
+        //   300: '#8fa4bb',
+        //   400: '#607a96',
+        //   500: '#3a5373',
+        //   600: '#294160',
+        //   700: '#1a2f4d',
+        //   800: '#0e1f38',
+        //   900: '#071427',
+        // },
         blue: {
           300: '#93c5fd',
           400: '#60a5fa',

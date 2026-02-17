@@ -1,16 +1,14 @@
 <template>
-  <div class="text-xs text-gray-500 space-y-1">
+  <div class="text-xs text-navy-400 space-y-0.5">
     <div v-if="assignedBy" class="flex items-center gap-1">
-      <UIcon name="i-heroicons-user" class="h-3 w-3" />
+      <span class="material-symbols-outlined" style="font-size: 12px;">person</span>
       <span>
-        Assigned by: <span class="font-medium">{{ assignedBy }}</span>
+        Assigned by: <span class="font-semibold text-navy-600">{{ assignedBy }}</span>
       </span>
     </div>
     <div v-if="assignedAt" class="flex items-center gap-1">
-      <UIcon name="i-heroicons-clock" class="h-3 w-3" />
-      <span>
-        {{ formattedDate }}
-      </span>
+      <span class="material-symbols-outlined" style="font-size: 12px;">schedule</span>
+      <span>{{ formattedDate }}</span>
     </div>
   </div>
 </template>

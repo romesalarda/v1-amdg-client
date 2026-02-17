@@ -85,7 +85,7 @@ export function usePartialUpdatePaymentMethod() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ methodId, body }: { methodId: number; body?: PaymentsMethodsPartialUpdateData['body'] }) =>
+    mutationFn: ({ methodId, body }: { methodId: string; body?: PaymentsMethodsPartialUpdateData['body'] }) =>
       paymentsMethodsPartialUpdate({ path: { method_id: String(methodId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -103,7 +103,7 @@ export function useDeletePaymentMethod() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (methodId: number) => paymentsMethodsDestroy({ path: { method_id: String(methodId) } }),
+    mutationFn: (methodId: string) => paymentsMethodsDestroy({ path: { method_id: String(methodId) } }),
     onSuccess: (_, methodId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

@@ -1,31 +1,29 @@
 <template>
   <EventsManagementLayout :event-id="id" :event="event?.data">
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Main Content (3/4) -->
-      <div class="lg:col-span-3 space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <!-- Main Content (8/12) -->
+      <div class="lg:col-span-8 space-y-8">
+
         <!-- Staff List -->
-        <UCard>
-          <template #header>
-            <div class="flex justify-between items-center">
-              <div>
-                <h2 class="text-xl font-bold text-gray-900">Event Staff</h2>
-                <p class="text-sm text-gray-600 mt-1">
-                  Manage staff members and their permissions for this event
-                </p>
-              </div>
-              <div class="flex gap-2">
-                <UButton
-                  v-if="canUpdateStaff"
-                  icon="i-heroicons-envelope"
-                  label="Send Invite"
-                  @click="showInviteModal = true"
-                />
-              </div>
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">group</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Event Staff</h2>
+              <p class="text-xs text-navy-400 mt-0.5">Manage staff members and their permissions for this event</p>
             </div>
-          </template>
+            <button
+              v-if="canUpdateStaff"
+              @click="showInviteModal = true"
+              class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              <span class="material-symbols-outlined text-sm">mail</span>
+              Send Invite
+            </button>
+          </div>
 
           <div v-if="staffLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-20" />
+            <div v-for="i in 3" :key="i" class="h-20 bg-mist-blue/60 rounded-xl animate-pulse" />
           </div>
 
           <div v-else-if="staffList.length" class="space-y-3">
@@ -38,62 +36,63 @@
               :canDeleteStaff="canDeleteStaff"
               @remove="removeStaff(staff.staff_id)"
               @update-permissions="handleUpdatePermissions(staff, $event)"
-              
             />
           </div>
 
-          <div v-else class="text-center py-12">
-            <div class="text-gray-600 mb-4">
-              <UIcon name="i-heroicons-users" class="text-5xl" />
-            </div>
-            <p class="text-gray-600 mb-4">No staff members yet</p>
-            <UButton
-              label="Send First Invite"
+          <div v-else class="text-center py-12 text-navy-500">
+            <span class="material-symbols-outlined text-5xl text-navy-200 mb-4 block">groups</span>
+            <p class="text-sm mb-4">No staff members yet</p>
+            <button
               @click="showInviteModal = true"
-            />
+              class="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              <span class="material-symbols-outlined text-sm">mail</span>
+              Send First Invite
+            </button>
           </div>
-        </UCard>
+        </section>
       </div>
 
-      <!-- Sidebar (1/4) -->
-      <div class="space-y-6">
+      <!-- Sidebar (4/12) -->
+      <div class="lg:col-span-4 space-y-6">
         <!-- Stats Card -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Staff Overview</h3>
-          </template>
-          <div class="space-y-4">
-            <div>
-              <div class="text-2xl font-bold">{{ staffList.length }}</div>
-              <div class="text-sm text-gray-600">Total Staff</div>
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="bg-primary px-6 py-4">
+            <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-base">bar_chart</span>
+              Staff Overview
+            </h3>
+          </div>
+          <div class="p-6 grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-3xl font-black text-navy-900">{{ staffList.length }}</div>
+              <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Total Staff</div>
             </div>
-            <div>
-              <div class="text-2xl font-bold">{{ rolesList.length }}</div>
-              <div class="text-sm text-gray-600">Defined Roles</div>
+            <div class="text-center">
+              <div class="text-3xl font-black text-primary">{{ rolesList.length }}</div>
+              <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Roles</div>
             </div>
           </div>
-        </UCard>
+        </section>
 
-        <!-- Quick Actions -->
-        <UCard>
-          <template #header>
-            <h3 class="font-semibold">Quick Actions</h3>
-          </template>
-          <div class="space-y-2">
-            <UButton
-              block
-              variant="soft"
-              label="Email All Staff"
-              icon="i-heroicons-envelope"
-            />
-            <UButton
-              block
-              variant="soft"
-              label="Export Staff List"
-              icon="i-heroicons-arrow-down-tray"
-            />
+        <!-- Help Card -->
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
+            <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Staff Tips</h3>
           </div>
-        </UCard>
+          <div class="p-6 text-sm space-y-3 text-navy-600">
+            <p>
+              <strong class="text-navy-800">Send Invites</strong> to add staff members. They'll receive an email with a link to accept.
+            </p>
+            <p>
+              <strong class="text-navy-800">Permissions</strong> control what each staff member can view and manage within this event.
+            </p>
+            <p>
+              Use the <strong class="text-navy-800">expand button</strong> on each staff card to edit their permissions inline.
+            </p>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -106,8 +105,6 @@
       :roles-list="rolesList"
       @invite-sent="handleInviteSent"
     />
-
-  
   </EventsManagementLayout>
 </template>
 
