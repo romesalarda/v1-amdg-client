@@ -21833,6 +21833,41 @@ export type EventListCheckPermissionsRetrieveResponses = {
 
 export type EventListCheckPermissionsRetrieveResponse = EventListCheckPermissionsRetrieveResponses[keyof EventListCheckPermissionsRetrieveResponses];
 
+export type EventListDemoteLandingImageCreateData = {
+    body: EventDetailRequest;
+    path: {
+        event_id: string;
+    };
+    query: {
+        /**
+         * Resource ID of the main image to demote
+         */
+        resource_id: number;
+    };
+    url: '/api/event/list/{event_id}/demote-landing-image/';
+};
+
+export type EventListDemoteLandingImageCreateErrors = {
+    /**
+     * Bad request - resource must be the main landing image
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Resource not found
+     */
+    404: unknown;
+};
+
+export type EventListDemoteLandingImageCreateResponses = {
+    200: Resource;
+};
+
+export type EventListDemoteLandingImageCreateResponse = EventListDemoteLandingImageCreateResponses[keyof EventListDemoteLandingImageCreateResponses];
+
 export type EventListLandingImagesListData = {
     body?: never;
     path: {
@@ -21914,6 +21949,41 @@ export type EventListPreviewTemplateApplicationRetrieveResponses = {
 };
 
 export type EventListPreviewTemplateApplicationRetrieveResponse = EventListPreviewTemplateApplicationRetrieveResponses[keyof EventListPreviewTemplateApplicationRetrieveResponses];
+
+export type EventListPromoteLandingImageCreateData = {
+    body: EventDetailRequest;
+    path: {
+        event_id: string;
+    };
+    query: {
+        /**
+         * Resource ID of the secondary image to promote
+         */
+        resource_id: number;
+    };
+    url: '/api/event/list/{event_id}/promote-landing-image/';
+};
+
+export type EventListPromoteLandingImageCreateErrors = {
+    /**
+     * Bad request - resource must be a landing image
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Resource not found
+     */
+    404: unknown;
+};
+
+export type EventListPromoteLandingImageCreateResponses = {
+    200: Resource;
+};
+
+export type EventListPromoteLandingImageCreateResponse = EventListPromoteLandingImageCreateResponses[keyof EventListPromoteLandingImageCreateResponses];
 
 export type EventListRemoveAvailabilityWindowDestroyData = {
     body?: never;
@@ -22698,6 +22768,58 @@ export type EventListUpdateAvailabilityWindowUpdateResponses = {
 };
 
 export type EventListUpdateAvailabilityWindowUpdateResponse = EventListUpdateAvailabilityWindowUpdateResponses[keyof EventListUpdateAvailabilityWindowUpdateResponses];
+
+export type EventListUpdateResourcePartialUpdateData = {
+    body?: {
+        /**
+         * Resource name
+         */
+        name?: string;
+        /**
+         * Resource description
+         */
+        description?: string;
+        /**
+         * Resource tag (e.g., LANDING_PHOTO_MAIN, LANDING_PHOTO_SECONDARY)
+         */
+        tag?: string;
+        /**
+         * Whether resource is public
+         */
+        public?: boolean;
+    };
+    path: {
+        event_id: string;
+    };
+    query: {
+        /**
+         * Resource ID to update
+         */
+        resource_id: number;
+    };
+    url: '/api/event/list/{event_id}/update-resource/';
+};
+
+export type EventListUpdateResourcePartialUpdateErrors = {
+    /**
+     * Bad request or protected resource
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Resource not found
+     */
+    404: unknown;
+};
+
+export type EventListUpdateResourcePartialUpdateResponses = {
+    200: Resource;
+};
+
+export type EventListUpdateResourcePartialUpdateResponse = EventListUpdateResourcePartialUpdateResponses[keyof EventListUpdateResourcePartialUpdateResponses];
 
 export type EventListWsTokenCreateData = {
     body: EventDetailRequest;
