@@ -2,36 +2,42 @@
   <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="space-y-6">
       <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-gray-900">Availability Windows</h1>
-          <p class="text-gray-600 mt-1">
-            Manage time-based availability for refunds, registration, merchandise, and more.
-          </p>
+      <section class="bg-gradient-to-br from-white via-mist-blue/20 to-white dark:from-navy-900 dark:via-navy-800 dark:to-navy-900 rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
+        <div class="flex items-start justify-between gap-4 px-8 py-6">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="material-symbols-outlined text-primary text-2xl">calendar_clock</span>
+              <h1 class="text-[13px] font-black text-primary dark:text-white uppercase tracking-widest">Availability Windows</h1>
+            </div>
+            <p class="text-sm text-navy-600 dark:text-navy-300">
+              Manage time-based availability for refunds, registration, merchandise, and more.
+            </p>
+          </div>
+          <button
+            @click="openCreateModal"
+            :disabled="isLoadingEvent || isLoadingWindows"
+            class="px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+          >
+            <span class="material-symbols-outlined text-lg">add</span>
+            Add Window
+          </button>
         </div>
-        <UButton
-          icon="i-heroicons-plus"
-          @click="openCreateModal"
-          :disabled="isLoadingEvent || isLoadingWindows"
-        >
-          Add Window
-        </UButton>
-      </div>
+      </section>
 
     <!-- Loading State -->
     <div v-if="isLoadingWindows" class="flex justify-center items-center py-12">
       <div class="flex flex-col items-center gap-3">
-        <UIcon name="i-heroicons-arrow-path" class="text-3xl text-primary animate-spin" />
-        <p class="text-gray-600">Loading availability windows...</p>
+        <span class="material-symbols-outlined text-4xl text-primary animate-spin">progress_activity</span>
+        <p class="text-sm text-navy-600 font-medium">Loading availability windows...</p>
       </div>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="windowsError" class="bg-red-50 border border-red-200 rounded-lg p-4">
+    <div v-else-if="windowsError" class="bg-red-50 border border-red-200 rounded-xl p-5">
       <div class="flex items-start gap-3">
-        <UIcon name="i-heroicons-exclamation-circle" class="text-red-600 text-xl mt-0.5" />
+        <span class="material-symbols-outlined text-red-600 text-2xl">error</span>
         <div>
-          <h3 class="font-semibold text-red-900">Failed to load availability windows</h3>
+          <h3 class="font-bold text-red-900 text-sm">Failed to load availability windows</h3>
           <p class="text-red-700 text-sm mt-1">{{ windowsError }}</p>
         </div>
       </div>
@@ -42,97 +48,111 @@
       <!-- Empty State -->
       <div v-if="!windows || windows.length === 0" class="space-y-6">
         <!-- Empty State Card -->
-        <UCard>
-          <div class="text-center py-12">
-            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-100 rounded-full mb-6">
-              <UIcon name="i-heroicons-calendar" class="text-4xl text-indigo-600" />
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="text-center py-12 px-8">
+            <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full mb-6">
+              <span class="material-symbols-outlined text-5xl text-primary">calendar_month</span>
             </div>
-            <h3 class="text-xl font-bold text-gray-900 mb-2">No availability windows yet</h3>
-            <p class="text-gray-600 mb-8 max-w-md mx-auto">
+            <h3 class="text-xl font-bold text-navy-900 dark:text-white mb-2">No availability windows yet</h3>
+            <p class="text-navy-600 dark:text-navy-300 mb-8 max-w-md mx-auto text-sm">
               Get started by creating your first availability window or applying a template to control when features are accessible.
             </p>
             <div class="flex items-center justify-center gap-3">
-              <UButton 
-                icon="i-heroicons-plus" 
+              <button 
                 @click="openCreateModal"
-                size="lg"
+                class="px-6 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
+                <span class="material-symbols-outlined text-lg">add</span>
                 Create Window
-              </UButton>
-              <UButton 
-                icon="i-heroicons-rectangle-stack" 
-                variant="outline"
+              </button>
+              <button 
                 @click="showTemplateSelector = !showTemplateSelector"
-                size="lg"
+                class="px-6 py-3 border-2 border-primary text-primary text-sm font-bold rounded-xl hover:bg-primary/5 transition-colors flex items-center gap-2"
               >
+                <span class="material-symbols-outlined text-lg">dashboard</span>
                 {{ showTemplateSelector ? 'Hide' : 'Use' }} Template
-              </UButton>
+              </button>
             </div>
           </div>
-        </UCard>
+        </section>
         
         <!-- Template Selector (Collapsible) -->
-        <UCard v-if="showTemplateSelector" class="border-2 border-indigo-200 bg-indigo-50/30">
-          <template #header>
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <UIcon name="i-heroicons-rectangle-stack" class="text-indigo-600" />
-                <h3 class="font-semibold text-gray-900">Apply Template</h3>
-              </div>
-              <UButton 
-                icon="i-heroicons-x-mark" 
-                variant="ghost" 
-                size="xs"
-                @click="showTemplateSelector = false"
-              />
+        <section v-if="showTemplateSelector" class="bg-white dark:bg-navy-900 border-2 border-primary/30 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">dashboard</span>
+              <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Apply Template</h3>
             </div>
-          </template>
-          <AvailabilityTemplateSelector
-            :event-id="eventId"
-            :has-windows="windows.length > 0"
-            :window-count="windows.length"
-            @template-applied="handleTemplateApplied"
-          />
-        </UCard>
+            <button 
+              @click="showTemplateSelector = false"
+              class="text-navy-400 hover:text-navy-600 transition-colors"
+            >
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <div class="p-6">
+            <AvailabilityTemplateSelector
+              :event-id="eventId"
+              :has-windows="windows.length > 0"
+              :window-count="windows.length"
+              @template-applied="handleTemplateApplied"
+            />
+          </div>
+        </section>
       </div>
 
       <!-- Windows Content -->
       <template v-else>
-        <!-- Template Selector -->
-        <AvailabilityTemplateSelector
-          :event-id="eventId"
-          :has-windows="windows.length > 0"
-          :window-count="windows.length"
-          @template-applied="handleTemplateApplied"
-        />
+        <!-- Template Selector (Collapsible) -->
+        <section class="bg-white dark:bg-navy-900 border-2 rounded-2xl shadow-drawn overflow-hidden transition-colors" :class="showTemplateSelector ? 'border-primary/30 bg-primary/5' : 'border-navy-100'">
+          <button
+            @click="showTemplateSelector = !showTemplateSelector"
+            class="w-full flex items-center justify-between px-6 py-4 hover:bg-navy-50/50 transition-colors"
+          >
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined transition-colors" :class="showTemplateSelector ? 'text-primary' : 'text-navy-400'">dashboard</span>
+              <h3 class="text-sm font-bold text-navy-900">Apply Template</h3>
+              <span class="text-[10px] font-bold text-navy-400 uppercase tracking-wider px-2 py-0.5 bg-navy-100 rounded-full">Optional</span>
+            </div>
+            <span class="material-symbols-outlined text-navy-400 transition-transform" :class="showTemplateSelector ? 'rotate-180' : ''">expand_more</span>
+          </button>
+          <div v-show="showTemplateSelector" class="px-6 pb-6 pt-2 border-t border-navy-50">
+            <AvailabilityTemplateSelector
+              :event-id="eventId"
+              :has-windows="windows.length > 0"
+              :window-count="windows.length"
+              @template-applied="handleTemplateApplied"
+            />
+          </div>
+        </section>
 
         <!-- Timeline/Calendar Visualization -->
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold">Visualization</h2>
-              <div class="flex items-center gap-2">
-                <UButton
-                  :variant="viewMode === 'timeline' ? 'solid' : 'ghost'"
-                  color="gray"
-                  size="sm"
-                  icon="i-heroicons-chart-bar"
-                  @click="viewMode = 'timeline'"
-                >
-                  Timeline
-                </UButton>
-                <UButton
-                  :variant="viewMode === 'calendar' ? 'solid' : 'ghost'"
-                  color="gray"
-                  size="sm"
-                  icon="i-heroicons-calendar"
-                  @click="viewMode = 'calendar'"
-                >
-                  Calendar
-                </UButton>
-              </div>
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">show_chart</span>
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Visualization</h2>
             </div>
-          </template>
+            <div class="flex items-center gap-2 bg-navy-50 rounded-lg p-1">
+              <button
+                @click="viewMode = 'timeline'"
+                :class="viewMode === 'timeline' ? 'bg-white shadow-sm text-primary' : 'text-navy-600 hover:text-navy-900'"
+                class="px-3 py-1.5 text-xs font-bold rounded-md transition-all flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-sm">timeline</span>
+                Timeline
+              </button>
+              <button
+                @click="viewMode = 'calendar'"
+                :class="viewMode === 'calendar' ? 'bg-white shadow-sm text-primary' : 'text-navy-600 hover:text-navy-900'"
+                class="px-3 py-1.5 text-xs font-bold rounded-md transition-all flex items-center gap-1.5"
+              >
+                <span class="material-symbols-outlined text-sm">calendar_month</span>
+                Calendar
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
           <AvailabilityWindowsTimeline
             v-if="viewMode === 'timeline'"
             :windows="windows"
@@ -150,60 +170,62 @@
             :event-end="event?.data?.end_datetime"
             :event-title="event?.data?.title"
             @window-click="handleWindowClick"
+            @date-click="handleDateClick"
           />
-        </UCard>
+          </div>
+        </section>
 
         <!-- Windows List -->
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold">All Windows ({{ windows.length }})</h2>
-              <div class="text-sm text-gray-500">
-                Sorted by start date
-              </div>
+        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">list</span>
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">All Windows</h2>
+              <span class="text-[10px] font-bold text-navy-500 px-2 py-0.5 bg-navy-100 rounded-full">{{ windows.length }}</span>
             </div>
-          </template>
+            <div class="text-xs text-navy-500 font-medium">
+              Sorted by start date
+            </div>
+          </div>
 
-          <div class="divide-y divide-gray-200">
+          <div class="divide-y divide-navy-50 px-6">
             <div
               v-for="window in sortedWindows"
               :key="window.availability_id"
-              class="py-4 first:pt-0 last:pb-0"
+              class="py-5 first:pt-5 last:pb-5"
             >
               <div class="flex items-start justify-between gap-4">
                 <!-- Window Info -->
                 <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-3 mb-2">
-                    <h3 class="font-semibold text-gray-900 truncate">
+                  <div class="flex items-center gap-2 mb-2 flex-wrap">
+                    <h3 class="font-bold text-navy-700 truncate text-sm">
                       {{ window.name }}
                     </h3>
-                    <UBadge
-                      :color="(getStatusColor(window) as any)"
-                      variant="subtle"
-                      size="xs"
+                    <span
+                      :class="getStatusColor(window) === 'green' ? 'bg-green-100 text-green-700' : getStatusColor(window) === 'yellow' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700'"
+                      class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
                     >
                       {{ getStatusLabel(window) }}
-                    </UBadge>
-                    <UBadge
-                      :color="(getTypeBadgeColor(window.availability_type) as any)"
-                      variant="subtle"
-                      size="xs"
+                    </span>
+                    <span
+                      :class="getTypeBadgeColor(window.availability_type) === 'blue' ? 'bg-blue-100 text-blue-700' : getTypeBadgeColor(window.availability_type) === 'green' ? 'bg-green-100 text-green-700' : getTypeBadgeColor(window.availability_type) === 'purple' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'"
+                      class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
                     >
                       {{ getTypeLabel(window.availability_type) }}
-                    </UBadge>
+                    </span>
                   </div>
 
-                  <p v-if="window.description" class="text-sm text-gray-600 mb-2">
+                  <p v-if="window.description" class="text-sm text-navy-600 dark:text-navy-300 mb-2">
                     {{ window.description }}
                   </p>
 
-                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500">
-                    <div class="flex items-center gap-1">
-                      <UIcon name="i-heroicons-calendar" class="text-gray-400" />
+                  <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-navy-500">
+                    <div class="flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-sm text-navy-400">calendar_month</span>
                       <span>{{ formatDateRange(window.available_from || '', window.available_to || '', eventTimezone) }}</span>
                     </div>
-                    <div class="flex items-center gap-1">
-                      <UIcon name="i-heroicons-clock" class="text-gray-400" />
+                    <div class="flex items-center gap-1.5">
+                      <span class="material-symbols-outlined text-sm text-navy-400">schedule</span>
                       <span>{{ formatTime(window.available_from, eventTimezone) }} - {{ formatTime(window.available_to, eventTimezone) }}</span>
                     </div>
                   </div>
@@ -211,29 +233,25 @@
 
                 <!-- Actions -->
                 <div class="flex items-center gap-2">
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    color="gray"
-                    variant="ghost"
-                    size="sm"
+                  <button
                     @click="handleEdit(window)"
+                    class="px-3 py-1.5 text-xs font-bold text-navy-600 hover:text-primary hover:bg-navy-50 rounded-lg transition-colors flex items-center gap-1.5"
                   >
+                    <span class="material-symbols-outlined text-sm">edit</span>
                     Edit
-                  </UButton>
-                  <UButton
-                    icon="i-heroicons-trash"
-                    color="red"
-                    variant="ghost"
-                    size="sm"
+                  </button>
+                  <button
                     @click="handleDelete(window)"
+                    class="px-3 py-1.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1.5"
                   >
+                    <span class="material-symbols-outlined text-sm">delete</span>
                     Delete
-                  </UButton>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-        </UCard>
+        </section>
       </template>
     </template>
 
@@ -245,6 +263,8 @@
       :event-timezone="eventTimezone"
       :event-start="event?.data?.start_datetime"
       :event-end="event?.data?.end_datetime"
+      :preset-start-date="presetStartDate"
+      :preset-end-date="presetEndDate"
       @close="closeModal"
       @success="handleSuccess"
     />
@@ -282,9 +302,9 @@ const route = useRoute()
 const { $notyf } = useNuxtApp()
 
 // View mode toggle
-const viewMode = ref<'timeline' | 'calendar'>('timeline')
+const viewMode = ref<'timeline' | 'calendar'>('calendar')
 
-// Template selector visibility for empty state
+// Template selector visibility
 const showTemplateSelector = ref(false)
 
 // Get event ID from route
@@ -316,14 +336,20 @@ const sortedWindows = computed(() => {
 // Modal state
 const isModalOpen = ref(false)
 const selectedWindow = ref<AvailabilityWindow | undefined>(undefined)
+const presetStartDate = ref<string | undefined>(undefined)
+const presetEndDate = ref<string | undefined>(undefined)
 
 function openCreateModal() {
   selectedWindow.value = undefined
+  presetStartDate.value = undefined
+  presetEndDate.value = undefined
   isModalOpen.value = true
 }
 
 function handleEdit(window: AvailabilityWindow) {
   selectedWindow.value = window
+  presetStartDate.value = undefined
+  presetEndDate.value = undefined
   isModalOpen.value = true
 }
 
@@ -331,9 +357,27 @@ function handleWindowClick(window: AvailabilityWindow) {
   handleEdit(window)
 }
 
+function handleDateClick(date: Date) {
+  // Set preset dates: clicked date at 00:00 to 23:59
+
+  console.log('Date clicked:', date)
+  const startDate = new Date(date)
+  startDate.setHours(0, 0, 0, 0)
+  
+  const endDate = new Date(date)
+  endDate.setHours(23, 59, 59, 999)
+  // Set type to Refund Window for quick creation
+  selectedWindow.value = undefined
+  presetStartDate.value = startDate.toISOString()
+  presetEndDate.value = endDate.toISOString()
+  isModalOpen.value = true
+}
+
 function closeModal() {
   isModalOpen.value = false
   selectedWindow.value = undefined
+  presetStartDate.value = undefined
+  presetEndDate.value = undefined
 }
 
 function handleSuccess() {

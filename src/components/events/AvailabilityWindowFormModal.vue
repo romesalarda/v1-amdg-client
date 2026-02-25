@@ -1,149 +1,228 @@
 <template>
-  <UModal v-model="isModalOpen" :prevent-close="isSubmitting">
-    <UCard>
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold">
-            {{ window ? 'Edit Availability Window' : 'Add Availability Window' }}
-          </h3>
-          <UButton
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark"
-            @click="closeModal"
-            :disabled="isSubmitting"
-          />
+  <!-- Modal Overlay -->
+  <div v-if="isOpen" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModal">
+    <!-- Modal Container -->
+    <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-xl w-full max-h-[90vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 py-3 border-b border-navy-50 bg-white dark:bg-navy-900">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary text-lg">{{ window ? 'edit_calendar' : 'add_circle' }}</span>
+          <div>
+            <h3 class="text-xs font-black text-primary dark:text-white uppercase tracking-widest leading-tight">
+              {{ window ? 'Edit Window' : 'Create Window' }}
+            </h3>
+            <p class="text-[10px] text-navy-500 mt-0.5">
+              {{ window ? 'Update settings' : 'Define availability period' }}
+            </p>
+          </div>
         </div>
-      </template>
+        <button
+          @click="closeModal"
+          :disabled="isSubmitting"
+          class="text-navy-400 hover:text-navy-600 transition-colors disabled:opacity-50"
+        >
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
 
-      <form @submit="onSubmit" class="space-y-4">
-        <!-- Name -->
-        <UFormGroup label="Window Name" name="name" required>
-          <UInput
-            v-model="name"
-            placeholder="e.g., Early Bird Registration"
-            :disabled="isSubmitting"
-          />
-          <span v-if="errors.name" class="text-sm text-red-500">{{ errors.name }}</span>
-        </UFormGroup>
-
-        <!-- Description -->
-        <UFormGroup label="Description" name="description">
-          <UTextarea
-            v-model="description"
-            placeholder="Optional description of this availability window"
-            :rows="3"
-            :disabled="isSubmitting"
-          />
-          <span v-if="errors.description" class="text-sm text-red-500">{{ errors.description }}</span>
-        </UFormGroup>
-
-        <!-- Availability Type -->
-        <UFormGroup label="Window Type" name="availability_type" required>
-          <USelectMenu
-            v-model="availability_type"
-            :options="AVAILABILITY_TYPES"
-            placeholder="Select window type"
-            value-attribute="value"
-            option-attribute="label"
-            :disabled="isSubmitting"
-          />
-          <span v-if="errors.availability_type" class="text-sm text-red-500">{{ errors.availability_type }}</span>
-        </UFormGroup>
-
-        <!-- Date Range -->
+      <!-- Form Content - Scrollable -->
+      <div class="flex-1 overflow-y-auto">
+        <form @submit.prevent="onSubmit" class="p-6 space-y-5">
+        <!-- Basic Information Section -->
         <div class="space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Available From -->
-            <UFormGroup label="Start Date & Time" name="available_from" required>
-              <input
-                v-model="available_from"
-                type="datetime-local"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                :disabled="isSubmitting"
-              />
-              <span v-if="errors.available_from" class="text-sm text-red-500">{{ errors.available_from }}</span>
-            </UFormGroup>
+          <div class="flex items-center gap-1.5 pb-1.5 border-b border-navy-100">
+            <span class="material-symbols-outlined text-sm text-primary">info</span>
+            <h4 class="text-xs font-black text-navy-900 uppercase tracking-wider">Basic Info</h4>
+          </div>
 
-            <!-- Available To -->
-            <UFormGroup label="End Date & Time" name="available_to" required>
-              <input
-                v-model="available_to"
-                type="datetime-local"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+          <!-- Name -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-navy-900" for="window-name">
+              Window Name <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="window-name"
+              v-model="name"
+              type="text"
+              placeholder="e.g., Early Bird Registration"
+              required
+              :disabled="isSubmitting"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-2 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+            />
+            <span v-if="errors.name" class="text-xs text-red-500">{{ errors.name }}</span>
+          </div>
+
+          <!-- Availability Type & Description in 2 columns on larger screens -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-navy-900" for="window-type">
+                Type <span class="text-red-500">*</span>
+              </label>
+              <select
+                id="window-type"
+                v-model="availability_type"
+                required
                 :disabled="isSubmitting"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+              >
+                <option value="" disabled>Select type...</option>
+                <option v-for="type in REDUCED_AVAILABILITY_TYPES" :key="type.value" :value="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+              <span v-if="errors.availability_type" class="text-xs text-red-500">{{ errors.availability_type }}</span>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-navy-900" for="window-timezone">
+                Timezone
+              </label>
+              <input
+                id="window-timezone"
+                v-model="timezone"
+                type="text"
+                placeholder="e.g., Europe/London"
+                :disabled="isSubmitting"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-2 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
               />
-              <span v-if="errors.available_to" class="text-sm text-red-500">{{ errors.available_to }}</span>
-            </UFormGroup>
+              <span v-if="errors.timezone" class="text-xs text-red-500">{{ errors.timezone }}</span>
+            </div>
+          </div>
+
+          <!-- Type Description -->
+          <p v-if="availability_type" class="text-[10px] text-navy-600 italic px-1">
+            {{ getTypeDescription(availability_type) }}
+          </p>
+
+          <!-- Description -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-navy-900" for="window-description">
+              Description <span class="text-navy-400 font-normal">(Optional)</span>
+            </label>
+            <textarea
+              id="window-description"
+              v-model="description"
+              placeholder="Additional details..."
+              rows="2"
+              :disabled="isSubmitting"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-2 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none disabled:bg-gray-100"
+            />
+            <span v-if="errors.description" class="text-xs text-red-500">{{ errors.description }}</span>
+          </div>
+        </div>
+
+        <!-- Date Range Section -->
+        <div class="space-y-3">
+          <div class="flex items-center gap-1.5 pb-1.5 border-b border-navy-100">
+            <span class="material-symbols-outlined text-sm text-primary">calendar_month</span>
+            <h4 class="text-xs font-black text-navy-900 uppercase tracking-wider">Date Range</h4>
           </div>
 
           <!-- Quick Date Presets -->
-          <div v-if="eventStart && !window" class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-            <div class="text-xs font-medium text-blue-900 mb-2 flex items-center gap-1">
-              <UIcon name="i-heroicons-light-bulb" class="w-3.5 h-3.5" />
-              Quick Presets (relative to event start)
+          <div v-if="eventStart && !window" class="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/30 rounded-xl p-3">
+            <div class="flex items-center gap-1.5 mb-2">
+              <span class="material-symbols-outlined text-primary text-sm">bolt</span>
+              <span class="text-[10px] font-black text-navy-900 uppercase tracking-wider">Quick Presets</span>
             </div>
-            <div class="flex flex-wrap gap-2">
-              <UButton
+            <div class="flex flex-wrap gap-1.5">
+              <button
                 v-for="preset in datePresets"
                 :key="preset.label"
-                size="xs"
-                variant="soft"
-                color="blue"
+                type="button"
                 @click="applyPreset(preset)"
                 :disabled="isSubmitting"
+                class="px-2.5 py-1 text-[10px] font-bold bg-white hover:bg-primary/10 border border-primary/30 text-primary rounded-lg transition-colors disabled:opacity-50"
               >
                 {{ preset.label }}
-              </UButton>
+              </button>
             </div>
           </div>
+
+          <!-- Date Inputs Side by Side -->
+          <div class="grid grid-cols-2 gap-3">
+            <!-- Available From -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-navy-900" for="window-start">
+                Start <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="window-start"
+                v-model="available_from"
+                type="datetime-local"
+                required
+                :disabled="isSubmitting"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+              />
+              <span v-if="errors.available_from" class="text-xs text-red-500">{{ errors.available_from }}</span>
+            </div>
+
+            <!-- Available To -->
+            <div class="space-y-1.5">
+              <label class="block text-xs font-bold text-navy-900" for="window-end">
+                End <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="window-end"
+                v-model="available_to"
+                type="datetime-local"
+                required
+                :disabled="isSubmitting"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+              />
+              <span v-if="errors.available_to" class="text-xs text-red-500">{{ errors.available_to }}</span>
+            </div>
+          </div>
+
+          <!-- Smart Default Indicator -->
+          <div v-if="availability_type && !window && hasSmartDefault" class="flex items-center gap-1.5 p-2 bg-green-50 border border-green-200 rounded-lg">
+            <span class="material-symbols-outlined text-green-600 text-sm">check_circle</span>
+            <span class="text-[10px] text-green-800 font-medium">
+              Smart defaults applied based on {{ getTypeLabel(availability_type) }}
+            </span>
+          </div>
         </div>
+        </form>
+      </div>
 
-        <!-- Timezone -->
-        <UFormGroup label="Timezone" name="timezone">
-          <UInput
-            v-model="timezone"
-            placeholder="e.g., Europe/London"
-            :disabled="isSubmitting"
-          />
-          <span v-if="errors.timezone" class="text-sm text-red-500">{{ errors.timezone }}</span>
-          <template #hint>
-            <span class="text-xs text-gray-500">Default timezone from event settings</span>
-          </template>
-        </UFormGroup>
-      </form>
-
-      <template #footer>
-        <div class="flex justify-end gap-3">
-          <UButton
-            color="gray"
-            variant="ghost"
+      <!-- Footer -->
+      <div class="flex items-center justify-between px-6 py-3 border-t border-navy-50 bg-navy-50/30">
+        <div class="flex items-center gap-1 text-[10px] text-navy-500">
+          <span class="material-symbols-outlined text-xs">schedule</span>
+          <span>{{ timezone || eventTimezone }}</span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            type="button"
             @click="closeModal"
             :disabled="isSubmitting"
+            class="px-4 py-1.5 border border-navy-200 text-navy-600 text-xs font-bold rounded-lg hover:bg-navy-50 transition-colors disabled:opacity-50"
           >
             Cancel
-          </UButton>
-          <UButton
+          </button>
+          <button
             type="submit"
             @click="onSubmit"
-            :loading="isSubmitting"
             :disabled="isSubmitting"
+            class="px-4 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-1.5"
           >
-            {{ window ? 'Update Window' : 'Create Window' }}
-          </UButton>
+            <span v-if="isSubmitting" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+            <span v-else class="material-symbols-outlined text-sm">{{ window ? 'check' : 'add' }}</span>
+            {{ window ? 'Update' : 'Create' }}
+          </button>
         </div>
-      </template>
-    </UCard>
-  </UModal>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { AvailabilityWindowSchema, AVAILABILITY_TYPES } from '~/schemas/events/availability'
+import { AvailabilityWindowSchema, AVAILABILITY_TYPES, REDUCED_AVAILABILITY_TYPES } from '~/schemas/events/availability'
 import type { AvailabilityWindow } from '~/api/types.gen'
 import { useCreateAvailabilityWindow, useUpdateAvailabilityWindow } from '~/composables/resources/events/availability-windows'
+import { getTypeLabel } from '~/utils/format/availability-windows'
 
 interface Props {
   isOpen: boolean
@@ -152,6 +231,8 @@ interface Props {
   eventTimezone?: string
   eventStart?: string
   eventEnd?: string
+  presetStartDate?: string
+  presetEndDate?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -164,16 +245,6 @@ const emit = defineEmits<{
 }>()
 
 const { $notyf } = useNuxtApp()
-
-// Modal state
-const isModalOpen = computed({
-  get: () => props.isOpen,
-  set: (value) => {
-    if (!value) {
-      emit('close')
-    }
-  },
-})
 
 const isSubmitting = ref(false)
 
@@ -192,6 +263,25 @@ const [timezone] = defineField('timezone')
 // Mutations
 const createMutation = useCreateAvailabilityWindow()
 const updateMutation = useUpdateAvailabilityWindow()
+
+// Track if smart defaults have been applied
+const hasSmartDefault = ref(false)
+
+// Get type description helper
+function getTypeDescription(type: string): string {
+  const descriptions: Record<string, string> = {
+    REGISTRATION_WINDOW: 'Controls when attendees can register for the event',
+    PAYMENT_WINDOW: 'Defines when payments can be made',
+    REFUND_WINDOW: 'Sets the period when refunds are available',
+    CANCELLATION_WINDOW: 'When attendees can cancel their registration',
+    EARLY_BIRD: 'Special early registration period with benefits',
+    LATE_REGISTRATION: 'Extended registration after the main window',
+    MERCHANDISE_WINDOW: 'When merchandise can be purchased',
+    DONATION_WINDOW: 'Period for accepting donations',
+    RESOURCE_WINDOW: 'When resources are accessible to attendees',
+  }
+  return descriptions[type] || 'Select a type to see smart date defaults'
+}
 
 // Date presets based on event start
 interface DatePreset {
@@ -279,6 +369,12 @@ function applySmartDefaults(type: string) {
   
   available_from.value = formatDateTimeLocal(fromDate.toISOString())
   available_to.value = formatDateTimeLocal(toDate.toISOString())
+  
+  // Set flag to show indicator
+  hasSmartDefault.value = true
+  setTimeout(() => {
+    hasSmartDefault.value = false
+  }, 5000) // Hide after 5 seconds
 }
 
 // Watch for availability type changes to apply smart defaults
@@ -290,7 +386,7 @@ watch(() => availability_type.value, (newType) => {
 
 // Watch for window prop changes to populate form
 watch(
-  () => props.window,
+  () => (props.window),
   (newWindow) => {
     if (newWindow) {
       // Editing existing window
@@ -309,8 +405,8 @@ watch(
           name: '',
           description: '',
           availability_type: undefined,
-          available_from: '',
-          available_to: '',
+          available_from: props.presetStartDate ? formatDateTimeLocal(props.presetStartDate) : '',
+          available_to: props.presetEndDate ? formatDateTimeLocal(props.presetEndDate) : '',
           timezone: props.eventTimezone,
         },
       })

@@ -15,6 +15,10 @@ export const AVAILABILITY_TYPES = [
   { value: 'PAYMENT_PACKAGE_WINDOW', label: 'Payment Package Window' },
 ]
 
+export const REDUCED_AVAILABILITY_TYPES = AVAILABILITY_TYPES.filter(type =>
+  ['REFUND_WINDOW', 'REGISTRATION_WINDOW', 'MERCHANDISE_WINDOW', 'DONATION_WINDOW'].includes(type.value)
+)
+
 /**
  * Availability window schema for create/update forms
  */

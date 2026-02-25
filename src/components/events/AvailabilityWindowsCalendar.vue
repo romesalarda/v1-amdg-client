@@ -51,12 +51,13 @@
           <div
             v-for="(day, index) in calendarDays"
             :key="index"
-            class="min-h-[120px] border-r border-b border-gray-200 last:border-r-0 p-2 relative"
+            class="min-h-[120px] border-r border-b border-gray-200 last:border-r-0 p-2 relative cursor-pointer hover:bg-primary/5 transition-colors"
             :class="{
               'bg-gray-50': !day.isCurrentMonth,
               'bg-blue-50': day.isToday && day.isCurrentMonth,
               'bg-white': day.isCurrentMonth && !day.isToday
             }"
+            @click="handleDateClick(day)"
           >
             <!-- Date Number and Event Indicator -->
             <div class="flex items-start justify-between mb-1">
@@ -103,7 +104,7 @@
                 class="text-xs rounded cursor-pointer transition-all hover:scale-[1.02]"
                 :class="getWindowSolidClasses(windowInfo.window.availability_type)"
                 :title="getDetailedTooltip(windowInfo.window, day.date)"
-                @click="$emit('windowClick', windowInfo.window)"
+                @click.stop="$emit('windowClick', windowInfo.window)"
               >
                 <!-- Start day: Show full details -->
                 <div v-if="windowInfo.isStart" class="p-1.5">
@@ -202,8 +203,9 @@ const props = defineProps<{
   eventTitle?: string
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   windowClick: [window: AvailabilityWindow]
+  dateClick: [date: Date]
 }>()
 
 const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -435,6 +437,14 @@ const getDetailedTooltip = (window: AvailabilityWindow, currentDate: Date): stri
   }
   
   return tooltip
+}
+
+// Handle date click - emit the date to parent
+const handleDateClick = (day: CalendarDay) => {
+  // Only emit if it's a date in the current month
+  if (day.isCurrentMonth) {
+    emit('dateClick', day.date)
+  }
 }
 </script>
 

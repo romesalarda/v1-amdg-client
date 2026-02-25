@@ -8,100 +8,112 @@
       <!-- Timeline Header -->
       <div class="flex items-center justify-between mb-2">
         <h3 class="text-sm font-semibold text-gray-700">Timeline View</h3>
-        <div class="text-xs text-gray-500">
-          {{ formatDateRange(earliestDate, latestDate, timezone) }}
+        <div class="text-xs text-gray-600 font-medium">
+          {{ formatDate(earliestDate, 'MMM d, yyyy') }} - {{ formatDate(latestDate, 'MMM d, yyyy') }}
         </div>
       </div>
 
-      <!-- Timeline Container -->
+      <!-- Compact Timeline Container -->
       <div class="relative bg-gray-50 rounded-lg p-4 overflow-x-auto">
-        <div class="min-w-[600px]">
-          <!-- Event Block (if provided) -->
-          <div v-if="eventStart && eventEnd" class="mb-6 relative">
-            <div class="text-xs font-medium text-gray-700 mb-2">Event</div>
-            <div
-              class="relative h-16 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg border-2 border-blue-700"
-              :style="getEventStyle()"
-            >
-              <div class="absolute inset-0 flex items-center px-4">
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <UIcon name="i-heroicons-calendar" class="w-5 h-5 text-white" />
-                    <span class="font-semibold text-white truncate">
-                      {{ eventTitle || 'Event' }}
-                    </span>
-                  </div>
-                  <div class="text-xs text-white/90 mt-1">
-                    {{ formatDateRange(eventStart, eventEnd, timezone) }}
-                  </div>
+        <div class="min-w-[800px]">
+          <!-- Date Markers (Top) -->
+          <div class="relative h-6 mb-3 border-b border-gray-300">
+            <div class="absolute inset-0 flex justify-between items-end">
+              <div v-for="marker in dateMarkers" :key="marker.date || marker.label" class="flex flex-col items-center">
+                <div class="h-2 w-px bg-gray-400"></div>
+                <div class="text-[10px] text-gray-600 font-medium whitespace-nowrap">
+                  {{ marker.label }}
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Availability Windows -->
-          <div v-if="windows && windows.length > 0" class="space-y-2">
-            <div class="text-xs font-medium text-gray-700 mb-2">Availability Windows</div>
-            <!-- Timeline Windows -->
-            <div class="space-y-3">
+          <!-- Event Block (if provided) -->
+          <div v-if="eventStart && eventEnd" class="mb-4 relative">
+            <div class="flex items-center gap-2 mb-1.5">
+              <span class="material-symbols-outlined text-sm text-blue-600">event</span>
+              <span class="text-xs font-semibold text-gray-700">{{ eventTitle || 'Event' }}</span>
+            </div>
+            <div class="relative h-8 mb-1">
+              <div
+                class="absolute h-full rounded bg-gradient-to-r from-blue-600 to-indigo-600 shadow-md border border-blue-700 flex items-center px-2"
+                :style="getEventStyle()"
+              >
+                <span class="text-xs text-white font-medium whitespace-nowrap">
+                  {{ formatDate(eventStart, 'MMM d') }} - {{ formatDate(eventEnd, 'MMM d') }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Compact Availability Windows - All in One View -->
+          <div v-if="windows && windows.length > 0" class="space-y-1">
+            <div class="flex items-center gap-2 mb-2">
+              <span class="material-symbols-outlined text-sm text-gray-600">schedule</span>
+              <span class="text-xs font-semibold text-gray-700">Availability Windows</span>
+              <span class="text-[10px] font-bold text-navy-500 px-1.5 py-0.5 bg-navy-100 rounded-full">{{ windows.length }}</span>
+            </div>
+            
+            <!-- All Windows in Compact Rows -->
+            <div class="space-y-1">
               <div
                 v-for="window in sortedWindows"
                 :key="window.availability_id"
-                class="relative"
+                class="relative h-8"
               >
-                <!-- Window Bar -->
-                <div
-                  class="group relative h-12 rounded-lg transition-all duration-200 hover:shadow-md cursor-pointer"
-                  :class="getWindowColorClass(window.availability_type)"
-                  :style="getWindowStyle(window)"
-                  @click="$emit('windowClick', window)"
-                >
-                  <!-- Window Content -->
-                  <div class="absolute inset-0 flex items-center px-3">
-                    <div class="flex-1 min-w-0">
-                      <div class="flex items-center gap-2">
-                        <span class="font-medium text-sm text-white truncate">
-                          {{ window.name }}
-                        </span>
-                        <UBadge
-                          v-if="window.is_active"
-                          color="white"
-                          variant="solid"
-                          size="xs"
-                        >
-                          Active
-                        </UBadge>
-                      </div>
-                      <div class="text-xs text-white/80 truncate">
-                        {{ getTypeLabel(window.availability_type) }}
-                      </div>
-                    </div>
+                <!-- Window Name Label (Left) -->
+                <div class="absolute left-0 top-0 bottom-0 w-40 flex items-center pr-2 border-r border-gray-300">
+                  <div class="truncate text-xs font-medium text-gray-700">
+                    {{ window.name }}
                   </div>
+                </div>
 
-                  <!-- Hover Tooltip -->
-                  <div class="absolute left-0 top-full mt-2 z-10 hidden group-hover:block">
-                    <div class="bg-gray-900 text-white text-xs rounded-lg shadow-lg p-3 min-w-[200px]">
-                      <div class="font-semibold mb-1">{{ window.name }}</div>
-                      <div class="space-y-1 text-gray-300">
-                        <div>{{ getTypeLabel(window.availability_type) }}</div>
-                        <div>{{ formatDateTime(window.available_from, timezone) }}</div>
-                        <div>to {{ formatDateTime(window.available_to, timezone) }}</div>
-                        <div v-if="window.description" class="mt-2 pt-2 border-t border-gray-700">
-                          {{ window.description }}
+                <!-- Timeline Bar (Right) -->
+                <div class="absolute left-40 right-0 top-0 bottom-0 pl-2">
+                  <div
+                    class="group relative h-full rounded transition-all duration-200 hover:shadow-md cursor-pointer"
+                    :class="getWindowColorClass(window.availability_type)"
+                    :style="getWindowStyle(window)"
+                    @click="$emit('windowClick', window)"
+                  >
+                    <!-- Inline Date Display -->
+                    <div class="absolute inset-0 flex items-center px-2 gap-1">
+                      <span class="text-[10px] text-white font-medium whitespace-nowrap">
+                        {{ formatDate(window.available_from, 'MMM d') }} - {{ formatDate(window.available_to, 'MMM d') }}
+                      </span>
+                      <span
+                        v-if="window.is_active"
+                        class="text-[9px] py-0 px-1 bg-white/20 rounded text-white font-bold"
+                      >
+                        ●
+                      </span>
+                    </div>
+
+                    <!-- Hover Tooltip -->
+                    <div class="absolute left-0 top-full mt-2 z-20 hidden group-hover:block">
+                      <div class="bg-gray-900 text-white text-xs rounded-lg shadow-xl p-3 min-w-[220px]">
+                        <div class="font-semibold mb-1.5">{{ window.name }}</div>
+                        <div class="space-y-1 text-gray-300">
+                          <div class="flex items-center gap-1.5">
+                            <span class="inline-block w-2 h-2 rounded-full" :class="getWindowDotClass(window.availability_type)"></span>
+                            {{ getTypeLabel(window.availability_type) }}
+                          </div>
+                          <div class="text-gray-200 font-medium pt-1">
+                            {{ formatDateTime(window.available_from, timezone) }}
+                          </div>
+                          <div class="text-gray-400 text-[10px]">to</div>
+                          <div class="text-gray-200 font-medium">
+                            {{ formatDateTime(window.available_to, timezone) }}
+                          </div>
+                          <div v-if="window.description" class="mt-2 pt-2 border-t border-gray-700 text-gray-300">
+                            {{ window.description }}
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Date Axis -->
-          <div class="mt-4 pt-4 border-t border-gray-300">
-            <div class="flex justify-between text-xs text-gray-600">
-              <span>{{ formatDate(earliestDate, 'MMM d, yyyy') }}</span>
-              <span>{{ formatDate(latestDate, 'MMM d, yyyy') }}</span>
             </div>
           </div>
         </div>
@@ -119,13 +131,14 @@
             ]"
           >
             <div class="flex items-start gap-2">
-              <UIcon
-                :name="warning.severity === 'error' ? 'i-heroicons-x-circle' : 'i-heroicons-exclamation-triangle'"
+              <span
                 :class="warning.severity === 'error' ? 'text-red-600' : 'text-yellow-600'"
-                class="mt-0.5"
-              />
-              <div :class="warning.severity === 'error' ? 'text-red-800' : 'text-yellow-800'" class="text-sm">
-                <span class="font-medium">{{ warning.title }}:</span>
+                class="material-symbols-outlined text-lg flex-shrink-0"
+              >
+                {{ warning.severity === 'error' ? 'error' : 'warning' }}
+              </span>
+              <div :class="warning.severity === 'error' ? 'text-red-800' : 'text-yellow-800'" class="text-xs">
+                <span class="font-semibold">{{ warning.title }}:</span>
                 {{ warning.message }}
               </div>
             </div>
@@ -204,6 +217,29 @@ const latestDate = computed(() => {
   return dates.length > 0 ? new Date(Math.max(...dates)).toISOString() : ''
 })
 
+// Generate date markers for the timeline
+const dateMarkers = computed(() => {
+  if (!earliestDate.value || !latestDate.value) return []
+  
+  const start = DateTime.fromISO(earliestDate.value)
+  const end = DateTime.fromISO(latestDate.value)
+  const totalDays = end.diff(start, 'days').days
+  
+  // Show 5-7 markers depending on range
+  const numMarkers = Math.min(7, Math.max(5, Math.ceil(totalDays / 30)))
+  const markers = []
+  
+  for (let i = 0; i < numMarkers; i++) {
+    const date = start.plus({ days: (totalDays / (numMarkers - 1)) * i })
+    markers.push({
+      date: date.toISO(),
+      label: date.toFormat('MMM d'),
+    })
+  }
+  
+  return markers
+})
+
 // Calculate position and width for event block
 function getEventStyle() {
   if (!props.eventStart || !props.eventEnd || !earliestDate.value || !latestDate.value) return {}
@@ -213,7 +249,7 @@ function getEventStyle() {
   const eventDuration = new Date(props.eventEnd).getTime() - new Date(props.eventStart).getTime()
   
   const left = (eventStartTime / totalRange) * 100
-  const width = (eventDuration / totalRange) * 500
+  const width = (eventDuration / totalRange) * 100
   
   return {
     marginLeft: `${left}%`,
@@ -221,7 +257,7 @@ function getEventStyle() {
   }
 }
 
-// Calculate position and width for timeline bars
+// Calculate position and width for timeline bars (relative to timeline area, not full width)
 function getWindowStyle(window: AvailabilityWindow) {
   if (!window.available_from || !window.available_to) return {}
   
@@ -234,8 +270,27 @@ function getWindowStyle(window: AvailabilityWindow) {
   
   return {
     marginLeft: `${left}%`,
-    width: `${width}%`,
+    width: `${Math.max(width, 2)}%`, // Minimum 2% width for visibility
   }
+}
+
+// Get dot color class for tooltip
+function getWindowDotClass(type: string | undefined) {
+
+  
+  const colorMap: Record<string, string> = {
+    REGISTRATION_WINDOW: 'bg-blue-400',
+    PAYMENT_WINDOW: 'bg-green-400',
+    REFUND_WINDOW: 'bg-red-400',
+    CANCELLATION_WINDOW: 'bg-orange-400',
+    EARLY_BIRD: 'bg-purple-400',
+    LATE_REGISTRATION: 'bg-yellow-400',
+  }
+
+  if (type === undefined) {
+    return 'bg-gray-400'
+  }
+  return colorMap[type] || 'bg-gray-400'
 }
 
 // Intelligent warnings for overlaps and logical inconsistencies
