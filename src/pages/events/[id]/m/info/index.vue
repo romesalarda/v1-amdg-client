@@ -5,7 +5,7 @@
       <div class="lg:col-span-8 space-y-8">
         <form @submit="onSubmit" class="space-y-8">
           <!-- Basic Details Section -->
-          <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
+          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
             <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
               <span class="material-symbols-outlined text-primary">edit_square</span>
               <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Basic Details</h2>
@@ -77,7 +77,7 @@
           </section>
 
           <!-- Description & Theme Section -->
-          <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
+          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
             <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
               <span class="material-symbols-outlined text-primary">description</span>
               <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Description & Theme</h2>
@@ -129,7 +129,7 @@
           </section>
 
           <!-- Event Timing Section -->
-          <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
+          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
             <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
               <span class="material-symbols-outlined text-primary">calendar_today</span>
               <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Event Timing</h2>
@@ -187,7 +187,7 @@
           </section>
 
           <!-- Capacity & Attendance Section -->
-          <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
+          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
             <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
               <span class="material-symbols-outlined text-primary">group</span>
               <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Capacity & Attendance</h2>
@@ -228,7 +228,7 @@
           </section>
 
           <!-- Additional Information Section -->
-          <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
+          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8" :class="{ 'hover:border-blue-500/20 transition-all': !isEditMode }">
             <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
               <span class="material-symbols-outlined text-primary">info</span>
               <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Additional Information</h2>
@@ -273,7 +273,7 @@
       <!-- Sidebar (4/12) -->
       <div class="lg:col-span-4 space-y-8">
         <!-- Quick Info -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h2 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
               <span class="material-symbols-outlined text-base">info</span>
@@ -313,7 +313,7 @@
         </section>
 
         <!-- Editor Tips -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
             <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Editor Tips</h2>

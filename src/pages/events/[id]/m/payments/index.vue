@@ -5,7 +5,7 @@
       <div class="lg:col-span-8 space-y-8">
 
         <!-- Payment Settings -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">credit_card</span>
             <div class="flex-1">
@@ -91,7 +91,7 @@
         </section>
 
         <!-- Payment Methods -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">account_balance</span>
             <div class="flex-1">
@@ -179,7 +179,7 @@
       <!-- Sidebar (4/12) -->
       <div class="lg:col-span-4 space-y-6">
         <!-- Payment Status -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
               <span class="material-symbols-outlined text-base">fact_check</span>
@@ -227,7 +227,7 @@
         </section>
 
         <!-- Payment Methods Stats -->
-        <section v-if="settingsForm.payment_enabled" class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section v-if="settingsForm.payment_enabled" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">bar_chart</span>
             <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Method Stats</h3>
@@ -245,7 +245,7 @@
         </section>
 
         <!-- Help Card -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
             <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Setup Tips</h3>

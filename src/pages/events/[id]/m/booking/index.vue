@@ -25,7 +25,7 @@
             <!-- Booking Packages Section (Step 1) -->
             <section>
               <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 1 - Required</span>
-              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
                 <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
                   <span class="material-symbols-outlined text-primary">inventory_2</span>
                   <div class="flex-1">
@@ -107,7 +107,7 @@
             <!-- Discounts Section (Step 2) -->
             <section>
               <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 2 - Recommended</span>
-              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
                 <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
                   <div class="flex-1">
                     <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discounts</h3>
@@ -193,7 +193,7 @@
             <!-- Ticket Types Section (Step 3) -->
             <section>
               <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 3 - Required</span>
-              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
                 <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
                   <span class="material-symbols-outlined text-primary">confirmation_number</span>
                   <div class="flex-1">
@@ -276,7 +276,7 @@
 
             <!-- Alternative Sign-ins Section -->
             <section class="mt-8">
-              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
                 <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
                   <span class="material-symbols-outlined text-primary">login</span>
                   <div class="flex-1">
@@ -345,7 +345,7 @@
       <!-- Sidebar (1/3) -->
       <div class="space-y-6">
         <!-- Booking Status Card -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
               <span class="material-symbols-outlined text-base">analytics</span>
@@ -373,7 +373,7 @@
         </section>
 
         <!-- Help Card -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
             <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Setup Tips</h3>
@@ -405,7 +405,7 @@
 
     <!-- Setup Guide Modal -->
     <div v-if="showSetupGuide" @click.self="showSetupGuide = false" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-white  border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-3 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary text-2xl">school</span>
           <h3 class="text-base font-black text-primary dark:text-white uppercase tracking-widest">Booking Setup Guide</h3>

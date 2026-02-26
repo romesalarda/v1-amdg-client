@@ -1,252 +1,423 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Header -->
-      <div class="mb-6">
-        <UButton 
-          to="/my-dashboard" 
-          icon="i-heroicons-arrow-left" 
-          variant="ghost" 
-          size="sm"
-          class="mb-4 hover:bg-white/50"
-        >
-          Back
-        </UButton>
-        
-        <h1 class="text-3xl font-black text-gray-900 mb-1">Create Event</h1>
-        <p class="text-gray-600">Fill in the required details to get started</p>
+  <div class="min-h-screen bg-mist-blue pb-32">
+    <!-- Back to Dashboard - Fixed Left -->
+    <NuxtLink 
+      to="/my-dashboard" 
+      class="fixed top-20 left-6 z-50 inline-flex items-center gap-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-primary/10 text-sm text-navy-600 hover:text-primary hover:border-primary/30 transition-all group"
+    >
+      <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
+      <span class="font-semibold">Dashboard</span>
+    </NuxtLink>
+
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+      <!-- Compact Header -->
+      <div class="mb-4 text-center">
+        <h1 class="text-2xl font-black text-navy-900 uppercase tracking-widest">Create Event</h1>
       </div>
 
-      <!-- Form Card -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200/80 overflow-hidden">
-        <form @submit="onSubmit">
-          <div class="p-6 sm:p-8 space-y-6">
-            <!-- Event Title -->
-            <UFormGroup label="Event Title" name="title" required class="space-y-2">
-              <UInput
-                v-model="title"
-                size="lg"
-                placeholder="e.g., Annual Youth Conference 2026"
-                class="focus:ring-2 focus:ring-primary/20"
-              />
-              <span v-if="errors.title" class="text-sm text-red-500">{{ errors.title }}</span>
-            </UFormGroup>
-
-            <!-- Description -->
-            <UFormGroup label="Description" name="short_description" hint="Brief summary of your event" class="space-y-2">
-              <UTextarea
-                v-model="short_description"
-                placeholder="What's this event about?"
-                :rows="3"
-                :maxlength="255"
-                class="focus:ring-2 focus:ring-primary/20"
-              />
-              <div class="flex justify-between items-center">
-                <span v-if="errors.short_description" class="text-sm text-red-500">{{ errors.short_description }}</span>
-                <span class="text-xs text-gray-400 ml-auto">{{ short_description?.length || 0 }}/255</span>
-              </div>
-            </UFormGroup>
-
-            <!-- Organization -->
-            <UFormGroup label="Host Organization" name="organisation" required class="space-y-2">
-              <USelectMenu
-                v-model="organisation"
-                :options="organizationOptions"
-                placeholder="Select organization"
-                value-attribute="value"
-                option-attribute="label"
-                size="lg"
-                :disabled="isLoadingOrganizations"
-                class="focus:ring-2 focus:ring-primary/20"
-              >
-                <template #leading>
-                  <UIcon name="i-heroicons-building-office-2" class="text-gray-400" />
-                </template>
-              </USelectMenu>
-              <span v-if="errors.organisation" class="text-sm text-red-500">{{ errors.organisation }}</span>
-            </UFormGroup>
-
-            <!-- Event Type and Display Code Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <UFormGroup label="Event Type" name="event_type" required class="space-y-2">
-                <USelectMenu
-                  v-model="event_type"
-                  :options="eventTypeOptions"
-                  placeholder="Select type"
-                  value-attribute="value"
-                  option-attribute="label"
-                  size="lg"
-                  :disabled="isLoadingEventTypes"
-                  class="focus:ring-2 focus:ring-primary/20"
-                >
-                  <template #leading>
-                    <UIcon name="i-heroicons-tag" class="text-gray-400" />
-                  </template>
-                </USelectMenu>
-                <span v-if="errors.event_type" class="text-sm text-red-500">{{ errors.event_type }}</span>
-              </UFormGroup>
-
-              <UFormGroup label="Display Code" name="display_code" required hint="Max 10 characters" class="space-y-2">
-                <UInput
-                  v-model="display_code"
-                  size="lg"
-                  placeholder="EVT123456"
-                  maxlength="10"
-                  class="focus:ring-2 focus:ring-primary/20"
-                >
-                  <template #trailing>
-                    <UButton
-                      variant="ghost"
-                      size="2xs"
-                      icon="i-heroicons-arrow-path"
-                      @click="display_code = generateDisplayCode()"
-                      title="Generate new code"
-                    />
-                  </template>
-                </UInput>
-                <span v-if="errors.display_code" class="text-sm text-red-500">{{ errors.display_code }}</span>
-              </UFormGroup>
+      <!-- Form Content -->
+      <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6">
+        <form @submit.prevent="handleStepSubmit">
+          <!-- Step 1: Event Details -->
+          <div v-show="currentStep === 0" class="space-y-4 animate-fadeIn">
+            <div class="border-b border-primary/10 pb-3 mb-4">
+              <h2 class="text-lg font-bold text-navy-900">Event Details</h2>
+              <p class="text-xs text-navy-500">Tell us about your event</p>
             </div>
 
-            <!-- Date & Time Grid -->
-            <div class="space-y-4">
-              <h3 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
-                <UIcon name="i-heroicons-calendar" class="text-primary" />
-                Event Schedule
-              </h3>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <UFormGroup label="Start" name="start_datetime" required class="space-y-2">
-                  <UInput
-                    v-model="start_datetime"
-                    type="datetime-local"
-                    size="lg"
-                    class="focus:ring-2 focus:ring-primary/20"
-                  />
-                  <span v-if="errors.start_datetime" class="text-xs text-red-500">{{ errors.start_datetime }}</span>
-                </UFormGroup>
-
-                <UFormGroup label="End" name="end_datetime" required class="space-y-2">
-                  <UInput
-                    v-model="end_datetime"
-                    type="datetime-local"
-                    size="lg"
-                    class="focus:ring-2 focus:ring-primary/20"
-                  />
-                  <span v-if="errors.end_datetime" class="text-xs text-red-500">{{ errors.end_datetime }}</span>
-                </UFormGroup>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="event-title">
+                  Event Title <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="event-title"
+                  v-model="title"
+                  type="text"
+                  placeholder="e.g., Annual Youth Conference 2026"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>
               </div>
 
-              <UFormGroup label="Timezone" name="timezone" required class="space-y-2">
-                <USelectMenu
-                  v-model="timezone"
-                  :options="timezoneOptions"
-                  placeholder="Select timezone"
-                  searchable
-                  size="lg"
-                  class="focus:ring-2 focus:ring-primary/20"
-                >
-                  <template #leading>
-                    <UIcon name="i-heroicons-globe-alt" class="text-gray-400" />
-                  </template>
-                </USelectMenu>
-                <span v-if="errors.timezone" class="text-sm text-red-500">{{ errors.timezone }}</span>
-              </UFormGroup>
-            </div>
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="theme">
+                  Theme <span class="text-navy-400 text-xs font-normal">(Optional)</span>
+                </label>
+                <input
+                  id="theme"
+                  v-model="theme"
+                  type="text"
+                  placeholder="e.g., Unity in Faith"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+              </div>
 
-            <!-- Optional: Maximum Capacity -->
-            <UFormGroup 
-              label="Maximum Capacity" 
-              name="maximum_attendance" 
-              hint="Optional - leave empty for unlimited"
-              class="space-y-2"
-            >
-              <UInput
-                :model-value="maximum_attendance ?? ''"
-                @update:model-value="maximum_attendance = $event ? Number($event) : undefined"
-                type="number"
-                placeholder="e.g., 150"
-                size="lg"
-                class="focus:ring-2 focus:ring-primary/20"
-              >
-                <template #leading>
-                  <UIcon name="i-heroicons-user-group" class="text-gray-400" />
-                </template>
-              </UInput>
-              <span v-if="errors.maximum_attendance" class="text-sm text-red-500">{{ errors.maximum_attendance }}</span>
-            </UFormGroup>
-
-            <!-- Expandable Additional Details -->
-            <UAccordion 
-              :items="[{ label: 'Additional Details (Optional)', slot: 'additional' }]"
-              :ui="{ wrapper: 'space-y-3', item: { base: 'border border-gray-200 rounded-lg' } }"
-            >
-              <template #additional>
-                <div class="space-y-4 p-4 bg-gray-50/50">
-                  <UFormGroup label="Event Theme" name="theme" class="space-y-2">
-                    <UInput
-                      v-model="theme"
-                      placeholder="e.g., Unity in Faith"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup label="Full Description" name="long_description" class="space-y-2">
-                    <UTextarea
-                      v-model="long_description"
-                      placeholder="Detailed information about the event..."
-                      :rows="5"
-                    />
-                  </UFormGroup>
-
-                  <UFormGroup label="Expected Attendance" name="expected_attendance" class="space-y-2">
-                    <UInput
-                      :model-value="expected_attendance ?? ''"
-                      @update:model-value="expected_attendance = $event ? Number($event) : undefined"
-                      type="number"
-                      placeholder="e.g., 100"
-                    />
-                  </UFormGroup>
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="short-desc">
+                  Short Description
+                </label>
+                <textarea
+                  id="short-desc"
+                  v-model="short_description"
+                  placeholder="Brief summary..."
+                  rows="2"
+                  maxlength="255"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                ></textarea>
+                <div class="flex justify-between items-center">
+                  <p v-if="errors.short_description" class="text-xs text-red-500">{{ errors.short_description }}</p>
+                  <span class="text-xs text-navy-400 ml-auto">{{ short_description?.length || 0 }}/255</span>
                 </div>
-              </template>
-            </UAccordion>
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="long-description">
+                  Full Description <span class="text-navy-400 text-xs font-normal">(Optional)</span>
+                </label>
+                <textarea
+                  id="long-description"
+                  v-model="long_description"
+                  placeholder="Detailed information about the event..."
+                  rows="3"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
+                ></textarea>
+              </div>
+            </div>
           </div>
 
-          <!-- Form Actions - Sticky Footer -->
-          <div class="bg-gray-50/80 backdrop-blur-sm border-t border-gray-200 px-6 py-4 sm:px-8 flex items-center justify-between sticky bottom-0">
-            <UButton
-              type="button"
-              variant="ghost"
-              color="gray"
-              @click="navigateTo('/my-dashboard')"
-            >
-              Cancel
-            </UButton>
-            
-            <div class="flex gap-2">
-              <UButton
-                type="submit"
-                variant="soft"
-                color="gray"
-                :loading="isSubmitting"
-                :disabled="isSubmitting"
-                @click.prevent="saveDraft"
-              >
-                <UIcon name="i-heroicons-document" class="mr-1" />
-                Save Draft
-              </UButton>
-              <UButton
-                type="submit"
-                color="primary"
-                :loading="isSubmitting"
-                :disabled="isSubmitting"
-                class="shadow-sm"
-              >
-                <UIcon name="i-heroicons-check-circle" class="mr-1" />
-                Create Event
-              </UButton>
+          <!-- Step 2: Organization & Type -->
+          <div v-show="currentStep === 1" class="space-y-4 animate-fadeIn">
+            <div class="border-b border-primary/10 pb-3 mb-4">
+              <h2 class="text-lg font-bold text-navy-900">Organization & Type</h2>
+              <p class="text-xs text-navy-500">Select the host organization and event type</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="organisation">
+                  Host Organization <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
+                    business
+                  </span>
+                  <select
+                    id="organisation"
+                    v-model="organisation"
+                    :disabled="isLoadingOrganizations"
+                    class="w-full rounded-xl border border-primary/20 bg-white pl-12 pr-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select organization</option>
+                    <option v-for="org in organizationOptions" :key="org.value" :value="org.value">
+                      {{ org.label }}
+                    </option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+                <p v-if="errors.organisation" class="text-xs text-red-500">{{ errors.organisation }}</p>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="event-type">
+                  Event Type <span class="text-red-500">*</span>
+                </label>
+                <div class="relative">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
+                    label
+                  </span>
+                  <select
+                    id="event-type"
+                    v-model="event_type"
+                    :disabled="isLoadingEventTypes"
+                    class="w-full rounded-xl border border-primary/20 bg-white pl-12 pr-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select type</option>
+                    <option v-for="type in eventTypeOptions" :key="type.value" :value="type.value">
+                      {{ type.label }}
+                    </option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+                <p v-if="errors.event_type" class="text-xs text-red-500">{{ errors.event_type }}</p>
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="display-code">
+                  Display Code <span class="text-red-500">*</span>
+                </label>
+                <p class="text-xs text-navy-500">Unique identifier for your event (max 10 characters)</p>
+                <div class="relative max-w-md">
+                  <input
+                    id="display-code"
+                    v-model="display_code"
+                    type="text"
+                    placeholder="EVT123456"
+                    maxlength="10"
+                    class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 pr-12 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                  <button
+                    type="button"
+                    @click="display_code = generateDisplayCode()"
+                    title="Generate new code"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg hover:bg-primary/10 transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-primary text-lg">refresh</span>
+                  </button>
+                </div>
+                <p v-if="errors.display_code" class="text-xs text-red-500">{{ errors.display_code }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Schedule -->
+          <div v-show="currentStep === 2" class="space-y-4 animate-fadeIn">
+            <div class="border-b border-primary/10 pb-3 mb-4">
+              <h2 class="text-lg font-bold text-navy-900">Event Schedule</h2>
+              <p class="text-xs text-navy-500">Set the date, time, and timezone</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="start-datetime">
+                  Start Date & Time <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="start-datetime"
+                  v-model="start_datetime"
+                  type="datetime-local"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                <p v-if="errors.start_datetime" class="text-xs text-red-500">{{ errors.start_datetime }}</p>
+              </div>
+
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="end-datetime">
+                  End Date & Time <span class="text-red-500">*</span>
+                </label>
+                <input
+                  id="end-datetime"
+                  v-model="end_datetime"
+                  type="datetime-local"
+                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                <p v-if="errors.end_datetime" class="text-xs text-red-500">{{ errors.end_datetime }}</p>
+              </div>
+
+              <div class="md:col-span-2 space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="timezone">
+                  Timezone <span class="text-red-500">*</span>
+                </label>
+                <div class="relative max-w-md">
+                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
+                    public
+                  </span>
+                  <select
+                    id="timezone"
+                    v-model="timezone"
+                    class="w-full rounded-xl border border-primary/20 bg-white pl-12 pr-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select timezone</option>
+                    <option v-for="tz in timezoneOptions" :key="tz" :value="tz">
+                      {{ tz }}
+                    </option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none">
+                    expand_more
+                  </span>
+                </div>
+                <p v-if="errors.timezone" class="text-xs text-red-500">{{ errors.timezone }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Summary -->
+          <div v-show="currentStep === 3" class="space-y-4 animate-fadeIn">
+            <div class="border-b border-primary/10 pb-3 mb-4">
+              <h2 class="text-lg font-bold text-navy-900">Review & Confirm</h2>
+              <p class="text-xs text-navy-500">Please review your event details before creating</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Event Details -->
+              <div class="bg-mist-blue/30 rounded-xl p-4 border border-primary/10 space-y-2">
+                <h3 class="text-xs font-bold text-navy-900 uppercase tracking-wide flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-base">info</span>
+                  Event Details
+                </h3>
+                <div class="space-y-1.5 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Title:</span>
+                    <span class="font-semibold text-navy-900">{{ title || '-' }}</span>
+                  </div>
+                  <div v-if="short_description" class="flex justify-between">
+                    <span class="text-navy-600">Description:</span>
+                    <span class="font-medium text-navy-900 text-right max-w-xs">{{ short_description }}</span>
+                  </div>
+                  <div v-if="theme" class="flex justify-between">
+                    <span class="text-navy-600">Theme:</span>
+                    <span class="font-medium text-navy-900">{{ theme }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Organization & Type -->
+              <div class="bg-mist-blue/30 rounded-xl p-4 border border-primary/10 space-y-2">
+                <h3 class="text-xs font-bold text-navy-900 uppercase tracking-wide flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-base">business</span>
+                  Organization & Type
+                </h3>
+                <div class="space-y-1.5 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Organization:</span>
+                    <span class="font-semibold text-navy-900">{{ organizationOptions.find(o => o.value === organisation)?.label || '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Event Type:</span>
+                    <span class="font-semibold text-navy-900">{{ eventTypeOptions.find(t => t.value === event_type)?.label || '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Display Code:</span>
+                    <span class="font-mono font-semibold text-navy-900">{{ display_code || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Schedule -->
+              <div class="bg-mist-blue/30 rounded-xl p-4 border border-primary/10 space-y-2">
+                <h3 class="text-xs font-bold text-navy-900 uppercase tracking-wide flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-base">event</span>
+                  Schedule
+                </h3>
+                <div class="space-y-1.5 text-sm">
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Start:</span>
+                    <span class="font-semibold text-navy-900">{{ start_datetime ? new Date(start_datetime).toLocaleString() : '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">End:</span>
+                    <span class="font-semibold text-navy-900">{{ end_datetime ? new Date(end_datetime).toLocaleString() : '-' }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-navy-600">Timezone:</span>
+                    <span class="font-semibold text-navy-900">{{ timezone || '-' }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </form>
+      </div>
+    </div>
+
+    <!-- Fixed Bottom Stepper Bar -->
+    <div class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-primary/10 shadow-lg">
+      <!-- Progress Bar -->
+      <div class="h-1 bg-navy-100">
+        <div 
+          class="h-full bg-primary transition-all duration-300 ease-out"
+          :style="{ width: `${((currentStep + 1) / steps.length) * 100}%` }"
+        ></div>
+      </div>
+      
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <!-- Stepper -->
+        <div class="flex items-center justify-between mb-4">
+          <div 
+            v-for="(step, index) in steps" 
+            :key="index"
+            class="flex items-center"
+            :class="{ 'flex-1': index < steps.length - 1 }"
+          >
+            <!-- Step Circle -->
+            <div class="flex flex-col items-center">
+              <div 
+                class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all"
+                :class="[
+                  currentStep > index ? 'bg-primary text-white' : 
+                  currentStep === index ? 'bg-primary text-white ring-4 ring-primary/20' : 
+                  'bg-navy-100 text-navy-400'
+                ]"
+              >
+                <span v-if="currentStep > index" class="material-symbols-outlined text-sm">check</span>
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <span 
+                class="text-[10px] font-semibold mt-1 text-center max-w-[70px] leading-tight"
+                :class="currentStep >= index ? 'text-navy-900' : 'text-navy-400'"
+              >
+                {{ step.title }}
+              </span>
+            </div>
+
+            <!-- Connector Line -->
+            <div 
+              v-if="index < steps.length - 1"
+              class="flex-1 h-0.5 mx-2 transition-all"
+              :class="currentStep > index ? 'bg-primary' : 'bg-navy-200'"
+            ></div>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex items-center justify-between">
+          <button
+            v-if="currentStep > 0"
+            type="button"
+            @click="previousStep"
+            class="rounded-xl border border-navy-300 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-700 transition-all hover:bg-navy-50 flex items-center gap-1.5"
+          >
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Previous
+          </button>
+          <button
+            v-else
+            type="button"
+            @click="navigateTo('/my-dashboard')"
+            class="rounded-xl border border-primary/30 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white hover:border-primary"
+          >
+            Cancel
+          </button>
+          
+          <div class="flex gap-2">
+            <button
+              v-if="currentStep < steps.length - 1"
+              type="button"
+              @click="saveDraft"
+              :disabled="isSubmitting"
+              class="rounded-xl border border-navy-300 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-700 transition-all hover:bg-navy-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              <span class="material-symbols-outlined text-sm">draft</span>
+              Save Draft
+            </button>
+            
+            <button
+              v-if="currentStep < steps.length - 1"
+              type="button"
+              @click="nextStep"
+              class="rounded-xl bg-primary px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 shadow-lg shadow-primary/20 flex items-center gap-1.5"
+            >
+              Next
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+            </button>
+            
+            <button
+              v-else
+              type="button"
+              @click="handleStepSubmit"
+              :disabled="isSubmitting"
+              class="rounded-xl bg-primary px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-1.5"
+            >
+              <span v-if="isSubmitting" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+              <span v-else class="material-symbols-outlined text-sm">check_circle</span>
+              {{ isSubmitting ? 'Creating...' : 'Create Event' }}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -267,6 +438,15 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { $notyf } = useNuxtApp()
+
+// Stepper state
+const currentStep = ref(0)
+const steps = [
+  { title: 'Details', icon: 'info' },
+  { title: 'Organization', icon: 'business' },
+  { title: 'Schedule', icon: 'event' },
+  { title: 'Review', icon: 'check_circle' }
+]
 
 // Extended event schema with all fields
 const createEventSchema = z.object({
@@ -402,6 +582,47 @@ const generateDisplayCode = () => {
   return `${prefix}${randomNum}`
 }
 
+// Step navigation
+const nextStep = () => {
+  // Validate current step before proceeding
+  if (currentStep.value === 0) {
+    if (!title.value) {
+      $notyf?.error('Please enter an event title')
+      return
+    }
+  } else if (currentStep.value === 1) {
+    if (!organisation.value || !event_type.value || !display_code.value) {
+      $notyf?.error('Please complete all required fields')
+      return
+    }
+  } else if (currentStep.value === 2) {
+    if (!start_datetime.value || !end_datetime.value || !timezone.value) {
+      $notyf?.error('Please complete the schedule details')
+      return
+    }
+    if (new Date(start_datetime.value) >= new Date(end_datetime.value)) {
+      $notyf?.error('End date must be after start date')
+      return
+    }
+  }
+  
+  if (currentStep.value < steps.length - 1) {
+    currentStep.value++
+  }
+}
+
+const previousStep = () => {
+  if (currentStep.value > 0) {
+    currentStep.value--
+  }
+}
+
+const handleStepSubmit = () => {
+  if (currentStep.value === steps.length - 1) {
+    onSubmit()
+  }
+}
+
 const onSubmit = handleSubmit((formValues) => {
   // Convert datetime-local to ISO format
   const startISO = new Date(formValues.start_datetime).toISOString()
@@ -481,3 +702,20 @@ useHead({
   ]
 })
 </script>
+
+<style scoped>
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+</style>

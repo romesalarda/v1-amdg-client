@@ -4,7 +4,7 @@
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
         <!-- Resources List -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">folder_open</span>
             <div class="flex-1">
@@ -100,7 +100,7 @@
       <!-- Sidebar (4/12) -->
       <div class="lg:col-span-4 space-y-8">
         <!-- Resource Stats -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
               <span class="material-symbols-outlined text-base">analytics</span>
@@ -124,7 +124,7 @@
         </section>
 
         <!-- Guidelines -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
             <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Guidelines</h3>
@@ -140,7 +140,7 @@
 
     <!-- Upload/Edit Modal -->
     <div v-if="showUploadModal || showEditModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModals">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-md w-full">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-md w-full">
         <div class="flex items-center gap-2 px-6 py-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">{{ showEditModal ? 'edit' : 'upload' }}</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">

@@ -4,7 +4,7 @@
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
         <!-- Landing Images Section -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">collections</span>
             <div class="flex-1">
@@ -88,7 +88,7 @@
           </section>
 
         <!-- Preview -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">preview</span>
             <div class="flex-1">
@@ -119,7 +119,7 @@
       <!-- Sidebar (4/12) -->
       <div class="lg:col-span-4 space-y-8">
         <!-- Image Stats -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
               <span class="material-symbols-outlined text-base">analytics</span>
@@ -145,7 +145,7 @@
         </section>
 
         <!-- Guidelines -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">lightbulb</span>
             <h3 class="text-[11px] font-black text-primary uppercase tracking-widest">Image Guidelines</h3>
@@ -162,7 +162,7 @@
 
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModal">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-md w-full">
+      <div class="bg-white  border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-md w-full">
         <div class="flex items-center gap-2 px-6 py-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">add_photo_alternate</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -214,7 +214,7 @@
           </div>
 
           <div class="space-y-2">
-            <label class="flex items-start gap-3 p-3 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+            <label class="flex items-start gap-3 p-3 bg-mist-blue/90 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
               <input
                 type="checkbox"
                 v-model="uploadForm.is_main"

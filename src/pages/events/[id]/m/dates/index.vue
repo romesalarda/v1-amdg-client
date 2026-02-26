@@ -2,7 +2,7 @@
   <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="space-y-6">
       <!-- Page Header -->
-      <section class="bg-gradient-to-br from-white via-mist-blue/20 to-white dark:from-navy-900 dark:via-navy-800 dark:to-navy-900 rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
+      <section class="bg-gradient-to-br from-white via-mist-blue/20 to-white rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
         <div class="flex items-start justify-between gap-4 px-8 py-6">
           <div>
             <div class="flex items-center gap-3 mb-2">
@@ -104,7 +104,7 @@
       <!-- Windows Content -->
       <template v-else>
         <!-- Template Selector (Collapsible) -->
-        <section class="bg-white dark:bg-navy-900 border-2 rounded-2xl shadow-drawn overflow-hidden transition-colors" :class="showTemplateSelector ? 'border-primary/30 bg-primary/5' : 'border-navy-100'">
+        <section class="bg-white border-2 rounded-2xl shadow-drawn overflow-hidden transition-colors" :class="showTemplateSelector ? 'border-primary/30 bg-primary/5' : 'border-navy-100'">
           <button
             @click="showTemplateSelector = !showTemplateSelector"
             class="w-full flex items-center justify-between px-6 py-4 hover:bg-navy-50/50 transition-colors"
@@ -127,7 +127,7 @@
         </section>
 
         <!-- Timeline/Calendar Visualization -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">show_chart</span>
@@ -176,7 +176,7 @@
         </section>
 
         <!-- Windows List -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">list</span>

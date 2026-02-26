@@ -2,9 +2,9 @@
   <!-- Modal Overlay -->
   <div v-if="isOpen" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModal">
     <!-- Modal Container -->
-    <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-xl w-full max-h-[90vh] flex flex-col">
+    <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-xl w-full max-h-[90vh] flex flex-col">
       <!-- Header -->
-      <div class="flex items-center justify-between px-6 py-3 border-b border-navy-50 bg-white dark:bg-navy-900">
+      <div class="flex items-center justify-between px-6 py-3 border-b border-navy-50 bg-white">
         <div class="flex items-center gap-2">
           <span class="material-symbols-outlined text-primary text-lg">{{ window ? 'edit_calendar' : 'add_circle' }}</span>
           <div>
