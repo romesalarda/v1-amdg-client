@@ -32,10 +32,12 @@
               :key="staff.staff_id"
               :staff="staff"
               :permissions="getStaffPermissions(staff.user!)"
+              :roles-list="rolesList"
               :canUpdateStaff="canUpdateStaff"
               :canDeleteStaff="canDeleteStaff"
               @remove="removeStaff(staff.staff_id)"
               @update-permissions="handleUpdatePermissions(staff, $event)"
+              @role-updated="refetchStaff"
             />
           </div>
 

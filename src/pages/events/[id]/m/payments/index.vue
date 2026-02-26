@@ -140,7 +140,7 @@
                     type="button"
                     @click="toggleMethodStatus(method.method_id, !method.is_active)"
                     class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
-                    :class="method.is_active ? 'bg-primary' : 'bg-navy-200'"
+                    :class="method.is_active ? 'bg-primary' : 'bg-navy-300/50' "
                   >
                     <span
                       class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
@@ -174,31 +174,6 @@
           </div>
         </section>
 
-        <!-- Discount Codes -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-            <span class="material-symbols-outlined text-primary">percent</span>
-            <div class="flex-1">
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discount Codes</h2>
-              <p class="text-xs text-navy-400 mt-0.5">Create promotional codes for discounted registration</p>
-            </div>
-            <button
-              @click="showDiscountModal = true"
-              :disabled="!settingsForm.payment_enabled"
-              class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              <span class="material-symbols-outlined text-sm">add</span>
-              Add Discount
-            </button>
-          </div>
-
-          <div class="text-center py-10 text-navy-500">
-            <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">local_offer</span>
-            <p v-if="!settingsForm.payment_enabled" class="text-sm">Enable payments to create discount codes</p>
-            <p v-else class="text-sm">No discount codes configured</p>
-            <p class="text-xs mt-1 text-navy-400">Feature coming soon</p>
-          </div>
-        </section>
       </div>
 
       <!-- Sidebar (4/12) -->
@@ -294,8 +269,8 @@
     <Teleport to="body">
       <div v-if="showPaymentMethodModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closePaymentMethodModal" />
-        <div class="relative w-full max-w-lg bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="flex items-center gap-2 px-6 py-5 border-b border-navy-50">
+        <div class="relative w-full max-w-lg bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn flex flex-col max-h-[90vh]">
+          <div class="flex items-center gap-2 px-6 py-5 border-b border-navy-50 flex-shrink-0">
             <span class="material-symbols-outlined text-primary">credit_card</span>
             <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest flex-1">
               {{ editingPaymentMethod ? 'Edit Payment Method' : 'Add Payment Method' }}
@@ -307,10 +282,10 @@
               <span class="material-symbols-outlined text-base">close</span>
             </button>
           </div>
-          <div class="p-6">
+          <div class="p-6 overflow-y-auto flex-1">
             <PaymentMethodForm
               :model-value="editingPaymentMethod"
-              :event-id="Number(id)"
+              :event-id="event?.data?.id"
               :is-loading="paymentMethodMutationLoading"
               @submit="handlePaymentMethodSubmit"
               @cancel="closePaymentMethodModal"
@@ -369,6 +344,7 @@ import {
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
+import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
@@ -470,7 +446,7 @@ const handlePaymentMethodSubmit = async (data: any) => {
     if (editingPaymentMethod.value) {
       // Update existing payment method
       await updatePaymentMethodMutation.mutateAsync({
-        methodId: editingPaymentMethod.value.id,
+        methodId: editingPaymentMethod.value.method_id,
         body: data,
       })
       toast.add({
@@ -518,22 +494,33 @@ const toggleMethodStatus = async (methodId: string, isActive: boolean) => {
 }
 
 const removePaymentMethod = async (methodId: string) => {
-  if (!confirm('Remove this payment method?')) return
+ Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will permanently remove the payment method.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove it',
+    cancelButtonText: 'Cancel',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await deletePaymentMethodMutation.mutateAsync(methodId)
+        toast.add({
+          title: 'Payment method removed',
+          color: 'green',
+        })
+        refetchPaymentMethods()
+      } catch (error) {
+        toast.add({
+          title: 'Failed to remove payment method',
+          description: error instanceof Error ? error.message : 'An error occurred',
+          color: 'red',
+        })
+      }
+    }
+  })
 
-  try {
-    await deletePaymentMethodMutation.mutateAsync(methodId)
-    toast.add({
-      title: 'Payment method removed',
-      color: 'green',
-    })
-    refetchPaymentMethods()
-  } catch (error) {
-    toast.add({
-      title: 'Failed to remove payment method',
-      description: error instanceof Error ? error.message : 'An error occurred',
-      color: 'red',
-    })
-  }
+  
 }
 
 const getMethodTypeLabel = (methodType: string) => {

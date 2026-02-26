@@ -1,338 +1,345 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
+    <!-- Help Button -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Main Content (2/3) -->
-      <div class="lg:col-span-2 space-y-6">
-        <!-- Ticket Types Section -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-            <span class="material-symbols-outlined text-primary">confirmation_number</span>
-            <div class="flex-1">
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Ticket Types</h2>
-              <p class="text-sm text-navy-600 mt-1">Define ticket categories with scopes and validity periods</p>
+      <!-- Main Content with Stepper (2/3) -->
+      <div class="lg:col-span-2">
+        <div class="flex gap-6">
+          <!-- Stepper -->
+          <div class="hidden md:flex flex-col items-center pt-12 relative" style="width: 48px;">
+            <div class="absolute top-0 bottom-0 left-1/2 w-[1px] -translate-x-1/2 stepper-line"></div>
+            
+            <div class="relative z-10 mb-[380px]">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">1</div>
             </div>
-            <UButton
-              icon="i-heroicons-plus"
-              size="sm"
-              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
-              @click="openTicketTypeModal()"
-              v-if="canCreateRegistration"
-
-            >
-              Add Ticket Type
-            </UButton>
+            <div class="relative z-10 mb-[480px]">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">2</div>
+            </div>
+            <div class="relative z-10">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">3</div>
+            </div>
           </div>
 
-          <div v-if="ticketTypesLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-24" />
-          </div>
-
-          <div v-else-if="ticketTypes.length" class="space-y-3">
-            <div
-              v-for="ticketType in ticketTypes"
-              :key="ticketType.id"
-              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-navy-900">{{ ticketType.title }}</h3>
-                    <UBadge
-                      :label="ticketType.scope?.replace(/_/g, ' ')"
-                      :color="ticketType.scope === 'FULL_EVENT' ? 'blue' : ticketType.scope === 'SINGLE_DAY' ? 'purple' : ticketType.scope === 'WORKSHOP_ONLY' ? 'orange' : 'gray'"
-                      variant="subtle"
-                      size="xs"
-                    />
+          <!-- Sections -->
+          <div class="flex-1 space-y-12">
+            <!-- Booking Packages Section (Step 1) -->
+            <section>
+              <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 1 - Required</span>
+              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+                <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
+                  <span class="material-symbols-outlined text-primary">inventory_2</span>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Booking Packages</h3>
+                    <p class="text-xs text-navy-600 mt-1">Create pricing packages linked to ticket types</p>
                   </div>
-                  <div class="text-sm text-navy-600 space-y-1">
-                    <div v-if="ticketType.valid_from || ticketType.valid_until" class="flex items-center gap-2">
-                      <span class="font-medium">Valid:</span>
-                      <span>
-                        {{ formatDate(ticketType.valid_from) || 'Start' }} - {{ formatDate(ticketType.valid_until) || 'End' }}
-                      </span>
+                  <button
+                    @click="openPackageModal()"
+                    :disabled="!ticketTypes.length"
+                    v-if="canCreateRegistration"
+                    class="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span>Add Package</span>
+                  </button>
+                </div>
+
+                <div class="p-6 space-y-4">
+                  <div v-if="packagesLoading" class="space-y-3">
+                    <div v-for="i in 3" :key="i" class="h-28 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                  </div>
+
+                  <div v-else-if="packages.length" class="space-y-3">
+                    <div
+                      v-for="pkg in packages"
+                      :key="pkg.id"
+                      class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
+                    >
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-navy-900">{{ pkg.name }}</h4>
+                          <p v-if="pkg.description" class="text-sm text-navy-600 mt-1">{{ pkg.description }}</p>
+                          <div class="flex items-center gap-2 mt-2">
+                            <span class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded border border-blue-100">
+                              {{ formatAmount(pkg.base_amount, pkg.base_amount_currency) }}
+                            </span>
+                            <span class="text-xs text-navy-500">
+                              Ticket: {{ getTicketTypeName(pkg.ticket_type) }}
+                            </span>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                          <button
+                            @click="togglePackageStatus(pkg.id, !pkg.is_active)"
+                            :disabled="!canUpdateRegistration"
+                            type="button"
+                            class="w-10 h-5 rounded-full relative transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/30" 
+                            :class="pkg.is_active ? 'bg-primary hover:bg-primary/90' : 'bg-navy-200 hover:bg-navy-300'"
+                          >
+                            <div class="absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-all duration-200 ease-in-out" :class="pkg.is_active ? 'right-1' : 'left-1'"></div>
+                          </button>
+                          <button
+                            @click="openPackageModal(pkg)"
+                            :disabled="!canUpdateRegistration"
+                            class="p-1.5 text-navy-600 hover:text-primary transition-colors disabled:opacity-50"
+                          >
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            @click="removePackage(pkg.id)"
+                            :disabled="!canDeleteRegistration"
+                            class="p-1.5 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                          >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <UToggle
-                    :model-value="ticketType.is_active"
-                    color="green"
-                    @update:model-value="toggleTicketTypeStatus(ticketType.id, $event)"
-                    v-if="canUpdateRegistration"
-                  />
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    size="xs"
-                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
-                    @click="openTicketTypeModal(ticketType)"
-                    v-if="canUpdateRegistration"
 
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    size="xs"
-                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
-                    @click="removeTicketType(ticketType.id)"
-                    v-if="canDeleteRegistration"
-                  />
+                  <div v-else class="text-center py-8 text-navy-600">
+                    <p v-if="!ticketTypes.length">Create ticket types first before adding packages</p>
+                    <p v-else>No packages yet. Create one to get started.</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          <div v-else class="text-center py-8 text-navy-600">
-            <p>No ticket types yet. Create one to get started.</p>
-          </div>
-        </section>
-
-        <!-- Discounts Section -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-            <span class="material-symbols-outlined text-primary">percent</span>
-            <div class="flex-1">
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discounts</h2>
-              <p class="text-sm text-navy-600 mt-1">Configure discount codes and eligibility rules</p>
-            </div>
-            <UButton
-              icon="i-heroicons-plus"
-              size="sm"
-              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
-              @click="openDiscountModal()"
-              :disabled="!packages.length"
-              v-if="canCreateRegistration"
-            >
-              Add Discount
-            </UButton>
-          </div>
-
-          <div v-if="discountsLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-28" />
-          </div>
-
-          <div v-else-if="discounts.length" class="space-y-3">
-            <div
-              v-for="discount in discounts"
-              :key="discount.id"
-              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-navy-900">{{ discount.name }}</h3>
-                    <UBadge
-                      :label="discount.discount_type === 'PERCENTAGE' ? `${(discount as any).percentage}%` : `$${formatAmount((discount as any).amount || 0)}`"
-                      :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'green'"
-                      variant="subtle"
-                      size="xs"
-                    />
-                    <UBadge
-                      v-if="discount.target_package"
-                      :label="discount.target_package.name"
-                      color="purple"
-                      variant="subtle"
-                      size="xs"
-                      icon="i-heroicons-cube"
-                    />
-                    <UBadge
-                      v-if="!discount.active"
-                      label="Inactive"
-                      color="gray"
-                      variant="subtle"
-                      size="xs"
-                    />
+            <!-- Discounts Section (Step 2) -->
+            <section>
+              <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 2 - Recommended</span>
+              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+                <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
+                  <div class="flex-1">
+                    <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Discounts</h3>
+                    <p class="text-xs text-navy-600 mt-1">Configure discount rules with eligibility criteria</p>
                   </div>
-                  <div class="text-sm text-navy-600 space-y-1">
-                    <p v-if="discount.description">{{ discount.description }}</p>
-                    <div v-if="discount.rules && discount.rules.length > 0" class="mt-2">
-                      <details class="cursor-pointer">
-                        <summary class="font-medium text-primary hover:text-navy-700">
-                          {{ discount.rules.length }} eligibility rule{{ discount.rules.length !== 1 ? 's' : '' }}
-                        </summary>
-                        <ul class="mt-2 ml-4 space-y-1 list-disc">
-                          <li v-for="rule in discount.rules" :key="rule.rule_id" class="text-xs">
-                            {{ rule.name }}
-                            <span v-if="!rule.active" class="text-navy-400">(inactive)</span>
-                          </li>
-                        </ul>
-                      </details>
-                    </div>
-                    <p v-else class="text-xs text-navy-400 mt-2">No eligibility rules - available to all</p>
-                  </div>
+                  <button
+                    @click="openDiscountModal()"
+                    :disabled="!packages.length"
+                    v-if="canCreateRegistration"
+                    class="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span>Add Discount</span>
+                  </button>
                 </div>
-                <div class="flex items-center gap-2">
-                  <UToggle
-                    :model-value="discount.active"
-                    color="green"
-                    @update:model-value="toggleDiscountStatus(discount.discount_id, $event)"
-                  />
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    size="xs"
-                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
-                    @click="openDiscountModal(discount)"
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    size="xs"
-                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
-                    @click="removeDiscount(discount.discount_id)"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div v-else class="text-center py-8 text-navy-600">
-            <p>No discounts configured yet</p>
-            <p class="text-xs mt-2 text-navy-400">Create discounts with eligibility rules for your event</p>
-          </div>
-        </section>
-
-        <!-- Booking Packages Section -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-            <span class="material-symbols-outlined text-primary">inventory_2</span>
-            <div class="flex-1">
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Booking Packages</h2>
-              <p class="text-sm text-navy-600 mt-1">Create pricing packages linked to ticket types</p>
-            </div>
-            <UButton
-              icon="i-heroicons-plus"
-              size="sm"
-              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
-              @click="openPackageModal()"
-              :disabled="!ticketTypes.length"
-              v-if="canCreateRegistration"
-            >
-              Add Package
-            </UButton>
-          </div>
-
-          <div v-if="packagesLoading" class="space-y-3">
-            <USkeleton v-for="i in 3" :key="i" class="h-28" />
-          </div>
-
-          <div v-else-if="packages.length" class="space-y-3">
-            <div
-              v-for="pkg in packages"
-              :key="pkg.id"
-              class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-2">
-                    <h3 class="font-semibold text-navy-900">{{ pkg.name }}</h3>
+                <div class="p-6 space-y-4">
+                  <div v-if="discountsLoading" class="space-y-3">
+                    <div v-for="i in 3" :key="i" class="h-28 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
                   </div>
-                  <div class="text-sm text-navy-600 space-y-1">
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium">Ticket Type:</span>
-                      <span>{{ getTicketTypeName(pkg.ticket_type) }}</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                      <span class="font-medium">Price:</span>
-                      <span class="text-primary font-semibold">{{ formatAmount(pkg.base_amount, pkg.base_amount_currency) }}</span>
+
+                  <div v-else-if="discounts.length" class="space-y-3">
+                    <div
+                      v-for="discount in discounts"
+                      :key="discount.discount_id"
+                      class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
+                    >
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-2 mb-2">
+                            <h3 class="font-semibold text-navy-900">{{ discount.name }}</h3>
+                            <!-- <span class="px-2 py-0.5 bg-green-100 text-green-700 text-[10px] font-bold rounded">
+                              {{ discount.discount_type === 'PERCENTAGE' ? `${discount.discount_value}%` : formatAmount(discount.discount_value, discount.) }}
+                            </span> -->
+                          </div>
+                          <div class="text-sm text-navy-600 space-y-1">
+                            <div v-if="discount.description" class="mb-1">
+                              {{ discount.description }}
+                            </div>
+                            <div v-if="discount.rules">
+                              <ul class="list-disc list-inside text-xs text-navy-500">
+                                <li v-for="(rule, index) in discount.rules" :key="index">
+                                  {{ rule.name}}
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                          <button
+                            @click="toggleDiscountStatus(discount.discount_id, !discount.active)"
+                            type="button"
+                            class="w-10 h-5 rounded-full relative transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary/30" 
+                            :class="discount.active ? 'bg-primary hover:bg-primary/90' : 'bg-navy-200 hover:bg-navy-300'"
+                          >
+                            <div class="absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-all duration-200 ease-in-out" :class="discount.active ? 'right-1' : 'left-1'"></div>
+                          </button>
+                          <button
+                            @click="openDiscountModal(discount)"
+                            class="p-1.5 text-navy-600 hover:text-primary transition-colors"
+                          >
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            @click="removeDiscount(discount.discount_id)"
+                            class="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div class="flex items-center gap-2">
-                  <UToggle
-                    :model-value="pkg.is_active"
-                    color="green"
-                    @update:model-value="togglePackageStatus(pkg.id, $event)"
-                    v-if="canUpdateRegistration"
-                  />
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    size="xs"
-                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
-                    @click="openPackageModal(pkg)"
-                    v-if="canUpdateRegistration"
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    size="xs"
-                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
-                    @click="removePackage(pkg.id)"
-                    v-if="canDeleteRegistration"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
 
-          <div v-else class="text-center py-8 text-navy-600">
-            <p v-if="!ticketTypes.length">Create ticket types first before adding packages</p>
-            <p v-else>No packages yet. Create one to get started.</p>
-          </div>
-        </section>
-
-        <!-- Alternative Sign-ins Section -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-            <span class="material-symbols-outlined text-primary">login</span>
-            <div class="flex-1">
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Alternative Sign-ins</h2>
-              <p class="text-sm text-navy-600 mt-1">Configure additional check-in methods for attendees</p>
-            </div>
-            <UButton
-              icon="i-heroicons-plus"
-              size="sm"
-              class="bg-primary text-white rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
-              @click="openSignInModal()"
-              v-if="canCreateRegistration"
-            >
-              Add Method
-            </UButton>
-          </div>
-
-          <div v-if="signInsLoading" class="space-y-3">
-            <USkeleton v-for="i in 2" :key="i" class="h-16" />
-          </div>
-
-          <div v-else-if="signIns.length" class="space-y-3">
-            <div
-              v-for="signIn in signIns"
-              :key="signIn.id"
-              class="p-3 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
-            >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
-                  <h3 class="font-semibold text-navy-900">{{ signIn.title }}</h3>
-                  <p v-if="(signIn as any).description" class="text-sm text-navy-600 mt-1">
-                    {{ (signIn as any).description }}
-                  </p>
-                  <div v-if="(signIn as any).format_match" class="mt-2 flex items-center gap-2">
-                    <UBadge color="blue" variant="subtle" size="xs">
-                      Pattern: {{ getPatternLabel((signIn as any).format_match) }}
-                    </UBadge>
-                    <span v-if="signIn.max_uses_per_signin" class="text-xs text-navy-500">
-                      Max uses: {{ signIn.max_uses_per_signin }}
-                    </span>
+                  <div v-else class="text-center py-8 text-navy-600">
+                    <p>No discounts configured yet</p>
+                    <p class="text-xs mt-2 text-navy-400">Create discounts with eligibility rules for your event</p>
                   </div>
                 </div>
-                <div class="flex items-center gap-2">
-                  <UButton
-                    icon="i-heroicons-pencil"
-                    size="xs"
-                    class="bg-white border border-navy-100 text-primary rounded-lg hover:bg-mist-blue/60 transition-all"
-                    @click="openSignInModal(signIn)"
-                  />
-                  <UButton
-                    icon="i-heroicons-trash"
-                    size="xs"
-                    class="bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-all"
-                    @click="removeSignIn(signIn.id)"
-                  />
+              </div>
+            </section>
+
+            <!-- Ticket Types Section (Step 3) -->
+            <section>
+              <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 3 - Required</span>
+              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+                <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
+                  <span class="material-symbols-outlined text-primary">confirmation_number</span>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Ticket Types</h3>
+                    <p class="text-xs text-navy-600 mt-1">Define ticket categories with scopes and validity periods</p>
+                  </div>
+                  <button
+                    @click="openTicketTypeModal()"
+                    v-if="canCreateRegistration"
+                    class="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight"
+                  >
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span>Add Ticket Type</span>
+                  </button>
+                </div>
+
+                <div class="p-6 space-y-4">
+                  <div v-if="ticketTypesLoading" class="space-y-3">
+                    <div v-for="i in 3" :key="i" class="h-24 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                  </div>
+
+                  <div v-else-if="ticketTypes.length" class="space-y-3">
+                    <div
+                      v-for="ticketType in ticketTypes"
+                      :key="ticketType.id"
+                      class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
+                    >
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <div class="flex items-center gap-2 mb-2">
+                            <h3 class="font-semibold text-navy-900">{{ ticketType.title }}</h3>
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded font-medium">
+                              {{ ticketType.scope?.replace(/_/g, ' ') }}
+                            </span>
+                          </div>
+                          <div class="text-sm text-navy-600 space-y-1">
+                            <div v-if="ticketType.valid_from || ticketType.valid_until" class="flex items-center gap-2">
+                              <span class="font-medium">Valid:</span>
+                              <span>
+                                {{ formatDate(ticketType.valid_from) || 'Start' }} - {{ formatDate(ticketType.valid_until) || 'End' }}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                          <button
+                            @click="toggleTicketTypeStatus(ticketType.id, !ticketType.is_active)"
+                            :disabled="!canUpdateRegistration"
+                            type="button"
+                            class="w-10 h-5 rounded-full relative transition-all duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-primary/30" 
+                            :class="ticketType.is_active ? 'bg-primary hover:bg-primary/90' : 'bg-navy-200 hover:bg-navy-300'"
+                          >
+                            <div class="absolute top-1 w-3 h-3 bg-white rounded-full shadow-sm transition-all duration-200 ease-in-out" :class="ticketType.is_active ? 'right-1' : 'left-1'"></div>
+                          </button>
+                          <button
+                            @click="openTicketTypeModal(ticketType)"
+                            :disabled="!canUpdateRegistration"
+                            class="p-1.5 text-navy-600 hover:text-primary transition-colors disabled:opacity-50"
+                          >
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            @click="removeTicketType(ticketType.id)"
+                            :disabled="!canDeleteRegistration"
+                            class="p-1.5 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                          >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-center py-8 text-navy-600">
+                    <p>No ticket types yet. Create one to get started.</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </section>
 
-          <div v-else class="text-center py-8 text-navy-600">
-            <p>No alternative sign-in methods configured</p>
-            <p class="text-xs mt-2 text-navy-400">Add methods like QR codes, RFID, etc.</p>
+            <!-- Alternative Sign-ins Section -->
+            <section class="mt-8">
+              <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+                <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
+                  <span class="material-symbols-outlined text-primary">login</span>
+                  <div class="flex-1">
+                    <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Alternative Sign-ins</h3>
+                    <p class="text-xs text-navy-600 dark:text-slate-400 mt-1">Optional: Configure alternative check-in methods</p>
+                  </div>
+                  <button
+                    @click="openSignInModal()"
+                    v-if="canCreateRegistration"
+                    class="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight"
+                  >
+                    <span class="material-symbols-outlined text-sm">add</span>
+                    <span>Add Method</span>
+                  </button>
+                </div>
+
+                <div class="p-6">
+                  <div v-if="signInsLoading" class="space-y-3">
+                    <div v-for="i in 2" :key="i" class="h-16 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse"></div>
+                  </div>
+
+                  <div v-else-if="signIns.length" class="space-y-3">
+                    <div
+                      v-for="signIn in signIns"
+                      :key="signIn.id"
+                      class="p-3 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
+                    >
+                      <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                          <h4 class="font-semibold text-navy-900 text-sm">{{ signIn.title }}</h4>
+                          <p v-if="signIn.description" class="text-xs text-navy-600 mt-1">{{ signIn.description }}</p>
+                          <div class="flex items-center gap-2 mt-2 text-xs text-navy-500">
+                            <span v-if="signIn.format_match">Pattern: {{ getPatternLabel(signIn.format_match) }}</span>
+                            <span v-if="signIn.max_uses_per_signin">• Max uses: {{ signIn.max_uses_per_signin }}</span>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                          <button
+                            @click="openSignInModal(signIn)"
+                            class="p-1.5 text-navy-600 hover:text-primary transition-colors"
+                          >
+                            <span class="material-symbols-outlined text-lg">edit</span>
+                          </button>
+                          <button
+                            @click="removeSignIn(signIn.id)"
+                            class="p-1.5 text-red-400 hover:text-red-600 transition-colors"
+                          >
+                            <span class="material-symbols-outlined text-lg">delete</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div v-else class="text-center py-8 text-navy-600">
+                    <p>No alternative sign-in methods configured</p>
+                    <p class="text-xs mt-2 text-navy-400">Add methods like QR codes, RFID, etc.</p>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
-        </section>
+        </div>
       </div>
 
       <!-- Sidebar (1/3) -->
@@ -341,26 +348,26 @@
         <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="bg-primary px-6 py-4">
             <h3 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
-              <span class="material-symbols-outlined text-base">dashboard</span>
+              <span class="material-symbols-outlined text-base">analytics</span>
               Booking Status
             </h3>
           </div>
           <div class="p-6 space-y-4">
             <div>
-              <div class="text-2xl font-bold text-navy-900">{{ ticketTypes.length }}</div>
-              <div class="text-sm text-navy-600">Total Ticket Types</div>
+              <p class="text-xs text-navy-500 mb-1">Ticket Types</p>
+              <p class="text-2xl font-bold text-primary">{{ ticketTypes.length }}</p>
             </div>
             <div>
-              <div class="text-2xl font-bold text-navy-900">{{ packages.length }}</div>
-              <div class="text-sm text-navy-600">Total Packages</div>
+              <p class="text-xs text-navy-500 mb-1">Packages</p>
+              <p class="text-2xl font-bold text-primary">{{ packages.length }}</p>
             </div>
             <div>
-              <div class="text-2xl font-bold text-green-600">{{ activePackagesCount }}</div>
-              <div class="text-sm text-navy-600">Active Packages</div>
+              <p class="text-xs text-navy-500 mb-1">Active Discounts</p>
+              <p class="text-2xl font-bold text-primary">{{ discounts.filter((d: any) => d.active).length }}</p>
             </div>
             <div>
-              <div class="text-2xl font-bold text-blue-600">{{ discounts.length }}</div>
-              <div class="text-sm text-navy-600">Configured Discounts</div>
+              <p class="text-xs text-navy-500 mb-1">Sign-in Methods</p>
+              <p class="text-2xl font-bold text-primary">{{ signIns.length }}</p>
             </div>
           </div>
         </section>
@@ -373,22 +380,117 @@
           </div>
           <div class="p-6 text-sm space-y-3 text-navy-600">
             <p>
-              <strong>Ticket Types</strong> define the scope and validity of tickets (full event, single day, or custom range).
+              This page is for configuring your event's booking system. Follow the steps in order to set up your ticketing and registration options.
             </p>
             <p>
-              <strong>Packages</strong> are pricing tiers linked to ticket types. Create multiple packages for different pricing options.
+              <strong>Step 1:</strong> Create booking packages to define base pricing tiers (e.g., Standard, Early Bird).
             </p>
             <p>
-              <strong>Alternative Sign-ins</strong> provide additional ways for attendees to check in (QR codes, RFID cards, etc.).
+              <strong>Step 2:</strong> Add discounts for special categories within packages (e.g., Students, Staff).
             </p>
+            <p>
+              <strong>Step 3:</strong> Define ticket types to control access scope (e.g., Single Day, Full Event, Workshop Pass).
+            </p>
+             <button
+              @click="showSetupGuide = true"
+              class="flex items-center space-x-2 px-4 py-2 border-2 border-primary rounded-xl font-semibold text-xs hover:bg-primary hover:text-white transition-all shadow-sm"
+            >
+              <span class="material-symbols-outlined text-base">help</span>
+              <span>Setup Guide</span>
+            </button>
           </div>
         </section>
       </div>
     </div>
 
+    <!-- Setup Guide Modal -->
+    <div v-if="showSetupGuide" @click.self="showSetupGuide = false" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary text-2xl">school</span>
+          <h3 class="text-base font-black text-primary dark:text-white uppercase tracking-widest">Booking Setup Guide</h3>
+        </div>
+
+        <div class="space-y-6 text-navy-900 dark:text-slate-200">
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+              1
+            </div>
+            <div class="flex-1">
+              <h4 class="font-bold text-primary mb-2">Booking Packages (Required)</h4>
+              <p class="text-sm text-primary">
+                Start by creating booking packages. These define your base pricing tiers and what attendees will purchase. 
+                For example: "Standard Registration", "Early Bird Special", or "VIP Package". Each package is linked to 
+                one or more ticket types and has a base price.
+              </p>
+              <p class="text-xs text-navy-500 mt-2 italic text-primary">
+                💡 Tip: Create different packages for different registration periods or attendee categories.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+              2
+            </div>
+            <div class="flex-1">
+              <h4 class="font-bold text-primary dark:text-white mb-2">Discounts (Optional)</h4>
+              <p class="text-sm leading-relaxed text-navy-700 dark:text-slate-300 text-primary">
+                Add discounts for special groups within each package. For instance, students might get 10% off the 
+                Standard Registration package, or event staff might get 20% off. You can define eligibility rules 
+                to automatically apply discounts based on attendee attributes like age, role, or organization.
+              </p>
+              <p class="text-xs text-navy-500 mt-2 italic text-primary">
+                💡 Tip: Use eligibility rules to automatically validate who qualifies for each discount.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm">
+              3
+            </div>
+            <div class="flex-1">
+              <h4 class="font-bold text-primary dark:text-white mb-2">Ticket Types (Required)</h4>
+              <p class="text-sm leading-relaxed text-navy-700 dark:text-slate-300 text-primary">
+                Finally, create ticket types to define what access attendees get. These control authorization and scope. 
+                For example: "Single Day Pass" (one day only), "Full Event Pass" (all days), or "Workshop Pass" (workshops only). 
+                Ticket types have validity periods and define what parts of your event attendees can access.
+              </p>
+              <p class="text-xs text-navy-500 mt-2 italic text-primary">
+                💡 Tip: Ticket types must be created before packages, as packages reference them.
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-blue-600 text-xl">info</span>
+              <div class="text-sm">
+                <p class="font-semibold text-blue-400 mb-1">Order Matters!</p>
+                <p class="text-blue-800 text-xs leading-relaxed">
+                  Create <strong>Ticket Types</strong> first, then <strong>Packages</strong> (which reference ticket types), 
+                  and finally <strong>Discounts</strong> (which apply to specific packages).
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end mt-6 pt-4 border-t border-navy-50">
+          <button
+            @click="showSetupGuide = false"
+            class="bg-primary text-white px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-navy-600 transition-all"
+          >
+            Got It!
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Add/Edit Ticket Type Modal -->
-    <UModal v-model="showTicketTypeModal" size="lg">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+    <div v-if="showTicketTypeModal" @click.self="closeTicketTypeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">confirmation_number</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -404,11 +506,11 @@
           @cancel="closeTicketTypeModal"
         />
       </div>
-    </UModal>
+    </div>
 
     <!-- Add/Edit Package Modal -->
-    <UModal v-model="showPackageModal" size="xl">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+    <div v-if="showPackageModal" @click.self="closePackageModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">inventory_2</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -424,11 +526,11 @@
           @cancel="closePackageModal"
         />
       </div>
-    </UModal>
+    </div>
 
     <!-- Add/Edit Alternative Sign-in Modal -->
-    <UModal v-model="showSignInModal" size="lg">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
+    <div v-if="showSignInModal" @click.self="closeSignInModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">login</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -532,29 +634,31 @@
           </div>
         </form>
       </div>
-    </UModal>
+    </div>
 
     <!-- Add/Edit Discount Modal -->
-    <UModal v-model="showDiscountModal" size="xl">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
-        <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
-          <span class="material-symbols-outlined text-primary">percent</span>
+    <div v-if="showDiscountModal" @click.self="closeDiscountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-3xl w-full">
+        <div class="flex items-center gap-3 px-6 py-4 border-b border-navy-50">
+          <span class="material-symbols-outlined text-primary text-xl">percent</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
             {{ editingDiscount ? 'Edit Discount' : 'Add Discount' }}
           </h3>
         </div>
 
-        <DiscountForm
-          :model-value="editingDiscount"
-          :event-id="Number(id)"
-          :is-loading="discountMutationLoading"
-          :packages="packages"
-          :selected-package-id="selectedPackageForDiscount"
-          @submit="handleDiscountSubmit"
-          @cancel="closeDiscountModal"
-        />
+        <div class="relative h-[600px] px-6 py-4 w-full">
+          <DiscountForm
+            :model-value="editingDiscount"
+            :event-id="Number(id)"
+            :is-loading="discountMutationLoading"
+            :packages="packages"
+            :selected-package-id="selectedPackageForDiscount"
+            @submit="handleDiscountSubmit"
+            @cancel="closeDiscountModal"
+          />
+        </div>
       </div>
-    </UModal>
+    </div>
   </EventManagementLayout>
 </template>
 
@@ -595,6 +699,7 @@ import BookingPackageForm from '~/components/events/forms/BookingPackageForm.vue
 import DiscountForm from '~/components/events/forms/DiscountForm.vue'
 
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
+import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
@@ -625,6 +730,9 @@ const signIns = computed(() => signInsData.value?.data?.results || [])
 const discounts = computed(() => discountsData.value?.data?.results || [])
 
 const activePackagesCount = computed(() => packages.value.filter((p: any) => p.is_active).length)
+
+// Setup Guide Modal
+const showSetupGuide = ref(false)
 
 // Ticket Type Modal & CRUD
 const showTicketTypeModal = ref(false)
@@ -708,23 +816,35 @@ const toggleTicketTypeStatus = async (ticketTypeId: number, isActive: boolean) =
 }
 
 const removeTicketType = async (ticketTypeId: number) => {
-  if (!confirm('Remove this ticket type? This may affect existing packages.')) return
 
-  try {
-    await deleteTicketTypeMutation.mutateAsync(ticketTypeId)
-    toast.add({
-      title: 'Ticket type removed',
-      color: 'green',
-    })
-    refetchTicketTypes()
-    refetchPackages()
-  } catch (error) {
-    toast.add({
-      title: 'Failed to remove ticket type',
-      description: error instanceof Error ? error.message : 'An error occurred',
-      color: 'red',
-    })
-  }
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will remove the ticket type and all associated references.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove it!',
+    cancelButtonText: 'Cancel',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+          await deleteTicketTypeMutation.mutateAsync(ticketTypeId)
+          toast.add({
+            title: 'Ticket type removed',
+            color: 'green',
+          })
+          refetchTicketTypes()
+          refetchPackages()
+        } catch (error) {
+          toast.add({
+            title: 'Failed to remove ticket type',
+            description: error instanceof Error ? error.message : 'An error occurred',
+            color: 'red',
+          })
+        }   
+      }
+  })
+
+ 
 }
 
 // Package Modal & CRUD
@@ -803,22 +923,32 @@ const togglePackageStatus = async (packageId: number, isActive: boolean) => {
 }
 
 const removePackage = async (packageId: number) => {
-  if (!confirm('Remove this booking package?')) return
 
-  try {
-    await deletePackageMutation.mutateAsync(packageId)
-    toast.add({
-      title: 'Package removed',
-      color: 'green',
-    })
-    refetchPackages()
-  } catch (error) {
-    toast.add({
-      title: 'Failed to remove package',
-      description: error instanceof Error ? error.message : 'An error occurred',
-      color: 'red',
-    })
-  }
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will remove the package and all associated discounts.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove it!',
+    cancelButtonText: 'Cancel',
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        await deletePackageMutation.mutateAsync(packageId)
+        toast.add({
+          title: 'Package removed',
+          color: 'green',
+        })
+        refetchPackages()
+      } catch (error) {
+        toast.add({
+          title: 'Failed to remove package',
+          description: error instanceof Error ? error.message : 'An error occurred',
+          color: 'red',
+        })
+      }
+    }
+  })
 }
 
 // Discount Modal & CRUD
@@ -857,37 +987,15 @@ const handleDiscountSubmit = async (data: any) => {
       percentage: data.discount_type === 'PERCENTAGE' ? data.percentage : undefined,
       amount: data.discount_type === 'FIXED' ? data.amount : undefined,
       active: data.active,
+      rules: data.rules || [],  // Include rules in main payload
     }
 
-    let discountId: number
-
     if (editingDiscount.value) {
-      // Update existing discount
-      const result = await updateDiscountMutation.mutateAsync({
+      // Update existing discount - now includes rules in one call
+      await updateDiscountMutation.mutateAsync({
         discountId: editingDiscount.value.discount_id,
         body: discountData,
       })
-      discountId = editingDiscount.value.id
-
-      // Smart rule diffing: only modify what changed
-      const existingRules = editingDiscount.value.rules || []
-      const newRules = data.rules || []
-      
-      // Since rules don't have IDs in the form (they're created fresh),
-      // we'll use a simple strategy: delete all and recreate
-      // This is simpler than trying to match rules by content
-      // Future enhancement: Add rule IDs to form to enable smart diffing
-      const deletePromises = existingRules.map((rule: any) =>
-        deleteDiscountRuleMutation.mutateAsync(rule.rule_id)
-      )
-      
-      try {
-        await Promise.allSettled(deletePromises)
-      } catch (error) {
-        console.error('Error deleting rules:', error)
-        // Continue with creation even if deletion fails
-      }
-
       toast.add({
         title: 'Discount updated',
         color: 'green',
@@ -903,47 +1011,16 @@ const handleDiscountSubmit = async (data: any) => {
         return
       }
 
-      // Use the new package-specific endpoint
-      const result = await createDiscountMutation.mutateAsync({
+      // Use the package-specific endpoint - now includes rules in one call
+      await createDiscountMutation.mutateAsync({
         packageId,
         discount: discountData
       })
-      discountId = (result.data as any)?.id
-
       toast.add({
         title: 'Discount created',
         color: 'green',
       })
     }
-
-    // Create rules if any
-    if (data.rules && data.rules.length > 0) {
-      const createRulePromises = data.rules.map((rule: any) =>
-        createDiscountRuleMutation.mutateAsync({
-          rule_type: rule.rule_type,
-          name: rule.name,
-          description: rule.description || undefined,
-          value: rule.value || undefined,
-          active: rule.active ?? true,
-          discount: discountId,
-        })
-      )
-
-      try {
-        const results = await Promise.allSettled(createRulePromises)
-        const failed = results.filter((r: any) => r.status === 'rejected').length
-        if (failed > 0) {
-          toast.add({
-            title: `Warning: ${failed} rule(s) failed to create`,
-            color: 'orange',
-          })
-        }
-      } catch (error) {
-        // Individual failures already handled by Promise.allSettled
-        console.error('Error creating rules:', error)
-      }
-    }
-
     closeDiscountModal()
     refetchDiscounts()
   } catch (error) {
@@ -976,9 +1053,16 @@ const toggleDiscountStatus = async (discountId: string, isActive: boolean) => {
 }
 
 const removeDiscount = async (discountId: string) => {
-  if (!confirm('Remove this discount? This will also delete all associated rules.')) return
 
-  try {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: 'This will remove the discount and all associated rules.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, remove it!',
+    cancelButtonText: 'Cancel',
+  }).then(async (result) => {
+    try {
     await deleteDiscountMutation.mutateAsync(discountId)
     toast.add({
       title: 'Discount removed',
@@ -992,6 +1076,7 @@ const removeDiscount = async (discountId: string) => {
       color: 'red',
     })
   }
+  })
 }
 
 // Alternative Sign-in Modal & CRUD
@@ -1147,8 +1232,6 @@ const onSubmitSignIn = async (e: Event) => {
 }
 
 const removeSignIn = async (signInId: string) => {
-  if (!confirm('Remove this sign-in method?')) return
-
   try {
     await deleteSignInMutation.mutateAsync(signInId)
     toast.add({
@@ -1198,3 +1281,11 @@ const getPatternLabel = (formatMatch: string | null): string => {
   return pattern ? pattern.example : 'Custom'
 }
 </script>
+
+<style scoped>
+.stepper-line {
+  background-image: linear-gradient(to bottom, #0F172A 50%, transparent 50%);
+  background-size: 1px 12px;
+  background-repeat: repeat-y;
+}
+</style>

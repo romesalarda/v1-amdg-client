@@ -12,23 +12,22 @@ export const paymentMethodSchema = z.object({
   method_type: paymentMethodTypeEnum,
   is_active: z.boolean().default(true),
   
-  // Bank transfer fields
+  // Bank transfer fields - optional with optional inner fields
   provided_details: z.object({
-    account_name: z.string().min(1, 'Account name is required'),
-    sort_code: z.string().min(1, 'Sort code is required'),
-    account_number: z.string().min(1, 'Account number is required'),
+    account_name: z.string().optional(),
+    sort_code: z.string().optional(),
+    account_number: z.string().optional(),
   }).optional(),
-  
-  // Stripe fields
-  stripe_account_id: z.string().optional(),
-  use_platform_account: z.boolean().optional(),
 }).refine(
   (data) => {
-    // If method_type is BANK_TRANSFER, require provided_details
+    // If method_type is BANK_TRANSFER, require provided_details with all fields
     if (data.method_type === 'BANK_TRANSFER') {
       return data.provided_details !== undefined && 
+             data.provided_details.account_name && 
              data.provided_details.account_name.length > 0 &&
+             data.provided_details.sort_code && 
              data.provided_details.sort_code.length > 0 &&
+             data.provided_details.account_number && 
              data.provided_details.account_number.length > 0
     }
     return true
@@ -36,19 +35,6 @@ export const paymentMethodSchema = z.object({
   { 
     message: 'Bank transfer details are required for bank transfer payment methods', 
     path: ['provided_details'] 
-  }
-).refine(
-  (data) => {
-    // If method_type is STRIPE, require either stripe_account_id or use_platform_account
-    if (data.method_type === 'STRIPE') {
-      return (data.stripe_account_id && data.stripe_account_id.length > 0) || 
-             data.use_platform_account === true
-    }
-    return true
-  },
-  { 
-    message: 'Either Stripe account ID or platform account must be specified for Stripe payments', 
-    path: ['stripe_account_id'] 
   }
 )
 

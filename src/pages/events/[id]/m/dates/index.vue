@@ -367,7 +367,19 @@ function handleDateClick(date: Date) {
   const endDate = new Date(date)
   endDate.setHours(23, 59, 59, 999)
   // Set type to Refund Window for quick creation
-  selectedWindow.value = undefined
+  const now = new Date().toISOString()
+  // selectedWindow.value = {
+  //   availability_id: '',
+  //   name: '',
+  //   description: '',
+  //   availability_type: 'REFUND_WINDOW',
+  //   available_from: startDate.toISOString(),
+  //   available_to: endDate.toISOString(),
+  //   timezone: eventTimezone.value,
+  //   is_active: true,
+  //   created_at: now,
+  //   updated_at: now,
+  // }
   presetStartDate.value = startDate.toISOString()
   presetEndDate.value = endDate.toISOString()
   isModalOpen.value = true

@@ -117,34 +117,20 @@
 
     <!-- Stripe Fields -->
     <template v-if="method_type === 'STRIPE'">
-      <div class="space-y-4 p-4 bg-mist-blue/40 rounded-lg">
-        <h4 class="font-semibold text-sm text-background-dark-600">Stripe Configuration</h4>
-        
-        <label class="flex items-center gap-2">
-          <input
-            v-model="usePlatformAccount"
-            v-bind="usePlatformAccountAttrs"
-            type="checkbox"
-            class="h-4 w-4 rounded border-gray-300 accent-[rgb(0,33,71)]"
-          />
-          <span class="text-sm text-background-dark-600">Use platform Stripe account</span>
-        </label>
-
-        <div v-if="!usePlatformAccount" class="space-y-2">
-          <label class="block text-sm font-medium text-background-dark-600" for="stripe-account-id">
-            Stripe Account ID
-          </label>
-          <input
-            id="stripe-account-id"
-            v-model="stripeAccountId"
-            v-bind="stripeAccountIdAttrs"
-            type="text"
-            placeholder="acct_xxxxxxxxxxxxx"
-            class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-          <p v-if="errors.stripe_account_id" class="text-xs text-red-500">
-            {{ errors.stripe_account_id }}
-          </p>
+      <div class="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+        <div class="flex items-start gap-3">
+          <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">info</span>
+          <div class="flex-1 space-y-2">
+            <h4 class="font-semibold text-sm text-primary">Platform Stripe Account</h4>
+            <p class="text-xs text-navy-600 leading-relaxed">
+              Stripe payments are processed through the official platform account for security and compliance. 
+              This ensures PCI compliance, fraud protection, and seamless transaction management.
+            </p>
+            <div class="flex items-center gap-2 pt-1">
+              <span class="material-symbols-outlined text-green-600 text-base">check_circle</span>
+              <span class="text-xs font-medium text-green-600">Automatically configured</span>
+            </div>
+          </div>
         </div>
       </div>
     </template>
@@ -201,7 +187,7 @@ import {
 
 interface Props {
   modelValue?: any
-  eventId: number
+  eventId: number | undefined
   isLoading?: boolean
 }
 
@@ -247,8 +233,6 @@ const { errors, handleSubmit, defineField, resetForm } = useForm({
       sort_code: '',
       account_number: '',
     },
-    stripe_account_id: props.modelValue?.stripe_account_id || '',
-    use_platform_account: props.modelValue?.use_platform_account || false,
   },
 })
 
@@ -262,10 +246,6 @@ const [isActive, isActiveAttrs] = defineField('is_active')
 const [accountName, accountNameAttrs] = defineField('provided_details.account_name')
 const [sortCode, sortCodeAttrs] = defineField('provided_details.sort_code')
 const [accountNumber, accountNumberAttrs] = defineField('provided_details.account_number')
-
-// Stripe fields
-const [stripeAccountId, stripeAccountIdAttrs] = defineField('stripe_account_id')
-const [usePlatformAccount, usePlatformAccountAttrs] = defineField('use_platform_account')
 
 // Handle form submission
 const onSubmit = handleSubmit((values) => {
@@ -285,16 +265,17 @@ const onSubmit = handleSubmit((values) => {
       account_number: values.provided_details.account_number,
     }
   } else if (values.method_type === 'STRIPE') {
-    cleanedData.provided_details = {}
-    if (values.use_platform_account) {
-      cleanedData.provided_details.use_platform_account = true
-    } else if (values.stripe_account_id) {
-      cleanedData.provided_details.stripe_account_id = values.stripe_account_id
+    // Always use platform account for Stripe
+    cleanedData.provided_details = {
+      use_platform_account: true
     }
   } else if (values.method_type === 'CASH') {
     // No provided_details needed for cash
     cleanedData.provided_details = {}
   }
+
+  console.log("s");
+  
 
   emit('submit', cleanedData)
 })
@@ -313,8 +294,6 @@ watch(() => props.modelValue, (newValue) => {
           sort_code: '',
           account_number: '',
         },
-        stripe_account_id: newValue.stripe_account_id || '',
-        use_platform_account: newValue.use_platform_account || false,
       },
     })
   }

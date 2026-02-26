@@ -3182,9 +3182,10 @@ export type DietaryRequirementRequest = {
 };
 
 /**
- * Create/Update serializer for Discount with validation.
+ * Create/Update serializer for Discount with validation and nested rules.
  *
  * Note: target_type and target_id should only be set internally by the system.
+ * Supports nested rule creation/update with a maximum of 2 rules per discount.
  */
 export type DiscountCreateUpdate = {
     name: string;
@@ -3203,9 +3204,10 @@ export type DiscountCreateUpdate = {
 };
 
 /**
- * Create/Update serializer for Discount with validation.
+ * Create/Update serializer for Discount with validation and nested rules.
  *
  * Note: target_type and target_id should only be set internally by the system.
+ * Supports nested rule creation/update with a maximum of 2 rules per discount.
  */
 export type DiscountCreateUpdateRequest = {
     name: string;
@@ -9775,9 +9777,10 @@ export type PatchedDietaryRequirementRequest = {
 };
 
 /**
- * Create/Update serializer for Discount with validation.
+ * Create/Update serializer for Discount with validation and nested rules.
  *
  * Note: target_type and target_id should only be set internally by the system.
+ * Supports nested rule creation/update with a maximum of 2 rules per discount.
  */
 export type PatchedDiscountCreateUpdateRequest = {
     name?: string;
@@ -14518,9 +14521,10 @@ export type DietaryRequirementWritable = {
 };
 
 /**
- * Create/Update serializer for Discount with validation.
+ * Create/Update serializer for Discount with validation and nested rules.
  *
  * Note: target_type and target_id should only be set internally by the system.
+ * Supports nested rule creation/update with a maximum of 2 rules per discount.
  */
 export type DiscountCreateUpdateRequestWritable = {
     name: string;
@@ -14538,6 +14542,12 @@ export type DiscountCreateUpdateRequestWritable = {
     target_type?: number | null;
     target_id?: number | null;
     active?: boolean;
+    /**
+     * List of discount rules (maximum 2)
+     */
+    rules?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -17239,9 +17249,10 @@ export type PatchedAvailabilityWindowRequestWritable = {
 };
 
 /**
- * Create/Update serializer for Discount with validation.
+ * Create/Update serializer for Discount with validation and nested rules.
  *
  * Note: target_type and target_id should only be set internally by the system.
+ * Supports nested rule creation/update with a maximum of 2 rules per discount.
  */
 export type PatchedDiscountCreateUpdateRequestWritable = {
     name?: string;
@@ -17259,6 +17270,12 @@ export type PatchedDiscountCreateUpdateRequestWritable = {
     target_type?: number | null;
     target_id?: number | null;
     active?: boolean;
+    /**
+     * List of discount rules (maximum 2)
+     */
+    rules?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**

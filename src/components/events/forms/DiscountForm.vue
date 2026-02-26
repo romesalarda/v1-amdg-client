@@ -1,312 +1,354 @@
 <template>
-  <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
-    <!-- Basic Information -->
-    <div class="space-y-2">
-      <label class="block text-sm font-medium text-background-dark-600" for="discount-name">
-        Discount Name <span class="text-red-500">*</span>
-      </label>
-      <input
-        id="discount-name"
-        v-model="name"
-        v-bind="nameAttrs"
-        type="text"
-        placeholder="e.g. Early Bird, Student Discount, Senior Rate"
-        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-      />
-      <p v-if="errors.name" class="text-xs text-red-500">{{ errors.name }}</p>
-    </div>
-
-    <div class="space-y-2">
-      <label class="block text-sm font-medium text-background-dark-600" for="discount-description">
-        Description
-      </label>
-      <textarea
-        id="discount-description"
-        v-model="description"
-        v-bind="descriptionAttrs"
-        placeholder="Additional details about this discount..."
-        rows="2"
-        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-      ></textarea>
-      <p v-if="errors.description" class="text-xs text-red-500">{{ errors.description }}</p>
-    </div>
-
-    <!-- Package Selector (for new discounts only) -->
-    <div v-if="!modelValue" class="space-y-2">
-      <label class="block text-sm font-medium text-background-dark-600" for="discount-package">
-        Booking Package <span class="text-red-500">*</span>
-      </label>
-      <select
-        id="discount-package"
-        v-model="packageId"
-        v-bind="packageIdAttrs"
-        :disabled="packages.length === 0"
-        class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-      >
-        <option value="" disabled>Select a booking package</option>
-        <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">
-          {{ pkg.name }} - ${{ Number(pkg.base_amount).toFixed(2) }}
-        </option>
-      </select>
-      <p v-if="packages.length === 0" class="text-xs text-orange-500">
-        Create a booking package first before adding discounts
-      </p>
-      <p v-else class="text-xs text-primary-500/60">
-        This discount will apply to the selected booking package
-      </p>
-      <p v-if="errors.packageId" class="text-xs text-red-500">{{ errors.packageId }}</p>
-    </div>
-
-    <!-- Package Display (for existing discounts) -->
-    <div v-else-if="modelValue?.target_package" class="space-y-2">
-      <label class="block text-sm font-medium text-background-dark-600">
-        Linked to Package
-      </label>
-      <div class="flex items-center gap-2 p-3 bg-mist-blue/40 rounded-lg border border-primary-500/20">
-        <span class="inline-block w-5 h-5 text-primary-500/60">📦</span>
-        <span class="font-medium text-background-dark-600">{{ modelValue.target_package.name }}</span>
-        <span class="ml-auto text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Package</span>
-      </div>
-      <p class="text-xs text-primary-500/60">
-        Package association cannot be changed after creation
-      </p>
-    </div>
-
-    <!-- Discount Type Selection -->
-    <div class="space-y-2">
-      <label class="block text-sm font-medium text-background-dark-600">
-        Discount Type <span class="text-red-500">*</span>
-      </label>
+  <form @submit="onSubmit" class="flex flex-col h-full text-background-dark-600">
+    <!-- Scrollable Content Area -->
+    <div class="flex-1 overflow-y-auto space-y-4 pb-20 pr-2">
+      
+      <!-- Section 1: Basic Information -->
       <div class="space-y-3">
-        <label
-          v-for="type in discountTypes"
-          :key="type.value"
-          class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg hover:bg-mist-blue/50 transition-colors cursor-pointer"
-          :class="{ 'border-primary bg-mist-blue/60': discount_type === type.value }"
-        >
-          <input
-            v-model="discount_type"
-            v-bind="discount_typeAttrs"
-            type="radio"
-            :value="type.value"
-            class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
-          />
-          <div class="flex-1">
-            <span class="block font-medium text-primary">{{ type.label }}</span>
-            <p class="text-sm text-primary-500/60">{{ type.description }}</p>
+        <div class="flex items-center gap-2 pb-2 border-b border-primary-500/20">
+          <span class="material-symbols-outlined text-primary text-lg">description</span>
+          <h3 class="text-xs font-black text-primary uppercase tracking-widest">Basic Information</h3>
+        </div>
+        
+        <div class="space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2 md:col-span-2">
+              <label class="block text-sm font-medium text-background-dark-600" for="discount-name">
+                Discount Name <span class="text-red-500">*</span>
+              </label>
+              <input
+                id="discount-name"
+                v-model="name"
+                v-bind="nameAttrs"
+                type="text"
+                placeholder="e.g. Early Bird, Student Discount"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <p v-if="errors.name" class="text-xs text-red-500">{{ errors.name }}</p>
+            </div>
+
+            <div class="space-y-2 md:col-span-2">
+              <label class="block text-sm font-medium text-background-dark-600" for="discount-description">
+                Description
+              </label>
+              <textarea
+                id="discount-description"
+                v-model="description"
+                v-bind="descriptionAttrs"
+                placeholder="Additional details..."
+                rows="2"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+              ></textarea>
+            </div>
           </div>
-        </label>
-      </div>
-      <p v-if="errors.discount_type" class="text-xs text-red-500">{{ errors.discount_type }}</p>
-    </div>
 
-    <!-- Conditional Amount/Percentage Fields -->
-    <template v-if="discount_type === 'PERCENTAGE'">
-      <div class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
-        <label class="block text-sm font-medium text-background-dark-600" for="discount-percentage">
-          Percentage <span class="text-red-500">*</span>
-        </label>
-        <div class="flex items-center gap-2">
-          <input
-            id="discount-percentage"
-            v-model="percentage"
-            v-bind="percentageAttrs"
-            type="text"
-            inputmode="decimal"
-            placeholder="e.g. 10 for 10% off"
-            class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-          <span class="text-primary-500/60">%</span>
+          <!-- Package Selector/Display -->
+          <div v-if="!modelValue" class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="discount-package">
+              Booking Package <span class="text-red-500">*</span>
+            </label>
+            <select
+              id="discount-package"
+              v-model="packageId"
+              v-bind="packageIdAttrs"
+              :disabled="packages.length === 0"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
+            >
+              <option value="" disabled>Select a booking package</option>
+              <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">
+                {{ pkg.name }} - ${{ Number(pkg.base_amount).toFixed(2) }}
+              </option>
+            </select>
+            <p v-if="packages.length === 0" class="text-xs text-orange-500">
+              Create a booking package first
+            </p>
+            <p v-if="errors.packageId" class="text-xs text-red-500">{{ errors.packageId }}</p>
+          </div>
+
+          <div v-else-if="modelValue?.target_package" class="space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600">
+              Linked Package
+            </label>
+            <div class="flex items-center gap-3 p-4 bg-mist-blue/40 rounded-lg border border-primary-500/20">
+              <span class="material-symbols-outlined text-primary-500/60">inventory_2</span>
+              <span class="font-medium text-background-dark-600">{{ modelValue.target_package.name }}</span>
+              <span class="ml-auto text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">Fixed</span>
+            </div>
+          </div>
         </div>
-        <p class="text-xs text-primary-500/60">Enter a value between 0 and 100</p>
-        <p v-if="errors.percentage" class="text-xs text-red-500">{{ errors.percentage }}</p>
       </div>
-    </template>
 
-    <template v-if="discount_type === 'FIXED'">
-      <div class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
-        <label class="block text-sm font-medium text-background-dark-600" for="discount-amount">
-          Fixed Amount <span class="text-red-500">*</span>
-        </label>
-        <div class="flex items-center gap-2">
-          <span class="text-primary-500/60">$</span>
-          <input
-            id="discount-amount"
-            v-model="amount"
-            v-bind="amountAttrs"
-            type="text"
-            inputmode="decimal"
-            placeholder="e.g. 50.00"
-            class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
+      <!-- Section 2: Discount Configuration -->
+      <div class="space-y-3">
+        <div class="flex items-center gap-2 pb-2 border-b border-primary-500/20">
+          <span class="material-symbols-outlined text-primary text-lg">sell</span>
+          <h3 class="text-xs font-black text-primary uppercase tracking-widest">Discount Configuration</h3>
         </div>
-        <p class="text-xs text-primary-500/60">Enter the fixed discount amount</p>
-        <p v-if="errors.amount" class="text-xs text-red-500">{{ errors.amount }}</p>
-      </div>
-    </template>
+        
+        <div class="space-y-4">
+          <div class="space-y-3">
+            <label class="block text-sm font-medium text-background-dark-600">
+              Type <span class="text-red-500">*</span>
+            </label>
+            <div class="grid grid-cols-2 gap-3">
+              <label
+                v-for="type in discountTypes"
+                :key="type.value"
+                class="flex items-start gap-2 p-3 border-2 border-primary-500/20 rounded-lg hover:bg-mist-blue/50 transition-colors cursor-pointer"
+                :class="{ 'border-primary bg-mist-blue/60': discount_type === type.value }"
+              >
+                <input
+                  v-model="discount_type"
+                  v-bind="discount_typeAttrs"
+                  type="radio"
+                  :value="type.value"
+                  class="mt-0.5 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
+                />
+                <div class="flex-1">
+                  <span class="block font-medium text-primary text-sm">{{ type.label }}</span>
+                  <p class="text-xs text-primary-500/60 mt-1">{{ type.description }}</p>
+                </div>
+              </label>
+            </div>
+            <p v-if="errors.discount_type" class="text-xs text-red-500">{{ errors.discount_type }}</p>
+          </div>
 
-    <!-- Active Toggle -->
-    <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
-      <span class="text-sm font-medium text-background-dark-600">Active discount</span>
-      <span class="relative inline-flex h-6 w-11 items-center">
-        <input
-          v-model="active"
-          v-bind="activeAttrs"
-          type="checkbox"
-          class="peer sr-only"
-        />
-        <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
-        <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
-      </span>
-    </label>
+          <!-- Value Fields -->
+          <div v-if="discount_type === 'PERCENTAGE'" class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="discount-percentage">
+              Percentage <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-3">
+              <input
+                id="discount-percentage"
+                v-model="percentage"
+                v-bind="percentageAttrs"
+                type="text"
+                inputmode="decimal"
+                placeholder="10"
+                class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <span class="text-primary-500/60 font-medium text-lg">%</span>
+            </div>
+            <p v-if="errors.percentage" class="text-xs text-red-500">{{ errors.percentage }}</p>
+          </div>
 
-    <!-- Rules Section -->
-    <div class="border-t border-primary-500/20 py-6 space-y-4">
-      <div class="flex items-center justify-between">
-        <div>
-          <h4 class="font-semibold text-background-dark-600">Eligibility Rules</h4>
-          <p class="text-sm text-primary-500/60 mt-1">Define conditions for who can use this discount</p>
+          <div v-if="discount_type === 'FIXED'" class="p-4 bg-mist-blue/40 rounded-lg space-y-2">
+            <label class="block text-sm font-medium text-background-dark-600" for="discount-amount">
+              Fixed Amount <span class="text-red-500">*</span>
+            </label>
+            <div class="flex items-center gap-3">
+              <span class="text-primary-500/60 font-medium text-lg">$</span>
+              <input
+                id="discount-amount"
+                v-model="amount"
+                v-bind="amountAttrs"
+                type="text"
+                inputmode="decimal"
+                placeholder="50.00"
+                class="flex-1 rounded-xl border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+            </div>
+            <p v-if="errors.amount" class="text-xs text-red-500">{{ errors.amount }}</p>
+          </div>
+
+          <!-- Active Toggle -->
+          <label class="flex items-center justify-between rounded-xl border border-primary-500/20 bg-white px-4 py-3">
+            <span class="text-sm font-medium text-background-dark-600">Active discount</span>
+            <span class="relative inline-flex h-6 w-11 items-center">
+              <input
+                v-model="active"
+                v-bind="activeAttrs"
+                type="checkbox"
+                class="peer sr-only"
+              />
+              <span class="h-6 w-11 rounded-full bg-primary-500/20 transition peer-checked:bg-primary"></span>
+              <span class="absolute left-1 h-4 w-4 rounded-full bg-white transition peer-checked:translate-x-5"></span>
+            </span>
+          </label>
         </div>
-        <button
-          type="button"
-          class="bg-white border border-primary text-primary rounded-xl text-[11px] font-black uppercase tracking-widest px-3 py-2 hover:bg-primary hover:text-white transition-all"
-          @click="addRule"
-        >
-          + Add Rule
-        </button>
       </div>
 
-      <!-- Rules List -->
-      <div v-if="rules.length > 0" class="space-y-3">
-        <div
-          v-for="(rule, index) in rules"
-          :key="index"
-          class="p-4 border border-primary-500/20 rounded-lg bg-white space-y-3"
-        >
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex-1 space-y-3">
-              <!-- Rule Type Dropdown -->
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-background-dark-600">
-                  Rule {{ index + 1 }} - Type <span class="text-red-500">*</span>
-                </label>
-                <select
-                  :model-value="rule.value.rule_type"
-                  @update:model-value="(value: any) => updateRuleField(index, 'rule_type', value)"
-                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+      <!-- Section 3: Eligibility Rules -->
+      <div class="space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-primary-500/20">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-lg">rule</span>
+            <h3 class="text-xs font-black text-primary uppercase tracking-widest">Eligibility Rules</h3>
+            <span class="text-xs text-primary-500/60">({{ rules.length }}/2)</span>
+          </div>
+          <button
+            type="button"
+            @click="addRule"
+            class="bg-primary text-white rounded-lg text-xs font-semibold px-3 py-1.5 hover:bg-navy-600 transition-all"
+          >
+            Add Rule
+          </button>
+        </div>
+        
+        <div class="space-y-3">
+          <!-- Rules List -->
+          <div v-if="rules.length > 0" class="space-y-3">
+            <div
+              v-for="(rule, index) in rules"
+              :key="index"
+              class="border border-primary-500/20 rounded-lg bg-mist-blue/20 overflow-hidden"
+            >
+              <!-- Rule Header -->
+              <div class="flex items-center justify-between px-4 py-2 bg-white border-b border-primary-500/20">
+                <div class="flex items-center gap-3">
+                  <span class="text-sm font-semibold text-primary">Rule {{ index + 1 }}</span>
+                  <span v-if="rule.value.name" class="text-sm text-primary-500/60">• {{ rule.value.name }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="text-red-600 hover:bg-red-50 rounded-lg p-2 transition-all"
+                  @click="removeRule(index)"
+                  title="Delete rule"
                 >
-                  <option value="" disabled>Select rule type</option>
-                  <option v-for="opt in ruleTypeOptions" :key="opt.value" :value="opt.value">
-                    {{ opt.label }}
-                  </option>
-                </select>
-                <p v-if="(errors as any)[`rules.${index}.rule_type`]" class="text-xs text-red-500">
-                  {{ (errors as any)[`rules.${index}.rule_type`] }}
-                </p>
-                <p v-if="rule.value.rule_type" class="text-xs text-primary-500/60">
+                  <span class="material-symbols-outlined text-lg">delete</span>
+                </button>
+              </div>
+
+              <!-- Rule Content -->
+              <div class="p-4 space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <!-- Rule Type -->
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-background-dark-600">
+                      Type <span class="text-red-500">*</span>
+                    </label>
+                    <select
+                      v-model="rules[index].value.rule_type"
+                      class="w-full rounded-lg border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="" disabled>Select type</option>
+                      <option v-for="opt in ruleTypeOptions" :key="opt.value" :value="opt.value">
+                        {{ opt.label }}
+                      </option>
+                    </select>
+                    <p v-if="(errors as any)[`rules.${index}.rule_type`]" class="text-xs text-red-500">
+                      {{ (errors as any)[`rules.${index}.rule_type`] }}
+                    </p>
+                  </div>
+
+                  <!-- Rule Name -->
+                  <div class="space-y-2">
+                    <label class="block text-sm font-medium text-background-dark-600">
+                      Name <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      v-model="rules[index].value.name"
+                      type="text"
+                      placeholder="e.g. Student Discount"
+                      class="w-full rounded-lg border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <p v-if="(errors as any)[`rules.${index}.name`]" class="text-xs text-red-500">
+                      {{ (errors as any)[`rules.${index}.name`] }}
+                    </p>
+                  </div>
+
+                  <!-- Conditional Value Field -->
+                  <div v-if="ruleRequiresValue(rule.value.rule_type)" class="space-y-2">
+                    <label class="block text-sm font-medium text-background-dark-600">
+                      Value <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                      v-model="rules[index].value.value"
+                      :placeholder="getRuleValuePlaceholder(rule.value.rule_type)"
+                      type="text"
+                      :inputmode="isAgeRule(rule.value.rule_type) ? 'numeric' : 'text'"
+                      class="w-full rounded-lg border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <p v-if="(errors as any)[`rules.${index}.value`]" class="text-xs text-red-500">
+                      {{ (errors as any)[`rules.${index}.value`] }}
+                    </p>
+                  </div>
+
+                  <!-- Active Checkbox -->
+                  <div class="flex items-center">
+                    <label class="flex items-center gap-2 mt-8">
+                      <input
+                        v-model="rules[index].value.active"
+                        type="checkbox"
+                        class="h-4 w-4 rounded border-gray-300 accent-[rgb(0,33,71)]"
+                      />
+                      <span class="text-sm text-background-dark-600">Active</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Rule Description -->
+                <div class="space-y-2">
+                  <label class="block text-sm font-medium text-background-dark-600">
+                    Description
+                  </label>
+                  <textarea
+                    v-model="rules[index].value.description"
+                    placeholder="Optional details..."
+                    rows="2"
+                    class="w-full rounded-lg border border-primary-500/20 bg-white px-4 py-2.5 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                  ></textarea>
+                </div>
+
+                <!-- Rule Type Info -->
+                <p v-if="rule.value.rule_type" class="text-xs text-primary-500/60 italic px-1">
                   {{ getRuleTypeDescription(rule.value.rule_type) }}
                 </p>
               </div>
-
-              <!-- Rule Name -->
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-background-dark-600">
-                  Rule Name <span class="text-red-500">*</span>
-                </label>
-                <input
-                  :model-value="rule.value.name"
-                  @update:model-value="(value: any) => updateRuleField(index, 'name', value)"
-                  type="text"
-                  placeholder="e.g. Student ID Required, Senior Discount"
-                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-                <p v-if="(errors as any)[`rules.${index}.name`]" class="text-xs text-red-500">
-                  {{ (errors as any)[`rules.${index}.name`] }}
-                </p>
-              </div>
-
-              <!-- Rule Description -->
-              <div class="space-y-2">
-                <label class="block text-sm font-medium text-background-dark-600">
-                  Rule Description
-                </label>
-                <textarea
-                  :model-value="rule.value.description"
-                  @update:model-value="(value: any) => updateRuleField(index, 'description', value)"
-                  placeholder="Optional description of this rule"
-                  rows="2"
-                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                ></textarea>
-                <p v-if="(errors as any)[`rules.${index}.description`]" class="text-xs text-red-500">
-                  {{ (errors as any)[`rules.${index}.description`] }}
-                </p>
-              </div>
-
-              <!-- Conditional Value Field -->
-              <div v-if="ruleRequiresValue(rule.value.rule_type)" class="space-y-2">
-                <label class="block text-sm font-medium text-background-dark-600">
-                  Value <span class="text-red-500">*</span>
-                </label>
-                <input
-                  :model-value="rule.value.value"
-                  @update:model-value="(value: any) => updateRuleField(index, 'value', value)"
-                  :placeholder="getRuleValuePlaceholder(rule.value.rule_type)"
-                  type="text"
-                  :inputmode="isAgeRule(rule.value.rule_type) ? 'numeric' : 'text'"
-                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-                <p v-if="(errors as any)[`rules.${index}.value`]" class="text-xs text-red-500">
-                  {{ (errors as any)[`rules.${index}.value`] }}
-                </p>
-              </div>
-
-              <!-- Active Rule Checkbox -->
-              <label class="flex items-center gap-2">
-                <input
-                  :model-value="rule.value.active"
-                  @update:model-value="(value: any) => updateRuleField(index, 'active', value)"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-gray-300 accent-[rgb(0,33,71)]"
-                />
-                <span class="text-sm text-background-dark-600">Active rule</span>
-              </label>
             </div>
+          </div>
 
-            <!-- Delete Button -->
+          <div v-else class="text-center py-8 text-primary-500/60 border-2 border-dashed border-primary-500/20 rounded-lg bg-gray-50/50">
+            <span class="material-symbols-outlined text-3xl text-primary-500/40 mb-2">rule</span>
+            <p class="text-sm mb-3">No rules configured</p>
             <button
               type="button"
-              class="bg-white border border-red-200 text-red-600 rounded-lg p-2 hover:bg-red-50 transition-all flex-shrink-0 mt-1"
-              @click="removeRule(index)"
-              title="Delete rule"
+              @click="addRule"
+              class="text-primary text-sm font-medium hover:underline"
             >
-              <span class="text-lg">🗑️</span>
+              Add your first rule
             </button>
           </div>
         </div>
       </div>
 
-      <div v-else class="text-center py-8 text-primary-500/60 border border-dashed border-primary-500/20 rounded-lg">
-        <p class="text-sm">No rules added yet</p>
-        <p class="text-xs mt-1">Click "Add Rule" to create eligibility conditions</p>
-      </div>
     </div>
 
-    <!-- Form Actions -->
-    <div class="border-t border-primary-500/20 pt-6 flex justify-end gap-2">
-      <button
-        type="button"
-        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
-        @click="$emit('cancel')"
-      >
-        Cancel
-      </button>
-      <button
-        type="submit"
-        :disabled="isLoading"
-        class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
-      >
-        Save Discount
-      </button>
+    <!-- Floating Footer -->
+    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-primary-500/20 px-6 py-4 shadow-lg">
+      <div class="flex justify-between items-center gap-4">
+        <div class="flex items-center gap-2 text-sm">
+          <span v-if="Object.keys(errors).length > 0" class="flex items-center gap-2 text-red-600">
+            <span class="material-symbols-outlined text-lg">error</span>
+            <span>{{ Object.keys(errors).length }} error{{ Object.keys(errors).length !== 1 ? 's' : '' }}</span>
+          </span>
+          <span v-else class="flex items-center gap-2 text-green-600">
+            <span class="material-symbols-outlined text-lg">check_circle</span>
+            <span>Ready to save</span>
+          </span>
+        </div>
+        <div class="flex gap-3">
+          <button
+            type="button"
+            class="rounded-xl border-2 border-primary bg-white px-6 py-2.5 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+            @click="$emit('cancel')"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            :disabled="isLoading"
+            class="rounded-xl bg-primary px-8 py-2.5 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <span v-if="isLoading" class="flex items-center gap-2">
+              <span class="material-symbols-outlined animate-spin text-base">progress_activity</span>
+              Saving...
+            </span>
+            <span v-else>Save Discount</span>
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 </template>
@@ -395,27 +437,21 @@ const { fields: rules, push: pushRule, remove: removeRule, update: updateRule } 
 
 // Add a new rule
 const addRule = () => {
+  if (rules.value.length >= 2) {
+    toast.add({
+      title: 'Maximum 2 rules allowed',
+      description: 'Each discount can have a maximum of 2 eligibility rules',
+      color: 'orange',
+    })
+    return
+  }
+  
   pushRule({
     rule_type: 'IS_EVENT_STAFF',
     name: '',
     description: '',
     value: '',
     active: true,
-  })
-}
-
-// Update a specific field in a rule
-const updateRuleField = (index: number, field: string, value: any) => {
-  const currentRule = rules.value[index].value
-  
-  // Ensure 'value' field is always stored as string (backend will cast as needed)
-  const processedValue = field === 'value' && value !== null && value !== undefined
-    ? String(value)
-    : value
-  
-  updateRule(index, {
-    ...currentRule,
-    [field]: processedValue,
   })
 }
 
@@ -492,6 +528,23 @@ watch(() => props.modelValue, (newValue) => {
         active: newValue.active ?? true,
         rules: newValue.rules || [],
       },
+    })
+    
+    // Manually sync rules with field array
+    // Clear existing
+    while (rules.value.length > 0) {
+      removeRule(0)
+    }
+    // Add from modelValue
+    const rulesArray = newValue.rules || []
+    rulesArray.forEach((rule: any) => {
+      pushRule({
+        rule_type: rule.rule_type,
+        name: rule.name,
+        description: rule.description || '',
+        value: rule.value || '',
+        active: rule.active ?? true,
+      })
     })
   }
 }, { immediate: true })

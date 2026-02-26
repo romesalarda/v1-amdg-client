@@ -112,7 +112,7 @@
         </div>
 
         <!-- Date Range Section -->
-        <div class="space-y-3">
+        <div class="space-y-3" v-if="availability_type">
           <div class="flex items-center gap-1.5 pb-1.5 border-b border-navy-100">
             <span class="material-symbols-outlined text-sm text-primary">calendar_month</span>
             <h4 class="text-xs font-black text-navy-900 uppercase tracking-wider">Date Range</h4>
@@ -151,7 +151,7 @@
                 type="datetime-local"
                 required
                 :disabled="isSubmitting"
-                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+                class="w-full cursor-pointer rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <span v-if="errors.available_from" class="text-xs text-red-500">{{ errors.available_from }}</span>
             </div>
@@ -167,9 +167,29 @@
                 type="datetime-local"
                 required
                 :disabled="isSubmitting"
-                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+                class="w-full cursor-pointer rounded-xl border border-primary-500/20 bg-white px-3 py-1.5 text-xs text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
               />
               <span v-if="errors.available_to" class="text-xs text-red-500">{{ errors.available_to }}</span>
+            </div>
+          </div>
+
+          <!-- End Date Quick Adjustments -->
+          <div v-if="available_from" class="bg-gradient-to-br from-teal-50 to-teal-100 border border-teal-300 rounded-xl p-3">
+            <div class="flex items-center gap-1.5 mb-2">
+              <span class="material-symbols-outlined text-teal-700 text-sm">schedule</span>
+              <span class="text-[10px] font-black text-navy-900 uppercase tracking-wider">End Date Adjustments</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                v-for="preset in endDatePresets"
+                :key="preset.label"
+                type="button"
+                @click="applyEndDatePreset(preset)"
+                :disabled="isSubmitting"
+                class="px-2.5 py-1 text-[10px] font-bold bg-white hover:bg-teal-50 border border-teal-400 text-teal-700 rounded-lg transition-colors disabled:opacity-50"
+              >
+                {{ preset.label }}
+              </button>
             </div>
           </div>
 
@@ -299,6 +319,23 @@ const datePresets = computed<DatePreset[]>(() => [
   { label: 'During Event', offsetFromDays: 0, offsetToDays: getDurationDays() },
 ])
 
+// End date presets (only adjust end date, keep start date)
+interface EndDatePreset {
+  label: string
+  offsetDays?: number
+  toEventStart?: boolean
+  toEventEnd?: boolean
+}
+
+const endDatePresets = computed<EndDatePreset[]>(() => [
+  { label: '+2 Days', offsetDays: 2 },
+  { label: '+1 Week', offsetDays: 7 },
+  { label: '+2 Weeks', offsetDays: 14 },
+  { label: '+1 Month', offsetDays: 30 },
+  { label: 'To Event Start', toEventStart: true },
+  { label: 'To Event End', toEventEnd: true },
+])
+
 function getDurationDays(): number {
   if (!props.eventStart || !props.eventEnd) return 1
   const start = new Date(props.eventStart)
@@ -322,6 +359,29 @@ function applyPreset(preset: DatePreset) {
   // Format for datetime-local input (YYYY-MM-DDTHH:mm)
   available_from.value = formatDateTimeLocal(fromDate.toISOString())
   available_to.value = formatDateTimeLocal(toDate.toISOString())
+}
+
+function applyEndDatePreset(preset: EndDatePreset) {
+  if (!available_from.value) return
+  
+  const startDate = new Date(available_from.value)
+  let endDate: Date
+  
+  if (preset.toEventStart && props.eventStart) {
+    // Set to event start
+    endDate = new Date(props.eventStart)
+  } else if (preset.toEventEnd && props.eventEnd) {
+    // Set to event end
+    endDate = new Date(props.eventEnd)
+  } else if (preset.offsetDays !== undefined) {
+    // Add offset days to current start date
+    endDate = new Date(startDate)
+    endDate.setDate(endDate.getDate() + preset.offsetDays)
+  } else {
+    return
+  }
+  
+  available_to.value = formatDateTimeLocal(endDate.toISOString())
 }
 
 // Smart defaults based on availability type
@@ -461,8 +521,20 @@ const onSubmit = handleSubmit(async (values) => {
       await createMutation.mutateAsync({
         eventId: props.eventId,
         body: payload,
+      }).then(() => {
+        // Reset form after successful creation to allow creating another window easily
+        resetForm({
+          values: {
+            name: '',
+            description: '',
+            availability_type: undefined,
+            available_from: props.presetStartDate ? formatDateTimeLocal(props.presetStartDate) : '',
+            available_to: props.presetEndDate ? formatDateTimeLocal(props.presetEndDate) : '',
+            timezone: props.eventTimezone,
+          },
+        })
+        $notyf.success('Availability window created successfully')
       })
-      $notyf.success('Availability window created successfully')
     }
 
     emit('success')
