@@ -15,7 +15,9 @@
         <div class="max-w-screen-xl mx-auto w-full px-6 grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
           <div>
             <div class="flex items-center gap-3 mb-6">
-              <span class="bg-blue-500/20 text-blue-400 border border-blue-400/30 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.1em] uppercase">Upcoming</span>
+              <span class="bg-blue-500/20 text-blue-400 border border-blue-400/30 px-3 py-1 rounded-full text-[10px] font-black tracking-[0.1em] uppercase">
+                {{ activeTimeFilter === 'past' ? 'Past Event' : 'Upcoming' }}
+              </span>
             </div>
             <h1 class="text-4xl md:text-5xl font-black leading-tight text-white mb-4">{{ featuredEvent.title }}</h1>
             <div class="flex items-center gap-4">
@@ -28,8 +30,8 @@
             </div>
           </div>
           
-          <!-- Countdown Timer -->
-          <div class="flex justify-center lg:justify-end">
+          <!-- Countdown Timer (only for upcoming events) -->
+          <div v-if="activeTimeFilter === 'upcoming'" class="flex justify-center lg:justify-end">
             <div class="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-8 text-white w-full max-w-sm flex flex-col items-center">
               <!-- <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-8 opacity-50 flex items-center gap-2">
                 <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span> Commencing In
@@ -116,6 +118,28 @@
           >
             Participating
           </button>
+          
+          <div class="w-px h-8 bg-deep-navy/10"></div>
+          
+          <button 
+            @click="activeTimeFilter = 'upcoming'"
+            :class="[
+              'px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all',
+              activeTimeFilter === 'upcoming' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border border-deep-navy/10 text-deep-navy/60 hover:border-blue-500 hover:text-blue-500'
+            ]"
+          >
+            Upcoming
+          </button>
+          <button 
+            @click="activeTimeFilter = 'past'"
+            :class="[
+              'px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all',
+              activeTimeFilter === 'past' ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/20' : 'bg-white border border-deep-navy/10 text-deep-navy/60 hover:border-blue-500 hover:text-blue-500'
+            ]"
+          >
+            Past
+          </button>
+          
           <button 
             @click="showFilters = !showFilters"
             :class="[
@@ -158,7 +182,9 @@
         <!-- Events List -->
         <div class="flex-grow space-y-8">
           <div class="flex items-center justify-between">
-            <h2 class="text-2xl font-black tracking-tight text-deep-navy">Upcoming Schedule</h2>
+            <h2 class="text-2xl font-black tracking-tight text-deep-navy">
+              {{ activeTimeFilter === 'upcoming' ? 'Upcoming Schedule' : 'Past Events' }}
+            </h2>
           </div>
 
           <div v-if="isLoadingEvents" class="space-y-6">
@@ -166,6 +192,19 @@
           </div>
 
           <div v-else class="space-y-6">
+            <!-- No events found message -->
+            <div v-if="filteredEvents.length === 0 && filteredStaffEvents.length === 0" class="text-center py-20 bg-mist-blue border border-deep-navy/10 rounded-2xl">
+              <svg class="w-16 h-16 mx-auto text-deep-navy/40 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <h3 class="text-xl font-black text-deep-navy mb-2">
+                {{ activeTimeFilter === 'past' ? 'No Past Events' : 'No Upcoming Events' }}
+              </h3>
+              <p class="text-deep-navy/60 font-medium">
+                {{ activeTimeFilter === 'past' ? 'You have no past events to display' : 'Check back later for new events' }}
+              </p>
+            </div>
+            
             <!-- Upcoming Events -->
             <div 
               v-for="event in filteredEvents" 
@@ -184,7 +223,7 @@
                   />
                   <div v-else class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
                   <div class="absolute top-4 left-4 bg-deep-navy/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase">
-                    {{ staffEventIds.has(event.id) ? 'Staff' : 'Attending' }}
+                    {{ activeTimeFilter === 'past' ? 'Past' : (staffEventIds.has(event.id) ? 'Staff' : 'Attending') }}
                   </div>
                 </div>
                 
@@ -236,7 +275,9 @@
                     @error="(e) => onImageError(e)"
                   />
                   <div v-else class="w-full h-full bg-gradient-to-br from-purple-400 to-purple-600"></div>
-                  <div class="absolute top-4 left-4 bg-deep-navy/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase">Lead Staff</div>
+                  <div class="absolute top-4 left-4 bg-deep-navy/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase">
+                    {{ activeTimeFilter === 'past' ? 'Past Staff' : 'Lead Staff' }}
+                  </div>
                 </div>
                 
                 <div class="flex-grow p-6 flex flex-col justify-between">
@@ -471,7 +512,7 @@
 </template>
 
 <script lang="ts" setup>
-import { useUpcomingEvents } from '~/composables/resources/events/events'
+import { useUpcomingEvents, usePastEvents } from '~/composables/resources/events/events'
 import { useOrganisationMemberships } from '~/composables/resources/organisation/organisationMemberships'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
@@ -491,12 +532,26 @@ const authStore = useAuthStore()
 // State for filters and search
 const searchQuery = ref('')
 const activeFilter = ref<'all' | 'staff' | 'participating'>('all')
+const activeTimeFilter = ref<'upcoming' | 'past'>('upcoming')
 const showFilters = ref(false)
 const selectedDate = ref<DateTime | null>(null)
 
 // Fetch upcoming events
-const { data: eventsData, isLoading: isLoadingEvents } = useUpcomingEvents()
-const allEvents = computed(() => eventsData.value?.data?.results || [])
+const { data: upcomingEventsData, isLoading: isLoadingUpcomingEvents } = useUpcomingEvents()
+const upcomingEventsResults = computed(() => upcomingEventsData.value?.data?.results || [])
+
+// Fetch past events
+const { data: pastEventsData, isLoading: isLoadingPastEvents } = usePastEvents()
+const pastEventsResults = computed(() => pastEventsData.value?.data?.results || [])
+
+// All events based on active time filter
+const allEvents = computed(() => {
+  return activeTimeFilter.value === 'upcoming' ? upcomingEventsResults.value : pastEventsResults.value
+})
+
+const isLoadingEvents = computed(() => {
+  return activeTimeFilter.value === 'upcoming' ? isLoadingUpcomingEvents.value : isLoadingPastEvents.value
+})
 
 // Fetch staff assignments for current user
 const { data: staffData, isLoading: isLoadingStaff } = useEventStaff(computed(() => ({
@@ -537,7 +592,7 @@ const userOrganisations = computed(() => {
 
 // Filter user's upcoming events (from their organizations, excluding staff events)
 const myUpcomingEvents = computed(() => {
-  return allEvents.value
+  return upcomingEventsResults.value
     .filter(event => 
       event.organisation && 
       userOrganizationIds.value.includes(event.organisation) &&
@@ -546,16 +601,34 @@ const myUpcomingEvents = computed(() => {
     .slice(0, 6)
 })
 
-// Events where user is staff
-const staffEvents = computed(() => {
-  return allEvents.value
+// Filter user's past events (from their organizations, excluding staff events)
+const myPastEvents = computed(() => {
+  return pastEventsResults.value
+    .filter(event => 
+      event.organisation && 
+      userOrganizationIds.value.includes(event.organisation) &&
+      !staffEventIds.value.has(event.id)
+    )
+    .slice(0, 6)
+})
+
+// Events where user is staff (upcoming)
+const upcomingStaffEvents = computed(() => {
+  return upcomingEventsResults.value
     .filter(event => staffEventIds.value.has(event.id))
     .slice(0, 6)
 })
 
-// Recommended events (events from other organizations, excluding staff events)
+// Events where user is staff (past)
+const pastStaffEvents = computed(() => {
+  return pastEventsResults.value
+    .filter(event => staffEventIds.value.has(event.id))
+    .slice(0, 6)
+})
+
+// Recommended events (events from other organizations, excluding staff events) - always upcoming
 const recommendedEvents = computed(() => {
-  return allEvents.value
+  return upcomingEventsResults.value
     .filter(event => 
       (!event.organisation || !userOrganizationIds.value.includes(event.organisation)) &&
       !staffEventIds.value.has(event.id)
@@ -563,11 +636,11 @@ const recommendedEvents = computed(() => {
     .slice(0, 6)
 })
 
-const isLoadingRecommended = isLoadingEvents
+const isLoadingRecommended = isLoadingUpcomingEvents
 
 // Filtered events based on search, date, and filter type
 const filteredEvents = computed(() => {
-  let events = myUpcomingEvents.value
+  let events = activeTimeFilter.value === 'upcoming' ? myUpcomingEvents.value : myPastEvents.value
 
   // Apply filter type
   if (activeFilter.value === 'staff') {
@@ -596,7 +669,7 @@ const filteredEvents = computed(() => {
 })
 
 const filteredStaffEvents = computed(() => {
-  let events = staffEvents.value
+  let events = activeTimeFilter.value === 'upcoming' ? upcomingStaffEvents.value : pastStaffEvents.value
 
   // Apply filter type
   if (activeFilter.value === 'participating') {
@@ -631,12 +704,18 @@ const formatSelectedDate = computed(() => {
 
 // Featured event (next upcoming event)
 const featuredEvent = computed(() => {
-  const combinedEvents = [...myUpcomingEvents.value, ...staffEvents.value]
-  if (combinedEvents.length === 0) return null
+  const eventsToCheck = activeTimeFilter.value === 'upcoming' 
+    ? [...myUpcomingEvents.value, ...upcomingStaffEvents.value]
+    : [...myPastEvents.value, ...pastStaffEvents.value]
+    
+  if (eventsToCheck.length === 0) return null
   
   // Sort by start date
-  const sorted = combinedEvents.sort((a, b) => {
-    return DateTime.fromISO(a.start_datetime).toMillis() - DateTime.fromISO(b.start_datetime).toMillis()
+  const sorted = eventsToCheck.sort((a, b) => {
+    const dateA = DateTime.fromISO(a.start_datetime).toMillis()
+    const dateB = DateTime.fromISO(b.start_datetime).toMillis()
+    // For upcoming: ascending (soonest first), for past: descending (most recent first)
+    return activeTimeFilter.value === 'upcoming' ? dateA - dateB : dateB - dateA
   })
   
   return sorted[0]
@@ -682,6 +761,18 @@ const getRelativeTime = (dateString: string) => {
   
   const days = Math.floor(diff.days)
   
+  // For past events
+  if (days < 0) {
+    const absDays = Math.abs(days)
+    if (absDays === 0) return 'Today'
+    if (absDays === 1) return 'Yesterday'
+    if (absDays < 7) return `${absDays} days ago`
+    if (absDays < 30) return `${Math.floor(absDays / 7)} weeks ago`
+    if (absDays < 365) return `${Math.floor(absDays / 30)} months ago`
+    return `${Math.floor(absDays / 365)} years ago`
+  }
+  
+  // For upcoming events
   if (days === 0) return 'Today'
   if (days === 1) return 'Tomorrow'
   if (days < 7) return `In ${days} days`
@@ -704,7 +795,9 @@ const calendarDays = computed(() => {
   while (current <= end) {
     const eventDates = new Set([
       ...myUpcomingEvents.value.map(e => DateTime.fromISO(e.start_datetime).toISODate()),
-      ...staffEvents.value.map(e => DateTime.fromISO(e.start_datetime).toISODate())
+      ...myPastEvents.value.map(e => DateTime.fromISO(e.start_datetime).toISODate()),
+      ...upcomingStaffEvents.value.map(e => DateTime.fromISO(e.start_datetime).toISODate()),
+      ...pastStaffEvents.value.map(e => DateTime.fromISO(e.start_datetime).toISODate())
     ])
     
     days.push({

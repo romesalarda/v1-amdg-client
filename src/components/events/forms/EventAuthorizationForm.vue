@@ -1,46 +1,46 @@
 <template>
-  <div class="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-50 dark:to-indigo-50 rounded-xl border-2 border-blue-200 dark:border-blue-200 p-6 shadow-lg">
+  <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
     <!-- Form Header -->
-    <div class="mb-6">
-      <div class="flex items-center gap-3 mb-2">
-        <div class="p-2 bg-blue-600 dark:bg-blue-600 rounded-lg">
-          <UIcon name="i-heroicons-shield-check" class="w-6 h-6 text-white dark:text-white" />
+    <div class="px-8 py-6 border-b-2 border-deep-navy/10">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
+          <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+          </svg>
         </div>
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-900">
-          {{ existingAuthorization ? 'Update Authorization' : 'Authorize Event' }}
-        </h2>
+        <div>
+          <h2 class="text-2xl font-black text-deep-navy uppercase tracking-tight">
+            {{ existingAuthorization ? 'Update Authorization' : 'Authorize Event' }}
+          </h2>
+          <p class="text-sm text-deep-navy/60 font-medium mt-1">
+            {{ existingAuthorization 
+              ? 'Modify the existing authorization status and details' 
+              : 'Review and approve or reject this event' 
+            }}
+          </p>
+        </div>
       </div>
-      <p class="text-gray-700 dark:text-gray-700 ml-14">
-        {{ existingAuthorization 
-          ? 'Modify the existing authorization status and details' 
-          : 'Review and approve or reject this event' 
-        }}
-      </p>
     </div>
 
     <!-- Current Status Badge (if updating) -->
-    <div v-if="existingAuthorization" class="mb-6 ml-14 p-4 bg-white dark:bg-white rounded-lg border border-gray-200 dark:border-gray-200">
-      <p class="text-sm font-medium text-gray-700 dark:text-gray-700 mb-2">Current Authorization:</p>
-      <div class="flex items-center gap-3">
-        <UBadge 
-          :color="getAuthStatusColor(existingAuthorization.status)" 
-          :label="existingAuthorization.status_display"
-          size="lg"
-        />
-        <span class="text-sm text-gray-600">
+    <div v-if="existingAuthorization" class="px-8 py-6 bg-blue-500/5 border-b-2 border-deep-navy/10">
+      <p class="text-[10px] font-black text-deep-navy/50 uppercase tracking-[0.2em] mb-3">Current Authorization:</p>
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="getAuthStatusClasses(existingAuthorization.status)">
+          {{ existingAuthorization.status_display }}
+        </span>
+        <span class="text-sm text-deep-navy/60 font-medium">
           by {{ existingAuthorization.reviewed_by_email }}
         </span>
       </div>
     </div>
 
     <!-- Authorization Form -->
-    <form @submit.prevent="onSubmit" class="space-y-6 ml-14">
-      <UFormGroup 
-        label="Authorization Decision" 
-        required 
-        :error="errors.status"
-        class="bg-white dark:bg-white rounded-lg p-4 border border-gray-200 dark:border-gray-200"
-      >
+    <form @submit.prevent="onSubmit" class="p-8 space-y-6">
+      <div>
+        <label for="status" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+          Authorization Decision <span class="text-red-500">*</span>
+        </label>
         <USelectMenu 
           v-model="status"
           :options="authStatusOptions"
@@ -49,57 +49,61 @@
           class="mt-2"
           value-attribute="value"
         />
-      </UFormGroup>
+        <p v-if="errors.status" class="mt-2 text-xs text-red-600 font-bold">{{ errors.status }}</p>
+      </div>
 
-      <UFormGroup 
-        label="Reason" 
-        :help="'Explain your decision (optional)'" 
-        :error="errors.reason"
-        class="bg-white dark:bg-white rounded-lg p-4 border border-gray-200 dark:border-gray-200"
-      >
+      <div>
+        <label for="reason" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+          Reason
+        </label>
         <UTextarea 
           v-model="reason"
           placeholder="Enter reason for this decision..."
           :rows="3"
           class="mt-2"
         />
-      </UFormGroup>
+        <p class="mt-2 text-xs text-deep-navy/50 font-medium">Explain your decision (optional)</p>
+        <p v-if="errors.reason" class="mt-2 text-xs text-red-600 font-bold">{{ errors.reason }}</p>
+      </div>
 
-      <UFormGroup 
-        label="Additional Notes" 
-        :help="'Any additional comments or requirements (optional)'" 
-        :error="errors.notes"
-        class="bg-white dark:bg-white rounded-lg p-4 border border-gray-200 dark:border-gray-200"
-      >
+      <div>
+        <label for="notes" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+          Additional Notes
+        </label>
         <UTextarea 
           v-model="notes"
           placeholder="Enter any additional notes..."
           :rows="4"
           class="mt-2"
         />
-      </UFormGroup>
+        <p class="mt-2 text-xs text-deep-navy/50 font-medium">Any additional comments or requirements (optional)</p>
+        <p v-if="errors.notes" class="mt-2 text-xs text-red-600 font-bold">{{ errors.notes }}</p>
+      </div>
 
       <div class="flex gap-3 pt-4">
-        <UButton 
+        <button
           type="submit"
-          color="primary"
-          size="xl"
-          :loading="isSubmitting"
-          :disabled="!status"
-          icon="i-heroicons-check-circle"
+          :disabled="!status || isSubmitting"
+          class="px-8 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center gap-2"
         >
+          <svg v-if="isSubmitting" class="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <svg v-else class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
           {{ existingAuthorization ? 'Update Authorization' : 'Submit Authorization' }}
-        </UButton>
+        </button>
 
-        <UButton 
+        <button
           type="button"
-          variant="outline"
-          size="xl"
           :disabled="isSubmitting"
           @click="onCancel"
+          class="px-8 py-3 border-2 border-deep-navy/20 text-deep-navy hover:bg-deep-navy/5 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50"
         >
           Cancel
-        </UButton>
+        </button>
       </div>
     </form>
   </div>
@@ -182,5 +186,16 @@ const getAuthStatusColor = (status?: string): 'yellow' | 'green' | 'red' | 'oran
     'CANCELLED': 'red',
   }
   return colors[status || ''] || 'gray'
+}
+
+const getAuthStatusClasses = (status?: string): string => {
+  const classes: Record<string, string> = {
+    'PENDING': 'bg-amber-500 text-white',
+    'APPROVED': 'bg-green-500 text-white',
+    'REJECTED': 'bg-red-500 text-white',
+    'POSTPONED': 'bg-orange-500 text-white',
+    'CANCELLED': 'bg-red-500 text-white',
+  }
+  return classes[status || ''] || 'bg-gray-500 text-white'
 }
 </script>

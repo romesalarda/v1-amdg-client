@@ -63,6 +63,41 @@ export function useOngoingEvents(params?: MaybeRefOrGetter<EventListOngoingListD
 }
 
 /**
+ * List past events (events that have ended)
+ */
+export function usePastEvents(params?: MaybeRefOrGetter<EventListListData['query'] | undefined>) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'past', params] as const,
+    queryFn: async () => {
+      const queryParams = toValue(params)
+      // Note: The backend doesn't have a dedicated past events endpoint,
+      // so we use the general events list. The filtering by end_datetime
+      // should ideally be done on the backend, but we'll handle it on the frontend
+      const response = await eventListList(queryParams ? { query: queryParams } : undefined)
+      
+      // Filter to only include past events (ended before now)
+      if (response.data?.results) {
+        const now = new Date().toISOString()
+        const pastEvents = response.data.results.filter((event: any) => {
+          return event.end_datetime && event.end_datetime < now
+        })
+        
+        return {
+          ...response,
+          data: {
+            ...response.data,
+            results: pastEvents,
+            count: pastEvents.length
+          }
+        }
+      }
+      
+      return response
+    },
+  })
+}
+
+/**
  * Retrieve a single event by ID
  */
 export function useEvent(eventId: MaybeRefOrGetter<String>) {

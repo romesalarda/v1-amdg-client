@@ -26,6 +26,7 @@
                   type="checkbox"
                   v-model="settingsForm.payment_enabled"
                   class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
+                  :disabled="!canEditPaymentMethods"
                 />
                 <div>
                   <p class="text-sm font-semibold text-navy-900">Enable Payments</p>
@@ -37,6 +38,8 @@
                 <input
                   type="checkbox"
                   v-model="settingsForm.product_selling_enabled"
+                  :disabled="!canEditPaymentMethods"
+
                   class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
                 <div>
@@ -49,6 +52,8 @@
                 <input
                   type="checkbox"
                   v-model="settingsForm.donation_enabled"
+                  :disabled="!canEditPaymentMethods"
+
                   class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
                 />
                 <div>
@@ -62,6 +67,7 @@
                   type="checkbox"
                   v-model="settingsForm.accepting_sponsorships_enabled"
                   class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
+                  :disabled="!canEditPaymentMethods"
                 />
                 <div>
                   <p class="text-sm font-semibold text-navy-900">Accept Sponsorships</p>
@@ -70,7 +76,7 @@
               </label>
             </div>
 
-            <div class="flex justify-end gap-2 pt-2">
+            <div class="flex justify-end gap-2 pt-2" v-if="canEditPaymentMethods">
               <button
                 type="button"
                 @click="resetSettings"
@@ -99,6 +105,7 @@
               <p class="text-xs text-navy-400 mt-0.5">Configure how attendees can pay for this event</p>
             </div>
             <button
+              v-if="canCreatePaymentMethods"
               @click="openPaymentMethodModal()"
               :disabled="!settingsForm.payment_enabled"
               class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -169,6 +176,7 @@
           <div v-else class="text-center py-10 text-navy-500">
             <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">account_balance</span>
             <p v-if="!settingsForm.payment_enabled" class="text-sm">Enable payments to configure payment methods</p>
+            <p v-else-if="!canEditPaymentMethods" class="text-sm">You don't have permission to edit payment methods</p>
             <p v-else class="text-sm">No payment methods configured</p>
             <p class="text-xs mt-1 text-navy-400">Add methods like Stripe, bank transfer, or cash</p>
           </div>
@@ -269,7 +277,7 @@
     <Teleport to="body">
       <div v-if="showPaymentMethodModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="closePaymentMethodModal" />
-        <div class="relative w-full max-w-lg bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn flex flex-col max-h-[90vh]">
+        <div class="relative w-full max-w-lg bg-white border border-deep-navy/10 rounded-2xl shadow-drawn flex flex-col max-h-[90vh]">
           <div class="flex items-center gap-2 px-6 py-5 border-b border-navy-50 flex-shrink-0">
             <span class="material-symbols-outlined text-primary">credit_card</span>
             <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest flex-1">
@@ -344,6 +352,8 @@ import {
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
+import { useCurrentUserEventPermissions } from '~/composables/permissions'
+
 import Swal from 'sweetalert2'
 
 definePageMeta({
@@ -353,6 +363,12 @@ definePageMeta({
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
+
+const { can } = useCurrentUserEventPermissions(id)
+
+const canEditPaymentMethods = computed(() => can('REGISTRATION', 'update').value.allowed)
+const canDeletePaymentMethods = computed(() => can('REGISTRATION', 'delete').value.allowed)
+const canCreatePaymentMethods = computed(() => can('REGISTRATION', 'create').value.allowed)
 
 // Fetch event data
 const { data: event } = useEvent(id)

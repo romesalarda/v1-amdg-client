@@ -2,69 +2,120 @@
   <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
     <!-- Page Header -->
     <div class="mb-8">
-    <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between">
         <div>
-        <h1 class="text-3xl font-bold text-gray-900">Events</h1>
-        <p class="mt-1 text-sm font-medium text-gray-700">
+          <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Events</h1>
+          <p class="mt-2 text-sm text-deep-navy/60 font-medium">
             Manage and view all events in this community
-        </p>
+          </p>
         </div>
-    </div>
+      </div>
     </div>
 
-    <!-- Filters and Search -->
-    <div class="mb-6 flex flex-wrap gap-4">
-      <div class="flex-1 min-w-64">
-        <UInput 
-          v-model="searchQuery"
-          icon="i-heroicons-magnifying-glass"
-          placeholder="Search events..."
-          size="lg"
-        />
+    <!-- Compact Search Bar -->
+    <div class="mb-8 bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-2">
+      <div class="flex items-center gap-0">
+        <div class="relative flex-grow min-w-0">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input 
+            v-model="searchQuery"
+            class="w-full h-12 pl-12 pr-4 bg-transparent border-none text-sm font-medium text-deep-navy placeholder:text-deep-navy/40 focus:ring-0 outline-none" 
+            placeholder="Search events..." 
+            type="text"
+          />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-deep-navy/40 hover:text-deep-navy transition-colors"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="h-8 w-px bg-deep-navy/10"></div>
+        
+        <div class="relative w-56">
+          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-deep-navy/40" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
+          </svg>
+          <select 
+            v-model="statusFilter"
+            class="w-full h-12 pl-12 pr-10 bg-transparent border-none text-[11px] font-black uppercase tracking-wider text-deep-navy focus:ring-0 appearance-none cursor-pointer"
+          >
+            <option :value="undefined">All Statuses</option>
+            <option value="DRAFTING">Drafting</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="OPEN">Open</option>
+            <option value="CLOSED">Closed</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="CANCELLED">Cancelled</option>
+            <option value="POSTPONED">Postponed</option>
+            <option value="ARCHIVED">Archived</option>
+          </select>
+          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-deep-navy/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </div>
-      <USelectMenu 
-        v-model="statusFilter"
-        :options="statusOptions"
-        placeholder="Filter by status"
-        size="lg"
-      />
     </div>
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-4">
-      <USkeleton class="h-32 w-full" v-for="i in 3" :key="i" />
+      <div v-for="i in 3" :key="i" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-6">
+        <USkeleton class="h-6 w-3/4 mb-3 rounded-lg" />
+        <USkeleton class="h-4 w-1/2 rounded-lg" />
+      </div>
     </div>
 
     <!-- Error State -->
-    <UAlert 
-      v-else-if="error" 
-      color="red" 
-      icon="i-heroicons-exclamation-triangle"
-      title="Error loading events"
-      :description="error.message"
-    />
+    <div v-else-if="error" class="bg-red-500/10 border-2 border-red-500/20 rounded-xl p-6">
+      <div class="flex gap-4">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-sm font-black text-deep-navy uppercase tracking-tight mb-1">Error loading events</h3>
+          <p class="text-xs text-deep-navy/70 font-medium">{{ error.message }}</p>
+        </div>
+      </div>
+    </div>
 
     <!-- Empty State -->
     <div 
       v-else-if="!filteredEvents?.length" 
-      class="text-center py-16 bg-white rounded-lg border border-gray-300 shadow-sm"
+      class="text-center py-16 bg-white border-2 border-deep-navy rounded-xl shadow-drawn"
     >
-      <UIcon name="i-heroicons-calendar" class="w-16 h-16 mx-auto text-gray-400 mb-4" />
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">No events found</h3>
-      <p class="text-gray-700 mb-6">
+      <div class="w-20 h-20 mx-auto bg-deep-navy/5 rounded-xl flex items-center justify-center mb-5 border-2 border-deep-navy/10">
+        <svg class="w-10 h-10 text-deep-navy/30" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+        </svg>
+      </div>
+      <h3 class="text-lg font-black text-deep-navy uppercase tracking-tight mb-2">No events found</h3>
+      <p class="text-sm text-deep-navy/60 font-medium mb-6">
         {{ searchQuery || statusFilter ? 'Try adjusting your filters' : 'Get started by creating your first event' }}
       </p>
-      <UButton 
+      <button 
         v-if="!searchQuery && !statusFilter"
-        icon="i-heroicons-plus"
-        color="primary"
+        class="inline-flex items-center gap-2 px-6 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
       >
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
         Create Event
-      </UButton>
+      </button>
     </div>
 
     <!-- Events List -->
-    <div v-else class="space-y-4">
+    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <EventListItem 
         v-for="event in filteredEvents" 
         :key="event.event_id"
@@ -102,20 +153,6 @@ const searchQuery = ref('')
 const statusFilter = ref<string | undefined>(undefined)
 const currentPage = ref(1)
 const pageSize = ref(10)
-
-// Status options for filter
-const statusOptions = [
-  { label: 'All Statuses', value: undefined },
-  { label: 'Drafting', value: 'DRAFTING' },
-  { label: 'Published', value: 'PUBLISHED' },
-  { label: 'Open', value: 'OPEN' },
-  { label: 'Closed', value: 'CLOSED' },
-  { label: 'In Progress', value: 'IN_PROGRESS' },
-  { label: 'Completed', value: 'COMPLETED' },
-  { label: 'Cancelled', value: 'CANCELLED' },
-  { label: 'Postponed', value: 'POSTPONED' },
-  { label: 'Archived', value: 'ARCHIVED' },
-]
 
 // Query params for API
 const queryParams = computed(() => ({

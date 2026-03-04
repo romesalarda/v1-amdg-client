@@ -1,129 +1,141 @@
 <template>
   <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-    <div class="space-y-6">
+    <div class="space-y-8">
       <!-- Send Invitation Section -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Send Invitation</h2>
-          <p class="text-sm text-gray-600 mt-1">Invite users to join your community</p>
+      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
+        <div class="px-8 py-6 border-b-2 border-deep-navy/10">
+          <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Send Invitation</h2>
+          <p class="text-sm text-deep-navy/60 mt-2 font-medium">Invite users to join your community</p>
         </div>
         
-        <div class="p-6">
+        <div class="p-8">
           <!-- Search Users -->
-          <div class="mb-6">
-            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
+          <div class="mb-8">
+            <label for="search" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
               Search Users
             </label>
             <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UIcon name="i-heroicons-magnifying-glass" class="h-5 w-5 text-gray-400" />
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg class="h-5 w-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
               </div>
               <input
                 id="search"
                 v-model="searchQuery"
                 type="text"
                 placeholder="Search by name or email..."
-                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full pl-12 pr-4 py-4 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                 @input="debouncedSearch"
               />
             </div>
           </div>
 
           <!-- Search Results -->
-          <div v-if="searchQuery && filteredUsers.length > 0" class="space-y-2 mb-6">
-            <p class="text-sm font-medium text-gray-700 mb-3">Search Results</p>
+          <div v-if="searchQuery && filteredUsers.length > 0" class="space-y-3 mb-8">
+            <p class="text-[10px] font-black text-deep-navy/50 mb-4 uppercase tracking-[0.2em]">Search Results</p>
             <div
               v-for="user in filteredUsers"
               :key="user.id"
-              class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+              class="flex items-center justify-between p-5 bg-white border-2 border-deep-navy/10 rounded-xl hover:border-deep-navy/30 transition-all"
             >
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                  <UIcon name="i-heroicons-user" class="w-6 h-6 text-gray-600" />
+              <div class="flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center border-2 border-blue-500/20">
+                  <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">
+                  <p class="text-sm font-black text-deep-navy uppercase tracking-tight">
                     {{ user.first_name }} {{ user.last_name }}
                   </p>
-                  <p class="text-xs text-gray-600">{{ user.email }}</p>
+                  <p class="text-xs text-deep-navy/60 font-medium">{{ user.email }}</p>
                 </div>
               </div>
               
               <div class="flex items-center gap-2">
-                <span v-if="hasInvite(user.id)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                  <UIcon name="i-heroicons-envelope" class="w-3 h-3 mr-1" />
+                <span v-if="hasInvite(user.id)" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500 text-white">
+                  <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
                   Invited
                 </span>
-                <span v-else-if="isMember(user.id)" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                  <UIcon name="i-heroicons-check-circle" class="w-3 h-3 mr-1" />
+                <span v-else-if="isMember(user.id)" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500 text-white">
+                  <svg class="w-3 h-3 mr-1 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
                   Member
                 </span>
-                <UButton
+                <button
                   v-else
-                  size="sm"
-                  :loading="sendingInviteToUserId === user.id"
+                  :disabled="sendingInviteToUserId === user.id"
                   @click="sendInvite(user.id)"
+                  class="px-5 py-2 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
                 >
-                  Send Invite
-                </UButton>
+                  {{ sendingInviteToUserId === user.id ? 'Sending...' : 'Send Invite' }}
+                </button>
               </div>
             </div>
           </div>
 
           <!-- No Results -->
-          <div v-else-if="searchQuery && filteredUsers.length === 0 && !isLoadingUsers" class="text-center py-8">
-            <UIcon name="i-heroicons-user-group" class="mx-auto h-12 w-12 text-gray-400" />
-            <p class="mt-2 text-sm text-gray-600">No users found</p>
+          <div v-else-if="searchQuery && filteredUsers.length === 0 && !isLoadingUsers" class="text-center py-12 bg-deep-navy/5 border-2 border-dashed border-deep-navy/20 rounded-xl">
+            <svg class="mx-auto h-16 w-16 text-deep-navy/30 mb-3" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+            </svg>
+            <p class="text-sm font-bold text-deep-navy/60">No users found</p>
           </div>
 
           <!-- Loading -->
           <div v-else-if="isLoadingUsers" class="text-center py-8">
-            <USkeleton class="h-12 w-full" />
+            <USkeleton class="h-16 w-full" />
           </div>
         </div>
       </div>
 
       <!-- Pending Invitations -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Pending Invitations</h2>
-          <p class="text-sm text-gray-600 mt-1">Invitations sent to users</p>
+      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
+        <div class="px-8 py-6 border-b-2 border-deep-navy/10">
+          <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Pending Invitations</h2>
+          <p class="text-sm text-deep-navy/60 mt-2 font-medium">Invitations sent to users</p>
         </div>
 
         <!-- Loading State -->
-        <div v-if="isLoadingInvites" class="p-6 space-y-4">
-          <div v-for="i in 3" :key="i" class="flex items-center gap-3">
-            <USkeleton class="h-12 w-12 rounded-full" />
+        <div v-if="isLoadingInvites" class="p-8 space-y-4">
+          <div v-for="i in 3" :key="i" class="flex items-center gap-4">
+            <USkeleton class="h-14 w-14 rounded-xl" />
             <div class="flex-1 space-y-2">
-              <USkeleton class="h-4 w-32" />
-              <USkeleton class="h-3 w-48" />
+              <USkeleton class="h-5 w-40" />
+              <USkeleton class="h-4 w-56" />
             </div>
           </div>
         </div>
 
         <!-- Invitations List -->
-        <div v-else-if="pendingInvites.length > 0" class="divide-y divide-gray-200">
+        <div v-else-if="pendingInvites.length > 0" class="divide-y-2 divide-deep-navy/5">
           <div
             v-for="invite in pendingInvites"
             :key="invite.id"
-            class="px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
+            class="px-8 py-6 flex items-center justify-between hover:bg-deep-navy/5 transition-colors"
           >
-            <div class="flex items-center gap-4">
-              <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                <UIcon name="i-heroicons-envelope" class="w-6 h-6 text-blue-600" />
+            <div class="flex items-center gap-5">
+              <div class="w-14 h-14 bg-blue-500/10 rounded-xl flex items-center justify-center border-2 border-blue-500/20">
+                <svg class="w-7 h-7 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                </svg>
               </div>
               <div>
-                <p class="text-sm font-medium text-gray-900">
+                <p class="text-sm font-black text-deep-navy uppercase tracking-tight">
                   {{ invite?.target_user_name || 'Invited User' }}
                 </p>
-                <p class="text-xs text-gray-600">{{ invite.target_user_email }}</p>
-                <div class="flex items-center gap-3 mt-1">
-                  <p class="text-xs text-gray-500">
+                <p class="text-xs text-deep-navy/60 font-medium mt-0.5">{{ invite.target_user_email }}</p>
+                <div class="flex items-center gap-4 mt-2">
+                  <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider">
                     Sent {{ formatDate(invite.added_at) }}
                   </p>
-                  <span v-if="invite.expires_at" class="text-xs" :class="{
+                  <span v-if="invite.expires_at" class="text-[10px] font-bold uppercase tracking-wider" :class="{
                     'text-red-600': isExpiringSoon(invite.expires_at),
-                    'text-gray-500': !isExpiringSoon(invite.expires_at)
+                    'text-deep-navy/50': !isExpiringSoon(invite.expires_at)
                   }">
                     Expires {{ formatDate(invite.expires_at) }}
                   </span>
@@ -131,49 +143,49 @@
               </div>
             </div>
             
-            <div class="flex items-center gap-2">
-              <span v-if="!invite.is_valid" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <div class="flex items-center gap-3">
+              <span v-if="!invite.is_valid" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500 text-white">
                 Expired
               </span>
-              <span v-else-if="!invite.is_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+              <span v-else-if="!invite.is_active" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gray-500 text-white">
                 Inactive
               </span>
-              <UButton
-                size="sm"
-                color="red"
-                variant="ghost"
-                :loading="removingInviteId === invite.id"
+              <button
+                :disabled="removingInviteId === invite.id"
                 @click="removeInvite(invite.id)"
+                class="px-5 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
               >
-                Cancel
-              </UButton>
+                {{ removingInviteId === invite.id ? 'Cancelling...' : 'Cancel' }}
+              </button>
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else class="px-6 py-12 text-center">
-          <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <UIcon name="i-heroicons-envelope" class="w-8 h-8 text-gray-400" />
+        <div v-else class="px-8 py-16 text-center">
+          <div class="w-20 h-20 mx-auto bg-deep-navy/5 rounded-xl flex items-center justify-center mb-5 border-2 border-deep-navy/10">
+            <svg class="w-10 h-10 text-deep-navy/30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+            </svg>
           </div>
-          <p class="text-sm text-gray-600">No pending invitations</p>
-          <p class="text-xs text-gray-500 mt-1">Search for users above to send invitations</p>
+          <p class="text-sm font-bold text-deep-navy/60">No pending invitations</p>
+          <p class="text-xs text-deep-navy/40 mt-2 font-medium">Search for users above to send invitations</p>
         </div>
       </div>
 
       <!-- Access Codes Section -->
-      <div class="bg-white rounded-lg shadow">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h2 class="text-lg font-semibold text-gray-900">Access Codes</h2>
-          <p class="text-sm text-gray-600 mt-1">Create codes that users can use to join your community</p>
+      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
+        <div class="px-8 py-6 border-b-2 border-deep-navy/10">
+          <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Access Codes</h2>
+          <p class="text-sm text-deep-navy/60 mt-2 font-medium">Create codes that users can use to join your community</p>
         </div>
 
         <!-- Create Access Code Form -->
-        <div class="p-6 border-b border-gray-200 bg-gray-50">
-          <div class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="p-8 border-b-2 border-deep-navy/10 bg-deep-navy/5">
+          <div class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label for="max_uses" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="max_uses" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
                   Max Uses (optional)
                 </label>
                 <input
@@ -182,128 +194,168 @@
                   type="number"
                   min="1"
                   placeholder="Unlimited"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-4 py-4 bg-white border-2 border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                 />
               </div>
               <div>
-                <label for="expires_at" class="block text-sm font-medium text-gray-700 mb-2">
+                <label for="expires_at" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
                   Expires At (optional)
                 </label>
                 <input
                   id="expires_at"
                   v-model="newAccessCode.expires_at"
                   type="datetime-local"
-                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  class="w-full px-4 py-4 bg-white border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
                 />
               </div>
             </div>
-            <UButton
-              :loading="isCreatingCode"
+            <button
+              :disabled="isCreatingCode"
               @click="createAccessCode"
+              class="px-6 py-4 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 flex items-center gap-2"
             >
-              <UIcon name="i-heroicons-plus" class="w-4 h-4 mr-2" />
-              Generate Code
-            </UButton>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              {{ isCreatingCode ? 'Generating...' : 'Generate Code' }}
+            </button>
           </div>
         </div>
 
         <!-- Loading State -->
-        <div v-if="isLoadingCodes" class="p-6 space-y-4">
-          <div v-for="i in 2" :key="i" class="flex items-center gap-3">
-            <USkeleton class="h-12 w-full" />
+        <div v-if="isLoadingCodes" class="p-8 space-y-4">
+          <div v-for="i in 2" :key="i" class="flex items-center justify-between">
+            <div class="flex-1 space-y-2">
+              <USkeleton class="h-6 w-48" />
+              <USkeleton class="h-4 w-64" />
+            </div>
+            <USkeleton class="h-10 w-24" />
           </div>
         </div>
 
         <!-- Access Codes List -->
-        <div v-else-if="accessCodes.length > 0" class="divide-y divide-gray-200">
+        <div v-else-if="accessCodes.length > 0" class="divide-y-2 divide-deep-navy/5">
           <div
             v-for="code in accessCodes"
             :key="code.id"
-            class="px-6 py-4 hover:bg-gray-50 transition-colors"
+            class="px-8 py-6 hover:bg-deep-navy/5 transition-colors"
           >
             <div class="flex items-start justify-between">
               <div class="flex-1">
-                <div class="flex items-center gap-3 mb-2">
-                  <code class="text-lg font-mono font-bold text-gray-900 bg-gray-100 px-3 py-1 rounded">
+                <div class="flex items-center gap-3 mb-3">
+                  <code class="px-4 py-2 bg-blue-500/10 border-2 border-blue-500/20 rounded-xl text-lg font-black text-blue-600 tracking-wider">
                     {{ code.code }}
                   </code>
                   <button
                     @click="copyCode(code.code || '')"
-                    class="text-gray-500 hover:text-gray-700"
+                    class="p-2 hover:bg-deep-navy/10 rounded-lg transition-colors"
                     title="Copy code"
                   >
-                    <UIcon name="i-heroicons-clipboard-document" class="w-5 h-5" />
+                    <svg class="w-5 h-5 text-deep-navy/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
                   </button>
                 </div>
-                <div class="flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                  <span class="flex items-center gap-1">
-                    <UIcon name="i-heroicons-user-group" class="w-3 h-3" />
-                    {{ code.uses }} / {{ code.max_uses || '∞' }} uses
-                  </span>
-                  <span v-if="code.expires_at" class="flex items-center gap-1" :class="{
+                
+                <div class="flex flex-wrap gap-4 text-[10px] font-bold uppercase tracking-wider text-deep-navy/50">
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path>
+                    </svg>
+                    <span>{{ code.uses }} / {{ code.max_uses || '∞' }} uses</span>
+                  </div>
+                  <div v-if="code.expires_at" class="flex items-center gap-2" :class="{
                     'text-red-600': isExpiringSoon(code.expires_at),
                   }">
-                    <UIcon name="i-heroicons-clock" class="w-3 h-3" />
-                    Expires {{ formatDate(code.expires_at) }}
-                  </span>
-                  <span v-else class="flex items-center gap-1">
-                    <UIcon name="i-heroicons-infinity" class="w-3 h-3" />
-                    No expiration
-                  </span>
-                  <span class="flex items-center gap-1">
-                    <UIcon name="i-heroicons-calendar" class="w-3 h-3" />
-                    Created {{ formatDate(code.added_at) }}
-                  </span>
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"></path>
+                    </svg>
+                    <span>Expires {{ formatDate(code.expires_at) }}</span>
+                  </div>
+                  <div v-else class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"></path>
+                    </svg>
+                    <span>Never expires</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"></path>
+                    </svg>
+                    <span>Created {{ formatDate(code.added_at) }}</span>
+                  </div>
                 </div>
               </div>
               
-              <div class="flex items-center gap-2">
-                <span v-if="!code.is_valid" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+              <div class="flex items-center gap-3">
+                <span v-if="!code.is_valid" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-red-500 text-white">
                   Invalid
                 </span>
-                <span v-else-if="!code.is_active" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                <span v-else-if="!code.is_active" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gray-500 text-white">
                   Inactive
                 </span>
-                <span v-else-if="code.is_single_use && code.uses > 0" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                <span v-else-if="code.is_single_use && code.uses > 0" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white">
                   Used
                 </span>
-                <span v-else class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span v-else class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500 text-white">
                   Active
                 </span>
-                <UButton
-                  size="sm"
-                  color="red"
-                  variant="ghost"
-                  :loading="removingCodeId === code.id"
+                <button
+                  :disabled="removingCodeId === code.id"
                   @click="removeAccessCode(code.id)"
+                  class="px-5 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
                 >
-                  Delete
-                </UButton>
+                  {{ removingCodeId === code.id ? 'Deleting...' : 'Delete' }}
+                </button>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Empty State -->
-        <div v-else class="px-6 py-12 text-center">
-          <div class="w-16 h-16 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <UIcon name="i-heroicons-key" class="w-8 h-8 text-gray-400" />
+        <div v-else class="px-8 py-16 text-center">
+          <div class="w-20 h-20 mx-auto bg-deep-navy/5 rounded-xl flex items-center justify-center mb-5 border-2 border-deep-navy/10">
+            <svg class="w-10 h-10 text-deep-navy/30" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12.65 10C11.7 7.31 8.9 5.5 5.77 6.12c-2.29.46-4.15 2.29-4.63 4.58C.32 14.57 3.26 18 7 18c2.61 0 4.83-1.67 5.65-4H17v2c0 1.1.9 2 2 2s2-.9 2-2v-2c1.1 0 2-.9 2-2s-.9-2-2-2h-8.35zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+            </svg>
           </div>
-          <p class="text-sm text-gray-600">No access codes created</p>
-          <p class="text-xs text-gray-500 mt-1">Generate a code above to allow users to join with a code</p>
+          <p class="text-sm font-bold text-deep-navy/60">No access codes created</p>
+          <p class="text-xs text-deep-navy/40 mt-2 font-medium">Generate a code above to allow users to join with a code</p>
         </div>
       </div>
 
       <!-- Info Box -->
-      <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-        <div class="flex gap-3">
-          <UIcon name="i-heroicons-information-circle" class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
-          <div class="text-sm text-blue-900">
-            <p class="font-medium mb-1">About Invitations & Access Codes</p>
-            <p class="text-blue-800">
-              Send invitations to specific users or create access codes that anyone can use. Invited users will receive a notification,
-              while access codes can be shared freely. Both can have expiration dates and usage limits.
-            </p>
+      <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-6">
+        <div class="flex gap-4">
+          <div class="flex-shrink-0">
+            <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+              <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-black text-deep-navy uppercase tracking-tight mb-2">Invitation Methods</h3>
+            <ul class="space-y-2 text-xs text-deep-navy/70 font-medium leading-relaxed">
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                </svg>
+                <span><strong class="font-bold text-deep-navy">Email Invitations:</strong> Send direct invitations to specific users by email</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                </svg>
+                <span><strong class="font-bold text-deep-navy">Access Codes:</strong> Generate codes that can be shared with multiple users</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                </svg>
+                <span><strong class="font-bold text-deep-navy">Expiration:</strong> Set expiration dates and usage limits to maintain security</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>

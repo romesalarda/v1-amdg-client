@@ -12,6 +12,7 @@
               <p class="text-xs text-navy-400 mt-0.5">Upload and manage documents, PDFs, and other files</p>
             </div>
             <button
+              v-if="canCreate"
               @click="showUploadModal = true"
               class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors"
             >
@@ -66,6 +67,7 @@
                     <span class="material-symbols-outlined text-navy-600 text-lg">download</span>
                   </a>
                   <button
+                    v-if="canEdit"
                     @click="editResource(resource)"
                     class="p-2 hover:bg-white/50 rounded-lg transition-colors"
                     title="Edit"
@@ -73,6 +75,7 @@
                     <span class="material-symbols-outlined text-navy-600 text-lg">edit</span>
                   </button>
                   <button
+                    v-if="canDelete"
                     @click="deleteResource(resource)"
                     class="p-2 hover:bg-red-50 rounded-lg transition-colors"
                     title="Delete"
@@ -261,14 +264,22 @@ import { useEvent } from '~/composables/resources/events/events'
 import { useEventResources, useAddEventResource, useRemoveEventResource, useUpdateEventResource } from '~/composables/resources/events/eventResources'
 import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import { useCurrentUserEventPermissions } from '~/composables/permissions'
 
 definePageMeta({
   layout: false,
 })
 
+
 const route = useRoute()
 const toast = useToast()
 const id = computed(() => route.params.id as string)
+
+const { can, refetch: refetchPermissions } = useCurrentUserEventPermissions(id)
+
+const canEdit = computed(() => can('CONTENT_MANAGEMENT', 'update').value.allowed)
+const canCreate = computed(() => can('CONTENT_MANAGEMENT', 'create').value.allowed)
+const canDelete = computed(() => can('CONTENT_MANAGEMENT', 'delete').value.allowed)
 
 const { data: eventData } = useEvent(id)
 const event = computed(() => eventData.value?.data)
@@ -451,4 +462,8 @@ const getResourceIcon = (type: string) => {
   }
   return icons[type] || 'folder'
 }
+
+onMounted(() => {
+  refetchPermissions()
+})
 </script>

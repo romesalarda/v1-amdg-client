@@ -490,7 +490,7 @@
 
     <!-- Add/Edit Ticket Type Modal -->
     <div v-if="showTicketTypeModal" @click.self="closeTicketTypeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">confirmation_number</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -510,7 +510,7 @@
 
     <!-- Add/Edit Package Modal -->
     <div v-if="showPackageModal" @click.self="closePackageModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">inventory_2</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -530,7 +530,7 @@
 
     <!-- Add/Edit Alternative Sign-in Modal -->
     <div v-if="showSignInModal" @click.self="closeSignInModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary">login</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
@@ -638,7 +638,7 @@
 
     <!-- Add/Edit Discount Modal -->
     <div v-if="showDiscountModal" @click.self="closeDiscountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-3xl w-full">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-3xl w-full">
         <div class="flex items-center gap-3 px-6 py-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary text-xl">percent</span>
           <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
