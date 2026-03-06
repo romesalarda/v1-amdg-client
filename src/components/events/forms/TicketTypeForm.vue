@@ -1,5 +1,16 @@
 <template>
   <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
+    <div class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-6 shadow-lg">
+      <div class="flex items-start gap-4">
+        <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full flex-shrink-0">
+          <span class="material-symbols-outlined text-blue-700 text-2xl">info</span>
+        </div>
+        <div class="flex-1">
+          <h3 class="text-sm font-black text-blue-900 uppercase tracking-wider mb-2">Ticket Type</h3>
+          <p class="text-sm text-blue-800 leading-relaxed">Tickets define scopes of what participants can access during the event.</p>
+        </div>
+      </div>
+    </div>
     <div class="space-y-2">
       <label class="block text-sm font-medium text-background-dark-600" for="ticket-title">
         Title <span class="text-red-500">*</span>
@@ -9,7 +20,7 @@
         v-model="title"
         v-bind="titleAttrs"
         type="text"
-        placeholder="e.g. General Admission, VIP, Early Bird"
+        placeholder="e.g. Full pass, Day pass, Workshop only"
         class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
       />
       <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>

@@ -480,6 +480,7 @@
           
           <div class="flex items-center gap-3">
             <!-- Collapse/Expand Toggle -->
+
             <button
               v-if="!isEditMode"
               type="button"
@@ -488,7 +489,7 @@
               :title="isActionsExpanded ? 'Hide actions' : 'Show actions'"
             >
               <span class="material-symbols-outlined text-sm">{{ isActionsExpanded ? 'chevron_right' : 'chevron_left' }}</span>
-              {{ isActionsExpanded ? 'Hide' : 'Settings' }}
+              {{ isActionsExpanded ? 'Hide' : 'Edit' }}
             </button>
             
             <!-- Actions Container with Transition -->
@@ -525,15 +526,15 @@
                 
                 <!-- Status Action Buttons -->
                 <template v-else>
-                  <button
-                    type="button"
-                    @click="isEditMode = true"
-                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20"
-                  >
-                    <span class="material-symbols-outlined text-base">edit</span>
-                    Edit
-                  </button>
-                  
+                              <button
+                      type="button"
+                      @click="isEditMode = true"
+                      class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20"
+                    >
+                      <span class="material-symbols-outlined text-base">edit</span>
+                      Edit
+                    </button>
+
                   <!-- Publish -->
                   <button
                     v-if="availableActions.canPublish"

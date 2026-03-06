@@ -1,5 +1,16 @@
 <template>
   <form @submit="onSubmit" class="space-y-4 text-background-dark-600">
+    <div class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full flex-shrink-0">
+            <span class="material-symbols-outlined text-blue-700 text-2xl">info</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-black text-blue-900 uppercase tracking-wider mb-2">Booking Packages</h3>
+            <p class="text-sm text-blue-800 leading-relaxed">Define the different booking options available for your event. This is where prices are set.</p>
+          </div>
+        </div>
+      </div>
     <div class="space-y-2">
       <label class="block text-sm font-medium text-background-dark-600" for="package-name">
         Package Name <span class="text-red-500">*</span>
