@@ -17,7 +17,11 @@ export default defineNuxtConfig({
     global: true
   },
   colorMode: {
-    preference: 'dark'
+    preference: 'light',
+    fallback: 'light',
+    dataValue: 'light',
+    classSuffix: '',
+    storageKey: 'nuxt-color-mode'
   },
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
