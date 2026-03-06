@@ -1,5 +1,79 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event">
+    <!-- Authorization Status Banner -->
+    <div v-if="event" class="mb-6">
+      <!-- Not Authorized Warning -->
+      <div v-if="!event.is_approved && currentAuthorization?.status !== 'PENDING'" class="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-4 flex-1">
+            <div class="flex items-center justify-center w-12 h-12 bg-yellow-100 rounded-full flex-shrink-0">
+              <span class="material-symbols-outlined text-yellow-700 text-2xl">warning</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Authorization Required</h3>
+              <p class="text-sm text-yellow-800 leading-relaxed mb-3">This event requires authorization before it can be published or opened for registration.</p>
+              <NuxtLink
+                :to="`/communities/${event.organisation}/m/events/${event.event_id}/authorise`"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider shadow-lg shadow-yellow-600/20"
+              >
+                <span class="material-symbols-outlined text-base">verified</span>
+                Request Authorization
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authorization Pending -->
+      <div v-else-if="currentAuthorization?.status === 'PENDING'" class="bg-blue-50 border-2 border-blue-400 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full flex-shrink-0">
+            <span class="material-symbols-outlined text-blue-700 text-2xl">pending</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-black text-blue-900 uppercase tracking-wider mb-2">Authorization Pending</h3>
+            <p class="text-sm text-blue-800 leading-relaxed">Your authorization request is currently under review. You'll be notified once it has been processed.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authorization Rejected -->
+      <div v-else-if="currentAuthorization?.status === 'REJECTED'" class="bg-red-50 border-2 border-red-400 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start justify-between gap-4">
+          <div class="flex items-start gap-4 flex-1">
+            <div class="flex items-center justify-center w-12 h-12 bg-red-100 rounded-full flex-shrink-0">
+              <span class="material-symbols-outlined text-red-700 text-2xl">cancel</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-sm font-black text-red-900 uppercase tracking-wider mb-2">Authorization Rejected</h3>
+              <p class="text-sm text-red-800 leading-relaxed mb-2">Your authorization request was rejected. Please review the feedback and make necessary changes.</p>
+              <p v-if="currentAuthorization.reason" class="text-sm text-red-800 leading-relaxed mb-3 italic">"{{ currentAuthorization.reason }}"</p>
+              <NuxtLink
+                :to="`/communities/${event.organisation}/m/events/${event.event_id}/authorise`"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider shadow-lg shadow-red-600/20"
+              >
+                <span class="material-symbols-outlined text-base">refresh</span>
+                Request Again
+              </NuxtLink>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Authorization Approved -->
+      <div v-else-if="event.is_approved" class="bg-green-50 border-2 border-green-400 rounded-2xl p-6 shadow-lg">
+        <div class="flex items-start gap-4">
+          <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full flex-shrink-0">
+            <span class="material-symbols-outlined text-green-700 text-2xl">check_circle</span>
+          </div>
+          <div class="flex-1">
+            <h3 class="text-sm font-black text-green-900 uppercase tracking-wider mb-2">Event Authorized</h3>
+            <p class="text-sm text-green-800 leading-relaxed">This event has been authorized and can now be published or opened for registration.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
@@ -42,21 +116,21 @@
                 <span v-if="errors.display_code" class="text-xs text-red-500 font-medium">{{ errors.display_code }}</span>
               </div>
 
-              <!-- Event Status -->
+              <!-- Current Status Display -->
               <div class="space-y-2">
-                <label class="block text-xs font-black text-primary uppercase tracking-wider">Event Status <span class="text-red-500">*</span></label>
-                <select
-                  v-if="isEditMode"
-                  v-model="status"
-                  class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all appearance-none"
-                  required
-                >
-                  <option v-for="option in statusOptions" :key="option.value" :value="option.value">
-                    {{ option.label }}
-                  </option>
-                </select>
-                <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">{{ statusOptions.find(o => o.value === status)?.label || '-' }}</p>
-                <span v-if="errors.status" class="text-xs text-red-500 font-medium">{{ errors.status }}</span>
+                <label class="block text-xs font-black text-primary uppercase tracking-wider">Current Status</label>
+                <div class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl flex items-center gap-3">
+                  <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider" :class="getStatusBadgeClass(event?.status)">
+                    {{ statusOptions.find(o => o.value === event?.status)?.label || '-' }}
+                  </span>
+                  <span v-if="event?.is_approved" class="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-black uppercase tracking-wider border border-green-300">
+                    ✓ Authorized
+                  </span>
+                </div>
+                <p class="text-xs text-navy-600 font-medium flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">info</span>
+                  Use action buttons below to change status
+                </p>
               </div>
 
               <!-- Short Description -->
@@ -340,6 +414,35 @@
           </div>
         </section>
 
+        <!-- Authorization History -->
+        <section v-if="authorizationHistory.length > 0" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">history</span>
+            <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Authorization History</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div 
+                v-for="auth in authorizationHistory.slice(0, 5)" 
+                :key="auth.id"
+                class="border-l-4 pl-4 py-2"
+                :class="getAuthBorderClass(auth.status)"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black uppercase tracking-wider" :class="getAuthTextClass(auth.status)">
+                    {{ auth.status_display }}
+                  </span>
+                  <span class="text-[10px] text-gray-500 font-medium">
+                    {{ formatCompactDateTime(auth.reviewed_at) }}
+                  </span>
+                </div>
+                <p class="text-[10px] text-navy-600 font-medium">By: {{ auth.reviewed_by_email }}</p>
+                <p v-if="auth.reason" class="text-xs text-navy-700 mt-1 italic">"{{ auth.reason }}"</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- Preview Actions -->
         <div class="bg-mist-blue rounded-2xl p-6 border border-dashed border-navy-200">
           <p class="text-[10px] font-black text-navy-400 uppercase tracking-[0.2em] mb-4 text-center">
@@ -370,45 +473,174 @@
           <div class="flex items-center gap-3">
             <span class="material-symbols-outlined text-primary text-xl">info</span>
             <div>
-              <p class="text-xs font-black text-primary uppercase tracking-widest">{{ isEditMode ? 'Edit Mode' : 'Preview Mode' }}</p>
-              <p class="text-[10px] text-deep-navy/60 font-medium">{{ isEditMode ? 'Make changes to event information' : 'Viewing event details' }}</p>
+              <p class="text-xs font-black text-primary uppercase tracking-widest">{{ isEditMode ? 'Edit Mode' : 'Manage Event' }}</p>
+              <p class="text-[10px] text-deep-navy/60 font-medium">{{ isEditMode ? 'Make changes to event information' : 'Use action buttons to manage event status' }}</p>
             </div>
           </div>
           
           <div class="flex items-center gap-3">
-            <button
-              v-if="isEditMode"
-              type="button"
-              @click="cancelEdit"
-              :disabled="isSubmitting"
-              class="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all text-sm font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
+            <!-- Collapse/Expand Toggle -->
             <button
               v-if="!isEditMode"
               type="button"
-              @click="isEditMode = true"
-              class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-sm font-bold uppercase tracking-wide shadow-lg shadow-primary/20"
+              @click="isActionsExpanded = !isActionsExpanded"
+              class="flex items-center gap-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all text-xs font-bold"
+              :title="isActionsExpanded ? 'Hide actions' : 'Show actions'"
             >
-              <span class="material-symbols-outlined text-lg">edit</span>
-              Edit Event
+              <span class="material-symbols-outlined text-sm">{{ isActionsExpanded ? 'chevron_right' : 'chevron_left' }}</span>
+              {{ isActionsExpanded ? 'Hide' : 'Settings' }}
             </button>
-            <button
-              v-if="isEditMode"
-              type="button"
-              @click="saveChanges"
-              :disabled="isSubmitting"
-              class="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-sm font-bold uppercase tracking-wide shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+            
+            <!-- Actions Container with Transition -->
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 scale-95"
+              enter-to-class="opacity-100 scale-100"
+              leave-active-class="transition-all duration-200 ease-in"
+              leave-from-class="opacity-100 scale-100"
+              leave-to-class="opacity-0 scale-95"
             >
-              <span class="material-symbols-outlined text-lg" v-if="!isSubmitting">save</span>
-              <span class="material-symbols-outlined text-lg animate-spin" v-else>progress_activity</span>
-              {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
-            </button>
+              <div v-if="isActionsExpanded" class="flex items-center gap-3 justify-end origin-right">
+                <!-- Edit Mode Buttons -->
+                <template v-if="isEditMode">
+                  <button
+                    type="button"
+                    @click="cancelEdit"
+                    :disabled="isSubmitting"
+                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all text-xs font-bold uppercase tracking-wide disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    @click="saveChanges"
+                    :disabled="isSubmitting"
+                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-symbols-outlined text-base" v-if="!isSubmitting">save</span>
+                    <span class="material-symbols-outlined text-base animate-spin" v-else>progress_activity</span>
+                    {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+                  </button>
+                </template>
+                
+                <!-- Status Action Buttons -->
+                <template v-else>
+                  <button
+                    type="button"
+                    @click="isEditMode = true"
+                    class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20"
+                  >
+                    <span class="material-symbols-outlined text-base">edit</span>
+                    Edit
+                  </button>
+                  
+                  <!-- Publish -->
+                  <button
+                    v-if="availableActions.canPublish"
+                    type="button"
+                    @click="handleStatusAction('PUBLISHED')"
+                    :disabled="!event?.is_approved"
+                    :title="!event?.is_approved ? 'Requires authorization before publishing' : 'Publish this event'"
+                    class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-symbols-outlined text-base">publish</span>
+                    Publish
+                  </button>
+                  
+                  <!-- Open Registration -->
+                  <button
+                    v-if="availableActions.canOpen"
+                    type="button"
+                    @click="handleStatusAction('OPEN')"
+                    :disabled="!event?.is_approved"
+                    :title="!event?.is_approved ? 'Requires authorization before opening registration' : 'Open for registration'"
+                    class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-green-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span class="material-symbols-outlined text-base">door_open</span>
+                    Open
+                  </button>
+                  
+                  <!-- Close -->
+                  <button
+                    v-if="availableActions.canClose"
+                    type="button"
+                    @click="handleStatusAction('CLOSED')"
+                    title="Close registration"
+                    class="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-orange-500/20"
+                  >
+                    <span class="material-symbols-outlined text-base">close</span>
+                    Close
+                  </button>
+                  
+                  <!-- Archive -->
+                  <button
+                    v-if="availableActions.canArchive"
+                    type="button"
+                    @click="handleStatusAction('ARCHIVED')"
+                    title="Archive this event"
+                    class="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-xl hover:bg-gray-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-gray-600/20"
+                  >
+                    <span class="material-symbols-outlined text-base">archive</span>
+                    Archive
+                  </button>
+                  
+                  <!-- Postpone -->
+                  <button
+                    v-if="availableActions.canPostpone"
+                    type="button"
+                    @click="handleStatusAction('POSTPONED')"
+                    title="Postpone this event"
+                    class="flex items-center gap-2 px-4 py-2 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-yellow-600/20"
+                  >
+                    <span class="material-symbols-outlined text-base">schedule</span>
+                    Postpone
+                  </button>
+                  
+                  <!-- Cancel -->
+                  <button
+                    v-if="availableActions.canCancel"
+                    type="button"
+                    @click="handleStatusAction('CANCELLED')"
+                    title="Cancel this event"
+                    class="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-red-600/20"
+                  >
+                    <span class="material-symbols-outlined text-base">cancel</span>
+                    Cancel
+                  </button>
+                  
+                  <!-- Delete -->
+                  <button
+                    v-if="availableActions.canDelete"
+                    type="button"
+                    @click="handleDeleteAction"
+                    title="Permanently delete this event"
+                    class="flex items-center gap-2 px-4 py-2 bg-red-700 text-white rounded-xl hover:bg-red-800 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-red-700/20"
+                  >
+                    <span class="material-symbols-outlined text-base">delete_forever</span>
+                    Delete
+                  </button>
+                </template>
+              </div>
+            </Transition>
           </div>
         </div>
       </div>
     </div>
+    
+    <!-- Confirmation Modals -->
+    <ConfirmActionModal
+      :is-open="confirmModal.isOpen"
+      :title="confirmModal.title"
+      :message="confirmModal.message"
+      :confirm-text="confirmModal.confirmText"
+      :require-typing="confirmModal.requireTyping"
+      :expected-text="confirmModal.expectedText"
+      :confirm-button-color="confirmModal.buttonColor"
+      :is-destructive="confirmModal.isDestructive"
+      :icon="confirmModal.icon"
+      @confirm="handleModalConfirm"
+      @cancel="handleModalCancel"
+    />
   </EventManagementLayout>
 </template>
 
@@ -416,29 +648,52 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { useEvent, useUpdateEvent } from '~/composables/resources/events/events'
+import { useEvent, useUpdateEvent, useDeleteEvent, usePartialUpdateEvent } from '~/composables/resources/events/events'
+import { useEventAuthorizations } from '~/composables/resources/events/eventAuthorizations'
 import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import ConfirmActionModal from '~/components/events/ConfirmActionModal.vue'
 
 definePageMeta({
   layout: false,
   middleware: 'auth',
 })
 const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 const id = computed(() => route.params.id as string)
 
 // Edit mode state
 const isEditMode = ref(false)
+const isActionsExpanded = ref(false)
 
 // Fetch event data
 const { data: eventData } = useEvent(id)
 const event = computed(() => eventData.value?.data)
 
+// Fetch authorization data
+const { data: authData } = useEventAuthorizations(computed(() => ({ event__event_id: event.value?.event_id })))
+const authorizationHistory = computed(() => authData.value?.data?.results || [])
+const currentAuthorization = computed(() => authorizationHistory.value?.[0])
+
+// Modal state
+const confirmModal = ref({
+  isOpen: false,
+  title: '',
+  message: '',
+  confirmText: 'Confirm',
+  requireTyping: false,
+  expectedText: '',
+  buttonColor: 'primary' as 'primary' | 'danger' | 'warning' | 'success',
+  isDestructive: false,
+  icon: 'info',
+  action: null as (() => void) | null,
+})
+
 // Form schema
 const eventInfoSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   display_code: z.string().min(1, 'Display code is required'),
-  status: z.enum(['DRAFTING', 'PUBLISHED', 'OPEN', 'CLOSED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED', 'POSTPONED', 'ARCHIVED', 'DELETED']),
   short_description: z.string().max(255).optional(),
   long_description: z.string().optional(),
   start_datetime: z.string().min(1, 'Start date is required'),
@@ -458,7 +713,6 @@ const { handleSubmit, errors, defineField, resetForm: resetFormValues, setValues
 
 const [title] = defineField('title')
 const [display_code] = defineField('display_code')
-const [status] = defineField('status')
 const [short_description] = defineField('short_description')
 const [long_description] = defineField('long_description')
 const [start_datetime] = defineField('start_datetime')
@@ -503,7 +757,6 @@ watch(event, (newEvent) => {
     setValues({
       title: newEvent.title,
       display_code: newEvent.display_code,
-      status: newEvent.status || 'DRAFTING',
       short_description: newEvent.short_description || '',
       long_description: newEvent.long_description || '',
       start_datetime: newEvent.start_datetime ? new Date(newEvent.start_datetime).toISOString().slice(0, 16) : '',
@@ -520,12 +773,215 @@ watch(event, (newEvent) => {
 }, { immediate: true })
 
 const updateMutation = useUpdateEvent()
+const partialUpdateMutation = usePartialUpdateEvent()
+const deleteMutation = useDeleteEvent()
+
+// Computed available actions based on current status and authorization
+const availableActions = computed(() => {
+  const status = event.value?.status
+  const isApproved = event.value?.is_approved
+  
+  return {
+    canPublish: status === 'DRAFTING',
+    canOpen: status === 'PUBLISHED',
+    canClose: status === 'OPEN' || status === 'IN_PROGRESS',
+    canArchive: status === 'CLOSED' || status === 'COMPLETED',
+    canPostpone: status !== 'ARCHIVED' && status !== 'DELETED' && status !== 'CANCELLED' && status !== 'POSTPONED',
+    canCancel: status !== 'ARCHIVED' && status !== 'DELETED' && status !== 'CANCELLED' && status !== 'COMPLETED',
+    canDelete: true, // Can delete from any status, but requires confirmation
+  }
+})
+
+// Status change handlers
+const handleStatusAction = (newStatus: string) => {
+  if (!event.value) return
+  
+  const statusConfig: Record<string, { title: string; message: string; confirmText: string; requireTyping: boolean; buttonColor: 'primary' | 'danger' | 'warning' | 'success'; isDestructive: boolean; icon: string }> = {
+    PUBLISHED: {
+      title: 'Publish Event',
+      message: 'Are you sure you want to publish this event? It will become visible to the public.',
+      confirmText: 'Publish',
+      requireTyping: false,
+      buttonColor: 'success',
+      isDestructive: false,
+      icon: 'publish',
+    },
+    OPEN: {
+      title: 'Open Registration',
+      message: 'Are you sure you want to open registration for this event? Participants will be able to sign up.',
+      confirmText: 'Open',
+      requireTyping: false,
+      buttonColor: 'success',
+      isDestructive: false,
+      icon: 'door_open',
+    },
+    CLOSED: {
+      title: 'Close Registration',
+      message: 'Are you sure you want to close registration? No new participants will be able to sign up.',
+      confirmText: 'Close',
+      requireTyping: false,
+      buttonColor: 'warning',
+      isDestructive: false,
+      icon: 'door_close',
+    },
+    ARCHIVED: {
+      title: 'Archive Event',
+      message: 'Are you sure you want to archive this event? It will be moved to archived events.',
+      confirmText: 'Archive',
+      requireTyping: false,
+      buttonColor: 'primary',
+      isDestructive: false,
+      icon: 'archive',
+    },
+    POSTPONED: {
+      title: 'Postpone Event',
+      message: 'Are you sure you want to postpone this event? You can update the dates later.',
+      confirmText: 'Postpone',
+      requireTyping: false,
+      buttonColor: 'warning',
+      isDestructive: false,
+      icon: 'schedule',
+    },
+    CANCELLED: {
+      title: 'Cancel Event',
+      message: `Are you sure you want to cancel this event? This action indicates the event will not take place. Type <strong>${event.value.title}</strong> to confirm.`,
+      confirmText: 'Cancel Event',
+      requireTyping: true,
+      buttonColor: 'danger',
+      isDestructive: true,
+      icon: 'cancel',
+    },
+  }
+  
+  const config = statusConfig[newStatus]
+  if (!config) return
+  
+  confirmModal.value = {
+    ...config,
+    isOpen: true,
+    expectedText: config.requireTyping ? event.value.title : '',
+    action: () => executeStatusChange(newStatus),
+  }
+}
+
+const executeStatusChange = async (newStatus: string) => {
+  if (!event.value) return
+  
+  try {
+    await partialUpdateMutation.mutateAsync({
+      eventId: id.value,
+      body: {
+        status: newStatus as any,
+      },
+    })
+    
+    toast.add({
+      title: 'Success',
+      description: `Event status updated to ${newStatus}`,
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Error',
+      description: error.message || 'Failed to update event status',
+      color: 'red',
+    })
+  }
+}
+
+const handleDeleteAction = () => {
+  if (!event.value) return
+  
+  confirmModal.value = {
+    isOpen: true,
+    title: 'Delete Event',
+    message: `<strong>Warning:</strong> This will permanently delete the event "${event.value.title}". This action cannot be undone. All associated data will be lost.<br><br>Type <strong>${event.value.title}</strong> to confirm deletion.`,
+    confirmText: 'Delete Forever',
+    requireTyping: true,
+    expectedText: event.value.title,
+    buttonColor: 'danger',
+    isDestructive: true,
+    icon: 'delete_forever',
+    action: executeDelete,
+  }
+}
+
+const executeDelete = async () => {
+  if (!event.value) return
+  
+  try {
+    await deleteMutation.mutateAsync(id.value)
+    
+    toast.add({
+      title: 'Success',
+      description: 'Event deleted successfully',
+      color: 'green',
+    })
+    
+    // Navigate back to events list
+    router.push('/events')
+  } catch (error: any) {
+    toast.add({
+      title: 'Error',
+      description: error.message || 'Failed to delete event',
+      color: 'red',
+    })
+  }
+}
+
+const handleModalConfirm = () => {
+  if (confirmModal.value.action) {
+    confirmModal.value.action()
+  }
+  confirmModal.value.isOpen = false
+}
+
+const handleModalCancel = () => {
+  confirmModal.value.isOpen = false
+}
+
+// Utility functions for styling
+const getStatusBadgeClass = (status?: string) => {
+  const classes: Record<string, string> = {
+    DRAFTING: 'bg-gray-100 text-gray-800 border border-gray-300',
+    PUBLISHED: 'bg-blue-100 text-blue-800 border border-blue-300',
+    OPEN: 'bg-green-100 text-green-800 border border-green-300',
+    CLOSED: 'bg-orange-100 text-orange-800 border border-orange-300',
+    IN_PROGRESS: 'bg-purple-100 text-purple-800 border border-purple-300',
+    COMPLETED: 'bg-gray-100 text-gray-800 border border-gray-300',
+    CANCELLED: 'bg-red-100 text-red-800 border border-red-300',
+    POSTPONED: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
+    ARCHIVED: 'bg-gray-100 text-gray-600 border border-gray-300',
+  }
+  return classes[status || ''] || 'bg-gray-100 text-gray-800'
+}
+
+const getAuthBorderClass = (status?: string) => {
+  const classes: Record<string, string> = {
+    PENDING: 'border-blue-400',
+    APPROVED: 'border-green-400',
+    REJECTED: 'border-red-400',
+    POSTPONED: 'border-orange-400',
+    CANCELLED: 'border-red-400',
+  }
+  return classes[status || ''] || 'border-gray-400'
+}
+
+const getAuthTextClass = (status?: string) => {
+  const classes: Record<string, string> = {
+    PENDING: 'text-blue-700',
+    APPROVED: 'text-green-700',
+    REJECTED: 'text-red-700',
+    POSTPONED: 'text-orange-700',
+    CANCELLED: 'text-red-700',
+  }
+  return classes[status || ''] || 'text-gray-700'
+}
 
 const saveChanges = async () => {
   const values = {
     title: title.value || '',
     display_code: display_code.value || '',
-    status: status.value || 'DRAFTING',
     short_description: short_description.value || '',
     long_description: long_description.value || '',
     start_datetime: start_datetime.value || '',
@@ -560,7 +1016,6 @@ const saveChanges = async () => {
     // Exit edit mode
     isEditMode.value = false
   } catch (error: any) {
-    const toast = useToast()
     toast.add({
       title: 'Error',
       description: error.message || 'Failed to update event information',
@@ -580,15 +1035,12 @@ const onSubmit = handleSubmit(async (values) => {
       },
     })
     
-    // Show success notification
-    const toast = useToast()
     toast.add({
       title: 'Success',
       description: 'Event information updated successfully',
       color: 'green',
     })
   } catch (error: any) {
-    const toast = useToast()
     toast.add({
       title: 'Error',
       description: error.message || 'Failed to update event information',
@@ -602,7 +1054,6 @@ const cancelEdit = () => {
     setValues({
       title: event.value.title,
       display_code: event.value.display_code,
-      status: event.value.status || 'DRAFTING',
       short_description: event.value.short_description || '',
       long_description: event.value.long_description || '',
       start_datetime: event.value.start_datetime ? new Date(event.value.start_datetime).toISOString().slice(0, 16) : '',
@@ -624,7 +1075,6 @@ const resetForm = () => {
     setValues({
       title: event.value.title,
       display_code: event.value.display_code,
-      status: event.value.status || 'DRAFTING',
       short_description: event.value.short_description || '',
       long_description: event.value.long_description || '',
       start_datetime: event.value.start_datetime ? new Date(event.value.start_datetime).toISOString().slice(0, 16) : '',

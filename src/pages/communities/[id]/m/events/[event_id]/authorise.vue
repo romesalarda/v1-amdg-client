@@ -238,6 +238,11 @@ import { formatDateTime } from '~/utils/time'
 import ManagementLayout from '~/components/communities/ManagementLayout.vue'
 import EventAuthorizationForm from '~/components/events/forms/EventAuthorizationForm.vue'
 
+definePageMeta({
+  middleware: ['auth', 'organisation-controller'],
+  layout: 'default',
+})
+
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
@@ -254,7 +259,7 @@ const { data: eventData, isLoading: isLoadingEvent, error: eventError } = useEve
 const event = computed(() => eventData.value?.data)
 
 // Fetch existing authorizations for this event
-const { data: authData } = useEventAuthorizations(computed(() => ({ event: event.value?.event_id })))
+const { data: authData } = useEventAuthorizations(computed(() => ({ event__event_id: event.value?.event_id })))
 const existingAuthorizations = computed(() => authData.value?.data?.results || [])
 
 // Get the most recent authorization (if any)

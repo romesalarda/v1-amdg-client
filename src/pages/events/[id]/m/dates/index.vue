@@ -48,12 +48,12 @@
       <!-- Empty State -->
       <div v-if="!windows || windows.length === 0" class="space-y-6">
         <!-- Empty State Card -->
-        <section class="bg-white dark:bg-navy-900 border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="text-center py-12 px-8">
             <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full mb-6">
               <span class="material-symbols-outlined text-5xl text-primary">calendar_month</span>
             </div>
-            <h3 class="text-xl font-bold text-navy-900 dark:text-white mb-2">No availability windows yet</h3>
+            <h3 class="text-xl font-bold text-navy-900 mb-2">No availability windows yet</h3>
             <p class="text-navy-600 dark:text-navy-300 mb-8 max-w-md mx-auto text-sm">
               Get started by creating your first availability window or applying a template to control when features are accessible.
             </p>

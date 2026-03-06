@@ -117,7 +117,6 @@ const onSubmit = handleSubmit((values) => {
       <UButton 
         :to="`/communities/${organisationId}`" 
         icon="i-heroicons-arrow-left" 
-        variant="ghost" 
         color="gray" 
         class="mb-6"
       >
@@ -206,7 +205,7 @@ const onSubmit = handleSubmit((values) => {
                   v-model="code"
                   type="text"
                   placeholder="Enter code (e.g., ABC123)"
-                  class="w-full pl-12 pr-4 py-4 text-lg font-mono border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-colors"
+                  class="w-full pl-12 pr-4 py-4 text-lg bg-white font-mono border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 uppercase transition-colors"
                   :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': errors.code }"
                   :disabled="isSubmitting"
                   @input="(e) => code = (e.target as HTMLInputElement).value.toUpperCase()"

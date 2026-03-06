@@ -767,7 +767,10 @@ const handleTicketTypeSubmit = async (data: any) => {
     if (editingTicketType.value) {
       await updateTicketTypeMutation.mutateAsync({
         ticketTypeId: editingTicketType.value.id,
-        body: data,
+        body: {
+          ...data,
+          event: route.params.id,
+        },
       })
       toast.add({
         title: 'Ticket type updated',
@@ -776,7 +779,7 @@ const handleTicketTypeSubmit = async (data: any) => {
     } else {
       await createTicketTypeMutation.mutateAsync({
         ...data,
-        event: Number(route.params.id),
+        event: event.value?.data?.id,
       })
       toast.add({
         title: 'Ticket type created',

@@ -320,6 +320,12 @@
 </template>
 
 <script setup lang="ts">
+
+definePageMeta({
+  middleware: ['auth', 'organisation-controller'],
+  layout: 'default',
+})
+
 import { useEvent } from '~/composables/resources/events/events'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { formatDateTime } from '~/utils/time'

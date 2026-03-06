@@ -193,4 +193,10 @@ const filteredEvents = computed(() => {
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
+
+definePageMeta({
+  middleware: ['auth', 'organisation-controller'],
+  layout: 'default',
+})
+
 </script>

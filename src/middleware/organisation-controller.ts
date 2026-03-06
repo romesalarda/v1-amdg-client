@@ -29,11 +29,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (controls.length === 0) {
       // User is not a controller
     //   useNuxtApp().$notyf?.error('You do not have permission to access this page')
-      return navigateTo(`/404`)
+      return navigateTo(`/403`)
     }
   } catch (error) {
     // console.error('Permission check error:', error)
     // useNuxtApp().$notyf?.error('Unable to verify permissions')
-    return navigateTo(`/404`)
+    return navigateTo(`/403`)
   }
 })
