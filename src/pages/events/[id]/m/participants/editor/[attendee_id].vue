@@ -1,597 +1,938 @@
 <template>
-  <EventManagementLayout :event-id="eventId" :event="event?.data">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="mb-6 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <NuxtLink
-            :to="`/events/${eventId}/m/participants/dashboard`"
-            class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
-          >
-            <svg class="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </NuxtLink>
-          <div>
-            <h1 class="text-2xl font-black text-deep-navy">{{ attendee?.full_name || 'Participant Details' }}</h1>
-            <p class="text-sm text-gray-500">View and manage participant information</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Tab Navigation -->
-      <div class="mb-6 bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
-        <div class="flex items-center overflow-x-auto">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            @click="changeTab(tab.id)"
-            :class="[
-              'flex items-center gap-2 px-6 py-3 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap',
-              activeTab === tab.id
-                ? 'border-primary text-primary bg-primary/5'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-            ]"
-          >
-            <svg v-html="tab.icon" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"></svg>
-            <span>{{ tab.label }}</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- Loading State -->
-      <div v-if="isLoading" class="space-y-4">
-        <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="p-6 space-y-4">
-            <div class="h-8 bg-gray-200 rounded animate-pulse w-1/3"></div>
-            <div class="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
-            <div class="h-4 bg-gray-200 rounded animate-pulse w-2/3"></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Content -->
-      <div v-else-if="attendee" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Content -->
-        <div class="lg:col-span-2 space-y-6">
-          
-          <!-- Overview Tab -->
-          <div v-if="activeTab === 'overview'">
-            <!-- Participant Header -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="p-6 m-2">
-                <div class="flex items-start justify-between mb-4">
-                  <div>
-                    <h2 class="text-2xl font-bold text-gray-900">{{ attendee.full_name }}</h2>
-                    <p class="text-sm text-gray-500 mt-1">ID: {{ attendee.attendee_display_id }}</p>
-                  </div>
-                  <div class="flex flex-wrap gap-2">
-                    <span
-                      v-if="attendee.is_minor"
-                      class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-800"
-                    >
-                      Minor
-                    </span>
-                    <span
-                      v-if="(attendee as any).is_event_staff"
-                      class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-100 text-purple-800"
-                    >
-                      Staff
-                    </span>
-                    <span
-                      :class="[
-                        'inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-semibold',
-                        (attendee as any).is_checked_in
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      ]"
-                    >
-                      {{ (attendee as any).is_checked_in ? 'Checked In' : 'Not Checked In' }}
-                    </span>
-                  </div>
-                </div>
+  <EventManagementLayout :event-id="eventId" :event="event?.data.value?.data">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Main Content (9/12) -->
+      <div class="lg:col-span-9 space-y-6">
+        
+        <!-- Header Card -->
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <UIcon name="i-heroicons-user" class="w-5 h-5 text-primary" />
+              <div>
+                <h1 class="text-sm font-black text-primary uppercase tracking-widest">
+                  {{ attendee.data.value?.data?.full_name || 'Loading...' }}
+                </h1>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  ID: {{ attendee.data.value?.data?.attendee_display_id }}
+                </p>
               </div>
-            </section>
-
-            <!-- Contact Information -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Contact Information
-                </h3>
-              </div>
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Email</p>
-                    <p class="text-sm text-gray-900">{{ attendee.email || 'Not provided' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Phone Number</p>
-                    <p class="text-sm text-gray-900">{{ attendee.phone_number || 'Not provided' }}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Personal Information -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                  Personal Information
-                </h3>
-              </div>
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">First Name</p>
-                    <p class="text-sm text-gray-900">{{ attendee.first_name }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Last Name</p>
-                    <p class="text-sm text-gray-900">{{ attendee.last_name }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Date of Birth</p>
-                    <p class="text-sm text-gray-900">{{ attendee.date_of_birth || 'Not provided' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Age</p>
-                    <p class="text-sm text-gray-900">{{ attendee.age }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Gender</p>
-                    <p class="text-sm text-gray-900">{{ attendee.gender || 'Not specified' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Relationship</p>
-                    <p class="text-sm text-gray-900">{{ attendee.relationship_display }}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <!-- Registration Information -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  Registration Information
-                </h3>
-              </div>
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Area From</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).area_from_name || 'Not specified' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Registration Date</p>
-                    <p class="text-sm text-gray-900">{{ formatDate((attendee as any).created_at) }}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
+            </div>
+            <div class="flex items-center gap-2">
+              <UBadge v-if="attendee.data.value?.data?.is_minor" color="amber" variant="soft">Minor</UBadge>
+              <UBadge v-if="(attendee.data.value?.data as any)?.is_event_staff" color="purple" variant="soft">Staff</UBadge>
+            </div>
           </div>
 
-          <!-- Edit Tab -->
-          <div v-else-if="activeTab === 'edit'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Edit Participant Information</h3>
+          <!-- Tab Navigation -->
+          <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
+            <nav class="flex gap-6">
+              <button
+                v-for="tab in tabs"
+                :key="tab.id"
+                @click="changeTab(tab.id)"
+                :class="[
+                  'py-2 px-1 border-b-2 font-semibold text-xs uppercase tracking-wide transition-colors',
+                  currentTab === tab.id
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ]"
+              >
+                {{ tab.label }}
+              </button>
+            </nav>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="p-5">
+            <!-- Overview Tab -->
+            <div v-if="currentTab === 'overview'">
+              <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Personal Information</h3>
+              <dl class="grid grid-cols-2 gap-x-6 gap-y-3">
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Full Name</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.full_name }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Email</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.email || 'N/A' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Phone</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.phone_number || 'N/A' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Date of Birth</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.date_of_birth || 'N/A' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Age</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.age }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Gender</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.gender || 'N/A' }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Relationship</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.relationship_display }}</dd>
+                </div>
+                <div>
+                  <dt class="text-xs font-semibold text-gray-500 uppercase">Area From</dt>
+                  <dd class="mt-0.5 text-sm text-gray-900">{{ attendee.data.value?.data?.area_from_name || 'N/A' }}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Edit Tab -->
+            <div v-if="currentTab === 'edit'">
+              <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Edit Basic Information</h3>
+              <form @submit.prevent="handleUpdate" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">First Name *</label>
+                  <input
+                    v-model="formData.first_name"
+                    type="text"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Last Name *</label>
+                  <input
+                    v-model="formData.last_name"
+                    type="text"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
               </div>
-              <form @submit.prevent="handleUpdate" class="p-6 space-y-6">
-                <!-- Basic Information -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">First Name *</label>
-                    <input
-                      v-model="formData.first_name"
-                      type="text"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Last Name *</label>
-                    <input
-                      v-model="formData.last_name"
-                      type="text"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Email</label>
+                <input
+                  v-model="formData.email"
+                  type="email"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Phone Number</label>
+                <input
+                  v-model="formData.phone_number"
+                  type="tel"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Date of Birth</label>
+                <input
+                  v-model="formData.date_of_birth"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Gender</label>
+                <input
+                  v-model="formData.gender"
+                  type="text"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Relationship to User</label>
+                <select
+                  v-model="formData.relationship_to_user"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="self">Self</option>
+                  <option value="spouse">Spouse</option>
+                  <option value="child">Child</option>
+                  <option value="friend">Friend</option>
+                  <option value="parent">Parent</option>
+                  <option value="sibling">Sibling</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Area From</label>
+                <select
+                  v-model="formData.area_from"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="null">Select area...</option>
+                  <option
+                    v-for="area in areas.data.value?.data?.results"
+                    :key="area.id"
+                    :value="area.id"
+                  >
+                    {{ area.area_name }}
+                  </option>
+                </select>
+              </div>
+              <div class="flex gap-3 pt-4">
+                <UButton
+                  type="submit"
+                  :disabled="updateMutation.isPending.value"
+                  size="sm"
+                  color="primary"
+                >
+                  {{ updateMutation.isPending.value ? 'Saving...' : 'Save Changes' }}
+                </UButton>
+                <UButton
+                  type="button"
+                  @click="changeTab('overview')"
+                  size="sm"
+                  variant="ghost"
+                  color="gray"
+                >
+                  Cancel
+                </UButton>
+              </div>
+            </form>
+          </div>
+        </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                    <input
-                      v-model="formData.email"
-                      type="email"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Phone Number</label>
-                    <input
-                      v-model="formData.phone_number"
-                      type="tel"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                </div>
+        <!-- Medical Tab -->
+        <section v-if="currentTab === 'medical'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-heart" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Medical Conditions</h2>
+            </div>
+            <UButton
+              @click="showAddMedicalForm = true"
+              size="sm"
+              color="primary"
+              icon="i-heroicons-plus"
+            >
+              Add Condition
+            </UButton>
+          </div>
+          <div class="p-5">
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Date of Birth *</label>
-                    <input
-                      v-model="formData.date_of_birth"
-                      type="date"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Gender</label>
-                    <select
-                      v-model="formData.gender"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            <!-- Add Medical Condition Form -->
+            <div v-if="showAddMedicalForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Medical Condition</h3>
+              <form @submit.prevent="handleAddMedicalCondition" class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Condition *</label>
+                  <select
+                    v-model="newMedicalCondition.medical_condition"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option :value="null">Select condition...</option>
+                    <option
+                      v-for="condition in medicalConditions.data.value?.data?.results"
+                      :key="condition.id"
+                      :value="condition.id"
                     >
-                      <option value="">Select gender</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                      <option value="Prefer not to say">Prefer not to say</option>
-                    </select>
-                  </div>
+                      {{ condition.label }}
+                    </option>
+                  </select>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Relationship *</label>
-                    <select
-                      v-model="formData.relationship_to_user"
-                      required
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    >
-                      <option value="">Select relationship</option>
-                      <option value="self">Self</option>
-                      <option value="spouse">Spouse</option>
-                      <option value="child">Child</option>
-                      <option value="parent">Parent</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="friend">Friend</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Area From</label>
-                    <select
-                      v-model="formData.area_from"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    >
-                      <option :value="null">Select area</option>
-                      <option v-for="area in areas" :key="area.id" :value="area.id">
-                        {{ area.area_name }}
-                      </option>
-                    </select>
-                  </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Severity</label>
+                  <select
+                    v-model="newMedicalCondition.severity"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value="">Not specified</option>
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                  </select>
                 </div>
-
-                <div class="flex items-center justify-end gap-3 pt-4 border-t">
-                  <button
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                  <textarea
+                    v-model="newMedicalCondition.details"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                  <textarea
+                    v-model="newMedicalCondition.notes"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <UButton
+                    type="submit"
+                    :disabled="createMedicalMutation.isPending.value"
+                    size="sm"
+                    color="green"
+                  >
+                    {{ createMedicalMutation.isPending.value ? 'Adding...' : 'Add' }}
+                  </UButton>
+                  <UButton
                     type="button"
-                    @click="activeTab = 'overview'"
-                    class="px-4 py-2 text-sm font-semibold text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    @click="cancelAddMedicalCondition"
+                    size="sm"
+                    variant="ghost"
+                    color="gray"
                   >
                     Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    :disabled="updateMutation.isPending.value"
-                    class="px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {{ updateMutation.isPending.value ? 'Saving...' : 'Save Changes' }}
-                  </button>
+                  </UButton>
                 </div>
               </form>
-            </section>
-          </div>
+            </div>
 
-          <!-- Medical Tab -->
-          <div v-else-if="activeTab === 'medical'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Medical Information</h3>
-              </div>
-              <div class="p-6">
-                <div class="space-y-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Medical Conditions</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).medical_conditions || 'No medical conditions reported' }}</p>
+            <!-- Medical Conditions List -->
+            <div v-if="medicalConditionsLoading" class="text-center py-8 text-gray-500 text-sm">
+              Loading medical conditions...
+            </div>
+            <div v-else-if="!attendeeMedicalConditions.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
+              No medical conditions recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="condition in attendeeMedicalConditions.data.value?.data?.results"
+                :key="condition.id"
+                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900 text-sm">{{ condition.condition_details.label }}</h4>
+                    <div class="mt-2 space-y-1">
+                      <p v-if="condition.severity" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Severity:</span> 
+                        <span :class="{
+                          'text-yellow-600': condition.severity === 'mild',
+                          'text-orange-600': condition.severity === 'moderate',
+                          'text-red-600': condition.severity === 'severe'
+                        }">
+                          {{ condition.severity.charAt(0).toUpperCase() + condition.severity.slice(1) }}
+                        </span>
+                      </p>
+                      <p v-if="condition.details" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Details:</span> {{ condition.details }}
+                      </p>
+                      <p v-if="condition.notes" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Notes:</span> {{ condition.notes }}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Medications</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).medications || 'No medications reported' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Allergies</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).allergies || 'No allergies reported' }}</p>
-                  </div>
+                  <UButton
+                    @click="deleteMedicalCondition(condition.id)"
+                    size="xs"
+                    color="red"
+                    variant="ghost"
+                    icon="i-heroicons-trash"
+                  >
+                    Delete
+                  </UButton>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
+        </section>
 
-          <!-- Dietary Tab -->
-          <div v-else-if="activeTab === 'dietary'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Dietary Requirements</h3>
-              </div>
-              <div class="p-6">
-                <div class="space-y-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Dietary Requirements</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).dietary_requirements || 'No dietary requirements reported' }}</p>
+        <!-- Dietary Tab -->
+        <section v-if="currentTab === 'dietary'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-cake" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Dietary Requirements</h2>
+            </div>
+            <UButton
+              @click="showAddDietaryForm = true"
+              size="sm"
+              color="primary"
+              icon="i-heroicons-plus"
+            >
+              Add Requirement
+            </UButton>
+          </div>
+          <div class="p-5">
+
+            <!-- Add Dietary Requirement Form -->
+            <div v-if="showAddDietaryForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Dietary Requirement</h3>
+              <form @submit.prevent="handleAddDietaryRequirement" class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Requirement *</label>
+                  <select
+                    v-model="newDietaryRequirement.dietary_requirement"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option :value="null">Select requirement...</option>
+                    <option
+                      v-for="requirement in dietaryRequirements.data.value?.data?.results"
+                      :key="requirement.id"
+                      :value="requirement.id"
+                    >
+                      {{ requirement.label }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                  <textarea
+                    v-model="newDietaryRequirement.details"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                  <textarea
+                    v-model="newDietaryRequirement.notes"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <UButton
+                    type="submit"
+                    :disabled="createDietaryMutation.isPending.value"
+                    size="sm"
+                    color="green"
+                  >
+                    {{ createDietaryMutation.isPending.value ? 'Adding...' : 'Add' }}
+                  </UButton>
+                  <UButton
+                    type="button"
+                    @click="cancelAddDietaryRequirement"
+                    size="sm"
+                    variant="ghost"
+                    color="gray"
+                  >
+                    Cancel
+                  </UButton>
+                </div>
+              </form>
+            </div>
+
+            <!-- Dietary Requirements List -->
+            <div v-if="dietaryRequirementsLoading" class="text-center py-8 text-gray-500 text-sm">
+              Loading dietary requirements...
+            </div>
+            <div v-else-if="!attendeeDietaryRequirements.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
+              No dietary requirements recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="requirement in attendeeDietaryRequirements.data.value?.data?.results"
+                :key="requirement.id"
+                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
+                    <div class="mt-2 space-y-1">
+                      <p v-if="requirement.details" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
+                      </p>
+                      <p v-if="requirement.notes" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Food Allergies</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).food_allergies || 'No food allergies reported' }}</p>
-                  </div>
+                  <UButton
+                    @click="deleteDietaryRequirement(requirement.id)"
+                    size="xs"
+                    color="red"
+                    variant="ghost"
+                    icon="i-heroicons-trash"
+                  >
+                    Delete
+                  </UButton>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
+        </section>
 
-          <!-- Accessibility Tab -->
-          <div v-else-if="activeTab === 'accessibility'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Accessibility Requirements</h3>
-              </div>
-              <div class="p-6">
-                <div class="space-y-4">
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Accessibility Requirements</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).accessibility_requirements || 'No accessibility requirements reported' }}</p>
+        <!-- Accessibility Tab -->
+        <section v-if="currentTab === 'accessibility'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-hand-raised" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Accessibility Requirements</h2>
+            </div>
+            <UButton
+              @click="showAddAccessibilityForm = true"
+              size="sm"
+              color="primary"
+              icon="i-heroicons-plus"
+            >
+              Add Requirement
+            </UButton>
+          </div>
+          <div class="p-5">
+
+            <!-- Add Accessibility Requirement Form -->
+            <div v-if="showAddAccessibilityForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Accessibility Requirement</h3>
+              <form @submit.prevent="handleAddAccessibilityRequirement" class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Requirement *</label>
+                  <select
+                    v-model="newAccessibilityRequirement.accessibility_requirement"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option :value="null">Select requirement...</option>
+                    <option
+                      v-for="requirement in accessibilityRequirements.data.value?.data?.results"
+                      :key="requirement.id"
+                      :value="requirement.id"
+                    >
+                      {{ requirement.label }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                  <textarea
+                    v-model="newAccessibilityRequirement.details"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                  <textarea
+                    v-model="newAccessibilityRequirement.notes"
+                    rows="2"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  ></textarea>
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <UButton
+                    type="submit"
+                    :disabled="createAccessibilityMutation.isPending.value"
+                    size="sm"
+                    color="green"
+                  >
+                    {{ createAccessibilityMutation.isPending.value ? 'Adding...' : 'Add' }}
+                  </UButton>
+                  <UButton
+                    type="button"
+                    @click="cancelAddAccessibilityRequirement"
+                    size="sm"
+                    variant="ghost"
+                    color="gray"
+                  >
+                    Cancel
+                  </UButton>
+                </div>
+              </form>
+            </div>
+
+            <!-- Accessibility Requirements List -->
+            <div v-if="accessibilityRequirementsLoading" class="text-center py-8 text-gray-500 text-sm">
+              Loading accessibility requirements...
+            </div>
+            <div v-else-if="!attendeeAccessibilityRequirements.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
+              No accessibility requirements recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="requirement in attendeeAccessibilityRequirements.data.value?.data?.results"
+                :key="requirement.id"
+                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
+                    <div class="mt-2 space-y-1">
+                      <p v-if="requirement.details" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
+                      </p>
+                      <p v-if="requirement.notes" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Special Accommodations</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).special_accommodations || 'No special accommodations required' }}</p>
-                  </div>
+                  <UButton
+                    @click="deleteAccessibilityRequirement(requirement.id)"
+                    size="xs"
+                    color="red"
+                    variant="ghost"
+                    icon="i-heroicons-trash"
+                  >
+                    Delete
+                  </UButton>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
+        </section>
 
-          <!-- Emergency Tab -->
-          <div v-else-if="activeTab === 'emergency'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Emergency Contact</h3>
-              </div>
-              <div class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Emergency Contacts Tab -->
+        <section v-if="currentTab === 'emergency'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Emergency Contacts</h2>
+            </div>
+            <UButton
+              @click="showAddEmergencyForm = true"
+              size="sm"
+              color="primary"
+              icon="i-heroicons-plus"
+            >
+              Add Contact
+            </UButton>
+          </div>
+          <div class="p-5">
+
+            <!-- Add Emergency Contact Form -->
+            <div v-if="showAddEmergencyForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+              <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Emergency Contact</h3>
+              <form @submit.prevent="handleAddEmergencyContact" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
                   <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Emergency Contact Name</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).emergency_contact_name || 'Not provided' }}</p>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">First Name *</label>
+                    <input
+                      v-model="newEmergencyContact.first_name"
+                      type="text"
+                      required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
                   </div>
                   <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Emergency Contact Phone</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).emergency_contact_phone || 'Not provided' }}</p>
-                  </div>
-                  <div>
-                    <p class="text-xs font-semibold text-gray-500 uppercase mb-1">Emergency Contact Relationship</p>
-                    <p class="text-sm text-gray-900">{{ (attendee as any).emergency_contact_relationship || 'Not provided' }}</p>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Last Name *</label>
+                    <input
+                      v-model="newEmergencyContact.last_name"
+                      type="text"
+                      required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
                   </div>
                 </div>
-              </div>
-            </section>
-          </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Relationship *</label>
+                  <select
+                    v-model="newEmergencyContact.relationship"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value="">Select relationship...</option>
+                    <option value="parent">Parent</option>
+                    <option value="sibling">Sibling</option>
+                    <option value="child">Child</option>
+                    <option value="spouse">Spouse</option>
+                    <option value="friend">Friend</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Phone Number *</label>
+                  <input
+                    v-model="newEmergencyContact.phone_number"
+                    type="tel"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Email</label>
+                  <input
+                    v-model="newEmergencyContact.email"
+                    type="email"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+                <div class="flex items-center">
+                  <input
+                    v-model="newEmergencyContact.primary_contact"
+                    type="checkbox"
+                    id="primary"
+                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/20"
+                  />
+                  <label for="primary" class="ml-2 text-xs font-medium text-gray-700">Primary Contact</label>
+                </div>
+                <div class="flex gap-2 pt-2">
+                  <UButton
+                    type="submit"
+                    :disabled="createEmergencyMutation.isPending.value"
+                    size="sm"
+                    color="green"
+                  >
+                    {{ createEmergencyMutation.isPending.value ? 'Adding...' : 'Add' }}
+                  </UButton>
+                  <UButton
+                    type="button"
+                    @click="cancelAddEmergencyContact"
+                    size="sm"
+                    variant="ghost"
+                    color="gray"
+                  >
+                    Cancel
+                  </UButton>
+                </div>
+              </form>
+            </div>
 
-          <!-- History Tab -->
-          <div v-else-if="activeTab === 'history'">
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-6 py-4 border-b border-gray-100">
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Event History</h3>
-              </div>
-              <div class="p-6">
-                <div class="text-center py-8">
-                  <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <p class="text-sm text-gray-500">Event history coming soon</p>
+            <!-- Emergency Contacts List -->
+            <div v-if="emergencyContactsLoading" class="text-center py-8 text-gray-500 text-sm">
+              Loading emergency contacts...
+            </div>
+            <div v-else-if="!emergencyContacts.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
+              No emergency contacts recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="contact in emergencyContacts.data.value?.data?.results"
+                :key="contact.id"
+                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-semibold text-gray-900 text-sm">{{ contact.full_name }}</h4>
+                      <UBadge v-if="contact.primary_contact" color="primary" size="xs">
+                        Primary
+                      </UBadge>
+                    </div>
+                    <div class="mt-2 space-y-1">
+                      <p class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Relationship:</span> {{ contact.relationship_display }}
+                      </p>
+                      <p class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Phone:</span> {{ contact.phone_number }}
+                      </p>
+                      <p v-if="contact.email" class="text-xs text-gray-600">
+                        <span class="font-bold uppercase tracking-wide">Email:</span> {{ contact.email }}
+                      </p>
+                    </div>
+                  </div>
+                  <UButton
+                    @click="deleteEmergencyContact(contact.id)"
+                    size="xs"
+                    color="red"
+                    variant="ghost"
+                    icon="i-heroicons-trash"
+                  >
+                    Delete
+                  </UButton>
                 </div>
               </div>
-            </section>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <!-- Sidebar - Quick Actions -->
-        <div class="lg:col-span-1">
-          <div class="sticky top-24 space-y-4">
-            <!-- Quick Actions -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-5 py-4 bg-primary border-b border-primary">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                  Quick Actions
-                </h3>
-              </div>
-              <div class="p-5 space-y-3">
-                <button
-                  v-if="!(attendee as any).is_checked_in"
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Check In
-                </button>
-                
-                <button
-                  @click="changeTab('edit')"
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                  Edit Details
-                </button>
-
-                <button
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  Send Message
-                </button>
-
-                <button
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-600 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                  Print Badge
-                </button>
-
-                <button
-                  @click="confirmDelete"
-                  class="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors"
-                >
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  Delete Participant
-                </button>
-              </div>
-            </section>
-
-            <!-- Info Card -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-              <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-                <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <h3 class="text-xs font-black text-primary uppercase tracking-widest">Information</h3>
-              </div>
-              <div class="p-5 text-xs space-y-2 text-gray-600">
-                <p>• View complete participant details</p>
-                <p>• Use quick actions for common tasks</p>
-                <p>• Changes are saved automatically</p>
-              </div>
-            </section>
+        <!-- History Tab -->
+        <section v-if="currentTab === 'history'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-clock" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Attendance History</h2>
+            </div>
           </div>
-        </div>
+          <div class="p-5">
+            <div class="text-center py-8 text-gray-500 text-sm">
+              History tracking coming soon
+            </div>
+          </div>
+        </section>
+      </section>
       </div>
 
-      <!-- Error State -->
-      <div v-else class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-12 text-center">
-        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <h3 class="text-lg font-semibold text-gray-900 mb-2">Participant not found</h3>
-        <p class="text-sm text-gray-500 mb-4">The participant you're looking for doesn't exist or has been removed.</p>
-        <NuxtLink
-          :to="`/events/${eventId}/m/participants/dashboard`"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-          </svg>
-          Back to Dashboard
-        </NuxtLink>
+      <!-- Sidebar (3/12) -->
+      <div class="lg:col-span-3 space-y-6">
+        <!-- Quick Actions -->
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-5 py-3 bg-gradient-to-r from-primary to-deep-navy">
+            <div class="flex items-center justify-between">
+              <h3 class="text-xs font-black text-white uppercase tracking-widest">
+                Quick Actions
+              </h3>
+            </div>
+          </div>
+
+          <div class="p-5 space-y-3">
+            <UButton
+              @click="changeTab('edit')"
+              block
+              size="sm"
+              color="primary"
+              icon="i-heroicons-pencil-square"
+            >
+              Edit Details
+            </UButton>
+            
+            <UButton
+              :to="`/events/${eventId}/m/participants/dashboard`"
+              block
+              size="sm"
+              variant="outline"
+              color="gray"
+              icon="i-heroicons-arrow-left"
+            >
+              Back to List
+            </UButton>
+            
+            <div class="pt-3 border-t border-gray-200">
+              <UButton
+                @click="confirmDelete"
+                block
+                size="sm"
+                color="red"
+                variant="soft"
+                icon="i-heroicons-trash"
+              >
+                Delete Participant
+              </UButton>
+            </div>
+          </div>
+        </section>
+
+        <!-- Info Card -->
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
+            <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-primary" />
+            <h3 class="text-xs font-black text-primary uppercase tracking-widest">Participant Info</h3>
+          </div>
+          <div class="p-5 space-y-3">
+            <div v-if="attendee.data.value?.data">
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-500 font-semibold uppercase">Status</span>
+                <UBadge :color="(attendee.data.value?.data as any)?.is_checked_in ? 'green' : 'gray'" variant="soft" size="xs">
+                  {{ (attendee.data.value?.data as any)?.is_checked_in ? 'Checked In' : 'Not Checked In' }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                <span class="text-gray-500 font-semibold uppercase">Medical</span>
+                <UBadge :color="attendeeMedicalConditions.data.value?.data?.count ? 'red' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeMedicalConditions.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                <span class="text-gray-500 font-semibold uppercase">Dietary</span>
+                <UBadge :color="attendeeDietaryRequirements.data.value?.data?.count ? 'amber' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeDietaryRequirements.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                <span class="text-gray-500 font-semibold uppercase">Accessibility</span>
+                <UBadge :color="attendeeAccessibilityRequirements.data.value?.data?.count ? 'blue' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeAccessibilityRequirements.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
+                <span class="text-gray-500 font-semibold uppercase">Emergency Contacts</span>
+                <UBadge :color="emergencyContacts.data.value?.data?.count ? 'purple' : 'gray'" variant="soft" size="xs">
+                  {{ emergencyContacts.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
+import { ref, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import * as z from 'zod'
 import { useAttendee, useUpdateAttendee, useDeleteAttendee } from '~/composables/resources/attendee/attendees'
 import { useEvent } from '~/composables/resources/events/events'
 import { useAreas } from '~/composables/resources/locations/locations'
+import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
+import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
+import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { 
+  useAttendeeMedicalConditions, 
+  useCreateAttendeeMedicalCondition, 
+  useDeleteAttendeeMedicalCondition 
+} from '~/composables/resources/attendee/attendeeMedicalConditions'
+import {
+  useAttendeeDietaryRequirements,
+  useCreateAttendeeDietaryRequirement,
+  useDeleteAttendeeDietaryRequirement
+} from '~/composables/resources/attendee/attendeeDietaryRequirementsRelationship'
+import {
+  useAttendeeAccessibilityRequirements,
+  useCreateAttendeeAccessibilityRequirement,
+  useDeleteAttendeeAccessibilityRequirement
+} from '~/composables/resources/attendee/attendeeAccessibilityRequirements'
+import {
+  useAttendeeEmergencyContacts,
+  useCreateAttendeeEmergencyContact,
+  useDeleteAttendeeEmergencyContact
+} from '~/composables/resources/attendee/attendeeEmergencyContacts'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
-import type { AttendeeList } from '~/api/types.gen'
-
-definePageMeta({
-  layout: false,
-  middleware: 'auth',
-})
 
 const route = useRoute()
 const router = useRouter()
-const eventId = computed(() => route.params.id as string)
+
 const attendeeId = computed(() => route.params.attendee_id as string)
+const eventId = computed(() => route.params.id as string)
+const currentTab = ref((route.query.tab as string) || 'overview')
 
-// Active tab management
-const activeTab = ref<string>((route.query.tab as string) || 'overview')
-
-// Tab definitions with inline SVG icons
 const tabs = [
-  {
-    id: 'overview',
-    label: 'Overview',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />'
-  },
-  {
-    id: 'edit',
-    label: 'Edit',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />'
-  },
-  {
-    id: 'medical',
-    label: 'Medical',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />'
-  },
-  {
-    id: 'dietary',
-    label: 'Dietary',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />'
-  },
-  {
-    id: 'accessibility',
-    label: 'Accessibility',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
-  },
-  {
-    id: 'emergency',
-    label: 'Emergency',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />'
-  },
-  {
-    id: 'history',
-    label: 'History',
-    icon: '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />'
-  }
+  { id: 'overview', label: 'Overview' },
+  { id: 'edit', label: 'Edit' },
+  { id: 'medical', label: 'Medical' },
+  { id: 'dietary', label: 'Dietary' },
+  { id: 'accessibility', label: 'Accessibility' },
+  { id: 'emergency', label: 'Emergency Contacts' },
+  { id: 'history', label: 'History' },
 ]
 
-// Fetch event details
-const { data: event } = useEvent(eventId)
+// Data queries
+const attendee = useAttendee(attendeeId)
+const event = useEvent(eventId)
+const areas = useAreas()
 
-// Fetch attendee details
-const { data: attendeeData, isLoading } = useAttendee(attendeeId)
-const attendee = computed(() => attendeeData.value?.data as AttendeeList | undefined)
+// Options for dropdowns
+const medicalConditions = useMedicalConditions()
+const dietaryRequirements = useDietaryRequirements()
+const accessibilityRequirements = useAccessibilityRequirements()
 
-// Fetch areas for dropdown
-const { data: areasData } = useAreas({ page_size: 100 })
-const areas = computed(() => areasData.value?.data?.results || [])
+// Relationship data
+const attendeeMedicalConditions = useAttendeeMedicalConditions(attendeeId)
+const attendeeDietaryRequirements = useAttendeeDietaryRequirements(attendeeId)
+const attendeeAccessibilityRequirements = useAttendeeAccessibilityRequirements(attendeeId)
+const emergencyContacts = useAttendeeEmergencyContacts(attendeeId)
 
-// Form data for editing
-const formData = ref({
+// Loading states
+const medicalConditionsLoading = computed(() => attendeeMedicalConditions.isLoading.value)
+const dietaryRequirementsLoading = computed(() => attendeeDietaryRequirements.isLoading.value)
+const accessibilityRequirementsLoading = computed(() => attendeeAccessibilityRequirements.isLoading.value)
+const emergencyContactsLoading = computed(() => emergencyContacts.isLoading.value)
+
+// Mutations
+const updateMutation = useUpdateAttendee()
+const deleteMutation = useDeleteAttendee()
+const createMedicalMutation = useCreateAttendeeMedicalCondition()
+const deleteMedicalMutation = useDeleteAttendeeMedicalCondition()
+const createDietaryMutation = useCreateAttendeeDietaryRequirement()
+const deleteDietaryMutation = useDeleteAttendeeDietaryRequirement()
+const createAccessibilityMutation = useCreateAttendeeAccessibilityRequirement()
+const deleteAccessibilityMutation = useDeleteAttendeeAccessibilityRequirement()
+const createEmergencyMutation = useCreateAttendeeEmergencyContact()
+const deleteEmergencyMutation = useDeleteAttendeeEmergencyContact()
+
+// Form data
+const formData = ref<{
+  first_name: string
+  last_name: string
+  email: string
+  phone_number: string
+  date_of_birth: string
+  gender: string
+  relationship_to_user: 'child' | 'friend' | 'other' | 'parent' | 'sibling' | 'spouse' | 'self' | ''
+  area_from: number | null
+}>({
   first_name: '',
   last_name: '',
   email: '',
@@ -599,89 +940,321 @@ const formData = ref({
   date_of_birth: '',
   gender: '',
   relationship_to_user: '',
-  area_from: null as number | null,
+  area_from: null,
 })
 
-// Initialize form when attendee data loads
-watch(attendee, (newAttendee) => {
-  if (newAttendee) {
+// Forms visibility
+const showAddMedicalForm = ref(false)
+const showAddDietaryForm = ref(false)
+const showAddAccessibilityForm = ref(false)
+const showAddEmergencyForm = ref(false)
+
+// New item forms
+const newMedicalCondition = ref({
+  medical_condition: null as number | null,
+  severity: '',
+  details: '',
+  notes: '',
+})
+
+const newDietaryRequirement = ref({
+  dietary_requirement: null as number | null,
+  details: '',
+  notes: '',
+})
+
+const newAccessibilityRequirement = ref({
+  accessibility_requirement: null as number | null,
+  details: '',
+  notes: '',
+})
+
+const newEmergencyContact = ref({
+  first_name: '',
+  last_name: '',
+  relationship: '',
+  phone_number: '',
+  email: '',
+  primary_contact: false,
+})
+
+// Zod schemas
+const medicalConditionSchema = z.object({
+  medical_condition: z.number({ required_error: 'Please select a condition' }),
+  severity: z.enum(['mild', 'moderate', 'severe', '']).optional(),
+  details: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+const dietaryRequirementSchema = z.object({
+  dietary_requirement: z.number({ required_error: 'Please select a requirement' }),
+  details: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+const accessibilityRequirementSchema = z.object({
+  accessibility_requirement: z.number({ required_error: 'Please select a requirement' }),
+  details: z.string().optional(),
+  notes: z.string().optional(),
+})
+
+const emergencyContactSchema = z.object({
+  first_name: z.string().min(1, 'First name is required'),
+  last_name: z.string().min(1, 'Last name is required'),
+  relationship: z.enum(['parent', 'sibling', 'child', 'spouse', 'friend', 'other'], {
+    required_error: 'Please select a relationship',
+  }),
+  phone_number: z.string().min(1, 'Phone number is required'),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  primary_contact: z.boolean().optional(),
+})
+
+// Initialize form data
+watch(() => attendee.data.value?.data, (newData) => {
+  if (newData) {
     formData.value = {
-      first_name: newAttendee.first_name || '',
-      last_name: newAttendee.last_name || '',
-      email: newAttendee.email || '',
-      phone_number: newAttendee.phone_number || '',
-      date_of_birth: newAttendee.date_of_birth || '',
-      gender: newAttendee.gender || '',
-      relationship_to_user: (newAttendee as any).relationship_to_user || '',
-      area_from: (newAttendee as any).area_from || null,
+      first_name: newData.first_name,
+      last_name: newData.last_name,
+      email: newData.email || '',
+      phone_number: newData.phone_number || '',
+      date_of_birth: newData.date_of_birth || '',
+      gender: newData.gender || '',
+      relationship_to_user: newData.relationship_to_user || '',
+      area_from: newData.area_from || null,
     }
   }
 }, { immediate: true })
 
-// Update mutation
-const updateMutation = useUpdateAttendee()
-
-// Delete mutation
-const deleteMutation = useDeleteAttendee()
-
-// Format date helper
-function formatDate(dateString: string | undefined) {
-  if (!dateString) return 'N/A'
-  const date = new Date(dateString)
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
+// Tab navigation
+const changeTab = (tabId: string) => {
+  currentTab.value = tabId
+  router.replace({ query: { tab: tabId } })
 }
 
-// Change tab function with URL update
-function changeTab(tabId: string) {
-  activeTab.value = tabId
-  router.replace({
-    query: { ...route.query, tab: tabId }
-  })
-}
-
-// Watch URL query changes
-watch(() => route.query.tab, (newTab) => {
-  if (newTab && typeof newTab === 'string') {
-    activeTab.value = newTab
-  }
-})
-
-// Handle update
-async function handleUpdate() {
+// Update basic info
+const handleUpdate = async () => {
   try {
     await updateMutation.mutateAsync({
       attendeeId: attendeeId.value,
       body: {
         ...formData.value,
-        event: eventId.value,
-      } as any
+        relationship_to_user: formData.value.relationship_to_user || undefined,
+      },
     })
-    
-    // Switch back to overview tab on success
-    activeTab.value = 'overview'
-    router.replace({ query: { tab: 'overview' } })
+    changeTab('overview')
   } catch (error) {
     console.error('Failed to update attendee:', error)
   }
 }
 
-// Delete confirmation
-async function confirmDelete() {
-  if (confirm('Are you sure you want to delete this participant? This action cannot be undone.')) {
-    try {
-      await deleteMutation.mutateAsync(attendeeId.value)
-      
-      // Redirect to dashboard on success
-      router.push(`/events/${eventId.value}/m/participants/dashboard`)
-    } catch (error) {
-      console.error('Failed to delete attendee:', error)
+// Medical conditions
+const handleAddMedicalCondition = async () => {
+  const result = medicalConditionSchema.safeParse(newMedicalCondition.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+
+    if (!attendee.data.value?.data?.attendee_id) {
+      alert('Attendee must be saved before adding medical conditions.')
+      return
     }
+    
+    await createMedicalMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        attendee: (attendee.data.value?.data?.attendee_id) as any,
+        medical_condition: newMedicalCondition.value.medical_condition!,
+        severity: (newMedicalCondition.value.severity || null) as any,
+        details: newMedicalCondition.value.details || null,
+        notes: newMedicalCondition.value.notes || null,
+      },
+    })
+    cancelAddMedicalCondition()
+  } catch (error) {
+    console.error('Failed to add medical condition:', error)
   }
 }
+
+const cancelAddMedicalCondition = () => {
+  showAddMedicalForm.value = false
+  newMedicalCondition.value = {
+    medical_condition: null,
+    severity: '',
+    details: '',
+    notes: '',
+  }
+}
+
+const deleteMedicalCondition = async (conditionId: number) => {
+  if (!confirm('Are you sure you want to delete this medical condition?')) return
+  
+  try {
+    await deleteMedicalMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      conditionId,
+    })
+  } catch (error) {
+    console.error('Failed to delete medical condition:', error)
+  }
+}
+
+// Dietary requirements
+const handleAddDietaryRequirement = async () => {
+  const result = dietaryRequirementSchema.safeParse(newDietaryRequirement.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await createDietaryMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        dietary_requirement: newDietaryRequirement.value.dietary_requirement!,
+        details: newDietaryRequirement.value.details || null,
+        notes: newDietaryRequirement.value.notes || null,
+      },
+    })
+    cancelAddDietaryRequirement()
+  } catch (error) {
+    console.error('Failed to add dietary requirement:', error)
+  }
+}
+
+const cancelAddDietaryRequirement = () => {
+  showAddDietaryForm.value = false
+  newDietaryRequirement.value = {
+    dietary_requirement: null,
+    details: '',
+    notes: '',
+  }
+}
+
+const deleteDietaryRequirement = async (requirementId: number) => {
+  if (!confirm('Are you sure you want to delete this dietary requirement?')) return
+  
+  try {
+    await deleteDietaryMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      requirementId,
+    })
+  } catch (error) {
+    console.error('Failed to delete dietary requirement:', error)
+  }
+}
+
+// Accessibility requirements
+const handleAddAccessibilityRequirement = async () => {
+  const result = accessibilityRequirementSchema.safeParse(newAccessibilityRequirement.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await createAccessibilityMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        accessibility_requirement: newAccessibilityRequirement.value.accessibility_requirement!,
+        details: newAccessibilityRequirement.value.details || null,
+        notes: newAccessibilityRequirement.value.notes || null,
+      },
+    })
+    cancelAddAccessibilityRequirement()
+  } catch (error) {
+    console.error('Failed to add accessibility requirement:', error)
+  }
+}
+
+const cancelAddAccessibilityRequirement = () => {
+  showAddAccessibilityForm.value = false
+  newAccessibilityRequirement.value = {
+    accessibility_requirement: null,
+    details: '',
+    notes: '',
+  }
+}
+
+const deleteAccessibilityRequirement = async (requirementId: number) => {
+  if (!confirm('Are you sure you want to delete this accessibility requirement?')) return
+  
+  try {
+    await deleteAccessibilityMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      requirementId,
+    })
+  } catch (error) {
+    console.error('Failed to delete accessibility requirement:', error)
+  }
+}
+
+// Emergency contacts
+const handleAddEmergencyContact = async () => {
+  const result = emergencyContactSchema.safeParse(newEmergencyContact.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await createEmergencyMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        first_name: newEmergencyContact.value.first_name,
+        last_name: newEmergencyContact.value.last_name,
+        relationship: newEmergencyContact.value.relationship as any,
+        phone_number: newEmergencyContact.value.phone_number,
+        email: newEmergencyContact.value.email || null,
+        primary_contact: newEmergencyContact.value.primary_contact,
+      },
+    })
+    cancelAddEmergencyContact()
+  } catch (error) {
+    console.error('Failed to add emergency contact:', error)
+  }
+}
+
+const cancelAddEmergencyContact = () => {
+  showAddEmergencyForm.value = false
+  newEmergencyContact.value = {
+    first_name: '',
+    last_name: '',
+    relationship: '',
+    phone_number: '',
+    email: '',
+    primary_contact: false,
+  }
+}
+
+const deleteEmergencyContact = async (contactId: number) => {
+  if (!confirm('Are you sure you want to delete this emergency contact?')) return
+  
+  try {
+    await deleteEmergencyMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      contactId,
+    })
+  } catch (error) {
+    console.error('Failed to delete emergency contact:', error)
+  }
+}
+
+// Delete attendee
+const confirmDelete = async () => {
+  if (!confirm(`Are you sure you want to delete ${attendee.data.value?.data?.full_name}? This action cannot be undone.`)) return
+  
+  try {
+    await deleteMutation.mutateAsync(attendeeId.value)
+    router.push(`/events/${eventId.value}/m/participants/dashboard`)
+  } catch (error) {
+    console.error('Failed to delete attendee:', error)
+  }
+}
+
+definePageMeta({
+  layout: false
+})
 </script>

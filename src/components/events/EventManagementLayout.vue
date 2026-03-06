@@ -214,6 +214,11 @@ const tabs = [
     label: 'Resources',
     icon: 'i-heroicons-document-text',
   },
+  {
+    path: 'participants/dashboard',
+    label: 'Participants',
+    icon: 'i-heroicons-users',
+  }
 ]
 
 const isActive = (section: string) => {
