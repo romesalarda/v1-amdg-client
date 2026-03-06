@@ -213,7 +213,7 @@
           <div class="p-5">
 
             <!-- Add Medical Condition Form -->
-            <div v-if="showAddMedicalForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+            <div v-if="showAddMedicalForm && !editingMedicalId" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
               <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Medical Condition</h3>
               <form @submit.prevent="handleAddMedicalCondition" class="space-y-3">
                 <div>
@@ -294,9 +294,71 @@
               <div
                 v-for="condition in attendeeMedicalConditions.data.value?.data?.results"
                 :key="condition.id"
-                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+                class="border border-gray-200 rounded-lg hover:border-primary/30 transition-colors bg-gray-50/30"
+                :class="editingMedicalId === condition.id ? 'p-0' : 'p-4'"
               >
-                <div class="flex items-start justify-between">
+                <!-- Edit Form (when editing this item) -->
+                <div v-if="editingMedicalId === condition.id" class="p-4">
+                  <div class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Edit Medical Condition</div>
+                  <form @submit.prevent="handleUpdateMedicalCondition" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Condition *</label>
+                      <select
+                        v-model="newMedicalCondition.medical_condition"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option :value="null">Select condition...</option>
+                        <option
+                          v-for="c in medicalConditions.data.value?.data?.results"
+                          :key="c.id"
+                          :value="c.id"
+                        >
+                          {{ c.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Severity</label>
+                      <select
+                        v-model="newMedicalCondition.severity"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="">Not specified</option>
+                        <option value="mild">Mild</option>
+                        <option value="moderate">Moderate</option>
+                        <option value="severe">Severe</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                      <textarea
+                        v-model="newMedicalCondition.details"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                      <textarea
+                        v-model="newMedicalCondition.notes"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div class="flex gap-2">
+                      <UButton type="submit" :disabled="updateMedicalMutation.isPending.value" size="sm" color="green">
+                        {{ updateMedicalMutation.isPending.value ? 'Updating...' : 'Update' }}
+                      </UButton>
+                      <UButton type="button" @click="cancelEditMedicalCondition" size="sm" variant="ghost" color="gray">
+                        Cancel
+                      </UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Display Mode (when not editing) -->
+                <div v-else class="flex items-start justify-between">
                   <div class="flex-1">
                     <h4 class="font-semibold text-gray-900 text-sm">{{ condition.condition_details.label }}</h4>
                     <div class="mt-2 space-y-1">
@@ -318,15 +380,26 @@
                       </p>
                     </div>
                   </div>
-                  <UButton
-                    @click="deleteMedicalCondition(condition.id)"
-                    size="xs"
-                    color="red"
-                    variant="ghost"
-                    icon="i-heroicons-trash"
-                  >
-                    Delete
-                  </UButton>
+                  <div class="flex gap-2">
+                    <UButton
+                      @click="editMedicalCondition(condition)"
+                      size="xs"
+                      color="primary"
+                      variant="ghost"
+                      icon="i-heroicons-pencil-square"
+                    >
+                      Edit
+                    </UButton>
+                    <UButton
+                      @click="deleteMedicalCondition(condition.id)"
+                      size="xs"
+                      color="red"
+                      variant="ghost"
+                      icon="i-heroicons-trash"
+                    >
+                      Delete
+                    </UButton>
+                  </div>
                 </div>
               </div>
             </div>
@@ -352,7 +425,7 @@
           <div class="p-5">
 
             <!-- Add Dietary Requirement Form -->
-            <div v-if="showAddDietaryForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+            <div v-if="showAddDietaryForm && !editingDietaryId" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
               <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Dietary Requirement</h3>
               <form @submit.prevent="handleAddDietaryRequirement" class="space-y-3">
                 <div>
@@ -421,29 +494,103 @@
               <div
                 v-for="requirement in attendeeDietaryRequirements.data.value?.data?.results"
                 :key="requirement.id"
-                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+                :class="editingDietaryId === requirement.id ? 'p-0' : 'p-4'"
+                class="border border-gray-200 rounded-lg hover:border-primary/30 transition-colors bg-gray-50/30"
               >
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
-                    <div class="mt-2 space-y-1">
-                      <p v-if="requirement.details" class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
-                      </p>
-                      <p v-if="requirement.notes" class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
-                      </p>
+                <!-- Inline Edit Form -->
+                <div v-if="editingDietaryId === requirement.id" class="p-4">
+                  <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Editing Dietary Requirement</h3>
+                  <form @submit.prevent="handleUpdateDietaryRequirement" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Requirement *</label>
+                      <select
+                        v-model="newDietaryRequirement.dietary_requirement"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option :value="null">Select requirement...</option>
+                        <option
+                          v-for="req in dietaryRequirements.data.value?.data?.results"
+                          :key="req.id"
+                          :value="req.id"
+                        >
+                          {{ req.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                      <textarea
+                        v-model="newDietaryRequirement.details"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                      <textarea
+                        v-model="newDietaryRequirement.notes"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                      <UButton
+                        type="submit"
+                        :disabled="updateDietaryMutation.isPending.value"
+                        size="sm"
+                        color="green"
+                      >
+                        {{ updateDietaryMutation.isPending.value ? 'Updating...' : 'Update' }}
+                      </UButton>
+                      <UButton
+                        type="button"
+                        @click="cancelEditDietaryRequirement"
+                        size="sm"
+                        variant="ghost"
+                        color="gray"
+                      >
+                        Cancel
+                      </UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Display Mode -->
+                <div v-else>
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
+                      <div class="mt-2 space-y-1">
+                        <p v-if="requirement.details" class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
+                        </p>
+                        <p v-if="requirement.notes" class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex gap-1">
+                      <UButton
+                        @click="editDietaryRequirement(requirement)"
+                        size="xs"
+                        color="primary"
+                        variant="ghost"
+                        icon="i-heroicons-pencil-square"
+                      >
+                        Edit
+                      </UButton>
+                      <UButton
+                        @click="deleteDietaryRequirement(requirement.id)"
+                        size="xs"
+                        color="red"
+                        variant="ghost"
+                        icon="i-heroicons-trash"
+                      >
+                        Delete
+                      </UButton>
                     </div>
                   </div>
-                  <UButton
-                    @click="deleteDietaryRequirement(requirement.id)"
-                    size="xs"
-                    color="red"
-                    variant="ghost"
-                    icon="i-heroicons-trash"
-                  >
-                    Delete
-                  </UButton>
                 </div>
               </div>
             </div>
@@ -469,7 +616,7 @@
           <div class="p-5">
 
             <!-- Add Accessibility Requirement Form -->
-            <div v-if="showAddAccessibilityForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+            <div v-if="showAddAccessibilityForm && !editingAccessibilityId" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
               <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Accessibility Requirement</h3>
               <form @submit.prevent="handleAddAccessibilityRequirement" class="space-y-3">
                 <div>
@@ -538,29 +685,103 @@
               <div
                 v-for="requirement in attendeeAccessibilityRequirements.data.value?.data?.results"
                 :key="requirement.id"
-                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+                :class="editingAccessibilityId === requirement.id ? 'p-0' : 'p-4'"
+                class="border border-gray-200 rounded-lg hover:border-primary/30 transition-colors bg-gray-50/30"
               >
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
-                    <div class="mt-2 space-y-1">
-                      <p v-if="requirement.details" class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
-                      </p>
-                      <p v-if="requirement.notes" class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
-                      </p>
+                <!-- Inline Edit Form -->
+                <div v-if="editingAccessibilityId === requirement.id" class="p-4">
+                  <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Editing Accessibility Requirement</h3>
+                  <form @submit.prevent="handleUpdateAccessibilityRequirement" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Requirement *</label>
+                      <select
+                        v-model="newAccessibilityRequirement.accessibility_requirement"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option :value="null">Select requirement...</option>
+                        <option
+                          v-for="req in accessibilityRequirements.data.value?.data?.results"
+                          :key="req.id"
+                          :value="req.id"
+                        >
+                          {{ req.label }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Details</label>
+                      <textarea
+                        v-model="newAccessibilityRequirement.details"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Notes</label>
+                      <textarea
+                        v-model="newAccessibilityRequirement.notes"
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      ></textarea>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                      <UButton
+                        type="submit"
+                        :disabled="updateAccessibilityMutation.isPending.value"
+                        size="sm"
+                        color="green"
+                      >
+                        {{ updateAccessibilityMutation.isPending.value ? 'Updating...' : 'Update' }}
+                      </UButton>
+                      <UButton
+                        type="button"
+                        @click="cancelEditAccessibilityRequirement"
+                        size="sm"
+                        variant="ghost"
+                        color="gray"
+                      >
+                        Cancel
+                      </UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Display Mode -->
+                <div v-else>
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <h4 class="font-semibold text-gray-900 text-sm">{{ requirement.requirement_details.label }}</h4>
+                      <div class="mt-2 space-y-1">
+                        <p v-if="requirement.details" class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Details:</span> {{ requirement.details }}
+                        </p>
+                        <p v-if="requirement.notes" class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Notes:</span> {{ requirement.notes }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex gap-1">
+                      <UButton
+                        @click="editAccessibilityRequirement(requirement)"
+                        size="xs"
+                        color="primary"
+                        variant="ghost"
+                        icon="i-heroicons-pencil-square"
+                      >
+                        Edit
+                      </UButton>
+                      <UButton
+                        @click="deleteAccessibilityRequirement(requirement.id)"
+                        size="xs"
+                        color="red"
+                        variant="ghost"
+                        icon="i-heroicons-trash"
+                      >
+                        Delete
+                      </UButton>
                     </div>
                   </div>
-                  <UButton
-                    @click="deleteAccessibilityRequirement(requirement.id)"
-                    size="xs"
-                    color="red"
-                    variant="ghost"
-                    icon="i-heroicons-trash"
-                  >
-                    Delete
-                  </UButton>
                 </div>
               </div>
             </div>
@@ -586,7 +807,7 @@
           <div class="p-5">
 
             <!-- Add Emergency Contact Form -->
-            <div v-if="showAddEmergencyForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+            <div v-if="showAddEmergencyForm && !editingEmergencyId" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
               <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">New Emergency Contact</h3>
               <form @submit.prevent="handleAddEmergencyContact" class="space-y-3">
                 <div class="grid grid-cols-2 gap-3">
@@ -684,37 +905,140 @@
               <div
                 v-for="contact in emergencyContacts.data.value?.data?.results"
                 :key="contact.id"
-                class="border border-gray-200 rounded-lg p-4 hover:border-primary/30 transition-colors bg-gray-50/30"
+                :class="editingEmergencyId === contact.id ? 'p-0' : 'p-4'"
+                class="border border-gray-200 rounded-lg hover:border-primary/30 transition-colors bg-gray-50/30"
               >
-                <div class="flex items-start justify-between">
-                  <div class="flex-1">
-                    <div class="flex items-center gap-2">
-                      <h4 class="font-semibold text-gray-900 text-sm">{{ contact.full_name }}</h4>
-                      <UBadge v-if="contact.primary_contact" color="primary" size="xs">
-                        Primary
-                      </UBadge>
+                <!-- Inline Edit Form -->
+                <div v-if="editingEmergencyId === contact.id" class="p-4">
+                  <h3 class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-3">Editing Emergency Contact</h3>
+                  <form @submit.prevent="handleUpdateEmergencyContact" class="space-y-3">
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">First Name *</label>
+                        <input
+                          v-model="newEmergencyContact.first_name"
+                          type="text"
+                          required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Last Name *</label>
+                        <input
+                          v-model="newEmergencyContact.last_name"
+                          type="text"
+                          required
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </div>
                     </div>
-                    <div class="mt-2 space-y-1">
-                      <p class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Relationship:</span> {{ contact.relationship_display }}
-                      </p>
-                      <p class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Phone:</span> {{ contact.phone_number }}
-                      </p>
-                      <p v-if="contact.email" class="text-xs text-gray-600">
-                        <span class="font-bold uppercase tracking-wide">Email:</span> {{ contact.email }}
-                      </p>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Relationship *</label>
+                      <select
+                        v-model="newEmergencyContact.relationship"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="">Select relationship...</option>
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="child">Child</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="friend">Friend</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Phone Number *</label>
+                      <input
+                        v-model="newEmergencyContact.phone_number"
+                        type="tel"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Email</label>
+                      <input
+                        v-model="newEmergencyContact.email"
+                        type="email"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+                    <div class="flex items-center">
+                      <input
+                        v-model="newEmergencyContact.primary_contact"
+                        type="checkbox"
+                        id="primary-edit"
+                        class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/20"
+                      />
+                      <label for="primary-edit" class="ml-2 text-xs font-medium text-gray-700">Primary Contact</label>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                      <UButton
+                        type="submit"
+                        :disabled="updateEmergencyMutation.isPending.value"
+                        size="sm"
+                        color="green"
+                      >
+                        {{ updateEmergencyMutation.isPending.value ? 'Updating...' : 'Update' }}
+                      </UButton>
+                      <UButton
+                        type="button"
+                        @click="cancelEditEmergencyContact"
+                        size="sm"
+                        variant="ghost"
+                        color="gray"
+                      >
+                        Cancel
+                      </UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <!-- Display Mode -->
+                <div v-else>
+                  <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2">
+                        <h4 class="font-semibold text-gray-900 text-sm">{{ contact.full_name }}</h4>
+                        <UBadge v-if="contact.primary_contact" color="primary" size="xs">
+                          Primary
+                        </UBadge>
+                      </div>
+                      <div class="mt-2 space-y-1">
+                        <p class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Relationship:</span> {{ contact.relationship_display }}
+                        </p>
+                        <p class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Phone:</span> {{ contact.phone_number }}
+                        </p>
+                        <p v-if="contact.email" class="text-xs text-gray-600">
+                          <span class="font-bold uppercase tracking-wide">Email:</span> {{ contact.email }}
+                        </p>
+                      </div>
+                    </div>
+                    <div class="flex gap-1">
+                      <UButton
+                        @click="editEmergencyContact(contact)"
+                        size="xs"
+                        color="primary"
+                        variant="ghost"
+                        icon="i-heroicons-pencil-square"
+                      >
+                        Edit
+                      </UButton>
+                      <UButton
+                        @click="deleteEmergencyContact(contact.id)"
+                        size="xs"
+                        color="red"
+                        variant="ghost"
+                        icon="i-heroicons-trash"
+                      >
+                        Delete
+                      </UButton>
                     </div>
                   </div>
-                  <UButton
-                    @click="deleteEmergencyContact(contact.id)"
-                    size="xs"
-                    color="red"
-                    variant="ghost"
-                    icon="i-heroicons-trash"
-                  >
-                    Delete
-                  </UButton>
                 </div>
               </div>
             </div>
@@ -851,22 +1175,26 @@ import { useDietaryRequirements } from '~/composables/resources/attendee/attende
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
 import { 
   useAttendeeMedicalConditions, 
-  useCreateAttendeeMedicalCondition, 
+  useCreateAttendeeMedicalCondition,
+  useUpdateAttendeeMedicalCondition,
   useDeleteAttendeeMedicalCondition 
 } from '~/composables/resources/attendee/attendeeMedicalConditions'
 import {
   useAttendeeDietaryRequirements,
   useCreateAttendeeDietaryRequirement,
+  useUpdateAttendeeDietaryRequirement,
   useDeleteAttendeeDietaryRequirement
 } from '~/composables/resources/attendee/attendeeDietaryRequirementsRelationship'
 import {
   useAttendeeAccessibilityRequirements,
   useCreateAttendeeAccessibilityRequirement,
+  useUpdateAttendeeAccessibilityRequirement,
   useDeleteAttendeeAccessibilityRequirement
 } from '~/composables/resources/attendee/attendeeAccessibilityRequirements'
 import {
   useAttendeeEmergencyContacts,
   useCreateAttendeeEmergencyContact,
+  useUpdateAttendeeEmergencyContact,
   useDeleteAttendeeEmergencyContact
 } from '~/composables/resources/attendee/attendeeEmergencyContacts'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
@@ -914,12 +1242,16 @@ const emergencyContactsLoading = computed(() => emergencyContacts.isLoading.valu
 const updateMutation = useUpdateAttendee()
 const deleteMutation = useDeleteAttendee()
 const createMedicalMutation = useCreateAttendeeMedicalCondition()
+const updateMedicalMutation = useUpdateAttendeeMedicalCondition()
 const deleteMedicalMutation = useDeleteAttendeeMedicalCondition()
 const createDietaryMutation = useCreateAttendeeDietaryRequirement()
+const updateDietaryMutation = useUpdateAttendeeDietaryRequirement()
 const deleteDietaryMutation = useDeleteAttendeeDietaryRequirement()
 const createAccessibilityMutation = useCreateAttendeeAccessibilityRequirement()
+const updateAccessibilityMutation = useUpdateAttendeeAccessibilityRequirement()
 const deleteAccessibilityMutation = useDeleteAttendeeAccessibilityRequirement()
 const createEmergencyMutation = useCreateAttendeeEmergencyContact()
+const updateEmergencyMutation = useUpdateAttendeeEmergencyContact()
 const deleteEmergencyMutation = useDeleteAttendeeEmergencyContact()
 
 // Form data
@@ -948,6 +1280,12 @@ const showAddMedicalForm = ref(false)
 const showAddDietaryForm = ref(false)
 const showAddAccessibilityForm = ref(false)
 const showAddEmergencyForm = ref(false)
+
+// Edit tracking
+const editingMedicalId = ref<number | null>(null)
+const editingDietaryId = ref<number | null>(null)
+const editingAccessibilityId = ref<number | null>(null)
+const editingEmergencyId = ref<number | null>(null)
 
 // New item forms
 const newMedicalCondition = ref({
@@ -1101,6 +1439,53 @@ const deleteMedicalCondition = async (conditionId: number) => {
   }
 }
 
+const editMedicalCondition = (condition: any) => {
+  editingMedicalId.value = condition.id
+  newMedicalCondition.value = {
+    medical_condition: condition.medical_condition,
+    severity: condition.severity || '',
+    details: condition.details || '',
+    notes: condition.notes || '',
+  }
+}
+
+const handleUpdateMedicalCondition = async () => {
+  if (!editingMedicalId.value) return
+  
+  const result = medicalConditionSchema.safeParse(newMedicalCondition.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await updateMedicalMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      conditionId: editingMedicalId.value,
+      body: {
+        attendee: (attendee.data.value?.data?.attendee_id) as any,
+        medical_condition: newMedicalCondition.value.medical_condition!,
+        severity: (newMedicalCondition.value.severity || null) as any,
+        details: newMedicalCondition.value.details || null,
+        notes: newMedicalCondition.value.notes || null,
+      },
+    })
+    cancelEditMedicalCondition()
+  } catch (error) {
+    console.error('Failed to update medical condition:', error)
+  }
+}
+
+const cancelEditMedicalCondition = () => {
+  editingMedicalId.value = null
+  newMedicalCondition.value = {
+    medical_condition: null,
+    severity: '',
+    details: '',
+    notes: '',
+  }
+}
+
 // Dietary requirements
 const handleAddDietaryRequirement = async () => {
   const result = dietaryRequirementSchema.safeParse(newDietaryRequirement.value)
@@ -1146,6 +1531,49 @@ const deleteDietaryRequirement = async (requirementId: number) => {
   }
 }
 
+const editDietaryRequirement = (requirement: any) => {
+  editingDietaryId.value = requirement.id
+  newDietaryRequirement.value = {
+    dietary_requirement: requirement.dietary_requirement,
+    details: requirement.details || '',
+    notes: requirement.notes || '',
+  }
+}
+
+const handleUpdateDietaryRequirement = async () => {
+  if (!editingDietaryId.value) return
+  
+  const result = dietaryRequirementSchema.safeParse(newDietaryRequirement.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await updateDietaryMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      requirementId: editingDietaryId.value,
+      body: {
+        dietary_requirement: newDietaryRequirement.value.dietary_requirement!,
+        details: newDietaryRequirement.value.details || null,
+        notes: newDietaryRequirement.value.notes || null,
+      },
+    })
+    cancelEditDietaryRequirement()
+  } catch (error) {
+    console.error('Failed to update dietary requirement:', error)
+  }
+}
+
+const cancelEditDietaryRequirement = () => {
+  editingDietaryId.value = null
+  newDietaryRequirement.value = {
+    dietary_requirement: null,
+    details: '',
+    notes: '',
+  }
+}
+
 // Accessibility requirements
 const handleAddAccessibilityRequirement = async () => {
   const result = accessibilityRequirementSchema.safeParse(newAccessibilityRequirement.value)
@@ -1188,6 +1616,49 @@ const deleteAccessibilityRequirement = async (requirementId: number) => {
     })
   } catch (error) {
     console.error('Failed to delete accessibility requirement:', error)
+  }
+}
+
+const editAccessibilityRequirement = (requirement: any) => {
+  editingAccessibilityId.value = requirement.id
+  newAccessibilityRequirement.value = {
+    accessibility_requirement: requirement.accessibility_requirement,
+    details: requirement.details || '',
+    notes: requirement.notes || '',
+  }
+}
+
+const handleUpdateAccessibilityRequirement = async () => {
+  if (!editingAccessibilityId.value) return
+  
+  const result = accessibilityRequirementSchema.safeParse(newAccessibilityRequirement.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await updateAccessibilityMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      requirementId: editingAccessibilityId.value,
+      body: {
+        accessibility_requirement: newAccessibilityRequirement.value.accessibility_requirement!,
+        details: newAccessibilityRequirement.value.details || null,
+        notes: newAccessibilityRequirement.value.notes || null,
+      },
+    })
+    cancelEditAccessibilityRequirement()
+  } catch (error) {
+    console.error('Failed to update accessibility requirement:', error)
+  }
+}
+
+const cancelEditAccessibilityRequirement = () => {
+  editingAccessibilityId.value = null
+  newAccessibilityRequirement.value = {
+    accessibility_requirement: null,
+    details: '',
+    notes: '',
   }
 }
 
@@ -1239,6 +1710,58 @@ const deleteEmergencyContact = async (contactId: number) => {
     })
   } catch (error) {
     console.error('Failed to delete emergency contact:', error)
+  }
+}
+
+const editEmergencyContact = (contact: any) => {
+  editingEmergencyId.value = contact.id
+  newEmergencyContact.value = {
+    first_name: contact.first_name,
+    last_name: contact.last_name,
+    relationship: contact.relationship,
+    phone_number: contact.phone_number,
+    email: contact.email || '',
+    primary_contact: contact.primary_contact || false,
+  }
+}
+
+const handleUpdateEmergencyContact = async () => {
+  if (!editingEmergencyId.value) return
+  
+  const result = emergencyContactSchema.safeParse(newEmergencyContact.value)
+  if (!result.success) {
+    alert(result.error.errors.map(e => e.message).join('\n'))
+    return
+  }
+  
+  try {
+    await updateEmergencyMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      contactId: editingEmergencyId.value,
+      body: {
+        first_name: newEmergencyContact.value.first_name,
+        last_name: newEmergencyContact.value.last_name,
+        relationship: newEmergencyContact.value.relationship as any,
+        phone_number: newEmergencyContact.value.phone_number,
+        email: newEmergencyContact.value.email || null,
+        primary_contact: newEmergencyContact.value.primary_contact,
+      },
+    })
+    cancelEditEmergencyContact()
+  } catch (error) {
+    console.error('Failed to update emergency contact:', error)
+  }
+}
+
+const cancelEditEmergencyContact = () => {
+  editingEmergencyId.value = null
+  newEmergencyContact.value = {
+    first_name: '',
+    last_name: '',
+    relationship: '',
+    phone_number: '',
+    email: '',
+    primary_contact: false,
   }
 }
 
