@@ -156,7 +156,10 @@
                 </p>
               </div>
               
-              <!-- Toggle Filters Button (Desktop) -->
+              
+            </div>
+            
+            <div class="flex items-center gap-2">
               <UButton
                 v-if="currentView === 'attendees'"
                 size="sm"
@@ -168,9 +171,6 @@
               >
                 {{ showFilters ? 'Hide' : 'Show' }} Filters
               </UButton>
-            </div>
-            
-            <div class="flex items-center gap-2">
               <!-- Export Button -->
               <UButton
                 size="sm"
@@ -372,7 +372,7 @@
                     {{ attendee.gender || '-' }}
                   </td>
                   <td class="py-3 px-4 text-gray-600 text-xs">
-                    {{ (attendee as any).area_from_name || '-' }}
+                    {{ attendee.area_from_name || '-' }}
                   </td>
                   <td class="py-3 px-4">
                     <UBadge 

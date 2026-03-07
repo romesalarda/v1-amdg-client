@@ -1328,10 +1328,10 @@
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-2 mb-1">
-                      <h4 class="text-sm font-semibold text-gray-900">{{ (consentRecord as any).consent_title }}</h4>
-                      <UBadge v-if="(consentRecord as any).consent_required" color="amber" size="xs">Required</UBadge>
+                      <h4 class="text-sm font-semibold text-gray-900">{{ consentRecord.consent_details?.title }}</h4>
+                      <UBadge v-if="consentRecord.consent_details?.required" color="amber" size="xs">Required</UBadge>
                     </div>
-                    <p class="text-xs text-gray-600 mb-2">{{ (consentRecord as any).consent_description }}</p>
+                    <p class="text-xs text-gray-600 mb-2">{{ consentRecord.consent_details?.description }}</p>
                     <div class="flex items-center gap-4">
                       <div class="flex items-center gap-2">
                         <label class="text-xs font-medium text-gray-700">Given:</label>
@@ -1392,12 +1392,12 @@
                 >
                   <div class="flex items-start justify-between">
                     <div>
-                      <h4 class="text-sm font-semibold text-gray-900">{{ (org as any).organisation_name }}</h4>
+                      <h4 class="text-sm font-semibold text-gray-900">{{ org.organisation_title }}</h4>
                       <p class="text-xs text-gray-600 mt-1">
                         Added: {{ new Date(org.added_at).toLocaleString() }}
                       </p>
-                      <p v-if="(org as any).added_by_name" class="text-xs text-gray-600">
-                        By: {{ (org as any).added_by_name }}
+                      <p v-if="org.added_by_name" class="text-xs text-gray-600">
+                        By: {{ org.added_by_name }}
                       </p>
                     </div>
                     <div class="flex gap-1">
