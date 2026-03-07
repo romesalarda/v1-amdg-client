@@ -507,8 +507,8 @@ export type AttendeeDetail = {
         consents?: string;
         messages?: string;
     };
-    area_from?: number | null;
     readonly area_from_name: string | null;
+    area_from?: number | null;
     booking?: number | null;
     readonly booking_id: string | null;
     readonly is_event_staff: boolean;
@@ -666,6 +666,7 @@ export type AttendeeList = {
         consents?: string;
         messages?: string;
     };
+    readonly area_from_name: string | null;
 };
 
 /**
@@ -673,7 +674,7 @@ export type AttendeeList = {
  */
 export type AttendeeMedicalCondition = {
     readonly id: number;
-    attendee: number;
+    attendee: string;
     readonly attendee_name: string;
     medical_condition: number;
     condition_details: MedicalCondition;
@@ -711,7 +712,7 @@ export type AttendeeMedicalCondition = {
  * Serializer for AttendeeMedicalCondition with nested condition details.
  */
 export type AttendeeMedicalConditionRequest = {
-    attendee: number;
+    attendee: string;
     medical_condition: number;
     details?: string | null;
     notes?: string | null;
@@ -9249,7 +9250,7 @@ export type PatchedAttendeeGuardianRequest = {
  * Serializer for AttendeeMedicalCondition with nested condition details.
  */
 export type PatchedAttendeeMedicalConditionRequest = {
-    attendee?: number;
+    attendee?: string;
     medical_condition?: number;
     details?: string | null;
     notes?: string | null;
@@ -11433,6 +11434,7 @@ export type PaymentMethod = {
     readonly created_by_name: string | null;
     readonly created_at: string;
     readonly updated_at: string;
+    provided_details?: unknown;
     /**
      *  links
      */
@@ -11498,6 +11500,7 @@ export type PaymentMethodDetail = {
     readonly created_by_name: string | null;
     readonly created_at: string;
     readonly updated_at: string;
+    provided_details?: unknown;
     /**
      *  links
      */
@@ -11507,7 +11510,6 @@ export type PaymentMethodDetail = {
         created_by?: string;
     };
     description?: string | null;
-    provided_details?: unknown;
 };
 
 /**
@@ -11832,6 +11834,18 @@ export type ProductVariantDetail = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    readonly images: {
+        main?: {
+            id?: number;
+            url?: string | null;
+            alt_text?: string;
+        } | null;
+        additional?: Array<{
+            id?: number;
+            url?: string | null;
+            alt_text?: string;
+        }>;
+    };
     readonly added_at: string;
     /**
      *  links
@@ -11889,6 +11903,18 @@ export type ProductVariantList = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    readonly images: {
+        main?: {
+            id?: number;
+            url?: string | null;
+            alt_text?: string;
+        } | null;
+        additional?: Array<{
+            id?: number;
+            url?: string | null;
+            alt_text?: string;
+        }>;
+    };
     readonly added_at: string;
     /**
      *  links
@@ -13494,7 +13520,7 @@ export type AttendeeListWritable = {
  * Serializer for AttendeeMedicalCondition with nested condition details.
  */
 export type AttendeeMedicalConditionWritable = {
-    attendee: number;
+    attendee: string;
     medical_condition: number;
     details?: string | null;
     notes?: string | null;
@@ -17451,6 +17477,7 @@ export type PaymentMethodWritable = {
     is_active?: boolean;
     event: number;
     created_by?: number | null;
+    provided_details?: unknown;
 };
 
 /**
@@ -17467,8 +17494,8 @@ export type PaymentMethodDetailWritable = {
     is_active?: boolean;
     event: number;
     created_by?: number | null;
-    description?: string | null;
     provided_details?: unknown;
+    description?: string | null;
 };
 
 /**
@@ -32148,6 +32175,47 @@ export type ProductsListVariantsUpdateResponses = {
 
 export type ProductsListVariantsUpdateResponse = ProductsListVariantsUpdateResponses[keyof ProductsListVariantsUpdateResponses];
 
+export type ProductsListVariantsAddImageCreateData = {
+    body?: {
+        /**
+         * Image file to upload (JPEG, PNG, GIF, or WebP, max 10MB)
+         */
+        image: Blob | File;
+        /**
+         * Whether this should be the main variant image (true/false, 1/0, yes/no)
+         */
+        is_main?: string;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/add-image/';
+};
+
+export type ProductsListVariantsAddImageCreateErrors = {
+    /**
+     * Invalid image file
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Variant not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsAddImageCreateResponses = {
+    /**
+     * Image added successfully
+     */
+    200: unknown;
+};
+
 export type ProductsListVariantsDecrementStockCreateData = {
     body?: {
         /**
@@ -32218,6 +32286,43 @@ export type ProductsListVariantsIncrementStockCreateErrors = {
 export type ProductsListVariantsIncrementStockCreateResponses = {
     /**
      * Stock incremented successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListVariantsRemoveImageCreateData = {
+    body?: {
+        /**
+         * ID of the resource to remove
+         */
+        resource_id: number;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/remove-image/';
+};
+
+export type ProductsListVariantsRemoveImageCreateErrors = {
+    /**
+     * Invalid resource_id
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Variant not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsRemoveImageCreateResponses = {
+    /**
+     * Image removed successfully
      */
     200: unknown;
 };

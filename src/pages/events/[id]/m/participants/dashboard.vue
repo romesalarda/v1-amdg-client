@@ -931,7 +931,7 @@ import type { AttendeeList, OrganisationList, BookingList } from '~/api/types.ge
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
-  area_from_name?: string | null
+  // area_from_name?: string | null
   is_event_staff?: boolean
   is_checked_in?: boolean
   is_registered?: boolean

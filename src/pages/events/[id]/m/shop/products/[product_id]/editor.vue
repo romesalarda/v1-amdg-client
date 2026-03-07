@@ -22,9 +22,14 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="space-y-4">
-        <USkeleton class="h-96 w-full" />
-        <USkeleton class="h-64 w-full" />
+      <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-4">
+          <USkeleton class="h-96 w-full" />
+          <USkeleton class="h-64 w-full" />
+        </div>
+        <div class="lg:col-span-1">
+          <USkeleton class="h-96 w-full" />
+        </div>
       </div>
 
       <!-- Error State -->
@@ -38,8 +43,11 @@
         </div>
       </div>
 
-      <!-- Tabs and Content -->
-      <div v-else class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+      <!-- Two Column Layout: Main Editor (2/3) + Sidebar (1/3) -->
+      <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Editor Area (2/3) -->
+        <div class="lg:col-span-2">
+          <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
         <!-- Tab Navigation -->
         <div class="border-b border-gray-200">
           <nav class="flex gap-2 px-6" aria-label="Tabs">
@@ -151,7 +159,7 @@
           </div>
 
           <!-- Variants Tab -->
-          <div v-show="activeTab === 'variants'" class="space-y-4">
+          <div v-show="activeTab === 'variants'" class="space-y-6">
             <div class="flex items-center justify-between">
               <p class="text-sm text-gray-600">
                 Add size and color variations for this product
@@ -177,60 +185,265 @@
             </div>
 
             <!-- Existing Variants -->
-            <div v-if="existingVariants.length > 0" class="space-y-3">
+            <div v-if="existingVariants.length > 0" class="space-y-4">
               <h3 class="text-sm font-semibold text-gray-700">Existing Variants</h3>
               <div
                 v-for="variant in existingVariants"
                 :key="variant.variant_id"
-                class="border border-gray-200 rounded-lg p-4"
+                class="border border-gray-200 rounded-lg p-5"
               >
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-4">
-                    <div
-                      class="w-10 h-10 rounded border border-gray-300"
-                      :style="{ backgroundColor: variant.color }"
-                    ></div>
-                    <div>
-                      <div class="font-semibold text-gray-900">{{ variant.size_display }}</div>
-                      <div class="text-sm text-gray-500">
-                        Stock: {{ variant.stock_quantity }} | £{{ variant.final_price }}
+                <!-- Read-only View -->
+                <div v-if="!editingVariants[variant.variant_id]">
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center gap-4">
+                      <div
+                        class="w-12 h-12 rounded-lg border-2 border-gray-300 shadow-sm"
+                        :style="{ backgroundColor: variant.color }"
+                      ></div>
+                      <div>
+                        <div class="font-bold text-gray-900 text-lg">{{ variant.size_display }}</div>
+                        <div class="text-sm text-gray-500 mt-1">
+                          Stock: {{ variant.stock_quantity }}
+                          <span v-if="variant.max_stock_quantity"> / {{ variant.max_stock_quantity }}</span>
+                           • £{{ variant.final_price }}
+                        </div>
                       </div>
                     </div>
+                    <div class="flex items-center gap-2">
+                      <UBadge :color="variant.is_active ? 'green' : 'gray'" size="xs">
+                        {{ variant.is_active ? 'Active' : 'Inactive' }}
+                      </UBadge>
+                      <UBadge :color="variant.verified ? 'blue' : 'gray'" size="xs">
+                        {{ variant.verified ? 'Verified' : 'Unverified' }}
+                      </UBadge>
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="blue"
+                        icon="i-heroicons-pencil"
+                        @click="startEditingVariant(variant)"
+                      />
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="red"
+                        icon="i-heroicons-trash"
+                        @click="deleteExistingVariant(variant.variant_id)"
+                      />
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <UBadge :color="variant.is_active ? 'green' : 'gray'" size="xs">
-                      {{ variant.is_active ? 'Active' : 'Inactive' }}
-                    </UBadge>
-                    <UBadge :color="variant.verified ? 'blue' : 'gray'" size="xs">
-                      {{ variant.verified ? 'Verified' : 'Unverified' }}
-                    </UBadge>
-                    <UButton
-                      size="xs"
-                      variant="ghost"
-                      color="red"
-                      icon="i-heroicons-trash"
-                      @click="deleteExistingVariant(variant.variant_id)"
-                    />
+
+                  <!-- Variant Images -->
+                  <div class="mt-4 pt-4 border-t border-gray-100">
+                    <div class="flex items-center justify-between mb-3">
+                      <span class="text-xs font-semibold text-gray-700">Variant Images</span>
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        icon="i-heroicons-photo"
+                        @click="variantFileInputs[variant.variant_id]?.click()"
+                      >
+                        Upload
+                      </UButton>
+                      <input
+                        :ref="(el) => { variantFileInputs[variant.variant_id] = el as HTMLInputElement | null }"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        class="hidden"
+                        @change="(e) => handleVariantImageUpload(variant.variant_id, e)"
+                      />
+                    </div>
+                    
+                    <!-- Images Grid -->
+                    <div v-if="variant.images && (variant.images.main || variant.images.additional?.length)" class="grid grid-cols-4 gap-3">
+                      <!-- Main Image -->
+                      <div v-if="variant.images.main" class="relative group">
+                        {{ variant.images.main.alt_text }}
+                        <img
+                          :src="variant.images.main.url || ''"
+                          :alt="variant.images.main.alt_text"
+                          class="w-full h-24 object-cover rounded-lg border border-gray-200"
+                        />
+                        <div class="absolute top-1 left-1">
+                          <UBadge color="primary" size="xs">Main</UBadge>
+                        </div>
+                        <button
+                          @click="removeVariantImageHandler(variant.variant_id, variant?.images?.main?.id)"
+                          class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                        </button>
+                      </div>
+                      <!-- Additional Images -->
+                      <div
+                        v-for="img in variant.images.additional"
+                        :key="img.id"
+                        class="relative group"
+                      >
+                        <img
+                          :src="img.url || ''"
+                          :alt="img.alt_text"
+                          class="w-full h-24 object-cover rounded-lg border border-gray-200"
+                        />
+                        <button
+                          @click="removeVariantImageHandler(variant.variant_id, img.id)"
+                          class="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    <!-- Empty State -->
+                    <div v-else class="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                      <UIcon name="i-heroicons-photo" class="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                      <p class="text-sm text-gray-600 mb-3">No images uploaded yet</p>
+                      <UButton
+                        size="xs"
+                        variant="outline"
+                        icon="i-heroicons-arrow-up-tray"
+                        @click="variantFileInputs[variant.variant_id]?.click()"
+                      >
+                        Upload Images
+                      </UButton>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Edit Mode -->
+                <div v-else class="space-y-4">
+                  <div class="flex items-center justify-between mb-4">
+                    <h4 class="font-semibold text-gray-900">Edit Variant</h4>
+                    <div class="flex items-center gap-2">
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="gray"
+                        @click="cancelEditingVariant(variant.variant_id)"
+                      >
+                        Cancel
+                      </UButton>
+                      <UButton
+                        size="xs"
+                        variant="solid"
+                        color="primary"
+                        @click="saveExistingVariant(variant)"
+                        :loading="updateVariant.isPending.value"
+                      >
+                        Save
+                      </UButton>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Size -->
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-2">Size *</label>
+                      <select
+                        v-model="variantEditForms[variant.variant_id].size"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="XS">Extra Small (XS)</option>
+                        <option value="SM">Small (SM)</option>
+                        <option value="MD">Medium (MD)</option>
+                        <option value="LG">Large (LG)</option>
+                        <option value="XL">Extra Large (XL)</option>
+                        <option value="OS">One Size (OS)</option>
+                        <option value="NA">Not Applicable (NA)</option>
+                      </select>
+                    </div>
+
+                    <!-- Color -->
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-2">Color</label>
+                      <div class="flex gap-2">
+                        <input
+                          v-model="variantEditForms[variant.variant_id].color"
+                          type="color"
+                          class="w-12 h-10 border border-gray-300 rounded cursor-pointer"
+                        />
+                        <input
+                          v-model="variantEditForms[variant.variant_id].color"
+                          type="text"
+                          placeholder="#FFFFFF"
+                          class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Stock -->
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-2">Stock Quantity</label>
+                      <input
+                        v-model.number="variantEditForms[variant.variant_id].stock_quantity"
+                        type="number"
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+
+                    <!-- Max Stock -->
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-2">Max Stock (Optional)</label>
+                      <input
+                        v-model.number="variantEditForms[variant.variant_id].max_stock_quantity"
+                        type="number"
+                        min="0"
+                        placeholder="Unlimited"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+
+                    <!-- Max Per Order -->
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-2">Max Per Order</label>
+                      <input
+                        v-model.number="variantEditForms[variant.variant_id].max_purchase_quantity_per_order"
+                        type="number"
+                        min="1"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-6 pt-4 border-t border-gray-200">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        v-model="variantEditForms[variant.variant_id].is_active"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span class="text-sm text-gray-700">Active</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input
+                        v-model="variantEditForms[variant.variant_id].verified"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                      <span class="text-sm text-gray-700">Verified</span>
+                    </label>
                   </div>
                 </div>
               </div>
             </div>
 
             <!-- New Variants -->
-            <div v-if="newVariants.length > 0" class="space-y-3">
+            <div v-if="newVariants.length > 0" class="space-y-4">
               <h3 class="text-sm font-semibold text-gray-700">New Variants (unsaved)</h3>
               <div
                 v-for="(variant, index) in newVariants"
                 :key="`new-${index}`"
-                class="border border-blue-200 bg-blue-50 rounded-lg p-4 space-y-4"
+                class="border border-blue-200 bg-blue-50 rounded-lg p-5 space-y-4"
               >
-                <div class="grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <!-- Size -->
-                  <div class="col-span-6 md:col-span-3">
+                  <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Size *</label>
                     <select
                       v-model="variant.size"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                     >
                       <option value="XS">Extra Small (XS)</option>
                       <option value="SM">Small (SM)</option>
@@ -243,7 +456,7 @@
                   </div>
 
                   <!-- Color -->
-                  <div class="col-span-6 md:col-span-3">
+                  <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Color</label>
                     <div class="flex gap-2">
                       <input
@@ -255,57 +468,57 @@
                         v-model="variant.color"
                         type="text"
                         placeholder="#FFFFFF"
-                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                       />
                     </div>
                   </div>
 
                   <!-- Stock -->
-                  <div class="col-span-4 md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">Stock</label>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Stock Quantity</label>
                     <input
                       v-model.number="variant.stock_quantity"
                       type="number"
                       min="0"
                       placeholder="0"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                     />
                   </div>
 
                   <!-- Max Stock -->
-                  <div class="col-span-4 md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">Max Stock</label>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Max Stock (Optional)</label>
                     <input
                       v-model.number="variant.max_stock_quantity"
                       type="number"
                       min="0"
-                      placeholder="∞"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      placeholder="Unlimited"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                     />
                   </div>
 
                   <!-- Max Per Order -->
-                  <div class="col-span-4 md:col-span-2">
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">Max/Order</label>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Max Per Order</label>
                     <input
                       v-model.number="variant.max_purchase_quantity_per_order"
                       type="number"
                       min="1"
                       placeholder="5"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                     />
                   </div>
                 </div>
 
                 <div class="flex items-center justify-between pt-3 border-t border-blue-200">
-                  <div class="flex items-center gap-4">
+                  <div class="flex items-center gap-6">
                     <label class="flex items-center gap-2 cursor-pointer">
                       <input
                         v-model="variant.is_active"
                         type="checkbox"
                         class="rounded border-gray-300 text-primary focus:ring-primary"
                       />
-                      <span class="text-xs text-gray-700">Active</span>
+                      <span class="text-sm text-gray-700">Active</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                       <input
@@ -313,7 +526,7 @@
                         type="checkbox"
                         class="rounded border-gray-300 text-primary focus:ring-primary"
                       />
-                      <span class="text-xs text-gray-700">Verified</span>
+                      <span class="text-sm text-gray-700">Verified</span>
                     </label>
                   </div>
                   <UButton
@@ -424,6 +637,138 @@
             </div>
           </div>
         </div>
+          </div>
+        </div>
+
+        <!-- Sidebar (1/3) -->
+        <div class="lg:col-span-1">
+          <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden sticky top-6">
+            <!-- Product Preview Header -->
+            <div class="p-4 bg-gray-50 border-b border-gray-200">
+              <h3 class="text-sm font-bold text-gray-900 uppercase">Product Preview</h3>
+            </div>
+
+            <!-- Product Image -->
+            <div class="p-4">
+              <div class="aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border border-gray-200 mb-4">
+                <img
+                  v-if="productImages.length > 0 && productImages[0].url"
+                  :src="productImages[0].url"
+                  :alt="form.title || 'Product'"
+                  class="w-full h-full object-cover"
+                />
+                <div v-else class="w-full h-full flex items-center justify-center">
+                  <div class="text-center">
+                    <UIcon name="i-heroicons-photo" class="w-16 h-16 text-gray-300 mx-auto mb-2" />
+                    <p class="text-xs text-gray-400">No image</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Product Title -->
+              <div class="mb-4">
+                <h4 class="text-lg font-bold text-gray-900 mb-1">
+                  {{ form.title || 'Untitled Product' }}
+                </h4>
+                <p v-if="form.description" class="text-sm text-gray-600 line-clamp-2">
+                  {{ form.description }}
+                </p>
+              </div>
+
+              <!-- Price Summary -->
+              <div class="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-gray-600">Base Price</span>
+                  <span class="text-sm font-semibold text-gray-900">£{{ form.base_amount?.toFixed(2) || '0.00' }}</span>
+                </div>
+                <div v-if="form.percentage_modifier && form.percentage_modifier !== 0" class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-gray-600">Modifier</span>
+                  <span class="text-sm font-semibold" :class="form.percentage_modifier > 0 ? 'text-green-600' : 'text-red-600'">
+                    {{ form.percentage_modifier > 0 ? '+' : '' }}{{ form.percentage_modifier }}%
+                  </span>
+                </div>
+                <div class="pt-2 border-t border-primary/20 flex items-center justify-between">
+                  <span class="text-sm font-bold text-gray-900">Final Price</span>
+                  <span class="text-lg font-black text-primary">
+                    £{{ calculateFinalPrice(form.base_amount || 0, form.percentage_modifier || 0).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Status Badges -->
+              <div class="space-y-2 mb-4">
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span class="text-xs font-medium text-gray-600">Status</span>
+                  <UBadge :color="form.is_active ? 'green' : 'gray'" size="xs">
+                    {{ form.is_active ? 'Active' : 'Inactive' }}
+                  </UBadge>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                  <span class="text-xs font-medium text-gray-600">Verification</span>
+                  <UBadge :color="form.verified ? 'blue' : 'gray'" size="xs">
+                    {{ form.verified ? 'Verified' : 'Unverified' }}
+                  </UBadge>
+                </div>
+              </div>
+
+              <!-- Stats -->
+              <div class="space-y-2 pt-4 border-t border-gray-200">
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-gray-600">Variants</span>
+                  <span class="text-sm font-semibold text-gray-900">
+                    {{ existingVariants.length + newVariants.length }}
+                  </span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-gray-600">Images</span>
+                  <span class="text-sm font-semibold text-gray-900">
+                    {{ productImages.length }}
+                  </span>
+                </div>
+                <div v-if="!isNewProduct" class="flex items-center justify-between">
+                  <span class="text-xs font-medium text-gray-600">Total Stock</span>
+                  <span class="text-sm font-semibold text-gray-900">
+                    {{ existingVariants.reduce((sum, v) => sum + (v.stock_quantity || 0), 0) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Quick Actions -->
+              <div v-if="!isNewProduct" class="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                <UButton
+                  block
+                  size="sm"
+                  variant="outline"
+                  color="gray"
+                  icon="i-heroicons-eye"
+                  @click="activeTab = 'basic'"
+                >
+                  View Details
+                </UButton>
+                <UButton
+                  block
+                  size="sm"
+                  variant="outline"
+                  color="gray"
+                  icon="i-heroicons-squares-2x2"
+                  @click="activeTab = 'variants'"
+                >
+                  Manage Variants
+                </UButton>
+                <UButton
+                  block
+                  size="sm"
+                  variant="outline"
+                  color="gray"
+                  icon="i-heroicons-photo"
+                  @click="activeTab = 'images'"
+                >
+                  Upload Images
+                </UButton>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Sticky Bottom Save Bar -->
@@ -469,10 +814,12 @@
 <script setup lang="ts">
 import { useEvent } from '~/composables/resources/events/events'
 import { useProduct, useCreateProduct, useUpdateProduct } from '~/composables/resources/products/products'
-import { useProductVariants, useCreateProductVariant, useDeleteProductVariant } from '~/composables/resources/products/productVariants'
+import { useProductVariants, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant } from '~/composables/resources/products/productVariants'
 import { useAddProductImage, useRemoveProductImage } from '~/composables/resources/products/productImages'
+import { useAddVariantImage, useRemoveVariantImage } from '~/composables/resources/products/productVariantImages'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import type { ProductVariantDetail } from '~/api/types.gen'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 
 definePageMeta({
   layout: false,
@@ -542,6 +889,11 @@ const existingVariants = computed(() => {
   return (results as ProductVariantDetail[]) || []
 })
 
+// Editing state for existing variants
+const editingVariants = ref<Record<string, boolean>>({})
+const variantEditForms = ref<Record<string, any>>({})
+const variantFileInputs = ref<Record<string, HTMLInputElement | null>>({})
+
 // Product Images
 const productImages = computed(() => {
   if (!productData.value?.data?.images) return []
@@ -580,14 +932,18 @@ watch(() => productData.value?.data, (product) => {
 const createProduct = useCreateProduct()
 const updateProduct = useUpdateProduct()
 const createVariant = useCreateProductVariant()
+const updateVariant = useUpdateProductVariant()
 const deleteVariant = useDeleteProductVariant()
 const addImage = useAddProductImage()
 const removeImageMutation = useRemoveProductImage()
+const addVariantImageMutation = useAddVariantImage()
+const removeVariantImageMutation = useRemoveVariantImage()
 
 const isSaving = computed(() => 
   createProduct.isPending.value || 
   updateProduct.isPending.value ||
-  createVariant.isPending.value
+  createVariant.isPending.value ||
+  updateVariant.isPending.value
 )
 
 // Image upload
@@ -710,6 +1066,139 @@ async function deleteExistingVariant(variantId: string) {
     toast.add({
       title: 'Error',
       description: err.message || 'Failed to delete variant',
+      color: 'red',
+    })
+  }
+}
+
+// Edit existing variant
+function startEditingVariant(variant: ProductVariantDetail) {
+  editingVariants.value[variant.variant_id] = true
+  variantEditForms.value[variant.variant_id] = {
+    size: variant.size,
+    color: variant.color,
+    stock_quantity: variant.stock_quantity,
+    max_stock_quantity: variant.max_stock_quantity,
+    max_purchase_quantity_per_order: variant.max_purchase_quantity_per_order,
+    is_active: variant.is_active,
+    verified: variant.verified,
+  }
+}
+
+function cancelEditingVariant(variantId: string) {
+  delete editingVariants.value[variantId]
+  delete variantEditForms.value[variantId]
+}
+
+async function saveExistingVariant(variant: ProductVariantDetail) {
+  const editForm = variantEditForms.value[variant.variant_id]
+  if (!editForm) return
+
+  try {
+    await updateVariant.mutateAsync({
+      productId: productId.value,
+      variantId: variant.variant_id,
+      body: {
+        product: variant.product,
+        size: editForm.size,
+        color: editForm.color,
+        stock_quantity: editForm.stock_quantity,
+        max_stock_quantity: editForm.max_stock_quantity,
+        max_purchase_quantity_per_order: editForm.max_purchase_quantity_per_order,
+        is_active: editForm.is_active,
+        verified: editForm.verified,
+      },
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Variant updated successfully',
+      color: 'green',
+    })
+
+    cancelEditingVariant(variant.variant_id)
+    refetchVariants()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to update variant',
+      color: 'red',
+    })
+  }
+}
+
+// Variant Image Upload
+async function handleVariantImageUpload(variantId: string, event: Event) {
+  const target = event.target as HTMLInputElement
+  const files = target.files
+  if (!files || files.length === 0) return
+
+  // Find the variant to check if it has a main image
+  const variant = existingVariants.value.find(v => v.variant_id === variantId)
+  const hasMainImage = variant?.images?.main !== null && variant?.images?.main !== undefined
+
+  try {
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      
+      // Validate file size (10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast.add({
+          title: 'File too large',
+          description: `${file.name} exceeds 10MB limit`,
+          color: 'red',
+        })
+        continue
+      }
+
+      // First uploaded image becomes main only if variant has no main image
+      await addVariantImageMutation.mutateAsync({
+        productId: productId.value,
+        variantId: variantId,
+        image: file,
+        isMain: !hasMainImage && i === 0,
+      })
+    }
+
+    toast.add({
+      title: 'Success',
+      description: `${files.length} image${files.length !== 1 ? 's' : ''} uploaded successfully`,
+      color: 'green',
+    })
+
+    // Clear the input
+    if (target) target.value = ''
+    refetchVariants()
+  } catch (err: any) {
+    toast.add({
+      title: 'Upload Error',
+      description: err.message || 'Failed to upload images',
+      color: 'red',
+    })
+  }
+}
+
+async function removeVariantImageHandler(variantId: string, imageId: number | undefined) {
+  if (!imageId) return
+
+  try {
+    await removeVariantImageMutation.mutateAsync({
+      productId: productId.value,
+      variantId: variantId,
+      resourceId: imageId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Image removed successfully',
+      color: 'green',
+    })
+
+    refetchVariants()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to remove image',
       color: 'red',
     })
   }
