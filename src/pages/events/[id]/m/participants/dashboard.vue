@@ -6,53 +6,107 @@
         
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <UIcon name="i-heroicons-users" class="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <div class="text-2xl font-black text-deep-navy">{{ totalAttendees }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Attendees</div>
+          <!-- Attendees View Statistics -->
+          <template v-if="currentView === 'attendees'">
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-users" class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalAttendees }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Attendees</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <div class="text-2xl font-black text-deep-navy">{{ checkedInCount }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Checked In</div>
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ checkedInCount }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Checked In</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                <UIcon name="i-heroicons-user-group" class="w-5 h-5 text-amber-600" />
-              </div>
-              <div>
-                <div class="text-2xl font-black text-deep-navy">{{ minorCount }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Minors</div>
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-user-group" class="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ minorCount }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Minors</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-purple-600" />
-              </div>
-              <div>
-                <div class="text-2xl font-black text-deep-navy">{{ staffCount }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Staff Members</div>
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ staffCount }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Staff Members</div>
+                </div>
               </div>
             </div>
-          </div>
+          </template>
+
+          <!-- Bookings View Statistics -->
+          <template v-else>
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-ticket" class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalBookings }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Bookings</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalAttendees }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Attendees</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-users" class="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalBookings ? Math.round(totalAttendees / totalBookings * 10) / 10 : 0 }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Avg Attendees/Booking</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-currency-pound" class="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">-</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Revenue</div>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Main Table Section -->
@@ -60,16 +114,51 @@
           <!-- Table Header -->
           <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <UIcon name="i-heroicons-user-group" class="w-5 h-5 text-primary" />
+              <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : 'i-heroicons-ticket'" class="w-5 h-5 text-primary" />
               <div class="flex-1">
-                <h2 class="text-sm font-black text-primary uppercase tracking-widest">Event Participants</h2>
-                <p class="text-xs text-gray-500 mt-0.5">
-                  Showing {{ attendees.length }} of {{ totalAttendees }} participants
+                <div class="flex items-center gap-3 mb-1">
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">
+                    {{ currentView === 'attendees' ? 'Event Participants' : 'Event Bookings' }}
+                  </h2>
+                  <!-- View Toggle -->
+                  <div class="flex bg-gray-100 rounded-lg p-0.5">
+                    <button
+                      @click="changeView('attendees')"
+                      :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                        currentView === 'attendees'
+                          ? 'bg-white text-primary shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      ]"
+                    >
+                      Attendees
+                    </button>
+                    <button
+                      @click="changeView('bookings')"
+                      :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                        currentView === 'bookings'
+                          ? 'bg-white text-primary shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      ]"
+                    >
+                      Bookings
+                    </button>
+                  </div>
+                </div>
+                <p class="text-xs text-gray-500">
+                  <template v-if="currentView === 'attendees'">
+                    Showing {{ attendees.length }} of {{ totalAttendees }} participants
+                  </template>
+                  <template v-else>
+                    Showing {{ bookings.length }} of {{ totalBookings }} bookings
+                  </template>
                 </p>
               </div>
               
               <!-- Toggle Filters Button (Desktop) -->
               <UButton
+                v-if="currentView === 'attendees'"
                 size="sm"
                 variant="ghost"
                 color="gray"
@@ -115,7 +204,7 @@
                   <input
                     v-model="searchQuery"
                     type="text"
-                    placeholder="Search by name, email, phone, or ID..."
+                    :placeholder="currentView === 'attendees' ? 'Search by name, email, phone, or ID...' : 'Search by booking reference...'"
                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
@@ -151,15 +240,22 @@
           </div>
 
           <!-- Table -->
-          <div v-if="isLoading" class="p-6 space-y-3">
+          <div v-if="(currentView === 'attendees' && isLoading) || (currentView === 'bookings' && bookingsLoading)" class="p-6 space-y-3">
             <div v-for="i in 10" :key="i" class="h-16 bg-gray-100 rounded-lg animate-pulse" />
           </div>
 
-          <div v-else-if="attendees.length === 0" class="p-12 text-center">
-            <UIcon name="i-heroicons-user-group" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">No participants found</h3>
+          <div v-else-if="(currentView === 'attendees' && attendees.length === 0) || (currentView === 'bookings' && bookings.length === 0)" class="p-12 text-center">
+            <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : 'i-heroicons-ticket'" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">
+              {{ currentView === 'attendees' ? 'No participants found' : 'No bookings found' }}
+            </h3>
             <p class="text-sm text-gray-500 mb-4">
-              {{ searchQuery || activeFilterCount > 0 ? 'Try adjusting your filters or search query' : 'No attendees have been registered for this event yet' }}
+              {{ searchQuery || activeFilterCount > 0 
+                ? 'Try adjusting your filters or search query' 
+                : currentView === 'attendees' 
+                  ? 'No attendees have been registered for this event yet' 
+                  : 'No bookings have been made for this event yet' 
+              }}
             </p>
             <UButton
               v-if="searchQuery || activeFilterCount > 0"
@@ -170,7 +266,7 @@
               Clear filters
             </UButton>
             <UButton
-              v-else
+              v-else-if="currentView === 'attendees'"
               color="primary"
               :to="`/events/${id}/m/participants/editor`"
             >
@@ -178,7 +274,8 @@
             </UButton>
           </div>
 
-          <div v-else class="overflow-x-auto">
+          <!-- Attendees Table -->
+          <div v-else-if="currentView === 'attendees'" class="overflow-x-auto">
             <table class="w-full text-left text-sm">
               <thead>
                 <tr class="border-b border-gray-200 bg-gray-50">
@@ -311,8 +408,95 @@
             </table>
           </div>
 
+          <!-- Bookings Table -->
+          <div v-else-if="currentView === 'bookings'" class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-gray-200 bg-gray-50">
+                  <th 
+                    class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                    @click="setSorting('booking_reference')"
+                  >
+                    <div class="flex items-center gap-1">
+                      Booking Reference
+                      <UIcon 
+                        v-if="currentSort === 'booking_reference'" 
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" 
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 font-semibold text-gray-700">Made By</th>
+                  <th 
+                    class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                    @click="setSorting('attendee_count')"
+                  >
+                    <div class="flex items-center gap-1">
+                      Attendees
+                      <UIcon 
+                        v-if="currentSort === 'attendee_count'" 
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" 
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </th>
+                  <th 
+                    class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                    @click="setSorting('booked_at')"
+                  >
+                    <div class="flex items-center gap-1">
+                      Booked At
+                      <UIcon 
+                        v-if="currentSort === 'booked_at'" 
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" 
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 font-semibold text-gray-700 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="booking in bookings"
+                  :key="booking.id"
+                  class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <td class="py-3 px-4">
+                    <span class="font-mono text-sm font-semibold text-gray-900">{{ booking.booking_reference }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-600">
+                    {{ booking.made_by_name || 'N/A' }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <UBadge color="blue" variant="soft" size="xs">
+                      {{ booking.attendee_count }} {{ booking.attendee_count === 1 ? 'person' : 'people' }}
+                    </UBadge>
+                  </td>
+                  <td class="py-3 px-4 text-gray-600 text-xs">
+                    {{ new Date(booking.booked_at).toLocaleString() }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <div class="flex items-center justify-end gap-1">
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="gray"
+                        icon="i-heroicons-eye"
+                        title="View details"
+                        @click="viewBookingDetails(booking)"
+                      >
+                        View
+                      </UButton>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- Pagination -->
-          <div v-if="!isLoading && attendees.length > 0" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div v-if="((currentView === 'attendees' && !isLoading && attendees.length > 0) || (currentView === 'bookings' && !bookingsLoading && bookings.length > 0))" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <select
                 v-model="pageSize"
@@ -324,14 +508,19 @@
                 <option :value="100">100 per page</option>
               </select>
               <span class="text-xs text-gray-500">
-                Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalAttendees) }} of {{ totalAttendees }}
+                <template v-if="currentView === 'attendees'">
+                  Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalAttendees) }} of {{ totalAttendees }}
+                </template>
+                <template v-else>
+                  Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalBookings) }} of {{ totalBookings }}
+                </template>
               </span>
             </div>
 
             <UPagination
               v-model="currentPage"
               :page-count="pageSize"
-              :total="totalAttendees"
+              :total="currentView === 'attendees' ? totalAttendees : totalBookings"
               :max="7"
             />
           </div>
@@ -597,15 +786,15 @@
             </div>
           </div>
 
-          <div class="pt-4 border-t flex gap-2">
-            <UButton
+          <div class="pt-4 border-t p-2 m-2">
+            <!-- <UButton
               block
               variant="solid"
               color="primary"
               :to="`/events/${id}/m/participants/editor/${selectedAttendeeDetails.attendee_id}`"
             >
               Edit Details
-            </UButton>
+            </UButton> -->
             <UButton
               block
               variant="outline"
@@ -618,16 +807,127 @@
         </div>
       </div>
     </UModal>
+
+    <!-- Booking Details Modal -->
+    <UModal v-model="showBookingDetailsModal">
+      <div v-if="selectedBooking" class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900 font-mono">{{ selectedBooking.booking_reference }}</h3>
+            <p class="text-sm text-gray-500">Booking Details</p>
+          </div>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            @click="showBookingDetailsModal = false"
+          />
+        </div>
+
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-4 pt-4 border-t">
+            <div>
+              <p class="text-xs font-semibold text-gray-500 uppercase">Made By</p>
+              <p class="text-sm text-gray-900">{{ selectedBooking.made_by_name || 'N/A' }}</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-gray-500 uppercase">Booked At</p>
+              <p class="text-sm text-gray-900">{{ new Date(selectedBooking.booked_at).toLocaleString() }}</p>
+            </div>
+            <div>
+              <p class="text-xs font-semibold text-gray-500 uppercase">Attendee Count</p>
+              <p class="text-sm text-gray-900">{{ selectedBooking.attendee_count }}</p>
+            </div>
+          </div>
+
+          <div v-if="selectedBooking.attendees && selectedBooking.attendees.length > 0" class="pt-4 border-t">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Attendees</p>
+            <div class="space-y-2 max-h-48 overflow-y-auto">
+              <NuxtLink
+                v-for="attendee in selectedBooking.attendees"
+                :key="attendee.attendee_id"
+                :to="`/events/${id}/m/participants/editor/${attendee.attendee_id}`"
+                class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
+              >
+                <div>
+                  <p class="text-sm font-medium text-gray-900">{{ attendee.full_name }}</p>
+                  <p class="text-xs text-gray-500">{{ attendee.attendee_display_id }}</p>
+                </div>
+                <UIcon name="i-heroicons-chevron-right" class="w-4 h-4 text-gray-400" />
+              </NuxtLink>
+            </div>
+          </div>
+
+          <div v-if="selectedBooking.payments && selectedBooking.payments.length > 0" class="pt-4 border-t">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Payments</p>
+            <div class="space-y-2">
+              <div
+                v-for="payment in selectedBooking.payments"
+                :key="payment.payment_id"
+                class="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+              >
+                <div>
+                  <p class="text-sm font-medium text-gray-900">£{{ payment.amount }}</p>
+                  <p class="text-xs text-gray-500">{{ payment.payment_method }}</p>
+                </div>
+                <UBadge 
+                  :color="payment.status === 'completed' ? 'green' : payment.status === 'pending' ? 'amber' : 'red'"
+                  variant="soft"
+                  size="xs"
+                >
+                  {{ payment.status }}
+                </UBadge>
+              </div>
+            </div>
+          </div>
+
+          <div v-if="selectedBooking.tickets && selectedBooking.tickets.length > 0" class="pt-4 border-t">
+            <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Tickets</p>
+            <div class="space-y-2">
+              <div
+                v-for="ticket in selectedBooking.tickets"
+                :key="ticket.ticket_id"
+                class="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+              >
+                <div>
+                  <p class="text-sm font-medium text-gray-900 font-mono">{{ ticket.ticket_code }}</p>
+                  <p class="text-xs text-gray-500">{{ ticket.ticket_type_name }}</p>
+                </div>
+                <UBadge 
+                  :color="ticket.is_used ? 'gray' : 'green'"
+                  variant="soft"
+                  size="xs"
+                >
+                  {{ ticket.is_used ? 'Used' : 'Available' }}
+                </UBadge>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 border-t flex gap-2">
+            <UButton
+              block
+              variant="outline"
+              color="gray"
+              @click="showBookingDetailsModal = false"
+            >
+              Close
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
 import { useAttendees } from '~/composables/resources/attendee/attendees'
+import { useBookings } from '~/composables/resources/booking/bookings'
 import { useEvent } from '~/composables/resources/events/events'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useAreas } from '~/composables/resources/locations/locations'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
-import type { AttendeeList, OrganisationList } from '~/api/types.gen'
+import type { AttendeeList, OrganisationList, BookingList } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
@@ -643,6 +943,27 @@ interface ExtendedOrganisationList extends OrganisationList {
   organisation_name?: string
 }
 
+// Extended booking type
+interface ExtendedBookingList extends BookingList {
+  attendees?: Array<{
+    attendee_id: number
+    attendee_display_id: string
+    full_name: string
+  }>
+  payments?: Array<{
+    payment_id: number
+    amount: number
+    payment_method: string
+    status: string
+  }>
+  tickets?: Array<{
+    ticket_id: number
+    ticket_code: string
+    ticket_type_name: string
+    is_used: boolean
+  }>
+}
+
 definePageMeta({
   layout: false,
   middleware: 'auth',
@@ -654,6 +975,9 @@ const id = computed(() => route.params.id as string)
 
 // Fetch event details
 const { data: event } = useEvent(id)
+
+// View toggle state
+const currentView = ref<'attendees' | 'bookings'>((route.query.view as string) === 'bookings' ? 'bookings' : 'attendees')
 
 // State
 const searchQuery = ref(route.query.search as string || '')
@@ -670,6 +994,8 @@ const showFilters = ref(true)
 // Modal state
 const showDetailsModal = ref(false)
 const selectedAttendeeDetails = ref<ExtendedAttendeeList | null>(null)
+const showBookingDetailsModal = ref(false)
+const selectedBooking = ref<ExtendedBookingList | null>(null)
 
 // Filters state
 const filters = ref({
@@ -733,8 +1059,30 @@ const queryParams = computed(() => {
   return params
 })
 
+// Bookings query parameters
+const bookingsQueryParams = computed(() => {
+  const params: any = {
+    event__event_id: id.value,
+    page: currentPage.value,
+    page_size: pageSize.value,
+  }
+
+  if (debouncedSearch.value) {
+    params.search = debouncedSearch.value // Search by booking reference
+  }
+
+  if (currentSort.value) {
+    params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+  }
+
+  return params
+})
+
 // Fetch attendees with reactive query params
 const { data: attendeesData, isLoading } = useAttendees(queryParams)
+
+// Fetch bookings
+const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
 
 // Fetch organisations for filter dropdown
 const { data: organisationsData } = useOrganisations({ page_size: 100 })
@@ -745,6 +1093,8 @@ const { data: areasData } = useAreas({ page_size: 100 })
 // Computed values
 const attendees = computed(() => (attendeesData.value?.data?.results || []) as ExtendedAttendeeList[])
 const totalAttendees = computed(() => attendeesData.value?.data?.count || 0)
+const bookings = computed(() => (bookingsData.value?.data?.results || []) as BookingList[])
+const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
 const organisations = computed(() => organisationsData.value?.data?.results || [])
 const areas = computed(() => areasData.value?.data?.results || [])
 
@@ -791,13 +1141,14 @@ const activeFilterCount = computed(() => {
 })
 
 // Sync state to URL query params
-watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters], () => {
+watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, currentView], () => {
   const query: any = {}
   
   if (searchQuery.value) query.search = searchQuery.value
   if (currentPage.value > 1) query.page = currentPage.value
   if (pageSize.value !== 25) query.page_size = pageSize.value
   if (currentSort.value) query.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+  if (currentView.value === 'bookings') query.view = 'bookings'
   
   if (filters.value.organisation) query.organisation = filters.value.organisation
   if (filters.value.areaFrom) query.area_from = filters.value.areaFrom
@@ -817,6 +1168,13 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters],
 }, { deep: true })
 
 // Functions
+function changeView(view: 'attendees' | 'bookings') {
+  currentView.value = view
+  currentPage.value = 1 // Reset to first page
+  selectedAttendees.value = [] // Clear selection
+  selectAll.value = false
+}
+
 function setSorting(field: string) {
   if (currentSort.value === field) {
     sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
@@ -857,6 +1215,11 @@ function toggleSelectAll() {
 function viewAttendeeDetails(attendee: ExtendedAttendeeList) {
   selectedAttendeeDetails.value = attendee
   showDetailsModal.value = true
+}
+
+function viewBookingDetails(booking: ExtendedBookingList) {
+  selectedBooking.value = booking
+  showBookingDetailsModal.value = true
 }
 
 function exportToCSV() {

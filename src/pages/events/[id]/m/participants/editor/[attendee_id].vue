@@ -1045,6 +1045,443 @@
           </div>
         </section>
 
+        <!-- Booking Tab -->
+        <section v-if="currentTab === 'booking'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-ticket" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Booking Information</h2>
+            </div>
+          </div>
+          <div class="p-5">
+            <div v-if="booking.isLoading.value" class="text-center py-8 text-gray-500 text-sm">
+              Loading booking...
+            </div>
+            <div v-else-if="!attendee.data.value?.data?.booking || !booking.data.value?.data" class="text-center py-8 text-gray-500 text-sm">
+              <UIcon name="i-heroicons-exclamation-circle" class="w-8 h-8 mx-auto mb-2 text-gray-400" />
+              <p>No booking linked to this attendee</p>
+            </div>
+            <div v-else class="space-y-4">
+              <!-- Booking Details -->
+              <div>
+                <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Booking Details</h3>
+                <dl class="grid grid-cols-2 gap-3">
+                  <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Booking Reference</dt>
+                    <dd class="mt-0.5 text-sm text-gray-900 font-mono">{{ booking.data.value.data.booking_reference }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Booked At</dt>
+                    <dd class="mt-0.5 text-sm text-gray-900">{{ new Date(booking.data.value.data.booked_at).toLocaleString() }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Made By</dt>
+                    <dd class="mt-0.5 text-sm text-gray-900">{{ booking.data.value.data.made_by_name || 'N/A' }}</dd>
+                  </div>
+                  <div>
+                    <dt class="text-xs font-semibold text-gray-500 uppercase">Attendee Count</dt>
+                    <dd class="mt-0.5 text-sm text-gray-900">{{ booking.data.value.data.attendee_count }}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <!-- Payment Information -->
+              <div v-if="booking.data.value.data.payments?.length" class="pt-4 border-t border-gray-200">
+                <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Payment Information</h3>
+                <div class="space-y-2">
+                  <div v-for="payment in booking.data.value.data.payments" :key="payment.payment_id" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div>
+                      <p class="text-xs font-semibold text-gray-900">{{ payment.payment_reference }}</p>
+                      <p class="text-xs text-gray-600">{{ payment.amount }}</p>
+                    </div>
+                    <UBadge 
+                      :color="payment.status === 'completed' ? 'green' : payment.status === 'pending' ? 'amber' : 'red'" 
+                      variant="soft" 
+                      size="xs"
+                    >
+                      {{ payment.status }}
+                    </UBadge>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Ticket Information -->
+              <div v-if="booking.data.value.data.tickets?.length" class="pt-4 border-t border-gray-200">
+                <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Tickets</h3>
+                <div class="space-y-2">
+                  <div v-for="ticket in booking.data.value.data.tickets" :key="ticket.ticket_id" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                    <div>
+                      <p class="text-xs font-semibold text-gray-900 font-mono">{{ ticket.ticket_code }}</p>
+                      <p class="text-xs text-gray-600">{{ ticket.attendee_name }}</p>
+                    </div>
+                    <UBadge 
+                      :color="ticket.status === 'ACTIVE' ? 'green' : 'gray'" 
+                      variant="soft" 
+                      size="xs"
+                    >
+                      {{ ticket.status }}
+                    </UBadge>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Other Attendees -->
+              <div v-if="booking.data.value.data.attendees?.length > 1" class="pt-4 border-t border-gray-200">
+                <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Other Attendees in this Booking</h3>
+                <div class="space-y-2">
+                  <NuxtLink
+                    v-for="siblingAttendee in booking.data.value.data.attendees.filter((a: any) => a.id !== attendeeId)"
+                    :key="siblingAttendee.id"
+                    :to="`/events/${eventId}/m/participants/editor/${siblingAttendee.id}`"
+                    class="block p-2 bg-gray-50 rounded-lg hover:bg-primary/5 transition-colors"
+                  >
+                    <p class="text-xs font-semibold text-primary">{{ siblingAttendee.name }}</p>
+                    <p class="text-xs text-gray-600">{{ siblingAttendee.display_id }}</p>
+                  </NuxtLink>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Actions Tab -->
+        <section v-if="currentTab === 'actions'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-heroicons-clipboard-document-list" class="w-4 h-4 text-primary" />
+                <h2 class="text-xs font-black text-primary uppercase tracking-widest">Action History</h2>
+              </div>
+              <   <UButton
+                @click="exportActionsToCSV"
+                size="xs"
+                color="primary"
+                variant="outline"
+                icon="i-heroicons-arrow-down-tray"
+              >
+                Export CSV
+              </UButton>
+            </div>
+          </div>
+          <div class="p-5">
+            <!-- Filters -->
+            <div class="mb-4 flex gap-3">
+              <div class="flex-1">
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Filter by Action</label>
+                <select
+                  v-model="actionTypeFilter"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                >
+                  <option value="">All Actions</option>
+                  <option value="registered">Registered</option>
+                  <option value="checked_in">Checked In</option>
+                  <option value="cancelled">Cancelled</option>
+                  <option value="updated_info">Updated Info</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Start Date</label>
+                <input
+                  v-model="actionDateStart"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">End Date</label>
+                <input
+                  v-model="actionDateEnd"
+                  type="date"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                />
+              </div>
+            </div>
+
+            <div v-if="attendeeActions.isLoading.value" class="text-center py-8 text-gray-500 text-sm">
+              Loading actions...
+            </div>
+            <div v-else-if="!filteredActions.length" class="text-center py-8 text-gray-500 text-sm">
+              No actions recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="action in filteredActions"
+                :key="action.id"
+                class="p-3 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <UBadge 
+                        :color="action.action === 'registered' ? 'green' : action.action === 'checked_in' ? 'blue' : action.action === 'cancelled' ? 'red' : 'gray'" 
+                        size="xs"
+                      >
+                        {{ action.action_display || action.action }}
+                      </UBadge>
+                      <span class="text-xs text-gray-600">{{ new Date(action.performed_at).toLocaleString() }}</span>
+                    </div>
+                    <p class="text-xs text-gray-700">
+                      <span class="font-semibold">Performed by:</span> {{ action.performed_by_name || 'System' }}
+                    </p>
+                    <p v-if="action.notes" class="text-xs text-gray-600 mt-1">{{ action.notes }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Consents Tab -->
+        <section v-if="currentTab === 'consents'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <UIcon name="i-heroicons-document-check" class="w-4 h-4 text-primary" />
+                <h2 class="text-xs font-black text-primary uppercase tracking-widest">Consents</h2>
+              </div>
+              <div class="flex gap-2">
+                <UButton
+                  @click="markAllRequiredConsentsAsGiven"
+                  size="xs"
+                  color="green"
+                  variant="outline"
+                  icon="i-heroicons-check-circle"
+                >
+                  Mark All Required
+                </UButton>
+                <UButton
+                  @click="showAddConsentForm = true"
+                  size="xs"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                >
+                  Add Consent
+                </UButton>
+              </div>
+            </div>
+          </div>
+          <div class="p-5">
+            <!-- Add Form -->
+            <div v-if="showAddConsentForm" class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Add Consent</h3>
+              <form @submit.prevent="handleAddConsent" class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Select Consent *</label>
+                  <select
+                    v-model="newConsent.consent"
+                    required
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option :value="null">Choose a consent...</option>
+                    <option
+                      v-for="consent in eventConsents.data.value?.data?.results"
+                      :key="consent.id"
+                      :value="consent.id"
+                    >
+                      {{ consent.title }} {{ consent.required ? '(Required)' : '' }}
+                    </option>
+                  </select>
+                </div>
+                <div class="flex items-center">
+                  <input
+                    v-model="newConsent.consent_given"
+                    type="checkbox"
+                    id="consent-given"
+                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/20"
+                  />
+                  <label for="consent-given" class="ml-2 text-xs font-medium text-gray-700">Consent Given</label>
+                </div>
+                <div class="flex gap-2">
+                  <UButton
+                    type="submit"
+                    :disabled="createConsentMutation.isPending.value"
+                    size="sm"
+                    color="primary"
+                  >
+                    {{ createConsentMutation.isPending.value ? 'Adding...' : 'Add' }}
+                  </UButton>
+                  <UButton
+                    type="button"
+                    @click="cancelAddConsent"
+                    size="sm"
+                    variant="ghost"
+                    color="gray"
+                  >
+                    Cancel
+                  </UButton>
+                </div>
+              </form>
+            </div>
+
+            <div v-if="attendeeConsents.isLoading.value" class="text-center py-8 text-gray-500 text-sm">
+              Loading consents...
+            </div>
+            <div v-else-if="!attendeeConsents.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
+              No consents recorded
+            </div>
+            <div v-else class="space-y-3">
+              <div
+                v-for="consentRecord in attendeeConsents.data.value.data.results"
+                :key="consentRecord.id"
+                class="p-3 bg-gray-50 rounded-lg border border-gray-200"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                      <h4 class="text-sm font-semibold text-gray-900">{{ (consentRecord as any).consent_title }}</h4>
+                      <UBadge v-if="(consentRecord as any).consent_required" color="amber" size="xs">Required</UBadge>
+                    </div>
+                    <p class="text-xs text-gray-600 mb-2">{{ (consentRecord as any).consent_description }}</p>
+                    <div class="flex items-center gap-4">
+                      <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-gray-700">Given:</label>
+                        <button
+                          @click="toggleConsentGiven(consentRecord)"
+                          :class="[
+                            'relative inline-flex h-5 w-9 items-center rounded-full transition-colors',
+                            consentRecord.consent_given ? 'bg-green-600' : 'bg-gray-300'
+                          ]"
+                        >
+                          <span
+                            :class="[
+                              'inline-block h-4 w-4 transform rounded-full bg-white transition-transform',
+                              consentRecord.consent_given ? 'translate-x-5' : 'translate-x-1'
+                            ]"
+                          />
+                        </button>
+                      </div>
+                      <p v-if="consentRecord.given_at" class="text-xs text-gray-600">
+                        Given: {{ new Date(consentRecord.given_at).toLocaleString() }}
+                      </p>
+                    </div>
+                  </div>
+                  <UButton
+                    @click="deleteConsent(consentRecord.id)"
+                    size="xs"
+                    color="red"
+                    variant="ghost"
+                    icon="i-heroicons-trash"
+                  >
+                    Delete
+                  </UButton>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Organisations Tab -->
+        <section v-if="currentTab === 'organisations'" class="bg-white border border-deep-navy/10 shadow-drawn">
+          <div class="px-5 py-3 border-b border-gray-100">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-building-office" class="w-4 h-4 text-primary" />
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Organisation</h2>
+            </div>
+          </div>
+          <div class="p-5">
+            <div v-if="attendeeOrganisations.isLoading.value" class="text-center py-8 text-gray-500 text-sm">
+              Loading organisation...
+            </div>
+            <div v-else>
+              <!-- Current Organisation -->
+              <div v-if="attendeeOrganisations.data.value?.data?.results?.length">
+                <div
+                  v-for="org in attendeeOrganisations.data.value.data.results"
+                  :key="org.id"
+                  class="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                >
+                  <div class="flex items-start justify-between">
+                    <div>
+                      <h4 class="text-sm font-semibold text-gray-900">{{ (org as any).organisation_name }}</h4>
+                      <p class="text-xs text-gray-600 mt-1">
+                        Added: {{ new Date(org.added_at).toLocaleString() }}
+                      </p>
+                      <p v-if="(org as any).added_by_name" class="text-xs text-gray-600">
+                        By: {{ (org as any).added_by_name }}
+                      </p>
+                    </div>
+                    <div class="flex gap-1">
+                      <UButton
+                        @click="showChangeOrganisation = true"
+                        size="xs"
+                        color="primary"
+                        variant="outline"
+                        icon="i-heroicons-arrow-path"
+                      >
+                        Change
+                      </UButton>
+                      <UButton
+                        @click="removeOrganisation(org.id)"
+                        size="xs"
+                        color="red"
+                        variant="ghost"
+                        icon="i-heroicons-trash"
+                      >
+                        Remove
+                      </UButton>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="mb-4 text-center py-8 text-gray-500 text-sm">
+                <p>No organisation assigned</p>
+                <UButton
+                  @click="showChangeOrganisation = true"
+                  size="sm"
+                  color="primary"
+                  class="mt-3"
+                  icon="i-heroicons-plus"
+                >
+                  Assign Organisation
+                </UButton>
+              </div>
+
+              <!-- Change Organisation Form -->
+              <div v-if="showChangeOrganisation" class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Change Organisation</h3>
+                <form @submit.prevent="handleChangeOrganisation" class="space-y-3">
+                  <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Select Organisation *</label>
+                    <select
+                      v-model="selectedOrganisation"
+                      required
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    >
+                      <option :value="null">Choose an organisation...</option>
+                      <option
+                        v-for="org in organisations.data.value?.data?.results"
+                        :key="org.id"
+                        :value="org.id"
+                      >
+                        {{ org.title }}
+                      </option>
+                    </select>
+                  </div>
+                  <div class="flex gap-2">
+                    <UButton
+                      type="submit"
+                      :disabled="createOrganisationMutation.isPending.value"
+                      size="sm"
+                      color="primary"
+                    >
+                      {{ createOrganisationMutation.isPending.value ? 'Saving...' : 'Save' }}
+                    </UButton>
+                    <UButton
+                      type="button"
+                      @click="showChangeOrganisation = false; selectedOrganisation = null"
+                      size="sm"
+                      variant="ghost"
+                      color="gray"
+                    >
+                      Cancel
+                    </UButton>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <!-- History Tab -->
         <section v-if="currentTab === 'history'" class="bg-white border border-deep-navy/10 shadow-drawn">
           <div class="px-5 py-3 border-b border-gray-100">
@@ -1173,6 +1610,12 @@ import { useAreas } from '~/composables/resources/locations/locations'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { useBooking } from '~/composables/resources/booking/bookings'
+import { useAttendeeActions } from '~/composables/resources/attendee/attendeeActions'
+import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
+import { useAttendeeConsents, useCreateAttendeeConsent, useUpdateAttendeeConsent, usePartialUpdateAttendeeConsent, useDeleteAttendeeConsent } from '~/composables/resources/attendee/attendeeConsentsRelationship'
+import { useAttendeeOrganisations, useCreateAttendeeOrganisation, useDeleteAttendeeOrganisation } from '~/composables/resources/attendee/attendeeOrganisations'
+import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { 
   useAttendeeMedicalConditions, 
   useCreateAttendeeMedicalCondition,
@@ -1209,10 +1652,14 @@ const currentTab = ref((route.query.tab as string) || 'overview')
 const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'edit', label: 'Edit' },
+  { id: 'booking', label: 'Booking' },
   { id: 'medical', label: 'Medical' },
   { id: 'dietary', label: 'Dietary' },
   { id: 'accessibility', label: 'Accessibility' },
   { id: 'emergency', label: 'Emergency Contacts' },
+  { id: 'actions', label: 'Actions' },
+  { id: 'consents', label: 'Consents' },
+  { id: 'organisations', label: 'Organisation' },
   { id: 'history', label: 'History' },
 ]
 
@@ -1220,6 +1667,45 @@ const tabs = [
 const attendee = useAttendee(attendeeId)
 const event = useEvent(eventId)
 const areas = useAreas()
+
+// Booking data
+const booking = useBooking(computed(() => attendee.data.value?.data?.booking || 0))
+
+// Actions data
+const attendeeActions = useAttendeeActions(computed(() => ({ attendee: attendeeId.value })))
+const actionTypeFilter = ref<string>('')
+const actionDateStart = ref<string>('')
+const actionDateEnd = ref<string>('')
+
+const filteredActions = computed(() => {
+  let actions = attendeeActions.data.value?.data?.results || []
+  if (actionTypeFilter.value) {
+    actions = actions.filter((a: any) => a.action === actionTypeFilter.value)
+  }
+  if (actionDateStart.value) {
+    actions = actions.filter((a: any) => new Date(a.performed_at) >= new Date(actionDateStart.value))
+  }
+  if (actionDateEnd.value) {
+    actions = actions.filter((a: any) => new Date(a.performed_at) <= new Date(actionDateEnd.value))
+  }
+  return actions
+})
+
+// Consents data
+const eventConsents = useConsents(computed(() => ({ event: eventId.value })))
+const attendeeConsents = useAttendeeConsents(attendeeId)
+const showAddConsentForm = ref(false)
+const editingConsentId = ref<number | null>(null)
+const newConsent = ref<{
+  consent: number | null
+  consent_given: boolean
+}>({ consent: null, consent_given: false })
+
+// Organisations data
+const attendeeOrganisations = useAttendeeOrganisations(attendeeId)
+const organisations = useOrganisations(computed(() => ({ page_size: 100 })))
+const showChangeOrganisation = ref(false)
+const selectedOrganisation = ref<number | null>(null)
 
 // Options for dropdowns
 const medicalConditions = useMedicalConditions()
@@ -1253,6 +1739,12 @@ const deleteAccessibilityMutation = useDeleteAttendeeAccessibilityRequirement()
 const createEmergencyMutation = useCreateAttendeeEmergencyContact()
 const updateEmergencyMutation = useUpdateAttendeeEmergencyContact()
 const deleteEmergencyMutation = useDeleteAttendeeEmergencyContact()
+const createConsentMutation = useCreateAttendeeConsent()
+const updateConsentMutation = useUpdateAttendeeConsent()
+const partialUpdateConsentMutation = usePartialUpdateAttendeeConsent()
+const deleteConsentMutation = useDeleteAttendeeConsent()
+const createOrganisationMutation = useCreateAttendeeOrganisation()
+const deleteOrganisationMutation = useDeleteAttendeeOrganisation()
 
 // Form data
 const formData = ref<{
@@ -1762,6 +2254,184 @@ const cancelEditEmergencyContact = () => {
     phone_number: '',
     email: '',
     primary_contact: false,
+  }
+}
+
+// Actions - Export to CSV
+const exportActionsToCSV = () => {
+  const actions = filteredActions.value
+  if (!actions.length) {
+    alert('No actions to export')
+    return
+  }
+
+  const headers = ['Action', 'Attendee ID', 'Attendee Name', 'Event Title', 'Performed By', 'Performed At', 'Notes']
+  const rows = actions.map((action: any) => [
+    action.action_display || action.action,
+    attendee.data.value?.data?.attendee_display_id || '',
+    attendee.data.value?.data?.full_name || '',
+    event.data.value?.data?.title || '',
+    action.performed_by_name || 'System',
+    new Date(action.performed_at).toLocaleString(),
+    action.notes || ''
+  ])
+
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+  ].join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `attendee-actions-${attendeeId.value}-${Date.now()}.csv`
+  a.click()
+  window.URL.revokeObjectURL(url)
+}
+
+// Consents - CRUD operations
+const handleAddConsent = async () => {
+  if (!newConsent.value.consent) {
+    alert('Please select a consent')
+    return
+  }
+
+  try {
+    await createConsentMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        consent: newConsent.value.consent,
+        consent_given: newConsent.value.consent_given,
+        given_at: newConsent.value.consent_given ? new Date().toISOString() : null,
+      } as any,
+    })
+    cancelAddConsent()
+  } catch (error) {
+    console.error('Failed to add consent:', error)
+    alert('Failed to add consent. It may already exist.')
+  }
+}
+
+const cancelAddConsent = () => {
+  showAddConsentForm.value = false
+  newConsent.value = {
+    consent: null,
+    consent_given: false,
+  }
+}
+
+const toggleConsentGiven = async (consentRecord: any) => {
+  try {
+    await partialUpdateConsentMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      consentId: consentRecord.id,
+      body: {
+        consent_given: !consentRecord.consent_given,
+        given_at: !consentRecord.consent_given ? new Date(). toISOString() : null,
+      } as any,
+    })
+  } catch (error) {
+    console.error('Failed to toggle consent:', error)
+  }
+}
+
+const deleteConsent = async (consentId: number) => {
+  if (!confirm('Are you sure you want to delete this consent record?')) return
+
+  try {
+    await deleteConsentMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      consentId,
+    })
+  } catch (error) {
+    console.error('Failed to delete consent:', error)
+  }
+}
+
+const markAllRequiredConsentsAsGiven = async () => {
+  const requiredConsents = eventConsents.data.value?.data?.results?.filter((c: any) => c.required) || []
+  const existingConsentIds = new Set(attendeeConsents.data.value?.data?.results?.map((ac: any) => ac.consent) || [])
+  
+  if (!confirm(`This will mark all ${requiredConsents.length} required consents as given. Continue?`)) return
+
+  try {
+    for (const consent of requiredConsents) {
+      if (!existingConsentIds.has(consent.id)) {
+        // Create new consent record
+        await createConsentMutation.mutateAsync({
+          attendeeId: attendeeId.value,
+          body: {
+            consent: consent.id,
+            consent_given: true,
+            given_at: new Date().toISOString(),
+          } as any,
+        })
+      } else {
+        // Update existing to mark as given
+        const existingRecord = attendeeConsents.data.value?.data?.results?.find((ac: any) => ac.consent === consent.id)
+        if (existingRecord && !existingRecord.consent_given) {
+          await partialUpdateConsentMutation.mutateAsync({
+            attendeeId: attendeeId.value,
+            consentId: existingRecord.id,
+            body: {
+              consent_given: true,
+              given_at: new Date().toISOString(),
+            } as any,
+          })
+        }
+      }
+    }
+    alert('All required consents marked as given')
+  } catch (error) {
+    console.error('Failed to mark consents:', error)
+    alert('Failed to mark some consents. Please try again.')
+  }
+}
+
+// Organisations - Management
+const handleChangeOrganisation = async () => {
+  if (!selectedOrganisation.value) {
+    alert('Please select an organisation')
+    return
+  }
+
+  try {
+    // Delete existing organisation if any
+    const existing = attendeeOrganisations.data.value?.data?.results?.[0]
+    if (existing) {
+      await deleteOrganisationMutation.mutateAsync({
+        attendeeId: attendeeId.value,
+        organisationId: existing.id,
+      })
+    }
+
+    // Create new organisation association
+    await createOrganisationMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: {
+        organisation: selectedOrganisation.value,
+      } as any,
+    })
+
+    showChangeOrganisation.value = false
+    selectedOrganisation.value = null
+  } catch (error) {
+    console.error('Failed to change organisation:', error)
+    alert('Failed to change organisation')
+  }
+}
+
+const removeOrganisation = async (organisationId: number) => {
+  if (!confirm('Are you sure you want to remove this organisation?')) return
+
+  try {
+    await deleteOrganisationMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      organisationId,
+    })
+  } catch (error) {
+    console.error('Failed to remove organisation:', error)
   }
 }
 
