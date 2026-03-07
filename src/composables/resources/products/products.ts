@@ -35,7 +35,7 @@ export function useProducts(params?: MaybeRefOrGetter<ProductsListListData['quer
 /**
  * Retrieve a single product by ID
  */
-export function useProduct(productId: MaybeRefOrGetter<number>) {
+export function useProduct(productId: MaybeRefOrGetter<String>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', productId] as const,
     queryFn: () => {

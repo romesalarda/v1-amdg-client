@@ -218,6 +218,11 @@ const tabs = [
     path: 'participants/dashboard',
     label: 'Participants',
     icon: 'i-heroicons-users',
+  },
+  {
+    label: "Shop",
+    path: 'shop/dashboard',
+    icon: 'i-heroicons-shopping-bag',
   }
 ]
 

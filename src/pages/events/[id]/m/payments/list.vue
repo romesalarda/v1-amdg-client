@@ -34,7 +34,7 @@
       <!-- Payments Tab -->
       <div v-if="activeTab === 'payments'" class="space-y-6">
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-4 gap-4">
+        <div class="grid grid-cols-5 gap-4">
           <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
