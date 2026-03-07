@@ -362,12 +362,27 @@
 
             <!-- Pagination -->
             <div v-if="!isLoading && products.length > 0" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-              <div class="text-sm text-gray-500">
-                Showing {{ products.length }} of {{ totalProducts }} products
+              <div class="flex items-center gap-3">
+                <select
+                  v-model="pageSize"
+                  class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="10">10 per page</option>
+                  <option :value="25">25 per page</option>
+                  <option :value="50">50 per page</option>
+                  <option :value="100">100 per page</option>
+                </select>
+                <span class="text-xs text-gray-500">
+                  Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalProducts) }} of {{ totalProducts }}
+                </span>
               </div>
-              <div class="flex gap-2">
-                <!-- Pagination controls would go here -->
-              </div>
+
+              <UPagination
+                v-model="currentPage"
+                :page-count="pageSize"
+                :total="totalProducts"
+                :max="7"
+              />
             </div>
           </template>
 
@@ -532,8 +547,90 @@ const tabs = computed(() => [
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
 ])
 
+// Pagination
+const currentPage = ref(1)
+const pageSize = ref(25)
+const searchQuery = ref('')
+
+// Debounced search
+const debouncedSearch = ref(searchQuery.value)
+let searchTimeout: ReturnType<typeof setTimeout>
+watch(searchQuery, (newValue) => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = newValue
+    currentPage.value = 1 // Reset to first page on search
+  }, 300)
+})
+
+// Search & Filters
+const showFilters = ref(false)
+const filters = reactive({
+  verified: false,
+  active: false,
+  inStock: false,
+  lowStock: false,
+  outOfStock: false,
+  minPrice: null as number | null,
+  maxPrice: null as number | null,
+})
+
+// Sorting
+const currentSort = ref<string | null>(null)
+const sortDirection = ref<'asc' | 'desc'>('asc')
+
+function setSorting(field: string) {
+  if (currentSort.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    currentSort.value = field
+    sortDirection.value = 'asc'
+  }
+}
+
+// Computed query parameters for API
+const queryParams = computed(() => {
+  const params: any = {
+    event: event.value?.data?.id,
+    page: currentPage.value,
+    page_size: pageSize.value,
+  }
+
+  // Search
+  if (debouncedSearch.value) {
+    params.search = debouncedSearch.value
+  }
+
+  // Sorting
+  if (currentSort.value) {
+    params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+  }
+
+  // Status filters
+  if (filters.verified) params.verified = true
+  if (filters.active) params.is_active = true
+
+  // Stock filters - in_stock is boolean, we need to handle multiple checkboxes differently
+  if (filters.inStock && !filters.outOfStock) {
+    params.in_stock = true
+  } else if (filters.outOfStock && !filters.inStock) {
+    params.in_stock = false
+  }
+  // If both or neither are checked, don't filter by stock
+
+  // Price range filters
+  if (filters.minPrice !== null && filters.minPrice !== undefined) {
+    params.min_price = filters.minPrice
+  }
+  if (filters.maxPrice !== null && filters.maxPrice !== undefined) {
+    params.max_price = filters.maxPrice
+  }
+
+  return params
+})
+
 // Products Data
-const { data: productsData, isLoading } = useProducts(() => ({ event: event.value?.data?.id }))
+const { data: productsData, isLoading } = useProducts(queryParams)
 const products = computed(() => productsData.value?.data?.results || [])
 const totalProducts = computed(() => productsData.value?.data?.count || 0)
 
@@ -550,18 +647,6 @@ const lowStockCount = computed(() =>
 )
 const totalRevenue = computed(() => 0) // TODO: Calculate from orders
 
-// Search & Filters
-const searchQuery = ref('')
-const showFilters = ref(false)
-const filters = reactive({
-  verified: false,
-  active: false,
-  inStock: false,
-  lowStock: false,
-  outOfStock: false,
-  minPrice: null as number | null,
-  maxPrice: null as number | null,
-})
 
 const activeFilterCount = computed(() => {
   let count = 0
@@ -584,7 +669,13 @@ function clearAllFilters() {
   filters.outOfStock = false
   filters.minPrice = null
   filters.maxPrice = null
+  currentPage.value = 1
 }
+
+// Watch filters and reset page when they change
+watch(filters, () => {
+  currentPage.value = 1
+}, { deep: true })
 
 // Table Selection
 const selectAll = ref(false)
@@ -598,18 +689,7 @@ function toggleSelectAll() {
   }
 }
 
-// Sorting
-const currentSort = ref<string | null>(null)
-const sortDirection = ref<'asc' | 'desc'>('asc')
 
-function setSorting(field: string) {
-  if (currentSort.value === field) {
-    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-  } else {
-    currentSort.value = field
-    sortDirection.value = 'asc'
-  }
-}
 
 // Actions
 function viewProductDetails(product: ProductList) {
