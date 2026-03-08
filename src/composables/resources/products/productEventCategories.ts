@@ -31,12 +31,12 @@ export function useProductEventCategories(params?: MaybeRefOrGetter<ProductsEven
 /**
  * Get a single event-category association by ID
  */
-export function useProductEventCategory(associationId: MaybeRefOrGetter<number>) {
+export function useProductEventCategory(associationId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', associationId] as const,
     queryFn: () => {
       const id = toValue(associationId)
-      return productsEventCategoriesRetrieve({ path: { id: String(id) } })
+      return productsEventCategoriesRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(associationId),
   })
@@ -63,7 +63,7 @@ export function useDeleteProductEventCategory() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (associationId: number) => productsEventCategoriesDestroy({ path: { id: String(associationId) } }),
+    mutationFn: (associationId: string) => productsEventCategoriesDestroy({ path: { id: associationId } }),
     onSuccess: (_, associationId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

@@ -401,7 +401,7 @@
                 <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
                 <div>
                   <h2 class="text-sm font-black text-primary uppercase tracking-widest">Product Categories</h2>
-                  <p class="text-xs text-gray-500">Organize products into categories for easier management</p>
+                  <p class="text-xs text-gray-500">Link existing categories to this event</p>
                 </div>
               </div>
               
@@ -445,19 +445,11 @@
                     <UButton
                       size="xs"
                       variant="ghost"
-                      color="blue"
-                      icon="i-heroicons-pencil"
-                      @click="openCategoryModal(category)"
-                      title="Edit category"
-                    />
-                    <UButton
-                      size="xs"
-                      variant="ghost"
                       color="red"
                       icon="i-heroicons-trash"
                       @click="handleDeleteCategory(category.id)"
                       :loading="deletingCategoryId === category.id"
-                      title="Delete category"
+                      title="Remove from event"
                     />
                   </div>
                 </div>
@@ -473,13 +465,13 @@
             <div v-else class="p-12 text-center">
               <UIcon name="i-heroicons-folder" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 class="text-lg font-semibold text-gray-900 mb-2">No categories yet</h3>
-              <p class="text-sm text-gray-500 mb-4">Create categories to organize your products</p>
+              <p class="text-sm text-gray-500 mb-4">Add existing categories to organize your event's products</p>
               <UButton
                 color="primary"
                 icon="i-heroicons-plus"
                 @click="openCategoryModal()"
               >
-                Create First Category
+                Add First Category
               </UButton>
             </div>
           </template>
@@ -690,34 +682,57 @@
     </div>
 
     <!-- Category Modal -->
-    <UModal v-model="showCategoryModal" :ui="{ width: 'max-w-xl' }">
+    <UModal v-model="showCategoryModal" :ui="{ width: 'max-w-2xl' }">
       <div class="p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">
-          {{ editingCategory ? 'Edit Category' : 'Add Category' }}
+        <h3 class="text-xl font-bold text-gray-900 mb-6">
+          Add Category to Event
         </h3>
 
-        <div class="space-y-4">
-          <!-- Category Name -->
+        <div class="space-y-5">
+          <!-- Search Bar -->
           <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Category Name *</label>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Search Categories</label>
             <input
-              v-model="categoryForm.name"
+              v-model="categorySearchQuery"
               type="text"
-              placeholder="e.g., Apparel, Accessories"
+              placeholder="Search by name or description..."
               class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              required
             />
           </div>
 
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="categoryForm.description"
-              rows="3"
-              placeholder="Optional description..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-            ></textarea>
+          <!-- Loading State -->
+          <div v-if="allCategoriesLoading" class="space-y-2">
+            <USkeleton class="h-20 w-full" v-for="i in 3" :key="i" />
+          </div>
+
+          <!-- Categories List -->
+          <div v-else-if="filteredCategories.length > 0" class="space-y-2 max-h-96 overflow-y-auto">
+            <label
+              v-for="category in filteredCategories"
+              :key="category.id"
+              class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+              :class="selectedCategoryId === category.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+            >
+              <input
+                v-model="selectedCategoryId"
+                type="radio"
+                :value="category.id"
+                class="mt-1 text-primary focus:ring-primary"
+              />
+              <div class="flex-1">
+                <div class="font-semibold text-gray-900">{{ category.name }}</div>
+                <p v-if="category.description" class="text-sm text-gray-600 mt-1">
+                  {{ category.description }}
+                </p>
+                <p v-else class="text-sm text-gray-400 italic mt-1">No description</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else class="text-center py-8 text-gray-500">
+            <UIcon name="i-heroicons-magnifying-glass" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p class="text-sm">{{ categorySearchQuery ? 'No categories match your search' : 'All categories have been added to this event' }}</p>
           </div>
         </div>
 
@@ -736,10 +751,11 @@
             variant="solid"
             color="primary"
             icon="i-heroicons-check"
-            :loading="createCategory.isPending.value || updateCategory.isPending.value"
+            :loading="createEventCategory.isPending.value"
+            :disabled="!selectedCategoryId"
             @click="submitCategoryForm"
           >
-            {{ editingCategory ? 'Update' : 'Create' }} Category
+            Add Category
           </UButton>
         </div>
       </div>
@@ -751,7 +767,8 @@
 import type { ProductList, ProductCategory } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useProducts } from '~/composables/resources/products/products'
-import { useProductCategories, useCreateProductCategory, useUpdateProductCategory, useDeleteProductCategory } from '~/composables/resources/products/productCategories'
+import { useProductCategories } from '~/composables/resources/products/productCategories'
+import { useProductEventCategories, useCreateProductEventCategory, useDeleteProductEventCategory } from '~/composables/resources/products/productEventCategories'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { 
   getStockStatus, 
@@ -777,7 +794,7 @@ const { data: event } = useEvent(id)
 const currentTab = ref('products')
 const tabs = computed(() => [
   { value: 'products', label: 'Products', icon: 'i-heroicons-cube', badge: totalProducts.value },
-  { value: 'discounts', label: 'Discounts', icon: 'i-heroicons-tag' },
+  // { value: 'discounts', label: 'Discounts', icon: 'i-heroicons-tag' },
   { value: 'categories', label: 'Categories', icon: 'i-heroicons-folder' },
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
 ])
@@ -962,114 +979,132 @@ function getProductStockStatus(product: ProductList) {
 // Categories Management
 // ============================================
 
-const { data: categoriesData, isLoading: categoriesLoading, refetch: refetchCategories } = useProductCategories(
+// Fetch EventCategories for this event (associations between event and categories)
+const { data: eventCategoriesData, isLoading: categoriesLoading, refetch: refetchCategories } = useProductEventCategories(
+  computed(() => {
+    const eventId = event.value?.data?.id
+    if (!eventId) return undefined
+    return {
+      event: eventId,
+      page_size: 100,
+    }
+  })
+)
+
+const eventCategories = computed(() => eventCategoriesData.value?.data?.results || [])
+
+// Fetch ALL available categories for selection
+const { data: allCategoriesData, isLoading: allCategoriesLoading } = useProductCategories(
   computed(() => ({
-    event: event.value?.data?.id,
-    page_size: 100, // Get all categories
+    page_size: 100,
   }))
 )
 
-const categories = computed(() => categoriesData.value?.data?.results || [])
+const allCategories = computed(() => allCategoriesData.value?.data?.results || [])
+
+// Extract the actual categories from the event-category associations
+// by looking up the full category object from allCategories
+const categories = computed(() => {
+  const categoryMap = new Map(allCategories.value.map(c => [c.id, c]))
+  return eventCategories.value
+    .map(ec => categoryMap.get(ec.category as number))
+    .filter((c): c is NonNullable<typeof c> => c !== undefined)
+})
+
+// Filter out categories already added to this event
+const availableCategories = computed(() => {
+  const existingCategoryIds = new Set(eventCategories.value.map(ec => ec.category as number))
+  return allCategories.value.filter(c => !existingCategoryIds.has(c.id))
+})
 
 // Category modal state
 const showCategoryModal = ref(false)
-const editingCategory = ref<ProductCategory | null>(null)
+const selectedCategoryId = ref<number | null>(null)
+const categorySearchQuery = ref('')
 const deletingCategoryId = ref<number | null>(null)
 
-// Category form data
-const categoryForm = reactive({
-  name: '',
-  description: '',
-})
-
 // Category mutations
-const createCategory = useCreateProductCategory()
-const updateCategory = useUpdateProductCategory()
-const deleteCategory = useDeleteProductCategory()
+const createEventCategory = useCreateProductEventCategory()
+const deleteEventCategory = useDeleteProductEventCategory()
 const toast = useToast()
 
-function openCategoryModal(category?: ProductCategory) {
-  editingCategory.value = category || null
-  
-  if (category) {
-    categoryForm.name = category.name
-    categoryForm.description = category.description || ''
-  } else {
-    categoryForm.name = ''
-    categoryForm.description = ''
-  }
-  
+// Filtered categories for search
+const filteredCategories = computed(() => {
+  if (!categorySearchQuery.value) return availableCategories.value
+  const query = categorySearchQuery.value.toLowerCase()
+  return availableCategories.value.filter(c => 
+    c.name.toLowerCase().includes(query) || 
+    c.description?.toLowerCase().includes(query)
+  )
+})
+
+function openCategoryModal() {
+  selectedCategoryId.value = null
+  categorySearchQuery.value = ''
   showCategoryModal.value = true
 }
 
 function closeCategoryModal() {
   showCategoryModal.value = false
-  editingCategory.value = null
+  selectedCategoryId.value = null
+  categorySearchQuery.value = ''
 }
 
 async function submitCategoryForm() {
   // Validation
-  if (!categoryForm.name) {
+  if (!selectedCategoryId.value) {
     toast.add({
       title: 'Validation Error',
-      description: 'Please enter a category name',
+      description: 'Please select a category',
       color: 'red',
     })
     return
   }
 
-  const categoryPayload: any = {
-    name: categoryForm.name,
-    description: categoryForm.description || null,
-    event: event.value?.data?.id,
-  }
-
   try {
-    if (editingCategory.value) {
-      // Update existing category
-      await updateCategory.mutateAsync({
-        categoryId: editingCategory.value.id,
-        body: categoryPayload,
-      })
+    // Create EventCategory association
+    if (!event.value?.data?.id) throw new Error('Event ID is missing')
+    
+    await createEventCategory.mutateAsync({
+      event: event.value?.data?.id,
+      category: selectedCategoryId.value,
+    })
 
-      toast.add({
-        title: 'Success',
-        description: 'Category updated successfully',
-        color: 'green',
-      })
-    } else {
-      // Create new category
-      await createCategory.mutateAsync(categoryPayload)
-
-      toast.add({
-        title: 'Success',
-        description: 'Category created successfully',
-        color: 'green',
-      })
-    }
+    toast.add({
+      title: 'Success',
+      description: 'Category added to event successfully',
+      color: 'green',
+    })
 
     refetchCategories()
     closeCategoryModal()
   } catch (err: any) {
     toast.add({
       title: 'Error',
-      description: err.message || 'Failed to save category',
+      description: err.message || 'Failed to add category',
       color: 'red',
     })
   }
 }
 
 async function handleDeleteCategory(categoryId: number) {
-  if (!confirm('Are you sure you want to delete this category? Products in this category will not be deleted.')) return
+  // Find the EventCategory association ID
+  // ec.category is just the category ID (number), not the full object
+  const eventCategory = eventCategories.value.find(ec => ec.category === categoryId)
+  if (!eventCategory) return
+
+  if (!confirm('Are you sure you want to remove this category from this event? The category itself will not be deleted.')) return
 
   deletingCategoryId.value = categoryId
 
   try {
-    await deleteCategory.mutateAsync(categoryId)
+    // Delete the EventCategory association (not the global category)
+    // eventCategory.id is a UUID string
+    await deleteEventCategory.mutateAsync(String(eventCategory.id))
 
     toast.add({
       title: 'Success',
-      description: 'Category deleted successfully',
+      description: 'Category removed from event successfully',
       color: 'green',
     })
 
@@ -1077,7 +1112,7 @@ async function handleDeleteCategory(categoryId: number) {
   } catch (err: any) {
     toast.add({
       title: 'Error',
-      description: err.message || 'Failed to delete category',
+      description: err.message || 'Failed to remove category',
       color: 'red',
     })
   } finally {

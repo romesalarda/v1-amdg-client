@@ -2,7 +2,7 @@
   <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="max-w-7xl mx-auto pb-32">
       <!-- Header -->
-      <div class="flex items-center justify-between mb-6">
+      <!-- <div class="flex items-center justify-between mb-6">
         <div>
           <h1 class="text-2xl font-black text-deep-navy uppercase">
             {{ isNewProduct ? 'Create Product' : 'Edit Product' }}
@@ -19,7 +19,7 @@
         >
           Back to Shop
         </UButton>
-      </div>
+      </div> -->
 
       <!-- Loading State -->
       <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -46,10 +46,20 @@
       <!-- Two Column Layout: Main Editor (2/3) + Sidebar (1/3) -->
       <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Editor Area (2/3) -->
+         
         <div class="lg:col-span-2">
+          
           <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
         <!-- Tab Navigation -->
         <div class="border-b border-gray-200">
+          <div class="p-2 ml-4 mt-3">
+            <h1 class="text-2xl font-black text-deep-navy uppercase">
+              {{ isNewProduct ? 'Create Product' : 'Edit Product' }}
+            </h1>
+            <p class="text-sm text-gray-500 mt-1">
+              {{ isNewProduct ? 'Add a new product to your event shop' : 'Update product details and variants' }}
+            </p>
+          </div>
           <nav class="flex gap-2 px-6" aria-label="Tabs">
             <button
               v-for="tab in tabs"
@@ -484,7 +494,8 @@
                         :disabled="variantEditForms[variant.variant_id] && checkVariantDuplicate(
                           variantEditForms[variant.variant_id].size,
                           variantEditForms[variant.variant_id].color,
-                          existingVariants.findIndex(v => v.variant_id === variant.variant_id)
+                          undefined,
+                          variant.variant_id
                         )"
                       >
                         Save
@@ -535,7 +546,8 @@
                       checkVariantDuplicate(
                         variantEditForms[variant.variant_id].size,
                         variantEditForms[variant.variant_id].color,
-                        existingVariants.findIndex(v => v.variant_id === variant.variant_id)
+                        undefined,
+                        variant.variant_id
                       )"
                     class="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg p-3"
                   >
@@ -883,9 +895,10 @@
 
             <div v-else>
               <!-- Header with Add Button -->
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between mb-1">
                 <div>
-                  <p class="text-sm text-gray-600">
+                  <h3 class="text-sm font-semibold text-gray-700 mb-1">Product Discounts</h3>
+                  <p class="text-xs text-gray-500">
                     Manage discounts that apply to this product based on attendee rules
                   </p>
                 </div>
@@ -901,83 +914,97 @@
               </div>
 
               <!-- Discounts Loading State -->
-              <div v-if="discountsLoading" class="space-y-3">
-                <USkeleton class="h-20 w-full" v-for="i in 3" :key="i" />
+              <div v-if="discountsLoading" class="space-y-4">
+                <USkeleton class="h-32 w-full rounded-lg" v-for="i in 3" :key="i" />
               </div>
 
               <!-- Discounts List -->
-              <div v-else-if="productDiscounts.length > 0" class="space-y-3">
+              <div v-else-if="productDiscounts.length > 0" class="space-y-4">
                 <div
                   v-for="discount in productDiscounts"
                   :key="discount.id"
-                  class="p-4 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
+                  class="p-5 border-2 border-gray-200 rounded-lg hover:border-primary/40 hover:shadow-sm transition-all bg-white"
                 >
-                  <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-start justify-between mb-4">
                     <div class="flex-1">
-                      <div class="flex items-center gap-2 mb-1">
-                        <h4 class="font-semibold text-gray-900">{{ discount.name }}</h4>
-                        <UBadge :color="discount.active ? 'green' : 'gray'" size="xs">
-                          {{ discount.active ? 'Active' : 'Inactive' }}
-                        </UBadge>
-                        <UBadge :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'purple'" size="xs">
-                          {{ discount.discount_value }}
-                        </UBadge>
+                      <div class="flex items-start gap-3 mb-2">
+                        <h4 class="font-bold text-gray-900 text-base">{{ discount.name }}</h4>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                          <UBadge :color="discount.active ? 'green' : 'gray'" size="xs" variant="soft">
+                            {{ discount.active ? 'Active' : 'Inactive' }}
+                          </UBadge>
+                          <UBadge :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'purple'" size="xs" variant="soft">
+                            {{ discount.discount_value }}
+                          </UBadge>
+                        </div>
                       </div>
-                      <p v-if="discount.description" class="text-sm text-gray-600">
+                      <p v-if="discount.description" class="text-sm text-gray-600 leading-relaxed">
                         {{ discount.description }}
                       </p>
-                    </div>
-                    <div class="flex items-center gap-2 ml-4">
-                      <UButton
-                        size="xs"
-                        variant="ghost"
-                        color="blue"
-                        icon="i-heroicons-pencil"
-                        @click="openDiscountModal(discount)"
-                      >
-                        Edit
-                      </UButton>
-                      <UButton
-                        size="xs"
-                        variant="ghost"
-                        color="red"
-                        icon="i-heroicons-trash"
-                        @click="handleDeleteDiscount(discount.discount_id)"
-                        :loading="deletingDiscountId === discount.discount_id"
-                      >
-                        Delete
-                      </UButton>
                     </div>
                   </div>
 
                   <!-- Rules Summary -->
-                  <div v-if="discount.rules && discount.rules.length > 0" class="pt-3 border-t border-gray-100">
-                    <div class="flex items-center gap-2 mb-2">
+                  <div v-if="discount.rules && discount.rules.length > 0" class="pt-4 border-t border-gray-200">
+                    <div class="flex items-center gap-2 mb-3">
                       <UIcon name="i-heroicons-funnel" class="w-4 h-4 text-gray-500" />
-                      <span class="text-xs font-semibold text-gray-700">
-                        {{ discount.rules.length }} {{ discount.rules.length === 1 ? 'Rule' : 'Rules' }}
+                      <span class="text-xs font-semibold text-gray-700 uppercase tracking-wide">
+                        Eligibility Rules ({{ discount.rules.length }})
                       </span>
                     </div>
                     <div class="flex flex-wrap gap-2">
-                      <UBadge
+                      <div
                         v-for="rule in discount.rules"
                         :key="rule.rule_id"
-                        color="gray"
-                        size="xs"
-                        variant="subtle"
+                        class="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-md"
                       >
-                        {{ rule.rule_type?.replace(/_/g, ' ') || 'Unknown Rule' }}
-                      </UBadge>
+                        <span class="text-xs font-medium text-gray-700">
+                          {{ rule.name || rule.rule_type?.replace(/_/g, ' ') || 'Unknown Rule' }}
+                        </span>
+                      </div>
                     </div>
+                  </div>
+
+                  <!-- No Rules Info -->
+                  <div v-else class="pt-4 border-t border-gray-200">
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                      <UIcon name="i-heroicons-information-circle" class="w-4 h-4" />
+                      <span>No eligibility rules - Available to everyone</span>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      color="blue"
+                      icon="i-heroicons-pencil"
+                      @click="openDiscountModal(discount)"
+                    >
+                      Edit
+                    </UButton>
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      color="red"
+                      icon="i-heroicons-trash"
+                      @click="handleDeleteDiscount(discount.discount_id)"
+                      :loading="deletingDiscountId === discount.discount_id"
+                    >
+                      Delete
+                    </UButton>
                   </div>
                 </div>
               </div>
 
               <!-- Empty State -->
-              <div v-else class="text-center py-12">
+              <div v-else class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
                 <UIcon name="i-heroicons-ticket" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 class="text-lg font-semibold text-gray-900 mb-2">No discounts yet</h3>
-                <p class="text-sm text-gray-500 mb-4">Add discounts to offer special pricing based on attendee rules</p>
+                <h3 class="text-base font-semibold text-gray-900 mb-2">No discounts yet</h3>
+                <p class="text-sm text-gray-500 mb-5 max-w-md mx-auto">
+                  Create discounts with custom rules to offer special pricing based on attendee eligibility
+                </p>
                 <UButton
                   size="sm"
                   variant="solid"
@@ -985,7 +1012,7 @@
                   icon="i-heroicons-plus"
                   @click="openDiscountModal()"
                 >
-                  Add First Discount
+                  Create First Discount
                 </UButton>
               </div>
             </div>
@@ -1569,11 +1596,11 @@
     <!-- Discount Modal -->
     <UModal v-model="showDiscountModal" :ui="{ width: 'max-w-2xl' }">
       <div class="p-6">
-        <h3 class="text-lg font-bold text-gray-900 mb-4">
+        <h3 class="text-xl font-bold text-gray-900 mb-6">
           {{ editingDiscount ? 'Edit Discount' : 'Add Discount' }}
         </h3>
 
-        <div class="space-y-4">
+        <div class="space-y-5">
           <!-- Discount Name -->
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">Discount Name *</label>
@@ -1683,11 +1710,11 @@
           </div>
 
           <!-- Rules Section -->
-          <div class="border-t border-gray-200 pt-4">
-            <div class="flex items-center justify-between mb-3">
+          <div class="border-t border-gray-200 pt-6 mt-6">
+            <div class="flex items-center justify-between mb-4">
               <div>
-                <label class="block text-sm font-semibold text-gray-700">Eligibility Rules</label>
-                <p class="text-xs text-gray-500 mt-1">Add conditions to control who can use this discount (max 2 rules)</p>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Eligibility Rules</label>
+                <p class="text-xs text-gray-500">Add conditions to control who can use this discount (max 2 rules)</p>
               </div>
               <UButton
                 size="xs"
@@ -1702,14 +1729,14 @@
             </div>
 
             <!-- Rules List -->
-            <div v-if="discountForm.rules.length > 0" class="space-y-3">
+            <div v-if="discountForm.rules.length > 0" class="space-y-4">
               <div
                 v-for="(rule, index) in discountForm.rules"
                 :key="index"
-                class="p-4 border border-gray-200 rounded-lg bg-gray-50/50"
+                class="p-4 border-2 border-gray-200 rounded-lg bg-white hover:border-gray-300 transition-colors"
               >
-                <div class="flex items-start justify-between mb-3">
-                  <span class="text-xs font-semibold text-gray-700">Rule {{ index + 1 }}</span>
+                <div class="flex items-center justify-between mb-4">
+                  <span class="text-sm font-semibold text-gray-900">Rule {{ index + 1 }}</span>
                   <UButton
                     size="xs"
                     variant="ghost"
@@ -1721,58 +1748,58 @@
                   </UButton>
                 </div>
 
-                <div class="space-y-3">
+                <div class="space-y-4">
                   <!-- Rule Type -->
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Type *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rule Type *</label>
                     <select
                       v-model="rule.rule_type"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
                     >
                       <option v-for="opt in RULE_TYPE_OPTIONS" :key="opt.value" :value="opt.value">
                         {{ opt.label }}
                       </option>
                     </select>
-                    <p v-if="getRuleTypeInfo(rule.rule_type)?.description" class="text-xs text-gray-500 mt-1 italic">
+                    <p v-if="getRuleTypeInfo(rule.rule_type)?.description" class="text-xs text-gray-500 mt-1.5">
                       {{ getRuleTypeInfo(rule.rule_type)?.description }}
                     </p>
                   </div>
 
                   <!-- Rule Name -->
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Rule Name *</label>
                     <input
                       v-model="rule.name"
                       type="text"
-                      placeholder="e.g., Under 18"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      placeholder="e.g., Under 18, Staff Members, etc."
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </div>
 
                   <!-- Rule Value (conditional) -->
-                  <div v-if="getRuleTypeInfo(rule.rule_type)">
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                  <div v-if="getRuleTypeInfo(rule.rule_type) && (getRuleTypeInfo(rule.rule_type) as any).requiresValue">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
                       Value *
-                      <span class="font-normal text-gray-500">
-                        ({{ rule.rule_type.includes('AGE') ? 'Age number' : 'Match value' }})
-                      </span>
                     </label>
                     <input
                       v-model="rule.value"
                       :type="rule.rule_type.includes('AGE') ? 'number' : 'text'"
-                      :placeholder="rule.rule_type.includes('AGE') ? '18' : 'Enter value'"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      :placeholder="rule.rule_type.includes('AGE') ? 'e.g., 18' : 'Enter match value'"
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
+                    <p class="text-xs text-gray-500 mt-1.5">
+                      {{ rule.rule_type.includes('AGE') ? 'Enter the age threshold' : 'Enter the value to match against' }}
+                    </p>
                   </div>
 
                   <!-- Rule Description -->
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Description (optional)</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Description (optional)</label>
                     <textarea
                       v-model="rule.description"
                       rows="2"
-                      placeholder="Optional details about this rule..."
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                      placeholder="Add optional details about this rule..."
+                      class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                     ></textarea>
                   </div>
                 </div>
@@ -1780,10 +1807,10 @@
             </div>
 
             <!-- Empty State -->
-            <div v-else class="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
-              <UIcon name="i-heroicons-funnel" class="w-8 h-8 text-gray-300 mx-auto mb-2" />
-              <p class="text-xs text-gray-500">No rules added yet</p>
-              <p class="text-xs text-gray-400 mt-1">Discount will be available to everyone</p>
+            <div v-else class="text-center py-8 border-2 border-dashed border-gray-200 rounded-lg bg-gray-50">
+              <UIcon name="i-heroicons-funnel" class="w-10 h-10 text-gray-300 mx-auto mb-3" />
+              <p class="text-sm font-medium text-gray-600">No rules added yet</p>
+              <p class="text-xs text-gray-500 mt-1">Discount will be available to everyone without restrictions</p>
             </div>
           </div>
         </div>
@@ -2433,13 +2460,17 @@ async function removeImageHandler(imageId?: number) {
 
 // Variant Management
 // Helper function to check for duplicate size+color combinations
-function checkVariantDuplicate(size: string, color: string, excludeIndex?: number): boolean {
+function checkVariantDuplicate(size: string, color: string, excludeIndex?: number, excludeVariantId?: string): boolean {
   // Normalize colors for comparison (case-insensitive, trim whitespace)
   const normalizedColor = color.trim().toUpperCase()
   
   // Check in existing variants
   const existsInExisting = existingVariants.value.some(
-    v => v.size === size && v.color?.trim().toUpperCase() === normalizedColor
+    v => {
+      // Exclude the variant being edited (if excludeVariantId is provided)
+      if (excludeVariantId && v.variant_id === excludeVariantId) return false
+      return v.size === size && v.color?.trim().toUpperCase() === normalizedColor
+    }
   )
   
   if (existsInExisting) return true
@@ -2990,7 +3021,7 @@ async function submitDiscountForm() {
       return
     }
     const ruleInfo = getRuleTypeInfo(rule.rule_type)
-    if (ruleInfo && !rule.value) {
+    if (ruleInfo && (ruleInfo as any).requiresValue && !rule.value) {
       toast.add({
         title: 'Validation Error',
         description: `Rule ${i + 1}: ${ruleInfo.label} requires a value`,
