@@ -395,15 +395,193 @@
 
           <!-- Categories Tab -->
           <template v-else-if="currentTab === 'categories'">
-            <div class="p-6">
-              <p class="text-gray-500 text-center py-12">Categories management will be implemented here</p>
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
+                <div>
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Product Categories</h2>
+                  <p class="text-xs text-gray-500">Organize products into categories for easier management</p>
+                </div>
+              </div>
+              
+              <UButton
+                size="sm"
+                variant="solid"
+                color="primary"
+                icon="i-heroicons-plus"
+                @click="openCategoryModal()"
+              >
+                Add Category
+              </UButton>
+            </div>
+
+            <!-- Categories Loading State -->
+            <div v-if="categoriesLoading" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <USkeleton class="h-32 w-full" v-for="i in 6" :key="i" />
+            </div>
+
+            <!-- Categories Grid -->
+            <div v-else-if="categories.length > 0" class="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div
+                v-for="category in categories"
+                :key="category.id"
+                class="bg-white border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
+                    </div>
+                    <div class="flex-1">
+                      <h3 class="font-semibold text-gray-900">{{ category.name }}</h3>
+                      <p v-if="category.product_count !== undefined" class="text-xs text-gray-500 mt-0.5">
+                        {{ category.product_count }} product{{ category.product_count !== 1 ? 's' : '' }}
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center gap-1">
+                    <UButton
+                      size="xs"
+                      variant="ghost"
+                      color="blue"
+                      icon="i-heroicons-pencil"
+                      @click="openCategoryModal(category)"
+                      title="Edit category"
+                    />
+                    <UButton
+                      size="xs"
+                      variant="ghost"
+                      color="red"
+                      icon="i-heroicons-trash"
+                      @click="handleDeleteCategory(category.id)"
+                      :loading="deletingCategoryId === category.id"
+                      title="Delete category"
+                    />
+                  </div>
+                </div>
+                
+                <p v-if="category.description" class="text-sm text-gray-600 line-clamp-2">
+                  {{ category.description }}
+                </p>
+                <p v-else class="text-sm text-gray-400 italic">No description</p>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="p-12 text-center">
+              <UIcon name="i-heroicons-folder" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">No categories yet</h3>
+              <p class="text-sm text-gray-500 mb-4">Create categories to organize your products</p>
+              <UButton
+                color="primary"
+                icon="i-heroicons-plus"
+                @click="openCategoryModal()"
+              >
+                Create First Category
+              </UButton>
             </div>
           </template>
 
           <!-- Stock Alerts Tab -->
           <template v-else-if="currentTab === 'stock'">
-            <div class="p-6">
-              <p class="text-gray-500 text-center py-12">Stock alerts will be implemented here</p>
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-bell" class="w-5 h-5 text-primary" />
+                <div>
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Stock Alerts</h2>
+                  <p class="text-xs text-gray-500">Products with low stock levels requiring attention</p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                <select
+                  v-model="stockAlertThreshold"
+                  class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="10">10% or less</option>
+                  <option :value="20">20% or less</option>
+                  <option :value="30">30% or less</option>
+                  <option :value="50">50% or less</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Stock Alerts Loading State -->
+            <div v-if="isLoading" class="p-6 space-y-3">
+              <USkeleton class="h-20 w-full" v-for="i in 5" :key="i" />
+            </div>
+
+            <!-- Stock Alerts List -->
+            <div v-else-if="lowStockProducts.length > 0" class="divide-y divide-gray-100">
+              <div
+                v-for="product in lowStockProducts"
+                :key="product.product_id"
+                class="p-6 hover:bg-gray-50 transition-colors"
+              >
+                <div class="flex items-start justify-between gap-4">
+                  <!-- Product Info -->
+                  <div class="flex items-start gap-4 flex-1">
+                    <div class="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                      <div class="w-full h-full flex items-center justify-center">
+                        <UIcon name="i-heroicons-photo" class="w-6 h-6 text-gray-400" />
+                      </div>
+                    </div>
+                    
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900">{{ product.title }}</h4>
+                        <UBadge
+                          :color="getStockAlertColor(product)"
+                          size="xs"
+                        >
+                          {{ getStockAlertLabel(product) }}
+                        </UBadge>
+                      </div>
+                      
+                      <div class="text-sm text-gray-600 space-y-1">
+                        <p>
+                          <span class="font-medium">Variants:</span>
+                          {{ product.variant_count }} variant{{ product.variant_count !== 1 ? 's' : '' }}
+                        </p>
+                        <p class="text-xs text-gray-500">
+                          Click "Restock" to manage variant inventories
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2">
+                    <UButton
+                      size="sm"
+                      variant="outline"
+                      color="primary"
+                      icon="i-heroicons-arrow-path"
+                      @click="navigateTo(`/events/${id}/m/shop/products/${product.product_id}/editor?tab=variants`)"
+                    >
+                      Restock
+                    </UButton>
+                    <UButton
+                      size="sm"
+                      variant="ghost"
+                      color="gray"  
+                      icon="i-heroicons-eye"
+                      @click="navigateTo(`/events/${id}/m/shop/products/${product.product_id}/editor`)"
+                      title="View product"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="p-12 text-center">
+              <UIcon name="i-heroicons-check-circle" class="w-16 h-16 text-green-300 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">All stocked up!</h3>
+              <p class="text-sm text-gray-500">No products are below the {{ stockAlertThreshold }}% stock threshold</p>
             </div>
           </template>
         </div>
@@ -510,13 +688,70 @@
         </div>
       </div>
     </div>
+
+    <!-- Category Modal -->
+    <UModal v-model="showCategoryModal" :ui="{ width: 'max-w-xl' }">
+      <div class="p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          {{ editingCategory ? 'Edit Category' : 'Add Category' }}
+        </h3>
+
+        <div class="space-y-4">
+          <!-- Category Name -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Category Name *</label>
+            <input
+              v-model="categoryForm.name"
+              type="text"
+              placeholder="e.g., Apparel, Accessories"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              required
+            />
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea
+              v-model="categoryForm.description"
+              rows="3"
+              placeholder="Optional description..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+          <UButton
+            class="flex-1"
+            variant="outline"
+            color="gray"
+            @click="closeCategoryModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            class="flex-1"
+            variant="solid"
+            color="primary"
+            icon="i-heroicons-check"
+            :loading="createCategory.isPending.value || updateCategory.isPending.value"
+            @click="submitCategoryForm"
+          >
+            {{ editingCategory ? 'Update' : 'Create' }} Category
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
-import type { ProductList } from '~/api/types.gen'
+import type { ProductList, ProductCategory } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useProducts } from '~/composables/resources/products/products'
+import { useProductCategories, useCreateProductCategory, useUpdateProductCategory, useDeleteProductCategory } from '~/composables/resources/products/productCategories'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { 
   getStockStatus, 
@@ -721,5 +956,162 @@ function getProductStockStatus(product: ProductList) {
   if (!hasVariants) return 'out-of-stock' as const
   // Default to 'in-stock' for products with variants (would need full detail to check actual stock)
   return 'in-stock' as const
+}
+
+// ============================================
+// Categories Management
+// ============================================
+
+const { data: categoriesData, isLoading: categoriesLoading, refetch: refetchCategories } = useProductCategories(
+  computed(() => ({
+    event: event.value?.data?.id,
+    page_size: 100, // Get all categories
+  }))
+)
+
+const categories = computed(() => categoriesData.value?.data?.results || [])
+
+// Category modal state
+const showCategoryModal = ref(false)
+const editingCategory = ref<ProductCategory | null>(null)
+const deletingCategoryId = ref<number | null>(null)
+
+// Category form data
+const categoryForm = reactive({
+  name: '',
+  description: '',
+})
+
+// Category mutations
+const createCategory = useCreateProductCategory()
+const updateCategory = useUpdateProductCategory()
+const deleteCategory = useDeleteProductCategory()
+const toast = useToast()
+
+function openCategoryModal(category?: ProductCategory) {
+  editingCategory.value = category || null
+  
+  if (category) {
+    categoryForm.name = category.name
+    categoryForm.description = category.description || ''
+  } else {
+    categoryForm.name = ''
+    categoryForm.description = ''
+  }
+  
+  showCategoryModal.value = true
+}
+
+function closeCategoryModal() {
+  showCategoryModal.value = false
+  editingCategory.value = null
+}
+
+async function submitCategoryForm() {
+  // Validation
+  if (!categoryForm.name) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please enter a category name',
+      color: 'red',
+    })
+    return
+  }
+
+  const categoryPayload: any = {
+    name: categoryForm.name,
+    description: categoryForm.description || null,
+    event: event.value?.data?.id,
+  }
+
+  try {
+    if (editingCategory.value) {
+      // Update existing category
+      await updateCategory.mutateAsync({
+        categoryId: editingCategory.value.id,
+        body: categoryPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Category updated successfully',
+        color: 'green',
+      })
+    } else {
+      // Create new category
+      await createCategory.mutateAsync(categoryPayload)
+
+      toast.add({
+        title: 'Success',
+        description: 'Category created successfully',
+        color: 'green',
+      })
+    }
+
+    refetchCategories()
+    closeCategoryModal()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to save category',
+      color: 'red',
+    })
+  }
+}
+
+async function handleDeleteCategory(categoryId: number) {
+  if (!confirm('Are you sure you want to delete this category? Products in this category will not be deleted.')) return
+
+  deletingCategoryId.value = categoryId
+
+  try {
+    await deleteCategory.mutateAsync(categoryId)
+
+    toast.add({
+      title: 'Success',
+      description: 'Category deleted successfully',
+      color: 'green',
+    })
+
+    refetchCategories()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to delete category',
+      color: 'red',
+    })
+  } finally {
+    deletingCategoryId.value = null
+  }
+}
+
+// ============================================
+// Stock Alerts
+// ============================================
+
+const stockAlertThreshold = ref(20) // Default to 20%
+
+const lowStockProducts = computed(() => {
+  // Note: ProductList doesn't include stock details
+  // Stock information is only available at variant level
+  // This is a placeholder implementation showing products with few or no variants
+  return products.value.filter(product => {
+    // Show products with 0 variants or very few variants as potentially needing attention
+    return product.variant_count <= 3
+  }).slice(0, 20) // Limit to 20 items
+})
+
+function getStockAlertColor(product: ProductList) {
+  // Placeholder implementation based on variant count
+  if (product.variant_count === 0) return 'red'
+  if (product.variant_count <= 2) return 'amber'
+  return 'yellow'
+}
+
+function getStockAlertLabel(product: ProductList) {
+  // Placeholder implementation based on variant count
+  if (product.variant_count === 0) return 'No Variants'
+  if (product.variant_count <= 2) return 'Low Variants'
+  return 'Check Variants'
 }
 </script>

@@ -31866,6 +31866,75 @@ export type ProductsListUpdateResponses = {
 
 export type ProductsListUpdateResponse = ProductsListUpdateResponses[keyof ProductsListUpdateResponses];
 
+export type ProductsListAddDiscountCreateData = {
+    body?: {
+        /**
+         * Optional: UUID of existing discount to associate
+         */
+        discount_id?: string | null;
+        /**
+         * Discount name
+         */
+        name: string;
+        /**
+         * Discount description
+         */
+        description?: string | null;
+        /**
+         * Type of discount
+         */
+        discount_type: 'PERCENTAGE' | 'FIXED';
+        /**
+         * Percentage value (required if discount_type is PERCENTAGE)
+         */
+        percentage?: string | null;
+        /**
+         * Fixed amount (required if discount_type is FIXED)
+         */
+        amount?: string | null;
+        /**
+         * Whether discount is active
+         */
+        active?: boolean;
+        /**
+         * Optional discount rules (maximum 2)
+         */
+        rules?: Array<{
+            rule_type?: string;
+            name?: string;
+            description?: string | null;
+            value?: string | null;
+        }>;
+    };
+    path: {
+        product_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_id}/add-discount/';
+};
+
+export type ProductsListAddDiscountCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Product not found
+     */
+    404: unknown;
+};
+
+export type ProductsListAddDiscountCreateResponses = {
+    /**
+     * Discount created successfully
+     */
+    201: unknown;
+};
+
 export type ProductsListAddImageCreateData = {
     body?: {
         /**
@@ -31898,6 +31967,69 @@ export type ProductsListAddImageCreateErrors = {
 export type ProductsListAddImageCreateResponses = {
     /**
      * Image added successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListDiscountsRetrieveData = {
+    body?: never;
+    path: {
+        product_id: string;
+    };
+    query?: {
+        /**
+         * Filter by active status
+         */
+        active?: boolean;
+    };
+    url: '/api/products/list/{product_id}/discounts/';
+};
+
+export type ProductsListDiscountsRetrieveErrors = {
+    /**
+     * Permission denied - requires authentication
+     */
+    403: unknown;
+    /**
+     * Product not found
+     */
+    404: unknown;
+};
+
+export type ProductsListDiscountsRetrieveResponses = {
+    /**
+     * Discounts retrieved successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListRemoveDiscountDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the discount to remove
+         */
+        discount_id: string;
+        product_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_id}/remove-discount/{discount_id}/';
+};
+
+export type ProductsListRemoveDiscountDestroyErrors = {
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Product or discount not found
+     */
+    404: unknown;
+};
+
+export type ProductsListRemoveDiscountDestroyResponses = {
+    /**
+     * Discount removed successfully
      */
     200: unknown;
 };
@@ -31961,6 +32093,48 @@ export type ProductsListToggleActiveCreateErrors = {
 export type ProductsListToggleActiveCreateResponses = {
     /**
      * Status toggled successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListUpdateDiscountPartialUpdateData = {
+    body?: {
+        name?: string | null;
+        description?: string | null;
+        discount_type?: 'PERCENTAGE' | 'FIXED';
+        percentage?: string | null;
+        amount?: string | null;
+        active?: boolean | null;
+    };
+    path: {
+        /**
+         * UUID of the discount to update
+         */
+        discount_id: string;
+        product_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_id}/update-discount/{discount_id}/';
+};
+
+export type ProductsListUpdateDiscountPartialUpdateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Product or discount not found
+     */
+    404: unknown;
+};
+
+export type ProductsListUpdateDiscountPartialUpdateResponses = {
+    /**
+     * Discount updated successfully
      */
     200: unknown;
 };
@@ -32175,6 +32349,76 @@ export type ProductsListVariantsUpdateResponses = {
 
 export type ProductsListVariantsUpdateResponse = ProductsListVariantsUpdateResponses[keyof ProductsListVariantsUpdateResponses];
 
+export type ProductsListVariantsAddDiscountCreateData = {
+    body?: {
+        /**
+         * Optional: UUID of existing discount to associate
+         */
+        discount_id?: string | null;
+        /**
+         * Discount name
+         */
+        name: string;
+        /**
+         * Discount description
+         */
+        description?: string | null;
+        /**
+         * Type of discount
+         */
+        discount_type: 'PERCENTAGE' | 'FIXED';
+        /**
+         * Percentage value (required if discount_type is PERCENTAGE)
+         */
+        percentage?: string | null;
+        /**
+         * Fixed amount (required if discount_type is FIXED)
+         */
+        amount?: string | null;
+        /**
+         * Whether discount is active
+         */
+        active?: boolean;
+        /**
+         * Optional discount rules (maximum 2)
+         */
+        rules?: Array<{
+            rule_type?: string;
+            name?: string;
+            description?: string | null;
+            value?: string | null;
+        }>;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/add-discount/';
+};
+
+export type ProductsListVariantsAddDiscountCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Variant not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsAddDiscountCreateResponses = {
+    /**
+     * Discount created successfully
+     */
+    201: unknown;
+};
+
 export type ProductsListVariantsAddImageCreateData = {
     body?: {
         /**
@@ -32253,6 +32497,39 @@ export type ProductsListVariantsDecrementStockCreateResponses = {
     200: unknown;
 };
 
+export type ProductsListVariantsDiscountsRetrieveData = {
+    body?: never;
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: {
+        /**
+         * Filter by active status
+         */
+        active?: boolean;
+    };
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/discounts/';
+};
+
+export type ProductsListVariantsDiscountsRetrieveErrors = {
+    /**
+     * Permission denied - requires authentication
+     */
+    403: unknown;
+    /**
+     * Variant not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsDiscountsRetrieveResponses = {
+    /**
+     * Discounts retrieved successfully
+     */
+    200: unknown;
+};
+
 export type ProductsListVariantsIncrementStockCreateData = {
     body?: {
         /**
@@ -32286,6 +32563,38 @@ export type ProductsListVariantsIncrementStockCreateErrors = {
 export type ProductsListVariantsIncrementStockCreateResponses = {
     /**
      * Stock incremented successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListVariantsRemoveDiscountDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * UUID of the discount to remove
+         */
+        discount_id: string;
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/remove-discount/{discount_id}/';
+};
+
+export type ProductsListVariantsRemoveDiscountDestroyErrors = {
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Variant or discount not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsRemoveDiscountDestroyResponses = {
+    /**
+     * Discount removed successfully
      */
     200: unknown;
 };
@@ -32388,6 +32697,49 @@ export type ProductsListVariantsToggleActiveCreateErrors = {
 export type ProductsListVariantsToggleActiveCreateResponses = {
     /**
      * Status toggled successfully
+     */
+    200: unknown;
+};
+
+export type ProductsListVariantsUpdateDiscountPartialUpdateData = {
+    body?: {
+        name?: string | null;
+        description?: string | null;
+        discount_type?: 'PERCENTAGE' | 'FIXED';
+        percentage?: string | null;
+        amount?: string | null;
+        active?: boolean | null;
+    };
+    path: {
+        /**
+         * UUID of the discount to update
+         */
+        discount_id: string;
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/update-discount/{discount_id}/';
+};
+
+export type ProductsListVariantsUpdateDiscountPartialUpdateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied - requires administrative access
+     */
+    403: unknown;
+    /**
+     * Variant or discount not found
+     */
+    404: unknown;
+};
+
+export type ProductsListVariantsUpdateDiscountPartialUpdateResponses = {
+    /**
+     * Discount updated successfully
      */
     200: unknown;
 };

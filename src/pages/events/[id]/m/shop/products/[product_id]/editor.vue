@@ -871,6 +871,125 @@
               </div>
             </div>
           </div>
+
+          <!-- Discounts Tab -->
+          <div v-show="activeTab === 'discounts'" class="space-y-6">
+            <div v-if="isNewProduct" class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-yellow-600" />
+                <p class="text-sm text-yellow-800">Save the product first before adding discounts</p>
+              </div>
+            </div>
+
+            <div v-else>
+              <!-- Header with Add Button -->
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm text-gray-600">
+                    Manage discounts that apply to this product based on attendee rules
+                  </p>
+                </div>
+                <UButton
+                  size="sm"
+                  variant="solid"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                  @click="openDiscountModal()"
+                >
+                  Add Discount
+                </UButton>
+              </div>
+
+              <!-- Discounts Loading State -->
+              <div v-if="discountsLoading" class="space-y-3">
+                <USkeleton class="h-20 w-full" v-for="i in 3" :key="i" />
+              </div>
+
+              <!-- Discounts List -->
+              <div v-else-if="productDiscounts.length > 0" class="space-y-3">
+                <div
+                  v-for="discount in productDiscounts"
+                  :key="discount.id"
+                  class="p-4 border border-gray-200 rounded-lg hover:border-primary/50 transition-colors"
+                >
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="flex-1">
+                      <div class="flex items-center gap-2 mb-1">
+                        <h4 class="font-semibold text-gray-900">{{ discount.name }}</h4>
+                        <UBadge :color="discount.active ? 'green' : 'gray'" size="xs">
+                          {{ discount.active ? 'Active' : 'Inactive' }}
+                        </UBadge>
+                        <UBadge :color="discount.discount_type === 'PERCENTAGE' ? 'blue' : 'purple'" size="xs">
+                          {{ discount.discount_value }}
+                        </UBadge>
+                      </div>
+                      <p v-if="discount.description" class="text-sm text-gray-600">
+                        {{ discount.description }}
+                      </p>
+                    </div>
+                    <div class="flex items-center gap-2 ml-4">
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="blue"
+                        icon="i-heroicons-pencil"
+                        @click="openDiscountModal(discount)"
+                      >
+                        Edit
+                      </UButton>
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="red"
+                        icon="i-heroicons-trash"
+                        @click="handleDeleteDiscount(discount.discount_id)"
+                        :loading="deletingDiscountId === discount.discount_id"
+                      >
+                        Delete
+                      </UButton>
+                    </div>
+                  </div>
+
+                  <!-- Rules Summary -->
+                  <div v-if="discount.rules && discount.rules.length > 0" class="pt-3 border-t border-gray-100">
+                    <div class="flex items-center gap-2 mb-2">
+                      <UIcon name="i-heroicons-funnel" class="w-4 h-4 text-gray-500" />
+                      <span class="text-xs font-semibold text-gray-700">
+                        {{ discount.rules.length }} {{ discount.rules.length === 1 ? 'Rule' : 'Rules' }}
+                      </span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                      <UBadge
+                        v-for="rule in discount.rules"
+                        :key="rule.rule_id"
+                        color="gray"
+                        size="xs"
+                        variant="subtle"
+                      >
+                        {{ rule.rule_type?.replace(/_/g, ' ') || 'Unknown Rule' }}
+                      </UBadge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-else class="text-center py-12">
+                <UIcon name="i-heroicons-ticket" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">No discounts yet</h3>
+                <p class="text-sm text-gray-500 mb-4">Add discounts to offer special pricing based on attendee rules</p>
+                <UButton
+                  size="sm"
+                  variant="solid"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                  @click="openDiscountModal()"
+                >
+                  Add First Discount
+                </UButton>
+              </div>
+            </div>
+          </div>
         </div>
           </div>
         </div>
@@ -1446,6 +1565,252 @@
         </div>
       </div>
     </UModal>
+
+    <!-- Discount Modal -->
+    <UModal v-model="showDiscountModal" :ui="{ width: 'max-w-2xl' }">
+      <div class="p-6">
+        <h3 class="text-lg font-bold text-gray-900 mb-4">
+          {{ editingDiscount ? 'Edit Discount' : 'Add Discount' }}
+        </h3>
+
+        <div class="space-y-4">
+          <!-- Discount Name -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Discount Name *</label>
+            <input
+              v-model="discountForm.name"
+              type="text"
+              placeholder="e.g., Student Discount"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              required
+            />
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea
+              v-model="discountForm.description"
+              rows="2"
+              placeholder="Optional description..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Discount Type -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Type *</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label
+                class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                :class="discountForm.discount_type === 'PERCENTAGE' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+              >
+                <input
+                  v-model="discountForm.discount_type"
+                  type="radio"
+                  value="PERCENTAGE"
+                  class="text-primary focus:ring-primary"
+                />
+                <div>
+                  <div class="font-semibold text-gray-900">Percentage</div>
+                  <div class="text-xs text-gray-500">e.g., 10% off</div>
+                </div>
+              </label>
+              <label
+                class="flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                :class="discountForm.discount_type === 'FIXED' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+              >
+                <input
+                  v-model="discountForm.discount_type"
+                  type="radio"
+                  value="FIXED"
+                  class="text-primary focus:ring-primary"
+                />
+                <div>
+                  <div class="font-semibold text-gray-900">Fixed Amount</div>
+                  <div class="text-xs text-gray-500">e.g., £5 off</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Discount Value -->
+          <div v-if="discountForm.discount_type === 'PERCENTAGE'">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Percentage *</label>
+            <div class="relative">
+              <input
+                v-model.number="discountForm.percentage"
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                placeholder="10"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary pr-12"
+                required
+              />
+              <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">%</span>
+            </div>
+          </div>
+
+          <div v-if="discountForm.discount_type === 'FIXED'">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Amount (£) *</label>
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">£</span>
+              <input
+                v-model.number="discountForm.amount"
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="5.00"
+                class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Active Status -->
+          <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <input
+              v-model="discountForm.active"
+              type="checkbox"
+              id="discount-active"
+              class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
+            />
+            <label for="discount-active" class="flex-1 cursor-pointer">
+              <div class="text-sm font-semibold text-gray-700">Active</div>
+              <div class="text-xs text-gray-500">Discount is currently available for use</div>
+            </label>
+          </div>
+
+          <!-- Rules Section -->
+          <div class="border-t border-gray-200 pt-4">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700">Eligibility Rules</label>
+                <p class="text-xs text-gray-500 mt-1">Add conditions to control who can use this discount (max 2 rules)</p>
+              </div>
+              <UButton
+                size="xs"
+                variant="outline"
+                color="primary"
+                icon="i-heroicons-plus"
+                :disabled="discountForm.rules.length >= 2"
+                @click="addDiscountRule"
+              >
+                Add Rule
+              </UButton>
+            </div>
+
+            <!-- Rules List -->
+            <div v-if="discountForm.rules.length > 0" class="space-y-3">
+              <div
+                v-for="(rule, index) in discountForm.rules"
+                :key="index"
+                class="p-4 border border-gray-200 rounded-lg bg-gray-50/50"
+              >
+                <div class="flex items-start justify-between mb-3">
+                  <span class="text-xs font-semibold text-gray-700">Rule {{ index + 1 }}</span>
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    color="red"
+                    icon="i-heroicons-trash"
+                    @click="removeDiscountRule(index)"
+                  >
+                    Remove
+                  </UButton>
+                </div>
+
+                <div class="space-y-3">
+                  <!-- Rule Type -->
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Type *</label>
+                    <select
+                      v-model="rule.rule_type"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
+                    >
+                      <option v-for="opt in RULE_TYPE_OPTIONS" :key="opt.value" :value="opt.value">
+                        {{ opt.label }}
+                      </option>
+                    </select>
+                    <p v-if="getRuleTypeInfo(rule.rule_type)?.description" class="text-xs text-gray-500 mt-1 italic">
+                      {{ getRuleTypeInfo(rule.rule_type)?.description }}
+                    </p>
+                  </div>
+
+                  <!-- Rule Name -->
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Name *</label>
+                    <input
+                      v-model="rule.name"
+                      type="text"
+                      placeholder="e.g., Under 18"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+
+                  <!-- Rule Value (conditional) -->
+                  <div v-if="getRuleTypeInfo(rule.rule_type)">
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">
+                      Value *
+                      <span class="font-normal text-gray-500">
+                        ({{ rule.rule_type.includes('AGE') ? 'Age number' : 'Match value' }})
+                      </span>
+                    </label>
+                    <input
+                      v-model="rule.value"
+                      :type="rule.rule_type.includes('AGE') ? 'number' : 'text'"
+                      :placeholder="rule.rule_type.includes('AGE') ? '18' : 'Enter value'"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </div>
+
+                  <!-- Rule Description -->
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Description (optional)</label>
+                    <textarea
+                      v-model="rule.description"
+                      rows="2"
+                      placeholder="Optional details about this rule..."
+                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="text-center py-6 border-2 border-dashed border-gray-200 rounded-lg">
+              <UIcon name="i-heroicons-funnel" class="w-8 h-8 text-gray-300 mx-auto mb-2" />
+              <p class="text-xs text-gray-500">No rules added yet</p>
+              <p class="text-xs text-gray-400 mt-1">Discount will be available to everyone</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+          <UButton
+            class="flex-1"
+            variant="outline"
+            color="gray"
+            @click="closeDiscountModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            class="flex-1"
+            variant="solid"
+            color="primary"
+            icon="i-heroicons-check"
+            :loading="createDiscount.isPending.value || updateDiscount.isPending.value"
+            @click="submitDiscountForm"
+          >
+            {{ editingDiscount ? 'Update' : 'Create' }} Discount
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
@@ -1455,6 +1820,7 @@ import { useProduct, useCreateProduct, useUpdateProduct } from '~/composables/re
 import { useProductVariants, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant } from '~/composables/resources/products/productVariants'
 import { useAddProductImage, useRemoveProductImage } from '~/composables/resources/products/productImages'
 import { useAddVariantImage, useRemoveVariantImage } from '~/composables/resources/products/productVariantImages'
+import { useProductDiscounts, useCreateProductDiscount, useUpdateProductDiscount, useDeleteProductDiscount } from '~/composables/resources/products/productDiscounts'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import type { ProductVariantDetail } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'
@@ -1481,6 +1847,7 @@ const tabs = [
   { id: 'basic', label: 'Basic Information', icon: 'i-heroicons-information-circle' },
   { id: 'variants', label: 'Variants', icon: 'i-heroicons-squares-2x2' },
   { id: 'images', label: 'Images', icon: 'i-heroicons-photo' },
+  { id: 'discounts', label: 'Discounts', icon: 'i-heroicons-ticket' },
 ]
 
 // Event Data
@@ -2456,6 +2823,263 @@ async function saveAll() {
   // Then save new variants if any
   if (newVariants.value.length > 0) {
     await saveNewVariants(productId.value)
+  }
+}
+
+const currentEvent = computed(() => event.value?.data)
+
+// ============================================
+// Discounts Management
+// ============================================
+
+// Fetch product discounts using the new specialized endpoint
+const { data: discountsData, isLoading: discountsLoading, refetch: refetchDiscounts } = useProductDiscounts(
+  productId,
+  undefined, // No active filter - show all discounts
+  {
+    enabled: computed(() => !isNewProduct.value)
+  }
+)
+
+// Get product-specific discounts from the new structure
+const productDiscounts = computed(() => {
+  if (!discountsData.value) return []
+  // The new endpoint returns a paginated response with results array
+  return (discountsData.value as any)?.results || []
+})
+
+// Discount modal state
+const showDiscountModal = ref(false)
+const editingDiscount = ref<any | null>(null)
+const deletingDiscountId = ref<string | null>(null)
+
+// Rule Type Options
+const RULE_TYPE_OPTIONS = [
+  { value: 'IS_EVENT_STAFF', label: 'Is Event Staff', description: 'Applies to event staff members' },
+  { value: 'IS_AGE_LT', label: 'Age Less Than', description: 'Applies if age is below specified value', requiresValue: true },
+  { value: 'IS_AGE_GT', label: 'Age Greater Than', description: 'Applies if age is above specified value', requiresValue: true },
+  { value: 'ORGANISATION_MATCHES', label: 'Organisation Matches', description: 'Applies to specific organisation', requiresValue: true },
+  { value: 'VALUE_MATCHES', label: 'Value Matches', description: 'Generic value matching rule', requiresValue: true },
+  { value: 'EVENT_STAFF_ROLE_MATCHES', label: 'Staff Role Matches', description: 'Applies to specific staff role', requiresValue: true },
+  { value: 'NAME_MATCHES', label: 'Name Matches', description: 'Applies if name matches pattern', requiresValue: true },
+  { value: 'LOCATION_MATCHES', label: 'Location Matches', description: 'Applies to specific location', requiresValue: true },
+  { value: 'CODE_MATCHES', label: 'Code Matches', description: 'Applies if code matches', requiresValue: true },
+] as const
+
+// Discount form data
+const discountForm = reactive({
+  name: '',
+  description: '',
+  discount_type: 'PERCENTAGE' as 'PERCENTAGE' | 'FIXED',
+  percentage: 0,
+  amount: 0,
+  active: true,
+  rules: [] as Array<{
+    rule_type: string
+    name: string
+    description?: string
+    value?: string
+  }>
+})
+
+// Discount mutations
+const createDiscount = useCreateProductDiscount()
+const updateDiscount = useUpdateProductDiscount()
+const deleteDiscount = useDeleteProductDiscount()
+
+function openDiscountModal(discount?: any) {
+  editingDiscount.value = discount || null
+  
+  if (discount) {
+    // Populate form with existing discount data
+    discountForm.name = discount.name
+    discountForm.description = discount.description || ''
+    discountForm.discount_type = discount.discount_type || 'PERCENTAGE'
+    discountForm.percentage = discount.percentage ? parseFloat(discount.percentage) : 0
+    discountForm.amount = discount.amount ? parseFloat(discount.amount) : 0
+    discountForm.active = discount.active ?? true
+    discountForm.rules = discount.rules ? discount.rules.map((r: any) => ({
+      rule_type: r.rule_type,
+      name: r.name,
+      description: r.description || '',
+      value: r.value || ''
+    })) : []
+  } else {
+    // Reset form for new discount
+    discountForm.name = ''
+    discountForm.description = ''
+    discountForm.discount_type = 'PERCENTAGE'
+    discountForm.percentage = 0
+    discountForm.amount = 0
+    discountForm.active = true
+    discountForm.rules = []
+  }
+  
+  showDiscountModal.value = true
+}
+
+function addDiscountRule() {
+  if (discountForm.rules.length >= 2) {
+    toast.add({
+      title: 'Maximum Rules Reached',
+      description: 'You can add a maximum of 2 rules per discount',
+      color: 'yellow',
+    })
+    return
+  }
+  
+  discountForm.rules.push({
+    rule_type: 'IS_EVENT_STAFF',
+    name: '',
+    description: '',
+    value: ''
+  })
+}
+
+function removeDiscountRule(index: number) {
+  discountForm.rules.splice(index, 1)
+}
+
+function getRuleTypeInfo(ruleType: string) {
+  return RULE_TYPE_OPTIONS.find(opt => opt.value === ruleType)
+}
+
+function closeDiscountModal() {
+  showDiscountModal.value = false
+  editingDiscount.value = null
+}
+
+async function submitDiscountForm() {
+  // Validation
+  if (!discountForm.name) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please enter a discount name',
+      color: 'red',
+    })
+    return
+  }
+
+  if (discountForm.discount_type === 'PERCENTAGE' && (discountForm.percentage <= 0 || discountForm.percentage > 100)) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Percentage must be between 0 and 100',
+      color: 'red',
+    })
+    return
+  }
+
+  if (discountForm.discount_type === 'FIXED' && discountForm.amount <= 0) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Amount must be greater than 0',
+      color: 'red',
+    })
+    return
+  }
+
+  // Validate rules
+  for (let i = 0; i < discountForm.rules.length; i++) {
+    const rule = discountForm.rules[i]
+    if (!rule.name) {
+      toast.add({
+        title: 'Validation Error',
+        description: `Rule ${i + 1}: Name is required`,
+        color: 'red',
+      })
+      return
+    }
+    const ruleInfo = getRuleTypeInfo(rule.rule_type)
+    if (ruleInfo && !rule.value) {
+      toast.add({
+        title: 'Validation Error',
+        description: `Rule ${i + 1}: ${ruleInfo.label} requires a value`,
+        color: 'red',
+      })
+      return
+    }
+  }
+
+  const discountPayload: any = {
+    name: discountForm.name,
+    description: discountForm.description || null,
+    discount_type: discountForm.discount_type,
+    percentage: discountForm.discount_type === 'PERCENTAGE' ? discountForm.percentage.toString() : null,
+    amount: discountForm.discount_type === 'FIXED' ? discountForm.amount.toString() : null,
+    active: discountForm.active,
+    rules: discountForm.rules.map(rule => ({
+      rule_type: rule.rule_type,
+      name: rule.name,
+      description: rule.description || null,
+      value: rule.value || null
+    }))
+  }
+
+  try {
+    if (editingDiscount.value) {
+      // Update existing discount
+      await updateDiscount.mutateAsync({
+        productId: productId.value,
+        discountId: editingDiscount.value.discount_id,
+        data: discountPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Discount updated successfully',
+        color: 'green',
+      })
+    } else {
+      // Create new discount
+      await createDiscount.mutateAsync({
+        productId: productId.value,
+        data: discountPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Discount created successfully',
+        color: 'green',
+      })
+    }
+
+    refetchDiscounts()
+    closeDiscountModal()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to save discount',
+      color: 'red',
+    })
+  }
+}
+
+async function handleDeleteDiscount(discountId: string) {
+  if (!confirm('Are you sure you want to delete this discount?')) return
+
+  deletingDiscountId.value = discountId
+
+  try {
+    await deleteDiscount.mutateAsync({
+      productId: productId.value,
+      discountId: discountId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Discount deleted successfully',
+      color: 'green',
+    })
+
+    refetchDiscounts()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to delete discount',
+      color: 'red',
+    })
+  } finally {
+    deletingDiscountId.value = null
   }
 }
 </script>
