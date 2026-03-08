@@ -767,6 +767,7 @@
               </div>
 
               <!-- Date Range -->
+              <div class="space-y-4">
               <div class="grid grid-cols-2 gap-4">
                 <div>
                   <label class="block text-sm font-semibold text-navy-700 mb-2">Available From *</label>
@@ -787,6 +788,74 @@
                     class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
+              </div>
+
+              <!-- Quick Date Presets -->
+              <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="material-symbols-outlined text-sm text-navy-500">bolt</span>
+                  <label class="text-sm font-semibold text-navy-700">Quick Date Presets</label>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('today', 7)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    1 week from today
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('today', 14)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    2 weeks from today
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('today', 30)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    1 month from today
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('event', -7)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    1 week before event
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('event', -14)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    2 weeks before event
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('event', -30)"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    1 month before event
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('during-event')"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    During event
+                  </button>
+                  <button
+                    type="button"
+                    @click="setPackageAvailabilityDates('full-period')"
+                    class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors"
+                  >
+                    Now until event
+                  </button>
+                </div>
+                <p class="text-xs text-navy-500 mt-2">Click to quickly set common date ranges</p>
+              </div>
               </div>
 
               <!-- Timezone -->
@@ -1763,6 +1832,46 @@ function closePackageAvailabilityModal() {
     router.replace({ query: { ...route.query, 'package-id': undefined, 'window-id': undefined } })
   }
   isManualModalOpen.value = false
+}
+
+function setPackageAvailabilityDates(preset: 'today' | 'event' | 'during-event' | 'full-period', offsetDays?: number) {
+  const now = new Date()
+  const startDate = new Date()
+  const endDate = new Date()
+  
+  if (preset === 'today' && offsetDays) {
+    // X days from today
+    startDate.setDate(now.getDate())
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setDate(now.getDate() + offsetDays)
+    endDate.setHours(23, 59, 59, 999)
+  } else if (preset === 'event' && offsetDays && event.value?.data?.start_datetime) {
+    // X days before/after event start
+    const eventStart = new Date(event.value.data.start_datetime)
+    startDate.setTime(now.getTime()) // Start from now
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setTime(eventStart.getTime())
+    endDate.setDate(endDate.getDate() + offsetDays) // Negative offset for "before"
+    endDate.setHours(23, 59, 59, 999)
+  } else if (preset === 'during-event' && event.value?.data?.start_datetime && event.value?.data?.end_datetime) {
+    // During the event
+    startDate.setTime(new Date(event.value.data.start_datetime).getTime())
+    endDate.setTime(new Date(event.value.data.end_datetime).getTime())
+  } else if (preset === 'full-period' && event.value?.data?.start_datetime) {
+    // Now until event start
+    startDate.setTime(now.getTime())
+    startDate.setHours(0, 0, 0, 0)
+    endDate.setTime(new Date(event.value.data.start_datetime).getTime())
+  }
+  
+  // Format for datetime-local input: YYYY-MM-DDTHH:mm
+  const formatForInput = (date: Date) => {
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  }
+  
+  packageAvailabilityForm.available_from = formatForInput(startDate)
+  packageAvailabilityForm.available_to = formatForInput(endDate)
 }
 
 async function submitPackageAvailabilityForm() {
