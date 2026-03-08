@@ -1541,7 +1541,7 @@ type AvailabilityWindowFormData = {
   window_id?: string
   name: string
   description?: string
-  availability_type: 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW'
+  availability_type: 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW'
   available_from: string
   available_to: string
   timezone: string
@@ -1569,15 +1569,15 @@ const packageAvailabilityWindows = computed(() => {
 
 // Availability window type options
 const BOOKING_AVAILABILITY_TYPE_OPTIONS = [
-  { value: 'PRODUCT_WINDOW', label: 'Purchase Window', description: 'Package can be purchased during this time' },
-  { value: 'PRODUCT_PREVIEW_WINDOW', label: 'Preview Window', description: 'Package is visible but cannot be purchased' },
+  { value: 'PAYMENT_PACKAGE_WINDOW', label: 'Purchase Window', description: 'Package can be purchased during this time' },
+  { value: 'PAYMENT_PACKAGE_PREVIEW_WINDOW', label: 'Preview Window', description: 'Package is visible but cannot be purchased' },
 ] as const
 
 // Availability window form data
 const packageAvailabilityForm = reactive({
   name: '',
   description: '',
-  availability_type: 'PRODUCT_WINDOW' as 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW',
+  availability_type: 'PAYMENT_PACKAGE_WINDOW' as 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW',
   available_from: '',
   available_to: '',
   timezone: '',
@@ -1601,18 +1601,18 @@ function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
       window_id: window.availability_id,
       name: window.name,
       description: window.description || '',
-      availability_type: (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW') 
+      availability_type: (window.availability_type === 'PAYMENT_PACKAGE_WINDOW' || window.availability_type === 'PAYMENT_PACKAGE_PREVIEW_WINDOW') 
         ? window.availability_type 
-        : 'PRODUCT_WINDOW',
+        : 'PAYMENT_PACKAGE_WINDOW',
       available_from: window.available_from ? formatDateTimeForInputPackage(window.available_from) : '',
       available_to: window.available_to ? formatDateTimeForInputPackage(window.available_to) : '',
       timezone: window.timezone || event.value?.data?.timezone || 'UTC'
     }
     packageAvailabilityForm.name = window.name
     packageAvailabilityForm.description = window.description || ''
-    packageAvailabilityForm.availability_type = (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW') 
+    packageAvailabilityForm.availability_type = (window.availability_type === 'PAYMENT_PACKAGE_WINDOW' || window.availability_type === 'PAYMENT_PACKAGE_PREVIEW_WINDOW') 
       ? window.availability_type 
-      : 'PRODUCT_WINDOW'
+      : 'PAYMENT_PACKAGE_WINDOW'
     packageAvailabilityForm.available_from = window.available_from ? formatDateTimeForInputPackage(window.available_from) : ''
     packageAvailabilityForm.available_to = window.available_to ? formatDateTimeForInputPackage(window.available_to) : ''
     packageAvailabilityForm.timezone = window.timezone || event.value?.data?.timezone || 'UTC'
@@ -1621,14 +1621,14 @@ function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
     editingAvailabilityWindow.value = {
       name: '',
       description: '',
-      availability_type: 'PRODUCT_WINDOW',
+      availability_type: 'PAYMENT_PACKAGE_WINDOW',
       available_from: '',
       available_to: '',
       timezone: event.value?.data?.timezone || 'UTC'
     }
     packageAvailabilityForm.name = ''
     packageAvailabilityForm.description = ''
-    packageAvailabilityForm.availability_type = 'PRODUCT_WINDOW'
+    packageAvailabilityForm.availability_type = 'PAYMENT_PACKAGE_WINDOW'
     packageAvailabilityForm.available_from = ''
     packageAvailabilityForm.available_to = ''
     packageAvailabilityForm.timezone = event.value?.data?.timezone || 'UTC'

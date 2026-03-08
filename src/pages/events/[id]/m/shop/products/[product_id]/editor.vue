@@ -1110,8 +1110,8 @@
                       variant="outline"
                       color="red"
                       icon="i-heroicons-trash"
-                      @click="handleDeleteAvailabilityWindow(window.window_id)"
-                      :loading="deletingWindowId === window.window_id"
+                      @click="handleDeleteAvailabilityWindow(window.availability_id)"
+                      :loading="deletingWindowId === window.availability_id"
                     >
                       Delete
                     </UButton>
@@ -3525,6 +3525,9 @@ async function handleDeleteAvailabilityWindow(windowId: string) {
   if (!confirm('Are you sure you want to delete this availability window?')) return
 
   deletingWindowId.value = windowId
+
+  console.log(windowId);
+  
 
   try {
     await removeAvailabilityWindow.mutateAsync({

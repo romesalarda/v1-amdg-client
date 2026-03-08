@@ -964,8 +964,9 @@ export type AvailabilityWindow = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -1011,8 +1012,9 @@ export type AvailabilityWindowRequest = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -9339,8 +9341,9 @@ export type PatchedAvailabilityWindowRequest = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -13619,8 +13622,9 @@ export type AvailabilityWindowWritable = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -13660,8 +13664,9 @@ export type AvailabilityWindowRequestWritable = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -17272,8 +17277,9 @@ export type PatchedAvailabilityWindowRequestWritable = {
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
+     * * `PAYMENT_PACKAGE_PREVIEW_WINDOW` - Payment Package Preview Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW' | 'PAYMENT_PACKAGE_PREVIEW_WINDOW';
     /**
      * Start datetime of availability
      */

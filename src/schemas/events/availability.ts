@@ -14,6 +14,7 @@ export const AVAILABILITY_TYPES = [
   { value: 'DISCOUNT_WINDOW', label: 'Discount Window' },
   { value: 'RESOURCE_WINDOW', label: 'Resource Window' },
   { value: 'PAYMENT_PACKAGE_WINDOW', label: 'Payment Package Window' },
+  { value: 'PAYMENT_PACKAGE_PREVIEW_WINDOW', label: 'Payment Package Preview Window' },
 ]
 
 export const REDUCED_AVAILABILITY_TYPES = AVAILABILITY_TYPES.filter(type =>
@@ -48,6 +49,7 @@ export const AvailabilityWindowSchema = z
         'DISCOUNT_WINDOW',
         'RESOURCE_WINDOW',
         'PAYMENT_PACKAGE_WINDOW',
+        'PAYMENT_PACKAGE_PREVIEW_WINDOW',
       ],
       { errorMap: () => ({ message: 'Please select a window type' }) }
     ),
