@@ -960,11 +960,12 @@ export type AvailabilityWindow = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -1006,11 +1007,12 @@ export type AvailabilityWindowRequest = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -1307,7 +1309,7 @@ export type BookingPackageCreateUpdateRequest = {
 };
 
 /**
- * Detailed serializer for BookingPackage with nested rules.
+ * Detailed serializer for BookingPackage with nested rules and availability windows.
  */
 export type BookingPackageDetail = {
     readonly id: number;
@@ -1328,6 +1330,7 @@ export type BookingPackageDetail = {
     created_by?: number | null;
     readonly created_by_name: string | null;
     readonly created_at: string;
+    readonly availability_windows: Array<AvailabilityWindow>;
     /**
      *  links
      */
@@ -1368,6 +1371,7 @@ export type BookingPackageList = {
     created_by?: number | null;
     readonly created_by_name: string | null;
     readonly created_at: string;
+    readonly availability_windows: Array<AvailabilityWindow>;
     /**
      *  links
      */
@@ -9331,11 +9335,12 @@ export type PatchedAvailabilityWindowRequest = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -11616,7 +11621,7 @@ export type ProductCreate = {
 };
 
 /**
- * Detailed serializer for Product with full information including images.
+ * Detailed serializer for Product with full information including images and availability windows.
  */
 export type ProductDetail = {
     readonly id: number;
@@ -11651,6 +11656,7 @@ export type ProductDetail = {
         self?: string;
         event?: string;
         variants?: string;
+        availability_windows?: string;
     };
     description?: string | null;
     readonly images: {
@@ -11665,7 +11671,7 @@ export type ProductDetail = {
             alt_text?: string;
         }>;
     };
-    readonly availability_windows: Array<unknown>;
+    readonly availability_windows: Array<AvailabilityWindow>;
     readonly rules: Array<unknown>;
     readonly variants: Array<unknown>;
     added_by?: number | null;
@@ -11711,6 +11717,7 @@ export type ProductList = {
         self?: string;
         event?: string;
         variants?: string;
+        availability_windows?: string;
     };
 };
 
@@ -11803,7 +11810,7 @@ export type ProductVariantCreateUpdateRequest = {
 };
 
 /**
- * Detailed serializer for ProductVariant with full information.
+ * Detailed serializer for ProductVariant with full information and availability windows.
  */
 export type ProductVariantDetail = {
     readonly id: number;
@@ -11853,6 +11860,7 @@ export type ProductVariantDetail = {
     readonly _links: {
         self?: string;
         product?: string;
+        availability_windows?: string;
     };
     /**
      * Return base amount as string.
@@ -11864,6 +11872,7 @@ export type ProductVariantDetail = {
      */
     percentage_modifier?: string;
     max_stock_quantity?: number | null;
+    readonly availability_windows: Array<AvailabilityWindow>;
     added_by?: number | null;
     readonly added_by_name: string | null;
     last_updated_by?: number | null;
@@ -11922,6 +11931,7 @@ export type ProductVariantList = {
     readonly _links: {
         self?: string;
         product?: string;
+        availability_windows?: string;
     };
 };
 
@@ -13605,11 +13615,12 @@ export type AvailabilityWindowWritable = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -13645,11 +13656,12 @@ export type AvailabilityWindowRequestWritable = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -13761,7 +13773,7 @@ export type BookingListWritable = {
 };
 
 /**
- * Detailed serializer for BookingPackage with nested rules.
+ * Detailed serializer for BookingPackage with nested rules and availability windows.
  */
 export type BookingPackageDetailWritable = {
     name: string;
@@ -17256,11 +17268,12 @@ export type PatchedAvailabilityWindowRequestWritable = {
      * * `DONATION_WINDOW` - Donation Window
      * * `PAYMENT_WINDOW` - Payment Window
      * * `PRODUCT_WINDOW` - Product Window
+     * * `PRODUCT_PREVIEW_WINDOW` - Product Preview Window
      * * `DISCOUNT_WINDOW` - Discount Window
      * * `RESOURCE_WINDOW` - Resource Window
      * * `PAYMENT_PACKAGE_WINDOW` - Payment Package Window
      */
-    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
+    availability_type?: 'REFUND_WINDOW' | 'REGISTRATION_WINDOW' | 'MERCHANDISE_WINDOW' | 'DONATION_WINDOW' | 'PAYMENT_WINDOW' | 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW' | 'DISCOUNT_WINDOW' | 'RESOURCE_WINDOW' | 'PAYMENT_PACKAGE_WINDOW';
     /**
      * Start datetime of availability
      */
@@ -17526,7 +17539,7 @@ export type ProductCreateWritable = {
 };
 
 /**
- * Detailed serializer for Product with full information including images.
+ * Detailed serializer for Product with full information including images and availability windows.
  */
 export type ProductDetailWritable = {
     title: string;
@@ -17574,7 +17587,7 @@ export type ProductUpdateWritable = {
 };
 
 /**
- * Detailed serializer for ProductVariant with full information.
+ * Detailed serializer for ProductVariant with full information and availability windows.
  */
 export type ProductVariantDetailWritable = {
     product: number;
@@ -20333,6 +20346,106 @@ export type BookingsPackagesUpdateResponses = {
 
 export type BookingsPackagesUpdateResponse = BookingsPackagesUpdateResponses[keyof BookingsPackagesUpdateResponses];
 
+export type BookingsPackageAddAvailabilityWindowData = {
+    body: AvailabilityWindowRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/add-availability-window/';
+};
+
+export type BookingsPackageAddAvailabilityWindowErrors = {
+    /**
+     * Validation errors
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type BookingsPackageAddAvailabilityWindowResponses = {
+    201: AvailabilityWindow;
+};
+
+export type BookingsPackageAddAvailabilityWindowResponse = BookingsPackageAddAvailabilityWindowResponses[keyof BookingsPackageAddAvailabilityWindowResponses];
+
+export type BookingsPackageAvailabilityWindowsListData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Filter packages eligible for specific attendee UUID
+         */
+        eligible_for_attendee?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
+        /**
+         * Filter by active status
+         */
+        is_active?: boolean;
+        /**
+         * Maximum package price
+         */
+        max_price?: number;
+        /**
+         * Minimum package price
+         */
+        min_price?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by ticket type ID
+         */
+        ticket_type?: number;
+        /**
+         * Filter by ticket type scope
+         *
+         * * `FULL_EVENT` - Full Event
+         * * `SINGLE_DAY` - Single Day
+         * * `WORKSHOP_ONLY` - Workshop Only
+         */
+        ticket_type__scope?: 'FULL_EVENT' | 'SINGLE_DAY' | 'WORKSHOP_ONLY';
+    };
+    url: '/api/bookings/packages/{id}/availability-windows/';
+};
+
+export type BookingsPackageAvailabilityWindowsListResponses = {
+    200: PaginatedAvailabilityWindowList;
+};
+
+export type BookingsPackageAvailabilityWindowsListResponse = BookingsPackageAvailabilityWindowsListResponses[keyof BookingsPackageAvailabilityWindowsListResponses];
+
 export type BookingsPackageAddDiscountData = {
     body?: {
         /**
@@ -20381,6 +20494,47 @@ export type BookingsPackageAddDiscountResponses = {
      */
     201: unknown;
 };
+
+export type BookingsPackageRemoveAvailabilityWindowData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query: {
+        /**
+         * Availability window ID to remove
+         */
+        window_id: string;
+    };
+    url: '/api/bookings/packages/{id}/remove-availability-window/';
+};
+
+export type BookingsPackageRemoveAvailabilityWindowErrors = {
+    /**
+     * Bad request - missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageRemoveAvailabilityWindowResponses = {
+    /**
+     * Window removed successfully
+     */
+    204: void;
+};
+
+export type BookingsPackageRemoveAvailabilityWindowResponse = BookingsPackageRemoveAvailabilityWindowResponses[keyof BookingsPackageRemoveAvailabilityWindowResponses];
 
 export type BookingsPackageRulesListData = {
     body?: never;
@@ -20452,6 +20606,82 @@ export type BookingsPackageRulesListResponses = {
 };
 
 export type BookingsPackageRulesListResponse = BookingsPackageRulesListResponses[keyof BookingsPackageRulesListResponses];
+
+export type BookingsPackageUpdateAvailabilityWindowData = {
+    body?: PatchedAvailabilityWindowRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/bookings/packages/{id}/update-availability-window/';
+};
+
+export type BookingsPackageUpdateAvailabilityWindowErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageUpdateAvailabilityWindowResponses = {
+    200: AvailabilityWindow;
+};
+
+export type BookingsPackageUpdateAvailabilityWindowResponse = BookingsPackageUpdateAvailabilityWindowResponses[keyof BookingsPackageUpdateAvailabilityWindowResponses];
+
+export type BookingsPackageUpdateAvailabilityWindowFullData = {
+    body: AvailabilityWindowRequestWritable;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/bookings/packages/{id}/update-availability-window/';
+};
+
+export type BookingsPackageUpdateAvailabilityWindowFullErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageUpdateAvailabilityWindowFullResponses = {
+    200: AvailabilityWindow;
+};
+
+export type BookingsPackageUpdateAvailabilityWindowFullResponse = BookingsPackageUpdateAvailabilityWindowFullResponses[keyof BookingsPackageUpdateAvailabilityWindowFullResponses];
 
 export type BookingsTicketTypesListData = {
     body?: never;
@@ -31866,6 +32096,58 @@ export type ProductsListUpdateResponses = {
 
 export type ProductsListUpdateResponse = ProductsListUpdateResponses[keyof ProductsListUpdateResponses];
 
+export type ProductsAddAvailabilityWindowData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        /**
+         * Type of availability window (defaults to PRODUCT_WINDOW)
+         */
+        availability_type?: string;
+        /**
+         * Start datetime
+         */
+        available_from: string;
+        /**
+         * End datetime
+         */
+        available_to: string;
+        /**
+         * Timezone string
+         */
+        timezone?: string;
+    };
+    path: {
+        product_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_id}/add-availability-window/';
+};
+
+export type ProductsAddAvailabilityWindowErrors = {
+    /**
+     * Validation errors
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type ProductsAddAvailabilityWindowResponses = {
+    /**
+     * Window created successfully
+     */
+    201: unknown;
+};
+
 export type ProductsListAddDiscountCreateData = {
     body?: {
         /**
@@ -31971,6 +32253,22 @@ export type ProductsListAddImageCreateResponses = {
     200: unknown;
 };
 
+export type ProductsAvailabilityWindowsListData = {
+    body?: never;
+    path: {
+        product_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_id}/availability-windows/';
+};
+
+export type ProductsAvailabilityWindowsListResponses = {
+    /**
+     * List of availability windows
+     */
+    200: unknown;
+};
+
 export type ProductsListDiscountsRetrieveData = {
     body?: never;
     path: {
@@ -32001,6 +32299,42 @@ export type ProductsListDiscountsRetrieveResponses = {
      * Discounts retrieved successfully
      */
     200: unknown;
+};
+
+export type ProductsRemoveAvailabilityWindowData = {
+    body?: never;
+    path: {
+        product_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to remove
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_id}/remove-availability-window/';
+};
+
+export type ProductsRemoveAvailabilityWindowErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductsRemoveAvailabilityWindowResponses = {
+    /**
+     * Window removed successfully
+     */
+    204: unknown;
 };
 
 export type ProductsListRemoveDiscountDestroyData = {
@@ -32093,6 +32427,102 @@ export type ProductsListToggleActiveCreateErrors = {
 export type ProductsListToggleActiveCreateResponses = {
     /**
      * Status toggled successfully
+     */
+    200: unknown;
+};
+
+export type ProductsUpdateAvailabilityWindowData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name?: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        available_from?: string;
+        available_to?: string;
+        timezone?: string;
+    };
+    path: {
+        product_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_id}/update-availability-window/';
+};
+
+export type ProductsUpdateAvailabilityWindowErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductsUpdateAvailabilityWindowResponses = {
+    /**
+     * Window updated successfully
+     */
+    200: unknown;
+};
+
+export type ProductsUpdateAvailabilityWindowFullData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name?: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        available_from?: string;
+        available_to?: string;
+        timezone?: string;
+    };
+    path: {
+        product_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_id}/update-availability-window/';
+};
+
+export type ProductsUpdateAvailabilityWindowFullErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductsUpdateAvailabilityWindowFullResponses = {
+    /**
+     * Window updated successfully
      */
     200: unknown;
 };
@@ -32349,6 +32779,59 @@ export type ProductsListVariantsUpdateResponses = {
 
 export type ProductsListVariantsUpdateResponse = ProductsListVariantsUpdateResponses[keyof ProductsListVariantsUpdateResponses];
 
+export type ProductVariantsAddAvailabilityWindowData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        /**
+         * Type of availability window (defaults to PRODUCT_WINDOW)
+         */
+        availability_type?: string;
+        /**
+         * Start datetime
+         */
+        available_from: string;
+        /**
+         * End datetime
+         */
+        available_to: string;
+        /**
+         * Timezone string
+         */
+        timezone?: string;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/add-availability-window/';
+};
+
+export type ProductVariantsAddAvailabilityWindowErrors = {
+    /**
+     * Validation errors
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type ProductVariantsAddAvailabilityWindowResponses = {
+    /**
+     * Window created successfully
+     */
+    201: unknown;
+};
+
 export type ProductsListVariantsAddDiscountCreateData = {
     body?: {
         /**
@@ -32460,6 +32943,23 @@ export type ProductsListVariantsAddImageCreateResponses = {
     200: unknown;
 };
 
+export type ProductVariantsAvailabilityWindowsListData = {
+    body?: never;
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query?: never;
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/availability-windows/';
+};
+
+export type ProductVariantsAvailabilityWindowsListResponses = {
+    /**
+     * List of availability windows
+     */
+    200: unknown;
+};
+
 export type ProductsListVariantsDecrementStockCreateData = {
     body?: {
         /**
@@ -32565,6 +33065,43 @@ export type ProductsListVariantsIncrementStockCreateResponses = {
      * Stock incremented successfully
      */
     200: unknown;
+};
+
+export type ProductVariantsRemoveAvailabilityWindowData = {
+    body?: never;
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to remove
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/remove-availability-window/';
+};
+
+export type ProductVariantsRemoveAvailabilityWindowErrors = {
+    /**
+     * Bad request
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductVariantsRemoveAvailabilityWindowResponses = {
+    /**
+     * Window removed successfully
+     */
+    204: unknown;
 };
 
 export type ProductsListVariantsRemoveDiscountDestroyData = {
@@ -32697,6 +33234,104 @@ export type ProductsListVariantsToggleActiveCreateErrors = {
 export type ProductsListVariantsToggleActiveCreateResponses = {
     /**
      * Status toggled successfully
+     */
+    200: unknown;
+};
+
+export type ProductVariantsUpdateAvailabilityWindowData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name?: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        available_from?: string;
+        available_to?: string;
+        timezone?: string;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/update-availability-window/';
+};
+
+export type ProductVariantsUpdateAvailabilityWindowErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductVariantsUpdateAvailabilityWindowResponses = {
+    /**
+     * Window updated successfully
+     */
+    200: unknown;
+};
+
+export type ProductVariantsUpdateAvailabilityWindowFullData = {
+    body?: {
+        /**
+         * Window name
+         */
+        name?: string;
+        /**
+         * Optional description
+         */
+        description?: string;
+        available_from?: string;
+        available_to?: string;
+        timezone?: string;
+    };
+    path: {
+        product_product_id: string;
+        variant_id: string;
+    };
+    query: {
+        /**
+         * Availability window ID to update
+         */
+        window_id: string;
+    };
+    url: '/api/products/list/{product_product_id}/variants/{variant_id}/update-availability-window/';
+};
+
+export type ProductVariantsUpdateAvailabilityWindowFullErrors = {
+    /**
+     * Invalid data or missing window_id
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Window not found
+     */
+    404: unknown;
+};
+
+export type ProductVariantsUpdateAvailabilityWindowFullResponses = {
+    /**
+     * Window updated successfully
      */
     200: unknown;
 };

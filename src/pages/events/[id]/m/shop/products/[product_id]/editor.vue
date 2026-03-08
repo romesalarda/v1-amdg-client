@@ -60,7 +60,7 @@
               {{ isNewProduct ? 'Add a new product to your event shop' : 'Update product details and variants' }}
             </p>
           </div>
-          <nav class="flex gap-2 px-6" aria-label="Tabs">
+          <nav class="flex gap-1" aria-label="Tabs">
             <button
               v-for="tab in tabs"
               :key="tab.id"
@@ -1017,6 +1017,128 @@
               </div>
             </div>
           </div>
+
+          <!-- Availability Windows Tab -->
+          <div v-show="activeTab === 'availability'" class="space-y-6">
+            <div v-if="isNewProduct" class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-yellow-600" />
+                <p class="text-sm text-yellow-800">Save the product first before adding availability windows</p>
+              </div>
+            </div>
+
+            <div v-else>
+              <!-- Header with Add Button -->
+              <div class="flex items-center justify-between mb-1">
+                <div>
+                  <h3 class="text-sm font-semibold text-gray-700 mb-1">Availability Windows</h3>
+                  <p class="text-xs text-gray-500">
+                    Control when this product can be purchased or previewed
+                  </p>
+                </div>
+                <UButton
+                  size="sm"
+                  variant="solid"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                  @click="openAvailabilityModal()"
+                >
+                  Add Window
+                </UButton>
+              </div>
+
+              <!-- Windows Loading State -->
+              <div v-if="availabilityWindowsLoading" class="space-y-4">
+                <USkeleton class="h-32 w-full rounded-lg" v-for="i in 3" :key="i" />
+              </div>
+
+              <!-- Windows List -->
+              <div v-else-if="availabilityWindows.length > 0" class="space-y-4">
+                <div
+                  v-for="window in availabilityWindows"
+                  :key="window.window_id"
+                  class="p-5 border-2 rounded-lg transition-all bg-white"
+                  :class="getWindowStatusClass(window)"
+                >
+                  <div class="flex items-start justify-between mb-4">
+                    <div class="flex-1">
+                      <div class="flex items-start gap-3 mb-2">
+                        <h4 class="font-bold text-gray-900 text-base">{{ window.name }}</h4>
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                          <UBadge :color="getWindowStatusBadgeColor(window)" size="xs" variant="soft">
+                            {{ getWindowStatus(window) }}
+                          </UBadge>
+                          <UBadge :color="window.availability_type === 'PRODUCT_WINDOW' ? 'blue' : 'purple'" size="xs" variant="soft">
+                            {{ window.availability_type === 'PRODUCT_WINDOW' ? 'Purchase' : 'Preview' }}
+                          </UBadge>
+                        </div>
+                      </div>
+                      <p v-if="window.description" class="text-sm text-gray-600 leading-relaxed mb-3">
+                        {{ window.description }}
+                      </p>
+                      <div class="flex items-center gap-4 text-xs text-gray-500">
+                        <div class="flex items-center gap-1">
+                          <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
+                          <span>{{ formatDateTime(window.available_from) }}</span>
+                        </div>
+                        <span>→</span>
+                        <div class="flex items-center gap-1">
+                          <UIcon name="i-heroicons-calendar" class="w-4 h-4" />
+                          <span>{{ formatDateTime(window.available_to) }}</span>
+                        </div>
+                      </div>
+                      <div v-if="window.timezone" class="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                        <UIcon name="i-heroicons-globe-alt" class="w-4 h-4" />
+                        <span>{{ window.timezone }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Actions -->
+                  <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      color="blue"
+                      icon="i-heroicons-pencil"
+                      @click="openAvailabilityModal(window)"
+                    >
+                      Edit
+                    </UButton>
+                    <UButton
+                      size="xs"
+                      variant="outline"
+                      color="red"
+                      icon="i-heroicons-trash"
+                      @click="handleDeleteAvailabilityWindow(window.window_id)"
+                      :loading="deletingWindowId === window.window_id"
+                    >
+                      Delete
+                    </UButton>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Empty State -->
+              <div v-else class="text-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                <UIcon name="i-heroicons-clock" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 class="text-base font-semibold text-gray-900 mb-2">No availability windows yet</h3>
+                <p class="text-sm text-gray-500 mb-5 max-w-md mx-auto">
+                  Add availability windows to control when this product can be purchased or viewed
+                </p>
+                
+                <UButton
+                  size="sm"
+                  variant="solid"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                  @click="openAvailabilityModal()"
+                >
+                  Create First Window
+                </UButton>
+              </div>
+            </div>
+          </div>
         </div>
           </div>
         </div>
@@ -1838,6 +1960,139 @@
         </div>
       </div>
     </UModal>
+
+    <!-- Availability Window Modal -->
+    <UModal v-model="showAvailabilityModal" :ui="{ width: 'max-w-2xl' }">
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-6">
+          {{ editingWindow ? 'Edit Availability Window' : 'Add Availability Window' }}
+        </h3>
+
+        <div class="space-y-5">
+          <!-- Window Name -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Name *</label>
+            <input
+              v-model="availabilityForm.name"
+              type="text"
+              placeholder="e.g., Early Bird Sales"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              required
+            />
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea
+              v-model="availabilityForm.description"
+              rows="2"
+              placeholder="Optional description..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Window Type -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Type *</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label
+                v-for="option in AVAILABILITY_TYPE_OPTIONS"
+                :key="option.value"
+                class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                :class="availabilityForm.availability_type === option.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+              >
+                <input
+                  v-model="availabilityForm.availability_type"
+                  type="radio"
+                  :value="option.value"
+                  class="text-primary focus:ring-primary mt-1"
+                />
+                <div class="flex-1">
+                  <div class="font-semibold text-gray-900 text-sm">{{ option.label }}</div>
+                  <div class="text-xs text-gray-500 mt-0.5">{{ option.description }}</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Date Range -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Start Date -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Available From *</label>
+              <input
+                v-model="availabilityForm.available_from"
+                type="datetime-local"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                required
+              />
+            </div>
+
+            <!-- End Date -->
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Available To *</label>
+              <input
+                v-model="availabilityForm.available_to"
+                type="datetime-local"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Timezone -->
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
+            <input
+              v-model="availabilityForm.timezone"
+              type="text"
+              placeholder="UTC"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+            <p class="text-xs text-gray-500 mt-1">
+              Defaults to event timezone: {{ event?.data?.timezone || 'UTC' }}
+            </p>
+          </div>
+
+          <!-- Info Box -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div class="flex-1">
+                <p class="text-sm font-medium text-blue-900 mb-1">About Availability Windows</p>
+                <p class="text-xs text-blue-700 leading-relaxed">
+                  <strong>Purchase Windows</strong> allow customers to buy the product during the specified time period. 
+                  <strong>Preview Windows</strong> make the product visible but not purchasable.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+          <UButton
+            class="flex-1"
+            variant="outline"
+            color="gray"
+            @click="closeAvailabilityModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            class="flex-1"
+            variant="solid"
+            color="primary"
+            icon="i-heroicons-check"
+            :loading="addAvailabilityWindow.isPending.value || updateAvailabilityWindow.isPending.value"
+            @click="submitAvailabilityForm"
+          >
+            {{ editingWindow ? 'Update' : 'Create' }} Window
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
@@ -1848,8 +2103,9 @@ import { useProductVariants, useCreateProductVariant, useUpdateProductVariant, u
 import { useAddProductImage, useRemoveProductImage } from '~/composables/resources/products/productImages'
 import { useAddVariantImage, useRemoveVariantImage } from '~/composables/resources/products/productVariantImages'
 import { useProductDiscounts, useCreateProductDiscount, useUpdateProductDiscount, useDeleteProductDiscount } from '~/composables/resources/products/productDiscounts'
+import { useProductAvailabilityWindows, useAddProductAvailabilityWindow, useUpdateProductAvailabilityWindow, useRemoveProductAvailabilityWindow } from '~/composables/resources/products/productAvailabilityWindows'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
-import type { ProductVariantDetail } from '~/api/types.gen'
+import type { ProductVariantDetail, AvailabilityWindow } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 
 definePageMeta({
@@ -1875,6 +2131,7 @@ const tabs = [
   { id: 'variants', label: 'Variants', icon: 'i-heroicons-squares-2x2' },
   { id: 'images', label: 'Images', icon: 'i-heroicons-photo' },
   { id: 'discounts', label: 'Discounts', icon: 'i-heroicons-ticket' },
+  { id: 'availability', label: 'Availability', icon: 'i-heroicons-clock' },
 ]
 
 // Event Data
@@ -3112,5 +3369,226 @@ async function handleDeleteDiscount(discountId: string) {
   } finally {
     deletingDiscountId.value = null
   }
+}
+
+// ===== AVAILABILITY WINDOWS =====
+
+// Fetch availability windows
+const { data: availabilityWindowsData, isLoading: availabilityWindowsLoading, refetch: refetchAvailabilityWindows } = useProductAvailabilityWindows(
+  computed(() => isNewProduct.value ? undefined : productId.value)
+)
+
+const availabilityWindows = computed(() => {
+  if (!availabilityWindowsData.value) return []
+  return ((availabilityWindowsData.value.data as any).results || [])
+})
+
+// Availability window modal state
+const showAvailabilityModal = ref(false)
+const editingWindow = ref<AvailabilityWindow | null>(null)
+const deletingWindowId = ref<string | null>(null)
+
+// Availability window type options
+const AVAILABILITY_TYPE_OPTIONS = [
+  { value: 'PRODUCT_WINDOW', label: 'Purchase Window', description: 'Product can be purchased during this time' },
+  { value: 'PRODUCT_PREVIEW_WINDOW', label: 'Preview Window', description: 'Product is visible but cannot be purchased' },
+] as const
+
+// Availability window form data
+const availabilityForm = reactive({
+  name: '',
+  description: '',
+  availability_type: 'PRODUCT_WINDOW' as 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW',
+  available_from: '',
+  available_to: '',
+  timezone: '',
+})
+
+// Availability window mutations
+const addAvailabilityWindow = useAddProductAvailabilityWindow()
+const updateAvailabilityWindow = useUpdateProductAvailabilityWindow()
+const removeAvailabilityWindow = useRemoveProductAvailabilityWindow()
+
+function openAvailabilityModal(window?: AvailabilityWindow) {
+  editingWindow.value = window || null
+  
+  if (window) {
+    // Populate form with existing window data
+    availabilityForm.name = window.name
+    availabilityForm.description = window.description || ''
+    availabilityForm.availability_type = (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW') 
+      ? window.availability_type 
+      : 'PRODUCT_WINDOW'
+    availabilityForm.available_from = window.available_from ? formatDateTimeForInput(window.available_from) : ''
+    availabilityForm.available_to = window.available_to ? formatDateTimeForInput(window.available_to) : ''
+    availabilityForm.timezone = window.timezone || event.value?.data?.timezone || 'UTC'
+  } else {
+    // Reset form for new window - default to event timezone
+    availabilityForm.name = ''
+    availabilityForm.description = ''
+    availabilityForm.availability_type = 'PRODUCT_WINDOW'
+    availabilityForm.available_from = ''
+    availabilityForm.available_to = ''
+    availabilityForm.timezone = event.value?.data?.timezone || 'UTC'
+  }
+  
+  showAvailabilityModal.value = true
+}
+
+function closeAvailabilityModal() {
+  showAvailabilityModal.value = false
+  editingWindow.value = null
+}
+
+async function submitAvailabilityForm() {
+  // Validation
+  if (!availabilityForm.name) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please enter a window name',
+      color: 'red',
+    })
+    return
+  }
+
+  if (!availabilityForm.available_from || !availabilityForm.available_to) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please specify both start and end dates',
+      color: 'red',
+    })
+    return
+  }
+
+  // Validate dates
+  const fromDate = new Date(availabilityForm.available_from)
+  const toDate = new Date(availabilityForm.available_to)
+  
+  if (toDate <= fromDate) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'End date must be after start date',
+      color: 'red',
+    })
+    return
+  }
+
+  const windowPayload = {
+    name: availabilityForm.name,
+    description: availabilityForm.description || undefined,
+    availability_type: availabilityForm.availability_type,
+    available_from: availabilityForm.available_from,
+    available_to: availabilityForm.available_to,
+    timezone: availabilityForm.timezone || 'UTC',
+  }
+
+  try {
+    if (editingWindow.value) {
+      // Update existing window
+      await updateAvailabilityWindow.mutateAsync({
+        productId: productId.value,
+        windowId: editingWindow.value.availability_id,
+        body: windowPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Availability window updated successfully',
+        color: 'green',
+      })
+    } else {
+      // Create new window
+      await addAvailabilityWindow.mutateAsync({
+        productId: productId.value,
+        body: windowPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Availability window created successfully',
+        color: 'green',
+      })
+    }
+
+    refetchAvailabilityWindows()
+    closeAvailabilityModal()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to save availability window',
+      color: 'red',
+    })
+  }
+}
+
+async function handleDeleteAvailabilityWindow(windowId: string) {
+  if (!confirm('Are you sure you want to delete this availability window?')) return
+
+  deletingWindowId.value = windowId
+
+  try {
+    await removeAvailabilityWindow.mutateAsync({
+      productId: productId.value,
+      windowId: windowId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Availability window deleted successfully',
+      color: 'green',
+    })
+
+    refetchAvailabilityWindows()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to delete availability window',
+      color: 'red',
+    })
+  } finally {
+    deletingWindowId.value = null
+  }
+}
+
+// Helper functions for window status display
+function getWindowStatus(window: any): string {
+  const now = new Date()
+  const from = new Date(window.available_from)
+  const to = new Date(window.available_to)
+  
+  if (now < from) return 'Upcoming'
+  if (now > to) return 'Expired'
+  return 'Active'
+}
+
+function getWindowStatusBadgeColor(window: any): 'green' | 'blue' | 'gray' {
+  const status = getWindowStatus(window)
+  if (status === 'Active') return 'green'
+  if (status === 'Upcoming') return 'blue'
+  return 'gray'
+}
+
+function getWindowStatusClass(window: any): string {
+  const status = getWindowStatus(window)
+  if (status === 'Active') return 'border-green-300 bg-green-50'
+  if (status === 'Upcoming') return 'border-blue-300 bg-blue-50'
+  return 'border-gray-300 bg-gray-50'
+}
+
+function formatDateTime(dateString: string): string {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleString('en-GB', { 
+    dateStyle: 'medium', 
+    timeStyle: 'short' 
+  })
+}
+
+function formatDateTimeForInput(dateString: string): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  // Format: YYYY-MM-DDTHH:mm
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
 }
 </script>

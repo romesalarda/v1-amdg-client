@@ -153,6 +153,13 @@
                         </div>
                         <div class="flex items-center space-x-3">
                           <button
+                            @click="openPackageAvailabilityModal(pkg.id)"
+                            title="Manage Availability Windows"
+                            class="p-1.5 text-navy-600 hover:text-primary transition-colors"
+                          >
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                          </button>
+                          <button
                             @click="togglePackageStatus(pkg.id, !pkg.is_active)"
                             :disabled="!canUpdateRegistration"
                             type="button"
@@ -366,7 +373,7 @@
             </div>
             <div>
               <p class="text-xs text-navy-500 mb-1">Active Discounts</p>
-              <p class="text-2xl font-bold text-primary">{{ discounts.filter((d: any) => d.active).length }}</p>
+              <p class="text-2xl font-bold text-primary">{{ discounts.filter(d => d.active).length }}</p>
             </div>
             <div>
               <p class="text-xs text-navy-500 mb-1">Sign-in Methods</p>
@@ -663,6 +670,239 @@
         </div>
       </div>
     </div>
+
+    <!-- Package Availability Windows Modal -->
+    <div v-if="showPackageAvailabilityModal" @click.self="closePackageAvailabilityModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50 flex-shrink-0">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary text-xl">schedule</span>
+            <div>
+              <h3 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">
+                Availability Windows
+              </h3>
+              <p class="text-xs text-navy-600 mt-0.5">{{ selectedPackageName }}</p>
+            </div>
+          </div>
+          <button
+            @click="closePackageAvailabilityModal"
+            class="p-1.5 text-navy-600 hover:text-primary transition-colors"
+          >
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-6 py-4">
+          <!-- Add Window Button -->
+          <div v-if="!editingAvailabilityWindow" class="mb-4">
+            <button
+              @click="openPackageAvailabilityWindowForm()"
+              class="bg-primary text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              <span>Add Window</span>
+            </button>
+          </div>
+
+          <!-- Window Form -->
+          <div v-if="editingAvailabilityWindow !== null" class="mb-6 p-5 border-2 border-primary/30 rounded-xl bg-primary/5">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-sm font-bold text-navy-900 uppercase tracking-wide">
+                {{ editingAvailabilityWindow ? 'Edit Window' : 'New Window' }}
+              </h4>
+              <button
+                @click="closePackageAvailabilityWindowForm"
+                class="text-navy-600 hover:text-red-600 transition-colors"
+              >
+                <span class="material-symbols-outlined text-sm">close</span>
+              </button>
+            </div>
+
+            <form @submit.prevent="submitPackageAvailabilityForm" class="space-y-4">
+              <!-- Window Name -->
+              <div>
+                <label class="block text-sm font-semibold text-navy-700 mb-2">Window Name *</label>
+                <input
+                  v-model="packageAvailabilityForm.name"
+                  type="text"
+                  placeholder="e.g., Early Bird Sales"
+                  required
+                  class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <!-- Description -->
+              <div>
+                <label class="block text-sm font-semibold text-navy-700 mb-2">Description</label>
+                <textarea
+                  v-model="packageAvailabilityForm.description"
+                  rows="2"
+                  placeholder="Optional description..."
+                  class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                ></textarea>
+              </div>
+
+              <!-- Window Type -->
+              <div>
+                <label class="block text-sm font-semibold text-navy-700 mb-2">Window Type *</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <label
+                    v-for="option in BOOKING_AVAILABILITY_TYPE_OPTIONS"
+                    :key="option.value"
+                    class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
+                    :class="packageAvailabilityForm.availability_type === option.value ? 'border-primary bg-primary/10' : 'border-navy-200 hover:border-navy-300'"
+                  >
+                    <input
+                      v-model="packageAvailabilityForm.availability_type"
+                      type="radio"
+                      :value="option.value"
+                      class="text-primary focus:ring-primary mt-1"
+                    />
+                    <div class="flex-1">
+                      <div class="font-semibold text-navy-900 text-sm">{{ option.label }}</div>
+                      <div class="text-xs text-navy-500 mt-0.5">{{ option.description }}</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Date Range -->
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-semibold text-navy-700 mb-2">Available From *</label>
+                  <input
+                    v-model="packageAvailabilityForm.available_from"
+                    type="datetime-local"
+                    required
+                    class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-sm font-semibold text-navy-700 mb-2">Available To *</label>
+                  <input
+                    v-model="packageAvailabilityForm.available_to"
+                    type="datetime-local"
+                    required
+                    class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+              </div>
+
+              <!-- Timezone -->
+              <div>
+                <label class="block text-sm font-semibold text-navy-700 mb-2">Timezone</label>
+                <input
+                  v-model="packageAvailabilityForm.timezone"
+                  type="text"
+                  placeholder="UTC"
+                  class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <p class="text-xs text-navy-500 mt-1">
+                  Defaults to event timezone: {{ event?.data?.timezone || 'UTC' }}
+                </p>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex items-center gap-3 pt-4 border-t border-navy-200">
+                <button
+                  type="button"
+                  @click="closePackageAvailabilityWindowForm"
+                  class="flex-1 px-4 py-2 border border-navy-300 text-navy-700 rounded-lg hover:bg-navy-50 transition-colors text-sm font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  :disabled="addPackageAvailabilityWindow.isPending.value || updatePackageAvailabilityWindow.isPending.value"
+                  class="flex-1 px-4 py-2 bg-primary text-white rounded-lg hover:bg-slate-800 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {{ editingAvailabilityWindow ? 'Update' : 'Create' }} Window
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Windows Loading State -->
+          <div v-if="packageAvailabilityWindowsLoading" class="space-y-3">
+            <div v-for="i in 3" :key="i" class="h-32 bg-slate-100 rounded-lg animate-pulse"></div>
+          </div>
+
+          <!-- Windows List -->
+          <div v-else-if="packageAvailabilityWindows.length > 0" class="space-y-3">
+            <div
+              v-for="window in packageAvailabilityWindows"
+              :key="window.availability_id"
+              class="p-5 border-2 rounded-lg transition-all"
+              :class="getPackageWindowStatusClass(window)"
+            >
+              <div class="flex items-start justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-2">
+                    <h4 class="font-bold text-navy-900 text-base">{{ window.name }}</h4>
+                    <span class="px-2 py-1 rounded text-[10px] font-bold" :class="getPackageWindowStatusBadgeColor(window)">
+                      {{ getPackageWindowStatus(window) }}
+                    </span>
+                    <span class="px-2 py-1 bg-blue-100 text-blue-700 text-[10px] font-bold rounded">
+                      {{ window.availability_type === 'PRODUCT_WINDOW' ? 'Purchase' : 'Preview' }}
+                    </span>
+                  </div>
+                  <p v-if="window.description" class="text-sm text-navy-600 mb-3">
+                    {{ window.description }}
+                  </p>
+                  <div class="flex items-center gap-4 text-xs text-navy-500">
+                    <div class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">calendar_today</span>
+                      <span>{{ formatDateTimePackage(window.available_from) }}</span>
+                    </div>
+                    <span>→</span>
+                    <div class="flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">calendar_today</span>
+                      <span>{{ formatDateTimePackage(window.available_to) }}</span>
+                    </div>
+                  </div>
+                  <div v-if="window.timezone" class="flex items-center gap-1 text-xs text-navy-400 mt-1">
+                    <span class="material-symbols-outlined text-sm">public</span>
+                    <span>{{ window.timezone }}</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    @click="openPackageAvailabilityWindowForm(window)"
+                    class="p-1.5 text-navy-600 hover:text-primary transition-colors"
+                  >
+                    <span class="material-symbols-outlined text-lg">edit</span>
+                  </button>
+                  <button
+                    @click="handleDeletePackageAvailabilityWindow(window.availability_id)"
+                    :disabled="deletingAvailabilityWindowId === window.availability_id"
+                    class="p-1.5 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+                  >
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-else-if="!editingAvailabilityWindow" class="text-center py-16">
+            <span class="material-symbols-outlined text-6xl text-navy-300 mb-4">schedule</span>
+            <h4 class="text-base font-semibold text-navy-900 mb-2">No availability windows yet</h4>
+            <p class="text-sm text-navy-500 mb-5">
+              Add availability windows to control when this package can be purchased
+            </p>
+            <button
+              @click="openPackageAvailabilityWindowForm()"
+              class="bg-primary text-white px-4 py-2 rounded-lg inline-flex items-center space-x-2 hover:bg-slate-800 transition-all text-xs font-bold uppercase tracking-tight"
+            >
+              <span class="material-symbols-outlined text-sm">add</span>
+              <span>Create First Window</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </EventManagementLayout>
 </template>
 
@@ -680,6 +920,12 @@ import {
   usePartialUpdateBookingPackage,
   useDeleteBookingPackage 
 } from '~/composables/resources/booking/bookingPackages'
+import { 
+  useBookingPackageAvailabilityWindows,
+  useAddBookingPackageAvailabilityWindow,
+  useUpdateBookingPackageAvailabilityWindow,
+  useRemoveBookingPackageAvailabilityWindow 
+} from '~/composables/resources/booking/bookingPackageAvailabilityWindows'
 import { 
   useBookingAlternativeSignins, 
   useCreateBookingAlternativeSignin,
@@ -701,6 +947,7 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import TicketTypeForm from '~/components/events/forms/TicketTypeForm.vue'
 import BookingPackageForm from '~/components/events/forms/BookingPackageForm.vue'
 import DiscountForm from '~/components/events/forms/DiscountForm.vue'
+import type { AvailabilityWindow } from '~/api/types.gen'
 
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
 import Swal from 'sweetalert2'
@@ -733,7 +980,7 @@ const packages = computed(() => packagesData.value?.data?.results || [])
 const signIns = computed(() => signInsData.value?.data?.results || [])
 const discounts = computed(() => discountsData.value?.data?.results || [])
 
-const activePackagesCount = computed(() => packages.value.filter((p: any) => p.is_active).length)
+const activePackagesCount = computed(() => packages.value.filter(p => p.is_active).length)
 
 // Setup Guide Modal
 const showSetupGuide = ref(false)
@@ -1273,7 +1520,7 @@ const formatAmount = (amount: string | number, currency?: string) => {
 }
 
 const getTicketTypeName = (ticketTypeId: number) => {
-  const ticketType = ticketTypes.value.find((t: any) => t.id === ticketTypeId)
+  const ticketType = ticketTypes.value.find(t => t.id === ticketTypeId)
   // filter any _
   return ticketType?.title.replace(/_/g, ' ') || 'Unknown'
 }
@@ -1287,6 +1534,277 @@ const getPatternLabel = (formatMatch: string | null): string => {
   const pattern = patternExamples[patternType]
   return pattern ? pattern.example : 'Custom'
 }
+
+// ===== AVAILABILITY WINDOWS FOR BOOKING PACKAGES =====
+
+type AvailabilityWindowFormData = {
+  window_id?: string
+  name: string
+  description?: string
+  availability_type: 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW'
+  available_from: string
+  available_to: string
+  timezone: string
+}
+
+// Availability window modal state
+const showPackageAvailabilityModal = ref(false)
+const selectedPackageId = ref<number | null>(null)
+const editingAvailabilityWindow = ref<AvailabilityWindowFormData | null>(null)
+const deletingAvailabilityWindowId = ref<string | null>(null)
+
+// Fetch availability windows for selected package
+const { 
+  data: packageAvailabilityWindowsData, 
+  isLoading: packageAvailabilityWindowsLoading, 
+  refetch: refetchPackageAvailabilityWindows 
+} = useBookingPackageAvailabilityWindows(
+  computed(() => selectedPackageId.value || undefined)
+)
+
+const packageAvailabilityWindows = computed(() => {
+  if (!packageAvailabilityWindowsData.value?.data) return []
+  return packageAvailabilityWindowsData.value.data.results || []
+})
+
+// Availability window type options
+const BOOKING_AVAILABILITY_TYPE_OPTIONS = [
+  { value: 'PRODUCT_WINDOW', label: 'Purchase Window', description: 'Package can be purchased during this time' },
+  { value: 'PRODUCT_PREVIEW_WINDOW', label: 'Preview Window', description: 'Package is visible but cannot be purchased' },
+] as const
+
+// Availability window form data
+const packageAvailabilityForm = reactive({
+  name: '',
+  description: '',
+  availability_type: 'PRODUCT_WINDOW' as 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW',
+  available_from: '',
+  available_to: '',
+  timezone: '',
+})
+
+// Availability window mutations
+const addPackageAvailabilityWindow = useAddBookingPackageAvailabilityWindow()
+const updatePackageAvailabilityWindow = useUpdateBookingPackageAvailabilityWindow()
+const removePackageAvailabilityWindow = useRemoveBookingPackageAvailabilityWindow()
+
+function openPackageAvailabilityModal(packageId: number) {
+  selectedPackageId.value = packageId
+  editingAvailabilityWindow.value = null
+  showPackageAvailabilityModal.value = true
+}
+
+function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
+  if (window) {
+    // Populate form with existing window data
+    editingAvailabilityWindow.value = {
+      window_id: window.availability_id,
+      name: window.name,
+      description: window.description || '',
+      availability_type: (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW') 
+        ? window.availability_type 
+        : 'PRODUCT_WINDOW',
+      available_from: window.available_from ? formatDateTimeForInputPackage(window.available_from) : '',
+      available_to: window.available_to ? formatDateTimeForInputPackage(window.available_to) : '',
+      timezone: window.timezone || event.value?.data?.timezone || 'UTC'
+    }
+    packageAvailabilityForm.name = window.name
+    packageAvailabilityForm.description = window.description || ''
+    packageAvailabilityForm.availability_type = (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW') 
+      ? window.availability_type 
+      : 'PRODUCT_WINDOW'
+    packageAvailabilityForm.available_from = window.available_from ? formatDateTimeForInputPackage(window.available_from) : ''
+    packageAvailabilityForm.available_to = window.available_to ? formatDateTimeForInputPackage(window.available_to) : ''
+    packageAvailabilityForm.timezone = window.timezone || event.value?.data?.timezone || 'UTC'
+  } else {
+    // Reset form for new window - use empty object to indicate form is open
+    editingAvailabilityWindow.value = {
+      name: '',
+      description: '',
+      availability_type: 'PRODUCT_WINDOW',
+      available_from: '',
+      available_to: '',
+      timezone: event.value?.data?.timezone || 'UTC'
+    }
+    packageAvailabilityForm.name = ''
+    packageAvailabilityForm.description = ''
+    packageAvailabilityForm.availability_type = 'PRODUCT_WINDOW'
+    packageAvailabilityForm.available_from = ''
+    packageAvailabilityForm.available_to = ''
+    packageAvailabilityForm.timezone = event.value?.data?.timezone || 'UTC'
+  }
+}
+
+function closePackageAvailabilityWindowForm() {
+  editingAvailabilityWindow.value = null
+}
+
+function closePackageAvailabilityModal() {
+  showPackageAvailabilityModal.value = false
+  selectedPackageId.value = null
+  editingAvailabilityWindow.value = null
+}
+
+async function submitPackageAvailabilityForm() {
+  // Validation
+  if (!packageAvailabilityForm.name) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please enter a window name',
+      color: 'red',
+    })
+    return
+  }
+
+  if (!packageAvailabilityForm.available_from || !packageAvailabilityForm.available_to) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Please specify both start and end dates',
+      color: 'red',
+    })
+    return
+  }
+
+  // Validate dates
+  const fromDate = new Date(packageAvailabilityForm.available_from)
+  const toDate = new Date(packageAvailabilityForm.available_to)
+  
+  if (toDate <= fromDate) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'End date must be after start date',
+      color: 'red',
+    })
+    return
+  }
+
+  if (!selectedPackageId.value) return
+
+  const windowPayload = {
+    name: packageAvailabilityForm.name,
+    description: packageAvailabilityForm.description || null,
+    availability_type: packageAvailabilityForm.availability_type,
+    available_from: packageAvailabilityForm.available_from,
+    available_to: packageAvailabilityForm.available_to,
+    timezone: packageAvailabilityForm.timezone || 'UTC',
+  }
+
+  try {
+    if (editingAvailabilityWindow.value?.window_id) {
+      // Update existing window
+      await updatePackageAvailabilityWindow.mutateAsync({
+        packageId: selectedPackageId.value,
+        windowId: editingAvailabilityWindow.value.window_id,
+        body: windowPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Availability window updated successfully',
+        color: 'green',
+      })
+    } else {
+      // Create new window
+      await addPackageAvailabilityWindow.mutateAsync({
+        packageId: selectedPackageId.value,
+        body: windowPayload,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Availability window created successfully',
+        color: 'green',
+      })
+    }
+
+    refetchPackageAvailabilityWindows()
+    closePackageAvailabilityWindowForm()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to save availability window',
+      color: 'red',
+    })
+  }
+}
+
+async function handleDeletePackageAvailabilityWindow(windowId: string) {
+  if (!confirm('Are you sure you want to delete this availability window?')) return
+  if (!selectedPackageId.value) return
+
+  deletingAvailabilityWindowId.value = windowId
+
+  try {
+    await removePackageAvailabilityWindow.mutateAsync({
+      packageId: selectedPackageId.value,
+      windowId: windowId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Availability window deleted successfully',
+      color: 'green',
+    })
+
+    refetchPackageAvailabilityWindows()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to delete availability window',
+      color: 'red',
+    })
+  } finally {
+    deletingAvailabilityWindowId.value = null
+  }
+}
+
+// Helper functions for window status display
+function getPackageWindowStatus(window: AvailabilityWindow): string {
+  const now = new Date()
+  const from = new Date(window.available_from || '')
+  const to = new Date(window.available_to || '')
+  
+  if (now < from) return 'Upcoming'
+  if (now > to) return 'Expired'
+  return 'Active'
+}
+
+function getPackageWindowStatusBadgeColor(window: AvailabilityWindow): string {
+  const status = getPackageWindowStatus(window)
+  if (status === 'Active') return 'text-green-700 bg-green-100'
+  if (status === 'Upcoming') return 'text-blue-700 bg-blue-100'
+  return 'text-gray-700 bg-gray-100'
+}
+
+function getPackageWindowStatusClass(window: AvailabilityWindow): string {
+  const status = getPackageWindowStatus(window)
+  if (status === 'Active') return 'border-green-300 bg-green-50'
+  if (status === 'Upcoming') return 'border-blue-300 bg-blue-50'
+  return 'border-gray-300 bg-gray-50'
+}
+
+function formatDateTimePackage(dateString: string | undefined): string {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleString('en-GB', { 
+    dateStyle: 'medium', 
+    timeStyle: 'short' 
+  })
+}
+
+function formatDateTimeForInputPackage(dateString: string | undefined): string {
+  if (!dateString) return ''
+  const date = new Date(dateString)
+  // Format: YYYY-MM-DDTHH:mm
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+}
+
+const selectedPackageName = computed(() => {
+  if (!selectedPackageId.value) return ''
+  const pkg = packages.value.find(p => p.id === selectedPackageId.value)
+  return pkg?.name || ''
+})
 </script>
 
 <style scoped>
