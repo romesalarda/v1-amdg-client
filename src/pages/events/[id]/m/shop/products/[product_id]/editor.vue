@@ -2107,6 +2107,7 @@ import { useProductAvailabilityWindows, useAddProductAvailabilityWindow, useUpda
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import type { ProductVariantDetail, AvailabilityWindow } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import type { LocationQueryValue } from 'vue-router'
 
 definePageMeta({
   layout: false,
@@ -2613,6 +2614,32 @@ watch(() => productData.value?.data, (product) => {
     initialForm.value = { ...form }
   }
 }, { immediate: true })
+
+// Handle query parameters for direct window editing
+watch(
+  () => ({ tab: route.query.tab, windowId: route.query['window-id'] }),
+  ({ tab, windowId }) => {
+    if (tab === 'availability' && windowId && !isNewProduct.value) {
+      // Switch to availability tab
+      activeTab.value = 'availability'
+      
+      // Wait for availability windows to load
+      nextTick(() => {
+        // Find the window with the given ID
+        const window = availabilityWindows.value.find((w: { availability_id: string | LocationQueryValue[] }) => w.availability_id === windowId)
+        if (window) {
+          openAvailabilityModal(window)
+          // Clear query params after opening the modal
+          router.replace({ query: { ...route.query, tab: undefined, 'window-id': undefined } })
+        }
+      })
+    } else if (tab && tab !== 'availability') {
+      // Handle other tabs
+      activeTab.value = tab as string
+    }
+  },
+  { immediate: true }
+)
 
 // Mutations
 const createProduct = useCreateProduct()

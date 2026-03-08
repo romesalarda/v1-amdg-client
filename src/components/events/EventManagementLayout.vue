@@ -161,7 +161,7 @@ import Footer from '~/components/common/Footer.vue'
 import type { EventDetail } from '~/api/types.gen'
 
 const props = defineProps<{
-  eventId: string | number
+  eventId: string
   event?: EventDetail
 }>()
 

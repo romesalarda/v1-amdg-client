@@ -299,6 +299,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const { $notyf } = useNuxtApp()
 
 // View mode toggle
@@ -347,6 +348,33 @@ function openCreateModal() {
 }
 
 function handleEdit(window: AvailabilityWindow) {
+  // Check if this window belongs to a product or package
+  const productPackageTypes = [
+    'PRODUCT_WINDOW',
+    'PRODUCT_PREVIEW_WINDOW',
+    'PAYMENT_PACKAGE_WINDOW',
+    'PAYMENT_PACKAGE_PREVIEW_WINDOW'
+  ]
+  
+  if (productPackageTypes.includes(window.availability_type || '')) {
+    // Redirect to the appropriate section with window ID
+    const isProduct = window.availability_type?.includes('PRODUCT')
+    const messageType = window.availability_type?.includes('PREVIEW') ? 'Preview' : 'Purchase'
+    
+    if (isProduct) {
+      $notyf.success(
+        `Redirecting to Products page where you can edit this ${messageType} Window...`
+      )
+      router.push(`/events/${eventId.value}/m/shop/products?window-id=${window.availability_id}`)
+    } else {
+      $notyf.success(
+        `Redirecting to Booking Packages page where you can edit this ${messageType} Window...`
+      )
+      router.push(`/events/${eventId.value}/m/booking?window-id=${window.availability_id}`)
+    }
+    return
+  }
+  
   selectedWindow.value = window
   presetStartDate.value = undefined
   presetEndDate.value = undefined

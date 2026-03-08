@@ -262,6 +262,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   close: []
   success: []
+  redirectRequired: [window: AvailabilityWindow]
 }>()
 
 const { $notyf } = useNuxtApp()

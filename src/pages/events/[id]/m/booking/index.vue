@@ -943,6 +943,7 @@ import {
   useCreatePaymentDiscountRule,
   useDeletePaymentDiscountRule,
 } from '~/composables/resources/payments/paymentDiscountRules'
+import { bookingsPackageAvailabilityWindowsList } from '~/api/sdk.gen'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import TicketTypeForm from '~/components/events/forms/TicketTypeForm.vue'
 import BookingPackageForm from '~/components/events/forms/BookingPackageForm.vue'
@@ -957,6 +958,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
 
@@ -985,6 +987,56 @@ const activePackagesCount = computed(() => packages.value.filter(p => p.is_activ
 // Setup Guide Modal
 const showSetupGuide = ref(false)
 
+// Flag to prevent watcher loops when manually opening modals
+const isManualModalOpen = ref(false)
+const hasSearchedForPackage = ref(false)
+
+// Watch for packages to load, then search for package if we only have window-id
+watch(
+  () => ({ 
+    packagesLoaded: packages.value.length > 0,
+    windowId: route.query['window-id'],
+    packageId: route.query['package-id']
+  }),
+  async ({ packagesLoaded, windowId, packageId }) => {
+    // Only search once if we have window-id but no package-id
+    if (!packagesLoaded || hasSearchedForPackage.value || !windowId || packageId) {
+      return
+    }
+    
+    hasSearchedForPackage.value = true
+    
+    try {
+      // Search through all packages to find which one has this window
+      for (const pkg of packages.value) {
+        const response = await bookingsPackageAvailabilityWindowsList({ 
+          path: { id: pkg.id } 
+        })
+        
+        const results = (response.data as any)?.results
+        if (results && Array.isArray(results)) {
+          const foundWindow = results.find((w: any) => w.availability_id === windowId)
+          
+          if (foundWindow) {
+            // Found it! Update URL with package-id
+            router.replace({ 
+              query: { 
+                ...route.query, 
+                'package-id': pkg.id.toString(), 
+                'window-id': windowId 
+              } 
+            })
+            break
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error finding package for window:', error)
+    }
+  },
+  { immediate: true }
+)
+
 // Ticket Type Modal & CRUD
 const showTicketTypeModal = ref(false)
 const editingTicketType = ref<any>(null)
@@ -1006,11 +1058,23 @@ const canCreateRegistration = computed(() => can('REGISTRATION', 'create').value
 const openTicketTypeModal = (ticketType?: any) => {
   editingTicketType.value = ticketType || null
   showTicketTypeModal.value = true
+  
+  // Update URL if editing existing ticket
+  if (ticketType?.id) {
+    isManualModalOpen.value = true
+    router.replace({ query: { ...route.query, 'ticket-id': ticketType.id.toString() } })
+  }
 }
 
 const closeTicketTypeModal = () => {
   showTicketTypeModal.value = false
   editingTicketType.value = null
+  
+  // Clear URL parameter
+  if (route.query['ticket-id']) {
+    router.replace({ query: { ...route.query, 'ticket-id': undefined } })
+  }
+  isManualModalOpen.value = false
 }
 
 const handleTicketTypeSubmit = async (data: any) => {
@@ -1116,11 +1180,23 @@ const packageMutationLoading = computed(() =>
 const openPackageModal = (pkg?: any) => {
   editingPackage.value = pkg || null
   showPackageModal.value = true
+  
+  // Update URL if editing existing package
+  if (pkg?.id) {
+    isManualModalOpen.value = true
+    router.replace({ query: { ...route.query, 'package-id': pkg.id.toString() } })
+  }
 }
 
 const closePackageModal = () => {
   showPackageModal.value = false
   editingPackage.value = null
+  
+  // Clear URL parameter
+  if (route.query['package-id']) {
+    router.replace({ query: { ...route.query, 'package-id': undefined } })
+  }
+  isManualModalOpen.value = false
 }
 
 const handlePackageSubmit = async (data: any) => {
@@ -1224,12 +1300,24 @@ const openDiscountModal = (discount?: any, packageId?: number) => {
   editingDiscount.value = discount || null
   selectedPackageForDiscount.value = packageId || null
   showDiscountModal.value = true
+  
+  // Update URL if editing existing discount
+  if (discount?.discount_id) {
+    isManualModalOpen.value = true
+    router.replace({ query: { ...route.query, 'discount-id': discount.discount_id } })
+  }
 }
 
 const closeDiscountModal = () => {
   showDiscountModal.value = false
   editingDiscount.value = null
   selectedPackageForDiscount.value = null
+  
+  // Clear URL parameter
+  if (route.query['discount-id']) {
+    router.replace({ query: { ...route.query, 'discount-id': undefined } })
+  }
+  isManualModalOpen.value = false
 }
 
 const handleDiscountSubmit = async (data: any) => {
@@ -1411,6 +1499,12 @@ const openSignInModal = (signIn?: any) => {
     signInForm.patternType = detectedType
     signInForm.format_match = detectedType === 'custom' ? (signIn.format_match || '') : ''
     signInForm.max_uses_per_signin = signIn.max_uses_per_signin ? String(signIn.max_uses_per_signin) : ''
+    
+    // Update URL if editing existing sign-in
+    if (signIn.id) {
+      isManualModalOpen.value = true
+      router.replace({ query: { ...route.query, 'signin-id': signIn.id.toString() } })
+    }
   } else {
     editingSignIn.value = null
     signInForm.title = ''
@@ -1430,6 +1524,12 @@ const closeSignInModal = () => {
   signInForm.patternType = 'none'
   signInForm.format_match = ''
   signInForm.max_uses_per_signin = ''
+  
+  // Clear URL parameter
+  if (route.query['signin-id']) {
+    router.replace({ query: { ...route.query, 'signin-id': undefined } })
+  }
+  isManualModalOpen.value = false
 }
 
 const onSubmitSignIn = async (e: Event) => {
@@ -1592,6 +1692,10 @@ function openPackageAvailabilityModal(packageId: number) {
   selectedPackageId.value = packageId
   editingAvailabilityWindow.value = null
   showPackageAvailabilityModal.value = true
+  
+  // Update URL with package-id
+  isManualModalOpen.value = true
+  router.replace({ query: { ...route.query, 'package-id': packageId.toString() } })
 }
 
 function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
@@ -1616,6 +1720,11 @@ function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
     packageAvailabilityForm.available_from = window.available_from ? formatDateTimeForInputPackage(window.available_from) : ''
     packageAvailabilityForm.available_to = window.available_to ? formatDateTimeForInputPackage(window.available_to) : ''
     packageAvailabilityForm.timezone = window.timezone || event.value?.data?.timezone || 'UTC'
+    
+    // Update URL with window-id
+    if (selectedPackageId.value) {
+      router.replace({ query: { ...route.query, 'package-id': selectedPackageId.value.toString(), 'window-id': window.availability_id } })
+    }
   } else {
     // Reset form for new window - use empty object to indicate form is open
     editingAvailabilityWindow.value = {
@@ -1637,12 +1746,23 @@ function openPackageAvailabilityWindowForm(window?: AvailabilityWindow) {
 
 function closePackageAvailabilityWindowForm() {
   editingAvailabilityWindow.value = null
+  
+  // Clear window-id from URL but keep package-id
+  if (route.query['window-id'] && selectedPackageId.value) {
+    router.replace({ query: { ...route.query, 'window-id': undefined, 'package-id': selectedPackageId.value.toString() } })
+  }
 }
 
 function closePackageAvailabilityModal() {
   showPackageAvailabilityModal.value = false
   selectedPackageId.value = null
   editingAvailabilityWindow.value = null
+  
+  // Clear package-id and window-id from URL
+  if (route.query['package-id'] || route.query['window-id']) {
+    router.replace({ query: { ...route.query, 'package-id': undefined, 'window-id': undefined } })
+  }
+  isManualModalOpen.value = false
 }
 
 async function submitPackageAvailabilityForm() {
@@ -1805,6 +1925,103 @@ const selectedPackageName = computed(() => {
   const pkg = packages.value.find(p => p.id === selectedPackageId.value)
   return pkg?.name || ''
 })
+
+// Handle query parameters for direct window editing
+watch(
+  () => ({ 
+    packageId: route.query['package-id'], 
+    windowId: route.query['window-id'],
+    packagesLoaded: packages.value.length > 0
+  }),
+  ({ packageId, windowId, packagesLoaded }) => {
+    // Skip if manually opening a modal (prevents loops)
+    if (isManualModalOpen.value) {
+      isManualModalOpen.value = false
+      return
+    }
+    
+    // Only handle if both package-id and window-id are present
+    if (packageId && windowId && packagesLoaded) {
+      const pkgId = parseInt(packageId as string, 10)
+      if (!isNaN(pkgId)) {
+        // Open the package availability modal
+        openPackageAvailabilityModal(pkgId)
+        
+        // Wait for the availability windows to load
+        nextTick(() => {
+          // Find the window with the given ID
+          const window = packageAvailabilityWindows.value.find(w => w.availability_id === windowId)
+          if (window) {
+            openPackageAvailabilityWindowForm(window)
+          }
+        })
+      }
+    }
+  }
+)
+
+// Handle query parameters for direct modal opening
+watch(
+  () => ({
+    packageId: route.query['package-id'],
+    ticketId: route.query['ticket-id'],
+    discountId: route.query['discount-id'],
+    signinId: route.query['signin-id'],
+    packagesLoaded: packages.value.length > 0,
+    ticketsLoaded: ticketTypes.value.length > 0,
+    discountsLoaded: discounts.value.length > 0,
+    signInsLoaded: signIns.value.length > 0
+  }),
+  ({ packageId, ticketId, discountId, signinId, packagesLoaded, ticketsLoaded, discountsLoaded, signInsLoaded }) => {
+    // Skip if manually opening a modal (prevents loops)
+    if (isManualModalOpen.value) {
+      isManualModalOpen.value = false
+      return
+    }
+    
+    // Only handle if we're not also opening a window (window-id takes precedence)
+    if (route.query['window-id']) return
+
+    // Open package modal
+    if (packageId && packagesLoaded && !showPackageAvailabilityModal.value) {
+      const pkgId = parseInt(packageId as string, 10)
+      if (!isNaN(pkgId)) {
+        const pkg = packages.value.find(p => p.id === pkgId)
+        if (pkg) {
+          openPackageModal(pkg)
+        }
+      }
+    }
+
+    // Open ticket type modal
+    if (ticketId && ticketsLoaded) {
+      const tktId = parseInt(ticketId as string, 10)
+      if (!isNaN(tktId)) {
+        const ticket = ticketTypes.value.find(t => t.id === tktId)
+        if (ticket) {
+          openTicketTypeModal(ticket)
+        }
+      }
+    }
+
+    // Open discount modal
+    if (discountId && discountsLoaded) {
+      const discount = discounts.value.find(d => d.discount_id === discountId)
+      if (discount) {
+        openDiscountModal(discount)
+      }
+    }
+
+    // Open sign-in modal
+    if (signinId && signInsLoaded) {
+      const signin = signIns.value.find(s => s.id === signinId)
+      if (signin) {
+        openSignInModal(signin)
+      }
+    }
+  }
+)
+
 </script>
 
 <style scoped>
