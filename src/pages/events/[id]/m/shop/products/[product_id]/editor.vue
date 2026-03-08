@@ -2108,6 +2108,7 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import type { ProductVariantDetail, AvailabilityWindow } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import type { LocationQueryValue } from 'vue-router'
+import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
@@ -2786,7 +2787,19 @@ function removeNewVariant(index: number) {
 }
 
 async function deleteExistingVariant(variantId: string) {
-  if (!confirm('Are you sure you want to delete this variant?')) return
+  const result = await Swal.fire({
+    title: 'Delete Variant?',
+    text: 'Are you sure you want to delete this variant? This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+    focusCancel: true,
+  })
+
+  if (!result.isConfirmed) return
 
   try {
     await deleteVariant.mutateAsync({
@@ -3370,7 +3383,19 @@ async function submitDiscountForm() {
 }
 
 async function handleDeleteDiscount(discountId: string) {
-  if (!confirm('Are you sure you want to delete this discount?')) return
+  const result = await Swal.fire({
+    title: 'Delete Discount?',
+    text: 'Are you sure you want to delete this discount? This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+    focusCancel: true,
+  })
+
+  if (!result.isConfirmed) return
 
   deletingDiscountId.value = discountId
 
@@ -3549,7 +3574,19 @@ async function submitAvailabilityForm() {
 }
 
 async function handleDeleteAvailabilityWindow(windowId: string) {
-  if (!confirm('Are you sure you want to delete this availability window?')) return
+  const result = await Swal.fire({
+    title: 'Delete Availability Window?',
+    text: 'Are you sure you want to delete this availability window? This action cannot be undone.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+    focusCancel: true,
+  })
+
+  if (!result.isConfirmed) return
 
   deletingWindowId.value = windowId
 

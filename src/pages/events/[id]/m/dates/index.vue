@@ -293,6 +293,7 @@ import AvailabilityWindowsCalendar from '~/components/events/AvailabilityWindows
 import AvailabilityWindowFormModal from '~/components/events/AvailabilityWindowFormModal.vue'
 import AvailabilityTemplateSelector from '~/components/events/AvailabilityTemplateSelector.vue'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
@@ -437,11 +438,19 @@ function handleTemplateApplied() {
 const deleteMutation = useDeleteAvailabilityWindow()
 
 async function handleDelete(window: AvailabilityWindow) {
-  const confirmed = confirm(
-    `Are you sure you want to delete "${window.name}"?\n\nThis action cannot be undone.`
-  )
+  const result = await Swal.fire({
+    title: 'Delete Availability Window?',
+    html: `Are you sure you want to delete <strong>"${window.name}"</strong>?<br><br>This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+    focusCancel: true,
+  })
 
-  if (!confirmed) return
+  if (!result.isConfirmed) return
 
   try {
     await deleteMutation.mutateAsync({
