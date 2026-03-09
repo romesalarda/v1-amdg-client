@@ -5609,7 +5609,7 @@ export type EventQuestionAnswer = {
     readonly id: number;
     question: string;
     readonly question_title: string;
-    attendee: number;
+    attendee: string;
     readonly attendee_name: string;
     answer_text: string;
     readonly selected_options: Array<EventQuestionAnswerChoice>;
@@ -5668,7 +5668,7 @@ export type EventQuestionAnswerChoiceRequest = {
  */
 export type EventQuestionAnswerRequest = {
     question: string;
-    attendee: number;
+    attendee: string;
     answer_text: string;
 };
 
@@ -9996,7 +9996,7 @@ export type PatchedEventQuestionAnswerChoiceRequest = {
  */
 export type PatchedEventQuestionAnswerRequest = {
     question?: string;
-    attendee?: number;
+    attendee?: string;
     answer_text?: string;
 };
 
@@ -15588,7 +15588,7 @@ export type EventQuestionWritable = {
  */
 export type EventQuestionAnswerWritable = {
     question: string;
-    attendee: number;
+    attendee: string;
     answer_text: string;
 };
 
@@ -15605,7 +15605,7 @@ export type EventQuestionAnswerChoiceWritable = {
  */
 export type EventQuestionAnswerRequestWritable = {
     question: string;
-    attendee: number;
+    attendee: string;
     answer_text: string;
     /**
      * List of option IDs to select for choice questions
@@ -17331,7 +17331,7 @@ export type PatchedDiscountCreateUpdateRequestWritable = {
  */
 export type PatchedEventQuestionAnswerRequestWritable = {
     question?: string;
-    attendee?: number;
+    attendee?: string;
     answer_text?: string;
     /**
      * List of option IDs to select for choice questions
@@ -23598,9 +23598,29 @@ export type EventQuestionAnswersListData = {
     path?: never;
     query?: {
         /**
+         * Search in answer text
+         */
+        answer_text?: string;
+        /**
          * Filter by attendee ID
          */
         attendee?: number;
+        /**
+         * Filter by attendee email
+         */
+        attendee_email?: string;
+        /**
+         * Filter by attendee UUID (public facing identifier)
+         */
+        attendee_id?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -23613,6 +23633,14 @@ export type EventQuestionAnswersListData = {
          * Filter by question ID
          */
         question?: string;
+        /**
+         * Filter by event ID (through question)
+         */
+        question__event?: number;
+        /**
+         * Search across answer text and question title
+         */
+        search?: string;
     };
     url: '/api/event/question-answers/';
 };
@@ -23722,7 +23750,30 @@ export type EventQuestionAnswersSubmitFormCreateData = {
     };
     path?: never;
     query?: {
+        /**
+         * Search in answer text
+         */
+        answer_text?: string;
+        /**
+         * Filter by attendee ID (integer primary key)
+         */
         attendee?: number;
+        /**
+         * Filter by attendee email
+         */
+        attendee_email?: string;
+        /**
+         * Filter by attendee UUID (public facing identifier)
+         */
+        attendee_id?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -23731,7 +23782,18 @@ export type EventQuestionAnswersSubmitFormCreateData = {
          * Number of results to return per page.
          */
         page_size?: number;
-        question?: string;
+        /**
+         * Filter by question ID
+         */
+        question?: number;
+        /**
+         * Filter by event ID (through question)
+         */
+        question__event?: number;
+        /**
+         * Search across answer text and question title
+         */
+        search?: string;
     };
     url: '/api/event/question-answers/submit-form/';
 };
@@ -33442,13 +33504,13 @@ export type ProductsOrdersListData = {
          */
         attendee?: number;
         /**
-         * Filter by attendee UUID
-         */
-        attendee__attendee_id?: string;
-        /**
          * Filter by attendee email
          */
-        attendee__email?: string;
+        attendee_email?: string;
+        /**
+         * Filter by attendee UUID (public facing identifier)
+         */
+        attendee_id?: string;
         /**
          * Filter orders created after this date
          */
