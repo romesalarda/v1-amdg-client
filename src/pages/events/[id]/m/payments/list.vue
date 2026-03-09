@@ -414,7 +414,7 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="text-sm font-semibold text-gray-900">
-                      £{{ parseFloat(payment.amount || '0').toFixed(2) }}
+                      {{ payment.amount }}
                     </div>
                   </td>
                   <td class="px-4 py-3">
@@ -483,7 +483,6 @@
               </p>
             </div>
           </div>
-          {{ selectedPayment }}
 
           <!-- Pagination -->
           <div v-if="!paymentsLoading && payments.length > 0" class="px-6 py-4 border-t border-gray-100">

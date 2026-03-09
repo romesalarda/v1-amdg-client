@@ -8,10 +8,14 @@
           <span class="material-symbols-outlined text-primary">receipt_long</span>
           <div class="flex-1">
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Payment Details</h3>
-            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ payment.payment_reference }}</p>
+            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ paymentData.payment_reference }}</p>
           </div>
-          <UBadge :color="getPaymentStatusColor(payment.status || 'PENDING') as any" variant="soft" size="lg">
-            {{ getPaymentStatusLabel(payment.status || 'PENDING') }}
+          <div class="text-right mr-2">
+            <div class="text-xs text-gray-500">Amount</div>
+            <div class="text-lg font-bold text-gray-900">{{ formatAmount(paymentData.modified_amount || paymentData.amount) }}</div>
+          </div>
+          <UBadge :color="getPaymentStatusColor(paymentData.status || 'PENDING') as any" variant="soft" size="lg">
+            {{ getPaymentStatusLabel(paymentData.status || 'PENDING') }}
           </UBadge>
           <button
             @click="$emit('close')"
@@ -23,7 +27,21 @@
 
         <!-- Content -->
         <div class="p-6 overflow-y-auto flex-1 space-y-6">
+          <!-- Loading State -->
+          <div v-if="isLoading" class="flex items-center justify-center py-12">
+            <div class="text-center">
+              <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p class="text-sm text-gray-500">Loading payment details...</p>
+            </div>
+          </div>
+
+          <!-- Error State -->
+          <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p class="text-sm text-red-800">Failed to load payment details. Please try again.</p>
+          </div>
+
           <!-- Basic Info -->
+          <template v-else>
           <section>
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">info</span>
@@ -32,29 +50,29 @@
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Payment ID</div>
-                <div class="font-mono text-sm font-semibold">{{ payment.payment_id }}</div>
+                <div class="font-mono text-sm font-semibold">{{ paymentData.payment_id }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Reference</div>
-                <div class="font-mono text-sm font-semibold">{{ payment.payment_reference }}</div>
+                <div class="font-mono text-sm font-semibold">{{ paymentData.payment_reference }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Created</div>
-                <div class="text-sm font-semibold">{{ formatDateTime(payment.created_at) }}</div>
+                <div class="text-sm font-semibold">{{ formatDateTime(paymentData.created_at) }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Updated</div>
-                <div class="text-sm font-semibold">{{ formatDateTime(payment.updated_at) }}</div>
+                <div class="text-sm font-semibold">{{ formatDateTime(paymentData.updated_at) }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">User</div>
-                <div class="text-sm font-semibold">{{ payment.user?.username || 'N/A' }}</div>
-                <div class="text-xs text-gray-500">{{ payment.user?.email || 'N/A' }}</div>
+                <div class="text-sm font-semibold">{{ paymentData.user?.username || 'N/A' }}</div>
+                <div class="text-xs text-gray-500">{{ paymentData.user?.email || 'N/A' }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Payment Method</div>
-                <div class="text-sm font-semibold">{{ getMethodTypeLabel(payment.method?.method_type) }}</div>
-                <div class="text-xs text-gray-500">{{ payment.method?.title }}</div>
+                <div class="text-sm font-semibold">{{ paymentData.method?.title || paymentData.method_title || 'N/A' }}</div>
+                <div class="text-xs text-gray-500">{{ getMethodTypeLabel(paymentData.method?.method_type) || 'N/A' }}</div>
               </div>
             </div>
           </section>
@@ -69,22 +87,22 @@
               <div class="space-y-2">
                 <div class="flex justify-between items-center">
                   <span class="text-sm text-gray-600">Base Amount:</span>
-                  <span class="font-semibold">£{{ parseFloat(payment.base_amount || '0').toFixed(2) }}</span>
+                  <span class="font-semibold">{{ formatAmount(paymentData.base_amount) }}</span>
                 </div>
-                <div v-if="payment.percentage_modifier" class="flex justify-between items-center text-amber-700">
-                  <span class="text-sm">Modifier ({{ payment.percentage_modifier }}%):</span>
+                <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex justify-between items-center text-amber-700">
+                  <span class="text-sm">Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%):</span>
                   <span class="font-semibold">
-                    {{ payment.percentage_modifier > 0 ? '+' : '' }}£{{ calculateModifier(payment.base_amount, payment.percentage_modifier).toFixed(2) }}
+                    {{ parseAmount(paymentData.percentage_modifier) > 0 ? '+' : '' }}{{ formatAmount(calculateModifier(paymentData.base_amount, paymentData.percentage_modifier)) }}
                   </span>
                 </div>
                 <div v-if="hasDiscounts" class="flex justify-between items-center text-blue-700">
                   <span class="text-sm">Discounts Applied:</span>
-                  <span class="font-semibold">-£{{ calculateDiscounts().toFixed(2) }}</span>
+                  <span class="font-semibold">-{{ formatAmount(calculateDiscounts()) }}</span>
                 </div>
                 <div class="border-t border-green-300 pt-2 mt-2">
                   <div class="flex justify-between items-center">
                     <span class="text-base font-bold text-gray-900">Final Amount:</span>
-                    <span class="text-xl font-black text-green-700">£{{ parseFloat(payment.modified_amount || '0').toFixed(2) }}</span>
+                    <span class="text-xl font-black text-green-700">{{ formatAmount(paymentData.modified_amount || paymentData.amount) }}</span>
                   </div>
                 </div>
               </div>
@@ -92,7 +110,7 @@
           </section>
 
           <!-- Stripe Information -->
-          <section v-if="payment.method?.method_type === 'STRIPE' && payment.stripe_payment_intent">
+          <section v-if="paymentData.method?.method_type === 'STRIPE' && paymentData.stripe_payment_intent">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">credit_card</span>
               Stripe Information
@@ -100,29 +118,29 @@
             <div class="grid grid-cols-1 gap-3">
               <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
                 <div class="text-xs text-purple-700 mb-1">Payment Intent ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ payment.stripe_payment_intent }}</div>
+                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_payment_intent }}</div>
               </div>
-              <div v-if="payment.stripe_charge_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <div v-if="paymentData.stripe_charge_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
                 <div class="text-xs text-purple-700 mb-1">Charge ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ payment.stripe_charge_id }}</div>
+                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_charge_id }}</div>
               </div>
-              <div v-if="payment.stripe_customer_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+              <div v-if="paymentData.stripe_customer_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
                 <div class="text-xs text-purple-700 mb-1">Customer ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ payment.stripe_customer_id }}</div>
+                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_customer_id }}</div>
               </div>
             </div>
           </section>
 
           <!-- Bank Transfer Information -->
-          <section v-if="payment.method?.method_type === 'BANK_TRANSFER' && payment.bank_transfer_reference">
+          <section v-if="paymentData.method?.method_type === 'BANK_TRANSFER' && paymentData.bank_transfer_reference">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">account_balance</span>
               Bank Transfer Information
             </h4>
             <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
               <div class="text-xs text-amber-700 mb-1">Bank Reference</div>
-              <div class="font-mono text-lg font-bold text-amber-900">{{ payment.bank_transfer_reference }}</div>
-              <div v-if="payment.status === 'PENDING'" class="mt-3 pt-3 border-t border-amber-200">
+              <div class="font-mono text-lg font-bold text-amber-900">{{ paymentData.bank_transfer_reference }}</div>
+              <div v-if="paymentData.status === 'PENDING'" class="mt-3 pt-3 border-t border-amber-200">
                 <p class="text-xs text-amber-800 mb-2">
                   This payment is awaiting verification. Please verify the bank transfer before proceeding.
                 </p>
@@ -131,14 +149,14 @@
           </section>
 
           <!-- Tickets -->
-          <section v-if="payment.tickets && payment.tickets.length > 0">
+          <section v-if="paymentData.tickets && paymentData.tickets.length > 0">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">confirmation_number</span>
-              Associated Tickets ({{ payment.tickets.length }})
+              Associated Tickets ({{ paymentData.tickets.length }})
             </h4>
             <div class="space-y-2">
               <div
-                v-for="ticket in payment.tickets"
+                v-for="ticket in paymentData.tickets"
                 :key="ticket.ticket_id"
                 class="bg-gray-50 rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 transition-colors"
               >
@@ -154,21 +172,21 @@
           </section>
 
           <!-- Refunds -->
-          <section v-if="payment.refund_requests_summary && payment.refund_requests_summary.total_refunded > 0">
+          <section v-if="paymentData.refund_requests_summary && paymentData.refund_requests_summary.total_refunded > 0">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">undo</span>
-              Refund Requests ({{ payment.refund_requests_summary.total_refunded }})
+              Refund Requests ({{ paymentData.refund_requests_summary.total_refunded }})
             </h4>
             <div class="space-y-2">
               <div
-                v-for="refund in payment.refund_requests_summary.refunds"
+                v-for="refund in paymentData.refund_requests_summary.refunds"
                 :key="refund.refund_id"
                 class="bg-blue-50 rounded-lg p-3 border border-blue-200"
               >
                 <div class="flex items-start justify-between">
                   <div>
                     <div class="font-mono text-sm font-semibold text-blue-900">{{ refund.tracking_reference }}</div>
-                    <div class="text-xs text-blue-700 mt-1">Amount: £{{ parseFloat(refund.amount || '0').toFixed(2) }}</div>
+                    <div class="text-xs text-blue-700 mt-1">Amount: {{ formatAmount(refund.amount) }}</div>
                     <div class="text-xs text-gray-500">{{ refund.reason || 'No reason provided' }}</div>
                   </div>
                   <UBadge :color="getRefundStatusColor(refund.verification_status || 'pending') as any" variant="soft" size="xs">
@@ -180,14 +198,14 @@
           </section>
 
           <!-- Payment History / Audit Trail -->
-          <section v-if="payment.history_actions && payment.history_actions.length > 0">
+          <section v-if="paymentData.history_actions && paymentData.history_actions.length > 0">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">history</span>
               Payment History
             </h4>
             <div class="space-y-2">
               <div
-                v-for="action in payment.history_actions"
+                v-for="action in paymentData.history_actions"
                 :key="action.action_id"
                 class="flex gap-3 items-start"
               >
@@ -203,22 +221,23 @@
               </div>
             </div>
           </section>
+          </template>
         </div>
 
         <!-- Footer Actions -->
         <div class="px-6 py-4 border-t border-navy-50 flex items-center justify-between gap-3 flex-shrink-0">
           <div class="flex items-center gap-2">
             <button
-              v-if="payment.status === 'PENDING' && payment.method?.method_type === 'BANK_TRANSFER'"
-              @click="$emit('verify', payment)"
+              v-if="!isLoading && paymentData.status === 'PENDING' && paymentData.method?.method_type === 'BANK_TRANSFER'"
+              @click="$emit('verify', paymentData)"
               class="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-lg">verified</span>
               Verify Bank Transfer
             </button>
             <button
-              v-if="payment.status === 'COMPLETED'"
-              @click="$emit('refund', payment)"
+              v-if="!isLoading && paymentData.status === 'COMPLETED'"
+              @click="$emit('refund', paymentData)"
               class="px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors flex items-center gap-2"
             >
               <span class="material-symbols-outlined text-lg">undo</span>
@@ -247,23 +266,64 @@ import {
   getRefundStatusColor,
 } from '~/schemas/events/paymentConstants'
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
+import { usePayment } from '~/composables/resources/payments/payments'
+import { usePaymentMethod } from '~/composables/resources/payments/paymentMethods'
 
 interface Props {
   payment: any
   open: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 defineEmits(['close', 'refund', 'verify'])
+
+// Fetch full payment details
+const { data: fullPaymentData, isLoading: isLoadingPayment, error: paymentError } = usePayment(computed(() => props.payment?.payment_id))
+
+// Fetch payment method details
+const methodId = computed(() => {
+  const payment = fullPaymentData.value?.data || props.payment
+  return payment?.method
+})
+const { data: methodData, isLoading: isLoadingMethod, error: methodError } = usePaymentMethod(methodId)
+
+// Combine loading and error states
+const isLoading = computed(() => isLoadingPayment.value || isLoadingMethod.value)
+const error = computed(() => paymentError.value || methodError.value)
+
+// Use full payment data with method details merged
+const paymentData = computed(() => {
+  const payment = fullPaymentData.value?.data || props.payment
+  const method = methodData.value?.data
+  
+  return {
+    ...payment,
+    method: method || payment.method
+  }
+})
 
 const hasDiscounts = computed(() => {
   // Check if there are discounts in metadata
   return false // TODO: implement discount checking from metadata
 })
 
-function calculateModifier(baseAmount: string, percentage: number): number {
-  const base = parseFloat(baseAmount || '0')
-  return (base * percentage) / 100
+function parseAmount(amount: string | number): number {
+  if (typeof amount === 'number') return amount
+  if (!amount) return 0
+  // Remove currency symbols and parse
+  const cleanAmount = String(amount).replace(/[£$€,]/g, '').trim()
+  const parsed = parseFloat(cleanAmount)
+  return isNaN(parsed) ? 0 : parsed
+}
+
+function formatAmount(amount: string | number): string {
+  return `£${parseAmount(amount).toFixed(2)}`
+}
+
+function calculateModifier(baseAmount: string | number, percentage: string | number): number {
+  const base = parseAmount(baseAmount)
+  const percent = typeof percentage === 'string' ? parseFloat(percentage) : percentage
+  return (base * percent) / 100
 }
 
 function calculateDiscounts(): number {
@@ -272,7 +332,12 @@ function calculateDiscounts(): number {
 }
 
 function formatDateTime(dateString: string): string {
+  if (!dateString) return 'N/A'
+  
   const date = new Date(dateString)
+  
+  // Check if date is valid
+  if (isNaN(date.getTime())) return 'N/A'
   
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
@@ -283,7 +348,8 @@ function formatDateTime(dateString: string): string {
   }).format(date)
 }
 
-function getMethodTypeLabel(methodType: string): string {
+function getMethodTypeLabel(methodType: string | undefined): string {
+  if (!methodType) return 'N/A'
   return paymentMethodTypeLabels[methodType as keyof typeof paymentMethodTypeLabels] || methodType
 }
 </script>

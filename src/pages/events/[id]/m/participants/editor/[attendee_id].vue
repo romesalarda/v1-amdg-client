@@ -1,12 +1,48 @@
 <template>
   <EventManagementLayout :event-id="eventId" :event="event?.data.value?.data">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      <!-- Main Content (9/12) -->
-      <div class="lg:col-span-9 space-y-6">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
+      <!-- Main Content (Left - 8/12 on xl, 12/12 on smaller) -->
+      <div class="xl:col-span-8 space-y-6">
         
         <!-- Header Card -->
         <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+          <!-- Mobile Header - Only visible on mobile -->
+          <div class="xl:hidden px-5 py-4 border-b border-gray-100">
+            <div class="flex items-center gap-4">
+              <!-- Profile Picture -->
+              <div class="flex-shrink-0">
+                <img
+                  v-if="linkedUserProfile?.profile_picture_url"
+                  :src="linkedUserProfile.profile_picture_url"
+                  :alt="attendee.data.value?.data?.full_name"
+                  class="w-16 h-16 rounded-full object-cover border-2 border-primary/20"
+                />
+                <div
+                  v-else
+                  class="w-16 h-16 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20"
+                >
+                  <UIcon name="i-heroicons-user" class="w-8 h-8 text-primary" />
+                </div>
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <h1 class="text-lg font-black text-primary uppercase tracking-wide truncate">
+                  {{ attendee.data.value?.data?.full_name || 'Loading...' }}
+                </h1>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  ID: {{ attendee.data.value?.data?.attendee_display_id }}
+                </p>
+                <div class="flex items-center gap-2 mt-2">
+                  <UBadge v-if="attendee.data.value?.data?.is_minor" color="amber" variant="soft" size="xs">Minor</UBadge>
+                  <UBadge v-if="(attendee.data.value?.data as any)?.is_event_staff" color="purple" variant="soft" size="xs">Staff</UBadge>
+                  <UBadge v-if="(attendee.data.value?.data as any)?.is_checked_in" color="green" variant="soft" size="xs">✓ Checked In</UBadge>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Desktop Header - Only visible on desktop -->
+          <div class="hidden xl:block px-5 py-3 border-b border-gray-100">
             <div class="flex items-center gap-3">
               <UIcon name="i-heroicons-user" class="w-5 h-5 text-primary" />
               <div>
@@ -18,29 +54,41 @@
                 </p>
               </div>
             </div>
-            <div class="flex items-center gap-2">
-              <UBadge v-if="attendee.data.value?.data?.is_minor" color="amber" variant="soft">Minor</UBadge>
-              <UBadge v-if="(attendee.data.value?.data as any)?.is_event_staff" color="purple" variant="soft">Staff</UBadge>
-            </div>
           </div>
 
-          <!-- Tab Navigation -->
-          <div class="px-5 py-3 border-b border-gray-100 bg-gray-50">
-            <nav class="flex gap-6">
-              <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                @click="changeTab(tab.id)"
-                :class="[
-                  'py-2 px-1 border-b-2 font-semibold text-xs uppercase tracking-wide transition-colors',
-                  currentTab === tab.id
-                    ? 'border-primary text-primary'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                ]"
+          <!-- Tab Navigation - Responsive -->
+          <div class="border-b border-gray-100 bg-gray-50">
+            <!-- Mobile Dropdown -->
+            <div class="xl:hidden px-5 py-3">
+              <select
+                v-model="currentTab"
+                @change="changeTab(currentTab)"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               >
-                {{ tab.label }}
-              </button>
-            </nav>
+                <option v-for="tab in tabs" :key="tab.id" :value="tab.id">
+                  {{ tab.label }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Desktop Horizontal Scrollable Tabs -->
+            <div class="hidden xl:block px-5 py-3 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+              <nav class="flex gap-6 min-w-max">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  @click="changeTab(tab.id)"
+                  :class="[
+                    'py-2 px-1 border-b-2 font-semibold text-xs uppercase tracking-wide transition-colors whitespace-nowrap',
+                    currentTab === tab.id
+                      ? 'border-primary text-primary'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  ]"
+                >
+                  {{ tab.label }}
+                </button>
+              </nav>
+            </div>
           </div>
 
           <!-- Tab Content -->
@@ -1499,19 +1547,199 @@
       </section>
       </div>
 
-      <!-- Sidebar (3/12) -->
-      <div class="lg:col-span-3 space-y-6">
-        <!-- Quick Actions -->
-        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-3 bg-gradient-to-r from-primary to-deep-navy">
-            <div class="flex items-center justify-between">
-              <h3 class="text-xs font-black text-white uppercase tracking-widest">
-                Quick Actions
-              </h3>
+      <!-- Sidebar (4/12) - Hidden on mobile, visible on xl -->
+      <div class="hidden xl:block xl:col-span-4 space-y-6">
+        <!-- Profile Card -->
+        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden sticky top-6">
+          <!-- Profile Picture Section -->
+           <!-- {{ attendee }} -->
+          <div class="relative bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 pb-20">
+            <div class="flex justify-center">
+              <div class="relative">
+                <img
+                  v-if="linkedUserProfile?.profile_picture_url && attendee.data.value?.data?.relationship_display.toLowerCase() == 'self'"
+                  :src="linkedUserProfile.profile_picture_url"
+                  :alt="attendee.data.value?.data?.full_name"
+                  class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                />
+                <div
+                  v-else
+                  class="w-32 h-32 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border-4 border-white shadow-lg"
+                >
+                  <UIcon name="i-heroicons-user" class="w-16 h-16 text-primary" />
+                </div>
+                
+                <!-- Linked User Indicator -->
+                <div
+                  v-if="linkedUserId"
+                  class="absolute -bottom-2 -right-2 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center border-4 border-white shadow-md"
+                  :title="'Linked to user account'"
+                >
+                  <UIcon name="i-heroicons-link" class="w-5 h-5 text-white" />
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="p-5 space-y-3">
+          <!-- Name & Basic Info -->
+          <div class="px-6 -mt-14 pb-6 relative z-10">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 text-center">
+              <h2 class="text-xl font-black text-gray-900 mb-1">
+                {{ attendee.data.value?.data?.full_name }}
+              </h2>
+              <p class="text-sm text-gray-500 mb-3">
+                {{ attendee.data.value?.data?.relationship_display }}
+              </p>
+              
+              <div class="flex items-center justify-center gap-2 mb-3">
+                <UBadge v-if="attendee.data.value?.data?.is_minor" color="amber" variant="soft" size="xs">
+                  {{ attendee.data.value?.data?.age }} years • Minor
+                </UBadge>
+                <UBadge v-else color="gray" variant="soft" size="xs">
+                  {{ attendee.data.value?.data?.age }} years
+                </UBadge>
+                <UBadge v-if="attendee.data.value?.data?.gender" color="gray" variant="soft" size="xs">
+                  {{ attendee.data.value?.data?.gender }}
+                </UBadge>
+              </div>
+
+              <!-- Status Badges -->
+              <div class="flex flex-wrap items-center justify-center gap-2 pt-3 border-t border-gray-100">
+                <UBadge v-if="(attendee.data.value?.data as any)?.is_checked_in" color="green" variant="soft" size="xs">
+                  ✓ Checked In
+                </UBadge>
+                <UBadge v-if="(attendee.data.value?.data as any)?.is_event_staff" color="purple" variant="soft" size="xs">
+                  Staff
+                </UBadge>
+                <UBadge v-if="(attendee.data.value?.data as any)?.is_cancelled" color="red" variant="soft" size="xs">
+                  Cancelled
+                </UBadge>
+              </div>
+            </div>
+          </div>
+
+          <!-- Contact Information -->
+          <div class="px-6 pb-6 space-y-3">
+            <div v-if="attendee.data.value?.data?.email" class="flex items-start gap-3 text-sm">
+              <UIcon name="i-heroicons-envelope" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-0.5">Email</p>
+                <a :href="`mailto:${attendee.data.value?.data?.email}`" class="text-primary hover:underline break-all">
+                  {{ attendee.data.value?.data?.email }}
+                </a>
+              </div>
+            </div>
+
+            <div v-if="attendee.data.value?.data?.phone_number" class="flex items-start gap-3 text-sm">
+              <UIcon name="i-heroicons-phone" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-0.5">Phone</p>
+                <a :href="`tel:${attendee.data.value?.data?.phone_number}`" class="text-gray-900 hover:text-primary">
+                  {{ attendee.data.value?.data?.phone_number }}
+                </a>
+              </div>
+            </div>
+
+            <div v-if="attendee.data.value?.data?.area_from_name" class="flex items-start gap-3 text-sm">
+              <UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-0.5">Area From</p>
+                <p class="text-gray-900">{{ attendee.data.value?.data?.area_from_name }}</p>
+              </div>
+            </div>
+
+            <div v-if="(attendee.data.value?.data as any)?.booking_id" class="flex items-start gap-3 text-sm">
+              <UIcon name="i-heroicons-ticket" class="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase mb-0.5">Booking</p>
+                <p class="text-gray-900 font-mono text-xs">#{{ (attendee.data.value?.data as any)?.booking_id?.slice(0, 8) }}...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Requirements Summary -->
+          <div class="px-6 pb-6">
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+              <h3 class="text-xs font-black text-gray-700 uppercase tracking-wider mb-3">Requirements</h3>
+              
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-heart" class="w-4 h-4 text-red-500" />
+                  <span class="text-gray-700">Medical</span>
+                </div>
+                <UBadge :color="attendeeMedicalConditions.data.value?.data?.count ? 'red' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeMedicalConditions.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-cake" class="w-4 h-4 text-amber-500" />
+                  <span class="text-gray-700">Dietary</span>
+                </div>
+                <UBadge :color="attendeeDietaryRequirements.data.value?.data?.count ? 'amber' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeDietaryRequirements.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-heart-circle" class="w-4 h-4 text-blue-500" />
+                  <span class="text-gray-700">Accessibility</span>
+                </div>
+                <UBadge :color="attendeeAccessibilityRequirements.data.value?.data?.count ? 'blue' : 'gray'" variant="soft" size="xs">
+                  {{ attendeeAccessibilityRequirements.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+              
+              <div class="flex items-center justify-between text-sm">
+                <div class="flex items-center gap-2">
+                  <UIcon name="i-heroicons-phone-arrow-up-right" class="w-4 h-4 text-purple-500" />
+                  <span class="text-gray-700">Emergency Contacts</span>
+                </div>
+                <UBadge :color="emergencyContacts.data.value?.data?.count ? 'purple' : 'gray'" variant="soft" size="xs">
+                  {{ emergencyContacts.data.value?.data?.count || 0 }}
+                </UBadge>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Link Info -->
+          <div v-if="linkedUserId" class="px-6 pb-6">
+            <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div class="flex items-start gap-3">
+                <UIcon name="i-heroicons-link" class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-xs font-semibold text-green-900 mb-1">Linked Account</p>
+                  <p class="text-xs text-green-700">
+                    This attendee is linked to a user account
+                    <span v-if="linkedUserProfile">({{ linkedUserProfile.preferred_name || linkedUserProfile.full_name }})</span>
+                  </p>
+                  <UButton
+                    v-if="attendee.data.value?.data?.relationship_to_user === 'self' && !syncingFromUser"
+                    @click="syncFromUserProfile"
+                    size="xs"
+                    color="green"
+                    variant="soft"
+                    class="mt-2"
+                    icon="i-heroicons-arrow-path"
+                  >
+                    Sync from Profile Data
+                  </UButton>
+                  <div v-if="syncingFromUser" class="mt-2 flex items-center gap-2 text-xs text-green-700">
+                    <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Syncing...
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="px-6 pb-6 space-y-2">
             <UButton
               @click="changeTab('edit')"
               block
@@ -1533,64 +1761,16 @@
               Back to List
             </UButton>
             
-            <div class="pt-3 border-t border-gray-200">
-              <UButton
-                @click="confirmDelete"
-                block
-                size="sm"
-                color="red"
-                variant="soft"
-                icon="i-heroicons-trash"
-              >
-                Delete Participant
-              </UButton>
-            </div>
-          </div>
-        </section>
-
-        <!-- Info Card -->
-        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-            <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-primary" />
-            <h3 class="text-xs font-black text-primary uppercase tracking-widest">Participant Info</h3>
-          </div>
-          <div class="p-5 space-y-3">
-            <div v-if="attendee.data.value?.data">
-              <div class="flex items-center justify-between text-xs">
-                <span class="text-gray-500 font-semibold uppercase">Status</span>
-                <UBadge :color="(attendee.data.value?.data as any)?.is_checked_in ? 'green' : 'gray'" variant="soft" size="xs">
-                  {{ (attendee.data.value?.data as any)?.is_checked_in ? 'Checked In' : 'Not Checked In' }}
-                </UBadge>
-              </div>
-              
-              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
-                <span class="text-gray-500 font-semibold uppercase">Medical</span>
-                <UBadge :color="attendeeMedicalConditions.data.value?.data?.count ? 'red' : 'gray'" variant="soft" size="xs">
-                  {{ attendeeMedicalConditions.data.value?.data?.count || 0 }}
-                </UBadge>
-              </div>
-              
-              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
-                <span class="text-gray-500 font-semibold uppercase">Dietary</span>
-                <UBadge :color="attendeeDietaryRequirements.data.value?.data?.count ? 'amber' : 'gray'" variant="soft" size="xs">
-                  {{ attendeeDietaryRequirements.data.value?.data?.count || 0 }}
-                </UBadge>
-              </div>
-              
-              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
-                <span class="text-gray-500 font-semibold uppercase">Accessibility</span>
-                <UBadge :color="attendeeAccessibilityRequirements.data.value?.data?.count ? 'blue' : 'gray'" variant="soft" size="xs">
-                  {{ attendeeAccessibilityRequirements.data.value?.data?.count || 0 }}
-                </UBadge>
-              </div>
-              
-              <div class="flex items-center justify-between text-xs pt-2 border-t border-gray-100">
-                <span class="text-gray-500 font-semibold uppercase">Emergency Contacts</span>
-                <UBadge :color="emergencyContacts.data.value?.data?.count ? 'purple' : 'gray'" variant="soft" size="xs">
-                  {{ emergencyContacts.data.value?.data?.count || 0 }}
-                </UBadge>
-              </div>
-            </div>
+            <UButton
+              @click="confirmDelete"
+              block
+              size="sm"
+              color="red"
+              variant="soft"
+              icon="i-heroicons-trash"
+            >
+              Delete Participant
+            </UButton>
           </div>
         </section>
       </div>
@@ -1607,6 +1787,7 @@ import * as z from 'zod'
 import { useAttendee, useUpdateAttendee, useDeleteAttendee } from '~/composables/resources/attendee/attendees'
 import { useEvent } from '~/composables/resources/events/events'
 import { useAreas } from '~/composables/resources/locations/locations'
+import { useProfile, useProfiles } from '~/composables/resources/user/profiles'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
@@ -1667,6 +1848,28 @@ const tabs = [
 const attendee = useAttendee(attendeeId)
 const event = useEvent(eventId)
 const areas = useAreas()
+
+// Parse user ID from attendee's _links.user URL
+const linkedUserId = computed(() => {
+  const userLink = attendee.data.value?.data?._links?.user
+  if (!userLink) return null
+  
+  // Extract user ID from URL like "/api/users/123/"
+  const match = userLink.match(/\/users\/(\d+)/)
+  return match ? parseInt(match[1]) : null
+})
+
+// Fetch linked profile data by user ID (public information only)
+const linkedProfilesQuery = useProfiles(computed(() => 
+  linkedUserId.value ? { user: linkedUserId.value } : undefined
+))
+const linkedUserProfile = computed(() => 
+  linkedProfilesQuery.data.value?.data?.results?.[0] || null
+)
+
+// State for sync functionality
+const syncingFromUser = ref(false)
+const toast = useToast()
 
 // Booking data
 const booking = useBooking(computed(() => attendee.data.value?.data?.booking || 0))
@@ -2432,6 +2635,77 @@ const removeOrganisation = async (organisationId: number) => {
     })
   } catch (error) {
     console.error('Failed to remove organisation:', error)
+  }
+}
+
+// Sync from User Profile
+const syncFromUserProfile = async () => {
+  if (!linkedUserProfile.value) {
+    toast.add({
+      title: 'Error',
+      description: 'No profile data found to sync from',
+      color: 'red',
+    })
+    return
+  }
+
+  syncingFromUser.value = true
+
+  try {
+    const profile = linkedUserProfile.value
+
+    // Build update data from profile (public data only)
+    const updateData: any = {}
+    
+    // Note: We can only sync public profile data (phone and area)
+    // Name and email are private user data not accessible from profiles
+
+    // Sync phone
+    if (!formData.value.phone_number && profile.contact_phone) {
+      updateData.phone_number = profile.contact_phone
+      formData.value.phone_number = profile.contact_phone
+    }
+
+    // Sync area from
+    if (!formData.value.area_from && profile.area_from) {
+      updateData.area_from = profile.area_from
+      formData.value.area_from = profile.area_from
+    }
+
+    // Only update if there are changes
+    if (Object.keys(updateData).length > 0) {
+      await updateMutation.mutateAsync({
+        attendeeId: attendeeId.value,
+        body: {
+          ...formData.value,
+          ...updateData,
+        },
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Attendee information synced from profile',
+        color: 'green',
+      })
+
+      // Refresh attendee data
+      await attendee.refetch()
+    } else {
+      toast.add({
+        title: 'No Changes',
+        description: 'Attendee information is already up to date',
+        color: 'blue',
+      })
+    }
+  } catch (error) {
+    console.error('Failed to sync from user profile:', error)
+    toast.add({
+      title: 'Error',
+      description: 'Failed to sync from profile',
+      color: 'red',
+    })
+  } finally {
+    syncingFromUser.value = false
   }
 }
 

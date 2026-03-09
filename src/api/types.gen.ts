@@ -33846,6 +33846,7 @@ export type ProfilesListData = {
          * Filter by timezone (exact match, e.g., Europe/London)
          */
         timezone?: string;
+        user?: number;
     };
     url: '/api/profiles/';
 };

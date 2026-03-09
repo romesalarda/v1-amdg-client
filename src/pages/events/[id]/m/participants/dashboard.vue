@@ -989,7 +989,7 @@ const sortDirection = ref<'asc' | 'desc'>('asc')
 // Selection state
 const selectedAttendees = ref<string[]>([])
 const selectAll = ref(false)
-const showFilters = ref(true)
+const showFilters = ref(false)
 
 // Modal state
 const showDetailsModal = ref(false)

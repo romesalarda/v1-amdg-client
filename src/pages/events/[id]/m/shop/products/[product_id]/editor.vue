@@ -3129,22 +3129,22 @@ async function saveNewVariants(currentProductId: string) {
   const seen = new Set<string>()
   const duplicates: string[] = []
   
-  for (const variant of newVariants.value) {
+  newVariants.value.forEach((variant, index) => {
     const key = `${variant.size}-${variant.color.trim().toUpperCase()}`
     
-    // Check against existing variants
-    if (checkVariantDuplicate(variant.size, variant.color)) {
+    // Check against existing variants and other new variants (excluding self)
+    if (checkVariantDuplicate(variant.size, variant.color, index)) {
       duplicates.push(`${variant.size} - ${variant.color}`)
-      continue
+      return
     }
     
-    // Check for duplicates within new variants
+    // Check for duplicates within new variants (redundant but kept for clarity)
     if (seen.has(key)) {
       duplicates.push(`${variant.size} - ${variant.color}`)
     } else {
       seen.add(key)
     }
-  }
+  })
   
   if (duplicates.length > 0) {
     toast.add({
