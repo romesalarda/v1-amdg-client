@@ -300,6 +300,21 @@ const editingAnswer = ref<{
 })
 const isSaving = ref(false)
 
+// Watcher to refetch answers when mutations succeed
+watch(
+  () => [
+    createAnswerMutation.isSuccess.value,
+    partialUpdateAnswerMutation.isSuccess.value,
+    deleteAnswerMutation.isSuccess.value,
+    createAnswerChoiceMutation.isSuccess.value,
+    deleteAnswerChoiceMutation.isSuccess.value
+  ],
+  () => {
+    // Refetch attendee answers when any mutation succeeds
+    attendeeAnswers.refetch()
+  }
+)
+
 // Computed
 const isLoading = computed(() => eventQuestions.isLoading.value || attendeeAnswers.isLoading.value)
 
