@@ -1,12 +1,25 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event">
+    <!-- Quick Actions Bar -->
+    <div class="mb-6 flex justify-end">
+      <UButton
+        :to="`/events/${id}/m/dashboard/statistics`"
+        color="primary"
+        variant="solid"
+        icon="i-heroicons-chart-bar-square"
+        size="md"
+      >
+        View Detailed Statistics
+      </UButton>
+    </div>
+
     <!-- Stats Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <!-- Total Registrations -->
       <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm flex justify-between items-start">
         <div>
           <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Total Registrations</p>
-          <h3 class="text-4xl font-black text-deep-navy mt-2">{{ event?.number_of_attendees || 0 }}</h3>
+          <h3 class="text-4xl font-black text-deep-navy mt-2">{{ eventStats?.total_attendees || event?.number_of_attendees || 0 }}</h3>
           <p v-if="event?.maximum_attendance" class="text-[10px] font-bold text-gray-400 mt-1 uppercase">
             of {{ event.maximum_attendance }} capacity
           </p>
@@ -60,38 +73,43 @@
 
     <!-- Financial Metrics Grid -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Net Profit -->
+      <!-- Total Revenue -->
       <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Net Profit</p>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Revenue</p>
         <div class="flex items-baseline gap-2">
-          <h3 class="text-3xl font-black text-deep-navy">£{{ netProfit.toLocaleString() }}.00</h3>
-          <span class="text-xs font-bold text-green-600 flex items-center">
-            <UIcon name="i-heroicons-arrow-up" class="w-3 h-3" /> 12%
-          </span>
+          <h3 class="text-3xl font-black text-deep-navy">£{{ formatRevenue(eventStats?.total_revenue) }}</h3>
         </div>
+        <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase">
+          from {{ eventStats?.total_bookings || 0 }} bookings
+        </p>
       </div>
 
-      <!-- Revenue Split -->
+      <!-- Revenue Breakdown -->
       <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Revenue Split</p>
+        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Revenue Sources</p>
         <div class="space-y-3">
           <div class="flex items-center justify-between text-[10px] font-bold uppercase">
-            <span class="text-deep-navy">Tickets</span>
-            <span class="text-gray-400">85%</span>
+            <span class="text-deep-navy">Bookings</span>
+            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.booking_revenue) }}</span>
           </div>
-          <div class="w-full h-3 bg-gray-100 rounded-full overflow-hidden flex">
-            <div class="h-full bg-deep-navy" style="width: 85%"></div>
-            <div class="h-full bg-gray-300" style="width: 15%"></div>
+          <div class="flex items-center justify-between text-[10px] font-bold uppercase">
+            <span class="text-deep-navy">Products</span>
+            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.product_revenue) }}</span>
           </div>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-deep-navy"></span>
-              <span class="text-[10px] font-bold text-gray-400 uppercase">Tickets</span>
-            </div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-gray-300"></span>
-              <span class="text-[10px] font-bold text-gray-400 uppercase">Merchandise</span>
-            </div>
+          <div class="flex items-center justify-between text-[10px] font-bold uppercase">
+            <span class="text-deep-navy">Donations</span>
+            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.donation_revenue) }}</span>
+          </div>
+          <div class="pt-2 border-t border-gray-200">
+            <UButton
+              :to="`/events/${id}/m/dashboard/statistics`"
+              variant="ghost"
+              color="primary"
+              size="xs"
+              block
+            >
+              View Full Breakdown
+            </UButton>
           </div>
         </div>
       </div>
@@ -279,6 +297,7 @@ import { useEventQuestions } from '~/composables/resources/events/eventQuestions
 import { useEventRoles } from '~/composables/resources/events/eventRoles'
 import { useEventResources } from '~/composables/resources/events/eventResources'
 import { useEventLandingImages } from '~/composables/resources/events/eventLandingImages'
+import { useEventOverview, useRevenueOverview } from '~/composables/statistics/event/event-statistics'
 import { formatDate, formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import LineChart from '~/components/charts/LineChart.vue'
@@ -314,6 +333,19 @@ const resourcesList = computed(() => resourcesData.value?.data)
 
 const { data: landingImagesData } = useEventLandingImages(id, { page_size: 1 })
 const landingImages = computed(() => landingImagesData.value?.data)
+
+// Fetch event statistics
+const { data: eventStatsData } = useEventOverview(computed(() => ({
+  // @ts-ignore - Backend accepts UUID string despite OpenAPI spec saying number
+  event_id: id.value,
+} as any)))
+const eventStats = computed(() => eventStatsData.value?.data)
+
+const { data: revenueData } = useRevenueOverview(computed(() => ({
+  // @ts-ignore
+  event_id: id.value,
+} as any)))
+const revenueBreakdown = computed(() => revenueData.value?.data)
 
 // Fetch attendees list for chart data and recent activity
 const { data: attendeesData, isPending: isAttendeesPending } = useQuery({
@@ -376,11 +408,12 @@ const registrationChartLabels = computed(() => {
   return labels
 })
 
-// Mock Financial Data (until backend aggregation is available)
-const netProfit = computed(() => {
-  // TODO: Calculate from payments when aggregation endpoint is available
-  return 42850
-})
+// Format revenue helper
+const formatRevenue = (value: string | number | null | undefined) => {
+  if (!value) return '0.00'
+  const numValue = typeof value === 'string' ? parseFloat(value) : value
+  return numValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
 
 // Mock Regional Distribution Data
 const attendeesByArea = computed(() => {

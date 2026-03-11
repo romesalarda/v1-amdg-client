@@ -576,6 +576,11 @@
               <p class="text-sm text-gray-500">No products are below the {{ stockAlertThreshold }}% stock threshold</p>
             </div>
           </template>
+
+          <!-- Statistics Tab -->
+          <template v-else-if="currentTab === 'statistics'">
+            <StatisticsIndex />
+          </template>
         </div>
       </div>
 
@@ -770,6 +775,7 @@ import { useProducts } from '~/composables/resources/products/products'
 import { useProductCategories } from '~/composables/resources/products/productCategories'
 import { useProductEventCategories, useCreateProductEventCategory, useDeleteProductEventCategory } from '~/composables/resources/products/productEventCategories'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import StatisticsIndex from './statistics/index.vue'
 import { 
   getStockStatus, 
   getStockStatusLabel, 
@@ -797,6 +803,7 @@ const tabs = computed(() => [
   // { value: 'discounts', label: 'Discounts', icon: 'i-heroicons-tag' },
   { value: 'categories', label: 'Categories', icon: 'i-heroicons-folder' },
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
+  { value: 'statistics', label: 'Statistics', icon: 'i-heroicons-chart-bar' },
 ])
 
 // Pagination
