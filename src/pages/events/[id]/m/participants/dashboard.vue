@@ -144,14 +144,28 @@
                     >
                       Bookings
                     </button>
+                    <button
+                      @click="changeView('statistics')"
+                      :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                        currentView === 'statistics'
+                          ? 'bg-white text-primary shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      ]"
+                    >
+                      Statistics
+                    </button>
                   </div>
                 </div>
                 <p class="text-xs text-gray-500">
                   <template v-if="currentView === 'attendees'">
                     Showing {{ attendees.length }} of {{ totalAttendees }} participants
                   </template>
-                  <template v-else>
+                  <template v-else-if="currentView === 'bookings'">
                     Showing {{ bookings.length }} of {{ totalBookings }} bookings
+                  </template>
+                  <template v-else>
+                    Statistics and analytics for event participants
                   </template>
                 </p>
               </div>
@@ -493,6 +507,11 @@
                 </tr>
               </tbody>
             </table>
+          </div>
+
+          <!-- Statistics View -->
+          <div v-else-if="currentView === 'statistics'">
+            <StatisticsIndex />
           </div>
 
           <!-- Pagination -->
@@ -927,6 +946,7 @@ import { useEvent } from '~/composables/resources/events/events'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useAreas } from '~/composables/resources/locations/locations'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import StatisticsIndex from './statistics/index.vue'
 import type { AttendeeList, OrganisationList, BookingList } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
@@ -977,7 +997,11 @@ const id = computed(() => route.params.id as string)
 const { data: event } = useEvent(id)
 
 // View toggle state
-const currentView = ref<'attendees' | 'bookings'>((route.query.view as string) === 'bookings' ? 'bookings' : 'attendees')
+const currentView = ref<'attendees' | 'bookings' | 'statistics'>(
+  (route.query.view as string) === 'bookings' ? 'bookings' : 
+  (route.query.view as string) === 'statistics' ? 'statistics' : 
+  'attendees'
+)
 
 // State
 const searchQuery = ref(route.query.search as string || '')
@@ -1149,6 +1173,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
   if (pageSize.value !== 25) query.page_size = pageSize.value
   if (currentSort.value) query.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
   if (currentView.value === 'bookings') query.view = 'bookings'
+  if (currentView.value === 'statistics') query.view = 'statistics'
   
   if (filters.value.organisation) query.organisation = filters.value.organisation
   if (filters.value.areaFrom) query.area_from = filters.value.areaFrom
@@ -1168,7 +1193,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
 }, { deep: true })
 
 // Functions
-function changeView(view: 'attendees' | 'bookings') {
+function changeView(view: 'attendees' | 'bookings' | 'statistics') {
   currentView.value = view
   currentPage.value = 1 // Reset to first page
   selectedAttendees.value = [] // Clear selection

@@ -52,6 +52,54 @@ export type AccessibilityRequirementRequest = {
 };
 
 /**
+ * Serializer for accessibility requirements statistics.
+ */
+export type AccessibilityRequirementsStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    attendees_with_requirements: number;
+    attendees_without_requirements: number;
+    requirements: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for age distribution statistics.
+ */
+export type AgeDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_with_age: number;
+    total_without_age: number;
+    average_age: number | null;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for area distribution statistics.
+ */
+export type AreaDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    total_with_area: number;
+    total_without_area: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Create/Update serializer for AreaLocation.
  */
 export type AreaLocationCreateUpdate = {
@@ -167,6 +215,23 @@ export type AreaLocationList = {
         chapter?: string;
         relative_areas?: string;
     };
+};
+
+/**
+ * Serializer for attendance check-in statistics.
+ */
+export type AttendanceStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    checked_in: number;
+    not_checked_in: number;
+    check_in_rate: number;
+    check_in_trends: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -1387,6 +1452,21 @@ export type BookingPackageList = {
 };
 
 /**
+ * Serializer for booking package performance statistics.
+ */
+export type BookingPackagePerformance = {
+    /**
+     * List of packages with booking and revenue data
+     */
+    packages: Array<{
+        [key: string]: unknown;
+    }>;
+    total_packages: number;
+    total_bookings: number;
+    total_revenue: string;
+};
+
+/**
  * Serializer for BookingPackageRule (nested in package).
  */
 export type BookingPackageRule = {
@@ -1465,6 +1545,52 @@ export type BookingPackageRuleCreateUpdateRequest = {
      */
     value?: string | null;
     active?: boolean;
+};
+
+/**
+ * Serializer for capacity utilization statistics.
+ */
+export type CapacityUtilization = {
+    /**
+     * List of events with capacity data
+     */
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Average capacity utilization percentage
+     */
+    average_utilization: number;
+};
+
+/**
+ * Serializer for category distribution statistics.
+ */
+export type CategoryDistribution = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Total number of categories
+     */
+    total_categories: number;
+    /**
+     * Product count per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -1751,6 +1877,32 @@ export type ClusterLocationList = {
 };
 
 /**
+ * Serializer for color distribution statistics.
+ */
+export type ColorDistribution = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per color with hex codes
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Request serializer for manual payment confirmation.
  */
 export type ConfirmPaymentIntentRequest = {
@@ -1817,6 +1969,22 @@ export type ConsentRequest = {
     version?: string;
     required?: boolean;
     active?: boolean;
+};
+
+/**
+ * Serializer for consent statistics.
+ */
+export type ConsentStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    total_consents: number;
+    consent_breakdown: Array<{
+        [key: string]: unknown;
+    }>;
+    message?: string;
 };
 
 /**
@@ -3142,6 +3310,28 @@ export type CustomTokenObtainPairRequest = {
 };
 
 /**
+ * Serializer for combined demographics statistics.
+ */
+export type Demographics = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    gender: {
+        [key: string]: unknown;
+    };
+    age: {
+        [key: string]: unknown;
+    };
+    relationships: {
+        [key: string]: unknown;
+    };
+    areas: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Serializer for DietaryRequirement.
  */
 export type DietaryRequirement = {
@@ -3186,6 +3376,22 @@ export type DietaryRequirementRequest = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     verified_by?: number | null;
+};
+
+/**
+ * Serializer for dietary requirements statistics.
+ */
+export type DietaryRequirementsStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    attendees_with_requirements: number;
+    attendees_without_requirements: number;
+    requirements: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -3639,6 +3845,22 @@ export type EmergencyContactRequest = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     verified_by?: number | null;
+};
+
+/**
+ * Serializer for emergency contact statistics.
+ */
+export type EmergencyContactStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    attendees_with_contacts: number;
+    attendees_without_contacts: number;
+    relationships: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -7682,6 +7904,20 @@ export type FamilyGroupList = {
 };
 
 /**
+ * Serializer for gender distribution statistics.
+ */
+export type GenderDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for Google OAuth callback handling.
  *
  * Processes the authorization code returned by Google and exchanges it
@@ -7965,6 +8201,25 @@ export type MedicalConditionRequest = {
     verified_by?: number | null;
 };
 
+/**
+ * Serializer for medical conditions statistics.
+ */
+export type MedicalConditionsStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    attendees_with_conditions: number;
+    attendees_without_conditions: number;
+    conditions: Array<{
+        [key: string]: unknown;
+    }>;
+    severity_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
 export type OrderCheckoutRequestRequest = {
     /**
      * ID of payment method to use
@@ -8106,6 +8361,74 @@ export type OrderList = {
 };
 
 /**
+ * Serializer for order status distribution statistics.
+ */
+export type OrderStatusDistribution = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Order count per status
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for order trends over time.
+ */
+export type OrderTrends = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of orders in the filtered period
+     */
+    total_orders: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Whether cumulative counts are included
+     */
+    cumulative: boolean;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Order counts over time with optional cumulative
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Update serializer for Order (limited fields).
  */
 export type OrderUpdate = {
@@ -8135,6 +8458,62 @@ export type OrderUpdateRequest = {
      * * `refunded` - Refunded
      */
     status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+};
+
+/**
+ * Serializer for orders by category.
+ */
+export type OrdersByCategory = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Number of categories
+     */
+    total_categories: number;
+    /**
+     * Order count per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for top products by order count.
+ */
+export type OrdersByProduct = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Number of products in results
+     */
+    total_products: number;
+    /**
+     * Products ranked by order count
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -8453,6 +8832,64 @@ export type OrganisationList = {
         created_by?: string;
         contacts?: string;
         memberships?: string;
+    };
+};
+
+/**
+ * Serializer for organization distribution statistics.
+ */
+export type OrganizationDistribution = {
+    /**
+     * List of organization event counts
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    total_events: number;
+};
+
+/**
+ * Serializer for comprehensive overview statistics (dashboard).
+ */
+export type OverviewStatistics = {
+    total_events: number;
+    active_events: number;
+    upcoming_events: number;
+    completed_events: number;
+    total_revenue: string;
+    total_bookings: number;
+    total_attendees: number;
+    average_capacity_utilization: number;
+    average_rating?: number | null;
+    total_reviews: number;
+    /**
+     * Recent activity trends
+     */
+    recent_trends?: {
+        [key: string]: unknown;
+    };
+    /**
+     * Filters applied to the query
+     */
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for overview/dashboard statistics.
+ */
+export type OverviewStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    demographics: {
+        [key: string]: unknown;
+    };
+    personal_info: {
+        [key: string]: unknown;
     };
 };
 
@@ -8989,6 +9426,20 @@ export type PaginatedOrganisationListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<OrganisationList>;
+};
+
+export type PaginatedOverviewStatisticsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OverviewStatistics>;
+};
+
+export type PaginatedOverviewStatsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OverviewStats>;
 };
 
 export type PaginatedPoiListList = {
@@ -11521,6 +11972,21 @@ export type PaymentMethodDetail = {
 };
 
 /**
+ * Serializer for payment status distribution.
+ */
+export type PaymentStatusDistribution = {
+    /**
+     * Payment status counts and amounts
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    total_bookings: number;
+    total_amount: string;
+    total_payments: number;
+};
+
+/**
  * Update serializer for Payment with status transition validation.
  */
 export type PaymentUpdate = {
@@ -11560,6 +12026,29 @@ export type PaymentUpdateRequest = {
     metadata?: unknown;
     stripe_payment_intent?: string | null;
     stripe_charge_id?: string | null;
+};
+
+/**
+ * Serializer for combined personal info statistics.
+ */
+export type PersonalInfoCombined = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    medical: {
+        [key: string]: unknown;
+    };
+    accessibility: {
+        [key: string]: unknown;
+    };
+    dietary: {
+        [key: string]: unknown;
+    };
+    emergency_contacts: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -11725,6 +12214,48 @@ export type ProductList = {
 };
 
 /**
+ * Serializer for product overview statistics.
+ */
+export type ProductOverview = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Number of active products
+     */
+    active_products: number;
+    /**
+     * Number of inactive products
+     */
+    inactive_products: number;
+    /**
+     * Number of verified products
+     */
+    verified_products: number;
+    /**
+     * Number of unverified products
+     */
+    unverified_products: number;
+    /**
+     * Active/Inactive distribution breakdown
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for product variant selection within a package.
  */
 export type ProductSelectionRequest = {
@@ -11740,6 +12271,44 @@ export type ProductSelectionRequest = {
      * Quantity to order (must not exceed package_product.quantity_per_attendee)
      */
     quantity?: number;
+};
+
+/**
+ * Serializer for product creation trends over time.
+ */
+export type ProductTrends = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of products in the filtered period
+     */
+    total_products: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Product creation counts over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -12305,6 +12874,37 @@ export type RefundRequestUpdateRequest = {
 };
 
 /**
+ * Serializer for registration trends statistics.
+ */
+export type RegistrationTrends = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    group_by: string;
+    date_from: string | null;
+    date_to: string | null;
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for relationship distribution statistics.
+ */
+export type RelationshipDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for RelativeArea model.
  */
 export type RelativeArea = {
@@ -12460,6 +13060,197 @@ export type ResourceRequest = {
 };
 
 /**
+ * Serializer for revenue breakdown by source.
+ */
+export type RevenueBreakdown = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Revenue breakdown by source (standalone vs package-linked)
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue by category.
+ */
+export type RevenueByCategory = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Number of categories
+     */
+    total_categories: number;
+    /**
+     * Revenue per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for per-event revenue statistics.
+ */
+export type RevenueByEvent = {
+    /**
+     * List of events with revenue data
+     */
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    total_events: number;
+};
+
+/**
+ * Serializer for revenue by product.
+ */
+export type RevenueByProduct = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Number of products in results
+     */
+    total_products: number;
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Products ranked by revenue
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type RevenueOverview = {
+    /**
+     * Total revenue from all sources
+     */
+    total_revenue: string;
+    /**
+     * Revenue from bookings
+     */
+    booking_revenue: string;
+    /**
+     * Revenue from product sales
+     */
+    product_revenue: string;
+    /**
+     * Revenue from donations
+     */
+    donation_revenue: string;
+    /**
+     * Revenue breakdown by source
+     */
+    breakdown: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type RevenueTrends = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue in the filtered period
+     */
+    total_revenue: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Revenue over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for event review statistics.
+ */
+export type ReviewStatistics = {
+    total_reviews: number;
+    average_rating: number;
+    /**
+     * Count of reviews per rating (1-5)
+     */
+    rating_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Count of approved vs pending reviews
+     */
+    approval_status: {
+        [key: string]: unknown;
+    };
+    /**
+     * List of highest-rated events
+     */
+    top_rated_events?: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for RoomVenue.
  */
 export type RoomVenue = {
@@ -12500,6 +13291,100 @@ export type RoomVenueCreateUpdateRequest = {
     room_name: string;
     description?: string | null;
     capacity?: number | null;
+};
+
+/**
+ * Serializer for size distribution statistics.
+ */
+export type SizeDistribution = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per size
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for staff allocation statistics.
+ */
+export type StaffAllocation = {
+    /**
+     * List of events with staff counts
+     */
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    total_staff_assignments: number;
+    average_staff_per_event: number;
+    /**
+     * Staff members with most event assignments
+     */
+    most_active_staff?: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for event status distribution statistics.
+ */
+export type StatusDistribution = {
+    /**
+     * List of status counts with labels and percentages
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Total number of events
+     */
+    total_events: number;
+    /**
+     * Filters applied to the query
+     */
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for stock level distribution statistics.
+ */
+export type StockLevels = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per stock level range
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -12702,6 +13587,47 @@ export type TicketTypeList = {
 
 export type TokenRefreshRequest = {
     refresh: string;
+};
+
+/**
+ * Serializer for event type distribution statistics.
+ */
+export type TypeDistribution = {
+    /**
+     * List of event type counts
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    total_events: number;
+    /**
+     * Filters applied to the query
+     */
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for upcoming events list.
+ */
+export type UpcomingEvents = {
+    /**
+     * List of upcoming events with details
+     */
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Total count of upcoming events
+     */
+    total_upcoming: number;
+    /**
+     * Start and end date of the range
+     */
+    date_range: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -13057,6 +13983,42 @@ export type UserUpdateRequest = {
 };
 
 /**
+ * Serializer for variant stock overview statistics.
+ */
+export type VariantStockOverview = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Total stock quantity across all variants
+     */
+    total_stock: number;
+    /**
+     * Number of variants with stock < 10
+     */
+    low_stock_count: number;
+    /**
+     * Number of variants with stock = 0
+     */
+    out_of_stock_count: number;
+    /**
+     * Average stock quantity per variant
+     */
+    average_stock: number;
+};
+
+/**
  * Serializer for VenueContact.
  */
 export type VenueContact = {
@@ -13306,6 +14268,42 @@ export type AccessibilityRequirementWritable = {
 };
 
 /**
+ * Serializer for accessibility requirements statistics.
+ */
+export type AccessibilityRequirementsStatsWritable = {
+    total_attendees: number;
+    attendees_with_requirements: number;
+    attendees_without_requirements: number;
+    requirements: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for age distribution statistics.
+ */
+export type AgeDistributionWritable = {
+    total_with_age: number;
+    total_without_age: number;
+    average_age: number | null;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for area distribution statistics.
+ */
+export type AreaDistributionWritable = {
+    total: number;
+    total_with_area: number;
+    total_without_area: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Detailed serializer for AreaLocation.
  */
 export type AreaLocationDetailWritable = {
@@ -13345,6 +14343,19 @@ export type AreaLocationListWritable = {
      */
     active?: boolean;
     established_date?: string | null;
+};
+
+/**
+ * Serializer for attendance check-in statistics.
+ */
+export type AttendanceStatsWritable = {
+    total_attendees: number;
+    checked_in: number;
+    not_checked_in: number;
+    check_in_rate: number;
+    check_in_trends: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -13836,6 +14847,26 @@ export type BookingPackageRuleWritable = {
 };
 
 /**
+ * Serializer for category distribution statistics.
+ */
+export type CategoryDistributionWritable = {
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Total number of categories
+     */
+    total_categories: number;
+    /**
+     * Product count per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Detailed serializer for ChapterLocation.
  */
 export type ChapterLocationDetailWritable = {
@@ -13914,6 +14945,22 @@ export type ClusterLocationListWritable = {
 };
 
 /**
+ * Serializer for color distribution statistics.
+ */
+export type ColorDistributionWritable = {
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per color with hex codes
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for Consent.
  */
 export type ConsentWritable = {
@@ -13925,6 +14972,18 @@ export type ConsentWritable = {
     version?: string;
     required?: boolean;
     active?: boolean;
+};
+
+/**
+ * Serializer for consent statistics.
+ */
+export type ConsentStatsWritable = {
+    total_attendees: number;
+    total_consents: number;
+    consent_breakdown: Array<{
+        [key: string]: unknown;
+    }>;
+    message?: string;
 };
 
 /**
@@ -14546,6 +15605,24 @@ export type CountryLocationListWritable = {
 };
 
 /**
+ * Serializer for combined demographics statistics.
+ */
+export type DemographicsWritable = {
+    gender: {
+        [key: string]: unknown;
+    };
+    age: {
+        [key: string]: unknown;
+    };
+    relationships: {
+        [key: string]: unknown;
+    };
+    areas: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Serializer for DietaryRequirement.
  */
 export type DietaryRequirementWritable = {
@@ -14561,6 +15638,18 @@ export type DietaryRequirementWritable = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     verified_by?: number | null;
+};
+
+/**
+ * Serializer for dietary requirements statistics.
+ */
+export type DietaryRequirementsStatsWritable = {
+    total_attendees: number;
+    attendees_with_requirements: number;
+    attendees_without_requirements: number;
+    requirements: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -14726,6 +15815,18 @@ export type EmergencyContactWritable = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     verified_by?: number | null;
+};
+
+/**
+ * Serializer for emergency contact statistics.
+ */
+export type EmergencyContactStatsWritable = {
+    total_attendees: number;
+    attendees_with_contacts: number;
+    attendees_without_contacts: number;
+    relationships: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -16410,6 +17511,16 @@ export type FamilyGroupListWritable = {
 };
 
 /**
+ * Serializer for gender distribution statistics.
+ */
+export type GenderDistributionWritable = {
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for InvolvedEventOrganisation.
  */
 export type InvolvedEventOrganisationWritable = {
@@ -16486,6 +17597,21 @@ export type MedicalConditionWritable = {
 };
 
 /**
+ * Serializer for medical conditions statistics.
+ */
+export type MedicalConditionsStatsWritable = {
+    total_attendees: number;
+    attendees_with_conditions: number;
+    attendees_without_conditions: number;
+    conditions: Array<{
+        [key: string]: unknown;
+    }>;
+    severity_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Create serializer for Order with validation.
  */
 export type OrderCreateWritable = {
@@ -16550,6 +17676,90 @@ export type OrderListWritable = {
      * * `refunded` - Refunded
      */
     status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+};
+
+/**
+ * Serializer for order status distribution statistics.
+ */
+export type OrderStatusDistributionWritable = {
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Order count per status
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for order trends over time.
+ */
+export type OrderTrendsWritable = {
+    /**
+     * Total number of orders in the filtered period
+     */
+    total_orders: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Whether cumulative counts are included
+     */
+    cumulative: boolean;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Order counts over time with optional cumulative
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for orders by category.
+ */
+export type OrdersByCategoryWritable = {
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Number of categories
+     */
+    total_categories: number;
+    /**
+     * Order count per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for top products by order count.
+ */
+export type OrdersByProductWritable = {
+    /**
+     * Number of products in results
+     */
+    total_products: number;
+    /**
+     * Products ranked by order count
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -16631,6 +17841,19 @@ export type OrganisationListWritable = {
     created_by?: number | null;
     landing_image?: string | null;
     logo?: string | null;
+};
+
+/**
+ * Serializer for overview/dashboard statistics.
+ */
+export type OverviewStatsWritable = {
+    total_attendees: number;
+    demographics: {
+        [key: string]: unknown;
+    };
+    personal_info: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -17102,6 +18325,13 @@ export type PaginatedOrganisationListListWritable = {
     results: Array<OrganisationListWritable>;
 };
 
+export type PaginatedOverviewStatsListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OverviewStatsWritable>;
+};
+
 export type PaginatedPoiListListWritable = {
     count: number;
     next?: string | null;
@@ -17518,6 +18748,25 @@ export type PaymentMethodDetailWritable = {
 };
 
 /**
+ * Serializer for combined personal info statistics.
+ */
+export type PersonalInfoCombinedWritable = {
+    total_attendees: number;
+    medical: {
+        [key: string]: unknown;
+    };
+    accessibility: {
+        [key: string]: unknown;
+    };
+    dietary: {
+        [key: string]: unknown;
+    };
+    emergency_contacts: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * List/Detail serializer for ProductCategory with HATEOAS links.
  */
 export type ProductCategoryWritable = {
@@ -17575,6 +18824,66 @@ export type ProductListWritable = {
     percentage_modifier?: string;
     verified?: boolean;
     is_active?: boolean;
+};
+
+/**
+ * Serializer for product overview statistics.
+ */
+export type ProductOverviewWritable = {
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Number of active products
+     */
+    active_products: number;
+    /**
+     * Number of inactive products
+     */
+    inactive_products: number;
+    /**
+     * Number of verified products
+     */
+    verified_products: number;
+    /**
+     * Number of unverified products
+     */
+    unverified_products: number;
+    /**
+     * Active/Inactive distribution breakdown
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for product creation trends over time.
+ */
+export type ProductTrendsWritable = {
+    /**
+     * Total number of products in the filtered period
+     */
+    total_products: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Product creation counts over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -17786,6 +19095,29 @@ export type RefundRequestListWritable = {
 };
 
 /**
+ * Serializer for registration trends statistics.
+ */
+export type RegistrationTrendsWritable = {
+    total_attendees: number;
+    group_by: string;
+    date_from: string | null;
+    date_to: string | null;
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for relationship distribution statistics.
+ */
+export type RelationshipDistributionWritable = {
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for RelativeArea model.
  */
 export type RelativeAreaWritable = {
@@ -17903,6 +19235,90 @@ export type ResourceRequestWritable = {
 };
 
 /**
+ * Serializer for revenue breakdown by source.
+ */
+export type RevenueBreakdownWritable = {
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Revenue breakdown by source (standalone vs package-linked)
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue by category.
+ */
+export type RevenueByCategoryWritable = {
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Number of categories
+     */
+    total_categories: number;
+    /**
+     * Revenue per category
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue by product.
+ */
+export type RevenueByProductWritable = {
+    /**
+     * Number of products in results
+     */
+    total_products: number;
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Products ranked by revenue
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type RevenueTrendsWritable = {
+    /**
+     * Total revenue in the filtered period
+     */
+    total_revenue: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Revenue over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for RoomVenue.
  */
 export type RoomVenueWritable = {
@@ -17911,6 +19327,38 @@ export type RoomVenueWritable = {
     description?: string | null;
     capacity?: number | null;
     added_by?: number | null;
+};
+
+/**
+ * Serializer for size distribution statistics.
+ */
+export type SizeDistributionWritable = {
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per size
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for stock level distribution statistics.
+ */
+export type StockLevelsWritable = {
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Variant count per stock level range
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -18169,6 +19617,32 @@ export type UserRegistrationRequestWritable = {
      * User's last name
      */
     last_name?: string;
+};
+
+/**
+ * Serializer for variant stock overview statistics.
+ */
+export type VariantStockOverviewWritable = {
+    /**
+     * Total number of product variants
+     */
+    total_variants: number;
+    /**
+     * Total stock quantity across all variants
+     */
+    total_stock: number;
+    /**
+     * Number of variants with stock < 10
+     */
+    low_stock_count: number;
+    /**
+     * Number of variants with stock = 0
+     */
+    out_of_stock_count: number;
+    /**
+     * Average stock quantity per variant
+     */
+    average_stock: number;
 };
 
 /**
@@ -18441,6 +19915,25 @@ export type AttendeesListData = {
          * Filter attendees with minimum age (inclusive)
          */
         age_min?: number;
+        /**
+         * Answers submitted after date
+         */
+        answer_submitted_after?: string;
+        /**
+         * Answers submitted before date
+         */
+        answer_submitted_before?: string;
+        /**
+         * Filter by question type
+         *
+         * * `short_answer` - Short Answer
+         * * `long_answer` - Long Answer
+         * * `upload` - Upload
+         * * `multiple_choice` - Multiple Choice
+         * * `single_choice` - Single Choice
+         * * `slider` - Slider
+         */
+        answered_question_type?: 'long_answer' | 'multiple_choice' | 'short_answer' | 'single_choice' | 'slider' | 'upload';
         area_from?: number;
         area_from_name?: string;
         attendee_display_id?: string;
@@ -18466,10 +19959,30 @@ export type AttendeesListData = {
         gender?: string;
         gender__icontains?: string;
         has_accessibility_requirements?: boolean;
+        /**
+         * Has answered any questions
+         */
+        has_answered_questions?: boolean;
         has_booking?: boolean;
+        /**
+         * Has at least one completed order
+         */
+        has_completed_orders?: boolean;
         has_dietary_requirements?: boolean;
         has_emergency_contacts?: boolean;
         has_medical_conditions?: boolean;
+        /**
+         * Has any orders
+         */
+        has_orders?: boolean;
+        /**
+         * Has pending or processing orders
+         */
+        has_pending_orders?: boolean;
+        /**
+         * Has incomplete required questions
+         */
+        has_unanswered_required_questions?: boolean;
         /**
          * Include soft-deleted attendees in results (staff only)
          */
@@ -18484,6 +19997,50 @@ export type AttendeesListData = {
         is_registered?: boolean;
         last_name?: string;
         medical_condition?: number;
+        /**
+         * Orders created after date
+         */
+        order_created_after?: string;
+        /**
+         * Orders created before date
+         */
+        order_created_before?: string;
+        /**
+         * Search by order reference ID
+         */
+        order_reference_id?: string;
+        /**
+         * Filter by order status
+         *
+         * * `draft` - Draft
+         * * `pending` - Pending
+         * * `processing` - Processing
+         * * `completed` - Completed
+         * * `cancelled` - Cancelled
+         * * `pending_refund` - Pending Refund
+         * * `refunded` - Refunded
+         */
+        order_status?: 'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        /**
+         * Exclude order status
+         *
+         * * `draft` - Draft
+         * * `pending` - Pending
+         * * `processing` - Processing
+         * * `completed` - Completed
+         * * `cancelled` - Cancelled
+         * * `pending_refund` - Pending Refund
+         * * `refunded` - Refunded
+         */
+        order_status_not?: 'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        /**
+         * Order total maximum amount
+         */
+        order_total_max?: number;
+        /**
+         * Order total minimum amount
+         */
+        order_total_min?: number;
         /**
          * Which field to use when ordering the results.
          */
@@ -18500,6 +20057,22 @@ export type AttendeesListData = {
         page_size?: number;
         phone_number?: string;
         /**
+         * Filter by purchased product variant ID
+         */
+        purchased_product?: number;
+        /**
+         * Search in purchased product titles
+         */
+        purchased_product_title?: string;
+        /**
+         * Filter by specific question UUID
+         */
+        question?: string;
+        /**
+         * Search within answer text
+         */
+        question_answer_search?: string;
+        /**
          * * `self` - Self
          * * `spouse` - Spouse
          * * `child` - Child
@@ -18513,7 +20086,19 @@ export type AttendeesListData = {
          * Search by first name, last name, email, phone number, or attendee display ID
          */
         search?: string;
+        /**
+         * Filter by selected choice option ID
+         */
+        selected_option?: number;
         self_registered?: boolean;
+        /**
+         * Slider answer maximum value
+         */
+        slider_answer_max?: number;
+        /**
+         * Slider answer minimum value
+         */
+        slider_answer_min?: number;
         updated_after?: string;
         updated_before?: string;
     };
@@ -19283,6 +20868,416 @@ export type AttendeesOrganisationsRetrieveResponses = {
 };
 
 export type AttendeesOrganisationsRetrieveResponse = AttendeesOrganisationsRetrieveResponses[keyof AttendeesOrganisationsRetrieveResponses];
+
+export type AttendeesStatisticsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/attendees/statistics/';
+};
+
+export type AttendeesStatisticsListResponses = {
+    200: PaginatedOverviewStatsList;
+};
+
+export type AttendeesStatisticsListResponse = AttendeesStatisticsListResponses[keyof AttendeesStatisticsListResponses];
+
+export type AttendeesStatisticsAccessibilityRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/accessibility/';
+};
+
+export type AttendeesStatisticsAccessibilityRetrieveResponses = {
+    200: AccessibilityRequirementsStats;
+};
+
+export type AttendeesStatisticsAccessibilityRetrieveResponse = AttendeesStatisticsAccessibilityRetrieveResponses[keyof AttendeesStatisticsAccessibilityRetrieveResponses];
+
+export type AttendeesStatisticsAgeDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Age grouping method. "ranges" groups into standard age ranges (0-12, 13-17, etc.). "individual" shows each age separately.
+         */
+        age_grouping?: 'individual' | 'ranges';
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/age-distribution/';
+};
+
+export type AttendeesStatisticsAgeDistributionRetrieveResponses = {
+    200: AgeDistribution;
+};
+
+export type AttendeesStatisticsAgeDistributionRetrieveResponse = AttendeesStatisticsAgeDistributionRetrieveResponses[keyof AttendeesStatisticsAgeDistributionRetrieveResponses];
+
+export type AttendeesStatisticsAreaDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/area-distribution/';
+};
+
+export type AttendeesStatisticsAreaDistributionRetrieveResponses = {
+    200: AreaDistribution;
+};
+
+export type AttendeesStatisticsAreaDistributionRetrieveResponse = AttendeesStatisticsAreaDistributionRetrieveResponses[keyof AttendeesStatisticsAreaDistributionRetrieveResponses];
+
+export type AttendeesStatisticsAttendanceRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/attendance/';
+};
+
+export type AttendeesStatisticsAttendanceRetrieveResponses = {
+    200: AttendanceStats;
+};
+
+export type AttendeesStatisticsAttendanceRetrieveResponse = AttendeesStatisticsAttendanceRetrieveResponses[keyof AttendeesStatisticsAttendanceRetrieveResponses];
+
+export type AttendeesStatisticsConsentsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/consents/';
+};
+
+export type AttendeesStatisticsConsentsRetrieveResponses = {
+    200: ConsentStats;
+};
+
+export type AttendeesStatisticsConsentsRetrieveResponse = AttendeesStatisticsConsentsRetrieveResponses[keyof AttendeesStatisticsConsentsRetrieveResponses];
+
+export type AttendeesStatisticsDemographicsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Age grouping method. "ranges" groups into standard age ranges (0-12, 13-17, etc.). "individual" shows each age separately.
+         */
+        age_grouping?: 'individual' | 'ranges';
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/demographics/';
+};
+
+export type AttendeesStatisticsDemographicsRetrieveResponses = {
+    200: Demographics;
+};
+
+export type AttendeesStatisticsDemographicsRetrieveResponse = AttendeesStatisticsDemographicsRetrieveResponses[keyof AttendeesStatisticsDemographicsRetrieveResponses];
+
+export type AttendeesStatisticsDietaryRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/dietary/';
+};
+
+export type AttendeesStatisticsDietaryRetrieveResponses = {
+    200: DietaryRequirementsStats;
+};
+
+export type AttendeesStatisticsDietaryRetrieveResponse = AttendeesStatisticsDietaryRetrieveResponses[keyof AttendeesStatisticsDietaryRetrieveResponses];
+
+export type AttendeesStatisticsEmergencyContactsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/emergency-contacts/';
+};
+
+export type AttendeesStatisticsEmergencyContactsRetrieveResponses = {
+    200: EmergencyContactStats;
+};
+
+export type AttendeesStatisticsEmergencyContactsRetrieveResponse = AttendeesStatisticsEmergencyContactsRetrieveResponses[keyof AttendeesStatisticsEmergencyContactsRetrieveResponses];
+
+export type AttendeesStatisticsGenderDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/gender-distribution/';
+};
+
+export type AttendeesStatisticsGenderDistributionRetrieveResponses = {
+    200: GenderDistribution;
+};
+
+export type AttendeesStatisticsGenderDistributionRetrieveResponse = AttendeesStatisticsGenderDistributionRetrieveResponses[keyof AttendeesStatisticsGenderDistributionRetrieveResponses];
+
+export type AttendeesStatisticsMedicalConditionsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/medical-conditions/';
+};
+
+export type AttendeesStatisticsMedicalConditionsRetrieveResponses = {
+    200: MedicalConditionsStats;
+};
+
+export type AttendeesStatisticsMedicalConditionsRetrieveResponse = AttendeesStatisticsMedicalConditionsRetrieveResponses[keyof AttendeesStatisticsMedicalConditionsRetrieveResponses];
+
+export type AttendeesStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/overview/';
+};
+
+export type AttendeesStatisticsOverviewRetrieveResponses = {
+    200: OverviewStats;
+};
+
+export type AttendeesStatisticsOverviewRetrieveResponse = AttendeesStatisticsOverviewRetrieveResponses[keyof AttendeesStatisticsOverviewRetrieveResponses];
+
+export type AttendeesStatisticsPersonalInfoRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/personal-info/';
+};
+
+export type AttendeesStatisticsPersonalInfoRetrieveResponses = {
+    200: PersonalInfoCombined;
+};
+
+export type AttendeesStatisticsPersonalInfoRetrieveResponse = AttendeesStatisticsPersonalInfoRetrieveResponses[keyof AttendeesStatisticsPersonalInfoRetrieveResponses];
+
+export type AttendeesStatisticsRegistrationTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/registration-trends/';
+};
+
+export type AttendeesStatisticsRegistrationTrendsRetrieveResponses = {
+    200: RegistrationTrends;
+};
+
+export type AttendeesStatisticsRegistrationTrendsRetrieveResponse = AttendeesStatisticsRegistrationTrendsRetrieveResponses[keyof AttendeesStatisticsRegistrationTrendsRetrieveResponses];
+
+export type AttendeesStatisticsRelationshipDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/relationship-distribution/';
+};
+
+export type AttendeesStatisticsRelationshipDistributionRetrieveResponses = {
+    200: RelationshipDistribution;
+};
+
+export type AttendeesStatisticsRelationshipDistributionRetrieveResponse = AttendeesStatisticsRelationshipDistributionRetrieveResponses[keyof AttendeesStatisticsRelationshipDistributionRetrieveResponses];
 
 export type AuthGoogleAuthorizeCreateData = {
     body: GoogleOAuthRequest;
@@ -24960,6 +26955,496 @@ export type EventStaffUpdateResponses = {
 };
 
 export type EventStaffUpdateResponse = EventStaffUpdateResponses[keyof EventStaffUpdateResponses];
+
+export type EventStatisticsBookingPackagesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by specific event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of items to return
+         */
+        limit?: number;
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+    };
+    url: '/api/event/statistics/booking-packages/';
+};
+
+export type EventStatisticsBookingPackagesRetrieveResponses = {
+    200: BookingPackagePerformance;
+};
+
+export type EventStatisticsBookingPackagesRetrieveResponse = EventStatisticsBookingPackagesRetrieveResponses[keyof EventStatisticsBookingPackagesRetrieveResponses];
+
+export type EventStatisticsCapacityUtilizationRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/capacity-utilization/';
+};
+
+export type EventStatisticsCapacityUtilizationRetrieveResponses = {
+    200: CapacityUtilization;
+};
+
+export type EventStatisticsCapacityUtilizationRetrieveResponse = EventStatisticsCapacityUtilizationRetrieveResponses[keyof EventStatisticsCapacityUtilizationRetrieveResponses];
+
+export type EventStatisticsOrganizationDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of items to return
+         */
+        limit?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/organization-distribution/';
+};
+
+export type EventStatisticsOrganizationDistributionRetrieveResponses = {
+    200: OrganizationDistribution;
+};
+
+export type EventStatisticsOrganizationDistributionRetrieveResponse = EventStatisticsOrganizationDistributionRetrieveResponses[keyof EventStatisticsOrganizationDistributionRetrieveResponses];
+
+export type EventStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/overview/';
+};
+
+export type EventStatisticsOverviewRetrieveResponses = {
+    200: OverviewStatistics;
+};
+
+export type EventStatisticsOverviewRetrieveResponse = EventStatisticsOverviewRetrieveResponses[keyof EventStatisticsOverviewRetrieveResponses];
+
+export type EventStatisticsPaymentStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by specific event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+    };
+    url: '/api/event/statistics/payment-status/';
+};
+
+export type EventStatisticsPaymentStatusRetrieveResponses = {
+    200: PaymentStatusDistribution;
+};
+
+export type EventStatisticsPaymentStatusRetrieveResponse = EventStatisticsPaymentStatusRetrieveResponses[keyof EventStatisticsPaymentStatusRetrieveResponses];
+
+export type EventStatisticsRegistrationTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Include cumulative data in trends
+         */
+        cumulative?: boolean;
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by specific event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Time period grouping for trends
+         */
+        period?: 'day' | 'month' | 'week';
+    };
+    url: '/api/event/statistics/registration-trends/';
+};
+
+export type EventStatisticsRegistrationTrendsRetrieveResponses = {
+    200: RegistrationTrends;
+};
+
+export type EventStatisticsRegistrationTrendsRetrieveResponse = EventStatisticsRegistrationTrendsRetrieveResponses[keyof EventStatisticsRegistrationTrendsRetrieveResponses];
+
+export type EventStatisticsRevenueByEventRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of items to return
+         */
+        limit?: number;
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Show detailed breakdown in results
+         */
+        show_breakdown?: boolean;
+        /**
+         * Sort field for results
+         */
+        sort_by?: string;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/revenue-by-event/';
+};
+
+export type EventStatisticsRevenueByEventRetrieveResponses = {
+    200: RevenueByEvent;
+};
+
+export type EventStatisticsRevenueByEventRetrieveResponse = EventStatisticsRevenueByEventRetrieveResponses[keyof EventStatisticsRevenueByEventRetrieveResponses];
+
+export type EventStatisticsRevenueOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by specific event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/revenue-overview/';
+};
+
+export type EventStatisticsRevenueOverviewRetrieveResponses = {
+    200: RevenueOverview;
+};
+
+export type EventStatisticsRevenueOverviewRetrieveResponse = EventStatisticsRevenueOverviewRetrieveResponses[keyof EventStatisticsRevenueOverviewRetrieveResponses];
+
+export type EventStatisticsReviewsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by specific event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of items to return
+         */
+        limit?: number;
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+    };
+    url: '/api/event/statistics/reviews/';
+};
+
+export type EventStatisticsReviewsRetrieveResponses = {
+    200: ReviewStatistics;
+};
+
+export type EventStatisticsReviewsRetrieveResponse = EventStatisticsReviewsRetrieveResponses[keyof EventStatisticsReviewsRetrieveResponses];
+
+export type EventStatisticsStaffAllocationRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of items to return
+         */
+        limit?: number;
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/staff-allocation/';
+};
+
+export type EventStatisticsStaffAllocationRetrieveResponses = {
+    200: StaffAllocation;
+};
+
+export type EventStatisticsStaffAllocationRetrieveResponse = EventStatisticsStaffAllocationRetrieveResponses[keyof EventStatisticsStaffAllocationRetrieveResponses];
+
+export type EventStatisticsStatusDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+    };
+    url: '/api/event/statistics/status-distribution/';
+};
+
+export type EventStatisticsStatusDistributionRetrieveResponses = {
+    200: StatusDistribution;
+};
+
+export type EventStatisticsStatusDistributionRetrieveResponse = EventStatisticsStatusDistributionRetrieveResponses[keyof EventStatisticsStatusDistributionRetrieveResponses];
+
+export type EventStatisticsTypeDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD)
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD)
+         */
+        date_to?: string;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+        /**
+         * Filter by event status (DRAFTING, PUBLISHED, OPEN, IN_PROGRESS, COMPLETED, CLOSED, CANCELLED, POSTPONED)
+         */
+        status?: string;
+    };
+    url: '/api/event/statistics/type-distribution/';
+};
+
+export type EventStatisticsTypeDistributionRetrieveResponses = {
+    200: TypeDistribution;
+};
+
+export type EventStatisticsTypeDistributionRetrieveResponse = EventStatisticsTypeDistributionRetrieveResponses[keyof EventStatisticsTypeDistributionRetrieveResponses];
+
+export type EventStatisticsUpcomingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Number of days ahead to consider for upcoming events
+         */
+        days_ahead?: number;
+        /**
+         * Filter by event type ID
+         */
+        event_type_id?: number;
+        /**
+         * Response format: "raw" for JSON data or "echarts" for ECharts configuration
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter by organization ID
+         */
+        organization_id?: number;
+    };
+    url: '/api/event/statistics/upcoming/';
+};
+
+export type EventStatisticsUpcomingRetrieveResponses = {
+    200: UpcomingEvents;
+};
+
+export type EventStatisticsUpcomingRetrieveResponse = EventStatisticsUpcomingRetrieveResponses[keyof EventStatisticsUpcomingRetrieveResponses];
 
 export type EventTypesListData = {
     body?: never;
@@ -33863,6 +36348,764 @@ export type ProductsOrdersSubmitCreateResponses = {
      */
     200: unknown;
 };
+
+export type ProductsStatisticsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/products/statistics/';
+};
+
+export type ProductsStatisticsListResponses = {
+    200: PaginatedOverviewStatisticsList;
+};
+
+export type ProductsStatisticsListResponse = ProductsStatisticsListResponses[keyof ProductsStatisticsListResponses];
+
+export type ProductsStatisticsCategoryDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter by active/inactive status.
+         */
+        is_active?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by verified/unverified status.
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/statistics/category-distribution/';
+};
+
+export type ProductsStatisticsCategoryDistributionRetrieveResponses = {
+    200: CategoryDistribution;
+};
+
+export type ProductsStatisticsCategoryDistributionRetrieveResponse = ProductsStatisticsCategoryDistributionRetrieveResponses[keyof ProductsStatisticsCategoryDistributionRetrieveResponses];
+
+export type ProductsStatisticsColorDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter by active/inactive status.
+         */
+        is_active?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by verified/unverified status.
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/statistics/color-distribution/';
+};
+
+export type ProductsStatisticsColorDistributionRetrieveResponses = {
+    200: ColorDistribution;
+};
+
+export type ProductsStatisticsColorDistributionRetrieveResponse = ProductsStatisticsColorDistributionRetrieveResponses[keyof ProductsStatisticsColorDistributionRetrieveResponses];
+
+export type ProductsStatisticsOrderStatusDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/order-status-distribution/';
+};
+
+export type ProductsStatisticsOrderStatusDistributionRetrieveResponses = {
+    200: OrderStatusDistribution;
+};
+
+export type ProductsStatisticsOrderStatusDistributionRetrieveResponse = ProductsStatisticsOrderStatusDistributionRetrieveResponses[keyof ProductsStatisticsOrderStatusDistributionRetrieveResponses];
+
+export type ProductsStatisticsOrderTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Include cumulative counts in trend data.
+         */
+        cumulative?: boolean;
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by order status (draft, pending, processing, completed, cancelled, refunded).
+         */
+        status?: string;
+    };
+    url: '/api/products/statistics/order-trends/';
+};
+
+export type ProductsStatisticsOrderTrendsRetrieveResponses = {
+    200: OrderTrends;
+};
+
+export type ProductsStatisticsOrderTrendsRetrieveResponse = ProductsStatisticsOrderTrendsRetrieveResponses[keyof ProductsStatisticsOrderTrendsRetrieveResponses];
+
+export type ProductsStatisticsOrdersByCategoryRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/orders-by-category/';
+};
+
+export type ProductsStatisticsOrdersByCategoryRetrieveResponses = {
+    200: OrdersByCategory;
+};
+
+export type ProductsStatisticsOrdersByCategoryRetrieveResponse = ProductsStatisticsOrdersByCategoryRetrieveResponses[keyof ProductsStatisticsOrdersByCategoryRetrieveResponses];
+
+export type ProductsStatisticsOrdersByProductRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Maximum number of items to return in results.
+         */
+        limit?: number;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/orders-by-product/';
+};
+
+export type ProductsStatisticsOrdersByProductRetrieveResponses = {
+    200: OrdersByProduct;
+};
+
+export type ProductsStatisticsOrdersByProductRetrieveResponse = ProductsStatisticsOrdersByProductRetrieveResponses[keyof ProductsStatisticsOrdersByProductRetrieveResponses];
+
+export type ProductsStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/overview/';
+};
+
+export type ProductsStatisticsOverviewRetrieveResponses = {
+    200: OverviewStatistics;
+};
+
+export type ProductsStatisticsOverviewRetrieveResponse = ProductsStatisticsOverviewRetrieveResponses[keyof ProductsStatisticsOverviewRetrieveResponses];
+
+export type ProductsStatisticsProductOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/product-overview/';
+};
+
+export type ProductsStatisticsProductOverviewRetrieveResponses = {
+    200: ProductOverview;
+};
+
+export type ProductsStatisticsProductOverviewRetrieveResponse = ProductsStatisticsProductOverviewRetrieveResponses[keyof ProductsStatisticsProductOverviewRetrieveResponses];
+
+export type ProductsStatisticsProductTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/product-trends/';
+};
+
+export type ProductsStatisticsProductTrendsRetrieveResponses = {
+    200: ProductTrends;
+};
+
+export type ProductsStatisticsProductTrendsRetrieveResponse = ProductsStatisticsProductTrendsRetrieveResponses[keyof ProductsStatisticsProductTrendsRetrieveResponses];
+
+export type ProductsStatisticsRevenueBreakdownRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/revenue-breakdown/';
+};
+
+export type ProductsStatisticsRevenueBreakdownRetrieveResponses = {
+    200: RevenueBreakdown;
+};
+
+export type ProductsStatisticsRevenueBreakdownRetrieveResponse = ProductsStatisticsRevenueBreakdownRetrieveResponses[keyof ProductsStatisticsRevenueBreakdownRetrieveResponses];
+
+export type ProductsStatisticsRevenueByCategoryRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/revenue-by-category/';
+};
+
+export type ProductsStatisticsRevenueByCategoryRetrieveResponses = {
+    200: RevenueByCategory;
+};
+
+export type ProductsStatisticsRevenueByCategoryRetrieveResponse = ProductsStatisticsRevenueByCategoryRetrieveResponses[keyof ProductsStatisticsRevenueByCategoryRetrieveResponses];
+
+export type ProductsStatisticsRevenueByProductRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Maximum number of items to return in results.
+         */
+        limit?: number;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/revenue-by-product/';
+};
+
+export type ProductsStatisticsRevenueByProductRetrieveResponses = {
+    200: RevenueByProduct;
+};
+
+export type ProductsStatisticsRevenueByProductRetrieveResponse = ProductsStatisticsRevenueByProductRetrieveResponses[keyof ProductsStatisticsRevenueByProductRetrieveResponses];
+
+export type ProductsStatisticsRevenueOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/revenue-overview/';
+};
+
+export type ProductsStatisticsRevenueOverviewRetrieveResponses = {
+    200: RevenueOverview;
+};
+
+export type ProductsStatisticsRevenueOverviewRetrieveResponse = ProductsStatisticsRevenueOverviewRetrieveResponses[keyof ProductsStatisticsRevenueOverviewRetrieveResponses];
+
+export type ProductsStatisticsRevenueTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format). Applies to order/revenue statistics.
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/revenue-trends/';
+};
+
+export type ProductsStatisticsRevenueTrendsRetrieveResponses = {
+    200: RevenueTrends;
+};
+
+export type ProductsStatisticsRevenueTrendsRetrieveResponse = ProductsStatisticsRevenueTrendsRetrieveResponses[keyof ProductsStatisticsRevenueTrendsRetrieveResponses];
+
+export type ProductsStatisticsSizeDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter by active/inactive status.
+         */
+        is_active?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by verified/unverified status.
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/statistics/size-distribution/';
+};
+
+export type ProductsStatisticsSizeDistributionRetrieveResponses = {
+    200: SizeDistribution;
+};
+
+export type ProductsStatisticsSizeDistributionRetrieveResponse = ProductsStatisticsSizeDistributionRetrieveResponses[keyof ProductsStatisticsSizeDistributionRetrieveResponses];
+
+export type ProductsStatisticsStatusDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/products/statistics/status-distribution/';
+};
+
+export type ProductsStatisticsStatusDistributionRetrieveResponses = {
+    200: StatusDistribution;
+};
+
+export type ProductsStatisticsStatusDistributionRetrieveResponse = ProductsStatisticsStatusDistributionRetrieveResponses[keyof ProductsStatisticsStatusDistributionRetrieveResponses];
+
+export type ProductsStatisticsStockLevelsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter by active/inactive status.
+         */
+        is_active?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by verified/unverified status.
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/statistics/stock-levels/';
+};
+
+export type ProductsStatisticsStockLevelsRetrieveResponses = {
+    200: StockLevels;
+};
+
+export type ProductsStatisticsStockLevelsRetrieveResponse = ProductsStatisticsStockLevelsRetrieveResponses[keyof ProductsStatisticsStockLevelsRetrieveResponses];
+
+export type ProductsStatisticsVariantStockOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific product category.
+         */
+        category_id?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter by active/inactive status.
+         */
+        is_active?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+        /**
+         * Filter by verified/unverified status.
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/statistics/variant-stock-overview/';
+};
+
+export type ProductsStatisticsVariantStockOverviewRetrieveResponses = {
+    200: VariantStockOverview;
+};
+
+export type ProductsStatisticsVariantStockOverviewRetrieveResponse = ProductsStatisticsVariantStockOverviewRetrieveResponses[keyof ProductsStatisticsVariantStockOverviewRetrieveResponses];
 
 export type ProfilesListData = {
     body?: never;
