@@ -17,6 +17,9 @@ export type PermissionCategory =
   | 'CONTENT_MANAGEMENT'
   | 'STAFF_MANAGEMENT'
   | 'REPORTING'
+  | 'PAYMENT_MANAGEMENT'
+  | 'BOOKING_MANAGEMENT'
+  | 'RESOURCE_MANAGEMENT'
 
 /**
  * CRUD action types

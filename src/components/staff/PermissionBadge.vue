@@ -35,6 +35,9 @@ const categoryLabels: Record<PermissionCategory, string> = {
   CONTENT_MANAGEMENT: 'Content',
   STAFF_MANAGEMENT: 'Staff',
   REPORTING: 'Reporting',
+  PAYMENT_MANAGEMENT: 'Payments',
+  BOOKING_MANAGEMENT: 'Bookings',
+  RESOURCE_MANAGEMENT: 'Resources',
 }
 
 // Permission level colors based on access rights

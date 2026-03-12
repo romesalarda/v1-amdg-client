@@ -5957,9 +5957,12 @@ export type EventPermission = {
      * * `PRODUCT_MANAGEMENT` - Product Management Permissions
      * * `CONTENT_MANAGEMENT` - Content Management Permissions
      * * `STAFF_MANAGEMENT` - Staff Management Permissions
+     * * `PAYMENT_MANAGEMENT` - Payment Management Permissions
+     * * `BOOKING_MANAGEMENT` - Booking Management Permissions
+     * * `RESOURCE_MANAGEMENT` - Resource Management Permissions
      * * `REPORTING` - Reporting Permissions
      */
-    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'REPORTING';
+    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
     readonly category_display: string;
     readonly created_at: string;
     readonly updated_at: string;
@@ -6039,9 +6042,12 @@ export type EventPermissionRequest = {
      * * `PRODUCT_MANAGEMENT` - Product Management Permissions
      * * `CONTENT_MANAGEMENT` - Content Management Permissions
      * * `STAFF_MANAGEMENT` - Staff Management Permissions
+     * * `PAYMENT_MANAGEMENT` - Payment Management Permissions
+     * * `BOOKING_MANAGEMENT` - Booking Management Permissions
+     * * `RESOURCE_MANAGEMENT` - Resource Management Permissions
      * * `REPORTING` - Reporting Permissions
      */
-    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'REPORTING';
+    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
 };
 
 /**
@@ -10952,9 +10958,12 @@ export type PatchedEventPermissionRequest = {
      * * `PRODUCT_MANAGEMENT` - Product Management Permissions
      * * `CONTENT_MANAGEMENT` - Content Management Permissions
      * * `STAFF_MANAGEMENT` - Staff Management Permissions
+     * * `PAYMENT_MANAGEMENT` - Payment Management Permissions
+     * * `BOOKING_MANAGEMENT` - Booking Management Permissions
+     * * `RESOURCE_MANAGEMENT` - Resource Management Permissions
      * * `REPORTING` - Reporting Permissions
      */
-    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'REPORTING';
+    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
 };
 
 export type PatchedEventQuestionAnswerChoiceRequest = {
@@ -17646,9 +17655,12 @@ export type EventPermissionWritable = {
      * * `PRODUCT_MANAGEMENT` - Product Management Permissions
      * * `CONTENT_MANAGEMENT` - Content Management Permissions
      * * `STAFF_MANAGEMENT` - Staff Management Permissions
+     * * `PAYMENT_MANAGEMENT` - Payment Management Permissions
+     * * `BOOKING_MANAGEMENT` - Booking Management Permissions
+     * * `RESOURCE_MANAGEMENT` - Resource Management Permissions
      * * `REPORTING` - Reporting Permissions
      */
-    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'REPORTING';
+    category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
 };
 
 export type EventPermissionAssignmentWritable = {

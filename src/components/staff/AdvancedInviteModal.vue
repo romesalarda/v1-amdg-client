@@ -329,6 +329,9 @@ const categories: PermissionCategory[] = [
   'CONTENT_MANAGEMENT',
   'STAFF_MANAGEMENT',
   'REPORTING',
+  'PAYMENT_MANAGEMENT',
+  'BOOKING_MANAGEMENT',
+  'RESOURCE_MANAGEMENT',
 ]
 
 const categoryLabels: Record<PermissionCategory, string> = {
@@ -338,6 +341,10 @@ const categoryLabels: Record<PermissionCategory, string> = {
   CONTENT_MANAGEMENT: 'Content Management',
   STAFF_MANAGEMENT: 'Staff Management',
   REPORTING: 'Reporting & Analytics',
+  PAYMENT_MANAGEMENT: 'Payment Management',
+  BOOKING_MANAGEMENT: 'Booking Management',
+  RESOURCE_MANAGEMENT: 'Resource Management',
+
 }
 
 const actions: CRUDAction[] = ['create', 'read', 'update', 'delete']
