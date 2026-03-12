@@ -1,6 +1,6 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 pb-24">
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
 
@@ -270,6 +270,29 @@
             </p>
           </div>
         </section>
+      </div>
+    </div>
+
+    <!-- Floating Navigation Bar -->
+    <div class="fixed bottom-0 left-64 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl">
+      <div class="max-w-7xl mx-auto px-6 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-primary">info</span>
+            <div>
+              <p class="text-sm font-semibold text-navy-900">Ready to view transactions?</p>
+              <p class="text-xs text-navy-500">View all payment transactions and manage refunds</p>
+            </div>
+          </div>
+          <NuxtLink
+            :to="`/events/${id}/m/payments/list`"
+            class="flex items-center gap-2 px-6 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
+          >
+            <span class="material-symbols-outlined text-lg">payments</span>
+            View Payments
+            <span class="material-symbols-outlined text-lg">arrow_forward</span>
+          </NuxtLink>
+        </div>
       </div>
     </div>
 

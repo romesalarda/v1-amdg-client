@@ -202,7 +202,7 @@
                 variant="solid"
                 color="primary"
                 icon="i-heroicons-plus"
-                :to="`/events/${id}/m/participants/editor`"
+                @click="showCreateModal = true"
               >
                 Add Attendee
               </UButton>
@@ -282,7 +282,7 @@
             <UButton
               v-else-if="currentView === 'attendees'"
               color="primary"
-              :to="`/events/${id}/m/participants/editor`"
+              @click="showCreateModal = true"
             >
               Add First Attendee
             </UButton>
@@ -936,18 +936,246 @@
         </div>
       </div>
     </UModal>
+
+    <!-- Create Attendee Modal -->
+    <UModal v-model="showCreateModal" :ui="{ width: 'sm:max-w-2xl' }">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Add New Participant</h3>
+            <p class="text-sm text-gray-500 mt-1">Fill in the details to create a new attendee for this event</p>
+          </div>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            @click="showCreateModal = false"
+          />
+        </div>
+
+        <form @submit.prevent="handleCreateAttendee" class="space-y-6">
+          <!-- Personal Information Section -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
+              <UIcon name="i-heroicons-user-circle" class="w-4 h-4" />
+              Personal Information
+            </h4>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  First Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="newAttendeeForm.first_name"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  :class="{ 'border-red-500': formErrors.first_name }"
+                />
+                <p v-if="formErrors.first_name" class="text-xs text-red-500 mt-1">{{ formErrors.first_name }}</p>
+              </div>
+
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Last Name <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="newAttendeeForm.last_name"
+                  type="text"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  :class="{ 'border-red-500': formErrors.last_name }"
+                />
+                <p v-if="formErrors.last_name" class="text-xs text-red-500 mt-1">{{ formErrors.last_name }}</p>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Email
+                </label>
+                <input
+                  v-model="newAttendeeForm.email"
+                  type="email"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  :class="{ 'border-red-500': formErrors.email }"
+                />
+                <p v-if="formErrors.email" class="text-xs text-red-500 mt-1">{{ formErrors.email }}</p>
+              </div>
+
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Phone Number
+                </label>
+                <input
+                  v-model="newAttendeeForm.phone_number"
+                  type="tel"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Date of Birth <span class="text-red-500">*</span>
+                </label>
+                <input
+                  v-model="newAttendeeForm.date_of_birth"
+                  type="date"
+                  required
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  :class="{ 'border-red-500': formErrors.date_of_birth }"
+                />
+                <p v-if="formErrors.date_of_birth" class="text-xs text-red-500 mt-1">{{ formErrors.date_of_birth }}</p>
+                <p v-if="previewAge !== null" class="text-xs text-gray-500 mt-1">Age: {{ previewAge }} years old</p>
+              </div>
+
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Gender
+                </label>
+                <select
+                  v-model="newAttendeeForm.gender"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="null">Select gender</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                  <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Booking Association Section -->
+          <div class="space-y-4 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <h4 class="text-xs font-black text-amber-900 uppercase tracking-widest flex items-center gap-2">
+              <UIcon name="i-heroicons-ticket" class="w-4 h-4" />
+              Booking Association <span class="text-amber-600">*</span>
+            </h4>
+            <p class="text-xs text-amber-800">
+              Attendees should be linked to a booking for proper event management and payment tracking.
+            </p>
+
+            <div>
+              <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                Search & Select Booking
+              </label>
+              <input
+                v-model="bookingSearchQuery"
+                type="text"
+                placeholder="Search by booking reference or attendee name..."
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary mb-2"
+              />
+              
+              <select
+                v-model="newAttendeeForm.booking"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                :class="{ 'border-amber-400': formErrors.booking }"
+              >
+                <option :value="null">Select a booking</option>
+                <option 
+                  v-for="booking in filteredBookings" 
+                  :key="booking.id" 
+                  :value="booking.id"
+                >
+                  {{ booking.booking_reference }} - {{ booking.made_by_name || 'N/A' }} ({{ booking.attendee_count }} attendee{{ booking.attendee_count !== 1 ? 's' : '' }})
+                  <template v-if="booking.attendees && booking.attendees.length > 0">
+                    - {{ booking.attendees.map(a => a.full_name).join(', ') }}
+                  </template>
+                </option>
+              </select>
+              <p v-if="formErrors.booking" class="text-xs text-amber-600 mt-1">{{ formErrors.booking }}</p>
+              <p v-if="filteredBookings.length === 0" class="text-xs text-gray-500 mt-2">
+                No bookings found. <NuxtLink :to="`/events/${id}/m/bookings`" class="text-primary underline">Create a booking first</NuxtLink>
+              </p>
+            </div>
+          </div>
+
+          <!-- Event Details Section -->
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
+              <UIcon name="i-heroicons-map-pin" class="w-4 h-4" />
+              Additional Details
+            </h4>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Relationship to User
+                </label>
+                <select
+                  v-model="newAttendeeForm.relationship_to_user"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="self">Self</option>
+                  <option value="spouse">Spouse</option>
+                  <option value="child">Child</option>
+                  <option value="friend">Friend</option>
+                  <option value="parent">Parent</option>
+                  <option value="sibling">Sibling</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">
+                  Area From
+                </label>
+                <select
+                  v-model="newAttendeeForm.area_from"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="null">Select area</option>
+                  <option v-for="area in areas" :key="area.id" :value="area.id">
+                    {{ area.area_name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Actions -->
+          <div class="flex gap-3 pt-4 border-t">
+            <UButton
+              type="button"
+              variant="outline"
+              color="gray"
+              @click="showCreateModal = false"
+              class="flex-1"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              type="submit"
+              variant="solid"
+              color="primary"
+              :loading="createAttendeeMutation.isPending.value"
+              :disabled="createAttendeeMutation.isPending.value"
+              class="flex-1"
+            >
+              Create Attendee
+            </UButton>
+          </div>
+        </form>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
-import { useAttendees } from '~/composables/resources/attendee/attendees'
+import { useAttendees, useCreateAttendee } from '~/composables/resources/attendee/attendees'
 import { useBookings } from '~/composables/resources/booking/bookings'
 import { useEvent } from '~/composables/resources/events/events'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useAreas } from '~/composables/resources/locations/locations'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import StatisticsIndex from './statistics/index.vue'
-import type { AttendeeList, OrganisationList, BookingList } from '~/api/types.gen'
+import type { AttendeeList, OrganisationList, BookingList, AttendeeCreateRequest } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
@@ -1020,6 +1248,25 @@ const showDetailsModal = ref(false)
 const selectedAttendeeDetails = ref<ExtendedAttendeeList | null>(null)
 const showBookingDetailsModal = ref(false)
 const selectedBooking = ref<ExtendedBookingList | null>(null)
+const showCreateModal = ref(false)
+
+// Create attendee form state
+const newAttendeeForm = ref<AttendeeCreateRequest>({
+  first_name: '',
+  last_name: '',
+  email: null,
+  phone_number: null,
+  date_of_birth: null,
+  gender: null,
+  relationship_to_user: 'self',
+  event: null,
+  user: null,
+  area_from: null,
+  booking: null,
+})
+
+const bookingSearchQuery = ref('')
+const formErrors = ref<Record<string, string>>({})
 
 // Filters state
 const filters = ref({
@@ -1102,11 +1349,24 @@ const bookingsQueryParams = computed(() => {
   return params
 })
 
+// Event bookings query for create modal (fetch all bookings for the event with higher page size)
+const eventBookingsQueryParams = computed(() => ({
+  event__event_id: id.value,
+  page_size: 100, // Fetch more bookings for the dropdown
+}))
+
 // Fetch attendees with reactive query params
 const { data: attendeesData, isLoading } = useAttendees(queryParams)
 
 // Fetch bookings
 const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
+
+// Fetch event bookings for create modal
+const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
+
+// Create attendee mutation
+const createAttendeeMutation = useCreateAttendee()
+const toast = useToast()
 
 // Fetch organisations for filter dropdown
 const { data: organisationsData } = useOrganisations({ page_size: 100 })
@@ -1121,6 +1381,53 @@ const bookings = computed(() => (bookingsData.value?.data?.results || []) as Boo
 const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
 const organisations = computed(() => organisationsData.value?.data?.results || [])
 const areas = computed(() => areasData.value?.data?.results || [])
+const eventBookings = computed(() => (eventBookingsData.value?.data?.results || []) as ExtendedBookingList[])
+
+// Filtered bookings for search
+const filteredBookings = computed(() => {
+  if (!bookingSearchQuery.value.trim()) {
+    return eventBookings.value
+  }
+  
+  const query = bookingSearchQuery.value.toLowerCase().trim()
+  
+  return eventBookings.value.filter(booking => {
+    // Search by booking reference
+    if (booking.booking_reference.toLowerCase().includes(query)) {
+      return true
+    }
+    
+    // Search by made_by name
+    if (booking.made_by_name?.toLowerCase().includes(query)) {
+      return true
+    }
+    
+    // Search by attendee names if available
+    if (booking.attendees && Array.isArray(booking.attendees)) {
+      return booking.attendees.some(attendee => 
+        attendee.full_name?.toLowerCase().includes(query)
+      )
+    }
+    
+    return false
+  })
+})
+
+// Computed age from date of birth for preview
+const previewAge = computed(() => {
+  if (!newAttendeeForm.value.date_of_birth) return null
+  
+  const today = new Date()
+  const birthDate = new Date(newAttendeeForm.value.date_of_birth)
+  let age = today.getFullYear() - birthDate.getFullYear()
+  const monthDiff = today.getMonth() - birthDate.getMonth ()
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--
+  }
+  
+  return age
+})
 
 // Statistics - these would ideally come from separate API endpoints for performance
 // For now, we'll fetch with specific filters
@@ -1289,5 +1596,100 @@ watch(selectedAttendees, (newVal) => {
 watch(currentPage, () => {
   selectedAttendees.value = []
   selectAll.value = false
+})
+
+// Create attendee functions
+function resetCreateForm() {
+  newAttendeeForm.value = {
+    first_name: '',
+    last_name: '',
+    email: null,
+    phone_number: null,
+    date_of_birth: null,
+    gender: null,
+    relationship_to_user: 'self',
+    event: Number(event.value?.data?.id) || null,
+    user: null,
+    area_from: null,
+    booking: null,
+  }
+  bookingSearchQuery.value = ''
+  formErrors.value = {}
+}
+
+function validateCreateForm(): boolean {
+  formErrors.value = {}
+  
+  if (!newAttendeeForm.value.first_name?.trim()) {
+    formErrors.value.first_name = 'First name is required'
+  }
+  
+  if (!newAttendeeForm.value.last_name?.trim()) {
+    formErrors.value.last_name = 'Last name is required'
+  }
+  
+  if (!newAttendeeForm.value.date_of_birth) {
+    formErrors.value.date_of_birth = 'Date of birth is required'
+  }
+  
+  if (newAttendeeForm.value.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newAttendeeForm.value.email)) {
+    formErrors.value.email = 'Invalid email format'
+  }
+  
+  if (!newAttendeeForm.value.booking) {
+    formErrors.value.booking = 'Booking selection is strongly recommended for proper attendee management'
+  }
+  
+  return Object.keys(formErrors.value).length === 0
+}
+
+async function handleCreateAttendee() {
+  if (!validateCreateForm()) {
+    return
+  }
+  
+  try {
+    // Set event ID
+    newAttendeeForm.value.event = Number(event.value?.data?.id) || null
+    
+    await createAttendeeMutation.mutateAsync(newAttendeeForm.value)
+    
+    toast.add({
+      title: 'Success',
+      description: 'Attendee created successfully',
+      color: 'green',
+    })
+    
+    showCreateModal.value = false
+    resetCreateForm()
+  } catch (error: any) {
+    console.error('Error creating attendee:', error)
+    
+    toast.add({
+      title: 'Error',
+      description: error?.message || 'Failed to create attendee. Please try again.',
+      color: 'red',
+    })
+    
+    // Handle API validation errors
+    if (error?.body) {
+      Object.keys(error.body).forEach(key => {
+        formErrors.value[key] = Array.isArray(error.body[key]) 
+          ? error.body[key][0] 
+          : error.body[key]
+      })
+    }
+  }
+}
+
+// Watch modal close to reset form
+watch(showCreateModal, (newVal) => {
+  if (newVal) {
+    // Pre-fill event when opening modal
+    newAttendeeForm.value.event = Number(id.value)
+  } else {
+    // Reset form when closing
+    resetCreateForm()
+  }
 })
 </script>
