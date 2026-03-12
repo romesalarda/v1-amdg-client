@@ -1,7 +1,41 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
-    <!-- Help Button -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- View Toggle -->
+    <div class="mb-6 flex items-center justify-between">
+      <div class="flex bg-gray-100 rounded-lg p-0.5">
+        <button
+          @click="changeView('management')"
+          :class="[
+            'px-4 py-2 text-sm font-semibold rounded-md transition-colors',
+            currentView === 'management'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          <span class="flex items-center gap-2">
+            <UIcon name="i-heroicons-cog-6-tooth" class="w-4 h-4" />
+            Management
+          </span>
+        </button>
+        <button
+          @click="changeView('statistics')"
+          :class="[
+            'px-4 py-2 text-sm font-semibold rounded-md transition-colors',
+            currentView === 'statistics'
+              ? 'bg-white text-primary shadow-sm'
+              : 'text-gray-600 hover:text-gray-900'
+          ]"
+        >
+          <span class="flex items-center gap-2">
+            <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
+            Statistics
+          </span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Management View -->
+    <div v-if="currentView === 'management'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content with Stepper (2/3) -->
       <div class="lg:col-span-2">
         <div class="flex gap-6">
@@ -972,6 +1006,11 @@
         </div>
       </div>
     </div>
+
+    <!-- Statistics View -->
+    <div v-else-if="currentView === 'statistics'">
+      <NuxtPage />
+    </div>
   </EventManagementLayout>
 </template>
 
@@ -1030,6 +1069,11 @@ const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
+
+// View toggle state
+const currentView = ref<'management' | 'statistics'>(
+  route.path.includes('/statistics') ? 'statistics' : 'management'
+)
 
 // Fetch event data
 const { data: event } = useEvent(id)
@@ -1105,6 +1149,23 @@ watch(
   },
   { immediate: true }
 )
+
+// View change handler
+function changeView(view: 'management' | 'statistics') {
+  currentView.value = view
+  if (view === 'statistics') {
+    // Navigate to the statistics child route
+    router.push(`/events/${id.value}/m/booking/statistics`)
+  } else {
+    // Navigate back to the parent booking route
+    router.push(`/events/${id.value}/m/booking`)
+  }
+}
+
+// Watch route changes to update currentView
+watch(() => route.path, (newPath) => {
+  currentView.value = newPath.includes('/statistics') ? 'statistics' : 'management'
+})
 
 // Ticket Type Modal & CRUD
 const showTicketTypeModal = ref(false)
