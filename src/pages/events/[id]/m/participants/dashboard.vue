@@ -1,8 +1,8 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
-    <div class="grid grid-cols-1 gap-6" :class="showFilters ? 'lg:grid-cols-12' : 'lg:grid-cols-1'">
-      <!-- Main Content (9/12 or full width) -->
-      <div :class="showFilters ? 'lg:col-span-9' : 'lg:col-span-12'" class="space-y-6">
+    <div class="space-y-6">
+      <!-- Main Content (full width) -->
+      <div class="space-y-6">
         
         <!-- Statistics Cards -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -179,11 +179,11 @@
                 size="sm"
                 variant="ghost"
                 color="gray"
-                :icon="showFilters ? 'i-heroicons-chevron-right' : 'i-heroicons-funnel'"
-                @click="showFilters = !showFilters"
-                class="hidden lg:flex"
+                icon="i-heroicons-funnel"
+                @click="showFiltersModal = true"
               >
-                {{ showFilters ? 'Hide' : 'Show' }} Filters
+                Filters
+                <UBadge v-if="activeFilterCount > 0" color="primary" size="xs" class="ml-1">{{ activeFilterCount }}</UBadge>
               </UButton>
               <!-- Export Button -->
               <UButton
@@ -250,6 +250,27 @@
               >
                 Filters
               </UButton>
+            </div>
+          </div>
+
+          <!-- Active Filter Chips -->
+          <div v-if="activeFilterChips.length > 0" class="px-6 py-3 border-b border-gray-100 bg-white">
+            <div class="flex flex-wrap gap-2">
+              <UBadge
+                v-for="chip in activeFilterChips"
+                :key="chip.key"
+                color="primary"
+                variant="soft"
+                class="flex items-center gap-1.5 px-2.5 py-1"
+              >
+                <span class="text-xs">{{ chip.label }}: {{ chip.value }}</span>
+                <button
+                  @click="removeFilter(chip.key)"
+                  class="hover:bg-primary/10 rounded-full p-0.5 transition-colors"
+                >
+                  <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                </button>
+              </UBadge>
             </div>
           </div>
 
@@ -545,213 +566,22 @@
           </div>
         </section>
       </div>
-
-      <!-- Right Sidebar Filters (3/12) -->
-      <div v-if="showFilters" class="lg:col-span-3">
-        <div class="sticky top-24 space-y-4">
-          <!-- Filters Card -->
-          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-            <div class="px-5 py-4 bg-primary border-b border-primary">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
-                  <UIcon name="i-heroicons-funnel" class="w-4 h-4" />
-                  Filters
-                </h3>
-                <button
-                  v-if="activeFilterCount > 0"
-                  @click="clearAllFilters"
-                  class="text-xs text-white/80 hover:text-white underline"
-                >
-                  Clear all
-                </button>
-              </div>
-            </div>
-
-            <div class="p-5 space-y-5 max-h-[calc(100vh-200px)] overflow-y-auto">
-              
-              <!-- Status Filters -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Status</label>
-                <div class="space-y-2">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.isCheckedIn"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Checked In Only</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.isRegistered"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Registered Only</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.isCancelled"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Show Cancelled</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.isMinor"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Minors Only</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.isStaff"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Staff Only</span>
-                  </label>
-                </div>
-              </div>
-
-              <!-- Organisation Filter -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Organisation</label>
-                <select
-                  v-model="filters.organisation"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option :value="undefined">All Organisations</option>
-                  <option v-for="org in organisations" :key="org.id" :value="org.id">
-                    {{ org.title }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Area Filter -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Area</label>
-                <select
-                  v-model="filters.areaFrom"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option :value="undefined">All Areas</option>
-                  <option v-for="area in areas" :key="area.id" :value="area.id">
-                    {{ area.area_name }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- Gender Filter -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Gender</label>
-                <select
-                  v-model="filters.gender"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                >
-                  <option :value="undefined">All Genders</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
-
-              <!-- Age Range -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Age Range</label>
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <input
-                      v-model.number="filters.ageMin"
-                      type="number"
-                      placeholder="Min"
-                      min="0"
-                      max="120"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                  <div>
-                    <input
-                      v-model.number="filters.ageMax"
-                      type="number"
-                      placeholder="Max"
-                      min="0"
-                      max="120"
-                      class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Requirements Filters -->
-              <div>
-                <label class="text-xs font-bold text-gray-700 uppercase tracking-wide mb-2 block">Requirements</label>
-                <div class="space-y-2">
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.hasDietaryRequirements"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Has Dietary Req.</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.hasMedicalConditions"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Has Medical Cond.</span>
-                  </label>
-                  <label class="flex items-center gap-2 cursor-pointer">
-                    <input
-                      v-model="filters.hasAccessibilityRequirements"
-                      type="checkbox"
-                      :true-value="true"
-                      :false-value="undefined"
-                      class="rounded border-gray-300 text-primary focus:ring-primary"
-                    />
-                    <span class="text-sm text-gray-700">Has Accessibility Req.</span>
-                  </label>
-                </div>
-              </div>
-
-            </div>
-          </section>
-
-          <!-- Help Card -->
-          <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-            <div class="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-              <UIcon name="i-heroicons-information-circle" class="w-4 h-4 text-primary" />
-              <h3 class="text-xs font-black text-primary uppercase tracking-widest">Quick Tips</h3>
-            </div>
-            <div class="p-5 text-xs space-y-2 text-gray-600">
-              <p>• Use search to find attendees by name, email, or phone</p>
-              <p>• Click column headers to sort the table</p>
-              <p>• Select multiple rows for bulk actions</p>
-              <p>• Export filtered results to CSV</p>
-            </div>
-          </section>
-        </div>
-      </div>
     </div>
+
+    <!-- Attendee Filters Modal -->
+    <AttendeeFiltersModal
+      v-model="showFiltersModal"
+      :filters="filters"
+      :organisations="organisations"
+      :areas="areas"
+      :dietary-requirements="dietaryRequirements"
+      :medical-conditions="medicalConditions"
+      :accessibility-requirements="accessibilityRequirements"
+      :event-questions="eventQuestions"
+      @apply="applyFilters"
+      @clear="clearAllFilters"
+      @question-search-input="handleQuestionSearchInput"
+    />
 
     <!-- Attendee Details Modal -->
     <UModal v-model="showDetailsModal">
@@ -1171,11 +1001,16 @@
 import { useAttendees, useCreateAttendee } from '~/composables/resources/attendee/attendees'
 import { useBookings } from '~/composables/resources/booking/bookings'
 import { useEvent } from '~/composables/resources/events/events'
+import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useAreas } from '~/composables/resources/locations/locations'
+import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
+import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
+import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import StatisticsIndex from './statistics/index.vue'
-import type { AttendeeList, OrganisationList, BookingList, AttendeeCreateRequest } from '~/api/types.gen'
+import type { AttendeeList, OrganisationList, BookingList, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
@@ -1241,13 +1076,15 @@ const sortDirection = ref<'asc' | 'desc'>('asc')
 // Selection state
 const selectedAttendees = ref<string[]>([])
 const selectAll = ref(false)
-const showFilters = ref(false)
 
 // Modal state
 const showDetailsModal = ref(false)
 const selectedAttendeeDetails = ref<ExtendedAttendeeList | null>(null)
 const showBookingDetailsModal = ref(false)
 const selectedBooking = ref<ExtendedBookingList | null>(null)
+const showFilters = ref(false)
+const showFiltersModal = ref(false)
+const currentFilterTab = ref<'basic' | 'questions' | 'orders' | 'advanced'>('basic')
 const showCreateModal = ref(false)
 
 // Create attendee form state
@@ -1268,22 +1105,70 @@ const newAttendeeForm = ref<AttendeeCreateRequest>({
 const bookingSearchQuery = ref('')
 const formErrors = ref<Record<string, string>>({})
 
-// Filters state
+// Filters state - comprehensive filter support
 const filters = ref({
+  // Demographics
   organisation: route.query.organisation ? Number(route.query.organisation) : undefined,
   areaFrom: route.query.area_from ? Number(route.query.area_from) : undefined,
   gender: route.query.gender as string | undefined,
   ageMin: route.query.age_min ? Number(route.query.age_min) : undefined,
   ageMax: route.query.age_max ? Number(route.query.age_max) : undefined,
+  
+  // Status filters
   isCheckedIn: route.query.is_checked_in === 'true' ? true : undefined,
   isRegistered: route.query.is_registered === 'true' ? true : undefined,
   isCancelled: route.query.is_cancelled === 'true' ? true : undefined,
   isMinor: route.query.is_minor === 'true' ? true : undefined,
   isStaff: route.query.is_event_staff === 'true' ? true : undefined,
+  
+  // Personal needs
   hasDietaryRequirements: route.query.has_dietary_requirements === 'true' ? true : undefined,
+  dietaryRequirement: route.query.dietary_requirement ? Number(route.query.dietary_requirement) : undefined,
   hasMedicalConditions: route.query.has_medical_conditions === 'true' ? true : undefined,
+  medicalCondition: route.query.medical_condition ? Number(route.query.medical_condition) : undefined,
   hasAccessibilityRequirements: route.query.has_accessibility_requirements === 'true' ? true : undefined,
+  accessibilityRequirement: route.query.accessibility_requirement ? Number(route.query.accessibility_requirement) : undefined,
+  hasEmergencyContacts: route.query.has_emergency_contacts === 'true' ? true : undefined,
+  
+  // Question filters
+  hasAnsweredQuestions: route.query.has_answered_questions === 'true' ? true : undefined,
+  question: route.query.question as string | undefined, // UUID
+  questionAnswerSearch: route.query.question_answer_search as string | undefined,
+  answeredQuestionType: route.query.answered_question_type as string | undefined,
+  hasUnansweredRequiredQuestions: route.query.has_unanswered_required_questions === 'true' ? true : undefined,
+  selectedOption: route.query.selected_option ? Number(route.query.selected_option) : undefined,
+  sliderAnswerMin: route.query.slider_answer_min ? Number(route.query.slider_answer_min) : undefined,
+  sliderAnswerMax: route.query.slider_answer_max ? Number(route.query.slider_answer_max) : undefined,
+  
+  // Order filters
+  hasOrders: route.query.has_orders === 'true' ? true : undefined,
+  orderStatus: route.query.order_status as string | undefined,
+  orderStatusNot: route.query.order_status_not as string | undefined,
+  purchasedProduct: route.query.purchased_product ? Number(route.query.purchased_product) : undefined,
+  purchasedProductTitle: route.query.purchased_product_title as string | undefined,
+  orderTotalMin: route.query.order_total_min ? Number(route.query.order_total_min) : undefined,
+  orderTotalMax: route.query.order_total_max ? Number(route.query.order_total_max) : undefined,
+  orderCreatedAfter: route.query.order_created_after as string | undefined,
+  orderCreatedBefore: route.query.order_created_before as string | undefined,
+  orderReferenceId: route.query.order_reference_id as string | undefined,
+  hasCompletedOrders: route.query.has_completed_orders === 'true' ? true : undefined,
+  hasPendingOrders: route.query.has_pending_orders === 'true' ? true : undefined,
+  
+  // Advanced filters
+  relationshipToUser: route.query.relationship_to_user as string | undefined,
+  selfRegistered: route.query.self_registered === 'true' ? true : undefined,
+  hasBooking: route.query.has_booking === 'true' ? true : undefined,
+  booking: route.query.booking as string | undefined,
+  dateOfBirthAfter: route.query.date_of_birth_after as string | undefined,
+  dateOfBirthBefore: route.query.date_of_birth_before as string | undefined,
+  createdAfter: route.query.created_after as string | undefined,
+  createdBefore: route.query.created_before as string | undefined,
+  includeDeleted: route.query.include_deleted === 'true' ? true : undefined,
 })
+
+// Debounced question answer search
+const debouncedQuestionSearch = ref(filters.value.questionAnswerSearch || '')
+let questionSearchTimeout: ReturnType<typeof setTimeout>
 
 // Debounced search
 const debouncedSearch = ref(searchQuery.value)
@@ -1312,20 +1197,61 @@ const queryParams = computed(() => {
     params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
   }
 
-  // Apply filters
+  // Basic filters - Demographics
   if (filters.value.organisation) params.organisation = filters.value.organisation
   if (filters.value.areaFrom) params.area_from = filters.value.areaFrom
   if (filters.value.gender) params.gender = filters.value.gender
   if (filters.value.ageMin) params.age_min = filters.value.ageMin
   if (filters.value.ageMax) params.age_max = filters.value.ageMax
+  if (filters.value.isMinor !== undefined) params.is_minor = filters.value.isMinor
+  
+  // Basic filters - Status
   if (filters.value.isCheckedIn !== undefined) params.is_checked_in = filters.value.isCheckedIn
   if (filters.value.isRegistered !== undefined) params.is_registered = filters.value.isRegistered
   if (filters.value.isCancelled !== undefined) params.is_cancelled = filters.value.isCancelled
-  if (filters.value.isMinor !== undefined) params.is_minor = filters.value.isMinor
   if (filters.value.isStaff !== undefined) params.is_event_staff = filters.value.isStaff
+  
+  // Basic filters - Personal Needs
   if (filters.value.hasDietaryRequirements !== undefined) params.has_dietary_requirements = filters.value.hasDietaryRequirements
+  if (filters.value.dietaryRequirement) params.dietary_requirement = filters.value.dietaryRequirement
   if (filters.value.hasMedicalConditions !== undefined) params.has_medical_conditions = filters.value.hasMedicalConditions
+  if (filters.value.medicalCondition) params.medical_condition = filters.value.medicalCondition
   if (filters.value.hasAccessibilityRequirements !== undefined) params.has_accessibility_requirements = filters.value.hasAccessibilityRequirements
+  if (filters.value.accessibilityRequirement) params.accessibility_requirement = filters.value.accessibilityRequirement
+  
+  // Question filters
+  if (filters.value.question) params.question = filters.value.question
+  if (debouncedQuestionSearch.value) params.question_answer_search = debouncedQuestionSearch.value
+  if (filters.value.hasAnsweredQuestions !== undefined) params.has_answered_questions = filters.value.hasAnsweredQuestions
+  if (filters.value.hasUnansweredRequiredQuestions !== undefined) params.has_unanswered_required_questions = filters.value.hasUnansweredRequiredQuestions
+  if (filters.value.selectedOption) params.selected_option = filters.value.selectedOption
+  if (filters.value.sliderAnswerMin) params.slider_answer_min = filters.value.sliderAnswerMin
+  if (filters.value.sliderAnswerMax) params.slider_answer_max = filters.value.sliderAnswerMax
+  
+  // Order filters
+  if (filters.value.hasOrders !== undefined) params.has_orders = filters.value.hasOrders
+  if (filters.value.orderStatus) params.order_status = filters.value.orderStatus
+  if (filters.value.orderStatusNot) params.order_status_not = filters.value.orderStatusNot
+  if (filters.value.purchasedProduct) params.purchased_product = filters.value.purchasedProduct
+  if (filters.value.purchasedProductTitle) params.purchased_product_title = filters.value.purchasedProductTitle
+  if (filters.value.orderTotalMin) params.order_total_min = filters.value.orderTotalMin
+  if (filters.value.orderTotalMax) params.order_total_max = filters.value.orderTotalMax
+  if (filters.value.orderCreatedAfter) params.order_created_after = filters.value.orderCreatedAfter
+  if (filters.value.orderCreatedBefore) params.order_created_before = filters.value.orderCreatedBefore
+  if (filters.value.orderReferenceId) params.order_reference_id = filters.value.orderReferenceId
+  if (filters.value.hasCompletedOrders !== undefined) params.has_completed_orders = filters.value.hasCompletedOrders
+  if (filters.value.hasPendingOrders !== undefined) params.has_pending_orders = filters.value.hasPendingOrders
+  
+  // Advanced filters
+  if (filters.value.relationshipToUser) params.relationship_to_user = filters.value.relationshipToUser
+  if (filters.value.selfRegistered !== undefined) params.self_registered = filters.value.selfRegistered
+  if (filters.value.hasBooking !== undefined) params.has_booking = filters.value.hasBooking
+  if (filters.value.booking) params.booking = filters.value.booking
+  if (filters.value.dateOfBirthAfter) params.date_of_birth_after = filters.value.dateOfBirthAfter
+  if (filters.value.dateOfBirthBefore) params.date_of_birth_before = filters.value.dateOfBirthBefore
+  if (filters.value.createdAfter) params.created_after = filters.value.createdAfter
+  if (filters.value.createdBefore) params.created_before = filters.value.createdBefore
+  if (filters.value.includeDeleted !== undefined) params.include_deleted = filters.value.includeDeleted
 
   return params
 })
@@ -1374,6 +1300,18 @@ const { data: organisationsData } = useOrganisations({ page_size: 100 })
 // Fetch areas for filter dropdown
 const { data: areasData } = useAreas({ page_size: 100 })
 
+// Fetch event questions for question-based filtering
+const { data: eventQuestionsData } = useEventQuestions({ event: Number(event.value?.data.id) })
+
+// Fetch dietary requirements for filter dropdown
+const { data: dietaryRequirementsData } = useDietaryRequirements({ page_size: 100 })
+
+// Fetch medical conditions for filter dropdown
+const { data: medicalConditionsData } = useMedicalConditions({ page_size: 100 })
+
+// Fetch accessibility requirements for filter dropdown
+const { data: accessibilityRequirementsData } = useAccessibilityRequirements({ page_size: 100 })
+
 // Computed values
 const attendees = computed(() => (attendeesData.value?.data?.results || []) as ExtendedAttendeeList[])
 const totalAttendees = computed(() => attendeesData.value?.data?.count || 0)
@@ -1382,6 +1320,110 @@ const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
 const organisations = computed(() => organisationsData.value?.data?.results || [])
 const areas = computed(() => areasData.value?.data?.results || [])
 const eventBookings = computed(() => (eventBookingsData.value?.data?.results || []) as ExtendedBookingList[])
+const eventQuestions = computed(() => eventQuestionsData.value?.data?.results || [])
+const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.results || [])
+const medicalConditions = computed(() => medicalConditionsData.value?.data?.results || [])
+const accessibilityRequirements = computed(() => accessibilityRequirementsData.value?.data?.results || [])
+
+// Create chips for active filters
+const activeFilterChips = computed(() => {
+  const chips: Array<{ key: string; label: string; value: string }> = []
+  
+  // Helper to format filter values
+  const formatValue = (value: any, key: string): string => {
+    if (typeof value === 'boolean') return value ? 'Yes' : 'No'
+    if (key === 'organisation' && organisations.value.length > 0) {
+      const org = organisations.value.find(o => o.id === value)
+      return org?.title || String(value)
+    }
+    if (key === 'areaFrom' && areas.value.length > 0) {
+      const area = areas.value.find(a => a.id === value)
+      return area?.area_name || String(value)
+    }
+    if (key === 'question' && eventQuestions.value.length > 0) {
+      const question = eventQuestions.value.find(q => q.id === value)
+      return question?.question_body || String(value)
+    }
+    if (key === 'dietaryRequirement' && dietaryRequirements.value.length > 0) {
+      const req = dietaryRequirements.value.find((r: any) => r.id === value)
+      return req?.label || String(value)
+    }
+    if (key === 'medicalCondition' && medicalConditions.value.length > 0) {
+      const cond = medicalConditions.value.find((c: any) => c.id === value)
+      return cond?.label || String(value)
+    }
+    if (key === 'accessibilityRequirement' && accessibilityRequirements.value.length > 0) {
+      const req = accessibilityRequirements.value.find((r: any) => r.id === value)
+      return req?.label || String(value)
+    }
+    return String(value)
+  }
+  
+  // Helper to get readable label
+  const getLabel = (key: string): string => {
+    const labels: Record<string, string> = {
+      organisation: 'Organisation',
+      areaFrom: 'Area',
+      gender: 'Gender',
+      ageMin: 'Min Age',
+      ageMax: 'Max Age',
+      isMinor: 'Minor',
+      isCheckedIn: 'Checked In',
+      isRegistered: 'Registered',
+      isCancelled: 'Cancelled',
+      isStaff: 'Staff',
+      hasDietaryRequirements: 'Has Dietary Req',
+      dietaryRequirement: 'Dietary Requirement',
+      hasMedicalConditions: 'Has Medical Cond',
+      medicalCondition: 'Medical Condition',
+      hasAccessibilityRequirements: 'Has Accessibility',
+      accessibilityRequirement: 'Accessibility Req',
+      question: 'Question',
+      questionAnswerSearch: 'Answer Search',
+      hasAnsweredQuestions: 'Answered Questions',
+      hasUnansweredRequiredQuestions: 'Unanswered Required',
+      selectedOption: 'Selected Option',
+      sliderAnswerMin: 'Slider Min',
+      sliderAnswerMax: 'Slider Max',
+      hasOrders: 'Has Orders',
+      orderStatus: 'Order Status',
+      orderStatusNot: 'Order Status Not',
+      purchasedProduct: 'Product',
+      purchasedProductTitle: 'Product Title',
+      orderTotalMin: 'Order Min',
+      orderTotalMax: 'Order Max',
+      orderCreatedAfter: 'Order After',
+      orderCreatedBefore: 'Order Before',
+      orderReferenceId: 'Order Reference',
+      hasCompletedOrders: 'Has Completed Orders',
+      hasPendingOrders: 'Has Pending Orders',
+      relationshipToUser: 'Relationship',
+      selfRegistered: 'Self Registered',
+      hasBooking: 'Has Booking',
+      booking: 'Booking',
+      dateOfBirthAfter: 'DOB After',
+      dateOfBirthBefore: 'DOB Before',
+      createdAfter: 'Created After',
+      createdBefore: 'Created Before',
+      includeDeleted: 'Include Deleted',
+      hasEmergencyContacts: 'Has Emergency Contacts',
+      answeredQuestionType: 'Answered Question Type',
+    }
+    return labels[key] || key
+  }
+  
+  Object.entries(filters.value).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      chips.push({
+        key,
+        label: getLabel(key),
+        value: formatValue(value, key)
+      })
+    }
+  })
+  
+  return chips
+})
 
 // Filtered bookings for search
 const filteredBookings = computed(() => {
@@ -1518,22 +1560,90 @@ function setSorting(field: string) {
 
 function clearAllFilters() {
   searchQuery.value = ''
+  debouncedQuestionSearch.value = ''
   filters.value = {
+    // Basic filters - Demographics
     organisation: undefined,
     areaFrom: undefined,
     gender: undefined,
     ageMin: undefined,
     ageMax: undefined,
+    isMinor: undefined,
+    
+    // Basic filters - Status
     isCheckedIn: undefined,
     isRegistered: undefined,
     isCancelled: undefined,
-    isMinor: undefined,
     isStaff: undefined,
+    
+    // Basic filters - Personal Needs
     hasDietaryRequirements: undefined,
+    dietaryRequirement: undefined,
     hasMedicalConditions: undefined,
+    medicalCondition: undefined,
     hasAccessibilityRequirements: undefined,
+    accessibilityRequirement: undefined,
+    
+    // Question filters
+    question: undefined,
+    questionAnswerSearch: undefined,
+    hasAnsweredQuestions: undefined,
+    hasUnansweredRequiredQuestions: undefined,
+    selectedOption: undefined,
+    sliderAnswerMin: undefined,
+    sliderAnswerMax: undefined,
+    answeredQuestionType: undefined,
+    
+    // Order filters
+    hasOrders: undefined,
+    orderStatus: undefined,
+    orderStatusNot: undefined,
+    purchasedProduct: undefined,
+    purchasedProductTitle: undefined,
+    orderTotalMin: undefined,
+    orderTotalMax: undefined,
+    orderCreatedAfter: undefined,
+    orderCreatedBefore: undefined,
+    orderReferenceId: undefined,
+    hasCompletedOrders: undefined,
+    hasPendingOrders: undefined,
+    
+    // Advanced filters
+    relationshipToUser: undefined,
+    selfRegistered: undefined,
+    hasBooking: undefined,
+    booking: undefined,
+    dateOfBirthAfter: undefined,
+    dateOfBirthBefore: undefined,
+    createdAfter: undefined,
+    createdBefore: undefined,
+    includeDeleted: undefined,
+    hasEmergencyContacts: undefined,
   }
   currentPage.value = 1
+}
+
+function removeFilter(key: string) {
+  // @ts-ignore - dynamic key access
+  filters.value[key] = undefined
+  if (key === 'questionAnswerSearch') {
+    debouncedQuestionSearch.value = ''
+  }
+  currentPage.value = 1
+}
+
+function applyFilters(updatedFilters: typeof filters.value) {
+  filters.value = { ...updatedFilters }
+  currentPage.value = 1
+  showFiltersModal.value = false
+}
+
+function handleQuestionSearchInput(value: string) {
+  clearTimeout(questionSearchTimeout)
+  questionSearchTimeout = setTimeout(() => {
+    debouncedQuestionSearch.value = value
+    filters.value.questionAnswerSearch = value
+  }, 500)
 }
 
 function toggleSelectAll() {
