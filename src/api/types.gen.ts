@@ -955,6 +955,40 @@ export type AttendeeOrganisationRequest = {
 };
 
 /**
+ * Serializer for overview/dashboard statistics.
+ */
+export type AttendeeOverviewStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    demographics: {
+        [key: string]: unknown;
+    };
+    personal_info: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for registration trends statistics.
+ */
+export type AttendeeRegistrationTrends = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_attendees: number;
+    group_by: string;
+    date_from: string | null;
+    date_to: string | null;
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for updating attendees.
  */
 export type AttendeeUpdate = {
@@ -998,6 +1032,29 @@ export type AttendeeUpdateRequest = {
      */
     relationship_to_user?: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
     area_from?: number | null;
+};
+
+/**
+ * Serializer for attendees per booking distribution.
+ */
+export type AttendeesPerBooking = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_bookings: number;
+    average_attendees: number;
+    max_attendees: number;
+    min_attendees: number;
+    distribution: Array<AttendeesPerBookingItem>;
+};
+
+/**
+ * Serializer for attendees per booking distribution item.
+ */
+export type AttendeesPerBookingItem = {
+    attendee_count: number;
+    booking_count: number;
 };
 
 /**
@@ -1125,6 +1182,23 @@ export type AvailabilityWindowTemplate = {
     readonly windows_count: number;
     readonly created_at: string;
     readonly updated_at: string;
+};
+
+/**
+ * Serializer for booking completion rate.
+ */
+export type BookingCompletionRate = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_intents: number;
+    completed_intents: number;
+    expired_intents: number;
+    cancelled_intents: number;
+    pending_intents: number;
+    total_bookings: number;
+    completion_rate: number;
 };
 
 /**
@@ -1342,6 +1416,21 @@ export type BookingList = {
 };
 
 /**
+ * Serializer for booking overview statistics.
+ */
+export type BookingOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_bookings: number;
+    total_attendees: number;
+    total_tickets: number;
+    average_attendees_per_booking: number;
+    status_breakdown: Array<StatusBreakdown>;
+};
+
+/**
  * Create/Update serializer for BookingPackage with validation.
  */
 export type BookingPackageCreateUpdate = {
@@ -1545,6 +1634,152 @@ export type BookingPackageRuleCreateUpdateRequest = {
      */
     value?: string | null;
     active?: boolean;
+};
+
+/**
+ * Serializer for booking reference type item.
+ */
+export type BookingReferenceTypeItem = {
+    event_code: string;
+    count: number;
+};
+
+/**
+ * Serializer for booking reference types distribution.
+ */
+export type BookingReferenceTypes = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_bookings: number;
+    distribution: Array<BookingReferenceTypeItem>;
+};
+
+/**
+ * Serializer for revenue breakdown by status.
+ */
+export type BookingRevenueBreakdown = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_revenue_all_statuses: number;
+    completed_revenue: number;
+    distribution: Array<RevenueBreakdownItem>;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type BookingRevenueOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_revenue: number;
+    average_revenue_per_booking: number;
+    max_revenue: number;
+    min_revenue: number;
+    total_bookings: number;
+    total_completed_payments: number;
+};
+
+/**
+ * Serializer for revenue trends.
+ */
+export type BookingRevenueTrends = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_revenue: number;
+    group_by: string;
+    trends: Array<RevenueTrendItem>;
+};
+
+/**
+ * Serializer for combined booking statistics overview.
+ */
+export type BookingStatisticsOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    bookings: BookingsSummary;
+    tickets: TicketsSummary;
+    packages: PackagesSummary;
+    intents: IntentsSummary;
+    revenue: RevenueSummary;
+};
+
+/**
+ * Serializer for booking status distribution.
+ */
+export type BookingStatusDistribution = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<DistributionItem>;
+};
+
+/**
+ * Serializer for booking timeline.
+ */
+export type BookingTimeline = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_bookings: number;
+    timeline: Array<TrendItem>;
+};
+
+/**
+ * Serializer for booking trends over time.
+ */
+export type BookingTrends = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_bookings: number;
+    group_by: string;
+    trends: Array<TrendItem>;
+};
+
+/**
+ * Serializer for bookings by package.
+ */
+export type BookingsByPackage = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_tickets_with_package: number;
+    total_tickets_without_package: number;
+    distribution: Array<BookingsByPackageItem>;
+};
+
+/**
+ * Serializer for bookings by package item.
+ */
+export type BookingsByPackageItem = {
+    package_name: string;
+    package_id: number;
+    ticket_count: number;
+    percentage: number;
+};
+
+/**
+ * Serializer for bookings summary in overview.
+ */
+export type BookingsSummary = {
+    total: number;
+    total_attendees: number;
+    average_attendees_per_booking: number;
 };
 
 /**
@@ -3615,6 +3850,43 @@ export type DiscountRuleCreateUpdateRequest = {
     discount: number;
 };
 
+/**
+ * Serializer for discount rule effectiveness statistics.
+ */
+export type DiscountRuleEffectiveness = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_rules: number;
+    rules: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for discount usage statistics.
+ */
+export type DiscountUsage = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_discounts: number;
+    type_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for distribution item.
+ */
+export type DistributionItem = {
+    label: string;
+    value: number;
+    percentage: number;
+};
+
 export type DonationCheckoutRequestRequest = {
     /**
      * Donation amount
@@ -3731,6 +4003,37 @@ export type DonationList = {
         self?: string;
         payment?: string;
     };
+};
+
+/**
+ * Serializer for donation statistics.
+ */
+export type DonationStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_donations: number;
+    total_amount: number | null;
+    average_amount: number | null;
+    status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for donation trends over time.
+ */
+export type DonationTrends = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total_count: number;
+    total_amount: number;
 };
 
 export type DonationVerificationRequestRequest = {
@@ -5627,6 +5930,21 @@ export type EventList = {
     };
 };
 
+/**
+ * Serializer for payment status distribution.
+ */
+export type EventPaymentStatusDistribution = {
+    /**
+     * Payment status counts and amounts
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    total_bookings: number;
+    total_amount: string;
+    total_payments: number;
+};
+
 export type EventPermission = {
     readonly id: number;
     readonly permission_id: string;
@@ -5951,6 +6269,51 @@ export type EventQuestionRequest = {
     max_value?: number | null;
     min_value?: number | null;
     options?: Array<EventQuestionOptionRequest>;
+};
+
+/**
+ * Serializer for registration trends over time.
+ */
+export type EventRegistrationTrends = {
+    /**
+     * Registration data points over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total_registrations: number;
+    /**
+     * Time period (day, week, month)
+     */
+    period: string;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type EventRevenueOverview = {
+    /**
+     * Total revenue from all sources
+     */
+    total_revenue: string;
+    /**
+     * Revenue from bookings
+     */
+    booking_revenue: string;
+    /**
+     * Revenue from product sales
+     */
+    product_revenue: string;
+    /**
+     * Revenue from donations
+     */
+    donation_revenue: string;
+    /**
+     * Revenue breakdown by source
+     */
+    breakdown: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type EventReview = {
@@ -7722,6 +8085,28 @@ export type EventStaffRequest = {
     notes?: string | null;
 };
 
+/**
+ * Serializer for event status distribution statistics.
+ */
+export type EventStatusDistribution = {
+    /**
+     * List of status counts with labels and percentages
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
+     * Total number of events
+     */
+    total_events: number;
+    /**
+     * Filters applied to the query
+     */
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+};
+
 export type EventType = {
     readonly id: number;
     title: string;
@@ -7994,6 +8379,59 @@ export type GoogleOAuthRequest = {
      * CSRF protection state parameter
      */
     state?: string;
+};
+
+/**
+ * Serializer for intent conversion rate.
+ */
+export type IntentConversionRate = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_intents: number;
+    completed: number;
+    expired: number;
+    cancelled: number;
+    pending: number;
+    conversion_rate: number;
+    expiration_rate: number;
+    cancellation_rate: number;
+};
+
+/**
+ * Serializer for intent overview statistics.
+ */
+export type IntentOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_intents: number;
+    status_breakdown: Array<StatusBreakdown>;
+    total_capacity_reserved: number;
+    average_capacity_per_intent: number;
+};
+
+/**
+ * Serializer for intent trends over time.
+ */
+export type IntentTrends = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_intents: number;
+    group_by: string;
+    trends: Array<TrendItem>;
+};
+
+/**
+ * Serializer for intents summary in overview.
+ */
+export type IntentsSummary = {
+    total: number;
+    status_breakdown: Array<StatusBreakdown>;
 };
 
 /**
@@ -8877,23 +9315,6 @@ export type OverviewStatistics = {
 };
 
 /**
- * Serializer for overview/dashboard statistics.
- */
-export type OverviewStats = {
-    readonly generated_at: string;
-    readonly filters_applied: {
-        [key: string]: unknown;
-    };
-    total_attendees: number;
-    demographics: {
-        [key: string]: unknown;
-    };
-    personal_info: {
-        [key: string]: unknown;
-    };
-};
-
-/**
  * Create/Update serializer for POI with validation.
  */
 export type PoiCreateUpdate = {
@@ -9001,6 +9422,94 @@ export type PoiList = {
     };
 };
 
+/**
+ * Serializer for package overview statistics.
+ */
+export type PackageOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_packages: number;
+    active_packages: number;
+    inactive_packages: number;
+    packages_with_tickets: number;
+    total_tickets_using_packages: number;
+    total_rules: number;
+    active_rules: number;
+};
+
+/**
+ * Serializer for package popularity.
+ */
+export type PackagePopularity = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_packages: number;
+    popularity: Array<PackagePopularityItem>;
+};
+
+/**
+ * Serializer for package popularity item.
+ */
+export type PackagePopularityItem = {
+    package_id: number;
+    package_name: string;
+    ticket_count: number;
+    is_active: boolean;
+    base_amount: number;
+};
+
+/**
+ * Serializer for package pricing analysis.
+ */
+export type PackagePricingAnalysis = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_packages: number;
+    average_base_amount: number;
+    max_base_amount: number;
+    min_base_amount: number;
+    average_modifier: number;
+    packages: Array<PackagePricingItem>;
+};
+
+/**
+ * Serializer for package pricing item.
+ */
+export type PackagePricingItem = {
+    package_id: number;
+    package_name: string;
+    base_amount: number;
+    percentage_modifier: number;
+    is_active: boolean;
+};
+
+/**
+ * Serializer for package rule distribution.
+ */
+export type PackageRuleDistribution = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_rules: number;
+    distribution: Array<DistributionItem>;
+};
+
+/**
+ * Serializer for packages summary in overview.
+ */
+export type PackagesSummary = {
+    total: number;
+    active: number;
+    total_usage: number;
+};
+
 export type PaginatedAccessibilityRequirementList = {
     count: number;
     next?: string | null;
@@ -9085,6 +9594,13 @@ export type PaginatedAttendeeOrganisationList = {
     results: Array<AttendeeOrganisation>;
 };
 
+export type PaginatedAttendeeOverviewStatsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<AttendeeOverviewStats>;
+};
+
 export type PaginatedAvailabilityWindowList = {
     count: number;
     next?: string | null;
@@ -9125,6 +9641,13 @@ export type PaginatedBookingPackageRuleList = {
     next?: string | null;
     previous?: string | null;
     results: Array<BookingPackageRule>;
+};
+
+export type PaginatedBookingStatisticsOverviewList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BookingStatisticsOverview>;
 };
 
 export type PaginatedChapterLocationListList = {
@@ -9428,20 +9951,6 @@ export type PaginatedOrganisationListList = {
     results: Array<OrganisationList>;
 };
 
-export type PaginatedOverviewStatisticsList = {
-    count: number;
-    next?: string | null;
-    previous?: string | null;
-    results: Array<OverviewStatistics>;
-};
-
-export type PaginatedOverviewStatsList = {
-    count: number;
-    next?: string | null;
-    previous?: string | null;
-    results: Array<OverviewStats>;
-};
-
 export type PaginatedPoiListList = {
     count: number;
     next?: string | null;
@@ -9470,6 +9979,13 @@ export type PaginatedPaymentMethodList = {
     results: Array<PaymentMethod>;
 };
 
+export type PaginatedPaymentOverviewStatsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PaymentOverviewStats>;
+};
+
 export type PaginatedProductCategoryList = {
     count: number;
     next?: string | null;
@@ -9482,6 +9998,13 @@ export type PaginatedProductListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<ProductList>;
+};
+
+export type PaginatedProductOverviewStatisticsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<ProductOverviewStatistics>;
 };
 
 export type PaginatedProductVariantListList = {
@@ -11972,18 +12495,136 @@ export type PaymentMethodDetail = {
 };
 
 /**
- * Serializer for payment status distribution.
+ * Serializer for payment method distribution statistics.
  */
-export type PaymentStatusDistribution = {
-    /**
-     * Payment status counts and amounts
-     */
+export type PaymentMethodDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    total_with_method: number;
+    total_without_method: number;
     distribution: Array<{
         [key: string]: unknown;
     }>;
-    total_bookings: number;
-    total_amount: string;
+};
+
+/**
+ * Serializer for payment overview statistics.
+ */
+export type PaymentOverview = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
     total_payments: number;
+    total_amount: number | null;
+    average_amount: number | null;
+    status_breakdown: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for combined overview statistics.
+ */
+export type PaymentOverviewStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    payments: {
+        [key: string]: unknown;
+    };
+    revenue: {
+        [key: string]: unknown;
+    };
+    discounts: {
+        [key: string]: unknown;
+    };
+    refunds: {
+        [key: string]: unknown;
+    };
+    donations: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for detailed revenue breakdown statistics.
+ */
+export type PaymentRevenueBreakdown = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    gross_revenue: number;
+    completed_payment_count: number;
+    refunded_amount: number;
+    refunded_payment_count: number;
+    pending_refund_amount: number;
+    pending_refund_count: number;
+    net_revenue: number;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type PaymentRevenueOverview = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_revenue: number | null;
+    total_completed_payments: number;
+    average_payment: number | null;
+    total_refunded: number | null;
+    refunded_payment_count: number;
+    net_revenue: number;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type PaymentRevenueTrends = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total_revenue: number;
+    total_payments: number;
+};
+
+/**
+ * Serializer for payment status distribution statistics.
+ */
+export type PaymentStatusDistribution = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for payment trends over time.
+ */
+export type PaymentTrends = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total: number;
 };
 
 /**
@@ -12256,6 +12897,148 @@ export type ProductOverview = {
 };
 
 /**
+ * Serializer for comprehensive product overview statistics.
+ */
+export type ProductOverviewStatistics = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Product count summary
+     */
+    product_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Variant and stock summary
+     */
+    variant_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Order count by status
+     */
+    order_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Revenue metrics
+     */
+    revenue_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Top 5 products by revenue
+     */
+    top_products_by_revenue: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue breakdown by source.
+ */
+export type ProductRevenueBreakdown = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Revenue breakdown by source (standalone vs package-linked)
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type ProductRevenueOverview = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue from completed orders
+     */
+    total_revenue: number;
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Average order value
+     */
+    average_order_value: number;
+    /**
+     * Number of completed orders
+     */
+    completed_orders: number;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type ProductRevenueTrends = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total revenue in the filtered period
+     */
+    total_revenue: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Revenue over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Serializer for product variant selection within a package.
  */
 export type ProductSelectionRequest = {
@@ -12271,6 +13054,32 @@ export type ProductSelectionRequest = {
      * Quantity to order (must not exceed package_product.quantity_per_attendee)
      */
     quantity?: number;
+};
+
+/**
+ * Serializer for status distribution statistics (active/inactive + verified/unverified combinations).
+ */
+export type ProductStatusDistribution = {
+    /**
+     * Timestamp when statistics were generated
+     */
+    readonly generated_at: string;
+    /**
+     * Filters applied to the query
+     */
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Distribution by status combinations
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -12757,6 +13566,21 @@ export type RefundPolicyCreateUpdateRequest = {
 };
 
 /**
+ * Serializer for refund processing time statistics.
+ */
+export type RefundProcessingTimes = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_processed: number;
+    average_days: number | null;
+    median_days: number | null;
+    min_days: number | null;
+    max_days: number | null;
+};
+
+/**
  * Create serializer for RefundRequest with validation.
  */
 export type RefundRequestCreate = {
@@ -12846,6 +13670,21 @@ export type RefundRequestList = {
 };
 
 /**
+ * Serializer for refund request statistics.
+ */
+export type RefundRequestStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_requests: number;
+    total_amount: number | null;
+    status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Update serializer for RefundRequest status changes.
  */
 export type RefundRequestUpdate = {
@@ -12874,20 +13713,18 @@ export type RefundRequestUpdateRequest = {
 };
 
 /**
- * Serializer for registration trends statistics.
+ * Serializer for refund trends over time.
  */
-export type RegistrationTrends = {
+export type RefundTrends = {
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
     };
-    total_attendees: number;
-    group_by: string;
-    date_from: string | null;
-    date_to: string | null;
     trends: Array<{
         [key: string]: unknown;
     }>;
+    total_count: number;
+    total_amount: number;
 };
 
 /**
@@ -13060,29 +13897,12 @@ export type ResourceRequest = {
 };
 
 /**
- * Serializer for revenue breakdown by source.
+ * Serializer for revenue breakdown item.
  */
-export type RevenueBreakdown = {
-    /**
-     * Timestamp when statistics were generated
-     */
-    readonly generated_at: string;
-    /**
-     * Filters applied to the query
-     */
-    readonly filters_applied: {
-        [key: string]: unknown;
-    };
-    /**
-     * Total revenue
-     */
-    total_revenue: number;
-    /**
-     * Revenue breakdown by source (standalone vs package-linked)
-     */
-    distribution: Array<{
-        [key: string]: unknown;
-    }>;
+export type RevenueBreakdownItem = {
+    status: string;
+    revenue: number;
+    payment_count: number;
 };
 
 /**
@@ -13129,6 +13949,44 @@ export type RevenueByEvent = {
 };
 
 /**
+ * Serializer for revenue by payment method statistics.
+ */
+export type RevenueByMethod = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_revenue: number;
+    methods: Array<{
+        [key: string]: unknown;
+    }>;
+    without_method_revenue: number | null;
+    without_method_count: number;
+};
+
+/**
+ * Serializer for revenue by package.
+ */
+export type RevenueByPackage = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_revenue: number;
+    distribution: Array<RevenueByPackageItem>;
+};
+
+/**
+ * Serializer for revenue by package item.
+ */
+export type RevenueByPackageItem = {
+    package_id: number;
+    package_name: string;
+    revenue: number;
+    ticket_count: number;
+};
+
+/**
  * Serializer for revenue by product.
  */
 export type RevenueByProduct = {
@@ -13159,69 +14017,43 @@ export type RevenueByProduct = {
 };
 
 /**
- * Serializer for revenue overview statistics.
+ * Serializer for revenue by ticket type.
  */
-export type RevenueOverview = {
-    /**
-     * Total revenue from all sources
-     */
-    total_revenue: string;
-    /**
-     * Revenue from bookings
-     */
-    booking_revenue: string;
-    /**
-     * Revenue from product sales
-     */
-    product_revenue: string;
-    /**
-     * Revenue from donations
-     */
-    donation_revenue: string;
-    /**
-     * Revenue breakdown by source
-     */
-    breakdown: Array<{
+export type RevenueByTicketType = {
+    generated_at?: string;
+    filters_applied?: {
         [key: string]: unknown;
-    }>;
+    };
+    total_revenue: number;
+    distribution: Array<RevenueByTicketTypeItem>;
 };
 
 /**
- * Serializer for revenue trends over time.
+ * Serializer for revenue by ticket type item.
  */
-export type RevenueTrends = {
-    /**
-     * Timestamp when statistics were generated
-     */
-    readonly generated_at: string;
-    /**
-     * Filters applied to the query
-     */
-    readonly filters_applied: {
-        [key: string]: unknown;
-    };
-    /**
-     * Total revenue in the filtered period
-     */
-    total_revenue: number;
-    /**
-     * Time grouping method (day, week, month)
-     */
-    group_by: string;
-    /**
-     * Start date of the period
-     */
-    date_from?: string | null;
-    /**
-     * End date of the period
-     */
-    date_to?: string | null;
-    /**
-     * Revenue over time
-     */
-    trends: Array<{
-        [key: string]: unknown;
-    }>;
+export type RevenueByTicketTypeItem = {
+    ticket_type_id: number;
+    scope: string;
+    revenue: number;
+    ticket_count: number;
+};
+
+/**
+ * Serializer for revenue summary in overview.
+ */
+export type RevenueSummary = {
+    total: number;
+    average_per_booking: number;
+    total_completed_payments: number;
+};
+
+/**
+ * Serializer for revenue trend data point.
+ */
+export type RevenueTrendItem = {
+    date: string;
+    revenue: number;
+    payment_count: number;
 };
 
 /**
@@ -13294,6 +14126,15 @@ export type RoomVenueCreateUpdateRequest = {
 };
 
 /**
+ * Serializer for scope breakdown item.
+ */
+export type ScopeBreakdown = {
+    scope: string;
+    count: number;
+    percentage: number;
+};
+
+/**
  * Serializer for size distribution statistics.
  */
 export type SizeDistribution = {
@@ -13340,25 +14181,12 @@ export type StaffAllocation = {
 };
 
 /**
- * Serializer for event status distribution statistics.
+ * Serializer for status breakdown item.
  */
-export type StatusDistribution = {
-    /**
-     * List of status counts with labels and percentages
-     */
-    distribution: Array<{
-        [key: string]: unknown;
-    }>;
-    /**
-     * Total number of events
-     */
-    total_events: number;
-    /**
-     * Filters applied to the query
-     */
-    filters_applied?: {
-        [key: string]: unknown;
-    };
+export type StatusBreakdown = {
+    status: string;
+    count: number;
+    percentage: number;
 };
 
 /**
@@ -13475,6 +14303,45 @@ export type TicketList = {
 };
 
 /**
+ * Serializer for ticket overview statistics.
+ */
+export type TicketOverview = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_tickets: number;
+    status_breakdown: Array<StatusBreakdown>;
+    scope_breakdown: Array<ScopeBreakdown>;
+    average_uses_remaining: number;
+    total_uses_remaining: number;
+};
+
+/**
+ * Serializer for ticket scope distribution.
+ */
+export type TicketScopeDistribution = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<DistributionItem>;
+};
+
+/**
+ * Serializer for ticket status distribution.
+ */
+export type TicketStatusDistribution = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<DistributionItem>;
+};
+
+/**
  * Create/Update serializer for TicketType with validation.
  */
 export type TicketTypeCreateUpdate = {
@@ -13554,6 +14421,28 @@ export type TicketTypeDetail = {
 };
 
 /**
+ * Serializer for ticket type distribution.
+ */
+export type TicketTypeDistribution = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total: number;
+    distribution: Array<TicketTypeDistributionItem>;
+};
+
+/**
+ * Serializer for ticket type distribution item.
+ */
+export type TicketTypeDistributionItem = {
+    ticket_type_id: number;
+    scope: string;
+    count: number;
+    percentage: number;
+};
+
+/**
  * List serializer for TicketType with HATEOAS links.
  */
 export type TicketTypeList = {
@@ -13585,8 +14474,73 @@ export type TicketTypeList = {
     };
 };
 
+/**
+ * Serializer for ticket usage statistics.
+ */
+export type TicketUsageStats = {
+    generated_at?: string;
+    filters_applied?: {
+        [key: string]: unknown;
+    };
+    total_tickets: number;
+    valid_tickets: number;
+    used_tickets: number;
+    cancelled_tickets: number;
+    average_uses_remaining: number;
+    total_uses_remaining: number;
+    max_uses: number;
+    min_uses: number;
+    usage_rate: number;
+};
+
+/**
+ * Serializer for tickets summary in overview.
+ */
+export type TicketsSummary = {
+    total: number;
+    status_breakdown: Array<StatusBreakdown>;
+};
+
 export type TokenRefreshRequest = {
     refresh: string;
+};
+
+/**
+ * Serializer for top discounts statistics.
+ */
+export type TopDiscounts = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_returned: number;
+    limit: number;
+    discounts: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for top donors statistics.
+ */
+export type TopDonors = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total_returned: number;
+    limit: number;
+    donors: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for trend data point.
+ */
+export type TrendItem = {
+    date: string;
+    count: number;
 };
 
 /**
@@ -14603,6 +15557,32 @@ export type AttendeeMessageListWritable = {
 export type AttendeeOrganisationWritable = {
     organisation: number;
     added_by?: number | null;
+};
+
+/**
+ * Serializer for overview/dashboard statistics.
+ */
+export type AttendeeOverviewStatsWritable = {
+    total_attendees: number;
+    demographics: {
+        [key: string]: unknown;
+    };
+    personal_info: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for registration trends statistics.
+ */
+export type AttendeeRegistrationTrendsWritable = {
+    total_attendees: number;
+    group_by: string;
+    date_from: string | null;
+    date_to: string | null;
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -15757,6 +16737,26 @@ export type DiscountRuleWritable = {
 };
 
 /**
+ * Serializer for discount rule effectiveness statistics.
+ */
+export type DiscountRuleEffectivenessWritable = {
+    total_rules: number;
+    rules: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for discount usage statistics.
+ */
+export type DiscountUsageWritable = {
+    total_discounts: number;
+    type_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
  * Detailed serializer for Donation.
  */
 export type DonationDetailWritable = {
@@ -15787,6 +16787,29 @@ export type DonationListWritable = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     donated_by?: number | null;
+};
+
+/**
+ * Serializer for donation statistics.
+ */
+export type DonationStatsWritable = {
+    total_donations: number;
+    total_amount: number | null;
+    average_amount: number | null;
+    status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for donation trends over time.
+ */
+export type DonationTrendsWritable = {
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total_count: number;
+    total_amount: number;
 };
 
 /**
@@ -17844,19 +18867,6 @@ export type OrganisationListWritable = {
 };
 
 /**
- * Serializer for overview/dashboard statistics.
- */
-export type OverviewStatsWritable = {
-    total_attendees: number;
-    demographics: {
-        [key: string]: unknown;
-    };
-    personal_info: {
-        [key: string]: unknown;
-    };
-};
-
-/**
  * Detailed serializer for POI with full information.
  */
 export type PoiDetailWritable = {
@@ -17980,6 +18990,13 @@ export type PaginatedAttendeeOrganisationListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<AttendeeOrganisationWritable>;
+};
+
+export type PaginatedAttendeeOverviewStatsListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<AttendeeOverviewStatsWritable>;
 };
 
 export type PaginatedAvailabilityWindowListWritable = {
@@ -18325,13 +19342,6 @@ export type PaginatedOrganisationListListWritable = {
     results: Array<OrganisationListWritable>;
 };
 
-export type PaginatedOverviewStatsListWritable = {
-    count: number;
-    next?: string | null;
-    previous?: string | null;
-    results: Array<OverviewStatsWritable>;
-};
-
 export type PaginatedPoiListListWritable = {
     count: number;
     next?: string | null;
@@ -18360,6 +19370,13 @@ export type PaginatedPaymentMethodListWritable = {
     results: Array<PaymentMethodWritable>;
 };
 
+export type PaginatedPaymentOverviewStatsListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PaymentOverviewStatsWritable>;
+};
+
 export type PaginatedProductCategoryListWritable = {
     count: number;
     next?: string | null;
@@ -18372,6 +19389,13 @@ export type PaginatedProductListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<ProductListWritable>;
+};
+
+export type PaginatedProductOverviewStatisticsListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<ProductOverviewStatisticsWritable>;
 };
 
 export type PaginatedProductVariantListListWritable = {
@@ -18748,6 +19772,107 @@ export type PaymentMethodDetailWritable = {
 };
 
 /**
+ * Serializer for payment method distribution statistics.
+ */
+export type PaymentMethodDistributionWritable = {
+    total: number;
+    total_with_method: number;
+    total_without_method: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for payment overview statistics.
+ */
+export type PaymentOverviewWritable = {
+    total_payments: number;
+    total_amount: number | null;
+    average_amount: number | null;
+    status_breakdown: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for combined overview statistics.
+ */
+export type PaymentOverviewStatsWritable = {
+    payments: {
+        [key: string]: unknown;
+    };
+    revenue: {
+        [key: string]: unknown;
+    };
+    discounts: {
+        [key: string]: unknown;
+    };
+    refunds: {
+        [key: string]: unknown;
+    };
+    donations: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Serializer for detailed revenue breakdown statistics.
+ */
+export type PaymentRevenueBreakdownWritable = {
+    gross_revenue: number;
+    completed_payment_count: number;
+    refunded_amount: number;
+    refunded_payment_count: number;
+    pending_refund_amount: number;
+    pending_refund_count: number;
+    net_revenue: number;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type PaymentRevenueOverviewWritable = {
+    total_revenue: number | null;
+    total_completed_payments: number;
+    average_payment: number | null;
+    total_refunded: number | null;
+    refunded_payment_count: number;
+    net_revenue: number;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type PaymentRevenueTrendsWritable = {
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total_revenue: number;
+    total_payments: number;
+};
+
+/**
+ * Serializer for payment status distribution statistics.
+ */
+export type PaymentStatusDistributionWritable = {
+    total: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for payment trends over time.
+ */
+export type PaymentTrendsWritable = {
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+    total: number;
+};
+
+/**
  * Serializer for combined personal info statistics.
  */
 export type PersonalInfoCombinedWritable = {
@@ -18852,6 +19977,124 @@ export type ProductOverviewWritable = {
     unverified_products: number;
     /**
      * Active/Inactive distribution breakdown
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for comprehensive product overview statistics.
+ */
+export type ProductOverviewStatisticsWritable = {
+    /**
+     * Product count summary
+     */
+    product_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Variant and stock summary
+     */
+    variant_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Order count by status
+     */
+    order_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Revenue metrics
+     */
+    revenue_summary: {
+        [key: string]: unknown;
+    };
+    /**
+     * Top 5 products by revenue
+     */
+    top_products_by_revenue: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue breakdown by source.
+ */
+export type ProductRevenueBreakdownWritable = {
+    /**
+     * Total revenue
+     */
+    total_revenue: number;
+    /**
+     * Revenue breakdown by source (standalone vs package-linked)
+     */
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for revenue overview statistics.
+ */
+export type ProductRevenueOverviewWritable = {
+    /**
+     * Total revenue from completed orders
+     */
+    total_revenue: number;
+    /**
+     * Total number of orders
+     */
+    total_orders: number;
+    /**
+     * Average order value
+     */
+    average_order_value: number;
+    /**
+     * Number of completed orders
+     */
+    completed_orders: number;
+};
+
+/**
+ * Serializer for revenue trends over time.
+ */
+export type ProductRevenueTrendsWritable = {
+    /**
+     * Total revenue in the filtered period
+     */
+    total_revenue: number;
+    /**
+     * Time grouping method (day, week, month)
+     */
+    group_by: string;
+    /**
+     * Start date of the period
+     */
+    date_from?: string | null;
+    /**
+     * End date of the period
+     */
+    date_to?: string | null;
+    /**
+     * Revenue over time
+     */
+    trends: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for status distribution statistics (active/inactive + verified/unverified combinations).
+ */
+export type ProductStatusDistributionWritable = {
+    /**
+     * Total number of products
+     */
+    total_products: number;
+    /**
+     * Distribution by status combinations
      */
     distribution: Array<{
         [key: string]: unknown;
@@ -19059,6 +20302,17 @@ export type RefundPolicyWritable = {
 };
 
 /**
+ * Serializer for refund processing time statistics.
+ */
+export type RefundProcessingTimesWritable = {
+    total_processed: number;
+    average_days: number | null;
+    median_days: number | null;
+    min_days: number | null;
+    max_days: number | null;
+};
+
+/**
  * Detailed serializer for RefundRequest with associations.
  */
 export type RefundRequestDetailWritable = {
@@ -19095,16 +20349,25 @@ export type RefundRequestListWritable = {
 };
 
 /**
- * Serializer for registration trends statistics.
+ * Serializer for refund request statistics.
  */
-export type RegistrationTrendsWritable = {
-    total_attendees: number;
-    group_by: string;
-    date_from: string | null;
-    date_to: string | null;
+export type RefundRequestStatsWritable = {
+    total_requests: number;
+    total_amount: number | null;
+    status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for refund trends over time.
+ */
+export type RefundTrendsWritable = {
     trends: Array<{
         [key: string]: unknown;
     }>;
+    total_count: number;
+    total_amount: number;
 };
 
 /**
@@ -19235,22 +20498,6 @@ export type ResourceRequestWritable = {
 };
 
 /**
- * Serializer for revenue breakdown by source.
- */
-export type RevenueBreakdownWritable = {
-    /**
-     * Total revenue
-     */
-    total_revenue: number;
-    /**
-     * Revenue breakdown by source (standalone vs package-linked)
-     */
-    distribution: Array<{
-        [key: string]: unknown;
-    }>;
-};
-
-/**
  * Serializer for revenue by category.
  */
 export type RevenueByCategoryWritable = {
@@ -19271,6 +20518,18 @@ export type RevenueByCategoryWritable = {
 };
 
 /**
+ * Serializer for revenue by payment method statistics.
+ */
+export type RevenueByMethodWritable = {
+    total_revenue: number;
+    methods: Array<{
+        [key: string]: unknown;
+    }>;
+    without_method_revenue: number | null;
+    without_method_count: number;
+};
+
+/**
  * Serializer for revenue by product.
  */
 export type RevenueByProductWritable = {
@@ -19286,34 +20545,6 @@ export type RevenueByProductWritable = {
      * Products ranked by revenue
      */
     distribution: Array<{
-        [key: string]: unknown;
-    }>;
-};
-
-/**
- * Serializer for revenue trends over time.
- */
-export type RevenueTrendsWritable = {
-    /**
-     * Total revenue in the filtered period
-     */
-    total_revenue: number;
-    /**
-     * Time grouping method (day, week, month)
-     */
-    group_by: string;
-    /**
-     * Start date of the period
-     */
-    date_from?: string | null;
-    /**
-     * End date of the period
-     */
-    date_to?: string | null;
-    /**
-     * Revenue over time
-     */
-    trends: Array<{
         [key: string]: unknown;
     }>;
 };
@@ -19418,6 +20649,28 @@ export type TicketTypeListWritable = {
     scope?: 'FULL_EVENT' | 'SINGLE_DAY' | 'WORKSHOP_ONLY';
     is_active?: boolean;
     created_by?: number | null;
+};
+
+/**
+ * Serializer for top discounts statistics.
+ */
+export type TopDiscountsWritable = {
+    total_returned: number;
+    limit: number;
+    discounts: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for top donors statistics.
+ */
+export type TopDonorsWritable = {
+    total_returned: number;
+    limit: number;
+    donors: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -20890,7 +22143,7 @@ export type AttendeesStatisticsListData = {
 };
 
 export type AttendeesStatisticsListResponses = {
-    200: PaginatedOverviewStatsList;
+    200: PaginatedAttendeeOverviewStatsList;
 };
 
 export type AttendeesStatisticsListResponse = AttendeesStatisticsListResponses[keyof AttendeesStatisticsListResponses];
@@ -21184,7 +22437,7 @@ export type AttendeesStatisticsOverviewRetrieveData = {
 };
 
 export type AttendeesStatisticsOverviewRetrieveResponses = {
-    200: OverviewStats;
+    200: AttendeeOverviewStats;
 };
 
 export type AttendeesStatisticsOverviewRetrieveResponse = AttendeesStatisticsOverviewRetrieveResponses[keyof AttendeesStatisticsOverviewRetrieveResponses];
@@ -21248,7 +22501,7 @@ export type AttendeesStatisticsRegistrationTrendsRetrieveData = {
 };
 
 export type AttendeesStatisticsRegistrationTrendsRetrieveResponses = {
-    200: RegistrationTrends;
+    200: AttendeeRegistrationTrends;
 };
 
 export type AttendeesStatisticsRegistrationTrendsRetrieveResponse = AttendeesStatisticsRegistrationTrendsRetrieveResponses[keyof AttendeesStatisticsRegistrationTrendsRetrieveResponses];
@@ -22683,6 +23936,848 @@ export type BookingsPackageUpdateAvailabilityWindowFullResponses = {
 };
 
 export type BookingsPackageUpdateAvailabilityWindowFullResponse = BookingsPackageUpdateAvailabilityWindowFullResponses[keyof BookingsPackageUpdateAvailabilityWindowFullResponses];
+
+export type BookingsStatisticsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/bookings/statistics/';
+};
+
+export type BookingsStatisticsListResponses = {
+    200: PaginatedBookingStatisticsOverviewList;
+};
+
+export type BookingsStatisticsListResponse = BookingsStatisticsListResponses[keyof BookingsStatisticsListResponses];
+
+export type BookingsStatisticsAttendeesPerBookingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/attendees-per-booking/';
+};
+
+export type BookingsStatisticsAttendeesPerBookingRetrieveResponses = {
+    200: AttendeesPerBooking;
+};
+
+export type BookingsStatisticsAttendeesPerBookingRetrieveResponse = BookingsStatisticsAttendeesPerBookingRetrieveResponses[keyof BookingsStatisticsAttendeesPerBookingRetrieveResponses];
+
+export type BookingsStatisticsBookingOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/booking-overview/';
+};
+
+export type BookingsStatisticsBookingOverviewRetrieveResponses = {
+    200: BookingOverview;
+};
+
+export type BookingsStatisticsBookingOverviewRetrieveResponse = BookingsStatisticsBookingOverviewRetrieveResponses[keyof BookingsStatisticsBookingOverviewRetrieveResponses];
+
+export type BookingsStatisticsBookingReferencesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/booking-references/';
+};
+
+export type BookingsStatisticsBookingReferencesRetrieveResponses = {
+    200: BookingReferenceTypes;
+};
+
+export type BookingsStatisticsBookingReferencesRetrieveResponse = BookingsStatisticsBookingReferencesRetrieveResponses[keyof BookingsStatisticsBookingReferencesRetrieveResponses];
+
+export type BookingsStatisticsBookingStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/booking-status/';
+};
+
+export type BookingsStatisticsBookingStatusRetrieveResponses = {
+    200: BookingStatusDistribution;
+};
+
+export type BookingsStatisticsBookingStatusRetrieveResponse = BookingsStatisticsBookingStatusRetrieveResponses[keyof BookingsStatisticsBookingStatusRetrieveResponses];
+
+export type BookingsStatisticsBookingTimelineRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/booking-timeline/';
+};
+
+export type BookingsStatisticsBookingTimelineRetrieveResponses = {
+    200: BookingTimeline;
+};
+
+export type BookingsStatisticsBookingTimelineRetrieveResponse = BookingsStatisticsBookingTimelineRetrieveResponses[keyof BookingsStatisticsBookingTimelineRetrieveResponses];
+
+export type BookingsStatisticsBookingTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/booking-trends/';
+};
+
+export type BookingsStatisticsBookingTrendsRetrieveResponses = {
+    200: BookingTrends;
+};
+
+export type BookingsStatisticsBookingTrendsRetrieveResponse = BookingsStatisticsBookingTrendsRetrieveResponses[keyof BookingsStatisticsBookingTrendsRetrieveResponses];
+
+export type BookingsStatisticsBookingsByPackageRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Maximum number of items to return.
+         */
+        limit?: number;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/bookings-by-package/';
+};
+
+export type BookingsStatisticsBookingsByPackageRetrieveResponses = {
+    200: BookingsByPackage;
+};
+
+export type BookingsStatisticsBookingsByPackageRetrieveResponse = BookingsStatisticsBookingsByPackageRetrieveResponses[keyof BookingsStatisticsBookingsByPackageRetrieveResponses];
+
+export type BookingsStatisticsCompletionRateRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/completion-rate/';
+};
+
+export type BookingsStatisticsCompletionRateRetrieveResponses = {
+    200: BookingCompletionRate;
+};
+
+export type BookingsStatisticsCompletionRateRetrieveResponse = BookingsStatisticsCompletionRateRetrieveResponses[keyof BookingsStatisticsCompletionRateRetrieveResponses];
+
+export type BookingsStatisticsIntentConversionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/intent-conversion/';
+};
+
+export type BookingsStatisticsIntentConversionRetrieveResponses = {
+    200: IntentConversionRate;
+};
+
+export type BookingsStatisticsIntentConversionRetrieveResponse = BookingsStatisticsIntentConversionRetrieveResponses[keyof BookingsStatisticsIntentConversionRetrieveResponses];
+
+export type BookingsStatisticsIntentOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/intent-overview/';
+};
+
+export type BookingsStatisticsIntentOverviewRetrieveResponses = {
+    200: IntentOverview;
+};
+
+export type BookingsStatisticsIntentOverviewRetrieveResponse = BookingsStatisticsIntentOverviewRetrieveResponses[keyof BookingsStatisticsIntentOverviewRetrieveResponses];
+
+export type BookingsStatisticsIntentTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/intent-trends/';
+};
+
+export type BookingsStatisticsIntentTrendsRetrieveResponses = {
+    200: IntentTrends;
+};
+
+export type BookingsStatisticsIntentTrendsRetrieveResponse = BookingsStatisticsIntentTrendsRetrieveResponses[keyof BookingsStatisticsIntentTrendsRetrieveResponses];
+
+export type BookingsStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/overview/';
+};
+
+export type BookingsStatisticsOverviewRetrieveResponses = {
+    200: BookingStatisticsOverview;
+};
+
+export type BookingsStatisticsOverviewRetrieveResponse = BookingsStatisticsOverviewRetrieveResponses[keyof BookingsStatisticsOverviewRetrieveResponses];
+
+export type BookingsStatisticsPackageOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/package-overview/';
+};
+
+export type BookingsStatisticsPackageOverviewRetrieveResponses = {
+    200: PackageOverview;
+};
+
+export type BookingsStatisticsPackageOverviewRetrieveResponse = BookingsStatisticsPackageOverviewRetrieveResponses[keyof BookingsStatisticsPackageOverviewRetrieveResponses];
+
+export type BookingsStatisticsPackagePopularityRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Maximum number of items to return.
+         */
+        limit?: number;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/package-popularity/';
+};
+
+export type BookingsStatisticsPackagePopularityRetrieveResponses = {
+    200: PackagePopularity;
+};
+
+export type BookingsStatisticsPackagePopularityRetrieveResponse = BookingsStatisticsPackagePopularityRetrieveResponses[keyof BookingsStatisticsPackagePopularityRetrieveResponses];
+
+export type BookingsStatisticsPackagePricingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/package-pricing/';
+};
+
+export type BookingsStatisticsPackagePricingRetrieveResponses = {
+    200: PackagePricingAnalysis;
+};
+
+export type BookingsStatisticsPackagePricingRetrieveResponse = BookingsStatisticsPackagePricingRetrieveResponses[keyof BookingsStatisticsPackagePricingRetrieveResponses];
+
+export type BookingsStatisticsPackageRulesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/package-rules/';
+};
+
+export type BookingsStatisticsPackageRulesRetrieveResponses = {
+    200: PackageRuleDistribution;
+};
+
+export type BookingsStatisticsPackageRulesRetrieveResponse = BookingsStatisticsPackageRulesRetrieveResponses[keyof BookingsStatisticsPackageRulesRetrieveResponses];
+
+export type BookingsStatisticsRevenueBreakdownRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/revenue-breakdown/';
+};
+
+export type BookingsStatisticsRevenueBreakdownRetrieveResponses = {
+    200: BookingRevenueBreakdown;
+};
+
+export type BookingsStatisticsRevenueBreakdownRetrieveResponse = BookingsStatisticsRevenueBreakdownRetrieveResponses[keyof BookingsStatisticsRevenueBreakdownRetrieveResponses];
+
+export type BookingsStatisticsRevenueByPackageRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Maximum number of items to return.
+         */
+        limit?: number;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/revenue-by-package/';
+};
+
+export type BookingsStatisticsRevenueByPackageRetrieveResponses = {
+    200: RevenueByPackage;
+};
+
+export type BookingsStatisticsRevenueByPackageRetrieveResponse = BookingsStatisticsRevenueByPackageRetrieveResponses[keyof BookingsStatisticsRevenueByPackageRetrieveResponses];
+
+export type BookingsStatisticsRevenueByTicketTypeRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/revenue-by-ticket-type/';
+};
+
+export type BookingsStatisticsRevenueByTicketTypeRetrieveResponses = {
+    200: RevenueByTicketType;
+};
+
+export type BookingsStatisticsRevenueByTicketTypeRetrieveResponse = BookingsStatisticsRevenueByTicketTypeRetrieveResponses[keyof BookingsStatisticsRevenueByTicketTypeRetrieveResponses];
+
+export type BookingsStatisticsRevenueOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/revenue-overview/';
+};
+
+export type BookingsStatisticsRevenueOverviewRetrieveResponses = {
+    200: BookingRevenueOverview;
+};
+
+export type BookingsStatisticsRevenueOverviewRetrieveResponse = BookingsStatisticsRevenueOverviewRetrieveResponses[keyof BookingsStatisticsRevenueOverviewRetrieveResponses];
+
+export type BookingsStatisticsRevenueTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/revenue-trends/';
+};
+
+export type BookingsStatisticsRevenueTrendsRetrieveResponses = {
+    200: BookingRevenueTrends;
+};
+
+export type BookingsStatisticsRevenueTrendsRetrieveResponse = BookingsStatisticsRevenueTrendsRetrieveResponses[keyof BookingsStatisticsRevenueTrendsRetrieveResponses];
+
+export type BookingsStatisticsTicketOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/ticket-overview/';
+};
+
+export type BookingsStatisticsTicketOverviewRetrieveResponses = {
+    200: TicketOverview;
+};
+
+export type BookingsStatisticsTicketOverviewRetrieveResponse = BookingsStatisticsTicketOverviewRetrieveResponses[keyof BookingsStatisticsTicketOverviewRetrieveResponses];
+
+export type BookingsStatisticsTicketScopeRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/ticket-scope/';
+};
+
+export type BookingsStatisticsTicketScopeRetrieveResponses = {
+    200: TicketScopeDistribution;
+};
+
+export type BookingsStatisticsTicketScopeRetrieveResponse = BookingsStatisticsTicketScopeRetrieveResponses[keyof BookingsStatisticsTicketScopeRetrieveResponses];
+
+export type BookingsStatisticsTicketStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/ticket-status/';
+};
+
+export type BookingsStatisticsTicketStatusRetrieveResponses = {
+    200: TicketStatusDistribution;
+};
+
+export type BookingsStatisticsTicketStatusRetrieveResponse = BookingsStatisticsTicketStatusRetrieveResponses[keyof BookingsStatisticsTicketStatusRetrieveResponses];
+
+export type BookingsStatisticsTicketTypesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/ticket-types/';
+};
+
+export type BookingsStatisticsTicketTypesRetrieveResponses = {
+    200: TicketTypeDistribution;
+};
+
+export type BookingsStatisticsTicketTypesRetrieveResponse = BookingsStatisticsTicketTypesRetrieveResponses[keyof BookingsStatisticsTicketTypesRetrieveResponses];
+
+export type BookingsStatisticsTicketUsageRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event (using event_id UUID). If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted records in statistics.
+         */
+        include_deleted?: boolean;
+        /**
+         * Filter statistics to a specific organization.
+         */
+        organization_id?: number;
+    };
+    url: '/api/bookings/statistics/ticket-usage/';
+};
+
+export type BookingsStatisticsTicketUsageRetrieveResponses = {
+    200: TicketUsageStats;
+};
+
+export type BookingsStatisticsTicketUsageRetrieveResponse = BookingsStatisticsTicketUsageRetrieveResponses[keyof BookingsStatisticsTicketUsageRetrieveResponses];
 
 export type BookingsTicketTypesListData = {
     body?: never;
@@ -26781,7 +28876,7 @@ export type EventStaffAvailabilityUpdateResponses = {
 
 export type EventStaffAvailabilityUpdateResponse = EventStaffAvailabilityUpdateResponses[keyof EventStaffAvailabilityUpdateResponses];
 
-export type EventStaffInvitesList2Data = {
+export type EventStaffInvitesGlobalListData = {
     body?: never;
     path?: never;
     query?: {
@@ -26817,11 +28912,11 @@ export type EventStaffInvitesList2Data = {
     url: '/api/event/staff-invites/';
 };
 
-export type EventStaffInvitesList2Responses = {
+export type EventStaffInvitesGlobalListResponses = {
     200: PaginatedEventStaffInviteListList;
 };
 
-export type EventStaffInvitesList2Response = EventStaffInvitesList2Responses[keyof EventStaffInvitesList2Responses];
+export type EventStaffInvitesGlobalListResponse = EventStaffInvitesGlobalListResponses[keyof EventStaffInvitesGlobalListResponses];
 
 export type EventStaffInvitesRetrieveData = {
     body?: never;
@@ -27137,7 +29232,7 @@ export type EventStatisticsPaymentStatusRetrieveData = {
 };
 
 export type EventStatisticsPaymentStatusRetrieveResponses = {
-    200: PaymentStatusDistribution;
+    200: EventPaymentStatusDistribution;
 };
 
 export type EventStatisticsPaymentStatusRetrieveResponse = EventStatisticsPaymentStatusRetrieveResponses[keyof EventStatisticsPaymentStatusRetrieveResponses];
@@ -27183,7 +29278,7 @@ export type EventStatisticsRegistrationTrendsRetrieveData = {
 };
 
 export type EventStatisticsRegistrationTrendsRetrieveResponses = {
-    200: RegistrationTrends;
+    200: EventRegistrationTrends;
 };
 
 export type EventStatisticsRegistrationTrendsRetrieveResponse = EventStatisticsRegistrationTrendsRetrieveResponses[keyof EventStatisticsRegistrationTrendsRetrieveResponses];
@@ -27275,7 +29370,7 @@ export type EventStatisticsRevenueOverviewRetrieveData = {
 };
 
 export type EventStatisticsRevenueOverviewRetrieveResponses = {
-    200: RevenueOverview;
+    200: EventRevenueOverview;
 };
 
 export type EventStatisticsRevenueOverviewRetrieveResponse = EventStatisticsRevenueOverviewRetrieveResponses[keyof EventStatisticsRevenueOverviewRetrieveResponses];
@@ -27377,7 +29472,7 @@ export type EventStatisticsStatusDistributionRetrieveData = {
 };
 
 export type EventStatisticsStatusDistributionRetrieveResponses = {
-    200: StatusDistribution;
+    200: EventStatusDistribution;
 };
 
 export type EventStatisticsStatusDistributionRetrieveResponse = EventStatisticsStatusDistributionRetrieveResponses[keyof EventStatisticsStatusDistributionRetrieveResponses];
@@ -34197,6 +36292,520 @@ export type PaymentsRefundsVerifyCreateResponses = {
 
 export type PaymentsRefundsVerifyCreateResponse = PaymentsRefundsVerifyCreateResponses[keyof PaymentsRefundsVerifyCreateResponses];
 
+export type PaymentsStatisticsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/payments/statistics/';
+};
+
+export type PaymentsStatisticsListResponses = {
+    200: PaginatedPaymentOverviewStatsList;
+};
+
+export type PaymentsStatisticsListResponse = PaymentsStatisticsListResponses[keyof PaymentsStatisticsListResponses];
+
+export type PaymentsStatisticsDiscountRulesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+    };
+    url: '/api/payments/statistics/discount-rules/';
+};
+
+export type PaymentsStatisticsDiscountRulesRetrieveResponses = {
+    200: DiscountRuleEffectiveness;
+};
+
+export type PaymentsStatisticsDiscountRulesRetrieveResponse = PaymentsStatisticsDiscountRulesRetrieveResponses[keyof PaymentsStatisticsDiscountRulesRetrieveResponses];
+
+export type PaymentsStatisticsDiscountUsageRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+    };
+    url: '/api/payments/statistics/discount-usage/';
+};
+
+export type PaymentsStatisticsDiscountUsageRetrieveResponses = {
+    200: DiscountUsage;
+};
+
+export type PaymentsStatisticsDiscountUsageRetrieveResponse = PaymentsStatisticsDiscountUsageRetrieveResponses[keyof PaymentsStatisticsDiscountUsageRetrieveResponses];
+
+export type PaymentsStatisticsDonationTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+    };
+    url: '/api/payments/statistics/donation-trends/';
+};
+
+export type PaymentsStatisticsDonationTrendsRetrieveResponses = {
+    200: DonationTrends;
+};
+
+export type PaymentsStatisticsDonationTrendsRetrieveResponse = PaymentsStatisticsDonationTrendsRetrieveResponses[keyof PaymentsStatisticsDonationTrendsRetrieveResponses];
+
+export type PaymentsStatisticsDonationsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+    };
+    url: '/api/payments/statistics/donations/';
+};
+
+export type PaymentsStatisticsDonationsRetrieveResponses = {
+    200: DonationStats;
+};
+
+export type PaymentsStatisticsDonationsRetrieveResponse = PaymentsStatisticsDonationsRetrieveResponses[keyof PaymentsStatisticsDonationsRetrieveResponses];
+
+export type PaymentsStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/overview/';
+};
+
+export type PaymentsStatisticsOverviewRetrieveResponses = {
+    200: PaymentOverviewStats;
+};
+
+export type PaymentsStatisticsOverviewRetrieveResponse = PaymentsStatisticsOverviewRetrieveResponses[keyof PaymentsStatisticsOverviewRetrieveResponses];
+
+export type PaymentsStatisticsPaymentMethodsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/payment-methods/';
+};
+
+export type PaymentsStatisticsPaymentMethodsRetrieveResponses = {
+    200: PaymentMethodDistribution;
+};
+
+export type PaymentsStatisticsPaymentMethodsRetrieveResponse = PaymentsStatisticsPaymentMethodsRetrieveResponses[keyof PaymentsStatisticsPaymentMethodsRetrieveResponses];
+
+export type PaymentsStatisticsPaymentOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/payment-overview/';
+};
+
+export type PaymentsStatisticsPaymentOverviewRetrieveResponses = {
+    200: PaymentOverview;
+};
+
+export type PaymentsStatisticsPaymentOverviewRetrieveResponse = PaymentsStatisticsPaymentOverviewRetrieveResponses[keyof PaymentsStatisticsPaymentOverviewRetrieveResponses];
+
+export type PaymentsStatisticsPaymentStatusRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/payment-status/';
+};
+
+export type PaymentsStatisticsPaymentStatusRetrieveResponses = {
+    200: PaymentStatusDistribution;
+};
+
+export type PaymentsStatisticsPaymentStatusRetrieveResponse = PaymentsStatisticsPaymentStatusRetrieveResponses[keyof PaymentsStatisticsPaymentStatusRetrieveResponses];
+
+export type PaymentsStatisticsPaymentTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/payment-trends/';
+};
+
+export type PaymentsStatisticsPaymentTrendsRetrieveResponses = {
+    200: PaymentTrends;
+};
+
+export type PaymentsStatisticsPaymentTrendsRetrieveResponse = PaymentsStatisticsPaymentTrendsRetrieveResponses[keyof PaymentsStatisticsPaymentTrendsRetrieveResponses];
+
+export type PaymentsStatisticsRefundProcessingRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+    };
+    url: '/api/payments/statistics/refund-processing/';
+};
+
+export type PaymentsStatisticsRefundProcessingRetrieveResponses = {
+    200: RefundProcessingTimes;
+};
+
+export type PaymentsStatisticsRefundProcessingRetrieveResponse = PaymentsStatisticsRefundProcessingRetrieveResponses[keyof PaymentsStatisticsRefundProcessingRetrieveResponses];
+
+export type PaymentsStatisticsRefundRequestsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+    };
+    url: '/api/payments/statistics/refund-requests/';
+};
+
+export type PaymentsStatisticsRefundRequestsRetrieveResponses = {
+    200: RefundRequestStats;
+};
+
+export type PaymentsStatisticsRefundRequestsRetrieveResponse = PaymentsStatisticsRefundRequestsRetrieveResponses[keyof PaymentsStatisticsRefundRequestsRetrieveResponses];
+
+export type PaymentsStatisticsRefundTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+    };
+    url: '/api/payments/statistics/refund-trends/';
+};
+
+export type PaymentsStatisticsRefundTrendsRetrieveResponses = {
+    200: RefundTrends;
+};
+
+export type PaymentsStatisticsRefundTrendsRetrieveResponse = PaymentsStatisticsRefundTrendsRetrieveResponses[keyof PaymentsStatisticsRefundTrendsRetrieveResponses];
+
+export type PaymentsStatisticsRevenueBreakdownRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/revenue-breakdown/';
+};
+
+export type PaymentsStatisticsRevenueBreakdownRetrieveResponses = {
+    200: PaymentRevenueBreakdown;
+};
+
+export type PaymentsStatisticsRevenueBreakdownRetrieveResponse = PaymentsStatisticsRevenueBreakdownRetrieveResponses[keyof PaymentsStatisticsRevenueBreakdownRetrieveResponses];
+
+export type PaymentsStatisticsRevenueByMethodRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/revenue-by-method/';
+};
+
+export type PaymentsStatisticsRevenueByMethodRetrieveResponses = {
+    200: RevenueByMethod;
+};
+
+export type PaymentsStatisticsRevenueByMethodRetrieveResponse = PaymentsStatisticsRevenueByMethodRetrieveResponses[keyof PaymentsStatisticsRevenueByMethodRetrieveResponses];
+
+export type PaymentsStatisticsRevenueOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/revenue-overview/';
+};
+
+export type PaymentsStatisticsRevenueOverviewRetrieveResponses = {
+    200: PaymentRevenueOverview;
+};
+
+export type PaymentsStatisticsRevenueOverviewRetrieveResponse = PaymentsStatisticsRevenueOverviewRetrieveResponses[keyof PaymentsStatisticsRevenueOverviewRetrieveResponses];
+
+export type PaymentsStatisticsRevenueTrendsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date for filtering (YYYY-MM-DD format).
+         */
+        date_from?: string;
+        /**
+         * End date for filtering (YYYY-MM-DD format).
+         */
+        date_to?: string;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         */
+        group_by?: 'day' | 'month' | 'week';
+        /**
+         * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/payments/statistics/revenue-trends/';
+};
+
+export type PaymentsStatisticsRevenueTrendsRetrieveResponses = {
+    200: PaymentRevenueTrends;
+};
+
+export type PaymentsStatisticsRevenueTrendsRetrieveResponse = PaymentsStatisticsRevenueTrendsRetrieveResponses[keyof PaymentsStatisticsRevenueTrendsRetrieveResponses];
+
+export type PaymentsStatisticsTopDiscountsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of results to return.
+         */
+        limit?: number;
+    };
+    url: '/api/payments/statistics/top-discounts/';
+};
+
+export type PaymentsStatisticsTopDiscountsRetrieveResponses = {
+    200: TopDiscounts;
+};
+
+export type PaymentsStatisticsTopDiscountsRetrieveResponse = PaymentsStatisticsTopDiscountsRetrieveResponses[keyof PaymentsStatisticsTopDiscountsRetrieveResponses];
+
+export type PaymentsStatisticsTopDonorsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics (superuser only).
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum number of results to return.
+         */
+        limit?: number;
+    };
+    url: '/api/payments/statistics/top-donors/';
+};
+
+export type PaymentsStatisticsTopDonorsRetrieveResponses = {
+    200: TopDonors;
+};
+
+export type PaymentsStatisticsTopDonorsRetrieveResponse = PaymentsStatisticsTopDonorsRetrieveResponses[keyof PaymentsStatisticsTopDonorsRetrieveResponses];
+
 export type ProductsCategoriesListData = {
     body?: never;
     path?: never;
@@ -36370,7 +38979,7 @@ export type ProductsStatisticsListData = {
 };
 
 export type ProductsStatisticsListResponses = {
-    200: PaginatedOverviewStatisticsList;
+    200: PaginatedProductOverviewStatisticsList;
 };
 
 export type ProductsStatisticsListResponse = ProductsStatisticsListResponses[keyof ProductsStatisticsListResponses];
@@ -36660,7 +39269,7 @@ export type ProductsStatisticsOverviewRetrieveData = {
 };
 
 export type ProductsStatisticsOverviewRetrieveResponses = {
-    200: OverviewStatistics;
+    200: ProductOverviewStatistics;
 };
 
 export type ProductsStatisticsOverviewRetrieveResponse = ProductsStatisticsOverviewRetrieveResponses[keyof ProductsStatisticsOverviewRetrieveResponses];
@@ -36778,7 +39387,7 @@ export type ProductsStatisticsRevenueBreakdownRetrieveData = {
 };
 
 export type ProductsStatisticsRevenueBreakdownRetrieveResponses = {
-    200: RevenueBreakdown;
+    200: ProductRevenueBreakdown;
 };
 
 export type ProductsStatisticsRevenueBreakdownRetrieveResponse = ProductsStatisticsRevenueBreakdownRetrieveResponses[keyof ProductsStatisticsRevenueBreakdownRetrieveResponses];
@@ -36900,7 +39509,7 @@ export type ProductsStatisticsRevenueOverviewRetrieveData = {
 };
 
 export type ProductsStatisticsRevenueOverviewRetrieveResponses = {
-    200: RevenueOverview;
+    200: ProductRevenueOverview;
 };
 
 export type ProductsStatisticsRevenueOverviewRetrieveResponse = ProductsStatisticsRevenueOverviewRetrieveResponses[keyof ProductsStatisticsRevenueOverviewRetrieveResponses];
@@ -36942,7 +39551,7 @@ export type ProductsStatisticsRevenueTrendsRetrieveData = {
 };
 
 export type ProductsStatisticsRevenueTrendsRetrieveResponses = {
-    200: RevenueTrends;
+    200: ProductRevenueTrends;
 };
 
 export type ProductsStatisticsRevenueTrendsRetrieveResponse = ProductsStatisticsRevenueTrendsRetrieveResponses[keyof ProductsStatisticsRevenueTrendsRetrieveResponses];
@@ -37018,7 +39627,7 @@ export type ProductsStatisticsStatusDistributionRetrieveData = {
 };
 
 export type ProductsStatisticsStatusDistributionRetrieveResponses = {
-    200: StatusDistribution;
+    200: ProductStatusDistribution;
 };
 
 export type ProductsStatisticsStatusDistributionRetrieveResponse = ProductsStatisticsStatusDistributionRetrieveResponses[keyof ProductsStatisticsStatusDistributionRetrieveResponses];

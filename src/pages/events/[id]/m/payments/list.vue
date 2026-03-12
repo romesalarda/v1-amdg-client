@@ -552,6 +552,11 @@
       <div v-if="activeTab === 'refunds'">
         <RefundsTab :event-id="id" />
       </div>
+
+      <!-- Statistics Tab -->
+      <div v-if="activeTab === 'statistics'">
+        <StatisticsIndex />
+      </div>
     </div>
 
     <!-- Payment Detail Modal -->
@@ -606,6 +611,9 @@ import DonationsTab from '~/components/events/payments/DonationsTab.vue'
 import RefundsTab from '~/components/events/payments/RefundsTab.vue'
 import Swal from 'sweetalert2'
 
+// Lazy load statistics component
+const StatisticsIndex = defineAsyncComponent(() => import('./statistics/index.vue'))
+
 definePageMeta({
   layout: false,
 })
@@ -636,6 +644,12 @@ const tabs = computed(() => [
     id: 'refunds',
     label: 'Refunds',
     icon: 'undo',
+    count: undefined,
+  },
+  {
+    id: 'statistics',
+    label: 'Statistics',
+    icon: 'bar_chart',
     count: undefined,
   },
 ])
