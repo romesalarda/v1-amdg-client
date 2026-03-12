@@ -38,11 +38,11 @@
             </div>
             <div class="flex justify-between text-sm mb-1">
               <span class="text-gray-600">Payment:</span>
-              <span class="font-mono font-medium text-gray-900">{{ refund.payment?.payment_reference }}</span>
+              <span class="font-mono font-medium text-gray-900">{{ refund.payment_reference }}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Requested By:</span>
-              <span class="font-medium text-gray-900">{{ refund.requested_by?.username }}</span>
+              <span class="font-medium text-gray-900">{{ refund.requested_by_name }}</span>
             </div>
             <div class="mt-3 pt-3 border-t" :class="approve ? 'border-green-300' : 'border-red-300'">
               <div class="text-xs text-gray-600 mb-1">Reason:</div>
@@ -140,13 +140,18 @@ import {
   useRejectPaymentRefund 
 } from '~/composables/resources/payments/paymentRefunds'
 
+import { usePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
+
 interface Props {
   refund: any
   approve: boolean
   open: boolean
 }
-
 const props = defineProps<Props>()
+
+const { data: refundData } = usePaymentRefund(props.refund.refund_id)
+const refund = computed(() => refundData.value?.data || props.refund)
+
 const emit = defineEmits(['close', 'completed'])
 
 const toast = useToast()

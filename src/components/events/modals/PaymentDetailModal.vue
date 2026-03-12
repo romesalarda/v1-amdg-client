@@ -66,13 +66,12 @@
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">User</div>
-                <div class="text-sm font-semibold">{{ paymentData.user?.username || 'N/A' }}</div>
-                <div class="text-xs text-gray-500">{{ paymentData.user?.email || 'N/A' }}</div>
+                <div class="text-sm font-semibold">{{ paymentData.user_name || 'N/A' }}</div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Payment Method</div>
                 <div class="text-sm font-semibold">{{ paymentData.method?.title || paymentData.method_title || 'N/A' }}</div>
-                <div class="text-xs text-gray-500">{{ getMethodTypeLabel(paymentData.method?.method_type) || 'N/A' }}</div>
+                <div class="text-xs text-gray-500">{{ getMethodTypeLabel(paymentData.method?.code) || 'N/A' }}</div>
               </div>
             </div>
           </section>
@@ -268,6 +267,7 @@ import {
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import { usePayment } from '~/composables/resources/payments/payments'
 import { usePaymentMethod } from '~/composables/resources/payments/paymentMethods'
+import { parseAmount } from '~/utils/money'
 
 interface Props {
   payment: any
@@ -306,15 +306,6 @@ const hasDiscounts = computed(() => {
   // Check if there are discounts in metadata
   return false // TODO: implement discount checking from metadata
 })
-
-function parseAmount(amount: string | number): number {
-  if (typeof amount === 'number') return amount
-  if (!amount) return 0
-  // Remove currency symbols and parse
-  const cleanAmount = String(amount).replace(/[£$€,]/g, '').trim()
-  const parsed = parseFloat(cleanAmount)
-  return isNaN(parsed) ? 0 : parsed
-}
 
 function formatAmount(amount: string | number): string {
   return `£${parseAmount(amount).toFixed(2)}`

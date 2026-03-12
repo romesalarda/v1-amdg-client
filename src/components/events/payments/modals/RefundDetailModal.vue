@@ -93,10 +93,7 @@
               <div class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Requested By</div>
                 <div class="text-sm font-semibold text-gray-900">
-                  {{ refund.requested_by?.username || 'N/A' }}
-                </div>
-                <div class="text-xs text-gray-500">
-                  {{ refund.requested_by?.email || 'N/A' }}
+                  {{ refund.requested_by_name || 'N/A' }}
                 </div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
@@ -177,18 +174,21 @@ import {
   getRefundStatusLabel,
   getRefundStatusColor,
 } from '~/schemas/events/paymentConstants'
-import {
-  getPaymentStatusLabel,
-  getPaymentStatusColor,
-} from '~/schemas/events/paymentConstants'
+
+import { usePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
 
 interface Props {
   refund: any
   open: boolean
 }
 
-defineProps<Props>()
+const props = defineProps<Props>()
 defineEmits(['close'])
+
+const { data: refundData } = usePaymentRefund(props.refund.refund_id)
+
+const refund = computed(() => refundData.value?.data || props.refund)
+
 
 function formatDateTime(dateString: string): string {
   const date = new Date(dateString)

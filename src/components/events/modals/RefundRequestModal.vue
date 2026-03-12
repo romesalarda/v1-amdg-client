@@ -8,7 +8,7 @@
           <span class="material-symbols-outlined text-blue-600">undo</span>
           <div class="flex-1">
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Initiate Refund Request</h3>
-            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ payment.payment_reference }}</p>
+            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ payment?.payment_reference }}</p>
           </div>
           <button
             @click="$emit('close')"
@@ -24,15 +24,15 @@
           <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
             <div class="flex justify-between mb-2">
               <span class="text-sm text-gray-600">Original Amount:</span>
-              <span class="text-lg font-bold text-gray-900">£{{ parseFloat(payment.modified_amount || '0').toFixed(2) }}</span>
+              <span class="text-lg font-bold text-gray-900">{{ payment?.amount }}</span>
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Payment Date:</span>
-              <span class="font-medium text-gray-900">{{ formatDate(payment.created_at) }}</span>
+              <span class="font-medium text-gray-900">{{ formatDate(payment?.created_at || '') }}</span>
             </div>
             <div class="flex justify-between text-sm mt-1">
               <span class="text-gray-600">User:</span>
-              <span class="font-medium text-gray-900">{{ payment.user?.username }}</span>
+              <span class="font-medium text-gray-900">{{ payment?.user_name }}</span>
             </div>
           </div>
 
@@ -53,7 +53,7 @@
                   <div class="flex-1">
                     <div class="text-sm font-semibold text-gray-900">Full Refund</div>
                     <div class="text-xs text-gray-600">
-                      Refund entire amount: £{{ parseFloat(payment.modified_amount || '0').toFixed(2) }}
+                      Refund entire amount: {{ payment?.amount || '0' }}
                     </div>
                   </div>
                 </label>
@@ -85,13 +85,13 @@
                 type="number"
                 step="0.01"
                 min="0.01"
-                :max="parseFloat(payment.modified_amount || '0')"
+                :max="parseFloat(payment?.amount || '0')"
                 placeholder="0.00"
                 required
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Maximum refundable: £{{ parseFloat(payment.modified_amount || '0').toFixed(2) }}
+                Maximum refundable: £{{ parseFloat(payment?.amount || '0').toFixed(2) }}
               </p>
             </div>
 
@@ -125,7 +125,7 @@
                     <li>This will create a refund request for review</li>
                     <li>The request must be verified before processing</li>
                     <li>Once approved, the refund will be processed automatically</li>
-                    <li v-if="payment.method?.method_type === 'STRIPE'">Stripe refunds are processed immediately upon verification</li>
+                    <li v-if="payment?.method_title === 'STRIPE'">Stripe refunds are processed immediately upon verification</li>
                     <li v-else>Manual refund coordination required for non-Stripe payments</li>
                   </ul>
                 </div>
@@ -159,6 +159,8 @@
 
 <script setup lang="ts">
 import { useCreatePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
+import { usePayment } from '~/composables/resources/payments/payments'
+import { parseAmount } from '~/utils/money'
 
 interface Props {
   payment: any
@@ -169,6 +171,10 @@ const props = defineProps<Props>()
 const emit = defineEmits(['close', 'created'])
 
 const toast = useToast()
+
+const { data: paymentData } = usePayment(props.payment.payment_id)
+
+const payment = computed(() => paymentData.value?.data)
 
 const refundType = ref<'full' | 'partial'>('full')
 const refundAmount = ref<number | null>(null)
@@ -209,12 +215,17 @@ async function handleSubmit() {
 
   try {
     const amount = refundType.value === 'full' 
-      ? parseFloat(props.payment.amount || '0')
-      : refundAmount.value!
+      ? payment.value?.amount 
+      : refundAmount.value?.toString()
+
+    if (!amount) {
+      throw new Error('Refund amount is required')
+    }
 
     await createRefundMutation.mutateAsync({
-      payment: Number(props.payment.payment_id),
-      amount: amount.toFixed(2),
+      payment: props.payment.payment_id,
+      amount: parseAmount(amount) as any,
+      // amount_currency: payment.value?.amount_currency || 'GBP',
       reason: reason.value.trim(),
     })
 

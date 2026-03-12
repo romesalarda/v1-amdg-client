@@ -19,3 +19,13 @@ export function formatMoney(
     maximumFractionDigits: 2,
   }).format(numericAmount)
 }
+
+
+export function parseAmount(amount: string | number): number {
+  if (typeof amount === 'number') return amount
+  if (!amount) return 0
+  // Remove currency symbols and parse
+  const cleanAmount = String(amount).replace(/[£$€,]/g, '').trim()
+  const parsed = parseFloat(cleanAmount)
+  return isNaN(parsed) ? 0 : parsed
+}
