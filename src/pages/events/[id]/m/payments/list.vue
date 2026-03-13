@@ -1013,7 +1013,7 @@ function handleRefundCreated() {
 
 function viewPaymentTickets(payment: any) {
   // Navigate to tickets page with filter for this payment
-  navigateTo(`/events/${id.value}/m/participants/dashboard?payment=${payment.payment_id}`)
+  navigateTo(`/events/${id.value}/m/participants/dashboard?payment_id=${payment.payment_id}`)
 }
 
 // Export CSV

@@ -12258,7 +12258,7 @@ export type PaymentDetail = {
     readonly user_name: string;
     event: number;
     readonly event_name: string;
-    method?: number | null;
+    readonly method: string;
     readonly method_title: string | null;
     /**
      * * `DRAFTING` - Drafting
@@ -12376,7 +12376,7 @@ export type PaymentList = {
     readonly user_name: string;
     event: number;
     readonly event_name: string;
-    method?: number | null;
+    readonly method: string;
     readonly method_title: string | null;
     /**
      * * `DRAFTING` - Drafting
@@ -13593,8 +13593,9 @@ export type RefundProcessingTimes = {
  * Create serializer for RefundRequest with validation.
  */
 export type RefundRequestCreate = {
-    payment: number;
+    payment: string;
     amount: string;
+    readonly amount_currency: string;
     reason: string;
 };
 
@@ -13602,7 +13603,7 @@ export type RefundRequestCreate = {
  * Create serializer for RefundRequest with validation.
  */
 export type RefundRequestCreateRequest = {
-    payment: number;
+    payment: string;
     amount: string;
     reason: string;
 };
@@ -19692,7 +19693,6 @@ export type PaymentDetailWritable = {
      */
     user: number;
     event: number;
-    method?: number | null;
     /**
      * * `DRAFTING` - Drafting
      * * `PENDING` - Pending
@@ -19735,7 +19735,6 @@ export type PaymentListWritable = {
      */
     user: number;
     event: number;
-    method?: number | null;
     /**
      * * `DRAFTING` - Drafting
      * * `PENDING` - Pending
@@ -20322,6 +20321,15 @@ export type RefundProcessingTimesWritable = {
     median_days: number | null;
     min_days: number | null;
     max_days: number | null;
+};
+
+/**
+ * Create serializer for RefundRequest with validation.
+ */
+export type RefundRequestCreateWritable = {
+    payment: string;
+    amount: string;
+    reason: string;
 };
 
 /**
@@ -21203,6 +21211,10 @@ export type AttendeesListData = {
         area_from_name?: string;
         attendee_display_id?: string;
         attendee_display_id__icontains?: string;
+        /**
+         * Filter by bank transfer reference
+         */
+        bank_transfer_reference?: string;
         booking?: string;
         created_after?: string;
         created_before?: string;
@@ -21210,6 +21222,23 @@ export type AttendeesListData = {
         date_of_birth_after?: string;
         date_of_birth_before?: string;
         dietary_requirement?: number;
+        /**
+         * Filter by discount UUID
+         */
+        discount_id?: string;
+        /**
+         * Filter by discount name
+         */
+        discount_name?: string;
+        /**
+         * Filter by donation verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        donation_status?: 'pending' | 'processed' | 'rejected' | 'verified';
         email?: string;
         /**
          * Filter attendees by event UUID
@@ -21234,6 +21263,14 @@ export type AttendeesListData = {
          */
         has_completed_orders?: boolean;
         has_dietary_requirements?: boolean;
+        /**
+         * Has discounts used in transactions
+         */
+        has_discounts_used?: boolean;
+        /**
+         * Has any donations
+         */
+        has_donations?: boolean;
         has_emergency_contacts?: boolean;
         has_medical_conditions?: boolean;
         /**
@@ -21241,9 +21278,17 @@ export type AttendeesListData = {
          */
         has_orders?: boolean;
         /**
+         * Has any payments
+         */
+        has_payments?: boolean;
+        /**
          * Has pending or processing orders
          */
         has_pending_orders?: boolean;
+        /**
+         * Has any refunds
+         */
+        has_refunds?: boolean;
         /**
          * Has incomplete required questions
          */
@@ -21320,6 +21365,34 @@ export type AttendeesListData = {
          * Number of results to return per page.
          */
         page_size?: number;
+        /**
+         * Filter by payment UUID
+         */
+        payment_id?: string;
+        /**
+         * Filter by payment method title
+         */
+        payment_method_title?: string;
+        /**
+         * Filter by payment method type
+         */
+        payment_method_type?: string;
+        /**
+         * Filter by payment reference
+         */
+        payment_reference?: string;
+        /**
+         * Filter by payment status
+         */
+        payment_status?: string;
+        /**
+         * Payment target type
+         *
+         * * `booking` - Booking
+         * * `order` - Order
+         * * `ticket` - Ticket
+         */
+        payment_target?: 'booking' | 'order' | 'ticket';
         phone_number?: string;
         /**
          * Filter by purchased product variant ID
@@ -21337,6 +21410,19 @@ export type AttendeesListData = {
          * Search within answer text
          */
         question_answer_search?: string;
+        /**
+         * Filter by active refund requests
+         */
+        refund_is_active?: boolean;
+        /**
+         * Filter by refund verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        refund_status?: 'pending' | 'processed' | 'rejected' | 'verified';
         /**
          * * `self` - Self
          * * `spouse` - Spouse

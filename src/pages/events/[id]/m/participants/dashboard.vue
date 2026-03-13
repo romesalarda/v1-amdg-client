@@ -1153,6 +1153,24 @@ const filters = ref({
   orderReferenceId: route.query.order_reference_id as string | undefined,
   hasCompletedOrders: route.query.has_completed_orders === 'true' ? true : undefined,
   hasPendingOrders: route.query.has_pending_orders === 'true' ? true : undefined,
+
+  // Payment filters
+  hasPayments: route.query.has_payments === 'true' ? true : undefined,
+  paymentId: route.query.payment_id as string | undefined,
+  paymentReference: route.query.payment_reference as string | undefined,
+  bankTransferReference: route.query.bank_transfer_reference as string | undefined,
+  paymentStatus: route.query.payment_status as string | undefined,
+  paymentTarget: route.query.payment_target as string | undefined,
+  paymentMethodType: route.query.payment_method_type as string | undefined,
+  paymentMethodTitle: route.query.payment_method_title as string | undefined,
+  hasRefunds: route.query.has_refunds === 'true' ? true : undefined,
+  refundStatus: route.query.refund_status as string | undefined,
+  refundIsActive: route.query.refund_is_active === 'true' ? true : undefined,
+  hasDonations: route.query.has_donations === 'true' ? true : undefined,
+  donationStatus: route.query.donation_status as string | undefined,
+  hasDiscountsUsed: route.query.has_discounts_used === 'true' ? true : undefined,
+  discountId: route.query.discount_id as string | undefined,
+  discountName: route.query.discount_name as string | undefined,
   
   // Advanced filters
   relationshipToUser: route.query.relationship_to_user as string | undefined,
@@ -1241,6 +1259,24 @@ const queryParams = computed(() => {
   if (filters.value.orderReferenceId) params.order_reference_id = filters.value.orderReferenceId
   if (filters.value.hasCompletedOrders !== undefined) params.has_completed_orders = filters.value.hasCompletedOrders
   if (filters.value.hasPendingOrders !== undefined) params.has_pending_orders = filters.value.hasPendingOrders
+
+  // Payment filters
+  if (filters.value.hasPayments !== undefined) params.has_payments = filters.value.hasPayments
+  if (filters.value.paymentId) params.payment_id = filters.value.paymentId
+  if (filters.value.paymentReference) params.payment_reference = filters.value.paymentReference
+  if (filters.value.bankTransferReference) params.bank_transfer_reference = filters.value.bankTransferReference
+  if (filters.value.paymentStatus) params.payment_status = filters.value.paymentStatus
+  if (filters.value.paymentTarget) params.payment_target = filters.value.paymentTarget
+  if (filters.value.paymentMethodType) params.payment_method_type = filters.value.paymentMethodType
+  if (filters.value.paymentMethodTitle) params.payment_method_title = filters.value.paymentMethodTitle
+  if (filters.value.hasRefunds !== undefined) params.has_refunds = filters.value.hasRefunds
+  if (filters.value.refundStatus) params.refund_status = filters.value.refundStatus
+  if (filters.value.refundIsActive !== undefined) params.refund_is_active = filters.value.refundIsActive
+  if (filters.value.hasDonations !== undefined) params.has_donations = filters.value.hasDonations
+  if (filters.value.donationStatus) params.donation_status = filters.value.donationStatus
+  if (filters.value.hasDiscountsUsed !== undefined) params.has_discounts_used = filters.value.hasDiscountsUsed
+  if (filters.value.discountId) params.discount_id = filters.value.discountId
+  if (filters.value.discountName) params.discount_name = filters.value.discountName
   
   // Advanced filters
   if (filters.value.relationshipToUser) params.relationship_to_user = filters.value.relationshipToUser
@@ -1397,6 +1433,22 @@ const activeFilterChips = computed(() => {
       orderReferenceId: 'Order Reference',
       hasCompletedOrders: 'Has Completed Orders',
       hasPendingOrders: 'Has Pending Orders',
+      hasPayments: 'Has Payments',
+      paymentId: 'Payment ID',
+      paymentReference: 'Payment Reference',
+      bankTransferReference: 'Bank Transfer Ref',
+      paymentStatus: 'Payment Status',
+      paymentTarget: 'Payment Target',
+      paymentMethodType: 'Method Type',
+      paymentMethodTitle: 'Method Title',
+      hasRefunds: 'Has Refunds',
+      refundStatus: 'Refund Status',
+      refundIsActive: 'Refund Active',
+      hasDonations: 'Has Donations',
+      donationStatus: 'Donation Status',
+      hasDiscountsUsed: 'Has Discounts Used',
+      discountId: 'Discount ID',
+      discountName: 'Discount Name',
       relationshipToUser: 'Relationship',
       selfRegistered: 'Self Registered',
       hasBooking: 'Has Booking',
@@ -1510,6 +1562,22 @@ const activeFilterCount = computed(() => {
   if (filters.value.hasDietaryRequirements !== undefined) count++
   if (filters.value.hasMedicalConditions !== undefined) count++
   if (filters.value.hasAccessibilityRequirements !== undefined) count++
+  if (filters.value.hasPayments !== undefined) count++
+  if (filters.value.paymentId) count++
+  if (filters.value.paymentReference) count++
+  if (filters.value.bankTransferReference) count++
+  if (filters.value.paymentStatus) count++
+  if (filters.value.paymentTarget) count++
+  if (filters.value.paymentMethodType) count++
+  if (filters.value.paymentMethodTitle) count++
+  if (filters.value.hasRefunds !== undefined) count++
+  if (filters.value.refundStatus) count++
+  if (filters.value.refundIsActive !== undefined) count++
+  if (filters.value.hasDonations !== undefined) count++
+  if (filters.value.donationStatus) count++
+  if (filters.value.hasDiscountsUsed !== undefined) count++
+  if (filters.value.discountId) count++
+  if (filters.value.discountName) count++
   return count
 })
 
@@ -1535,8 +1603,56 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
   if (filters.value.isMinor !== undefined) query.is_minor = filters.value.isMinor
   if (filters.value.isStaff !== undefined) query.is_event_staff = filters.value.isStaff
   if (filters.value.hasDietaryRequirements !== undefined) query.has_dietary_requirements = filters.value.hasDietaryRequirements
+  if (filters.value.dietaryRequirement) query.dietary_requirement = filters.value.dietaryRequirement
   if (filters.value.hasMedicalConditions !== undefined) query.has_medical_conditions = filters.value.hasMedicalConditions
+  if (filters.value.medicalCondition) query.medical_condition = filters.value.medicalCondition
   if (filters.value.hasAccessibilityRequirements !== undefined) query.has_accessibility_requirements = filters.value.hasAccessibilityRequirements
+  if (filters.value.accessibilityRequirement) query.accessibility_requirement = filters.value.accessibilityRequirement
+  if (filters.value.hasEmergencyContacts !== undefined) query.has_emergency_contacts = filters.value.hasEmergencyContacts
+  if (filters.value.question) query.question = filters.value.question
+  if (filters.value.questionAnswerSearch) query.question_answer_search = filters.value.questionAnswerSearch
+  if (filters.value.hasAnsweredQuestions !== undefined) query.has_answered_questions = filters.value.hasAnsweredQuestions
+  if (filters.value.hasUnansweredRequiredQuestions !== undefined) query.has_unanswered_required_questions = filters.value.hasUnansweredRequiredQuestions
+  if (filters.value.selectedOption) query.selected_option = filters.value.selectedOption
+  if (filters.value.sliderAnswerMin) query.slider_answer_min = filters.value.sliderAnswerMin
+  if (filters.value.sliderAnswerMax) query.slider_answer_max = filters.value.sliderAnswerMax
+  if (filters.value.hasOrders !== undefined) query.has_orders = filters.value.hasOrders
+  if (filters.value.orderStatus) query.order_status = filters.value.orderStatus
+  if (filters.value.orderStatusNot) query.order_status_not = filters.value.orderStatusNot
+  if (filters.value.purchasedProduct) query.purchased_product = filters.value.purchasedProduct
+  if (filters.value.purchasedProductTitle) query.purchased_product_title = filters.value.purchasedProductTitle
+  if (filters.value.orderTotalMin) query.order_total_min = filters.value.orderTotalMin
+  if (filters.value.orderTotalMax) query.order_total_max = filters.value.orderTotalMax
+  if (filters.value.orderCreatedAfter) query.order_created_after = filters.value.orderCreatedAfter
+  if (filters.value.orderCreatedBefore) query.order_created_before = filters.value.orderCreatedBefore
+  if (filters.value.orderReferenceId) query.order_reference_id = filters.value.orderReferenceId
+  if (filters.value.hasCompletedOrders !== undefined) query.has_completed_orders = filters.value.hasCompletedOrders
+  if (filters.value.hasPendingOrders !== undefined) query.has_pending_orders = filters.value.hasPendingOrders
+  if (filters.value.hasPayments !== undefined) query.has_payments = filters.value.hasPayments
+  if (filters.value.paymentId) query.payment_id = filters.value.paymentId
+  if (filters.value.paymentReference) query.payment_reference = filters.value.paymentReference
+  if (filters.value.bankTransferReference) query.bank_transfer_reference = filters.value.bankTransferReference
+  if (filters.value.paymentStatus) query.payment_status = filters.value.paymentStatus
+  if (filters.value.paymentTarget) query.payment_target = filters.value.paymentTarget
+  if (filters.value.paymentMethodType) query.payment_method_type = filters.value.paymentMethodType
+  if (filters.value.paymentMethodTitle) query.payment_method_title = filters.value.paymentMethodTitle
+  if (filters.value.hasRefunds !== undefined) query.has_refunds = filters.value.hasRefunds
+  if (filters.value.refundStatus) query.refund_status = filters.value.refundStatus
+  if (filters.value.refundIsActive !== undefined) query.refund_is_active = filters.value.refundIsActive
+  if (filters.value.hasDonations !== undefined) query.has_donations = filters.value.hasDonations
+  if (filters.value.donationStatus) query.donation_status = filters.value.donationStatus
+  if (filters.value.hasDiscountsUsed !== undefined) query.has_discounts_used = filters.value.hasDiscountsUsed
+  if (filters.value.discountId) query.discount_id = filters.value.discountId
+  if (filters.value.discountName) query.discount_name = filters.value.discountName
+  if (filters.value.relationshipToUser) query.relationship_to_user = filters.value.relationshipToUser
+  if (filters.value.selfRegistered !== undefined) query.self_registered = filters.value.selfRegistered
+  if (filters.value.hasBooking !== undefined) query.has_booking = filters.value.hasBooking
+  if (filters.value.booking) query.booking = filters.value.booking
+  if (filters.value.dateOfBirthAfter) query.date_of_birth_after = filters.value.dateOfBirthAfter
+  if (filters.value.dateOfBirthBefore) query.date_of_birth_before = filters.value.dateOfBirthBefore
+  if (filters.value.createdAfter) query.created_after = filters.value.createdAfter
+  if (filters.value.createdBefore) query.created_before = filters.value.createdBefore
+  if (filters.value.includeDeleted !== undefined) query.include_deleted = filters.value.includeDeleted
 
   router.replace({ query })
 }, { deep: true })
@@ -1607,6 +1723,24 @@ function clearAllFilters() {
     orderReferenceId: undefined,
     hasCompletedOrders: undefined,
     hasPendingOrders: undefined,
+
+    // Payment filters
+    hasPayments: undefined,
+    paymentId: undefined,
+    paymentReference: undefined,
+    bankTransferReference: undefined,
+    paymentStatus: undefined,
+    paymentTarget: undefined,
+    paymentMethodType: undefined,
+    paymentMethodTitle: undefined,
+    hasRefunds: undefined,
+    refundStatus: undefined,
+    refundIsActive: undefined,
+    hasDonations: undefined,
+    donationStatus: undefined,
+    hasDiscountsUsed: undefined,
+    discountId: undefined,
+    discountName: undefined,
     
     // Advanced filters
     relationshipToUser: undefined,

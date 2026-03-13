@@ -430,6 +430,183 @@
           </div>
         </div>
 
+        <!-- Payments Tab -->
+        <div v-if="currentTab === 'payments'" class="space-y-6">
+          <p class="text-sm text-gray-600 mb-4">
+            Filter attendees by payments, refunds, donations, and discounts
+          </p>
+
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest">Payments</h4>
+
+            <div class="grid grid-cols-2 gap-3">
+              <UCheckbox
+                v-model="localFilters.hasPayments"
+                label="Has Any Payments"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Status</label>
+                <USelectMenu
+                  v-model="localFilters.paymentStatus"
+                  :options="paymentStatusOptions"
+                  placeholder="All statuses"
+                  value-attribute="value"
+                  option-attribute="label"
+                  class="w-full"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Target</label>
+                <USelectMenu
+                  v-model="localFilters.paymentTarget"
+                  :options="paymentTargetOptions"
+                  placeholder="All targets"
+                  value-attribute="value"
+                  option-attribute="label"
+                  class="w-full"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Method Type</label>
+                <USelectMenu
+                  v-model="localFilters.paymentMethodType"
+                  :options="paymentMethodTypeOptions"
+                  placeholder="All method types"
+                  value-attribute="value"
+                  option-attribute="label"
+                  class="w-full"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Method Title</label>
+                <UInput
+                  v-model="localFilters.paymentMethodTitle"
+                  placeholder="Search method title"
+                  icon="i-heroicons-magnifying-glass"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment ID</label>
+                <UInput
+                  v-model="localFilters.paymentId"
+                  placeholder="Payment UUID"
+                  icon="i-heroicons-hashtag"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Reference</label>
+                <UInput
+                  v-model="localFilters.paymentReference"
+                  placeholder="Payment reference"
+                  icon="i-heroicons-document-text"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Bank Transfer Reference</label>
+              <UInput
+                v-model="localFilters.bankTransferReference"
+                placeholder="Bank transfer reference"
+                icon="i-heroicons-building-library"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest">Refunds</h4>
+
+            <div class="grid grid-cols-2 gap-3">
+              <UCheckbox
+                v-model="localFilters.hasRefunds"
+                label="Has Any Refunds"
+              />
+              <UCheckbox
+                v-model="localFilters.refundIsActive"
+                label="Active Refund Requests"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Refund Verification Status</label>
+              <USelectMenu
+                v-model="localFilters.refundStatus"
+                :options="verificationStatusOptions"
+                placeholder="All refund statuses"
+                value-attribute="value"
+                option-attribute="label"
+                class="w-full"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest">Donations</h4>
+
+            <div class="grid grid-cols-2 gap-3">
+              <UCheckbox
+                v-model="localFilters.hasDonations"
+                label="Has Any Donations"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Donation Verification Status</label>
+              <USelectMenu
+                v-model="localFilters.donationStatus"
+                :options="verificationStatusOptions"
+                placeholder="All donation statuses"
+                value-attribute="value"
+                option-attribute="label"
+                class="w-full"
+              />
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h4 class="text-xs font-black text-primary uppercase tracking-widest">Discounts</h4>
+
+            <div class="grid grid-cols-2 gap-3">
+              <UCheckbox
+                v-model="localFilters.hasDiscountsUsed"
+                label="Has Discounts Used"
+              />
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Discount ID</label>
+                <UInput
+                  v-model="localFilters.discountId"
+                  placeholder="Discount UUID"
+                  icon="i-heroicons-hashtag"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Discount Name</label>
+                <UInput
+                  v-model="localFilters.discountName"
+                  placeholder="Search discount name"
+                  icon="i-heroicons-magnifying-glass"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Advanced Tab -->
         <div v-if="currentTab === 'advanced'" class="space-y-6">
           <!-- Relationship Filters -->
@@ -579,7 +756,7 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-const currentTab = ref<'basic' | 'questions' | 'orders' | 'advanced'>('basic')
+const currentTab = ref<'basic' | 'questions' | 'orders' | 'payments' | 'advanced'>('basic')
 const localFilters = ref({ ...props.filters })
 const debouncedQuestionSearch = ref(props.filters.questionAnswerSearch || '')
 
@@ -593,6 +770,7 @@ const tabs = [
   { value: 'basic' as const, label: 'Basic', icon: 'i-heroicons-user-group' },
   { value: 'questions' as const, label: 'Questions', icon: 'i-heroicons-question-mark-circle' },
   { value: 'orders' as const, label: 'Orders', icon: 'i-heroicons-shopping-cart' },
+  { value: 'payments' as const, label: 'Payments', icon: 'i-heroicons-credit-card' },
   { value: 'advanced' as const, label: 'Advanced', icon: 'i-heroicons-adjustments-horizontal' },
 ]
 
@@ -620,6 +798,35 @@ const orderStatusOptions = [
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'pending_refund', label: 'Pending Refund' },
   { value: 'refunded', label: 'Refunded' },
+]
+
+const paymentStatusOptions = [
+  { value: 'DRAFTING', label: 'Drafting' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'COMPLETED', label: 'Completed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
+  { value: 'FAILED', label: 'Failed' },
+  { value: 'PENDING_REFUND', label: 'Pending Refund' },
+  { value: 'REFUNDED', label: 'Refunded' },
+]
+
+const paymentTargetOptions = [
+  { value: 'booking', label: 'Booking' },
+  { value: 'order', label: 'Order' },
+  { value: 'ticket', label: 'Ticket' },
+]
+
+const paymentMethodTypeOptions = [
+  { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
+  { value: 'STRIPE', label: 'Stripe' },
+  { value: 'CASH', label: 'Cash' },
+]
+
+const verificationStatusOptions = [
+  { value: 'pending', label: 'Pending' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'rejected', label: 'Rejected' },
+  { value: 'processed', label: 'Processed' },
 ]
 
 // Get selected question details
@@ -672,6 +879,23 @@ function getTabFilterCount(tab: string): number {
     if (filters.orderReferenceId) count++
     if (filters.hasCompletedOrders) count++
     if (filters.hasPendingOrders) count++
+  } else if (tab === 'payments') {
+    if (filters.hasPayments) count++
+    if (filters.paymentId) count++
+    if (filters.paymentReference) count++
+    if (filters.bankTransferReference) count++
+    if (filters.paymentStatus) count++
+    if (filters.paymentTarget) count++
+    if (filters.paymentMethodType) count++
+    if (filters.paymentMethodTitle) count++
+    if (filters.hasRefunds) count++
+    if (filters.refundStatus) count++
+    if (filters.refundIsActive) count++
+    if (filters.hasDonations) count++
+    if (filters.donationStatus) count++
+    if (filters.hasDiscountsUsed) count++
+    if (filters.discountId) count++
+    if (filters.discountName) count++
   } else if (tab === 'advanced') {
     if (filters.relationshipToUser) count++
     if (filters.selfRegistered) count++
