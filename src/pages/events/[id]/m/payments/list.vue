@@ -132,6 +132,13 @@
 
               <div class="flex items-center gap-2">
                 <button
+                  @click="showCreatePaymentModal = true"
+                  class="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
+                >
+                  <span class="material-symbols-outlined text-lg">add</span>
+                  Create Payment
+                </button>
+                <button
                   @click="showPaymentFilters = !showPaymentFilters"
                   :class="[
                     'px-4 py-2 text-sm font-semibold rounded-xl transition-colors flex items-center gap-2',
@@ -586,6 +593,14 @@
       @close="closeRefundModal"
       @created="handleRefundCreated"
     />
+
+    <CreatePaymentModal
+      :open="showCreatePaymentModal"
+      :event-id="id"
+      :event-pk="event?.data?.id ?? null"
+      @close="showCreatePaymentModal = false"
+      @created="handlePaymentCreated"
+    />
   </EventManagementLayout>
 </template>
 
@@ -607,6 +622,7 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import PaymentDetailModal from '~/components/events/modals/PaymentDetailModal.vue'
 import BankTransferVerifyModal from '~/components/events/modals/BankTransferVerifyModal.vue'
 import RefundRequestModal from '~/components/events/modals/RefundRequestModal.vue'
+import CreatePaymentModal from '~/components/events/payments/modals/CreatePaymentModal.vue'
 import DonationsTab from '~/components/events/payments/DonationsTab.vue'
 import RefundsTab from '~/components/events/payments/RefundsTab.vue'
 import Swal from 'sweetalert2'
@@ -960,6 +976,7 @@ const showVerifyModal = ref(false)
 const paymentToVerify = ref<any>(null)
 const showRefundModal = ref(false)
 const paymentToRefund = ref<any>(null)
+const showCreatePaymentModal = ref(false)
 
 function viewPaymentDetails(payment: any) {
   selectedPayment.value = payment
@@ -1007,6 +1024,16 @@ function handleRefundCreated() {
   toast.add({
     title: 'Refund request created',
     description: 'Refund request has been submitted for review',
+    color: 'green',
+  })
+}
+
+function handlePaymentCreated() {
+  showCreatePaymentModal.value = false
+  refetchPayments()
+  toast.add({
+    title: 'Payment created',
+    description: 'The payment record has been created successfully.',
     color: 'green',
   })
 }

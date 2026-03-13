@@ -12207,8 +12207,8 @@ export type PatchedVenueMetadataCreateUpdateRequest = {
 /**
  * Create serializer for Payment with validation.
  *
- * Note: target_type and target_id should only be set internally by the system,
- * not via external API calls. They are marked write_only for internal use only.
+ * Supports frontend-safe target selection fields while preserving temporary
+ * backward compatibility for legacy target_type + target_id payloads.
  */
 export type PaymentCreate = {
     /**
@@ -12226,8 +12226,8 @@ export type PaymentCreate = {
 /**
  * Create serializer for Payment with validation.
  *
- * Note: target_type and target_id should only be set internally by the system,
- * not via external API calls. They are marked write_only for internal use only.
+ * Supports frontend-safe target selection fields while preserving temporary
+ * backward compatibility for legacy target_type + target_id payloads.
  */
 export type PaymentCreateRequest = {
     /**
@@ -19646,8 +19646,8 @@ export type PatchedRefundAssociationCreateRequestWritable = {
 /**
  * Create serializer for Payment with validation.
  *
- * Note: target_type and target_id should only be set internally by the system,
- * not via external API calls. They are marked write_only for internal use only.
+ * Supports frontend-safe target selection fields while preserving temporary
+ * backward compatibility for legacy target_type + target_id payloads.
  */
 export type PaymentCreateWritable = {
     /**
@@ -19664,8 +19664,8 @@ export type PaymentCreateWritable = {
 /**
  * Create serializer for Payment with validation.
  *
- * Note: target_type and target_id should only be set internally by the system,
- * not via external API calls. They are marked write_only for internal use only.
+ * Supports frontend-safe target selection fields while preserving temporary
+ * backward compatibility for legacy target_type + target_id payloads.
  */
 export type PaymentCreateRequestWritable = {
     /**
@@ -19676,8 +19676,23 @@ export type PaymentCreateRequestWritable = {
     method?: number | null;
     base_amount: string;
     description?: string | null;
+    /**
+     * Payment target type: booking, order, ticket, or none.
+     *
+     * * `booking` - Booking
+     * * `order` - Order
+     * * `ticket` - Ticket
+     * * `none` - None
+     */
+    target?: 'booking' | 'order' | 'ticket' | 'none' | null;
+    /**
+     * Target identifier (UUID or numeric ID).
+     */
+    target_id?: string | null;
+    /**
+     * Deprecated: internal ContentType ID. Use 'target' instead.
+     */
     target_type?: number | null;
-    target_id?: number | null;
     metadata?: unknown;
 };
 
@@ -35597,7 +35612,7 @@ export type PaymentsListListData = {
         /**
          * Filter by target object ID
          */
-        target_id?: number;
+        target_id?: string;
         /**
          * Filter by target content type ID
          */
