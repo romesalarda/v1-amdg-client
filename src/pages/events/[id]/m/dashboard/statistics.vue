@@ -534,9 +534,10 @@ const paymentStatusOption = computed(() => {
           value: item.count,
           name: item.label,
           itemStyle: {
-            color: item.label === 'COMPLETED' ? '#10b981' : 
-                   item.label === 'PENDING' ? '#f59e0b' : 
-                   '#ef4444'
+            color: item.label === 'Completed' ? '#10b981' : 
+                   item.label === 'Pending' ? '#f59e0b' : 
+                   item.label === 'Refunded' ? '#ef4444' : 
+                   '#6b7280'
           }
         })),
         emphasis: {

@@ -17,7 +17,7 @@
     />
 
     <!-- Sub-tab Navigation -->
-    <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-2">
+    <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-3 mx-5">
       <div class="flex flex-wrap gap-2">
         <button
           v-for="tab in tabs"
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Tab Content -->
-    <div class="min-h-[400px]">
+    <div class="min-h-[400px] p-5">
       <KeepAlive>
         <component 
           :is="currentTabComponent" 

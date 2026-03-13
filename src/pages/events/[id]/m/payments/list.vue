@@ -448,10 +448,26 @@
                         <span class="material-symbols-outlined text-lg">visibility</span>
                       </button>
                       <button
-                        v-if="payment.status === 'PENDING' && payment.method_title?.toLowerCase().includes('bank')"
-                        @click="openVerifyBankTransfer(payment)"
+                        v-if="payment.status === 'DRAFTING'"
+                        @click="promoteDraftToPending(payment)"
+                        class="p-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-colors"
+                        title="Promote to Pending"
+                      >
+                        <span class="material-symbols-outlined text-lg">publish</span>
+                      </button>
+                      <button
+                        v-if="payment.status === 'PENDING'"
+                        @click="demotePendingToDrafting(payment)"
+                        class="p-1.5 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors"
+                        title="Demote to Drafting"
+                      >
+                        <span class="material-symbols-outlined text-lg">vertical_align_bottom</span>
+                      </button>
+                      <button
+                        v-if="payment.status === 'PENDING' && (isBankTransferPayment(payment) || !payment.method_title)"
+                        @click="handlePendingVerification(payment)"
                         class="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
-                        title="Verify Bank Transfer"
+                        :title="isBankTransferPayment(payment) ? 'Verify Bank Transfer' : 'Mark as Verified'"
                       >
                         <span class="material-symbols-outlined text-lg">verified</span>
                       </button>
@@ -469,6 +485,14 @@
                         title="View Tickets"
                       >
                         <span class="material-symbols-outlined text-lg">confirmation_number</span>
+                      </button>
+                      <button
+                        v-if="canDeletePayment(payment)"
+                        @click="deleteRefundedPayment(payment)"
+                        class="p-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete Refunded Payment"
+                      >
+                        <span class="material-symbols-outlined text-lg">delete</span>
                       </button>
                     </div>
                   </td>
@@ -609,8 +633,10 @@ import { useEvent } from '~/composables/resources/events/events'
 import {
   usePayments,
   useCancelPayment,
+  useDeletePayment,
   useMarkPaymentCompleted,
   useMarkPaymentFailed,
+  usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import {
@@ -757,8 +783,18 @@ const totalPages = computed(() => Math.ceil(paymentsTotalCount.value / paymentsP
 
 // Mutations
 const cancelPaymentMutation = useCancelPayment()
+const deletePaymentMutation = useDeletePayment()
 const markCompletedMutation = useMarkPaymentCompleted()
 const markFailedMutation = useMarkPaymentFailed()
+const partialUpdatePaymentMutation = usePartialUpdatePayment()
+
+const hasEventEnded = computed(() => {
+  const eventData = event.value?.data as any
+  const endDateValue = eventData?.end_datetime || eventData?.end_date
+  if (!endDateValue) return false
+  const timestamp = new Date(endDateValue).getTime()
+  return !Number.isNaN(timestamp) && timestamp < Date.now()
+})
 
 // Stats calculations
 const stats = computed(() => {
@@ -993,6 +1029,44 @@ function openVerifyBankTransfer(payment: any) {
   showVerifyModal.value = true
 }
 
+function isBankTransferPayment(payment: any): boolean {
+  return (payment.method_title || '').toLowerCase().includes('bank')
+}
+
+async function handlePendingVerification(payment: any) {
+  if (isBankTransferPayment(payment)) {
+    openVerifyBankTransfer(payment)
+    return
+  }
+
+  const result = await Swal.fire({
+    title: 'Mark payment as verified?',
+    text: `${payment.payment_reference} has no method. Promote it to completed?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, mark verified',
+    cancelButtonText: 'Cancel',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await markCompletedMutation.mutateAsync(payment.payment_id)
+    refetchPayments()
+    toast.add({
+      title: 'Payment verified',
+      description: `${payment.payment_reference} is now completed.`,
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Verification failed',
+      description: error?.message || 'Could not verify this payment.',
+      color: 'red',
+    })
+  }
+}
+
 function closeVerifyModal() {
   showVerifyModal.value = false
   paymentToVerify.value = null
@@ -1036,6 +1110,116 @@ function handlePaymentCreated() {
     description: 'The payment record has been created successfully.',
     color: 'green',
   })
+}
+
+function canDeletePayment(payment: any): boolean {
+  if (payment.status === 'DRAFTING') return true
+  return hasEventEnded.value && payment.status === 'REFUNDED'
+}
+
+async function demotePendingToDrafting(payment: any) {
+  const result = await Swal.fire({
+    title: 'Demote payment to draft?',
+    text: `Move ${payment.payment_reference} from PENDING to DRAFTING?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, demote',
+    cancelButtonText: 'Cancel',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await partialUpdatePaymentMutation.mutateAsync({
+      paymentId: payment.payment_id,
+      body: { status: 'DRAFTING' },
+    })
+    refetchPayments()
+    toast.add({
+      title: 'Payment demoted',
+      description: `${payment.payment_reference} is now drafting.`,
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Demotion failed',
+      description: error?.message || 'Could not demote this payment to drafting.',
+      color: 'red',
+    })
+  }
+}
+
+async function promoteDraftToPending(payment: any) {
+  const result = await Swal.fire({
+    title: 'Promote draft payment?',
+    text: `Move ${payment.payment_reference} from DRAFTING to PENDING?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, promote',
+    cancelButtonText: 'Cancel',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await partialUpdatePaymentMutation.mutateAsync({
+      paymentId: payment.payment_id,
+      body: { status: 'PENDING' },
+    })
+    refetchPayments()
+    toast.add({
+      title: 'Payment promoted',
+      description: `${payment.payment_reference} is now pending.`,
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Promotion failed',
+      description: error?.message || 'Could not promote this payment to pending.',
+      color: 'red',
+    })
+  }
+}
+
+async function deleteRefundedPayment(payment: any) {
+  if (!canDeletePayment(payment)) {
+    toast.add({
+      title: 'Delete blocked',
+      description: 'Payments can only be deleted when drafting, or refunded after the event has ended.',
+      color: 'amber',
+    })
+    return
+  }
+
+  const isDrafting = payment.status === 'DRAFTING'
+
+  const result = await Swal.fire({
+    title: isDrafting ? 'Delete drafting payment?' : 'Delete refunded payment?',
+    text: `${payment.payment_reference} will be permanently deleted.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await deletePaymentMutation.mutateAsync(payment.payment_id)
+    refetchPayments()
+    toast.add({
+      title: 'Payment deleted',
+      description: `${payment.payment_reference} was deleted.`,
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Delete failed',
+      description: error?.message || 'Could not delete this payment.',
+      color: 'red',
+    })
+  }
 }
 
 function viewPaymentTickets(payment: any) {

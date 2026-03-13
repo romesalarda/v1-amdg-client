@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-4">
+  <div class="bg-white border border-deep-navy/10 shadow-sm p-4">
     <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
       <!-- Left: Quick Date Ranges -->
       <div class="flex flex-wrap gap-2">

@@ -33,9 +33,10 @@
               :staff="staff"
               :permissions="getStaffPermissions(staff.user!)"
               :roles-list="rolesList"
+              :event-created-by="event?.data?.created_by"
               :canUpdateStaff="canUpdateStaff"
               :canDeleteStaff="canDeleteStaff"
-              @remove="removeStaff(staff.staff_id)"
+              @remove="removeStaff(staff)"
               @update-permissions="handleUpdatePermissions(staff, $event)"
               @role-updated="refetchStaff"
             />
@@ -88,10 +89,10 @@
               <strong class="text-navy-800">Send Invites</strong> to add staff members. They'll receive an email with a link to accept.
             </p>
             <p>
-              <strong class="text-navy-800">Permissions</strong> control what each staff member can view and manage within this event.
+              Start with <strong class="text-navy-800">Role assignment</strong> for fast setup, then use custom permissions only when needed.
             </p>
             <p>
-              Use the <strong class="text-navy-800">expand button</strong> on each staff card to edit their permissions inline.
+              The <strong class="text-navy-800">event creator is immutable</strong> and always has locked admin access.
             </p>
           </div>
         </section>
@@ -189,6 +190,11 @@ const getStaffPermissions = (userId: number): EventPermissionAssignment[] => {
   return permissionAssignments.value.filter(p => p.user === userId)
 }
 
+const isCreatorStaffMember = (staff: { user?: number | null }) => {
+  const creatorId = event.value?.data?.created_by
+  return creatorId != null && staff.user === creatorId
+}
+
 // Handle invite sent
 const createInviteMutation = useCreateEventStaffInvite()
 
@@ -225,32 +231,47 @@ const createPermissionMutation = useCreateEventPermissionAssignment()
 const deletePermissionMutation = useDeleteEventPermissionAssignment()
 
 const handleUpdatePermissions = async (staff: any, permissions: Record<string, CRUDAction[]>) => {
-  try {
-    // Get current permissions for this user
-    const currentPermissions = getStaffPermissions(staff.user!)
+  if (isCreatorStaffMember(staff)) {
+    toast.add({
+      title: 'Creator permissions are locked',
+      description: 'Event creator permissions cannot be edited manually.',
+      color: 'orange',
+    })
+    return
+  }
 
-    console.log("permissinons to update", permissionAssignments.value);
-    
-    
-    // Delete existing permissions
-    for (const perm of currentPermissions) {
-      await deletePermissionMutation.mutateAsync(perm.id)
+  try {
+    const currentPermissions = getStaffPermissions(staff.user!)
+    const eventPk = event.value?.data.id
+
+    if (!eventPk) {
+      throw new Error('Event is not ready. Please refresh and try again.')
     }
-    
-    // Create new permissions
+
+    const deleteResults = await Promise.allSettled(
+      currentPermissions.map(perm => deletePermissionMutation.mutateAsync(perm.id))
+    )
+    const deleteFailures = deleteResults.filter(result => result.status === 'rejected')
+    if (deleteFailures.length > 0) {
+      throw new Error('Could not clear previous permissions. Please retry.')
+    }
+
+    const createPayloads: Array<{
+      event: number
+      user: number
+      permission: number
+      read_only: boolean
+      allow_create: boolean
+      allow_update: boolean
+      allow_delete: boolean
+    }> = []
+
     for (const [category, actions] of Object.entries(permissions)) {
-      // Find the permission by category
       const permission = permissionsList.value.find(p => p.category === category)
       if (!permission) continue
 
-      const event_pk = event.value?.data.id
-      console.log("event pk ", event_pk);
-      
-      if (!event_pk) continue
-      
-      // Create permission assignment
-      await createPermissionMutation.mutateAsync({
-        event: event_pk,
+      createPayloads.push({
+        event: eventPk,
         user: staff.user!,
         permission: permission.id,
         read_only: actions.includes('read') && actions.length === 1,
@@ -260,13 +281,23 @@ const handleUpdatePermissions = async (staff: any, permissions: Record<string, C
       })
     }
 
+    const createResults = await Promise.allSettled(
+      createPayloads.map(payload => createPermissionMutation.mutateAsync(payload))
+    )
+    const createFailures = createResults.filter(result => result.status === 'rejected')
+    if (createFailures.length > 0) {
+      throw new Error('Some permissions failed to apply. Please review and retry.')
+    }
+
     toast.add({
       title: 'Permissions updated',
       color: 'green',
     })
 
-    refetchPermissions()
+    await refetchPermissions()
   } catch (error) {
+    await refetchPermissions()
+
     toast.add({
       title: 'Failed to update permissions',
       description: error instanceof Error ? error.message : 'An error occurred',
@@ -278,11 +309,20 @@ const handleUpdatePermissions = async (staff: any, permissions: Record<string, C
 // Remove staff
 const removeStaffMutation = useDeleteEventStaff()
 
-const removeStaff = async (staffId: string) => {
+const removeStaff = async (staff: { staff_id: string; user?: number | null }) => {
+  if (isCreatorStaffMember(staff)) {
+    toast.add({
+      title: 'Creator cannot be removed',
+      description: 'Event creator has immutable admin access.',
+      color: 'orange',
+    })
+    return
+  }
+
   if (!confirm('Remove this staff member? This will also remove all their permissions.')) return
 
   try {
-    await removeStaffMutation.mutateAsync(staffId)
+    await removeStaffMutation.mutateAsync(staff.staff_id)
 
     toast.add({
       title: 'Staff member removed',

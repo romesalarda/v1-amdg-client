@@ -18,34 +18,65 @@
             <span v-if="currentRole" class="px-2 py-0.5 bg-primary/10 text-primary rounded font-medium">
               {{ currentRole.role_name }}
             </span>
+            <span
+              v-if="isCreatorStaff"
+              class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold"
+            >
+              Creator Admin (Locked)
+            </span>
           </div>
           <AuditTrailDisplay
             :assigned-by="staff.assigned_by_email"
             :assigned-at="staff.assigned_at"
           />
+
+          <div class="mt-2 flex items-center gap-2">
+            <label class="text-[10px] font-black text-primary uppercase tracking-wider">Role</label>
+            <select
+              v-model="selectedRoleId"
+              @change="handleRoleChange"
+              :disabled="roleSelectDisabled"
+              class="flex-1 px-3 py-1.5 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-lg text-xs font-medium text-[#071427] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <option :value="null">No role assigned</option>
+              <option v-for="role in rolesList" :key="role.id" :value="role.id">
+                {{ role.name }}
+              </option>
+            </select>
+            <span v-if="roleUpdateLoading" class="material-symbols-outlined text-primary animate-spin text-sm">
+              progress_activity
+            </span>
+          </div>
         </div>
       </div>
 
       <!-- Actions -->
       <div class="flex items-center gap-1.5 flex-shrink-0">
         <button
-          v-if="canUpdateStaff"
+          v-if="canUpdateStaff && !isCreatorStaff"
           @click="toggleExpand"
-          :aria-label="isExpanded ? 'Collapse' : 'Expand'"
+          :aria-label="isExpanded ? 'Hide custom permissions' : 'Customize permissions'"
           class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-white rounded-lg transition-colors"
         >
           <span class="material-symbols-outlined text-base">
-            {{ isExpanded ? 'expand_less' : 'expand_more' }}
+            {{ isExpanded ? 'tune' : 'tune' }}
           </span>
         </button>
         <button
-          v-if="canDeleteStaff"
+          v-if="canDeleteStaff && !isCreatorStaff"
           @click="$emit('remove')"
           aria-label="Remove staff member"
           class="p-1.5 text-navy-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
         >
           <span class="material-symbols-outlined text-base">delete</span>
         </button>
+        <span
+          v-else-if="isCreatorStaff"
+          class="material-symbols-outlined text-amber-600"
+          title="Event creator access is immutable"
+        >
+          lock
+        </span>
       </div>
     </div>
 
@@ -71,41 +102,18 @@
       No permissions assigned
     </div>
 
-    <!-- Expanded View: Role & Permission Editor -->
+    <!-- Expanded View: Permission Editor -->
     <div v-if="isExpanded" class="mt-4 border-t border-deep-navy/10 pt-4 space-y-4">
-      <!-- Role Assignment Section -->
-      <div class="space-y-2">
-        <label class="block text-xs font-black text-primary uppercase tracking-wider">
-          Assigned Role
-        </label>
-        <div class="flex items-center gap-2">
-          <select
-            v-model="selectedRoleId"
-            @change="handleRoleChange"
-            :disabled="!canUpdateStaff || roleUpdateLoading"
-            class="flex-1 px-4 py-2 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-[#071427] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <option :value="null">No role assigned</option>
-            <option v-for="role in rolesList" :key="role.id" :value="role.id">
-              {{ role.name }}
-            </option>
-          </select>
-          <span v-if="roleUpdateLoading" class="material-symbols-outlined text-primary animate-spin">
-            progress_activity
-          </span>
-        </div>
-        <p class="text-xs text-navy-500">
-          Roles provide pre-configured permission sets that can be customized below
+      <div>
+        <p class="text-xs text-navy-500 mb-2">
+          Customize permissions only when role defaults are not enough.
         </p>
-      </div>
-
-      <!-- Permission Editor Section -->
-      <div class="border-t border-deep-navy/10 pt-4">
         <InlinePermissionEditor
           :staff-id="staff.staff_id"
           :event-id="staff.event"
           :user-id="staff.user!"
           :current-permissions="permissions"
+          :disabled="!canUpdateStaff || isCreatorStaff"
           @save="handleSavePermissions"
           @cancel="isExpanded = false"
         />
@@ -131,6 +139,7 @@ interface Props {
   staff: EventStaff
   permissions: EventPermissionAssignment[]
   rolesList: any[]
+  eventCreatedBy?: number | null
   canUpdateStaff?: boolean
   canDeleteStaff?: boolean
 }
@@ -149,6 +158,17 @@ const isExpanded = ref(false)
 const maxVisiblePermissions = 5
 const selectedRoleId = ref<number | null>(null)
 const roleUpdateLoading = ref(false)
+
+const isCreatorStaff = computed(() => {
+  if (props.eventCreatedBy == null) {
+    return false
+  }
+  return props.staff.user === props.eventCreatedBy
+})
+
+const roleSelectDisabled = computed(() => {
+  return !props.canUpdateStaff || roleUpdateLoading.value || isCreatorStaff.value
+})
 
 // Fetch role assignments for this user/event
 const roleAssignmentsFilter = computed(() => {
@@ -179,6 +199,16 @@ watch(currentRole, (newRole) => {
 }, { immediate: true })
 
 const handleRoleChange = async () => {
+  if (isCreatorStaff.value) {
+    toast.add({
+      title: 'Creator role is locked',
+      description: 'Event creator is immutable and always treated as admin.',
+      color: 'orange',
+    })
+    selectedRoleId.value = currentRole.value?.role || null
+    return
+  }
+
   if (!props.staff.user) {
     toast.add({
       title: 'Cannot assign role',
