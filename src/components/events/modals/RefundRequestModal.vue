@@ -91,7 +91,7 @@
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Maximum refundable: £{{ parseFloat(payment?.amount || '0').toFixed(2) }}
+                Maximum refundable: {{ payment?.amount }}
               </p>
             </div>
 

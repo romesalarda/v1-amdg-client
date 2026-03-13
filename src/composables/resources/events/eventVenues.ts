@@ -35,7 +35,7 @@ export function useEventVenues(params?: MaybeRefOrGetter<EventVenuesListData['qu
 /**
  * Get a single event venue by ID
  */
-export function useEventVenue(eventVenueId: MaybeRefOrGetter<number>) {
+export function useEventVenue(eventVenueId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', eventVenueId] as const,
     queryFn: () => {
@@ -67,7 +67,7 @@ export function useUpdateEventVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ eventVenueId, body }: { eventVenueId: number; body: EventVenuesUpdateData['body'] }) =>
+    mutationFn: ({ eventVenueId, body }: { eventVenueId: string; body: EventVenuesUpdateData['body'] }) =>
       eventVenuesUpdate({ path: { event_venue_id: String(eventVenueId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -85,7 +85,7 @@ export function usePartialUpdateEventVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ eventVenueId, body }: { eventVenueId: number; body?: EventVenuesPartialUpdateData['body'] }) =>
+    mutationFn: ({ eventVenueId, body }: { eventVenueId: string; body?: EventVenuesPartialUpdateData['body'] }) =>
       eventVenuesPartialUpdate({ path: { event_venue_id: String(eventVenueId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -103,7 +103,7 @@ export function useDeleteEventVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (eventVenueId: number) => eventVenuesDestroy({ path: { event_venue_id: String(eventVenueId) } }),
+    mutationFn: (eventVenueId: string) => eventVenuesDestroy({ path: { event_venue_id: String(eventVenueId) } }),
     onSuccess: (_, eventVenueId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

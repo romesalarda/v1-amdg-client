@@ -535,6 +535,18 @@
                       Edit
                     </button>
 
+                  <!-- Move To Drafting -->
+                  <button
+                    v-if="availableActions.canMoveToDraft"
+                    type="button"
+                    @click="handleStatusAction('DRAFTING')"
+                    title="Move this event back to drafting"
+                    class="flex items-center gap-2 px-4 py-2 bg-slate-600 text-white rounded-xl hover:bg-slate-700 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-slate-600/20"
+                  >
+                    <span class="material-symbols-outlined text-base">edit_note</span>
+                    Draft
+                  </button>
+
                   <!-- Publish -->
                   <button
                     v-if="availableActions.canPublish"
@@ -780,11 +792,12 @@ const deleteMutation = useDeleteEvent()
 // Computed available actions based on current status and authorization
 const availableActions = computed(() => {
   const status = event.value?.status
-  const isApproved = event.value?.is_approved
+  const statusValue = status || ''
   
   return {
-    canPublish: status === 'DRAFTING',
-    canOpen: status === 'PUBLISHED',
+    canMoveToDraft: ['PUBLISHED', 'OPEN', 'CLOSED', 'POSTPONED', 'CANCELLED'].includes(statusValue),
+    canPublish: ['DRAFTING', 'POSTPONED', 'CANCELLED'].includes(statusValue),
+    canOpen: ['PUBLISHED', 'POSTPONED'].includes(statusValue),
     canClose: status === 'OPEN' || status === 'IN_PROGRESS',
     canArchive: status === 'CLOSED' || status === 'COMPLETED',
     canPostpone: status !== 'ARCHIVED' && status !== 'DELETED' && status !== 'CANCELLED' && status !== 'POSTPONED',
@@ -798,6 +811,15 @@ const handleStatusAction = (newStatus: string) => {
   if (!event.value) return
   
   const statusConfig: Record<string, { title: string; message: string; confirmText: string; requireTyping: boolean; buttonColor: 'primary' | 'danger' | 'warning' | 'success'; isDestructive: boolean; icon: string }> = {
+    DRAFTING: {
+      title: 'Move To Drafting',
+      message: 'Are you sure you want to move this event back to drafting? This is useful when you need to revise details before publishing again.',
+      confirmText: 'Move To Draft',
+      requireTyping: false,
+      buttonColor: 'primary',
+      isDestructive: false,
+      icon: 'edit_note',
+    },
     PUBLISHED: {
       title: 'Publish Event',
       message: 'Are you sure you want to publish this event? It will become visible to the public.',

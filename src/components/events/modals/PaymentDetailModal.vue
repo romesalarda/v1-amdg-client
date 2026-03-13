@@ -210,11 +210,11 @@
               >
                 <div class="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0"></div>
                 <div class="flex-1 pb-3">
-                  <div class="text-sm font-semibold">{{ action.action }}</div>
+                  <div class="text-sm font-semibold">{{ action.action.replace(/_/g, ' ') }}</div>
                   <div class="text-xs text-gray-500">{{ action.description }}</div>
                   <div class="text-xs text-gray-400 mt-1">
                     {{ formatDateTime(action.timestamp) }}
-                    <span v-if="action.performed_by"> by {{ action.performed_by.username }}</span>
+                    <span v-if="action.performed_by"> by {{ action.performed_by }}</span>
                   </div>
                 </div>
               </div>

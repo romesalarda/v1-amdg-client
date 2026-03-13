@@ -215,6 +215,11 @@ const tabs = [
     icon: 'i-heroicons-document-text',
   },
   {
+    path: 'venue',
+    label: 'Venues',
+    icon: 'i-heroicons-map-pin',
+  },
+  {
     path: 'participants/dashboard',
     label: 'Participants',
     icon: 'i-heroicons-users',

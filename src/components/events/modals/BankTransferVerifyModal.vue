@@ -28,11 +28,11 @@
             </div>
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Amount:</span>
-              <span class="font-bold text-gray-900">£{{ parseFloat(payment.modified_amount || '0').toFixed(2) }}</span>
+              <span class="font-bold text-gray-900">{{ payment.base_amount }}</span>
             </div>
             <div class="flex justify-between text-sm mt-1">
               <span class="text-gray-600">User:</span>
-              <span class="font-medium text-gray-900">{{ payment.user?.username }}</span>
+              <span class="font-medium text-gray-900">{{ payment.user_name }}</span>
             </div>
           </div>
 
@@ -54,6 +54,7 @@
               <p class="text-xs text-gray-500 mt-1">
                 These notes will be saved in the payment history for audit purposes.
               </p>
+
             </div>
 
             <!-- Verification Decision -->
@@ -146,6 +147,7 @@
 
 <script setup lang="ts">
 import { useVerifyBankTransferPayment } from '~/composables/resources/payments/payments'
+import { usePayment } from '~/composables/resources/payments/payments'    
 
 interface Props {
   payment: any
@@ -162,6 +164,8 @@ const verified = ref<boolean | null>(null)
 const isLoading = ref(false)
 
 const verifyMutation = useVerifyBankTransferPayment()
+const { data: paymentData } = usePayment(props.payment.payment_id)
+const payment = computed(() => paymentData.value?.data || props.payment)
 
 async function handleVerify() {
   if (!notes.value.trim() || verified.value === null) {

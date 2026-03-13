@@ -105,7 +105,7 @@
               <div v-if="refund.processed_by" class="bg-gray-50 rounded-lg p-4">
                 <div class="text-xs text-gray-500 mb-1">Processed By</div>
                 <div class="text-sm font-semibold text-gray-900">
-                  {{ refund.processed_by.username }}
+                  {{ refund.processed_by_name }}
                 </div>
               </div>
               <div v-if="refund.processed_at" class="bg-gray-50 rounded-lg p-4">
