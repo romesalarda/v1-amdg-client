@@ -8507,26 +8507,44 @@ export type InvolvedEventOrganisationCreateUpdateRequest = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation required.
+ * Create/Update serializer for Leader with typed location fields.
  */
 export type LeaderCreateUpdate = {
     user: number;
     /**
-     * The organisation this leader belongs to (required for grouping)
+     * The organisation this leader belongs to
      */
     organisation: number;
+    /**
+     * Type of location this leader is assigned to
+     *
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
     notes?: string;
 };
 
 /**
- * Create/Update serializer for Leader with organisation required.
+ * Create/Update serializer for Leader with typed location fields.
  */
 export type LeaderCreateUpdateRequest = {
     user: number;
     /**
-     * The organisation this leader belongs to (required for grouping)
+     * The organisation this leader belongs to
      */
     organisation: number;
+    /**
+     * Type of location this leader is assigned to
+     *
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
     notes?: string;
 };
 
@@ -8541,13 +8559,17 @@ export type LeaderDetail = {
     organisation?: number | null;
     readonly organisation_name: string;
     /**
-     * Type of authority
+     * Type of location (country, cluster, chapter, area)
      */
-    readonly authority_type: string;
+    readonly location_type: string;
     /**
-     * Name of the authority object (country, cluster, chapter, area, or organisation)
+     * ID of the location
      */
-    readonly authority_object_name: string;
+    readonly location_id: number;
+    /**
+     * Name of the assigned location
+     */
+    readonly location_name: string;
     notes?: string;
     added_by?: number | null;
     readonly added_by_name: string | null;
@@ -8560,12 +8582,12 @@ export type LeaderDetail = {
         self?: string;
         user?: string;
         organisation?: string;
-        authority_object?: string;
+        location?: string;
     };
 };
 
 /**
- * List serializer for Leader with organisation grouping.
+ * List serializer for Leader with typed location fields.
  */
 export type LeaderList = {
     readonly id: number;
@@ -8575,13 +8597,17 @@ export type LeaderList = {
     organisation?: number | null;
     readonly organisation_name: string;
     /**
-     * Type of authority
+     * Type of location (country, cluster, chapter, area)
      */
-    readonly authority_type: string;
+    readonly location_type: string;
     /**
-     * Name of the authority object (country, cluster, chapter, area, or organisation)
+     * ID of the location
      */
-    readonly authority_object_name: string;
+    readonly location_id: number;
+    /**
+     * Name of the assigned location
+     */
+    readonly location_name: string;
     notes?: string;
     added_by?: number | null;
     readonly added_by_name: string | null;
@@ -8594,7 +8620,129 @@ export type LeaderList = {
         self?: string;
         user?: string;
         organisation?: string;
-        authority_object?: string;
+        location?: string;
+    };
+};
+
+/**
+ * Create/update serializer for location leader invites.
+ */
+export type LocationLeaderInviteCreateUpdate = {
+    organisation: number;
+    target_user: number | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    notes?: string;
+    expires_at?: string | null;
+    is_active?: boolean;
+};
+
+/**
+ * Create/update serializer for location leader invites.
+ */
+export type LocationLeaderInviteCreateUpdateRequest = {
+    organisation: number;
+    target_user: number | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    notes?: string;
+    expires_at?: string | null;
+    is_active?: boolean;
+};
+
+/**
+ * Detailed serializer for location leader invites.
+ */
+export type LocationLeaderInviteDetail = {
+    readonly id: string;
+    organisation: number;
+    readonly organisation_name: string;
+    target_user: number | null;
+    readonly target_user_name: string | null;
+    readonly target_user_email: string | null;
+    invited_by?: number | null;
+    readonly invited_by_name: string | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    /**
+     * Name of location
+     */
+    readonly location_name: string;
+    notes?: string;
+    readonly accepted: boolean;
+    readonly accepted_at: string | null;
+    is_active?: boolean;
+    readonly is_valid: boolean;
+    expires_at?: string | null;
+    readonly added_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        organisation?: string;
+        target_user?: string;
+        accept?: string;
+    };
+};
+
+/**
+ * List serializer for location leader invites.
+ */
+export type LocationLeaderInviteList = {
+    readonly id: string;
+    organisation: number;
+    readonly organisation_name: string;
+    target_user: number | null;
+    readonly target_user_name: string | null;
+    readonly target_user_email: string | null;
+    invited_by?: number | null;
+    readonly invited_by_name: string | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    /**
+     * Name of location
+     */
+    readonly location_name: string;
+    notes?: string;
+    readonly accepted: boolean;
+    readonly accepted_at: string | null;
+    is_active?: boolean;
+    readonly is_valid: boolean;
+    expires_at?: string | null;
+    readonly added_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        organisation?: string;
+        target_user?: string;
+        accept?: string;
     };
 };
 
@@ -9899,6 +10047,13 @@ export type PaginatedLeaderListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<LeaderList>;
+};
+
+export type PaginatedLocationLeaderInviteListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<LocationLeaderInviteList>;
 };
 
 export type PaginatedMedicalConditionList = {
@@ -11788,15 +11943,43 @@ export type PatchedInvolvedEventOrganisationCreateUpdateRequest = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation required.
+ * Create/Update serializer for Leader with typed location fields.
  */
 export type PatchedLeaderCreateUpdateRequest = {
     user?: number;
     /**
-     * The organisation this leader belongs to (required for grouping)
+     * The organisation this leader belongs to
      */
     organisation?: number;
+    /**
+     * Type of location this leader is assigned to
+     *
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
     notes?: string;
+};
+
+/**
+ * Create/update serializer for location leader invites.
+ */
+export type PatchedLocationLeaderInviteCreateUpdateRequest = {
+    organisation?: number;
+    target_user?: number | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id?: number;
+    notes?: string;
+    expires_at?: string | null;
+    is_active?: boolean;
 };
 
 /**
@@ -18575,20 +18758,33 @@ export type InvolvedEventOrganisationWritable = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation required.
+ * Create/Update serializer for Leader with typed location fields.
  */
 export type LeaderCreateUpdateRequestWritable = {
     user: number;
     /**
-     * The organisation this leader belongs to (required for grouping)
+     * The organisation this leader belongs to
      */
     organisation: number;
     /**
-     * Internal use only - do not set manually
+     * Type of location this leader is assigned to
+     *
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
+    /**
+     * Numeric ID of the location this leader is assigned to
+     */
+    location_id?: number;
+    /**
+     * Deprecated compatibility field
      */
     target_type?: string;
     /**
-     * Internal use only - do not set manually
+     * Deprecated compatibility field
      */
     target_id?: number;
     notes?: string;
@@ -18605,13 +18801,53 @@ export type LeaderDetailWritable = {
 };
 
 /**
- * List serializer for Leader with organisation grouping.
+ * List serializer for Leader with typed location fields.
  */
 export type LeaderListWritable = {
     user: number;
     organisation?: number | null;
     notes?: string;
     added_by?: number | null;
+};
+
+/**
+ * Detailed serializer for location leader invites.
+ */
+export type LocationLeaderInviteDetailWritable = {
+    organisation: number;
+    target_user: number | null;
+    invited_by?: number | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    notes?: string;
+    is_active?: boolean;
+    expires_at?: string | null;
+};
+
+/**
+ * List serializer for location leader invites.
+ */
+export type LocationLeaderInviteListWritable = {
+    organisation: number;
+    target_user: number | null;
+    invited_by?: number | null;
+    /**
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type: 'country' | 'cluster' | 'chapter' | 'area';
+    location_id: number;
+    notes?: string;
+    is_active?: boolean;
+    expires_at?: string | null;
 };
 
 /**
@@ -19299,6 +19535,13 @@ export type PaginatedLeaderListListWritable = {
     results: Array<LeaderListWritable>;
 };
 
+export type PaginatedLocationLeaderInviteListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<LocationLeaderInviteListWritable>;
+};
+
 export type PaginatedMedicalConditionListWritable = {
     count: number;
     next?: string | null;
@@ -19607,20 +19850,33 @@ export type PatchedEventQuestionAnswerRequestWritable = {
 };
 
 /**
- * Create/Update serializer for Leader with organisation required.
+ * Create/Update serializer for Leader with typed location fields.
  */
 export type PatchedLeaderCreateUpdateRequestWritable = {
     user?: number;
     /**
-     * The organisation this leader belongs to (required for grouping)
+     * The organisation this leader belongs to
      */
     organisation?: number;
     /**
-     * Internal use only - do not set manually
+     * Type of location this leader is assigned to
+     *
+     * * `country` - Country
+     * * `cluster` - Cluster
+     * * `chapter` - Chapter
+     * * `area` - Area
+     */
+    location_type?: 'country' | 'cluster' | 'chapter' | 'area';
+    /**
+     * Numeric ID of the location this leader is assigned to
+     */
+    location_id?: number;
+    /**
+     * Deprecated compatibility field
      */
     target_type?: string;
     /**
-     * Internal use only - do not set manually
+     * Deprecated compatibility field
      */
     target_id?: number;
     notes?: string;
@@ -33993,6 +34249,188 @@ export type OrganisationsInvolvedEventsUpdateResponses = {
 
 export type OrganisationsInvolvedEventsUpdateResponse = OrganisationsInvolvedEventsUpdateResponses[keyof OrganisationsInvolvedEventsUpdateResponses];
 
+export type OrganisationsLeaderInvitesListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by accepted status
+         */
+        accepted?: boolean;
+        /**
+         * Filter by active status
+         */
+        is_active?: boolean;
+        /**
+         * Filter by current invite validity
+         */
+        is_valid?: boolean;
+        /**
+         * Filter by location ID
+         */
+        location_id?: number;
+        /**
+         * Filter by location type
+         *
+         * * `country` - Country
+         * * `cluster` - Cluster
+         * * `chapter` - Chapter
+         * * `area` - Area
+         */
+        location_type?: 'area' | 'chapter' | 'cluster' | 'country';
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Filter by organisation ID
+         */
+        organisation?: number;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by target user ID
+         */
+        target_user?: number;
+    };
+    url: '/api/organisations/leader-invites/';
+};
+
+export type OrganisationsLeaderInvitesListResponses = {
+    200: PaginatedLocationLeaderInviteListList;
+};
+
+export type OrganisationsLeaderInvitesListResponse = OrganisationsLeaderInvitesListResponses[keyof OrganisationsLeaderInvitesListResponses];
+
+export type OrganisationsLeaderInvitesCreateData = {
+    body: LocationLeaderInviteCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/leader-invites/';
+};
+
+export type OrganisationsLeaderInvitesCreateResponses = {
+    201: LocationLeaderInviteCreateUpdate;
+};
+
+export type OrganisationsLeaderInvitesCreateResponse = OrganisationsLeaderInvitesCreateResponses[keyof OrganisationsLeaderInvitesCreateResponses];
+
+export type OrganisationsLeaderInvitesDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this location leader invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-invites/{id}/';
+};
+
+export type OrganisationsLeaderInvitesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type OrganisationsLeaderInvitesDestroyResponse = OrganisationsLeaderInvitesDestroyResponses[keyof OrganisationsLeaderInvitesDestroyResponses];
+
+export type OrganisationsLeaderInvitesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this location leader invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-invites/{id}/';
+};
+
+export type OrganisationsLeaderInvitesRetrieveResponses = {
+    200: LocationLeaderInviteDetail;
+};
+
+export type OrganisationsLeaderInvitesRetrieveResponse = OrganisationsLeaderInvitesRetrieveResponses[keyof OrganisationsLeaderInvitesRetrieveResponses];
+
+export type OrganisationsLeaderInvitesPartialUpdateData = {
+    body?: PatchedLocationLeaderInviteCreateUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this location leader invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-invites/{id}/';
+};
+
+export type OrganisationsLeaderInvitesPartialUpdateResponses = {
+    200: LocationLeaderInviteCreateUpdate;
+};
+
+export type OrganisationsLeaderInvitesPartialUpdateResponse = OrganisationsLeaderInvitesPartialUpdateResponses[keyof OrganisationsLeaderInvitesPartialUpdateResponses];
+
+export type OrganisationsLeaderInvitesUpdateData = {
+    body: LocationLeaderInviteCreateUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this location leader invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-invites/{id}/';
+};
+
+export type OrganisationsLeaderInvitesUpdateResponses = {
+    200: LocationLeaderInviteCreateUpdate;
+};
+
+export type OrganisationsLeaderInvitesUpdateResponse = OrganisationsLeaderInvitesUpdateResponses[keyof OrganisationsLeaderInvitesUpdateResponses];
+
+export type OrganisationsLeaderInvitesAcceptCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this location leader invite.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-invites/{id}/accept/';
+};
+
+export type OrganisationsLeaderInvitesAcceptCreateResponses = {
+    200: LocationLeaderInviteDetail;
+};
+
+export type OrganisationsLeaderInvitesAcceptCreateResponse = OrganisationsLeaderInvitesAcceptCreateResponses[keyof OrganisationsLeaderInvitesAcceptCreateResponses];
+
+export type OrganisationsLeaderInvitesMyInvitesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/leader-invites/my-invites/';
+};
+
+export type OrganisationsLeaderInvitesMyInvitesRetrieveResponses = {
+    200: LocationLeaderInviteDetail;
+};
+
+export type OrganisationsLeaderInvitesMyInvitesRetrieveResponse = OrganisationsLeaderInvitesMyInvitesRetrieveResponses[keyof OrganisationsLeaderInvitesMyInvitesRetrieveResponses];
+
 export type OrganisationsLeadersListData = {
     body?: never;
     path?: never;
@@ -34010,13 +34448,13 @@ export type OrganisationsLeadersListData = {
          */
         added_by?: number;
         /**
-         * Filter by authority object ID
+         * Filter by location ID
          */
-        authority_id?: number;
+        location_id?: number;
         /**
-         * Filter by authority type (country, cluster, chapter, area, organisation)
+         * Filter by location type (country, cluster, chapter, area)
          */
-        authority_type?: string;
+        location_type?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -34138,6 +34576,37 @@ export type OrganisationsLeadersUpdateResponses = {
 };
 
 export type OrganisationsLeadersUpdateResponse = OrganisationsLeadersUpdateResponses[keyof OrganisationsLeadersUpdateResponses];
+
+export type OrganisationsLeadersCandidateUsersRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Optional location id to exclude existing leaders
+         */
+        location_id?: number;
+        /**
+         * Optional location type to exclude existing leaders
+         */
+        location_type?: string;
+        /**
+         * Organisation ID
+         */
+        organisation: number;
+        /**
+         * Search by name, username, or email
+         */
+        search?: string;
+    };
+    url: '/api/organisations/leaders/candidate-users/';
+};
+
+export type OrganisationsLeadersCandidateUsersRetrieveResponses = {
+    /**
+     * Paginated list of candidate users
+     */
+    200: unknown;
+};
 
 export type OrganisationsListListData = {
     body?: never;

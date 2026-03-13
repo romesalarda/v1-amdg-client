@@ -1,312 +1,164 @@
 <template>
-  <div class="min-h-screen">
-    <!-- Header -->
-    <section class="max-w-8xl mx-auto px-6 lg:px-10 py-8">
-      <div class="text-center mb-8">
-        <div class="mb-3 flex justify-center items-center gap-4 opacity-40">
-          <div class="h-[1px] w-12 bg-primary"></div>
-          <span class="text-[10px] uppercase tracking-[0.5em] text-primary">Invitation Registry</span>
-          <div class="h-[1px] w-12 bg-primary"></div>
+  <div class="min-h-screen bg-gray-50">
+    <section class="max-w-6xl mx-auto px-6 lg:px-10 py-10">
+      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
+        <div class="px-8 py-8 bg-gradient-to-r from-deep-navy to-deep-navy/80 text-white">
+          <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-200">Invitation Center</p>
+          <h1 class="mt-3 text-3xl md:text-4xl font-black uppercase tracking-tight">Your Invitations</h1>
+          <p class="mt-3 text-sm text-blue-100/90 max-w-2xl">
+            Review and accept invitations for communities, location leadership, and event staffing.
+          </p>
+          <div class="mt-5 flex flex-wrap gap-3">
+            <NuxtLink to="/communities" class="px-5 py-2 bg-white text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider border-2 border-white hover:bg-blue-50 transition-colors">
+              Browse Communities
+            </NuxtLink>
+            <NuxtLink to="/events" class="px-5 py-2 bg-transparent text-white rounded-lg font-black text-xs uppercase tracking-wider border-2 border-white/60 hover:border-white transition-colors">
+              Browse Events
+            </NuxtLink>
+          </div>
         </div>
 
-        <h1 class="text-white font-light text-3xl md:text-5xl leading-tight mb-4">
-          Your <span class="gold-gradient-text italic font-black glow-gold">Invitations</span>
-        </h1>
-        <p class="text-white/70 max-w-2xl mx-auto">
-          View and manage your organization and event staff invitations
-        </p>
-      </div>
-
-      <div class="flex justify-center">
-        <NuxtLink to="/communities" class="px-6 py-2 bg-navy-accent/60 border border-primary/30 text-white hover:border-primary/60 transition-colors font-mono uppercase tracking-wider text-sm">
-          Browse Communities
-        </NuxtLink>
+        <div class="px-8 py-6 border-t-2 border-deep-navy/10 bg-deep-navy/5">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Community Invites</p>
+              <p class="text-2xl font-black text-deep-navy mt-2">{{ orgInvites.length }}</p>
+            </div>
+            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Leader Invites</p>
+              <p class="text-2xl font-black text-deep-navy mt-2">{{ leaderInvites.length }}</p>
+            </div>
+            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
+              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Event Staff Invites</p>
+              <p class="text-2xl font-black text-deep-navy mt-2">{{ staffInvites.length }}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- Loading State -->
-    <div v-if="isLoadingOrg" class="max-w-5xl mx-auto px-6 lg:px-10 py-12">
-      <div class="space-y-4">
-        <div v-for="i in 3" :key="i" class="bg-navy-accent/40 border border-primary/30 p-4">
-          <div class="flex items-center gap-4">
-            <USkeleton class="h-16 w-16" />
-            <div class="flex-1 space-y-2">
-              <USkeleton class="h-6 w-1/2" />
-              <USkeleton class="h-4 w-3/4" />
-            </div>
-            <USkeleton class="h-10 w-24" />
-          </div>
-        </div>
+    <section v-if="isLoading" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12 space-y-4">
+      <div v-for="i in 3" :key="i" class="bg-white border-2 border-deep-navy/10 rounded-xl p-5">
+        <USkeleton class="h-5 w-40" />
+        <USkeleton class="h-4 w-72 mt-3" />
+        <USkeleton class="h-10 w-28 mt-5" />
       </div>
-    </div>
+    </section>
 
-    <!-- Invitations List -->
-    <div v-else-if="hasInvites" class="max-w-5xl mx-auto px-6 lg:px-10 py-12">
-      <div class="space-y-8">
-        <!-- Organization Invites Section -->
-        <section v-if="orgInvites.length > 0">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-primary/20 border border-primary/40 flex items-center justify-center">
-              <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-            </div>
+    <section v-else-if="hasInvites" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12 space-y-8">
+      <div v-if="orgInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
+        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
+          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Community Invitations</h2>
+        </div>
+        <div class="divide-y-2 divide-deep-navy/5">
+          <div v-for="invite in orgInvites" :key="`org-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-xl font-bold text-white uppercase tracking-wider">Organization Invitations</h2>
-              <p class="text-xs text-primary/60 font-mono">{{ orgInvites.length }} pending</p>
+              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.organisation_name }}</p>
+              <p class="text-xs text-deep-navy/60 font-medium mt-1">Invited by {{ invite.invited_by_name || 'Unknown user' }}</p>
+              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+                {{ statusLabel(invite) }}
+              </span>
+              <button
+                v-if="isInviteAcceptable(invite)"
+                :disabled="acceptingOrgInviteId === invite.id"
+                @click="handleAcceptOrgInvite(invite.id)"
+                class="px-4 py-2 bg-deep-navy text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-deep-navy/90 transition-colors disabled:opacity-50"
+              >
+                {{ acceptingOrgInviteId === invite.id ? 'Accepting...' : 'Accept' }}
+              </button>
+              <NuxtLink :to="`/communities/${invite.organisation}`" class="px-4 py-2 border-2 border-deep-navy/20 text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider hover:border-deep-navy/50 transition-colors">
+                View
+              </NuxtLink>
             </div>
           </div>
-          
-          <div class="space-y-4">
-            <div
-              v-for="invite in orgInvites"
-              :key="'org-' + invite.id"
-              class="bg-navy-accent/40 border border-primary/30 hover:border-primary/60 transition-all architectural-border"
-            >
-              <div class="p-4">
-                <div class="flex items-start gap-4">
-                  <!-- Organization Logo -->
-                  <div class="w-16 h-16 bg-primary/10 border border-primary/30 p-2 flex-shrink-0">
-                    <svg class="w-full h-full text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
+        </div>
+      </div>
 
-                  <!-- Invitation Details -->
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-white mb-1 uppercase tracking-wider">
-                      {{ invite.organisation_name }}
-                    </h3>
-                    
-                    <div class="space-y-2 text-xs text-white/60 font-mono">
-                      <p v-if="invite.invited_by_name" class="flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Invited by {{ invite.invited_by_name }}
-                      </p>
-                      <p class="flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Received {{ formatDate(invite.added_at) }}
-                      </p>
-                      <p v-if="invite.expires_at" class="flex items-center gap-1" :class="{
-                        'text-red-400': isExpiringSoon(invite.expires_at),
-                        'text-amber-400': !isExpiringSoon(invite.expires_at) && !invite.is_valid
-                      }">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {{ invite.is_valid ? `Expires ${formatDate(invite.expires_at)}` : 'Expired' }}
-                      </p>
-                    </div>
-
-                    <!-- Status Badges -->
-                    <div class="mt-3 flex items-center gap-2">
-                      <span v-if="invite.accepted" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-green-900/40 text-green-400 border border-green-500/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Accepted
-                      </span>
-                      <span v-else-if="!invite.is_valid" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-red-900/40 text-red-400 border border-red-500/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Invalid
-                      </span>
-                      <span v-else-if="!invite.is_active" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-gray-800/40 text-gray-400 border border-gray-600/40">
-                        Inactive
-                      </span>
-                      <span v-else class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-primary/20 text-primary border border-primary/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Pending
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div class="flex flex-col gap-2 flex-shrink-0">
-                    <button
-                      v-if="!invite.accepted && invite.is_valid && invite.is_active"
-                      @click="handleAcceptOrgInvite(invite.id)"
-                      :disabled="acceptingOrgInviteId === invite.id"
-                      class="px-4 py-2 bg-primary text-[#0a192f] border border-primary hover:bg-primary/90 transition-colors font-mono uppercase tracking-wider text-xs disabled:opacity-50"
-                    >
-                      {{ acceptingOrgInviteId === invite.id ? 'Accepting...' : 'Accept' }}
-                    </button>
-                    <NuxtLink
-                      :to="`/communities/${invite.organisation}`"
-                      class="px-4 py-2 bg-navy-accent/60 border border-primary/30 text-white hover:border-primary/60 transition-colors font-mono uppercase tracking-wider text-xs text-center"
-                    >
-                      View
-                    </NuxtLink>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- Event Staff Invites Section -->
-        <!-- Note: Currently requires backend endpoint for global staff invites.
-             The API is event-scoped (/api/event/list/{event_id}/staff-invites/)
-             so we need a new endpoint like /api/event/staff-invites/my-invites/
-             to fetch all staff invites for the current user across all events.
-             For now, this section is prepared but won't show invites until backend support is added. -->
-        <section v-if="staffInvites.length > 0">
-          <div class="flex items-center gap-3 mb-4">
-            <div class="w-8 h-8 bg-purple-900/40 border border-purple-500/40 flex items-center justify-center">
-              <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-            </div>
+      <div v-if="leaderInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
+        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
+          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Leader Invitations</h2>
+        </div>
+        <div class="divide-y-2 divide-deep-navy/5">
+          <div v-for="invite in leaderInvites" :key="`leader-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
             <div>
-              <h2 class="text-xl font-bold text-white uppercase tracking-wider">Event Staff Invitations</h2>
-              <p class="text-xs text-purple-400/60 font-mono">{{ staffInvites.length }} pending</p>
+              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.organisation_name }}</p>
+              <p class="text-xs text-deep-navy/60 font-medium mt-1">{{ invite.location_name }} · {{ invite.location_type }} #{{ invite.location_id }}</p>
+              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+                {{ statusLabel(invite) }}
+              </span>
+              <button
+                v-if="isInviteAcceptable(invite)"
+                :disabled="acceptingLeaderInviteId === invite.id"
+                @click="handleAcceptLeaderInvite(invite.id, invite.organisation)"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {{ acceptingLeaderInviteId === invite.id ? 'Accepting...' : 'Accept' }}
+              </button>
+              <NuxtLink :to="`/communities/${invite.organisation}`" class="px-4 py-2 border-2 border-blue-200 text-blue-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-blue-400 transition-colors">
+                View
+              </NuxtLink>
             </div>
           </div>
-          
-          <div class="space-y-4">
-            <div
-              v-for="invite in staffInvites"
-              :key="'staff-' + invite.id"
-              class="bg-navy-accent/40 border border-purple-500/30 hover:border-purple-500/60 transition-all architectural-border"
-            >
-              <div class="p-4">
-                <div class="flex items-start gap-4">
-                  <!-- Event Icon -->
-                  <div class="w-16 h-16 bg-purple-900/20 border border-purple-500/30 p-2 flex-shrink-0">
-                    <svg class="w-full h-full text-purple-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
+        </div>
+      </div>
 
-                  <!-- Invitation Details -->
-                  <div class="flex-1 min-w-0">
-                    <h3 class="text-lg font-semibold text-white mb-1 uppercase tracking-wider">
-                      {{ invite.event_title }}
-                    </h3>
-                    <p class="text-xs text-purple-400 font-mono font-medium mb-2 uppercase tracking-wider">
-                      Staff Member Invitation
-                    </p>
-                    
-                    <div class="space-y-2 text-xs text-white/60 font-mono">
-                      <p v-if="invite.invited_by_email" class="flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                        </svg>
-                        Invited by {{ invite.invited_by_email }}
-                      </p>
-                      <p class="flex items-center gap-1">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        Received {{ formatDate(invite.added_at) }}
-                      </p>
-                      <p v-if="invite.expires_at" class="flex items-center gap-1" :class="{
-                        'text-red-400': isExpiringSoon(invite.expires_at),
-                        'text-amber-400': !isExpiringSoon(invite.expires_at) && !invite.is_valid
-                      }">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        {{ invite.is_valid ? `Expires ${formatDate(invite.expires_at)}` : 'Expired' }}
-                      </p>
-                    </div>
-
-                    <!-- Status Badges -->
-                    <div class="mt-3 flex items-center gap-2">
-                      <span v-if="invite.accepted" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-green-900/40 text-green-400 border border-green-500/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Accepted
-                      </span>
-                      <span v-else-if="!invite.is_valid" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-red-900/40 text-red-400 border border-red-500/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Invalid
-                      </span>
-                      <span v-else-if="!invite.is_active" class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-gray-800/40 text-gray-400 border border-gray-600/40">
-                        Inactive
-                      </span>
-                      <span v-else class="inline-flex items-center px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider bg-purple-900/40 text-purple-400 border border-purple-500/40">
-                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        Pending
-                      </span>
-                    </div>
-                  </div>
-
-                  <!-- Action Buttons -->
-                  <div class="flex flex-col gap-2 flex-shrink-0">
-                    <button
-                      v-if="!invite.accepted && invite.is_valid && invite.is_active"
-                      @click="handleAcceptStaffInvite(invite)"
-                      :disabled="acceptingStaffInviteId === invite.id"
-                      class="px-4 py-2 bg-purple-600 text-white border border-purple-500 hover:bg-purple-700 transition-colors font-mono uppercase tracking-wider text-xs disabled:opacity-50"
-                    >
-                      {{ acceptingStaffInviteId === invite.id ? 'Accepting...' : 'Accept' }}
-                    </button>
-                    <NuxtLink
-                      :to="`/events/${invite.event}/`"
-                      class="px-4 py-2 bg-navy-accent/60 border border-purple-500/30 text-white hover:border-purple-500/60 transition-colors font-mono uppercase tracking-wider text-xs text-center"
-                    >
-                      View
-                    </NuxtLink>
-                  </div>
-                </div>
-              </div>
+      <div v-if="staffInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
+        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
+          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Event Staff Invitations</h2>
+        </div>
+        <div class="divide-y-2 divide-deep-navy/5">
+          <div v-for="invite in staffInvites" :key="`staff-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
+            <div>
+              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.event_title }}</p>
+              <p class="text-xs text-deep-navy/60 font-medium mt-1">Invited by {{ invite.invited_by_email || 'Unknown user' }}</p>
+              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+                {{ statusLabel(invite) }}
+              </span>
+              <button
+                v-if="isInviteAcceptable(invite)"
+                :disabled="acceptingStaffInviteId === invite.id"
+                @click="handleAcceptStaffInvite(invite)"
+                class="px-4 py-2 bg-violet-600 text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-violet-700 transition-colors disabled:opacity-50"
+              >
+                {{ acceptingStaffInviteId === invite.id ? 'Accepting...' : 'Accept' }}
+              </button>
+              <NuxtLink :to="`/events/${invite.event}`" class="px-4 py-2 border-2 border-violet-200 text-violet-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-violet-400 transition-colors">
+                View
+              </NuxtLink>
             </div>
           </div>
-        </section>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div v-else-if="!isLoading" class="max-w-5xl mx-auto px-6 lg:px-10 py-20">
-      <div class="text-center">
-        <div class="w-16 h-16 mx-auto bg-navy-accent/60 border border-primary/30 flex items-center justify-center mb-4">
-          <svg class="w-8 h-8 text-primary/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-medium text-white mb-2 uppercase tracking-wider">No invitations</h3>
-        <p class="text-white/60 mb-6">
-          You don't have any pending invitations.
-        </p>
-        <div class="flex items-center justify-center gap-4">
-          <NuxtLink to="/communities" class="px-6 py-2 bg-primary text-[#0a192f] border border-primary hover:bg-primary/90 transition-colors font-mono uppercase tracking-wider text-sm">
-            Browse Communities
-          </NuxtLink>
-          <NuxtLink to="/events" class="px-6 py-2 bg-navy-accent/60 border border-primary/30 text-white hover:border-primary/60 transition-colors font-mono uppercase tracking-wider text-sm">
-            Browse Events
-          </NuxtLink>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Error State -->
-    <div v-if="isError" class="max-w-5xl mx-auto px-6 lg:px-10 py-12">
-      <div class="bg-red-900/20 border border-red-500/50 p-6 text-center">
-        <svg class="mx-auto w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-        <p class="text-red-400">Failed to load invitations. Please try again later.</p>
+    <section v-else class="max-w-6xl mx-auto px-6 lg:px-10 pb-12">
+      <div class="bg-white border-2 border-deep-navy/20 rounded-xl p-12 text-center">
+        <h3 class="text-lg font-black text-deep-navy uppercase tracking-tight">No Pending Invitations</h3>
+        <p class="text-sm text-deep-navy/60 font-medium mt-2">You are all caught up for now.</p>
       </div>
-    </div>
+    </section>
+
+    <section v-if="isError" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12">
+      <div class="bg-red-50 border-2 border-red-200 rounded-xl px-8 py-6">
+        <p class="text-red-700 font-bold text-sm">Failed to load invitations. Please refresh and try again.</p>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useOrganisationInvites, useAcceptOrganisationInvite } from '~/composables/resources/organisation/organisationInvites'
-import { useAcceptEventStaffInvite } from '~/composables/resources/events/eventStaffInvites'
+import { useMyOrganisationLeaderInvites, useAcceptOrganisationLeaderInvite } from '~/composables/resources/organisation/organisationLeaderInvites'
+import { useAcceptEventStaffInvite, useMyEventStaffInvites } from '~/composables/resources/events/eventStaffInvites'
 import { useAuthStore } from '~/stores/auth'
 import { formatDate, isExpiringSoon } from '~/utils/time'
 import type { EventStaffInviteList } from '~/api/types.gen'
@@ -327,26 +179,57 @@ const authStore = useAuthStore()
 const { $notyf } = useNuxtApp()
 
 const acceptingOrgInviteId = ref<string | null>(null)
+const acceptingLeaderInviteId = ref<string | null>(null)
 const acceptingStaffInviteId = ref<string | null>(null)
 
+type InboxInviteLike = {
+  id: string
+  organisation?: number | null
+  accepted?: boolean
+  is_valid?: boolean
+  is_active?: boolean
+  expires_at?: string | null
+}
+
 // Fetch user's organization invites
-const { data: orgData, isLoading: isLoadingOrg, isError } = useOrganisationInvites(computed(() => ({
+const { data: orgData, isLoading: isLoadingOrg, isError: isOrgError } = useOrganisationInvites(computed(() => ({
   target_user: authStore.user?.id,
 })))
 
 const orgInvites = computed(() => orgData.value?.data?.results || [])
 
-// Event staff invites
-// After regenerating the API, uncomment this to fetch global staff invites:
-import { useMyEventStaffInvites } from '~/composables/resources/events/eventStaffInvites'
-const { data: staffInvitesData } = useMyEventStaffInvites(computed(() => ({ is_valid: true, accepted: false })))
+const { data: leaderInvitesData, isLoading: isLoadingLeader, isError: isLeaderError } = useMyOrganisationLeaderInvites()
+const leaderInvites = computed(() => leaderInvitesData.value?.invites || [])
+
+const { data: staffInvitesData, isLoading: isLoadingStaff, isError: isStaffError } = useMyEventStaffInvites(computed(() => ({ is_valid: true, accepted: false })))
 const staffInvites = computed(() => staffInvitesData.value?.data?.results || [])
 
-// Temporary: Empty array until API is regenerated with global endpoint
-// const staffInvites = ref<EventStaffInviteList[]>([])
+const isLoading = computed(() => isLoadingOrg.value || isLoadingLeader.value || isLoadingStaff.value)
+const isError = computed(() => isOrgError.value || isLeaderError.value || isStaffError.value)
+const hasInvites = computed(() => {
+  return orgInvites.value.length > 0 || leaderInvites.value.length > 0 || staffInvites.value.length > 0
+})
 
-const isLoading = computed(() => isLoadingOrg)
-const hasInvites = computed(() => orgInvites.value.length > 0 || staffInvites.value.length > 0)
+const isInviteAcceptable = (invite: InboxInviteLike) => {
+  return !invite.accepted && invite.is_valid && invite.is_active
+}
+
+const statusLabel = (invite: InboxInviteLike) => {
+  if (invite.accepted) return 'Accepted'
+  if (!invite.is_valid) return 'Expired'
+  if (!invite.is_active) return 'Inactive'
+  return 'Pending'
+}
+
+const statusBadgeClass = (invite: InboxInviteLike) => {
+  if (invite.accepted) return 'bg-green-100 text-green-700 border border-green-200'
+  if (!invite.is_valid) return 'bg-red-100 text-red-700 border border-red-200'
+  if (!invite.is_active) return 'bg-gray-100 text-gray-700 border border-gray-200'
+  if (invite.is_valid && invite.expires_at && isExpiringSoon(invite.expires_at)) {
+    return 'bg-amber-100 text-amber-700 border border-amber-200'
+  }
+  return 'bg-blue-100 text-blue-700 border border-blue-200'
+}
 
 // Accept organization invite
 const { mutate: acceptOrgInvite } = useAcceptOrganisationInvite()
@@ -355,7 +238,7 @@ const handleAcceptOrgInvite = (inviteId: string) => {
   acceptingOrgInviteId.value = inviteId
   
   acceptOrgInvite(inviteId, {
-    onSuccess: (response) => {
+    onSuccess: () => {
       $notyf?.success('Organization invitation accepted successfully!')
       acceptingOrgInviteId.value = null
       
@@ -373,6 +256,29 @@ const handleAcceptOrgInvite = (inviteId: string) => {
   })
 }
 
+const { mutate: acceptLeaderInvite } = useAcceptOrganisationLeaderInvite()
+
+const handleAcceptLeaderInvite = (inviteId: string, organisationId?: number | null) => {
+  acceptingLeaderInviteId.value = inviteId
+
+  acceptLeaderInvite(inviteId, {
+    onSuccess: () => {
+      $notyf?.success('Leader invitation accepted successfully!')
+      acceptingLeaderInviteId.value = null
+
+      if (organisationId) {
+        setTimeout(() => {
+          navigateTo(`/communities/${organisationId}`)
+        }, 1200)
+      }
+    },
+    onError: (error: any) => {
+      $notyf?.error(error?.body?.error || error?.message || 'Failed to accept leader invitation')
+      acceptingLeaderInviteId.value = null
+    }
+  })
+}
+
 // Accept event staff invite
 const { mutate: acceptStaffInvite } = useAcceptEventStaffInvite()
 
@@ -381,7 +287,7 @@ const handleAcceptStaffInvite = (invite: EventStaffInviteList) => {
   const eventId = invite.event
   
   acceptStaffInvite({ eventId, inviteId: invite.id }, {
-    onSuccess: (response) => {
+    onSuccess: () => {
       $notyf?.success('Event staff invitation accepted! You are now a staff member.')
       acceptingStaffInviteId.value = null
       
