@@ -58,7 +58,7 @@
           </template>
 
           <!-- Bookings View Statistics -->
-          <template v-else>
+          <template v-else-if="currentView === 'bookings'">
             <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -107,6 +107,107 @@
               </div>
             </div>
           </template>
+
+          <!-- Families View Statistics -->
+          <template v-else-if="currentView === 'families'">
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-home-modern" class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalFamilyGroups }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Families</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-user-group" class="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ visibleFamilyMembers }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Visible Members</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ familiesWithMembers }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Families With Members</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-users" class="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ familyGroups.length }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Groups On This Page</div>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template v-else>
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-chart-bar" class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalAttendees }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Attendees</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ checkedInCount }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Checked In</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-home-modern" class="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalFamilyGroups }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Family Groups</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-ticket" class="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalBookings }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Bookings</div>
+                </div>
+              </div>
+            </div>
+          </template>
         </div>
 
         <!-- Main Table Section -->
@@ -114,11 +215,11 @@
           <!-- Table Header -->
           <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : 'i-heroicons-ticket'" class="w-5 h-5 text-primary" />
+              <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : currentView === 'bookings' ? 'i-heroicons-ticket' : currentView === 'families' ? 'i-heroicons-home-modern' : 'i-heroicons-chart-bar'" class="w-5 h-5 text-primary" />
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-1">
                   <h2 class="text-sm font-black text-primary uppercase tracking-widest">
-                    {{ currentView === 'attendees' ? 'Event Participants' : 'Event Bookings' }}
+                    {{ currentView === 'attendees' ? 'Event Participants' : currentView === 'bookings' ? 'Event Bookings' : currentView === 'families' ? 'Event Families' : 'Event Statistics' }}
                   </h2>
                   <!-- View Toggle -->
                   <div class="flex bg-gray-100 rounded-lg p-0.5">
@@ -155,6 +256,17 @@
                     >
                       Statistics
                     </button>
+                    <button
+                      @click="changeView('families')"
+                      :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                        currentView === 'families'
+                          ? 'bg-white text-primary shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      ]"
+                    >
+                      Families
+                    </button>
                   </div>
                 </div>
                 <p class="text-xs text-gray-500">
@@ -163,6 +275,9 @@
                   </template>
                   <template v-else-if="currentView === 'bookings'">
                     Showing {{ bookings.length }} of {{ totalBookings }} bookings
+                  </template>
+                  <template v-else-if="currentView === 'families'">
+                    Showing {{ familyGroups.length }} of {{ totalFamilyGroups }} families
                   </template>
                   <template v-else>
                     Statistics and analytics for event participants
@@ -187,6 +302,7 @@
               </UButton>
               <!-- Export Button -->
               <UButton
+                v-if="currentView === 'attendees'"
                 size="sm"
                 variant="outline"
                 color="gray"
@@ -198,6 +314,7 @@
               
               <!-- Add Attendee Button -->
               <UButton
+                v-if="currentView === 'attendees'"
                 size="sm"
                 variant="solid"
                 color="primary"
@@ -218,14 +335,14 @@
                   <input
                     v-model="searchQuery"
                     type="text"
-                    :placeholder="currentView === 'attendees' ? 'Search by name, email, phone, or ID...' : 'Search by booking reference...'"
+                    :placeholder="currentView === 'attendees' ? 'Search by name, email, phone, or ID...' : currentView === 'bookings' ? 'Search by booking reference...' : currentView === 'families' ? 'Search family name...' : 'Search statistics...'"
                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
               </div>
               
               <!-- Active Filters Badge -->
-              <div v-if="activeFilterCount > 0" class="flex items-center gap-2">
+              <div v-if="currentView === 'attendees' && activeFilterCount > 0" class="flex items-center gap-2">
                 <UBadge color="primary" variant="soft">
                   {{ activeFilterCount }} filter{{ activeFilterCount > 1 ? 's' : '' }} active
                 </UBadge>
@@ -241,6 +358,7 @@
               
               <!-- Toggle Filters Button (Mobile) -->
               <UButton
+                v-if="currentView === 'attendees'"
                 size="sm"
                 variant="outline"
                 color="gray"
@@ -254,7 +372,7 @@
           </div>
 
           <!-- Active Filter Chips -->
-          <div v-if="activeFilterChips.length > 0" class="px-6 py-3 border-b border-gray-100 bg-white">
+          <div v-if="currentView === 'attendees' && activeFilterChips.length > 0" class="px-6 py-3 border-b border-gray-100 bg-white">
             <div class="flex flex-wrap gap-2">
               <UBadge
                 v-for="chip in activeFilterChips"
@@ -275,25 +393,27 @@
           </div>
 
           <!-- Table -->
-          <div v-if="(currentView === 'attendees' && isLoading) || (currentView === 'bookings' && bookingsLoading)" class="p-6 space-y-3">
+          <div v-if="(currentView === 'attendees' && isLoading) || (currentView === 'bookings' && bookingsLoading) || (currentView === 'families' && familyGroupsLoading)" class="p-6 space-y-3">
             <div v-for="i in 10" :key="i" class="h-16 bg-gray-100 rounded-lg animate-pulse" />
           </div>
 
-          <div v-else-if="(currentView === 'attendees' && attendees.length === 0) || (currentView === 'bookings' && bookings.length === 0)" class="p-12 text-center">
-            <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : 'i-heroicons-ticket'" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <div v-else-if="(currentView === 'attendees' && attendees.length === 0) || (currentView === 'bookings' && bookings.length === 0) || (currentView === 'families' && familyGroups.length === 0)" class="p-12 text-center">
+            <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : currentView === 'bookings' ? 'i-heroicons-ticket' : 'i-heroicons-home-modern'" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 class="text-lg font-semibold text-gray-900 mb-2">
-              {{ currentView === 'attendees' ? 'No participants found' : 'No bookings found' }}
+              {{ currentView === 'attendees' ? 'No participants found' : currentView === 'bookings' ? 'No bookings found' : 'No families found' }}
             </h3>
             <p class="text-sm text-gray-500 mb-4">
-              {{ searchQuery || activeFilterCount > 0 
+              {{ searchQuery || (currentView === 'attendees' && activeFilterCount > 0) 
                 ? 'Try adjusting your filters or search query' 
                 : currentView === 'attendees' 
                   ? 'No attendees have been registered for this event yet' 
-                  : 'No bookings have been made for this event yet' 
+                  : currentView === 'bookings' 
+                    ? 'No bookings have been made for this event yet' 
+                    : 'No family groups have been created for this event yet'
               }}
             </p>
             <UButton
-              v-if="searchQuery || activeFilterCount > 0"
+              v-if="searchQuery || (currentView === 'attendees' && activeFilterCount > 0)"
               variant="soft"
               color="gray"
               @click="clearAllFilters"
@@ -530,13 +650,88 @@
             </table>
           </div>
 
+          <!-- Families Table -->
+          <div v-else-if="currentView === 'families'" class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+              <thead>
+                <tr class="border-b border-gray-200 bg-gray-50">
+                  <th
+                    class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                    @click="setSorting('family_name')"
+                  >
+                    <div class="flex items-center gap-1">
+                      Family Name
+                      <UIcon
+                        v-if="currentSort === 'family_name'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 font-semibold text-gray-700">Members</th>
+                  <th class="py-3 px-4 font-semibold text-gray-700">Scope</th>
+                  <th
+                    class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
+                    @click="setSorting('created_at')"
+                  >
+                    <div class="flex items-center gap-1">
+                      Created
+                      <UIcon
+                        v-if="currentSort === 'created_at'"
+                        :name="sortDirection === 'asc' ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                        class="w-4 h-4"
+                      />
+                    </div>
+                  </th>
+                  <th class="py-3 px-4 font-semibold text-gray-700 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="group in familyGroups"
+                  :key="group.id"
+                  class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                >
+                  <td class="py-3 px-4">
+                    <div class="font-semibold text-gray-900">{{ group.family_name }}</div>
+                    <div class="text-xs text-gray-500">Family ID #{{ group.id }}</div>
+                  </td>
+                  <td class="py-3 px-4">
+                    <UBadge color="blue" variant="soft" size="xs">
+                      {{ group.member_count }} {{ group.member_count === 1 ? 'member' : 'members' }}
+                    </UBadge>
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-600">
+                    Event #{{ group.event || 'N/A' }}
+                  </td>
+                  <td class="py-3 px-4 text-gray-600 text-xs">
+                    {{ new Date(group.created_at).toLocaleString() }}
+                  </td>
+                  <td class="py-3 px-4">
+                    <div class="flex items-center justify-end gap-1">
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="gray"
+                        icon="i-heroicons-eye"
+                        @click="openFamilyMembersModal(group)"
+                      >
+                        Open
+                      </UButton>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
           <!-- Statistics View -->
           <div v-else-if="currentView === 'statistics'">
             <StatisticsIndex />
           </div>
 
           <!-- Pagination -->
-          <div v-if="((currentView === 'attendees' && !isLoading && attendees.length > 0) || (currentView === 'bookings' && !bookingsLoading && bookings.length > 0))" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
+          <div v-if="((currentView === 'attendees' && !isLoading && attendees.length > 0) || (currentView === 'bookings' && !bookingsLoading && bookings.length > 0) || (currentView === 'families' && !familyGroupsLoading && familyGroups.length > 0))" class="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
               <select
                 v-model="pageSize"
@@ -551,8 +746,11 @@
                 <template v-if="currentView === 'attendees'">
                   Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalAttendees) }} of {{ totalAttendees }}
                 </template>
-                <template v-else>
+                <template v-else-if="currentView === 'bookings'">
                   Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalBookings) }} of {{ totalBookings }}
+                </template>
+                <template v-else>
+                  Showing {{ ((currentPage - 1) * pageSize) + 1 }} to {{ Math.min(currentPage * pageSize, totalFamilyGroups) }} of {{ totalFamilyGroups }}
                 </template>
               </span>
             </div>
@@ -560,7 +758,7 @@
             <UPagination
               v-model="currentPage"
               :page-count="pageSize"
-              :total="currentView === 'attendees' ? totalAttendees : totalBookings"
+              :total="currentView === 'attendees' ? totalAttendees : currentView === 'bookings' ? totalBookings : totalFamilyGroups"
               :max="7"
             />
           </div>
@@ -763,6 +961,130 @@
               Close
             </UButton>
           </div>
+        </div>
+      </div>
+    </UModal>
+
+    <!-- Family Members Modal -->
+    <UModal v-model="showFamilyMembersModal" :ui="{ width: 'sm:max-w-5xl' }">
+      <div v-if="selectedFamilyGroup" class="p-6">
+        <div class="flex items-start justify-between mb-4 gap-4">
+          <div class="flex-1 min-w-0">
+            <h3 class="text-xl font-bold text-gray-900">Family Group</h3>
+            <p class="text-sm text-gray-500">Edit the family name and update each member's relationship and head status.</p>
+          </div>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            @click="showFamilyMembersModal = false"
+          />
+        </div>
+
+        <div class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+          <div class="flex flex-col sm:flex-row gap-3 items-stretch sm:items-end">
+            <div class="flex-1">
+              <label class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1 block">Family Name</label>
+              <input
+                v-model="editingFamilyName"
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+            <UButton
+              color="primary"
+              :loading="savingFamilyName || updateFamilyGroupMutation.isPending.value"
+              :disabled="savingFamilyName || updateFamilyGroupMutation.isPending.value"
+              @click="handleSaveFamilyName"
+            >
+              Save Name
+            </UButton>
+          </div>
+        </div>
+
+        <div v-if="familyMembersLoading" class="space-y-2">
+          <div v-for="i in 5" :key="i" class="h-12 bg-gray-100 rounded animate-pulse" />
+        </div>
+
+        <div v-else-if="familyMembers.length === 0" class="py-10 text-center border border-dashed border-gray-200 rounded-xl">
+          <UIcon name="i-heroicons-user-group" class="w-10 h-10 text-gray-300 mx-auto mb-2" />
+          <p class="text-sm text-gray-500">No family members found for this group.</p>
+        </div>
+
+        <div v-else class="border border-gray-200 rounded-xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-gray-50 border-b border-gray-200">
+                <th class="py-2.5 px-3 text-left font-semibold text-gray-700">Attendee</th>
+                <th class="py-2.5 px-3 text-left font-semibold text-gray-700">Relationship</th>
+                <th class="py-2.5 px-3 text-left font-semibold text-gray-700">Head</th>
+                <th class="py-2.5 px-3 text-right font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="member in familyMembers"
+                :key="member.id"
+                class="border-b border-gray-100 last:border-b-0"
+              >
+                <td class="py-2.5 px-3">
+                  <div class="font-medium text-gray-900">{{ member.attendee_name }}</div>
+                  <div class="text-xs text-gray-500">Membership #{{ member.id }}</div>
+                </td>
+                <td class="py-2.5 px-3">
+                  <select
+                    :value="member.relationship"
+                    class="w-full max-w-[170px] px-2.5 py-1.5 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    :disabled="updateFamilyAttendeeMutation.isPending.value"
+                    @change="handleUpdateFamilyMemberRelationship(member, ($event.target as HTMLSelectElement).value as FamilyRelationship)"
+                  >
+                    <option
+                      v-for="option in familyRelationshipOptions"
+                      :key="option.value"
+                      :value="option.value"
+                    >
+                      {{ option.label }}
+                    </option>
+                  </select>
+                </td>
+                <td class="py-2.5 px-3">
+                  <label class="inline-flex items-center gap-2 text-xs text-gray-600">
+                    <input
+                      type="checkbox"
+                      :checked="Boolean(member.is_primary_guardian)"
+                      class="rounded border-gray-300 text-primary focus:ring-primary"
+                      :disabled="updateFamilyAttendeeMutation.isPending.value"
+                      @change="handleToggleFamilyHead(member, ($event.target as HTMLInputElement).checked)"
+                    />
+                    Primary guardian
+                  </label>
+                </td>
+                <td class="py-2.5 px-3 text-right">
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    color="red"
+                    icon="i-heroicons-trash"
+                    :disabled="deleteFamilyAttendeeMutation.isPending.value"
+                    @click="handleRemoveFamilyMember(member)"
+                  >
+                    Remove
+                  </UButton>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex items-center justify-between text-xs text-gray-500">
+          <span>Total members: {{ totalFamilyMembers }}</span>
+          <UButton
+            variant="outline"
+            color="gray"
+            @click="showFamilyMembersModal = false"
+          >
+            Close
+          </UButton>
         </div>
       </div>
     </UModal>
@@ -1007,10 +1329,12 @@ import { useAreas } from '~/composables/resources/locations/locations'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { useFamilyGroups, useFamilyGroupMembers, usePartialUpdateFamilyGroup } from '~/composables/resources/common/familyGroups'
+import { usePartialUpdateFamilyAttendee, useDeleteFamilyAttendee } from '~/composables/resources/common/familyAttendees'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import StatisticsIndex from './statistics/index.vue'
-import type { AttendeeList, OrganisationList, BookingList, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
+import type { AttendeeList, OrganisationList, BookingList, FamilyGroupList, FamilyAttendee, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
@@ -1047,6 +1371,17 @@ interface ExtendedBookingList extends BookingList {
   }>
 }
 
+type FamilyRelationship = FamilyAttendee['relationship']
+
+const familyRelationshipOptions: Array<{ value: FamilyRelationship; label: string }> = [
+  { value: 'parent', label: 'Parent' },
+  { value: 'child', label: 'Child' },
+  { value: 'sibling', label: 'Sibling' },
+  { value: 'spouse', label: 'Spouse' },
+  { value: 'friend', label: 'Friend' },
+  { value: 'other', label: 'Other' },
+]
+
 definePageMeta({
   layout: false,
   middleware: 'auth',
@@ -1060,8 +1395,9 @@ const id = computed(() => route.params.id as string)
 const { data: event } = useEvent(id)
 
 // View toggle state
-const currentView = ref<'attendees' | 'bookings' | 'statistics'>(
+const currentView = ref<'attendees' | 'bookings' | 'families' | 'statistics'>(
   (route.query.view as string) === 'bookings' ? 'bookings' : 
+  (route.query.view as string) === 'families' ? 'families' : 
   (route.query.view as string) === 'statistics' ? 'statistics' : 
   'attendees'
 )
@@ -1082,6 +1418,10 @@ const showDetailsModal = ref(false)
 const selectedAttendeeDetails = ref<ExtendedAttendeeList | null>(null)
 const showBookingDetailsModal = ref(false)
 const selectedBooking = ref<ExtendedBookingList | null>(null)
+const showFamilyMembersModal = ref(false)
+const selectedFamilyGroup = ref<FamilyGroupList | null>(null)
+const editingFamilyName = ref('')
+const savingFamilyName = ref(false)
 const showFilters = ref(false)
 const showFiltersModal = ref(false)
 const currentFilterTab = ref<'basic' | 'questions' | 'orders' | 'advanced'>('basic')
@@ -1311,6 +1651,25 @@ const bookingsQueryParams = computed(() => {
   return params
 })
 
+// Family groups query parameters
+const familyGroupsQueryParams = computed(() => {
+  const params: any = {
+    event: id.value,
+    page: currentPage.value,
+    page_size: pageSize.value,
+  }
+
+  if (debouncedSearch.value) {
+    params.search = debouncedSearch.value
+  }
+
+  if (currentSort.value) {
+    params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+  }
+
+  return params
+})
+
 // Event bookings query for create modal (fetch all bookings for the event with higher page size)
 const eventBookingsQueryParams = computed(() => ({
   event__event_id: id.value,
@@ -1323,11 +1682,19 @@ const { data: attendeesData, isLoading } = useAttendees(queryParams)
 // Fetch bookings
 const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
 
+// Fetch family groups and selected group members
+const { data: familyGroupsData, isLoading: familyGroupsLoading, refetch: refetchFamilyGroups } = useFamilyGroups(familyGroupsQueryParams)
+const selectedFamilyGroupId = computed(() => selectedFamilyGroup.value?.id || 0)
+const { data: familyMembersData, isLoading: familyMembersLoading, refetch: refetchFamilyMembers } = useFamilyGroupMembers(selectedFamilyGroupId)
+
 // Fetch event bookings for create modal
 const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
 
 // Create attendee mutation
 const createAttendeeMutation = useCreateAttendee()
+const updateFamilyGroupMutation = usePartialUpdateFamilyGroup()
+const updateFamilyAttendeeMutation = usePartialUpdateFamilyAttendee()
+const deleteFamilyAttendeeMutation = useDeleteFamilyAttendee()
 const toast = useToast()
 
 // Fetch organisations for filter dropdown
@@ -1353,6 +1720,27 @@ const attendees = computed(() => (attendeesData.value?.data?.results || []) as E
 const totalAttendees = computed(() => attendeesData.value?.data?.count || 0)
 const bookings = computed(() => (bookingsData.value?.data?.results || []) as BookingList[])
 const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
+const familyGroups = computed(() => (familyGroupsData.value?.data?.results || []) as FamilyGroupList[])
+const totalFamilyGroups = computed(() => familyGroupsData.value?.data?.count || 0)
+const familyMembers = computed(() => {
+  const payload = familyMembersData.value?.data as { results?: FamilyAttendee[] } | FamilyAttendee[] | undefined
+  if (!payload) {
+    return [] as FamilyAttendee[]
+  }
+  return Array.isArray(payload) ? payload : (payload.results || [])
+})
+const totalFamilyMembers = computed(() => {
+  const payload = familyMembersData.value?.data as { count?: number } | FamilyAttendee[] | undefined
+  if (!payload) {
+    return 0
+  }
+  if (Array.isArray(payload)) {
+    return payload.length
+  }
+  return payload.count ?? 0
+})
+const familiesWithMembers = computed(() => familyGroups.value.filter(group => group.member_count > 0).length)
+const visibleFamilyMembers = computed(() => familyGroups.value.reduce((sum, group) => sum + group.member_count, 0))
 const organisations = computed(() => organisationsData.value?.data?.results || [])
 const areas = computed(() => areasData.value?.data?.results || [])
 const eventBookings = computed(() => (eventBookingsData.value?.data?.results || []) as ExtendedBookingList[])
@@ -1590,6 +1978,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
   if (pageSize.value !== 25) query.page_size = pageSize.value
   if (currentSort.value) query.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
   if (currentView.value === 'bookings') query.view = 'bookings'
+  if (currentView.value === 'families') query.view = 'families'
   if (currentView.value === 'statistics') query.view = 'statistics'
   
   if (filters.value.organisation) query.organisation = filters.value.organisation
@@ -1658,11 +2047,135 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
 }, { deep: true })
 
 // Functions
-function changeView(view: 'attendees' | 'bookings' | 'statistics') {
+function changeView(view: 'attendees' | 'bookings' | 'families' | 'statistics') {
   currentView.value = view
   currentPage.value = 1 // Reset to first page
   selectedAttendees.value = [] // Clear selection
   selectAll.value = false
+}
+
+async function openFamilyMembersModal(group: FamilyGroupList) {
+  selectedFamilyGroup.value = group
+  editingFamilyName.value = group.family_name
+  showFamilyMembersModal.value = true
+  await refetchFamilyMembers()
+}
+
+async function handleSaveFamilyName() {
+  if (!selectedFamilyGroup.value) {
+    return
+  }
+
+  const trimmedName = editingFamilyName.value.trim()
+  if (!trimmedName) {
+    toast.add({
+      title: 'Family name required',
+      description: 'Please enter a valid family name.',
+      color: 'orange',
+    })
+    return
+  }
+
+  if (trimmedName === selectedFamilyGroup.value.family_name) {
+    return
+  }
+
+  try {
+    savingFamilyName.value = true
+    await updateFamilyGroupMutation.mutateAsync({
+      groupId: selectedFamilyGroup.value.id,
+      body: { family_name: trimmedName },
+    })
+
+    selectedFamilyGroup.value = {
+      ...selectedFamilyGroup.value,
+      family_name: trimmedName,
+    }
+
+    toast.add({
+      title: 'Family updated',
+      description: 'Family name updated successfully.',
+      color: 'green',
+    })
+
+    await refetchFamilyGroups()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update family',
+      description: error instanceof Error ? error.message : 'Unable to save family name.',
+      color: 'red',
+    })
+  } finally {
+    savingFamilyName.value = false
+  }
+}
+
+async function handleUpdateFamilyMemberRelationship(member: FamilyAttendee, relationship: FamilyRelationship) {
+  try {
+    await updateFamilyAttendeeMutation.mutateAsync({
+      membershipId: member.id,
+      body: { relationship },
+    })
+
+    toast.add({
+      title: 'Relationship updated',
+      color: 'green',
+    })
+
+    await refetchFamilyMembers()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update relationship',
+      description: error instanceof Error ? error.message : 'Unable to update relationship.',
+      color: 'red',
+    })
+  }
+}
+
+async function handleToggleFamilyHead(member: FamilyAttendee, isPrimaryGuardian: boolean) {
+  try {
+    await updateFamilyAttendeeMutation.mutateAsync({
+      membershipId: member.id,
+      body: { is_primary_guardian: isPrimaryGuardian },
+    })
+
+    toast.add({
+      title: isPrimaryGuardian ? 'Head updated' : 'Head removed',
+      color: 'green',
+    })
+
+    await refetchFamilyMembers()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update head status',
+      description: error instanceof Error ? error.message : 'Unable to update family head.',
+      color: 'red',
+    })
+  }
+}
+
+async function handleRemoveFamilyMember(member: FamilyAttendee) {
+  if (!confirm(`Remove ${member.attendee_name} from this family?`)) {
+    return
+  }
+
+  try {
+    await deleteFamilyAttendeeMutation.mutateAsync(member.id)
+
+    toast.add({
+      title: 'Member removed',
+      description: `${member.attendee_name} was removed from the family.`,
+      color: 'green',
+    })
+
+    await Promise.all([refetchFamilyMembers(), refetchFamilyGroups()])
+  } catch (error) {
+    toast.add({
+      title: 'Failed to remove member',
+      description: error instanceof Error ? error.message : 'Unable to remove this member.',
+      color: 'red',
+    })
+  }
 }
 
 function setSorting(field: string) {
@@ -1935,5 +2448,13 @@ watch(showCreateModal, (newVal) => {
     // Reset form when closing
     resetCreateForm()
   }
+})
+
+watch(showFamilyMembersModal, (isOpen) => {
+  if (isOpen) {
+    return
+  }
+  selectedFamilyGroup.value = null
+  editingFamilyName.value = ''
 })
 </script>
