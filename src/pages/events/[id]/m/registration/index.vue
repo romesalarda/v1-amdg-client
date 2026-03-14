@@ -168,7 +168,7 @@
               <UCard
                 :key="question.id || question.tempId"
                 :data-question-id="question.id || question.tempId"
-                class="group relative transition-all hover:shadow-lg"
+                class="group relative transition-all hover:shadow-lg my-3"
                 :class="{
                   'ring-2 ring-blue-500': selectedQuestion?.id === question.id || selectedQuestion?.tempId === question.tempId,
                   'border-l-4 border-l-blue-500': question.isExpanded,
@@ -609,6 +609,54 @@
           </div>
         </UCard>
 
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h3 class="font-semibold text-gray-900">Consent Definitions</h3>
+              <UButton
+                size="xs"
+                icon="i-heroicons-plus"
+                :disabled="readOnly"
+                @click="startCreateConsent"
+              />
+            </div>
+          </template>
+
+          <div class="space-y-3">
+            <div v-if="eventConsents.isLoading.value" class="text-xs text-gray-500">Loading consents...</div>
+            <div v-else-if="!eventConsents.data.value?.data?.results?.length" class="text-xs text-gray-500">No consents defined yet.</div>
+            <div v-else class="space-y-2 max-h-72 overflow-y-auto">
+              <div
+                v-for="consent in eventConsents.data.value?.data?.results"
+                :key="consent.id"
+                class="p-3 border border-gray-200 rounded-lg"
+              >
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="text-sm font-medium text-gray-900 truncate">{{ consent.title }}</div>
+                    <div class="text-xs text-gray-600">{{ consent.code }} · v{{ consent.version || '1.0' }}</div>
+                    <div class="mt-1 flex items-center gap-1">
+                      <UBadge v-if="consent.required" size="xs" color="red" variant="soft" label="Required" />
+                      <UBadge :size="'xs'" :color="consent.active ? 'green' : 'gray'" variant="soft" :label="consent.active ? 'Active' : 'Inactive'" />
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-1" v-if="!readOnly">
+                    <UButton size="2xs" variant="ghost" icon="i-heroicons-pencil-square" @click="startEditConsent(consent)" />
+                    <UButton
+                      size="2xs"
+                      variant="ghost"
+                      color="red"
+                      icon="i-heroicons-trash"
+                      :loading="deleteConsentMutation.isPending.value"
+                      @click="removeConsentDefinition(consent.id)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </UCard>
+
         <!-- Jump to Question -->
         <UCard v-if="questions.length > 3">
           <template #header>
@@ -695,6 +743,57 @@
         </UCard>
       </div>
     </div>
+
+    <UModal v-model="showConsentForm" :ui="{ width: 'sm:max-w-2xl' }">
+      <UCard>
+        <template #header>
+          <div class="flex items-center justify-between">
+            <h3 class="font-semibold text-gray-900">
+              {{ editingConsentId ? 'Edit Consent Definition' : 'Create Consent Definition' }}
+            </h3>
+            <UButton
+              icon="i-heroicons-x-mark"
+              variant="ghost"
+              size="xs"
+              @click="resetConsentForm"
+            />
+          </div>
+        </template>
+
+        <div class="space-y-3">
+          <UInput v-model="consentForm.code" placeholder="Code" size="sm" :disabled="readOnly" />
+          <UInput v-model="consentForm.title" placeholder="Title" size="sm" :disabled="readOnly" />
+          <UTextarea v-model="consentForm.description" placeholder="Description" :rows="4" size="sm" :disabled="readOnly" />
+          <UInput v-model="consentForm.external_link" placeholder="External link (optional)" size="sm" :disabled="readOnly" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <UInput v-model="consentForm.version" placeholder="Version" size="sm" :disabled="readOnly" />
+            <div class="flex items-center gap-4 text-xs">
+              <label class="flex items-center gap-1">
+                <input v-model="consentForm.required" type="checkbox" :disabled="readOnly" />
+                Required
+              </label>
+              <label class="flex items-center gap-1">
+                <input v-model="consentForm.active" type="checkbox" :disabled="readOnly" />
+                Active
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <template #footer>
+          <div class="flex items-center justify-end gap-2">
+            <UButton size="sm" label="Cancel" variant="ghost" @click="resetConsentForm" />
+            <UButton
+              size="sm"
+              :label="editingConsentId ? 'Save Changes' : 'Create Consent'"
+              :disabled="readOnly"
+              :loading="createConsentMutation.isPending.value || updateConsentMutation.isPending.value"
+              @click="saveConsentDefinition"
+            />
+          </div>
+        </template>
+      </UCard>
+    </UModal>
   </EventsManagementLayout>
 </template>
 
@@ -703,6 +802,12 @@ import type { EventQuestion } from '~/api/types.gen'
 import { eventQuestionsRetrieve } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
+import {
+  useConsents,
+  useCreateConsent,
+  useUpdateConsent,
+  useDeleteConsent,
+} from '~/composables/resources/attendee/attendeeConsents'
 import { useRegistrationFormBuilder } from '~/composables/websockets/events/useRegistrationFormBuilder'
 import { useEventWebSocket } from '~/composables/websockets/events/useEventWebSocket'
 import { useQuestionSync } from '~/composables/websockets/events/useQuestionSync'
@@ -752,6 +857,119 @@ const { data: event } = useEvent(id)
 
 // Get event integer ID for API calls
 const eventIntId = computed(() => event.value?.data?.id)
+
+// Consent definitions (event-scoped)
+const consentFilters = computed(() => {
+  if (!eventIntId.value) return undefined
+  return {
+    event: event.value?.data?.event_id,
+    page_size: 100,
+  }
+})
+
+const eventConsents = useConsents(consentFilters)
+const createConsentMutation = useCreateConsent()
+const updateConsentMutation = useUpdateConsent()
+const deleteConsentMutation = useDeleteConsent()
+
+const showConsentForm = ref(false)
+const editingConsentId = ref<number | null>(null)
+const consentForm = reactive({
+  code: '',
+  title: '',
+  description: '',
+  external_link: '',
+  version: '1.0',
+  required: false,
+  active: true,
+})
+
+const resetConsentForm = () => {
+  showConsentForm.value = false
+  editingConsentId.value = null
+  consentForm.code = ''
+  consentForm.title = ''
+  consentForm.description = ''
+  consentForm.external_link = ''
+  consentForm.version = '1.0'
+  consentForm.required = false
+  consentForm.active = true
+}
+
+const startCreateConsent = () => {
+  resetConsentForm()
+  showConsentForm.value = true
+}
+
+const startEditConsent = (consent: any) => {
+  editingConsentId.value = consent.id
+  showConsentForm.value = true
+  consentForm.code = consent.code || ''
+  consentForm.title = consent.title || ''
+  consentForm.description = consent.description || ''
+  consentForm.external_link = consent.external_link || ''
+  consentForm.version = consent.version || '1.0'
+  consentForm.required = !!consent.required
+  consentForm.active = !!consent.active
+}
+
+const saveConsentDefinition = async () => {
+  if (!eventIntId.value) {
+    toast.add({ title: 'Event Not Ready', description: 'Please wait for event details.', color: 'red', timeout: 3000 })
+    return
+  }
+
+  if (!consentForm.code.trim() || !consentForm.title.trim() || !consentForm.description.trim()) {
+    toast.add({ title: 'Missing Fields', description: 'Code, title, and description are required.', color: 'red', timeout: 3000 })
+    return
+  }
+
+  const payload = {
+    event: eventIntId.value,
+    code: consentForm.code.trim(),
+    title: consentForm.title.trim(),
+    description: consentForm.description.trim(),
+    external_link: consentForm.external_link.trim() || null,
+    version: consentForm.version.trim() || '1.0',
+    required: consentForm.required,
+    active: consentForm.active,
+  }
+
+  try {
+    if (editingConsentId.value) {
+      await updateConsentMutation.mutateAsync({ consentId: editingConsentId.value, body: payload })
+      toast.add({ title: 'Consent Updated', description: 'Consent definition saved.', color: 'green', timeout: 3000 })
+    } else {
+      await createConsentMutation.mutateAsync(payload)
+      toast.add({ title: 'Consent Created', description: 'Consent definition created.', color: 'green', timeout: 3000 })
+    }
+    resetConsentForm()
+  } catch (error) {
+    toast.add({ title: 'Save Failed', description: 'Could not save consent definition.', color: 'red', timeout: 4000 })
+  }
+}
+
+const removeConsentDefinition = async (consentId: number) => {
+  const result = await Swal.fire({
+    title: 'Delete Consent?',
+    text: 'This consent definition will be removed.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#ef4444',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Delete',
+    cancelButtonText: 'Cancel',
+  })
+
+  if (!result.isConfirmed) return
+
+  try {
+    await deleteConsentMutation.mutateAsync(consentId)
+    toast.add({ title: 'Consent Deleted', description: 'Consent definition removed.', color: 'green', timeout: 3000 })
+  } catch (error) {
+    toast.add({ title: 'Delete Failed', description: 'Could not delete consent definition.', color: 'red', timeout: 4000 })
+  }
+}
 
 // Fetch questions from API
 const eventIdFilter = { event__event_id: route.params.id as string }

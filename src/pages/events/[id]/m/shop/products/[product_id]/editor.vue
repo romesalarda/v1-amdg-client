@@ -168,6 +168,79 @@
             </div>
           </div>
 
+          <!-- Categories Tab -->
+          <div v-show="activeTab === 'categories'" class="space-y-6">
+            <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="text-sm font-semibold text-blue-900">Product Categories</h3>
+                  <p class="text-xs text-blue-700 mt-1">
+                    Categories are managed at event level. This view shows categories currently attached to this product.
+                  </p>
+                </div>
+                <UButton
+                  size="sm"
+                  variant="outline"
+                  color="blue"
+                  icon="i-heroicons-arrow-top-right-on-square"
+                  @click="navigateTo(`/events/${eventId}/m/shop/dashboard`)"
+                >
+                  Manage in Dashboard
+                </UButton>
+              </div>
+            </div>
+
+            <div v-if="isNewProduct" class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-yellow-600" />
+                <p class="text-sm text-yellow-800">Save the product first to view assigned categories</p>
+              </div>
+            </div>
+
+            <div v-else class="space-y-4">
+              <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <UIcon name="i-heroicons-tag" class="w-4 h-4 text-primary" />
+                  <h4 class="text-sm font-semibold text-gray-900">Assigned To This Product</h4>
+                </div>
+
+                <div v-if="productCategoryNames.length" class="flex flex-wrap gap-2">
+                  <UBadge
+                    v-for="name in productCategoryNames"
+                    :key="name"
+                    color="primary"
+                    variant="soft"
+                  >
+                    {{ name }}
+                  </UBadge>
+                </div>
+                <p v-else class="text-sm text-gray-500">No categories are currently shown on this product.</p>
+              </div>
+
+              <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <UIcon name="i-heroicons-folder" class="w-4 h-4 text-gray-600" />
+                  <h4 class="text-sm font-semibold text-gray-900">Event Categories</h4>
+                </div>
+
+                <div v-if="eventCategoriesLoading || allCategoriesLoading" class="space-y-2">
+                  <USkeleton class="h-8 w-40" v-for="i in 3" :key="i" />
+                </div>
+                <div v-else-if="eventCategoryNames.length" class="flex flex-wrap gap-2">
+                  <UBadge
+                    v-for="name in eventCategoryNames"
+                    :key="name"
+                    color="gray"
+                    variant="soft"
+                  >
+                    {{ name }}
+                  </UBadge>
+                </div>
+                <p v-else class="text-sm text-gray-500">No categories have been added to this event yet.</p>
+              </div>
+            </div>
+          </div>
+
           <!-- Variants Tab -->
           <div v-show="activeTab === 'variants'" class="space-y-6">
             <div class="flex items-center justify-between">
@@ -2167,6 +2240,8 @@
 import { useEvent } from '~/composables/resources/events/events'
 import { useProduct, useCreateProduct, useUpdateProduct } from '~/composables/resources/products/products'
 import { useProductVariants, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant } from '~/composables/resources/products/productVariants'
+import { useProductCategories } from '~/composables/resources/products/productCategories'
+import { useProductEventCategories } from '~/composables/resources/products/productEventCategories'
 import { useAddProductImage, useRemoveProductImage } from '~/composables/resources/products/productImages'
 import { useAddVariantImage, useRemoveVariantImage } from '~/composables/resources/products/productVariantImages'
 import { useProductDiscounts, useCreateProductDiscount, useUpdateProductDiscount, useDeleteProductDiscount } from '~/composables/resources/products/productDiscounts'
@@ -2197,6 +2272,7 @@ const SIZE_OPTIONS = ['XS', 'SM', 'MD', 'LG', 'XL', 'OS', 'NA'] as const
 const activeTab = ref('basic')
 const tabs = [
   { id: 'basic', label: 'Basic Information', icon: 'i-heroicons-information-circle' },
+  { id: 'categories', label: 'Categories', icon: 'i-heroicons-tag' },
   { id: 'variants', label: 'Variants', icon: 'i-heroicons-squares-2x2' },
   { id: 'images', label: 'Images', icon: 'i-heroicons-photo' },
   { id: 'discounts', label: 'Discounts', icon: 'i-heroicons-ticket' },
@@ -2205,6 +2281,33 @@ const tabs = [
 
 // Event Data
 const { data: event } = useEvent(eventId)
+
+// Category Data
+const { data: allCategoriesData, isLoading: allCategoriesLoading } = useProductCategories(
+  computed(() => ({ page_size: 100 }))
+)
+
+const { data: eventCategoriesData, isLoading: eventCategoriesLoading } = useProductEventCategories(
+  computed(() => {
+    const eventNumericId = event.value?.data?.id
+    if (!eventNumericId) return undefined
+    return {
+      event: eventNumericId,
+      page_size: 100,
+    }
+  })
+)
+
+const productCategoryNames = computed(() => productData.value?.data?.categories || [])
+const eventCategoryNames = computed(() => {
+  const allCategoryMap = new Map(
+    (allCategoriesData.value?.data?.results || []).map((category: any) => [category.id, category.name])
+  )
+  const associations = eventCategoriesData.value?.data?.results || []
+  return associations
+    .map((association: any) => (association.category_name as string) || allCategoryMap.get(association.category as number) || '')
+    .filter(Boolean)
+})
 
 // Product Data (only load if editing existing product)
 const { data: productData, isLoading, error } = useProduct(

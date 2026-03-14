@@ -8236,6 +8236,8 @@ export type FamilyAttendeeRequest = {
  */
 export type FamilyGroupCreateUpdate = {
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
 };
 
 /**
@@ -8243,6 +8245,8 @@ export type FamilyGroupCreateUpdate = {
  */
 export type FamilyGroupCreateUpdateRequest = {
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
 };
 
 /**
@@ -8251,6 +8255,8 @@ export type FamilyGroupCreateUpdateRequest = {
 export type FamilyGroupDetail = {
     readonly id: number;
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
     created_by?: number | null;
     readonly created_by_name: string | null;
     /**
@@ -8276,6 +8282,8 @@ export type FamilyGroupDetail = {
 export type FamilyGroupList = {
     readonly id: number;
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
     created_by?: number | null;
     readonly created_by_name: string | null;
     /**
@@ -11923,6 +11931,8 @@ export type PatchedFamilyAttendeeRequest = {
  */
 export type PatchedFamilyGroupCreateUpdateRequest = {
     family_name?: string;
+    organisation?: number | null;
+    event?: number | null;
 };
 
 /**
@@ -18718,6 +18728,8 @@ export type FamilyAttendeeWritable = {
  */
 export type FamilyGroupDetailWritable = {
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
     created_by?: number | null;
 };
 
@@ -18726,6 +18738,8 @@ export type FamilyGroupDetailWritable = {
  */
 export type FamilyGroupListWritable = {
     family_name: string;
+    organisation?: number | null;
+    event?: number | null;
     created_by?: number | null;
 };
 
@@ -30160,12 +30174,14 @@ export type FamilyAttendeesListData = {
     path?: never;
     query?: {
         attendee?: string;
+        event?: string;
         family_group?: number;
         is_primary_guardian?: boolean;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        organisation?: number;
         /**
          * A page number within the paginated result set.
          */
@@ -30286,11 +30302,13 @@ export type FamilyGroupsListData = {
     path?: never;
     query?: {
         created_by?: number;
+        event?: string;
         family_name?: string;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        organisation?: number;
         /**
          * A page number within the paginated result set.
          */
@@ -30411,11 +30429,13 @@ export type FamilyGroupsMembersListData = {
     };
     query?: {
         created_by?: number;
+        event?: string;
         family_name?: string;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
+        organisation?: number;
         /**
          * A page number within the paginated result set.
          */

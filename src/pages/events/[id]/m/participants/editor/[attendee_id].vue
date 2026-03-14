@@ -1414,6 +1414,182 @@
               </div>
             </div>
 
+            <!-- Family & Guardians Tab -->
+            <div v-if="currentTab === 'family'" class="space-y-6">
+              <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
+                    <UIcon name="i-heroicons-users" class="w-4 h-4" />
+                    Guardians
+                  </h3>
+                  <UButton @click="showAddGuardianForm = true" size="xs" color="primary" icon="i-heroicons-plus">Add</UButton>
+                </div>
+
+                <div v-if="showAddGuardianForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+                  <form @submit.prevent="handleAddGuardian" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Search Attendee in Event *</label>
+                      <input
+                        v-model="guardianSearchQuery"
+                        type="text"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        placeholder="Search by name, email, or attendee ID"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Guardian Attendee *</label>
+                      <select
+                        v-model="selectedGuardianAttendeeId"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option :value="null">Select attendee...</option>
+                        <option
+                          v-for="candidate in filteredGuardianAttendees"
+                          :key="candidate.attendee_id"
+                          :value="candidate.attendee_id"
+                        >
+                          {{ candidate.full_name }} ({{ candidate.attendee_display_id }})
+                        </option>
+                      </select>
+                      <p v-if="guardianAttendees.isLoading.value" class="mt-1 text-xs text-gray-500">Loading attendees...</p>
+                      <p v-else-if="guardianSearchQuery && !filteredGuardianAttendees.length" class="mt-1 text-xs text-gray-500">No attendees match your search in this event.</p>
+                      <p v-if="selectedGuardianCandidate && !selectedGuardianHasLinkedUser" class="mt-1 text-xs text-amber-700">
+                        Selected attendee has no linked user account and cannot be added as a guardian.
+                      </p>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Relationship *</label>
+                      <select
+                        v-model="newGuardian.relationship"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="child">Child</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="friend">Friend</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <div class="flex gap-2">
+                      <UButton type="submit" :disabled="createGuardianMutation.isPending.value" size="sm" color="green">
+                        {{ createGuardianMutation.isPending.value ? 'Adding...' : 'Add Guardian' }}
+                      </UButton>
+                      <UButton type="button" @click="cancelAddGuardian" size="sm" variant="ghost" color="gray">Cancel</UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <div v-if="guardians.isLoading.value" class="text-center py-4 text-gray-500 text-sm">Loading guardians...</div>
+                <div v-else-if="!guardians.data.value?.data?.results?.length" class="text-center py-4 text-gray-500 text-sm">No guardians recorded</div>
+                <div v-else class="space-y-2">
+                  <div
+                    v-for="guardian in guardians.data.value?.data?.results"
+                    :key="guardian.id"
+                    class="p-3 border border-gray-200 rounded-lg bg-gray-50/30 flex items-center justify-between"
+                  >
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900">{{ guardian.user_name || guardian.user_email || 'Unlinked Guardian' }}</p>
+                      <p class="text-xs text-gray-600">Relationship: {{ guardian.relationship_display }}</p>
+                    </div>
+                    <UButton @click="deleteGuardian(guardian.id)" size="xs" color="red" variant="ghost" icon="i-heroicons-trash" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white border border-gray-200 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h3 class="text-xs font-black text-primary uppercase tracking-widest flex items-center gap-2">
+                    <UIcon name="i-heroicons-user-group" class="w-4 h-4" />
+                    Family Memberships
+                  </h3>
+                  <div class="flex items-center gap-2">
+                    <UButton @click="showCreateFamilyGroupForm = true" size="xs" color="gray" variant="outline" icon="i-heroicons-user-group">New Group</UButton>
+                    <UButton @click="showAddFamilyMembershipForm = true" size="xs" color="primary" icon="i-heroicons-plus">Add</UButton>
+                  </div>
+                </div>
+
+                <div v-if="showCreateFamilyGroupForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+                  <form @submit.prevent="handleCreateFamilyGroup" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Family Group Name *</label>
+                      <input
+                        v-model="newFamilyGroupName"
+                        type="text"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        placeholder="e.g. Smith Family"
+                      />
+                    </div>
+                    <div class="flex gap-2">
+                      <UButton type="submit" :disabled="createFamilyGroupMutation.isPending.value" size="sm" color="green">
+                        {{ createFamilyGroupMutation.isPending.value ? 'Creating...' : 'Create Group' }}
+                      </UButton>
+                      <UButton type="button" @click="cancelCreateFamilyGroup" size="sm" variant="ghost" color="gray">Cancel</UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <div v-if="showAddFamilyMembershipForm" class="bg-gray-50/50 rounded-xl p-4 mb-3 border border-gray-200">
+                  <form @submit.prevent="handleAddFamilyMembership" class="space-y-3">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Family Group *</label>
+                      <select
+                        v-model="newFamilyMembership.family_group"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option :value="null">Select group...</option>
+                        <option v-for="group in familyGroups.data.value?.data?.results" :key="group.id" :value="group.id">
+                          {{ group.family_name }}
+                        </option>
+                      </select>
+                    </div>
+                    <div>
+                      <label class="block text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Relationship *</label>
+                      <select
+                        v-model="newFamilyMembership.relationship"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      >
+                        <option value="parent">Parent</option>
+                        <option value="sibling">Sibling</option>
+                        <option value="child">Child</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="friend">Friend</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input v-model="newFamilyMembership.is_primary_guardian" type="checkbox" class="rounded border-gray-300 text-primary focus:ring-primary" />
+                      <span class="text-xs text-gray-700">Primary Guardian in Family</span>
+                    </label>
+                    <div class="flex gap-2">
+                      <UButton type="submit" :disabled="createFamilyMembershipMutation.isPending.value" size="sm" color="green">
+                        {{ createFamilyMembershipMutation.isPending.value ? 'Adding...' : 'Add Membership' }}
+                      </UButton>
+                      <UButton type="button" @click="cancelAddFamilyMembership" size="sm" variant="ghost" color="gray">Cancel</UButton>
+                    </div>
+                  </form>
+                </div>
+
+                <div v-if="familyMemberships.isLoading.value" class="text-center py-4 text-gray-500 text-sm">Loading family memberships...</div>
+                <div v-else-if="!familyMemberships.data.value?.data?.results?.length" class="text-center py-4 text-gray-500 text-sm">No family memberships recorded</div>
+                <div v-else class="space-y-2">
+                  <div
+                    v-for="membership in familyMemberships.data.value?.data?.results"
+                    :key="membership.id"
+                    class="p-3 border border-gray-200 rounded-lg bg-gray-50/30 flex items-center justify-between"
+                  >
+                    <div>
+                      <p class="text-sm font-semibold text-gray-900">{{ membership.family_name }}</p>
+                      <p class="text-xs text-gray-600">{{ membership.relationship_display }}<span v-if="membership.is_primary_guardian"> · Primary Guardian</span></p>
+                    </div>
+                    <UButton @click="deleteFamilyMembership(membership.id)" size="xs" color="red" variant="ghost" icon="i-heroicons-trash" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Actions Tab -->
             <div v-if="currentTab === 'actions'">
               <div class="flex items-center justify-between mb-4">
@@ -1777,7 +1953,7 @@ import * as z from 'zod'
 import { useToast } from '#ui/composables/useToast'
 
 // Composables - Attendee
-import { useAttendee, useUpdateAttendee, useDeleteAttendee } from '~/composables/resources/attendee/attendees'
+import { useAttendee, useAttendees, useUpdateAttendee, useDeleteAttendee } from '~/composables/resources/attendee/attendees'
 import { useEvent } from '~/composables/resources/events/events'
 import { useAreas } from '~/composables/resources/locations/locations'
 import { useProfile, useProfiles } from '~/composables/resources/user/profiles'
@@ -1825,6 +2001,18 @@ import {
   useDeleteAttendeeConsent
 } from '~/composables/resources/attendee/attendeeConsentsRelationship'
 
+// Composables - Family & Guardians
+import {
+  useGuardians,
+  useCreateGuardian,
+  useDeleteGuardian,
+  useFamilyAttendees,
+  useCreateFamilyAttendee,
+  useDeleteFamilyAttendee,
+  useFamilyGroups,
+  useCreateFamilyGroup,
+} from '~/composables/resources/common'
+
 // Composables - Organisations
 import {
   useAttendeeOrganisations,
@@ -1871,6 +2059,7 @@ const tabs = [
   { id: 'booking', label: 'Booking' },
   { id: 'emergency', label: 'Emergency Contacts' },
   { id: 'consents', label: 'Consents' },
+  { id: 'family', label: 'Family & Guardians' },
   { id: 'questions', label: 'Question Answers' },
   { id: 'orders', label: 'Orders' },
   { id: 'actions', label: 'Actions' },
@@ -1917,6 +2106,36 @@ const emergencyContacts = useAttendeeEmergencyContacts(attendeeId)
 // Consents
 const eventConsents = useConsents(computed(() => ({ event: eventId.value })))
 const attendeeConsents = useAttendeeConsents(attendeeId)
+
+// Family & Guardians
+// const attendeeNumericId = computed<number | null>(() => {
+//   const numericId = (attendee.data.value?.data as any)?.id
+//   return typeof numericId === 'number' ? numericId : null
+// })
+
+
+const guardians = useGuardians(computed(() => {
+  if (!attendeeId.value) return undefined
+  return {
+    attendee: attendee.data.value?.data?.attendee_id,
+    page_size: 100,
+  }
+}))
+
+const familyMemberships = useFamilyAttendees(computed(() => {
+  if (!attendeeId.value) return undefined
+  return {
+    attendee: attendee.data.value?.data?.attendee_id,
+    page_size: 100,
+  }
+}))
+
+const familyGroups = useFamilyGroups(computed(() => ({ page_size: 100, event: eventId.value } as any)))
+
+const guardianAttendees = useAttendees(computed(() => ({
+  event: eventId.value,
+  page_size: 200,
+})))
 
 // Actions
 const attendeeActions = useAttendeeActions(computed(() => ({ attendee: attendeeId.value })))
@@ -1975,6 +2194,13 @@ const createConsentMutation = useCreateAttendeeConsent()
 const updateConsentMutation = useUpdateAttendeeConsent()
 const partialUpdateConsentMutation = usePartialUpdateAttendeeConsent()
 const deleteConsentMutation = useDeleteAttendeeConsent()
+
+// Family & Guardians
+const createGuardianMutation = useCreateGuardian()
+const deleteGuardianMutation = useDeleteGuardian()
+const createFamilyMembershipMutation = useCreateFamilyAttendee()
+const deleteFamilyMembershipMutation = useDeleteFamilyAttendee()
+const createFamilyGroupMutation = useCreateFamilyGroup()
 
 // Organisations
 const createOrganisationMutation = useCreateAttendeeOrganisation()
@@ -2063,6 +2289,62 @@ const newConsent = ref<{
   consent: number | null
   consent_given: boolean
 }>({ consent: null, consent_given: false })
+
+// Family & Guardians
+const showAddGuardianForm = ref(false)
+const showAddFamilyMembershipForm = ref(false)
+const showCreateFamilyGroupForm = ref(false)
+const newFamilyGroupName = ref('')
+const newGuardian = ref<{
+  relationship: 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other'
+}>({
+  relationship: 'parent',
+})
+
+const guardianSearchQuery = ref('')
+const selectedGuardianAttendeeId = ref<string | null>(null)
+
+const filteredGuardianAttendees = computed(() => {
+  const attendees = guardianAttendees.data.value?.data?.results || []
+  const searchQuery = guardianSearchQuery.value.trim().toLowerCase()
+
+  return attendees
+    .filter((candidate: any) => candidate.attendee_id !== attendeeId.value)
+    .filter((candidate: any) => {
+      if (!searchQuery) return true
+
+      const fullName = String(candidate.full_name || '').toLowerCase()
+      const email = String(candidate.email || '').toLowerCase()
+      const displayId = String(candidate.attendee_display_id || '').toLowerCase()
+
+      return (
+        fullName.includes(searchQuery) ||
+        email.includes(searchQuery) ||
+        displayId.includes(searchQuery)
+      )
+    })
+})
+
+const selectedGuardianCandidate = computed(() => {
+  if (!selectedGuardianAttendeeId.value) return null
+  return filteredGuardianAttendees.value.find(
+    (candidate: any) => candidate.attendee_id === selectedGuardianAttendeeId.value,
+  ) || null
+})
+
+const selectedGuardianHasLinkedUser = computed(() => {
+  return !!(selectedGuardianCandidate.value as any)?._links?.user
+})
+
+const newFamilyMembership = ref<{
+  family_group: number | null
+  relationship: 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
+  is_primary_guardian: boolean
+}>({
+  family_group: null,
+  relationship: 'sibling',
+  is_primary_guardian: false,
+})
 
 // Organisations
 const showChangeOrganisation = ref(false)
@@ -2697,6 +2979,204 @@ const cancelAddConsent = () => {
   newConsent.value = {
     consent: null,
     consent_given: false,
+  }
+}
+
+// ====================
+// FAMILY & GUARDIANS HANDLERS
+// ====================
+
+const cancelAddGuardian = () => {
+  showAddGuardianForm.value = false
+  newGuardian.value = {
+    relationship: 'parent',
+  }
+  guardianSearchQuery.value = ''
+  selectedGuardianAttendeeId.value = null
+}
+
+const extractErrorMessage = (error: unknown, fallback: string) => {
+  const apiError = error as any
+  const responseData = apiError?.response?.data
+
+  if (typeof responseData === 'string' && responseData.trim()) {
+    return responseData
+  }
+
+  if (responseData && typeof responseData === 'object') {
+    const candidateKeys = ['detail', 'non_field_errors', 'message', 'error']
+    for (const key of candidateKeys) {
+      const value = responseData[key]
+      if (typeof value === 'string' && value.trim()) {
+        return value
+      }
+      if (Array.isArray(value) && value.length && typeof value[0] === 'string') {
+        return value[0]
+      }
+    }
+
+    const firstFieldValue = Object.values(responseData).find(
+      (value: any) => typeof value === 'string' || (Array.isArray(value) && value.length),
+    )
+    if (typeof firstFieldValue === 'string' && firstFieldValue.trim()) {
+      return firstFieldValue
+    }
+    if (Array.isArray(firstFieldValue) && firstFieldValue.length && typeof firstFieldValue[0] === 'string') {
+      return firstFieldValue[0]
+    }
+  }
+
+  if (apiError instanceof Error && apiError.message.trim()) {
+    return apiError.message
+  }
+
+  return fallback
+}
+
+const handleAddGuardian = async () => {
+  if (!attendeeId.value) {
+    toast.add({ title: 'Error', description: 'Attendee is not loaded yet', color: 'red' })
+    return
+  }
+
+  if (!selectedGuardianAttendeeId.value) {
+    toast.add({ title: 'Error', description: 'Please choose an attendee to link as guardian', color: 'red' })
+    return
+  }
+
+  const selectedCandidate = filteredGuardianAttendees.value.find(
+    (candidate: any) => candidate.attendee_id === selectedGuardianAttendeeId.value,
+  ) as any
+
+  if (!selectedCandidate?._links?.user) {
+    toast.add({
+      title: 'Guardian Account Required',
+      description: 'Selected attendee does not have a linked user account.',
+      color: 'red',
+    })
+    return
+  }
+
+  const userLinkMatch = String(selectedCandidate._links.user).match(/\/users\/(\d+)\//)
+  const selectedGuardianUserId = userLinkMatch ? parseInt(userLinkMatch[1], 10) : null
+
+  if (!selectedGuardianUserId) {
+    toast.add({ title: 'Error', description: 'Could not resolve guardian user account', color: 'red' })
+    return
+  }
+
+  try {
+    await createGuardianMutation.mutateAsync({
+      attendee: attendeeId.value,
+      user: selectedGuardianUserId,
+      relationship: newGuardian.value.relationship,
+    } as any)
+
+    cancelAddGuardian()
+    toast.add({ title: 'Success', description: 'Guardian added', color: 'green' })
+  } catch (error) {
+    console.error('Failed to add guardian:', error)
+    toast.add({ title: 'Error', description: extractErrorMessage(error, 'Failed to add guardian'), color: 'red' })
+  }
+}
+
+const deleteGuardian = async (guardianId: number) => {
+  if (!confirm('Are you sure you want to remove this guardian relationship?')) return
+
+  try {
+    await deleteGuardianMutation.mutateAsync(guardianId)
+    toast.add({ title: 'Success', description: 'Guardian removed', color: 'green' })
+  } catch (error) {
+    console.error('Failed to delete guardian:', error)
+    toast.add({ title: 'Error', description: 'Failed to remove guardian', color: 'red' })
+  }
+}
+
+const cancelAddFamilyMembership = () => {
+  showAddFamilyMembershipForm.value = false
+  newFamilyMembership.value = {
+    family_group: null,
+    relationship: 'sibling',
+    is_primary_guardian: false,
+  }
+}
+
+const handleAddFamilyMembership = async () => {
+  if (!attendeeId.value || !newFamilyMembership.value.family_group) {
+    toast.add({ title: 'Error', description: 'Select a family group first', color: 'red' })
+    return
+  }
+
+  try {
+    await createFamilyMembershipMutation.mutateAsync({
+      family_group: newFamilyMembership.value.family_group,
+      attendee: attendeeId.value,
+      relationship: newFamilyMembership.value.relationship,
+      is_primary_guardian: newFamilyMembership.value.is_primary_guardian,
+    } as any)
+
+    cancelAddFamilyMembership()
+    toast.add({ title: 'Success', description: 'Family membership added', color: 'green' })
+  } catch (error) {
+    console.error('Failed to add family membership:', error)
+    const errorMessage = extractErrorMessage(error, 'Failed to add family membership')
+    if (errorMessage.toLowerCase().includes('already a member')) {
+      cancelAddFamilyMembership()
+      toast.add({
+        title: 'Already Added',
+        description: 'This attendee is already in the selected family group.',
+        color: 'blue',
+      })
+      return
+    }
+    toast.add({ title: 'Error', description: errorMessage, color: 'red' })
+  }
+}
+
+const cancelCreateFamilyGroup = () => {
+  showCreateFamilyGroupForm.value = false
+  newFamilyGroupName.value = ''
+}
+
+const handleCreateFamilyGroup = async () => {
+  const familyName = newFamilyGroupName.value.trim()
+  if (!familyName) {
+    toast.add({ title: 'Error', description: 'Please enter a family group name', color: 'red' })
+    return
+  }
+
+  const eventNumericId = event.data.value?.data?.id
+  const organisationId = (event.data.value?.data as any)?.organisation
+
+  if (!eventNumericId || !organisationId) {
+    toast.add({ title: 'Error', description: 'Event context is not ready yet', color: 'red' })
+    return
+  }
+
+  try {
+    await createFamilyGroupMutation.mutateAsync({
+      family_name: familyName,
+      event: eventNumericId,
+      organisation: organisationId,
+    } as any)
+
+    cancelCreateFamilyGroup()
+    toast.add({ title: 'Success', description: 'Family group created', color: 'green' })
+  } catch (error) {
+    console.error('Failed to create family group:', error)
+    toast.add({ title: 'Error', description: extractErrorMessage(error, 'Failed to create family group'), color: 'red' })
+  }
+}
+
+const deleteFamilyMembership = async (membershipId: number) => {
+  if (!confirm('Are you sure you want to remove this family membership?')) return
+
+  try {
+    await deleteFamilyMembershipMutation.mutateAsync(membershipId)
+    toast.add({ title: 'Success', description: 'Family membership removed', color: 'green' })
+  } catch (error) {
+    console.error('Failed to remove family membership:', error)
+    toast.add({ title: 'Error', description: 'Failed to remove family membership', color: 'red' })
   }
 }
 

@@ -14,23 +14,24 @@
             {{ staff.user_email }}
           </div>
           <div class="flex items-center gap-2 text-xs text-navy-400">
-            <span>Staff ID: {{ staff.staff_id }}</span>
-            <span v-if="currentRole" class="px-2 py-0.5 bg-primary/10 text-primary rounded font-medium">
+            <!-- <span>Staff ID: {{ staff.staff_id }}</span> -->
+            <span v-if="currentRole" class="py-2 bg-primary/10 text-primary rounded font-medium">
               {{ currentRole.role_name }}
             </span>
             <span
               v-if="isCreatorStaff"
               class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded font-semibold"
             >
-              Creator Admin (Locked)
+              Creator of Event
             </span>
           </div>
           <AuditTrailDisplay
             :assigned-by="staff.assigned_by_email"
             :assigned-at="staff.assigned_at"
+            v-if="!isCreatorStaff"
           />
 
-          <div class="mt-2 flex items-center gap-2">
+          <div class="mt-2 flex items-center gap-2" v-if="!isCreatorStaff">
             <label class="text-[10px] font-black text-primary uppercase tracking-wider">Role</label>
             <select
               v-model="selectedRoleId"
@@ -81,7 +82,7 @@
     </div>
 
     <!-- Permission Badges (collapsed view) -->
-    <div v-if="!isExpanded && permissions.length > 0" class="mt-3 flex flex-wrap gap-2">
+    <div v-if="!isExpanded && permissions.length > 0 && !isCreatorStaff" class="mt-3 flex flex-wrap gap-2">
       <PermissionBadge
         v-for="perm in displayPermissions"
         :key="perm.id"
