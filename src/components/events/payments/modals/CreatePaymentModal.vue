@@ -235,7 +235,7 @@ const userSearchQuery = ref('')
 const selectedUser = ref<any | null>(null)
 
 const targetChoices: Array<{ value: TargetType; label: string }> = [
-  { value: 'none', label: 'No target' },
+  { value: 'none', label: 'General' },
   { value: 'booking', label: 'Booking' },
   { value: 'order', label: 'Order' },
   { value: 'ticket', label: 'Ticket' },

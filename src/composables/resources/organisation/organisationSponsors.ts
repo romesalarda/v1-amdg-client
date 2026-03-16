@@ -41,8 +41,8 @@ export function useOrganisationSponsor(sponsorId: MaybeRefOrGetter<number>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', sponsorId] as const,
     queryFn: () => {
-      const id = toValue(sponsorId)
-      return organisationsSponsorsRetrieve({ path: { id } })
+      const id = String(toValue(sponsorId))
+      return organisationsSponsorsRetrieve({ path: { sponsor_id: id } })
     },
     enabled: () => !!toValue(sponsorId),
   })
@@ -55,10 +55,10 @@ export function useOrganisationSponsorPackages(sponsorId: MaybeRefOrGetter<numbe
   return useQuery({
     queryKey: [...QUERY_KEY, 'packages', sponsorId, params] as const,
     queryFn: () => {
-      const id = toValue(sponsorId)
+      const id = String(toValue(sponsorId))
       const queryParams = toValue(params)
       return organisationsSponsorsPackagesList({
-        path: { id },
+        path: { sponsor_id: id },
         ...(queryParams ? { query: queryParams } : {}),
       })
     },
@@ -87,8 +87,8 @@ export function useUpdateOrganisationSponsor() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ sponsorId, body }: { sponsorId: number; body: OrganisationsSponsorsUpdateData['body'] }) =>
-      organisationsSponsorsUpdate({ path: { id: sponsorId }, body }),
+    mutationFn: ({ sponsorId, body }: { sponsorId: number | string; body: OrganisationsSponsorsUpdateData['body'] }) =>
+      organisationsSponsorsUpdate({ path: { sponsor_id: String(sponsorId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -108,8 +108,8 @@ export function usePartialUpdateOrganisationSponsor() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ sponsorId, body }: { sponsorId: number; body?: OrganisationsSponsorsPartialUpdateData['body'] }) =>
-      organisationsSponsorsPartialUpdate({ path: { id: sponsorId }, body }),
+    mutationFn: ({ sponsorId, body }: { sponsorId: number | string; body?: OrganisationsSponsorsPartialUpdateData['body'] }) =>
+      organisationsSponsorsPartialUpdate({ path: { sponsor_id: String(sponsorId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -129,7 +129,7 @@ export function useDeleteOrganisationSponsor() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (sponsorId: number) => organisationsSponsorsDestroy({ path: { id: sponsorId } }),
+    mutationFn: (sponsorId: number | string) => organisationsSponsorsDestroy({ path: { sponsor_id: String(sponsorId) } }),
     onSuccess: (_, sponsorId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

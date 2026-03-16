@@ -200,6 +200,11 @@ const tabs = [
     icon: 'i-heroicons-credit-card',
   },
   {
+    path: 'sponsors',
+    label: 'Sponsors',
+    icon: 'i-heroicons-building-office-2',
+  },
+  {
     path: 'registration',
     label: 'Registration Form',
     icon: 'i-heroicons-clipboard-document-list',

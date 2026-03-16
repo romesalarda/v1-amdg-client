@@ -39,8 +39,8 @@ export function useOrganisationSponsorPackage(packageId: MaybeRefOrGetter<number
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', packageId] as const,
     queryFn: () => {
-      const id = toValue(packageId)
-      return organisationsSponsorPackagesRetrieve({ path: { id } })
+      const id = String(toValue(packageId))
+      return organisationsSponsorPackagesRetrieve({ path: { package_id: id } })
     },
     enabled: () => !!toValue(packageId),
   })
@@ -67,8 +67,8 @@ export function useUpdateOrganisationSponsorPackage() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ packageId, body }: { packageId: number; body: OrganisationsSponsorPackagesUpdateData['body'] }) =>
-      organisationsSponsorPackagesUpdate({ path: { id: packageId }, body }),
+    mutationFn: ({ packageId, body }: { packageId: number | string; body: OrganisationsSponsorPackagesUpdateData['body'] }) =>
+      organisationsSponsorPackagesUpdate({ path: { package_id: String(packageId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -85,8 +85,8 @@ export function usePartialUpdateOrganisationSponsorPackage() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ packageId, body }: { packageId: number; body?: OrganisationsSponsorPackagesPartialUpdateData['body'] }) =>
-      organisationsSponsorPackagesPartialUpdate({ path: { id: packageId }, body }),
+    mutationFn: ({ packageId, body }: { packageId: number | string; body?: OrganisationsSponsorPackagesPartialUpdateData['body'] }) =>
+      organisationsSponsorPackagesPartialUpdate({ path: { package_id: String(packageId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteOrganisationSponsorPackage() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (packageId: number) => organisationsSponsorPackagesDestroy({ path: { id: packageId } }),
+    mutationFn: (packageId: number | string) => organisationsSponsorPackagesDestroy({ path: { package_id: String(packageId) } }),
     onSuccess: (_, packageId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({
