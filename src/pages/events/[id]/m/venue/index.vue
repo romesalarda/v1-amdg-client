@@ -49,6 +49,7 @@
 									</div>
 									<p class="text-sm text-navy-600 mt-1">{{ entry.venue_address || 'No address available' }}</p>
 									<p class="text-xs text-navy-400 mt-1">{{ entry.venue_city || 'No city' }}</p>
+									
 								</div>
 
 								<div class="flex items-center gap-1">
@@ -66,6 +67,14 @@
 										Remove
 									</button>
 								</div>
+							</div>
+							 <div v-if="entry.venue_address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10 mt-4 rounded-lg overflow-hidden flex items-center justify-center">
+								<iframe
+								:src="`https://maps.google.com/maps?q=${encodeURIComponent(entry.venue_address + ' ' + (entry.venue_city || ''))}&output=embed`"
+								class="w-full h-full border-0"
+								loading="lazy"
+								referrerpolicy="no-referrer-when-downgrade"
+								></iframe>
 							</div>
 						</article>
 					</div>

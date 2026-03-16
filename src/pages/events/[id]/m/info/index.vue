@@ -61,7 +61,7 @@
       </div>
 
       <!-- Authorization Approved -->
-      <div v-else-if="event.is_approved" class="bg-green-50 border-2 border-green-400 rounded-2xl p-6 shadow-lg">
+      <!-- <div v-else-if="event.is_approved" class="bg-green-50 border-2 border-green-400 rounded-2xl p-6 shadow-lg">
         <div class="flex items-start gap-4">
           <div class="flex items-center justify-center w-12 h-12 bg-green-100 rounded-full flex-shrink-0">
             <span class="material-symbols-outlined text-green-700 text-2xl">check_circle</span>
@@ -71,7 +71,7 @@
             <p class="text-sm text-green-800 leading-relaxed">This event has been authorized and can now be published or opened for registration.</p>
           </div>
         </div>
-      </div>
+      </div> -->
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -358,7 +358,7 @@
             <div class="space-y-1">
               <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event ID</p>
               <p class="text-[11px] font-bold text-primary break-all bg-mist-blue p-2 rounded-lg border border-navy-100/50">
-                {{ event?.event_id || '-' }}
+                {{ event?.display_identifier || '-' }}
               </p>
             </div>
             <div class="grid grid-cols-2 gap-4">

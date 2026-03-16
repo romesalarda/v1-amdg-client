@@ -421,7 +421,7 @@ const paymentSourcesOption = computed(() => {
 	return {
 		tooltip: {
 			trigger: 'item',
-			formatter: (params: any) => `${params.name}: ${formatMoney(params.value, 'GBP')}`,
+			formatter: (params: any) => `${params.name}: ${params.value}`,
 		},
 		legend: {
 			bottom: 0,

@@ -203,6 +203,16 @@
               <p class="text-deep-navy/60 font-medium">
                 {{ activeTimeFilter === 'past' ? 'You have no past events to display' : 'Check back later for new events' }}
               </p>
+               <NuxtLink
+               v-if="selectedDate && selectedDate > DateTime.now()"
+              :to="`/events/create?sdt=${selectedDate ? encodeURIComponent(selectedDate.toISODate() || '') : ''}`"
+              class="inline-flex items-center gap-2 px-6 py-3 mt-4 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
+                >
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Create Event
+              </NuxtLink>
             </div>
             
             <!-- Upcoming Events -->
@@ -313,6 +323,7 @@
 
         <!-- Calendar Sidebar -->
         <aside class="w-full lg:w-80 shrink-0">
+         
           <div class="bg-white border border-deep-navy/10 shadow-drawn p-6 sticky top-40 rounded-2xl">
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-deep-navy">Schedule View</h3>

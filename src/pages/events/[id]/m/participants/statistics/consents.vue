@@ -38,7 +38,7 @@
 
     <!-- Consent Breakdown -->
     <div v-else-if="consentsData?.data?.consent_breakdown">
-      <div class="grid grid-cols-1 gap-6">
+      <div class="grid grid-cols-2 gap-6">
         <StatSection 
           v-for="consent in consentsData.data.consent_breakdown"
           :key="(consent as any).consent_code"

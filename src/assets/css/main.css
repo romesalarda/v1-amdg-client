@@ -176,9 +176,18 @@
   .form-group-dark input,
   .form-group-dark textarea,
   .form-group-dark select {
-    background-color: rgba(10, 25, 47, 0.8) !important;
-    border-color: rgba(0, 33, 71, 0.3) !important;
-    color: white !important;
+    background-color: rgba(10, 25, 47, 0.8);
+    border-color: rgba(0, 33, 71, 0.3);
+    color: white;
+    width: 100%;
+  }
+
+  .form-group-light input,
+  .form-group-light textarea,
+  .form-group-light select {
+    background-color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 33, 71, 0.3);
+    color: #0a192f;
     width: 100%;
   }
   
@@ -194,8 +203,9 @@
   .form-group-dark input:focus,
   .form-group-dark textarea:focus,
   .form-group-dark select:focus {
-    border-color: rgba(0, 33, 71, 0.6) !important;
-    outline: none !important;
+    border-color: rgba(0, 33, 71, 0.6);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 33, 71, 0.4);
     /* ring: 0 !important; */
   }
   
