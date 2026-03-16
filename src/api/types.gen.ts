@@ -7891,6 +7891,7 @@ export type EventSponsorPackageDetail = {
     package_name: string;
     package_description?: string | null;
     readonly base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -7937,6 +7938,7 @@ export type EventSponsorPackageList = {
     package_name: string;
     package_description?: string | null;
     readonly base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -9389,6 +9391,26 @@ export type OrganisationDetail = {
 };
 
 /**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationEventPerformanceStatistics = {
+    events: Array<{
+        [key: string]: unknown;
+    }>;
+    totals: {
+        [key: string]: unknown;
+    };
+    limit: number;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Create/Update serializer for OrganisationInvite.
  */
 export type OrganisationInviteCreateUpdate = {
@@ -9467,6 +9489,26 @@ export type OrganisationInviteList = {
 };
 
 /**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationLeaderDistributionStatistics = {
+    total_leaders: number;
+    distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    area_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * List serializer for Organisation with HATEOAS links.
  */
 export type OrganisationList = {
@@ -9490,6 +9532,65 @@ export type OrganisationList = {
         created_by?: string;
         contacts?: string;
         memberships?: string;
+    };
+};
+
+/**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationOverviewStatistics = {
+    total_organisations: number;
+    total_events: number;
+    active_events: number;
+    upcoming_events: number;
+    completed_events: number;
+    total_attendees: number;
+    average_attendees_per_event: number;
+    total_members: number;
+    verified_members: number;
+    total_controllers: number;
+    total_revenue: number;
+    total_completed_payments: number;
+    average_payment_value: number;
+    average_event_revenue: number;
+    revenue_sources: Array<{
+        [key: string]: unknown;
+    }>;
+    event_status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    payment_status_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationPaymentSourcesStatistics = {
+    total_completed_payments: number;
+    total_revenue: number;
+    average_payment_value: number;
+    average_event_revenue: number;
+    sources: Array<{
+        [key: string]: unknown;
+    }>;
+    verified_donations: {
+        [key: string]: unknown;
+    };
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
     };
 };
 
@@ -10182,6 +10283,13 @@ export type PaginatedOrganisationListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<OrganisationList>;
+};
+
+export type PaginatedOrganisationOverviewStatisticsList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OrganisationOverviewStatistics>;
 };
 
 export type PaginatedPoiListList = {
@@ -20758,9 +20866,11 @@ export type PaymentCreateRequestWritable = {
      * * `booking` - Booking
      * * `order` - Order
      * * `ticket` - Ticket
+     * * `donation` - Donation
+     * * `sponsorship` - Sponsorship
      * * `none` - None
      */
-    target?: 'booking' | 'order' | 'ticket' | 'none' | null;
+    target?: 'booking' | 'order' | 'ticket' | 'donation' | 'sponsorship' | 'none' | null;
     /**
      * Target identifier (UUID or numeric ID).
      */
@@ -36512,6 +36622,148 @@ export type OrganisationsSponsorsPackagesListResponses = {
 };
 
 export type OrganisationsSponsorsPackagesListResponse = OrganisationsSponsorsPackagesListResponses[keyof OrganisationsSponsorsPackagesListResponses];
+
+export type OrganisationsStatisticsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/organisations/statistics/';
+};
+
+export type OrganisationsStatisticsListResponses = {
+    200: PaginatedOrganisationOverviewStatisticsList;
+};
+
+export type OrganisationsStatisticsListResponse = OrganisationsStatisticsListResponses[keyof OrganisationsStatisticsListResponses];
+
+export type OrganisationsStatisticsEventPerformanceRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum events to return in event-performance endpoint.
+         */
+        limit?: number;
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/event-performance/';
+};
+
+export type OrganisationsStatisticsEventPerformanceRetrieveResponses = {
+    200: OrganisationEventPerformanceStatistics;
+};
+
+export type OrganisationsStatisticsEventPerformanceRetrieveResponse = OrganisationsStatisticsEventPerformanceRetrieveResponses[keyof OrganisationsStatisticsEventPerformanceRetrieveResponses];
+
+export type OrganisationsStatisticsLeadersDistributionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/leaders-distribution/';
+};
+
+export type OrganisationsStatisticsLeadersDistributionRetrieveResponses = {
+    200: OrganisationLeaderDistributionStatistics;
+};
+
+export type OrganisationsStatisticsLeadersDistributionRetrieveResponse = OrganisationsStatisticsLeadersDistributionRetrieveResponses[keyof OrganisationsStatisticsLeadersDistributionRetrieveResponses];
+
+export type OrganisationsStatisticsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/overview/';
+};
+
+export type OrganisationsStatisticsOverviewRetrieveResponses = {
+    200: OrganisationOverviewStatistics;
+};
+
+export type OrganisationsStatisticsOverviewRetrieveResponse = OrganisationsStatisticsOverviewRetrieveResponses[keyof OrganisationsStatisticsOverviewRetrieveResponses];
+
+export type OrganisationsStatisticsPaymentsBySourceRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/payments-by-source/';
+};
+
+export type OrganisationsStatisticsPaymentsBySourceRetrieveResponses = {
+    200: OrganisationPaymentSourcesStatistics;
+};
+
+export type OrganisationsStatisticsPaymentsBySourceRetrieveResponse = OrganisationsStatisticsPaymentsBySourceRetrieveResponses[keyof OrganisationsStatisticsPaymentsBySourceRetrieveResponses];
 
 export type PaymentsDiscountRulesListData = {
     body?: never;
