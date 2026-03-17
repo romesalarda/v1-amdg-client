@@ -86,7 +86,11 @@
           isActive(tab.path)
             ? 'bg-white/10 text-white'
             : 'text-white/60 hover:text-white hover:bg-white/5',
+          tab.disabled ? 'cursor-not-allowed opacity-50' : ''
+          
         ]"
+
+        
       >
         <UIcon :name="tab.icon" class="w-5 h-5" />
         <span>{{ tab.label }}</span>
@@ -155,15 +159,17 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
-import { formatDateTime } from '~/utils/time'
 import Navbar from '~/components/common/Navbar.vue'
-import Footer from '~/components/common/Footer.vue'
+import { useEventSettings, usePartialUpdateEventSettings } from '~/composables/resources/events/eventSettings'
 import type { EventDetail } from '~/api/types.gen'
+
 
 const props = defineProps<{
   eventId: string
   event?: EventDetail
 }>()
+const { data: settingsData } = useEventSettings(props.eventId)
+const eventSettings = computed(() => settingsData.value?.data)
 
 const route = useRoute()
 const sidebarOpen = ref(false)
@@ -198,11 +204,13 @@ const tabs = [
     path: 'payments',
     label: 'Payments',
     icon: 'i-heroicons-credit-card',
+    disabled: !eventSettings.value?.payment_enabled,
   },
   {
     path: 'sponsors',
     label: 'Sponsors',
     icon: 'i-heroicons-building-office-2',
+    disabled: !eventSettings.value?.accepting_sponsorships_enabled,
   },
   {
     path: 'registration',
@@ -233,6 +241,7 @@ const tabs = [
     label: "Shop",
     path: 'shop/dashboard',
     icon: 'i-heroicons-shopping-bag',
+    disabled: !eventSettings.value?.product_selling_enabled,
   }
 ]
 

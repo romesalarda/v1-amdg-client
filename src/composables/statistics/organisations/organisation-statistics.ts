@@ -6,12 +6,18 @@ import {
   organisationsStatisticsLeadersDistributionRetrieve,
   organisationsStatisticsEventPerformanceRetrieve,
   organisationsStatisticsPaymentsBySourceRetrieve,
+  organisationsStatisticsSponsorsOverviewRetrieve,
+  organisationsStatisticsSponsorPackagesPerformanceRetrieve,
+  organisationsStatisticsSponsorInviteConversionRetrieve,
 } from '~/api/sdk.gen'
 import type {
   OrganisationsStatisticsOverviewRetrieveData,
   OrganisationsStatisticsLeadersDistributionRetrieveData,
   OrganisationsStatisticsEventPerformanceRetrieveData,
   OrganisationsStatisticsPaymentsBySourceRetrieveData,
+  OrganisationsStatisticsSponsorsOverviewRetrieveData,
+  OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData,
+  OrganisationsStatisticsSponsorInviteConversionRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['organisations', 'statistics'] as const
@@ -21,6 +27,9 @@ type OverviewQuery = OrganisationsStatisticsOverviewRetrieveData['query']
 type LeadersQuery = OrganisationsStatisticsLeadersDistributionRetrieveData['query']
 type EventPerformanceQuery = OrganisationsStatisticsEventPerformanceRetrieveData['query']
 type PaymentSourcesQuery = OrganisationsStatisticsPaymentsBySourceRetrieveData['query']
+type SponsorsOverviewQuery = OrganisationsStatisticsSponsorsOverviewRetrieveData['query']
+type SponsorPackagesPerformanceQuery = OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData['query']
+type SponsorInviteConversionQuery = OrganisationsStatisticsSponsorInviteConversionRetrieveData['query']
 
 /**
  * Overview metrics for organisation, events, attendance, members and payments.
@@ -90,6 +99,63 @@ export function useOrganisationPaymentsBySourceStatistics(
     queryFn: () => {
       const queryParams = toValue(params)
       return organisationsStatisticsPaymentsBySourceRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+    staleTime: 30 * 1000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  })
+}
+
+/**
+ * Sponsor funnel overview including commitments, realized revenue and invite outcomes.
+ */
+export function useOrganisationSponsorsOverviewStatistics(
+  params?: MaybeRefOrGetter<SponsorsOverviewQuery | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'sponsors-overview', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return organisationsStatisticsSponsorsOverviewRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+    staleTime: 30 * 1000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  })
+}
+
+/**
+ * Sponsor package performance split by package and event.
+ */
+export function useOrganisationSponsorPackagesPerformanceStatistics(
+  params?: MaybeRefOrGetter<SponsorPackagesPerformanceQuery | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'sponsor-packages-performance', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return organisationsStatisticsSponsorPackagesPerformanceRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+    staleTime: 30 * 1000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  })
+}
+
+/**
+ * Sponsor invite acceptance and conversion metrics.
+ */
+export function useOrganisationSponsorInviteConversionStatistics(
+  params?: MaybeRefOrGetter<SponsorInviteConversionQuery | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'sponsor-invite-conversion', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return organisationsStatisticsSponsorInviteConversionRetrieve(
         queryParams ? { query: queryParams } : undefined
       )
     },

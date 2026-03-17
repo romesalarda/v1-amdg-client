@@ -6478,6 +6478,18 @@ export type EventSettings = {
      */
     participants_registration_require_verification?: boolean;
     /**
+     * Whether sponsorship checkout requires verified sponsors before completion.
+     */
+    requires_verified_sponsors_for_checkout?: boolean;
+    /**
+     * Whether sponsorship checkout is limited to accepted invite token flow.
+     */
+    requires_invite_acceptance_for_checkout?: boolean;
+    /**
+     * Optional organiser notes describing sponsorship checkout policy.
+     */
+    sponsor_checkout_policy_notes?: string | null;
+    /**
      * Default timezone for event
      *
      * * `Africa/Abidjan` - Africa/Abidjan
@@ -7123,6 +7135,18 @@ export type EventSettingsRequest = {
      * Whether participants for this event require manual event staff verification before being fully registered.
      */
     participants_registration_require_verification?: boolean;
+    /**
+     * Whether sponsorship checkout requires verified sponsors before completion.
+     */
+    requires_verified_sponsors_for_checkout?: boolean;
+    /**
+     * Whether sponsorship checkout is limited to accepted invite token flow.
+     */
+    requires_invite_acceptance_for_checkout?: boolean;
+    /**
+     * Optional organiser notes describing sponsorship checkout policy.
+     */
+    sponsor_checkout_policy_notes?: string | null;
     /**
      * Default timezone for event
      *
@@ -9685,6 +9709,74 @@ export type OrganisationPaymentSourcesStatistics = {
 };
 
 /**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationSponsorInviteConversionStatistics = {
+    summary: {
+        [key: string]: unknown;
+    };
+    event_breakdown: Array<{
+        [key: string]: unknown;
+    }>;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationSponsorOverviewStatistics = {
+    total_sponsors: number;
+    unique_organisations_sponsoring: number;
+    verification_summary: {
+        [key: string]: unknown;
+    };
+    payment_summary: {
+        [key: string]: unknown;
+    };
+    invite_summary: {
+        [key: string]: unknown;
+    };
+    commitment_amount: number;
+    realization_rate: number;
+    event_breakdown: Array<{
+        [key: string]: unknown;
+    }>;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
+ * Base serializer supporting raw and ECharts response modes.
+ */
+export type OrganisationSponsorPackagePerformanceStatistics = {
+    packages: Array<{
+        [key: string]: unknown;
+    }>;
+    totals: {
+        [key: string]: unknown;
+    };
+    limit: number;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Serializer for organization distribution statistics.
  */
 export type OrganizationDistribution = {
@@ -10499,6 +10591,13 @@ export type PaginatedRoomVenueList = {
     next?: string | null;
     previous?: string | null;
     results: Array<RoomVenue>;
+};
+
+export type PaginatedSponsorableEventListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<SponsorableEventList>;
 };
 
 export type PaginatedTicketListList = {
@@ -12143,6 +12242,18 @@ export type PatchedEventSettingsRequest = {
      * Whether participants for this event require manual event staff verification before being fully registered.
      */
     participants_registration_require_verification?: boolean;
+    /**
+     * Whether sponsorship checkout requires verified sponsors before completion.
+     */
+    requires_verified_sponsors_for_checkout?: boolean;
+    /**
+     * Whether sponsorship checkout is limited to accepted invite token flow.
+     */
+    requires_invite_acceptance_for_checkout?: boolean;
+    /**
+     * Optional organiser notes describing sponsorship checkout policy.
+     */
+    sponsor_checkout_policy_notes?: string | null;
     /**
      * Default timezone for event
      *
@@ -15323,6 +15434,113 @@ export type SponsorPackagePerformance = {
     total_completed_revenue: string;
     total_refunded_revenue: string;
     total_net_revenue: string;
+};
+
+/**
+ * List serializer for organisation-facing sponsorable event discovery.
+ */
+export type SponsorableEventList = {
+    readonly id: number;
+    readonly event_id: string;
+    display_code: string;
+    display_identifier?: string;
+    /**
+     * display title
+     */
+    title: string;
+    /**
+     * URL safe title
+     */
+    readonly url_safe_title: string | null;
+    readonly landing_images: Array<Resource>;
+    main_landing_image: Resource;
+    /**
+     * * `DRAFTING` - Drafting
+     * * `PUBLISHED` - Published
+     * * `OPEN` - Open for Registration
+     * * `CLOSED` - Closed
+     * * `IN_PROGRESS` - In Progress
+     * * `COMPLETED` - Completed
+     * * `DELETED` - Deleted
+     * * `CANCELLED` - Cancelled
+     * * `POSTPONED` - Postponed
+     * * `ARCHIVED` - Archived
+     */
+    status?: 'DRAFTING' | 'PUBLISHED' | 'OPEN' | 'CLOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELETED' | 'CANCELLED' | 'POSTPONED' | 'ARCHIVED';
+    readonly status_display: string;
+    event_type?: number | null;
+    readonly event_type_name: string;
+    /**
+     * The organisation hosting this event.
+     */
+    organisation?: number | null;
+    readonly organisation_name: string;
+    short_description?: string | null;
+    start_datetime: string;
+    end_datetime: string;
+    timezone: string;
+    readonly created_at: string;
+    created_by?: number | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        /**
+         * Link to this event
+         */
+        self: string;
+        /**
+         * Link to the event type
+         */
+        event_type?: string;
+        /**
+         * Link to the organisation
+         */
+        organisation?: string;
+        /**
+         * Link to user who created this event
+         */
+        created_by?: string;
+        /**
+         * Link to event settings
+         */
+        settings: string;
+    };
+    readonly accepting_sponsorships_enabled: boolean;
+    readonly requires_invite_acceptance_for_checkout: boolean;
+    readonly requires_verified_sponsors_for_checkout: boolean;
+    readonly sponsor_checkout_policy_notes: string | null;
+    readonly active_sponsorship_packages_count: number;
+    readonly can_checkout: boolean;
+};
+
+/**
+ * Organisation sponsorship payment history grouped by selected event.
+ */
+export type SponsorshipPaymentHistory = {
+    readonly event_id: string;
+    readonly event_title: string;
+    readonly organisation_id: number;
+    readonly organisation_title: string;
+    readonly summary: {
+        [key: string]: unknown;
+    };
+    readonly timeline: Array<SponsorshipPaymentTimelineItem>;
+};
+
+/**
+ * Single sponsorship payment timeline entry.
+ */
+export type SponsorshipPaymentTimelineItem = {
+    readonly payment_id: string;
+    readonly payment_reference: string;
+    readonly status: string;
+    readonly amount: string;
+    readonly currency: string;
+    readonly method_type: string | null;
+    readonly method_title: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
 };
 
 /**
@@ -18984,6 +19202,18 @@ export type EventSettingsWritable = {
      */
     participants_registration_require_verification?: boolean;
     /**
+     * Whether sponsorship checkout requires verified sponsors before completion.
+     */
+    requires_verified_sponsors_for_checkout?: boolean;
+    /**
+     * Whether sponsorship checkout is limited to accepted invite token flow.
+     */
+    requires_invite_acceptance_for_checkout?: boolean;
+    /**
+     * Optional organiser notes describing sponsorship checkout policy.
+     */
+    sponsor_checkout_policy_notes?: string | null;
+    /**
      * Default timezone for event
      *
      * * `Africa/Abidjan` - Africa/Abidjan
@@ -20764,6 +20994,13 @@ export type PaginatedRoomVenueListWritable = {
     results: Array<RoomVenueWritable>;
 };
 
+export type PaginatedSponsorableEventListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<SponsorableEventListWritable>;
+};
+
 export type PaginatedTicketListListWritable = {
     count: number;
     next?: string | null;
@@ -21957,6 +22194,41 @@ export type SponsorPackagePaymentStatusWritable = {
     packages: Array<{
         [key: string]: unknown;
     }>;
+};
+
+/**
+ * List serializer for organisation-facing sponsorable event discovery.
+ */
+export type SponsorableEventListWritable = {
+    display_code: string;
+    display_identifier?: string;
+    /**
+     * display title
+     */
+    title: string;
+    /**
+     * * `DRAFTING` - Drafting
+     * * `PUBLISHED` - Published
+     * * `OPEN` - Open for Registration
+     * * `CLOSED` - Closed
+     * * `IN_PROGRESS` - In Progress
+     * * `COMPLETED` - Completed
+     * * `DELETED` - Deleted
+     * * `CANCELLED` - Cancelled
+     * * `POSTPONED` - Postponed
+     * * `ARCHIVED` - Archived
+     */
+    status?: 'DRAFTING' | 'PUBLISHED' | 'OPEN' | 'CLOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELETED' | 'CANCELLED' | 'POSTPONED' | 'ARCHIVED';
+    event_type?: number | null;
+    /**
+     * The organisation hosting this event.
+     */
+    organisation?: number | null;
+    short_description?: string | null;
+    start_datetime: string;
+    end_datetime: string;
+    timezone: string;
+    created_by?: number | null;
 };
 
 /**
@@ -29080,6 +29352,52 @@ export type EventListOngoingListResponses = {
 };
 
 export type EventListOngoingListResponse = EventListOngoingListResponses[keyof EventListOngoingListResponses];
+
+export type EventListSponsorableListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        event_id?: string;
+        event_type?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        organisation?: number;
+        /**
+         * Page number.
+         */
+        page?: number;
+        /**
+         * Number of results per page.
+         */
+        page_size?: number;
+        /**
+         * Search by title, description, or display code.
+         */
+        search?: string;
+        /**
+         * * `DRAFTING` - Drafting
+         * * `PUBLISHED` - Published
+         * * `OPEN` - Open for Registration
+         * * `CLOSED` - Closed
+         * * `IN_PROGRESS` - In Progress
+         * * `COMPLETED` - Completed
+         * * `DELETED` - Deleted
+         * * `CANCELLED` - Cancelled
+         * * `POSTPONED` - Postponed
+         * * `ARCHIVED` - Archived
+         */
+        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+    };
+    url: '/api/event/list/sponsorable/';
+};
+
+export type EventListSponsorableListResponses = {
+    200: PaginatedSponsorableEventListList;
+};
+
+export type EventListSponsorableListResponse = EventListSponsorableListResponses[keyof EventListSponsorableListResponses];
 
 export type EventListUpcomingListData = {
     body?: never;
@@ -36948,6 +37266,28 @@ export type OrganisationsSponsorsCheckoutCreateResponses = {
 
 export type OrganisationsSponsorsCheckoutCreateResponse = OrganisationsSponsorsCheckoutCreateResponses[keyof OrganisationsSponsorsCheckoutCreateResponses];
 
+export type OrganisationsSponsorsPaymentHistoryRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Event public UUID.
+         */
+        event_id: string;
+        /**
+         * Organisation ID.
+         */
+        organisation_id: number;
+    };
+    url: '/api/organisations/sponsors/payment-history/';
+};
+
+export type OrganisationsSponsorsPaymentHistoryRetrieveResponses = {
+    200: SponsorshipPaymentHistory;
+};
+
+export type OrganisationsSponsorsPaymentHistoryRetrieveResponse = OrganisationsSponsorsPaymentHistoryRetrieveResponses[keyof OrganisationsSponsorsPaymentHistoryRetrieveResponses];
+
 export type OrganisationsStatisticsListData = {
     body?: never;
     path?: never;
@@ -37089,6 +37429,112 @@ export type OrganisationsStatisticsPaymentsBySourceRetrieveResponses = {
 };
 
 export type OrganisationsStatisticsPaymentsBySourceRetrieveResponse = OrganisationsStatisticsPaymentsBySourceRetrieveResponses[keyof OrganisationsStatisticsPaymentsBySourceRetrieveResponses];
+
+export type OrganisationsStatisticsSponsorInviteConversionRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Event public UUID filter.
+         */
+        event_id?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/sponsor-invite-conversion/';
+};
+
+export type OrganisationsStatisticsSponsorInviteConversionRetrieveResponses = {
+    200: OrganisationSponsorInviteConversionStatistics;
+};
+
+export type OrganisationsStatisticsSponsorInviteConversionRetrieveResponse = OrganisationsStatisticsSponsorInviteConversionRetrieveResponses[keyof OrganisationsStatisticsSponsorInviteConversionRetrieveResponses];
+
+export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Event public UUID filter.
+         */
+        event_id?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Maximum events to return in event-performance endpoint.
+         */
+        limit?: number;
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/sponsor-packages-performance/';
+};
+
+export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses = {
+    200: OrganisationSponsorPackagePerformanceStatistics;
+};
+
+export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponse = OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses[keyof OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses];
+
+export type OrganisationsStatisticsSponsorsOverviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Event public UUID filter.
+         */
+        event_id?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/sponsors-overview/';
+};
+
+export type OrganisationsStatisticsSponsorsOverviewRetrieveResponses = {
+    200: OrganisationSponsorOverviewStatistics;
+};
+
+export type OrganisationsStatisticsSponsorsOverviewRetrieveResponse = OrganisationsStatisticsSponsorsOverviewRetrieveResponses[keyof OrganisationsStatisticsSponsorsOverviewRetrieveResponses];
 
 export type PaymentsDiscountRulesListData = {
     body?: never;
