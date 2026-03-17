@@ -7727,6 +7727,20 @@ export type EventSettingsRequest = {
 };
 
 /**
+ * Payload serializer for sponsor checkout action.
+ */
+export type EventSponsorCheckoutRequest = {
+    event_id?: string;
+    package_id: string;
+    payment_method_id: number;
+    organisation_id?: number;
+    invite_token?: string;
+    chapter_location?: number;
+    name?: string;
+    description?: string;
+};
+
+/**
  * Create/Update serializer for EventSponsor.
  */
 export type EventSponsorCreateUpdate = {
@@ -7796,6 +7810,82 @@ export type EventSponsorDetail = {
      * Sponsorship packages
      */
     readonly packages: Array<unknown>;
+};
+
+/**
+ * Create/update serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteCreateUpdate = {
+    event: number;
+    email: string;
+    organisation?: number | null;
+    chapter_location?: number | null;
+    readonly accepted: boolean;
+    readonly declined: boolean;
+};
+
+/**
+ * Create/update serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteCreateUpdateRequest = {
+    event: number;
+    email: string;
+    organisation?: number | null;
+    chapter_location?: number | null;
+};
+
+/**
+ * Detail serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteDetail = {
+    readonly invite_id: string;
+    event: number;
+    readonly event_name: string;
+    email: string;
+    readonly token: string;
+    organisation?: number | null;
+    readonly organisation_name: string | null;
+    chapter_location?: number | null;
+    readonly accepted: boolean;
+    readonly declined: boolean;
+    readonly is_valid: boolean;
+    readonly sent_at: string;
+    readonly responded_at: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+        organisation?: string;
+    };
+};
+
+/**
+ * List serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteList = {
+    readonly invite_id: string;
+    event: number;
+    readonly event_name: string;
+    email: string;
+    readonly token: string;
+    organisation?: number | null;
+    readonly organisation_name: string | null;
+    chapter_location?: number | null;
+    readonly accepted: boolean;
+    readonly declined: boolean;
+    readonly is_valid: boolean;
+    readonly sent_at: string;
+    readonly responded_at: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+        organisation?: string;
+    };
 };
 
 /**
@@ -10143,6 +10233,13 @@ export type PaginatedEventSettingsList = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventSettings>;
+};
+
+export type PaginatedEventSponsorInviteListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventSponsorInviteList>;
 };
 
 export type PaginatedEventSponsorListList = {
@@ -12658,6 +12755,16 @@ export type PatchedEventSponsorCreateUpdateRequest = {
     organisation?: number;
     event?: number;
     package?: number | null;
+    chapter_location?: number | null;
+};
+
+/**
+ * Create/update serializer for EventSponsorInvite.
+ */
+export type PatchedEventSponsorInviteCreateUpdateRequest = {
+    event?: number;
+    email?: string;
+    organisation?: number | null;
     chapter_location?: number | null;
 };
 
@@ -19499,6 +19606,36 @@ export type EventSponsorDetailWritable = {
 };
 
 /**
+ * Create/update serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteCreateUpdateWritable = {
+    event: number;
+    email: string;
+    organisation?: number | null;
+    chapter_location?: number | null;
+};
+
+/**
+ * Detail serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteDetailWritable = {
+    event: number;
+    email: string;
+    organisation?: number | null;
+    chapter_location?: number | null;
+};
+
+/**
+ * List serializer for EventSponsorInvite.
+ */
+export type EventSponsorInviteListWritable = {
+    event: number;
+    email: string;
+    organisation?: number | null;
+    chapter_location?: number | null;
+};
+
+/**
  * List serializer for EventSponsor.
  */
 export type EventSponsorListWritable = {
@@ -20366,6 +20503,13 @@ export type PaginatedEventSettingsListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventSettingsWritable>;
+};
+
+export type PaginatedEventSponsorInviteListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventSponsorInviteListWritable>;
 };
 
 export type PaginatedEventSponsorListListWritable = {
@@ -36265,6 +36409,174 @@ export type OrganisationsMembershipsVerifyWithCodeCreateResponses = {
 
 export type OrganisationsMembershipsVerifyWithCodeCreateResponse = OrganisationsMembershipsVerifyWithCodeCreateResponses[keyof OrganisationsMembershipsVerifyWithCodeCreateResponses];
 
+export type OrganisationsSponsorInvitesListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter accepted invites
+         */
+        accepted?: boolean;
+        /**
+         * Filter by chapter location ID
+         */
+        chapter_location_id?: number;
+        /**
+         * Filter declined invites
+         */
+        declined?: boolean;
+        /**
+         * Filter by invitee email
+         */
+        email?: string;
+        /**
+         * Filter by event UUID
+         */
+        event_id?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Filter by organisation UUID
+         */
+        organisation_id?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter invites sent after this date
+         */
+        sent_after?: string;
+        /**
+         * Filter invites sent before this date
+         */
+        sent_before?: string;
+    };
+    url: '/api/organisations/sponsor-invites/';
+};
+
+export type OrganisationsSponsorInvitesListResponses = {
+    200: PaginatedEventSponsorInviteListList;
+};
+
+export type OrganisationsSponsorInvitesListResponse = OrganisationsSponsorInvitesListResponses[keyof OrganisationsSponsorInvitesListResponses];
+
+export type OrganisationsSponsorInvitesCreateData = {
+    body: EventSponsorInviteCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/sponsor-invites/';
+};
+
+export type OrganisationsSponsorInvitesCreateResponses = {
+    201: EventSponsorInviteCreateUpdate;
+};
+
+export type OrganisationsSponsorInvitesCreateResponse = OrganisationsSponsorInvitesCreateResponses[keyof OrganisationsSponsorInvitesCreateResponses];
+
+export type OrganisationsSponsorInvitesDestroyData = {
+    body?: never;
+    path: {
+        invite_id: string;
+    };
+    query?: never;
+    url: '/api/organisations/sponsor-invites/{invite_id}/';
+};
+
+export type OrganisationsSponsorInvitesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type OrganisationsSponsorInvitesDestroyResponse = OrganisationsSponsorInvitesDestroyResponses[keyof OrganisationsSponsorInvitesDestroyResponses];
+
+export type OrganisationsSponsorInvitesRetrieveData = {
+    body?: never;
+    path: {
+        invite_id: string;
+    };
+    query?: never;
+    url: '/api/organisations/sponsor-invites/{invite_id}/';
+};
+
+export type OrganisationsSponsorInvitesRetrieveResponses = {
+    200: EventSponsorInviteDetail;
+};
+
+export type OrganisationsSponsorInvitesRetrieveResponse = OrganisationsSponsorInvitesRetrieveResponses[keyof OrganisationsSponsorInvitesRetrieveResponses];
+
+export type OrganisationsSponsorInvitesPartialUpdateData = {
+    body?: PatchedEventSponsorInviteCreateUpdateRequest;
+    path: {
+        invite_id: string;
+    };
+    query?: never;
+    url: '/api/organisations/sponsor-invites/{invite_id}/';
+};
+
+export type OrganisationsSponsorInvitesPartialUpdateResponses = {
+    200: EventSponsorInviteCreateUpdate;
+};
+
+export type OrganisationsSponsorInvitesPartialUpdateResponse = OrganisationsSponsorInvitesPartialUpdateResponses[keyof OrganisationsSponsorInvitesPartialUpdateResponses];
+
+export type OrganisationsSponsorInvitesUpdateData = {
+    body: EventSponsorInviteCreateUpdateRequest;
+    path: {
+        invite_id: string;
+    };
+    query?: never;
+    url: '/api/organisations/sponsor-invites/{invite_id}/';
+};
+
+export type OrganisationsSponsorInvitesUpdateResponses = {
+    200: EventSponsorInviteCreateUpdate;
+};
+
+export type OrganisationsSponsorInvitesUpdateResponse = OrganisationsSponsorInvitesUpdateResponses[keyof OrganisationsSponsorInvitesUpdateResponses];
+
+export type OrganisationsSponsorInvitesAcceptByTokenCreateData = {
+    body?: {
+        token: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/organisations/sponsor-invites/accept-by-token/';
+};
+
+export type OrganisationsSponsorInvitesAcceptByTokenCreateResponses = {
+    200: EventSponsorInviteDetail;
+};
+
+export type OrganisationsSponsorInvitesAcceptByTokenCreateResponse = OrganisationsSponsorInvitesAcceptByTokenCreateResponses[keyof OrganisationsSponsorInvitesAcceptByTokenCreateResponses];
+
+export type OrganisationsSponsorInvitesDeclineByTokenCreateData = {
+    body?: {
+        token: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/organisations/sponsor-invites/decline-by-token/';
+};
+
+export type OrganisationsSponsorInvitesDeclineByTokenCreateResponses = {
+    200: EventSponsorInviteDetail;
+};
+
+export type OrganisationsSponsorInvitesDeclineByTokenCreateResponse = OrganisationsSponsorInvitesDeclineByTokenCreateResponses[keyof OrganisationsSponsorInvitesDeclineByTokenCreateResponses];
+
 export type OrganisationsSponsorPackagesListData = {
     body?: never;
     path?: never;
@@ -36622,6 +36934,19 @@ export type OrganisationsSponsorsPackagesListResponses = {
 };
 
 export type OrganisationsSponsorsPackagesListResponse = OrganisationsSponsorsPackagesListResponses[keyof OrganisationsSponsorsPackagesListResponses];
+
+export type OrganisationsSponsorsCheckoutCreateData = {
+    body: EventSponsorCheckoutRequest;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/sponsors/checkout/';
+};
+
+export type OrganisationsSponsorsCheckoutCreateResponses = {
+    200: EventSponsorDetail;
+};
+
+export type OrganisationsSponsorsCheckoutCreateResponse = OrganisationsSponsorsCheckoutCreateResponses[keyof OrganisationsSponsorsCheckoutCreateResponses];
 
 export type OrganisationsStatisticsListData = {
     body?: never;

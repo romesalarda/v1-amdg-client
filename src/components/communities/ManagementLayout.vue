@@ -75,6 +75,17 @@
           </NuxtLink>
 
           <NuxtLink
+            :to="`/communities/${organisationId}/m/sponsors`"
+            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
+            :class="isActive('sponsors')
+              ? 'border-blue-600 text-blue-600'
+              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
+          >
+            <UIcon name="i-heroicons-banknotes" class="w-4 h-4 inline mr-1" />
+            Sponsors
+          </NuxtLink>
+
+          <NuxtLink
             :to="`/communities/${organisationId}/m/leaders`"
             class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
             :class="isActive('leaders')

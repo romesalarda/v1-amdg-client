@@ -33,6 +33,106 @@
 				</div>
 			</section>
 
+			<section class="xl:col-span-12 bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+				<div class="px-6 py-5 border-b border-navy-50 flex items-center justify-between gap-3">
+					<div>
+						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Sponsor Invites</h3>
+						<p class="text-xs text-navy-400 mt-1">Invite organisations to sponsor this event and track responses.</p>
+					</div>
+				</div>
+
+				<div class="p-6 border-b border-navy-50 bg-mist-blue/20 grid grid-cols-1 md:grid-cols-4 gap-3">
+					<div class="md:col-span-2">
+						<label class="block text-[10px] font-bold uppercase tracking-wide text-navy-500 mb-1">Invite Email</label>
+						<input
+							v-model.trim="inviteForm.email"
+							type="email"
+							placeholder="sponsor@example.com"
+							class="w-full px-3 py-2 rounded-xl border border-navy-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+						/>
+					</div>
+					<div>
+						<label class="block text-[10px] font-bold uppercase tracking-wide text-navy-500 mb-1">Organisation</label>
+						<select
+							v-model.number="inviteForm.organisation"
+							class="w-full px-3 py-2 rounded-xl border border-navy-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+						>
+							<option :value="null">Optional organisation</option>
+							<option v-for="org in organisationOptions" :key="org.id" :value="org.id">{{ org.title }}</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-[10px] font-bold uppercase tracking-wide text-navy-500 mb-1">Chapter Location</label>
+						<select
+							v-model.number="inviteForm.chapter_location"
+							class="w-full px-3 py-2 rounded-xl border border-navy-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+						>
+							<option :value="null">Optional chapter</option>
+							<option v-for="chapter in chapterOptions" :key="chapter.id" :value="chapter.id">
+								{{ chapter.chapter_name }} ({{ chapter.cluster_name }})
+							</option>
+						</select>
+					</div>
+				</div>
+
+				<div class="px-6 py-4 flex justify-end border-b border-navy-50">
+					<button
+						class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-colors disabled:opacity-60"
+						:disabled="!canManage || inviteMutating || !inviteForm.email"
+						@click="createInvite"
+					>
+						Send Invite
+					</button>
+				</div>
+
+				<div v-if="invitesLoading" class="p-6 space-y-3">
+					<div v-for="i in 3" :key="i" class="h-20 rounded-xl bg-mist-blue/60 animate-pulse" />
+				</div>
+
+				<div v-else-if="eventInvites.length" class="divide-y divide-navy-50">
+					<div
+						v-for="invite in eventInvites"
+						:key="invite.invite_id"
+						class="px-6 py-4 flex items-start justify-between gap-4 hover:bg-mist-blue/30 transition-colors"
+					>
+						<div class="min-w-0">
+							<div class="flex items-center gap-2 flex-wrap">
+								<h4 class="text-sm font-bold text-navy-900">{{ invite.email }}</h4>
+								<span class="text-[10px] px-2 py-1 rounded-full font-semibold" :class="inviteStatusClass(invite)">
+									{{ inviteStatusLabel(invite) }}
+								</span>
+							</div>
+							<p class="text-xs text-navy-500 mt-1">Organisation: {{ invite.organisation_name || 'Not linked' }}</p>
+							<div class="mt-2 text-[11px] text-navy-500 flex items-center gap-3 flex-wrap">
+								<span>Sent: {{ formatInviteDate(invite.sent_at) }}</span>
+								<span>Token: <strong class="text-navy-800">{{ invite.token }}</strong></span>
+							</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<button
+								class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-mist-blue text-navy-700 hover:bg-mist-blue/70 transition-colors"
+								@click="copyInviteToken(invite.token)"
+							>
+								Copy Token
+							</button>
+							<button
+								class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+								:disabled="!canManage || inviteMutating"
+								@click="deleteInvite(invite.invite_id)"
+							>
+								Delete
+							</button>
+						</div>
+					</div>
+				</div>
+
+				<div v-else class="p-10 text-center text-navy-500">
+					<span class="material-symbols-outlined text-4xl text-navy-300 mb-2 block">mail</span>
+					<p class="text-sm">No sponsor invites sent for this event.</p>
+					<p class="text-xs text-navy-400 mt-1">Use invites to let organisations accept sponsorship by token.</p>
+				</div>
+			</section>
+
 			<section class="xl:col-span-5 bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
 				<div class="px-6 py-5 border-b border-navy-50 flex items-center justify-between gap-3">
 					<div>
@@ -436,9 +536,12 @@ import {
 	extractCollection,
 	useApproveEventSponsor,
 	useCreateEventSponsor,
+	useCreateEventSponsorInvite,
 	useCreateEventSponsorshipPackage,
+	useDeleteEventSponsorInvite,
 	useDeleteEventSponsor,
 	useDeleteEventSponsorshipPackage,
+	useEventSponsorInvites,
 	useEventSponsorPackagePerformance,
 	useEventSponsors,
 	useEventSponsorshipPackages,
@@ -449,6 +552,7 @@ import {
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
 import { useLocationChapters } from '~/composables/resources/locations/locationChapters'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
+import { formatDate } from '~/utils/time'
 
 definePageMeta({
 	layout: false,
@@ -485,6 +589,17 @@ interface EventSponsorshipPackageItem {
 	sponsors_count?: number
 }
 
+interface EventSponsorInviteItem {
+	invite_id: string
+	email: string
+	token: string
+	accepted: boolean
+	declined: boolean
+	is_valid: boolean
+	sent_at: string
+	organisation_name?: string | null
+}
+
 interface SponsorPerformance {
 	total_net_revenue?: string
 }
@@ -512,14 +627,17 @@ const eventInternalId = computed(() => event.value?.data?.id)
 
 const sponsorsQuery = useEventSponsors(id)
 const packagesQuery = useEventSponsorshipPackages(id)
+const invitesQuery = useEventSponsorInvites(id)
 const performanceQuery = useEventSponsorPackagePerformance(computed(() => ({ event_id: id.value })))
 
 const sponsors = computed(() => extractCollection<EventSponsorItem>(sponsorsQuery.data.value?.data))
 const sponsorshipPackages = computed(() => extractCollection<EventSponsorshipPackageItem>(packagesQuery.data.value?.data))
+const eventInvites = computed(() => extractCollection<EventSponsorInviteItem>(invitesQuery.data.value?.data))
 const performanceData = computed(() => (performanceQuery.data.value?.data || {}) as SponsorPerformance)
 
 const sponsorsLoading = computed(() => sponsorsQuery.isLoading.value)
 const packagesLoading = computed(() => packagesQuery.isLoading.value)
+const invitesLoading = computed(() => invitesQuery.isLoading.value)
 
 const sponsorSearchTerm = ref('')
 const sponsorStatusFilter = ref<'all' | SponsorStatus>('all')
@@ -561,6 +679,8 @@ const updateSponsorMutation = useUpdateEventSponsor()
 const deleteSponsorMutation = useDeleteEventSponsor()
 const approveSponsorMutation = useApproveEventSponsor()
 const rejectSponsorMutation = useRejectEventSponsor()
+const createInviteMutation = useCreateEventSponsorInvite()
+const deleteInviteMutation = useDeleteEventSponsorInvite()
 
 const createPackageMutation = useCreateEventSponsorshipPackage()
 const updatePackageMutation = useUpdateEventSponsorshipPackage()
@@ -578,6 +698,17 @@ const packageMutating = computed(() => {
 	return createPackageMutation.isPending.value
 		|| updatePackageMutation.isPending.value
 		|| deletePackageMutation.isPending.value
+})
+
+const inviteMutating = computed(() => {
+	return createInviteMutation.isPending.value
+		|| deleteInviteMutation.isPending.value
+})
+
+const inviteForm = reactive({
+	email: '',
+	organisation: null as number | null,
+	chapter_location: null as number | null,
 })
 
 const showSponsorModal = ref(false)
@@ -642,6 +773,9 @@ watch(
 		if (organisationId && sponsorModalMode.value === 'create' && !sponsorForm.organisation) {
 			sponsorForm.organisation = organisationId
 		}
+		if (organisationId && !inviteForm.organisation) {
+			inviteForm.organisation = organisationId
+		}
 	},
 	{ immediate: true },
 )
@@ -667,6 +801,12 @@ function resetSponsorForm() {
 	sponsorForm.chapter_location = null
 	organisationSearchTerm.value = ''
 	chapterSearchTerm.value = ''
+}
+
+function resetInviteForm() {
+	inviteForm.email = ''
+	inviteForm.organisation = event.value?.data?.organisation || null
+	inviteForm.chapter_location = null
 }
 
 function resetPackageForm() {
@@ -857,6 +997,66 @@ async function deletePackage(pkg: EventSponsorshipPackageItem) {
 	}
 }
 
+async function createInvite() {
+	if (!eventInternalId.value) {
+		toast.add({ title: 'Event not loaded', color: 'red' })
+		return
+	}
+
+	if (!inviteForm.email) {
+		toast.add({ title: 'Invite email is required', color: 'red' })
+		return
+	}
+
+	try {
+		await createInviteMutation.mutateAsync({
+			body: {
+				event: Number(eventInternalId.value),
+				email: inviteForm.email,
+				organisation: inviteForm.organisation,
+				chapter_location: inviteForm.chapter_location,
+			},
+		})
+		toast.add({ title: 'Sponsor invite sent', color: 'green' })
+		resetInviteForm()
+	}
+	catch (error: unknown) {
+		toast.add({
+			title: 'Could not send invite',
+			description: getErrorMessage(error, 'Please review the invite details and try again.'),
+			color: 'red',
+		})
+	}
+}
+
+async function deleteInvite(inviteId: string) {
+	if (!window.confirm('Delete this sponsor invite?')) {
+		return
+	}
+
+	try {
+		await deleteInviteMutation.mutateAsync({ inviteId })
+		toast.add({ title: 'Sponsor invite deleted', color: 'green' })
+	}
+	catch (error: unknown) {
+		toast.add({
+			title: 'Could not delete invite',
+			description: getErrorMessage(error, 'Invite could not be deleted.'),
+			color: 'red',
+		})
+	}
+}
+
+async function copyInviteToken(token: string) {
+	try {
+		await navigator.clipboard.writeText(token)
+		toast.add({ title: 'Invite token copied', color: 'green' })
+	}
+	catch {
+		toast.add({ title: 'Could not copy invite token', color: 'red' })
+	}
+}
+
 async function approveSponsor(sponsor: EventSponsorItem) {
 	try {
 		await approveSponsorMutation.mutateAsync({ eventId: id.value, sponsorId: sponsor.sponsor_id })
@@ -896,6 +1096,40 @@ function statusBadgeClass(status: SponsorStatus | undefined) {
 		return 'bg-indigo-100 text-indigo-700'
 	}
 	return 'bg-amber-100 text-amber-700'
+}
+
+function inviteStatusLabel(invite: EventSponsorInviteItem) {
+	if (invite.accepted) {
+		return 'Accepted'
+	}
+	if (invite.declined) {
+		return 'Declined'
+	}
+	if (!invite.is_valid) {
+		return 'Expired'
+	}
+	return 'Pending'
+}
+
+function inviteStatusClass(invite: EventSponsorInviteItem) {
+	if (invite.accepted) {
+		return 'bg-green-100 text-green-700'
+	}
+	if (invite.declined) {
+		return 'bg-rose-100 text-rose-700'
+	}
+	if (!invite.is_valid) {
+		return 'bg-navy-100 text-navy-600'
+	}
+	return 'bg-amber-100 text-amber-700'
+}
+
+function formatInviteDate(value?: string) {
+	if (!value) {
+		return 'Unknown'
+	}
+
+	return formatDate(value)
 }
 
 function formatMoney(value: string | number | undefined | null) {

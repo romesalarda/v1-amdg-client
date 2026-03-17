@@ -13,14 +13,19 @@ import {
   eventListSponsorshipPackagesPartialUpdate,
   eventListSponsorshipPackagesDestroy,
   eventStatisticsSponsorPackagesRetrieve,
+  organisationsSponsorInvitesList,
+  organisationsSponsorInvitesCreate,
+  organisationsSponsorInvitesDestroy,
 } from '~/api/sdk.gen'
 import type {
   EventSponsorCreateUpdateRequest,
+  EventSponsorInviteCreateUpdateRequest,
   EventSponsorPackageCreateUpdateRequest,
   EventStatisticsSponsorPackagesRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['eventSponsors'] as const
+const INVITES_QUERY_KEY = ['eventSponsorInvites'] as const
 
 export function extractCollection<T>(payload: unknown): T[] {
   if (!payload)
@@ -213,6 +218,46 @@ export function useEventSponsorPackagePerformance(
     queryFn: () => {
       const queryParams = toValue(params)
       return eventStatisticsSponsorPackagesRetrieve(queryParams ? { query: queryParams } : undefined)
+    },
+  })
+}
+
+export function useEventSponsorInvites(eventId: MaybeRefOrGetter<string>) {
+  return useQuery({
+    queryKey: [...INVITES_QUERY_KEY, 'list', eventId] as const,
+    queryFn: () => {
+      const id = toValue(eventId)
+      return organisationsSponsorInvitesList({ query: { event_id: id, page_size: 200 } })
+    },
+    enabled: () => !!toValue(eventId),
+  })
+}
+
+export function useCreateEventSponsorInvite() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ body }: { body: EventSponsorInviteCreateUpdateRequest }) => {
+      return organisationsSponsorInvitesCreate({ body })
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({ queryKey: INVITES_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: ['organisationSponsorInvites'] })
+      queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, 'list', String(variables.body.event)] })
+    },
+  })
+}
+
+export function useDeleteEventSponsorInvite() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ inviteId }: { inviteId: string }) => {
+      return organisationsSponsorInvitesDestroy({ path: { invite_id: inviteId } })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: INVITES_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: ['organisationSponsorInvites'] })
     },
   })
 }

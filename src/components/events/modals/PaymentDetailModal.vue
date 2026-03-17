@@ -74,6 +74,10 @@
                 <div class="text-xs text-gray-500">{{ getMethodTypeLabel(paymentData.method?.code) || 'N/A' }}</div>
               </div>
             </div>
+            <div class="bg-gray-50 rounded-lg p-4 mt-4">
+                <div class="text-xs text-gray-500 mb-1">Description</div>
+                <div class="text-sm font-semibold">{{ paymentData.description }}</div>
+              </div>
           </section>
 
           <!-- Amount Breakdown -->
