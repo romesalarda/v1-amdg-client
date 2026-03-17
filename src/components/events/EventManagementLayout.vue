@@ -80,13 +80,15 @@
         v-for="tab in tabs"
         :key="tab.path"
         :to="`/events/${eventId}/m/${tab.path}`"
-        @click="sidebarOpen = false"
+        @click="onTabClick($event, tab.disabled)"
+        :aria-disabled="tab.disabled ? 'true' : undefined"
+        :tabindex="tab.disabled ? -1 : undefined"
         :class="[
           'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all',
           isActive(tab.path)
             ? 'bg-white/10 text-white'
             : 'text-white/60 hover:text-white hover:bg-white/5',
-          tab.disabled ? 'cursor-not-allowed opacity-50' : ''
+          tab.disabled ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''
           
         ]"
 
@@ -160,7 +162,7 @@
 import { ref, computed } from 'vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import Navbar from '~/components/common/Navbar.vue'
-import { useEventSettings, usePartialUpdateEventSettings } from '~/composables/resources/events/eventSettings'
+import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import type { EventDetail } from '~/api/types.gen'
 
 
@@ -174,7 +176,7 @@ const eventSettings = computed(() => settingsData.value?.data)
 const route = useRoute()
 const sidebarOpen = ref(false)
 
-const tabs = [
+const tabs = computed(() => [
   {
     path: 'dashboard',
     label: 'Dashboard',
@@ -238,19 +240,29 @@ const tabs = [
     icon: 'i-heroicons-users',
   },
   {
-    label: "Shop",
+    label: 'Shop',
     path: 'shop/dashboard',
     icon: 'i-heroicons-shopping-bag',
     disabled: !eventSettings.value?.product_selling_enabled,
+  },
+])
+
+const onTabClick = (event: MouseEvent, disabled?: boolean) => {
+  if (disabled) {
+    event.preventDefault()
+    event.stopPropagation()
+    return
   }
-]
+
+  sidebarOpen.value = false
+}
 
 const isActive = (section: string) => {
   return route.path.includes(`/m/${section}`)
 }
 
 const currentPageTitle = computed(() => {
-  const activeTab = tabs.find(tab => isActive(tab.path))
+  const activeTab = tabs.value.find(tab => isActive(tab.path))
   return activeTab?.label || 'Event Management'
 })
 
