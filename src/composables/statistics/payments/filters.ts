@@ -4,7 +4,7 @@ export interface PaymentStatisticsFilters {
   event_id?: string
   format?: 'raw' | 'echarts'
   include_deleted?: boolean
-  group_by?: 'day' | 'week' | 'month'
+  group_by?: 'day' | 'week' | 'month' | 'hour'
   date_from?: string
   date_to?: string
   status?: string
@@ -136,7 +136,7 @@ export function usePaymentStatisticsFilters(initialEventId?: string) {
   }
 
   // Set trend grouping (for trends)
-  const setGroupBy = (groupBy: 'day' | 'week' | 'month') => {
+  const setGroupBy = (groupBy: 'day' | 'week' | 'month' | 'hour') => {
     filters.value.group_by = groupBy
   }
 

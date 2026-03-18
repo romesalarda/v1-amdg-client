@@ -21,8 +21,8 @@
         icon-color="purple"
       />
       <StatCard
-        :value="areaData?.data?.total_with_area ?? 0"
-        label="With Location"
+        :value="selectedLocationTotalWithValue"
+        :label="`With ${selectedLocationLabel}`"
         icon="i-heroicons-map-pin"
         icon-color="amber"
       />
@@ -98,26 +98,39 @@
         </div>
       </StatSection>
 
-      <!-- Area Distribution -->
+      <!-- Location Distribution -->
       <StatSection 
-        title="Geographic Distribution"
-        description="Distribution of attendees by area"
+        :title="`Geographic Distribution by ${selectedLocationLabel}`"
+        description="Distribution of attendees by area, chapter, cluster, and country"
       >
-        <div v-if="areaLoading" class="flex items-center justify-center h-64">
+        <div class="mb-4 flex flex-wrap gap-2">
+          <button
+            v-for="option in locationOptions"
+            :key="option.value"
+            @click="selectedLocationType = option.value"
+            class="px-3 py-1.5 rounded-md text-xs font-bold uppercase tracking-wide transition-colors"
+            :class="selectedLocationType === option.value
+              ? 'bg-amber-600 text-white'
+              : 'bg-amber-50 text-amber-700 hover:bg-amber-100'"
+          >
+            {{ option.label }}
+          </button>
+        </div>
+        <div v-if="locationBreakdownLoading" class="flex items-center justify-center h-64">
           <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
         </div>
-        <div v-else-if="areaError" class="text-center text-red-600 py-8">
-          Error loading area distribution
+        <div v-else-if="locationBreakdownError" class="text-center text-red-600 py-8">
+          Error loading location distribution
         </div>
         <BarChart
-          v-else-if="areaChartData.length"
-          :data="areaChartData"
+          v-else-if="locationChartData.length"
+          :data="locationChartData"
           height="300px"
           color="#f59e0b"
           :horizontal="true"
         />
         <div v-else class="text-center text-gray-500 py-8">
-          No area data available
+          No location data available
         </div>
       </StatSection>
     </div>
@@ -125,8 +138,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useAgeDistribution, useGenderDistribution, useRelationshipDistribution, useAreaDistribution } from '~/composables/statistics/attendee/attendee-statistics'
+import { ref, computed } from 'vue'
+import { useAgeDistribution, useGenderDistribution, useRelationshipDistribution, useLocationBreakdown } from '~/composables/statistics/attendee/attendee-statistics'
 import StatCard from '~/components/statistics/StatCard.vue'
 import StatSection from '~/components/statistics/StatSection.vue'
 import PieChart from '~/components/charts/PieChart.vue'
@@ -139,12 +152,19 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const selectedLocationType = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
+const locationOptions = [
+  { value: 'area' as const, label: 'Area' },
+  { value: 'chapter' as const, label: 'Chapter' },
+  { value: 'cluster' as const, label: 'Cluster' },
+  { value: 'country' as const, label: 'Country' },
+]
 
 // Fetch statistics data
 const { data: ageData, isLoading: ageLoading, error: ageError } = useAgeDistribution(() => props.queryParams)
 const { data: genderData, isLoading: genderLoading, error: genderError } = useGenderDistribution(() => props.queryParams)
 const { data: relationshipData, isLoading: relationshipLoading, error: relationshipError } = useRelationshipDistribution(() => props.queryParams)
-const { data: areaData, isLoading: areaLoading, error: areaError } = useAreaDistribution(() => props.queryParams)
+const { data: locationBreakdownData, isLoading: locationBreakdownLoading, error: locationBreakdownError } = useLocationBreakdown(() => props.queryParams)
 
 // Transform data for charts
 const ageChartData = computed<BarChartData[]>(() => {
@@ -171,10 +191,37 @@ const relationshipChartData = computed<PieChartData[]>(() => {
   }))
 })
 
-const areaChartData = computed<BarChartData[]>(() => {
-  if (!areaData.value?.data?.distribution) return []
-  // Take top 10 areas
-  return areaData.value.data.distribution
+const selectedLocationSection = computed(() => {
+  const data = locationBreakdownData.value?.data
+  if (!data) return null
+
+  const sections = {
+    area: data.by_area,
+    chapter: data.by_chapter,
+    cluster: data.by_cluster,
+    country: data.by_country,
+  }
+
+  return sections[selectedLocationType.value] as any
+})
+
+const selectedLocationLabel = computed(() => {
+  const option = locationOptions.find((item) => item.value === selectedLocationType.value)
+  return option?.label ?? 'Location'
+})
+
+const selectedLocationTotalWithValue = computed(() => {
+  const section = selectedLocationSection.value
+  if (!section) return 0
+
+  return section.total_with_value ?? section.total_with_area ?? 0
+})
+
+const locationChartData = computed<BarChartData[]>(() => {
+  const distribution = selectedLocationSection.value?.distribution
+  if (!distribution) return []
+
+  return distribution
     .slice(0, 10)
     .map((item: any) => ({
       label: item.label,

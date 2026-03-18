@@ -37,9 +37,13 @@
             @change="handleGroupByChange"
             class="px-2 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           >
-            <option value="day">Day</option>
-            <option value="week">Week</option>
-            <option value="month">Month</option>
+            <option
+              v-for="option in normalizedGroupByOptions"
+              :key="option"
+              :value="option"
+            >
+              {{ optionLabels[option] }}
+            </option>
           </select>
         </div>
 
@@ -109,7 +113,8 @@ interface Props {
   quickDateRanges: QuickDateRange[]
   selectedQuickRange: string
   includeDeleted: boolean
-  groupBy?: 'day' | 'week' | 'month'
+  groupBy?: 'day' | 'week' | 'month' | 'hour'
+  allowedGroupBy?: Array<'day' | 'week' | 'month' | 'hour'>
   dateRangeLabel?: string
   showGroupingOptions?: boolean
 }
@@ -117,7 +122,7 @@ interface Props {
 interface Emits {
   (e: 'apply-quick-range', value: string): void
   (e: 'toggle-include-deleted'): void
-  (e: 'update-group-by', value: 'day' | 'week' | 'month'): void
+  (e: 'update-group-by', value: 'day' | 'week' | 'month' | 'hour'): void
   (e: 'apply-custom-range', from: string, to: string): void
   (e: 'reset'): void
   (e: 'export'): void
@@ -125,6 +130,7 @@ interface Emits {
 
 const props = withDefaults(defineProps<Props>(), {
   showGroupingOptions: false,
+  allowedGroupBy: () => ['day', 'week', 'month'],
 })
 
 const emit = defineEmits<Emits>()
@@ -132,7 +138,21 @@ const emit = defineEmits<Emits>()
 const showCustomDateRange = ref(false)
 const customDateFrom = ref('')
 const customDateTo = ref('')
-const localGroupBy = ref(props.groupBy || 'day')
+const localGroupBy = ref<'day' | 'week' | 'month' | 'hour'>(props.groupBy || 'day')
+const optionLabels: Record<'day' | 'week' | 'month' | 'hour', string> = {
+  day: 'Day',
+  week: 'Week',
+  month: 'Month',
+  hour: 'Hour',
+}
+
+const normalizedGroupByOptions = computed<Array<'day' | 'week' | 'month' | 'hour'>>(() => {
+  if (!props.allowedGroupBy.length) {
+    return ['day', 'week', 'month']
+  }
+
+  return props.allowedGroupBy
+})
 
 const hasActiveFilters = computed(() => {
   return props.selectedQuickRange !== 'all_time' || props.includeDeleted
@@ -145,11 +165,27 @@ watch(() => props.selectedQuickRange, (newValue) => {
   }
 })
 
-watch(() => props.groupBy, (newValue) => {
-  if (newValue) {
-    localGroupBy.value = newValue
-  }
-})
+watch(
+  [() => props.groupBy, normalizedGroupByOptions],
+  ([currentGroupBy, options]) => {
+    if (!props.showGroupingOptions) {
+      return
+    }
+
+    const fallbackOption = options[0]
+
+    if (!currentGroupBy || !options.includes(currentGroupBy)) {
+      localGroupBy.value = fallbackOption
+      if (currentGroupBy !== fallbackOption) {
+        emit('update-group-by', fallbackOption)
+      }
+      return
+    }
+
+    localGroupBy.value = currentGroupBy
+  },
+  { immediate: true }
+)
 
 const handleQuickRange = (value: string) => {
   if (value === 'custom') {

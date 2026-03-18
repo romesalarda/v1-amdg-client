@@ -8,7 +8,7 @@
       :include-deleted="filters.filters.value.include_deleted ?? false"
       :group-by="filters.filters.value.group_by"
       :date-range-label="dateRangeLabel"
-      :show-grouping-options="['bookings', 'revenue', 'intents'].includes(currentTab)"
+        :show-grouping-options="supportsGroupBy"
       @apply-quick-range="handleQuickRange"
       @toggle-include-deleted="filters.toggleIncludeDeleted"
       @update-group-by="filters.setGroupBy"
@@ -40,7 +40,7 @@
       <KeepAlive>
         <component 
           :is="currentTabComponent" 
-          :query-params="filters.queryParams.value"
+          :query-params="activeQueryParams"
           :group-by="filters.filters.value.group_by"
           :date-range-label="dateRangeLabel"
           @update-group-by="filters.setGroupBy"
@@ -90,6 +90,17 @@ const tabs = [
 ]
 
 const currentTab = ref('overview')
+const tabsWithGroupBy = ['bookings', 'revenue', 'intents'] as const
+
+const supportsGroupBy = computed(() => tabsWithGroupBy.includes(currentTab.value as typeof tabsWithGroupBy[number]))
+
+const activeQueryParams = computed(() => {
+  const params = { ...filters.queryParams.value }
+  if (!supportsGroupBy.value) {
+    delete params.group_by
+  }
+  return params
+})
 
 // Lazy load tab components
 const currentTabComponent = computed(() => {

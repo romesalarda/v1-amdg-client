@@ -9,7 +9,7 @@ export interface ProductStatisticsFilters {
   is_active?: boolean
   verified?: boolean
   status?: string // Order status filter
-  group_by?: 'day' | 'week' | 'month'
+  group_by?: 'day' | 'week' | 'month' | 'hour'
   date_from?: string
   date_to?: string
   limit?: number
@@ -194,7 +194,7 @@ export function useProductStatisticsFilters(initialEventId?: string) {
   }
 
   // Set trend grouping
-  const setGroupBy = (groupBy: 'day' | 'week' | 'month') => {
+  const setGroupBy = (groupBy: 'day' | 'week' | 'month' | 'hour') => {
     filters.value.group_by = groupBy
   }
 

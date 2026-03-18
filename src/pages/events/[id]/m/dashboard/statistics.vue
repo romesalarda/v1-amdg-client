@@ -110,16 +110,27 @@
               <UIcon name="i-heroicons-chart-bar-square" class="w-5 h-5 text-primary" />
               <h3 class="text-sm font-black text-primary uppercase tracking-widest">Registration Trends</h3>
             </div>
-            <UButton
-              size="xs"
-              variant="ghost"
-              color="gray"
-              icon="i-heroicons-arrow-path"
-              @click="refetchRegistrationTrends"
-              :loading="isLoadingRegistrationTrends"
-            >
-              Refresh
-            </UButton>
+            <div class="flex items-center gap-2">
+              <select
+                v-model="registrationPeriod"
+                class="px-2 py-1 text-xs font-semibold border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="hour">Hour</option>
+                <option value="day">Day</option>
+                <option value="week">Week</option>
+                <option value="month">Month</option>
+              </select>
+              <UButton
+                size="xs"
+                variant="ghost"
+                color="gray"
+                icon="i-heroicons-arrow-path"
+                @click="refetchRegistrationTrends"
+                :loading="isLoadingRegistrationTrends"
+              >
+                Refresh
+              </UButton>
+            </div>
           </div>
           <div class="p-6">
             <div v-if="isLoadingRegistrationTrends" class="h-80 flex items-center justify-center">
@@ -275,7 +286,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -316,6 +327,7 @@ definePageMeta({
 
 const route = useRoute()
 const id = computed(() => route.params.id as string)
+const registrationPeriod = ref<'hour' | 'day' | 'week' | 'month'>('week')
 
 // Fetch event details
 const { data: event } = useEvent(id)
@@ -342,7 +354,7 @@ const {
 } = useRegistrationTrends(computed(() => ({
   // @ts-ignore - Backend accepts UUID string despite OpenAPI spec saying number
   event_id: id.value,
-  period: 'week' as const,
+  period: registrationPeriod.value,
   cumulative: true,
 } as any)))
 
@@ -388,6 +400,32 @@ const registrationTrendsOption = computed(() => {
   const trends = registrationTrendsData.value?.data?.trends
   if (!trends || trends.length === 0) return null
 
+  const formatTrendLabel = (value: string) => {
+    const date = new Date(value)
+
+    if (registrationPeriod.value === 'hour') {
+      return date.toLocaleString('en-GB', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    }
+
+    if (registrationPeriod.value === 'month') {
+      return date.toLocaleDateString('en-GB', {
+        month: 'short',
+        year: 'numeric',
+      })
+    }
+
+    return date.toLocaleDateString('en-GB', {
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
   return {
     tooltip: {
       trigger: 'axis',
@@ -410,10 +448,7 @@ const registrationTrendsOption = computed(() => {
     xAxis: {
       type: 'category',
       boundaryGap: false,
-      data: trends.map((t: any) => new Date(t.date).toLocaleDateString('en-GB', { 
-        month: 'short', 
-        day: 'numeric' 
-      }))
+      data: trends.map((t: any) => formatTrendLabel(t.date))
     },
     yAxis: {
       type: 'value'

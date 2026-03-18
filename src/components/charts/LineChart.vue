@@ -51,7 +51,7 @@ const option = computed(() => ({
       const point = params[0]
       return `<div style="padding: 4px;">
         <div style="font-weight: 600; margin-bottom: 4px;">${point.name}</div>
-        <div style="color: #6b7280;">Registrations: <strong>${point.value}</strong></div>
+        <div style="color: #6b7280;">${point.name || 'Value'}: <strong>${point.value}</strong></div>
       </div>`
     }
   },

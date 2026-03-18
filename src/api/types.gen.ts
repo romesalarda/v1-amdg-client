@@ -6291,7 +6291,7 @@ export type EventRegistrationTrends = {
     }>;
     total_registrations: number;
     /**
-     * Time period (day, week, month)
+     * Time period (hour, day, week, month)
      */
     period: string;
 };
@@ -8808,6 +8808,29 @@ export type LeaderList = {
         user?: string;
         organisation?: string;
         location?: string;
+    };
+};
+
+/**
+ * Serializer for combined location breakdown statistics.
+ */
+export type LocationBreakdown = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    total: number;
+    by_area: {
+        [key: string]: unknown;
+    };
+    by_chapter: {
+        [key: string]: unknown;
+    };
+    by_cluster: {
+        [key: string]: unknown;
+    };
+    by_country: {
+        [key: string]: unknown;
     };
 };
 
@@ -20119,6 +20142,25 @@ export type LeaderListWritable = {
 };
 
 /**
+ * Serializer for combined location breakdown statistics.
+ */
+export type LocationBreakdownWritable = {
+    total: number;
+    by_area: {
+        [key: string]: unknown;
+    };
+    by_chapter: {
+        [key: string]: unknown;
+    };
+    by_cluster: {
+        [key: string]: unknown;
+    };
+    by_country: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Detailed serializer for location leader invites.
  */
 export type LocationLeaderInviteDetailWritable = {
@@ -24151,6 +24193,32 @@ export type AttendeesStatisticsGenderDistributionRetrieveResponses = {
 };
 
 export type AttendeesStatisticsGenderDistributionRetrieveResponse = AttendeesStatisticsGenderDistributionRetrieveResponses[keyof AttendeesStatisticsGenderDistributionRetrieveResponses];
+
+export type AttendeesStatisticsLocationBreakdownRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/location-breakdown/';
+};
+
+export type AttendeesStatisticsLocationBreakdownRetrieveResponses = {
+    200: LocationBreakdown;
+};
+
+export type AttendeesStatisticsLocationBreakdownRetrieveResponse = AttendeesStatisticsLocationBreakdownRetrieveResponses[keyof AttendeesStatisticsLocationBreakdownRetrieveResponses];
 
 export type AttendeesStatisticsMedicalConditionsRetrieveData = {
     body?: never;
@@ -31289,7 +31357,7 @@ export type EventStatisticsRegistrationTrendsRetrieveData = {
         /**
          * Time period grouping for trends
          */
-        period?: 'day' | 'month' | 'week';
+        period?: 'day' | 'hour' | 'month' | 'week';
     };
     url: '/api/event/statistics/registration-trends/';
 };
@@ -39123,9 +39191,9 @@ export type PaymentsStatisticsDonationTrendsRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         * Time grouping for trends. "hour" groups by hour, "day" by day, "week" by week, "month" by month.
          */
-        group_by?: 'day' | 'month' | 'week';
+        group_by?: 'day' | 'hour' | 'month' | 'week';
     };
     url: '/api/payments/statistics/donation-trends/';
 };
@@ -39283,9 +39351,9 @@ export type PaymentsStatisticsPaymentTrendsRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         * Time grouping for trends. "hour" groups by hour, "day" by day, "week" by week, "month" by month.
          */
-        group_by?: 'day' | 'month' | 'week';
+        group_by?: 'day' | 'hour' | 'month' | 'week';
         /**
          * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
          */
@@ -39365,9 +39433,9 @@ export type PaymentsStatisticsRefundTrendsRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         * Time grouping for trends. "hour" groups by hour, "day" by day, "week" by week, "month" by month.
          */
-        group_by?: 'day' | 'month' | 'week';
+        group_by?: 'day' | 'hour' | 'month' | 'week';
     };
     url: '/api/payments/statistics/refund-trends/';
 };
@@ -39477,9 +39545,9 @@ export type PaymentsStatisticsRevenueTrendsRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Time grouping for trends. "day" groups by day, "week" by week, "month" by month.
+         * Time grouping for trends. "hour" groups by hour, "day" by day, "week" by week, "month" by month.
          */
-        group_by?: 'day' | 'month' | 'week';
+        group_by?: 'day' | 'hour' | 'month' | 'week';
         /**
          * Include soft-deleted orders in statistics. NOTE: Payment model does not support soft-delete, only Order model does.
          */

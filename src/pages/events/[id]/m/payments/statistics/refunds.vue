@@ -202,6 +202,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const activeGroupBy = computed(() => (props.queryParams.group_by as string) || 'day')
 
 // Fetch statistics data
 const { data: refundRequests, isLoading: refundRequestsLoading, error: refundRequestsError } = useRefundRequests(() => props.queryParams)
@@ -228,6 +229,21 @@ const refundTrendsData = computed<{ data: number[], labels: string[] }>(() => {
     labels: trends.map((item: { date?: string }) => {
       if (!item.date) return ''
       const date = new Date(item.date)
+
+      if (activeGroupBy.value === 'hour') {
+        return date.toLocaleString('en-GB', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      }
+
+      if (activeGroupBy.value === 'month') {
+        return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+      }
+
       return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
     }),
   }

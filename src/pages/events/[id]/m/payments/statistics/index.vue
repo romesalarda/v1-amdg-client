@@ -6,6 +6,7 @@
       :selected-quick-range="filters.selectedQuickRange.value"
       :include-deleted="filters.filters.value.include_deleted ?? false"
       :group-by="filters.filters.value.group_by"
+      :allowed-group-by="['hour', 'day', 'week', 'month']"
       :date-range-label="dateRangeLabel"
       :show-grouping-options="['revenue', 'payment-methods', 'donations', 'refunds'].includes(currentTab)"
       @apply-quick-range="handleQuickRange"

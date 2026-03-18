@@ -6,6 +6,7 @@ import {
   attendeesStatisticsGenderDistributionRetrieve,
   attendeesStatisticsRelationshipDistributionRetrieve,
   attendeesStatisticsAreaDistributionRetrieve,
+  attendeesStatisticsLocationBreakdownRetrieve,
   attendeesStatisticsDemographicsRetrieve,
   attendeesStatisticsMedicalConditionsRetrieve,
   attendeesStatisticsAccessibilityRetrieve,
@@ -22,6 +23,7 @@ import type {
   AttendeesStatisticsGenderDistributionRetrieveData,
   AttendeesStatisticsRelationshipDistributionRetrieveData,
   AttendeesStatisticsAreaDistributionRetrieveData,
+  AttendeesStatisticsLocationBreakdownRetrieveData,
   AttendeesStatisticsDemographicsRetrieveData,
   AttendeesStatisticsMedicalConditionsRetrieveData,
   AttendeesStatisticsAccessibilityRetrieveData,
@@ -98,6 +100,23 @@ export function useAreaDistribution(
     queryFn: () => {
       const queryParams = toValue(params)
       return attendeesStatisticsAreaDistributionRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+  })
+}
+
+/**
+ * Get combined location breakdown statistics (area/chapter/cluster/country)
+ */
+export function useLocationBreakdown(
+  params?: MaybeRefOrGetter<AttendeesStatisticsLocationBreakdownRetrieveData['query'] | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'location-breakdown', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return attendeesStatisticsLocationBreakdownRetrieve(
         queryParams ? { query: queryParams } : undefined
       )
     },

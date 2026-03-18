@@ -6,7 +6,7 @@ export interface StatisticsFilters {
   format?: 'raw' | 'echarts'
   include_deleted?: boolean
   age_grouping?: 'ranges' | 'individual'
-  group_by?: 'day' | 'week' | 'month'
+  group_by?: 'day' | 'week' | 'month' | 'hour'
   date_from?: string
   date_to?: string
 }
@@ -138,7 +138,7 @@ export function useStatisticsFilters(initialEventId?: string) {
   }
 
   // Set trend grouping (for registration trends)
-  const setGroupBy = (groupBy: 'day' | 'week' | 'month') => {
+  const setGroupBy = (groupBy: 'day' | 'week' | 'month' | 'hour') => {
     filters.value.group_by = groupBy
   }
 

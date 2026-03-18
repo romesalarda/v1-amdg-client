@@ -177,6 +177,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const activeGroupBy = computed(() => (props.queryParams.group_by as string) || 'day')
 
 // Fetch statistics data
 const { data: donationStats, isLoading: donationStatsLoading, error: donationStatsError } = useDonationStats(() => props.queryParams)
@@ -203,6 +204,21 @@ const donationTrendsData = computed<{ data: number[], labels: string[] }>(() => 
     labels: trends.map((item: { date?: string }) => {
       if (!item.date) return ''
       const date = new Date(item.date)
+
+      if (activeGroupBy.value === 'hour') {
+        return date.toLocaleString('en-GB', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+        })
+      }
+
+      if (activeGroupBy.value === 'month') {
+        return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+      }
+
       return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
     }),
   }
@@ -214,7 +230,27 @@ const donationCountChartData = computed<BarChartData[]>(() => {
   
   const trends = donationTrends.value.data.trends
   return trends.map((item: { date?: string; count?: number }) => ({
-    label: item.date ? new Date(item.date).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' }) : '',
+    label: item.date
+      ? (() => {
+          const date = new Date(item.date)
+
+          if (activeGroupBy.value === 'hour') {
+            return date.toLocaleString('en-GB', {
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false,
+            })
+          }
+
+          if (activeGroupBy.value === 'month') {
+            return date.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })
+          }
+
+          return date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })
+        })()
+      : '',
     value: item.count ?? 0,
   }))
 })

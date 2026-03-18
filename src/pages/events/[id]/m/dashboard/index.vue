@@ -134,27 +134,46 @@
       </div>
     </div>
 
-    <!-- Bottom Grid: Attendees per Area + Recent Activity -->
+    <!-- Bottom Grid: Attendees by Location + Recent Activity -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-      <!-- Attendees per Area (8 cols) -->
+      <!-- Attendees by Location (8 cols) -->
       <div class="lg:col-span-8">
         <section class="bg-white border border-deep-navy rounded-lg shadow-sm overflow-hidden">
           <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
             <h2 class="text-sm font-black text-deep-navy flex items-center gap-2 uppercase tracking-widest">
               <UIcon name="i-heroicons-map" class="text-xl" />
-              Attendees per Area
+              Attendees by {{ selectedLocationScopeLabel }}
             </h2>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="scope in locationScopes"
+                :key="scope.value"
+                @click="selectedLocationScope = scope.value"
+                class="px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded border transition-colors"
+                :class="selectedLocationScope === scope.value
+                  ? 'bg-deep-navy text-white border-deep-navy'
+                  : 'bg-white text-gray-500 border-gray-200 hover:border-deep-navy/40 hover:text-deep-navy'"
+              >
+                {{ scope.label }}
+              </button>
+            </div>
           </div>
           <div class="p-6">
-            <div class="space-y-4">
+            <div v-if="isLocationBreakdownPending" class="py-8 flex items-center justify-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-deep-navy"></div>
+            </div>
+            <div v-else-if="attendeesByLocation.length" class="space-y-4">
               <ProgressBar
-                v-for="area in attendeesByArea"
-                :key="area.label"
-                :label="area.label"
-                :value="area.value"
-                :percentage="area.percentage"
+                v-for="location in attendeesByLocation"
+                :key="location.label"
+                :label="location.label"
+                :value="location.value"
+                :percentage="location.percentage"
                 color="primary"
               />
+            </div>
+            <div v-else class="py-8 text-center text-gray-500 text-sm font-semibold uppercase tracking-wider">
+              No {{ selectedLocationScopeLabel.toLowerCase() }} location data available
             </div>
           </div>
         </section>
@@ -298,6 +317,7 @@ import { useEventRoles } from '~/composables/resources/events/eventRoles'
 import { useEventResources } from '~/composables/resources/events/eventResources'
 import { useEventLandingImages } from '~/composables/resources/events/eventLandingImages'
 import { useEventOverview, useRevenueOverview } from '~/composables/statistics/event/event-statistics'
+import { useLocationBreakdown } from '~/composables/statistics/attendee/attendee-statistics'
 import { formatDate, formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import LineChart from '~/components/charts/LineChart.vue'
@@ -346,6 +366,19 @@ const { data: revenueData } = useRevenueOverview(computed(() => ({
   event_id: id.value,
 } as any)))
 const revenueBreakdown = computed(() => revenueData.value?.data)
+
+const locationScopes = [
+  { value: 'area' as const, label: 'Area' },
+  { value: 'chapter' as const, label: 'Chapter' },
+  { value: 'cluster' as const, label: 'Cluster' },
+  { value: 'country' as const, label: 'Country' },
+]
+const selectedLocationScope = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
+
+const { data: locationBreakdownData, isPending: isLocationBreakdownPending } = useLocationBreakdown(computed(() => ({
+  // @ts-ignore - Backend accepts UUID string despite OpenAPI spec saying number
+  event_id: id.value,
+} as any)))
 
 // Fetch attendees list for chart data and recent activity
 const { data: attendeesData, isPending: isAttendeesPending } = useQuery({
@@ -415,15 +448,32 @@ const formatRevenue = (value: string | number | null | undefined) => {
   return numValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
 }
 
-// Mock Regional Distribution Data
-const attendeesByArea = computed(() => {
-  // TODO: Calculate from attendees location data when available
-  return [
-    { label: 'Southeast', value: 482, percentage: 65 },
-    { label: 'Birmingham', value: 315, percentage: 45 },
-    { label: 'Wales', value: 218, percentage: 32 },
-    { label: 'Scotland', value: 156, percentage: 20 },
-  ]
+const selectedLocationScopeLabel = computed(() => {
+  const selected = locationScopes.find((scope) => scope.value === selectedLocationScope.value)
+  return selected?.label ?? 'Area'
+})
+
+const attendeesByLocation = computed(() => {
+  const breakdown = locationBreakdownData.value?.data
+  if (!breakdown) return []
+
+  const sectionMap = {
+    area: breakdown.by_area,
+    chapter: breakdown.by_chapter,
+    cluster: breakdown.by_cluster,
+    country: breakdown.by_country,
+  }
+
+  const section = sectionMap[selectedLocationScope.value] as any
+  if (!section?.distribution) return []
+
+  return section.distribution
+    .slice(0, 8)
+    .map((item: any) => ({
+      label: item.label,
+      value: item.value,
+      percentage: item.percentage,
+    }))
 })
 
 // Recent Activities (converted from latest registrations)
