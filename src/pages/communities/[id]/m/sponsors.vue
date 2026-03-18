@@ -29,7 +29,7 @@
 				</div>
 
 				<div v-if="activeTab === 'search'" class="space-y-6">
-					<div class="w-full md:w-[420px]">
+					<div class="w-full md:w-full">
 						<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Search Events</label>
 						<input
 							v-model="eventSearch"
@@ -75,7 +75,7 @@
 									type="button"
 									@click="eventPage = Math.max(1, eventPage - 1)"
 									:disabled="!hasPrevEventsPage"
-									class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black uppercase tracking-wider disabled:opacity-40"
+									class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black text-primary uppercase tracking-wider disabled:opacity-40"
 								>
 									Prev
 								</button>
@@ -83,7 +83,7 @@
 									type="button"
 									@click="eventPage = eventPage + 1"
 									:disabled="!hasNextEventsPage"
-									class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black uppercase tracking-wider disabled:opacity-40"
+									class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black text-primary uppercase tracking-wider disabled:opacity-40"
 								>
 									Next
 								</button>

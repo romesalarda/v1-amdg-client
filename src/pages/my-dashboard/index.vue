@@ -328,12 +328,12 @@
             <div class="flex items-center justify-between mb-6">
               <h3 class="text-[11px] font-black uppercase tracking-[0.2em] text-deep-navy">Schedule View</h3>
               <div class="flex gap-1">
-                <button @click="previousMonth" class="p-1 hover:text-blue-600 transition-colors">
+                <button @click="previousMonth" class="p-1 hover:text-blue-600 transition-colors text-primary">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <button @click="nextMonth" class="p-1 hover:text-blue-600 transition-colors">
+                <button @click="nextMonth" class="p-1 hover:text-blue-600 transition-colors text-primary">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                   </svg>

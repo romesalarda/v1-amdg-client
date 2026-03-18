@@ -97,9 +97,9 @@
 
 <script setup lang="ts">
 import { useQuery } from '@tanstack/vue-query'
-import { bookingsListList, bookingsTicketsList, productsOrdersList } from '~/api/sdk.gen'
+import { bookingsListList, bookingsTicketsList, organisationsSponsorsList, productsOrdersList } from '~/api/sdk.gen'
 
-type TargetType = 'booking' | 'order' | 'ticket'
+type TargetType = 'booking' | 'order' | 'ticket' | 'sponsorship'
 
 interface PickerItem {
   id: string
@@ -127,6 +127,7 @@ const pageSize = ref(10)
 const targetLabel = computed(() => {
   if (props.targetType === 'booking') return 'Booking'
   if (props.targetType === 'order') return 'Order'
+  if (props.targetType === 'sponsorship') return 'Sponsorship'
   return 'Ticket'
 })
 
@@ -152,6 +153,14 @@ const queryParams = computed(() => {
     }
   }
 
+  if (props.targetType === 'sponsorship') {
+    return {
+      ...base,
+      event_id: props.eventId,
+      search: searchQuery.value || undefined,
+    }
+  }
+
   return {
     ...base,
     search: searchQuery.value || undefined,
@@ -168,6 +177,10 @@ const { data, isLoading } = useQuery({
 
     if (props.targetType === 'order') {
       return productsOrdersList({ query: queryParams.value })
+    }
+
+    if (props.targetType === 'sponsorship') {
+      return organisationsSponsorsList({ query: queryParams.value })
     }
 
     return bookingsTicketsList({ query: queryParams.value })
@@ -194,6 +207,14 @@ const items = computed<PickerItem[]>(() => {
       id: String(row.order_id || row.id),
       primary: row.order_reference_id || row.order_id || `Order #${row.id}`,
       secondary: `${row.customer_name || row.attendee_name || 'Unknown customer'} • ${row.status_display || row.status || 'Unknown status'}`,
+    }))
+  }
+
+  if (props.targetType === 'sponsorship') {
+    return results.map((row) => ({
+      id: String(row.sponsor_id),
+      primary: row.name || `Sponsor #${row.id}`,
+      secondary: `${row.organisation_name || 'Unknown organisation'} • ${row.verification_status || 'pending'}`,
     }))
   }
 

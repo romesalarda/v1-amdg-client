@@ -214,13 +214,13 @@ const revenueByMethodChartData = computed<BarChartData[]>(() => {
   if (!revenueByMethod.value?.data?.methods) return []
   
   const methods = revenueByMethod.value.data.methods as Array<{
-    method_title?: string
-    total_revenue?: number
+    method?: string
+    revenue?: number
   }>
   
   return methods.map((item) => ({
-    label: item.method_title ?? 'Unknown',
-    value: item.total_revenue ?? 0,
+    label: item.method ?? 'Unknown',
+    value: item.revenue ?? 0,
   }))
 })
 </script>

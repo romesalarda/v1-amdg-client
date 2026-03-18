@@ -47,7 +47,7 @@ function getManagementSection(path: string): RestrictedSection | null {
   const match = path.match(/^\/events\/[^/]+\/m\/([^/?#]+)/)
   const section = match?.[1]
 
-  if (section === 'payments' || section === 'sponsors' || section === 'shop') {
+  if (section === 'sponsors' || section === 'shop') {
     return section
   }
 

@@ -7,7 +7,7 @@
           <span class="material-symbols-outlined text-primary">payments</span>
           <div class="flex-1">
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Create Payment</h3>
-            <p class="text-xs text-gray-500 mt-0.5">Create an admin payment and optionally link it to a target object</p>
+            <p class="text-xs text-gray-500 mt-0.5">Create a standard payment or donation in one step</p>
           </div>
           <button
             @click="$emit('close')"
@@ -22,22 +22,39 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">
-                  Amount (GBP)
+                  Amount
                   <span class="text-red-500">*</span>
                 </label>
-                <input
-                  v-model.number="form.base_amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  placeholder="0.00"
-                  required
-                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
+                <div class="grid grid-cols-[1fr_auto] gap-2">
+                  <input
+                    v-model.number="form.base_amount"
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    placeholder="0.00"
+                    required
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                  <select
+                    v-model="form.base_amount_currency"
+                    class="px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option
+                      v-for="currency in currencyChoices"
+                      :key="currency"
+                      :value="currency"
+                    >
+                      {{ currency }}
+                    </option>
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-2">Payment Method</label>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                  Payment Method
+                  <span v-if="isDonationMode" class="text-red-500">*</span>
+                </label>
                 <select
                   v-model="form.method"
                   class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
@@ -64,10 +81,12 @@
                 <input
                   v-model="userSearchQuery"
                   type="text"
-                  placeholder="Search users by email, username, first name..."
+                  placeholder="Search event attendees and service team members..."
                   class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
                 />
               </div>
+
+              <p class="mt-1 text-xs text-gray-500">Type at least 2 characters to search users for this event only.</p>
 
               <div
                 v-if="showUserResults"
@@ -120,7 +139,7 @@
               </div>
             </div>
 
-            <div v-if="form.target !== 'none'" class="space-y-2">
+            <div v-if="form.target !== 'none' && form.target !== 'donation'" class="space-y-2">
               <label class="block text-sm font-semibold text-gray-700">Target Object</label>
               <button
                 type="button"
@@ -147,12 +166,20 @@
               </div>
             </div>
 
+            <div v-if="isDonationMode" class="bg-pink-50 border border-pink-200 rounded-lg p-3">
+              <p class="text-xs text-pink-800">
+                Donation mode creates both a donation and its linked payment in one submission.
+              </p>
+            </div>
+
             <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                {{ isDonationMode ? 'Message' : 'Description' }}
+              </label>
               <textarea
                 v-model="form.description"
                 rows="3"
-                placeholder="Optional payment description"
+                :placeholder="isDonationMode ? 'Optional donor message' : 'Optional payment description'"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
@@ -171,7 +198,7 @@
                 class="flex-1 px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 <span v-if="isSubmitting" class="material-symbols-outlined animate-spin text-lg">progress_activity</span>
-                <span v-else>Create Payment</span>
+                <span v-else>{{ isDonationMode ? 'Create Donation + Payment' : 'Create Payment' }}</span>
               </button>
             </div>
           </form>
@@ -179,10 +206,10 @@
       </div>
 
       <PaymentTargetPickerModal
-        v-if="showTargetPicker && form.target !== 'none'"
+        v-if="showTargetPicker && form.target !== 'none' && form.target !== 'donation'"
         :open="showTargetPicker"
         :event-id="eventId"
-        :target-type="form.target"
+        :target-type="form.target as 'booking' | 'order' | 'ticket' | 'sponsorship'"
         @close="showTargetPicker = false"
         @select="handleTargetSelected"
       />
@@ -192,11 +219,13 @@
 
 <script setup lang="ts">
 import { useCreatePayment } from '~/composables/resources/payments/payments'
+import { useCreatePaymentDonationWithPayment } from '~/composables/resources/payments/paymentDonations'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
-import { useUsers } from '~/composables/resources/user/users'
+import { useEventAttendeeUsers } from '~/composables/resources/user/users'
 import PaymentTargetPickerModal from './PaymentTargetPickerModal.vue'
 
-type TargetType = 'booking' | 'order' | 'ticket' | 'none'
+type TargetType = 'booking' | 'order' | 'ticket' | 'sponsorship' | 'donation' | 'none'
+type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'CAD' | 'AUD' | 'NZD'
 
 interface Props {
   open: boolean
@@ -205,7 +234,7 @@ interface Props {
 }
 
 interface SelectedTarget {
-  target: 'booking' | 'order' | 'ticket'
+  target: 'booking' | 'order' | 'ticket' | 'sponsorship'
   targetId: string
   label: string
   subtitle: string
@@ -222,6 +251,7 @@ const toast = useToast()
 
 const form = reactive({
   base_amount: null as number | null,
+  base_amount_currency: 'GBP' as CurrencyCode,
   method: null as number | null,
   target: 'none' as TargetType,
   description: '',
@@ -234,11 +264,15 @@ const selectedTarget = ref<SelectedTarget | null>(null)
 const userSearchQuery = ref('')
 const selectedUser = ref<any | null>(null)
 
+const currencyChoices: CurrencyCode[] = ['GBP', 'USD', 'EUR', 'CAD', 'AUD', 'NZD']
+
 const targetChoices: Array<{ value: TargetType; label: string }> = [
   { value: 'none', label: 'General' },
+  { value: 'donation', label: 'Donation' },
   { value: 'booking', label: 'Booking' },
   { value: 'order', label: 'Order' },
   { value: 'ticket', label: 'Ticket' },
+  { value: 'sponsorship', label: 'Sponsorship' },
 ]
 
 const paymentMethodParams = computed(() => ({
@@ -252,23 +286,30 @@ const { data: paymentMethodsData } = usePaymentMethods(paymentMethodParams)
 const paymentMethods = computed(() => paymentMethodsData.value?.data?.results || [])
 
 const usersParams = computed(() => ({
-  search: userSearchQuery.value || undefined,
+  event_id: props.eventId,
+  search: userSearchQuery.value.length >= 2 ? userSearchQuery.value : undefined,
   page_size: 10,
 }))
 
-const { data: usersData } = useUsers(usersParams)
+const { data: usersData } = useEventAttendeeUsers(usersParams)
 
 const userResults = computed(() => usersData.value?.data?.results || [])
 const showUserResults = computed(() => userSearchQuery.value.length >= 2 && !selectedUser.value)
+const isDonationMode = computed(() => form.target === 'donation')
 
 const createPaymentMutation = useCreatePayment()
+const createDonationWithPaymentMutation = useCreatePaymentDonationWithPayment()
 
 const isFormValid = computed(() => {
   if (!props.eventPk || !selectedUser.value || !form.base_amount || form.base_amount <= 0) {
     return false
   }
 
-  if (form.target !== 'none' && !selectedTarget.value) {
+  if (isDonationMode.value && !form.method) {
+    return false
+  }
+
+  if (form.target !== 'none' && form.target !== 'donation' && !selectedTarget.value) {
     return false
   }
 
@@ -312,15 +353,26 @@ async function handleSubmit() {
   isSubmitting.value = true
 
   try {
-    await createPaymentMutation.mutateAsync({
-      user: Number(selectedUser.value.id),
-      event: Number(props.eventPk),
-      method: form.method,
-      base_amount: form.base_amount.toFixed(2),
-      description: form.description || null,
-      target: form.target,
-      target_id: form.target === 'none' ? null : selectedTarget.value?.targetId || null,
-    })
+    if (isDonationMode.value) {
+      await createDonationWithPaymentMutation.mutateAsync({
+        amount: form.base_amount.toFixed(2),
+        payment_method_id: Number(form.method),
+        user_id: Number(selectedUser.value.id),
+        event_id: props.eventId,
+        message: form.description || undefined,
+      })
+    } else {
+      await createPaymentMutation.mutateAsync({
+        user: Number(selectedUser.value.id),
+        event: Number(props.eventPk),
+        method: form.method,
+        base_amount: form.base_amount.toFixed(2),
+        base_amount_currency: form.base_amount_currency,
+        description: form.description || null,
+        target: form.target,
+        target_id: form.target === 'none' ? null : selectedTarget.value?.targetId || null,
+      } as any)
+    }
 
     emit('created')
   } catch (error: any) {
@@ -339,6 +391,7 @@ watch(
   (isOpen) => {
     if (isOpen) {
       form.base_amount = null
+      form.base_amount_currency = 'GBP'
       form.method = null
       form.target = 'none'
       form.description = ''

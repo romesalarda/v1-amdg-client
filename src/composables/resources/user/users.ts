@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
+  usersEventAttendeesList,
   usersList,
   usersRetrieve,
   usersCreate,
@@ -17,6 +18,7 @@ import {
 import type {
   UsersListData,
   UsersCreateData,
+  UsersEventAttendeesListData,
   UsersUpdateData,
   UsersPartialUpdateData,
   UsersDestroyData,
@@ -37,6 +39,16 @@ export function useUsers(params?: MaybeRefOrGetter<UsersListData['query'] | unde
       const queryParams = toValue(params)
       return usersList(queryParams ? { query: queryParams } : undefined)
     },
+  })
+}
+
+/**
+ * List users scoped to event attendee/service-team membership.
+ */
+export function useEventAttendeeUsers(params: MaybeRefOrGetter<UsersEventAttendeesListData['query']>) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'event-attendees', params] as const,
+    queryFn: () => usersEventAttendeesList({ query: toValue(params) }),
   })
 }
 

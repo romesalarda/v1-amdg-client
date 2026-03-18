@@ -3895,6 +3895,10 @@ export type DonationCheckoutRequestRequest = {
      */
     payment_method_id: number;
     /**
+     * Optional donor user ID (admins only when not self)
+     */
+    user_id?: number;
+    /**
      * Optional event ID
      */
     event_id?: string;
@@ -7964,6 +7968,7 @@ export type EventSponsorPackageCreateUpdate = {
     package_name: string;
     package_description?: string | null;
     base_amount: string;
+    readonly base_amount_currency: string;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
@@ -13442,7 +13447,10 @@ export type PaymentCreate = {
     event: number;
     method?: number | null;
     base_amount: string;
-    readonly base_amount_currency: string | null;
+    /**
+     * ISO 4217 currency code for base_amount (e.g., GBP, USD, EUR).
+     */
+    base_amount_currency?: string;
     description?: string | null;
     metadata?: unknown;
 };
@@ -13461,6 +13469,10 @@ export type PaymentCreateRequest = {
     event: number;
     method?: number | null;
     base_amount: string;
+    /**
+     * ISO 4217 currency code for base_amount (e.g., GBP, USD, EUR).
+     */
+    base_amount_currency?: string;
     description?: string | null;
     metadata?: unknown;
 };
@@ -19885,6 +19897,25 @@ export type EventSponsorListWritable = {
 };
 
 /**
+ * Create/Update serializer for EventSponsorPackage with validation.
+ */
+export type EventSponsorPackageCreateUpdateWritable = {
+    event: number;
+    package_name: string;
+    package_description?: string | null;
+    base_amount: string;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+    active?: boolean;
+    /**
+     * Sponsorship tier (e.g., 1 for Gold, 2 for Silver, etc.)
+     */
+    tier?: number;
+};
+
+/**
  * Detailed serializer for EventSponsorPackage with payment info.
  */
 export type EventSponsorPackageDetailWritable = {
@@ -21214,24 +21245,6 @@ export type PatchedRefundAssociationCreateRequestWritable = {
  * Supports frontend-safe target selection fields while preserving temporary
  * backward compatibility for legacy target_type + target_id payloads.
  */
-export type PaymentCreateWritable = {
-    /**
-     * Paid by
-     */
-    user: number;
-    event: number;
-    method?: number | null;
-    base_amount: string;
-    description?: string | null;
-    metadata?: unknown;
-};
-
-/**
- * Create serializer for Payment with validation.
- *
- * Supports frontend-safe target selection fields while preserving temporary
- * backward compatibility for legacy target_type + target_id payloads.
- */
 export type PaymentCreateRequestWritable = {
     /**
      * Paid by
@@ -21240,9 +21253,13 @@ export type PaymentCreateRequestWritable = {
     event: number;
     method?: number | null;
     base_amount: string;
+    /**
+     * ISO 4217 currency code for base_amount (e.g., GBP, USD, EUR).
+     */
+    base_amount_currency?: string;
     description?: string | null;
     /**
-     * Payment target type: booking, order, ticket, or none.
+     * Payment target type: booking, order, ticket, donation, sponsorship, or none.
      *
      * * `booking` - Booking
      * * `order` - Order
@@ -42936,6 +42953,66 @@ export type UsersChangePasswordCreateResponses = {
      */
     200: unknown;
 };
+
+export type UsersEventAttendeesListData = {
+    body?: never;
+    path?: never;
+    query: {
+        email_verified?: boolean;
+        /**
+         * Event UUID to scope the user list.
+         */
+        event_id: string;
+        is_active?: boolean;
+        is_staff?: boolean;
+        /**
+         * OAuth provider used for authentication (if any)
+         *
+         * * `google` - Google
+         * * `github` - GitHub
+         * * `` - None
+         */
+        oauth_provider?: '' | 'github' | 'google';
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Filter by organisation name (case-insensitive partial match)
+         */
+        organisation?: string;
+        /**
+         * Page number for paginated results.
+         */
+        page?: number;
+        /**
+         * Page size (max 100).
+         */
+        page_size?: number;
+        /**
+         * Optional search across email, username, first name, and last name.
+         */
+        search?: string;
+    };
+    url: '/api/users/event-attendees/';
+};
+
+export type UsersEventAttendeesListErrors = {
+    /**
+     * Missing or invalid event_id query parameter.
+     */
+    400: unknown;
+    /**
+     * Unauthorized - Authentication required
+     */
+    401: unknown;
+};
+
+export type UsersEventAttendeesListResponses = {
+    200: PaginatedUserList;
+};
+
+export type UsersEventAttendeesListResponse = UsersEventAttendeesListResponses[keyof UsersEventAttendeesListResponses];
 
 export type UsersMeRetrieveData = {
     body?: never;

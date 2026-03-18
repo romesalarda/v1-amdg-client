@@ -206,7 +206,6 @@ const tabs = computed(() => [
     path: 'payments',
     label: 'Payments',
     icon: 'i-heroicons-credit-card',
-    disabled: !eventSettings.value?.payment_enabled,
   },
   {
     path: 'sponsors',
