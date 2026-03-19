@@ -9,6 +9,7 @@ import {
   bookingsIntentsPartialUpdate,
   bookingsIntentsDestroy,
   bookingsIntentCancel,
+  bookingsListPingIntentRetrieve,
 } from '~/api/sdk.gen'
 import type {
   BookingsIntentsListData,
@@ -17,6 +18,7 @@ import type {
   BookingsIntentsPartialUpdateData,
   BookingsIntentsDestroyData,
   BookingsIntentCancelData,
+  BookingsListPingIntentRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['bookingIntents'] as const
@@ -129,5 +131,15 @@ export function useCancelBookingIntent() {
         queryKey: [...QUERY_KEY, 'detail', intentId],
       })
     },
+  })
+}
+
+/**
+ * Ping booking intent to retrieve latest status and keep expiry alive.
+ */
+export function usePingBookingIntent() {
+  return useMutation({
+    mutationFn: (query: BookingsListPingIntentRetrieveData['query']) =>
+      bookingsListPingIntentRetrieve({ query }),
   })
 }

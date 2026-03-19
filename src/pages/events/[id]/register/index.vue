@@ -228,6 +228,36 @@
 								<div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
 									Relationship is set to <span class="font-bold">Self</span> for this registration mode.
 								</div>
+								<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+									<p class="text-sm font-semibold text-slate-900">Area from</p>
+									<p class="mt-1 text-xs text-slate-600">
+										Search and select an area, then lock an area id for this attendee.
+									</p>
+									<div class="mt-3 grid gap-3 md:grid-cols-2">
+										<UInput
+											v-model="areaSearch"
+											placeholder="Search area name (min 2 chars)"
+										/>
+										<USelectMenu
+											v-model="selectedAreaId"
+											:options="areaOptions"
+											value-attribute="value"
+											option-attribute="label"
+											placeholder="Select matching area"
+										/>
+									</div>
+									<div class="mt-3 flex flex-wrap items-center gap-2">
+										<UButton size="xs" :loading="areaLookupLoading" @click="lockAreaFromEventSelection">
+											Find and lock area
+										</UButton>
+										<UButton v-if="hasCurrentAreaFrom" size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
+											Clear area
+										</UButton>
+									</div>
+									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
+										{{ hasCurrentAreaFrom ? `Locked area ID: ${currentAttendee.area_from}` : 'Area not selected yet.' }}
+									</p>
+								</div>
 							</div>
 						</div>
 
@@ -567,6 +597,25 @@
 				</div>
 	</div>
 
+	<UModal v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
+		<div class="space-y-4 p-6 md:p-8">
+			<div class="flex items-start gap-3">
+				<div class="mt-0.5 rounded-full bg-amber-100 p-2">
+					<UIcon name="i-heroicons-exclamation-triangle" class="h-5 w-5 text-amber-700" />
+				</div>
+				<div>
+					<h3 class="text-lg font-bold text-slate-900">Registration session expired</h3>
+					<p class="mt-1 text-sm text-slate-600">
+						Your booking intent is no longer active. To protect checkout integrity, you'll be redirected to the event page.
+					</p>
+				</div>
+			</div>
+			<div class="flex justify-end">
+				<UButton color="primary" @click="redirectToEventHome">Return to event</UButton>
+			</div>
+		</div>
+	</UModal>
+
 	<UModal v-model="showCheckoutSuccessModal" :ui="{ width: 'sm:max-w-3xl' }">
 		<div class="space-y-6 p-6 md:p-8">
 			<div class="text-center">
@@ -610,14 +659,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
-import { useCreateBookingIntent } from '~/composables/resources/booking/bookingIntents'
+import { useCreateBookingIntent, usePingBookingIntent } from '~/composables/resources/booking/bookingIntents'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
@@ -625,6 +674,7 @@ import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
 import { useBookingPackages } from '~/composables/resources/booking/bookingPackages'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
+import { locationsAreasList } from '~/api/sdk.gen'
 import { buildCheckoutPayload, createIdempotencyKey } from '~/composables/registration/checkout'
 import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
@@ -693,7 +743,14 @@ const reminderLocation = computed(() => {
 })
 
 const bookingIntentMutation = useCreateBookingIntent()
+const pingBookingIntentMutation = usePingBookingIntent()
 const isCreatingIntent = ref(false)
+const showIntentExpiredModal = ref(false)
+const areaLookupLoading = ref(false)
+const areaSearch = ref('')
+const selectedAreaId = ref<number | undefined>(undefined)
+const areaOptions = ref<Array<{ label: string; value: number }>>([])
+let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 watchEffect(() => {
 	if (!event.value || store.bookingIntentId || isCreatingIntent.value) return
@@ -735,6 +792,7 @@ const currentAttendeeNumber = computed(() => store.currentIndex + 1)
 const isRegistrarSelf = computed(() => store.registrarAttending && store.currentIndex === 0)
 const showRelationshipField = computed(() => !(registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1))
 const stepProgressPercent = computed(() => ((activeStepIndex.value + 1) / steps.length) * 100)
+const hasCurrentAreaFrom = computed(() => !!currentAttendee.value?.area_from)
 
 watchEffect(() => {
 	if (!currentAttendee.value) return
@@ -981,8 +1039,9 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasNames = !!attendee.first_name && !!attendee.last_name
 	const hasRelationship = !!attendee.relationship_to_user || (store.registrarAttending && attendee === store.attendees[0])
 	const hasDob = !!attendee.date_of_birth
+	const hasAreaFrom = !!attendee.area_from
 	const hasPackage = !!attendee.packageId
-	return hasNames && hasRelationship && hasDob && hasPackage && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
+	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
 }
 
 const canContinue = computed(() => {
@@ -991,7 +1050,8 @@ const canContinue = computed(() => {
 		const hasNames = !!currentAttendee.value.first_name && !!currentAttendee.value.last_name
 		const hasRelationship = !!currentAttendee.value.relationship_to_user || isRegistrarSelf.value
 		const hasDob = !!currentAttendee.value.date_of_birth
-		return hasNames && hasRelationship && hasDob
+		const hasAreaFrom = !!currentAttendee.value.area_from
+		return hasNames && hasRelationship && hasDob && hasAreaFrom
 	}
 	if (activeStepIndex.value === 1) {
 		return attendeeHasRequiredAnswers(currentAttendee.value)
@@ -1041,8 +1101,169 @@ const toggleConsent = (consentId: number, eventTarget: Event) => {
 	store.setConsents(store.currentIndex, updated)
 }
 
-const handleNext = () => {
+const redirectToEventHome = () => {
+	showIntentExpiredModal.value = false
+	store.bookingIntentId = null
+	if (event.value?.event_id) {
+		router.push({ path: `/events/${event.value.event_id}` })
+		return
+	}
+	router.push({ path: `/events/${eventId.value}` })
+}
+
+const markIntentExpired = () => {
+	showIntentExpiredModal.value = true
+}
+
+const pingBookingIntent = async (silent: boolean = true) => {
+	if (isCreatingIntent.value) {
+		return true
+	}
+
+	if (!store.bookingIntentId) {
+		markIntentExpired()
+		return false
+	}
+
+	try {
+		const response = await pingBookingIntentMutation.mutateAsync({
+			intent: store.bookingIntentId,
+		})
+		const data = response.data as {
+			is_active?: boolean
+			redirect_required?: boolean
+		}
+
+		if (!data?.is_active || data?.redirect_required) {
+			markIntentExpired()
+			return false
+		}
+
+		return true
+	} catch (error: any) {
+		const statusCode = error?.status || error?.response?.status
+		if (statusCode === 400 || statusCode === 404) {
+			markIntentExpired()
+			return false
+		}
+
+		if (!silent) {
+			toast.add({ title: 'Warning', description: 'Unable to verify booking intent right now.', color: 'amber' })
+		}
+		return true
+	}
+}
+
+let intentPingTimer: ReturnType<typeof setInterval> | null = null
+
+const stopIntentPing = () => {
+	if (!intentPingTimer) return
+	clearInterval(intentPingTimer)
+	intentPingTimer = null
+}
+
+const startIntentPing = () => {
+	stopIntentPing()
+	if (!store.bookingIntentId) return
+	intentPingTimer = setInterval(() => {
+		void pingBookingIntent(true)
+	}, 120000)
+}
+
+watch(
+	() => store.bookingIntentId,
+	(intentId) => {
+		if (!intentId) {
+			stopIntentPing()
+			return
+		}
+		void pingBookingIntent(true)
+		startIntentPing()
+	},
+	{ immediate: true }
+)
+
+watch(
+	() => store.currentIndex,
+	() => {
+		selectedAreaId.value = undefined
+		areaSearch.value = ''
+		areaOptions.value = []
+	}
+)
+
+watch(
+	() => areaSearch.value,
+	(term) => {
+		if (areaSearchDebounceTimer) {
+			clearTimeout(areaSearchDebounceTimer)
+			areaSearchDebounceTimer = null
+		}
+
+		const query = term.trim()
+		if (query.length < 2) {
+			areaOptions.value = []
+			selectedAreaId.value = undefined
+			return
+		}
+
+		areaSearchDebounceTimer = setTimeout(async () => {
+			areaLookupLoading.value = true
+			try {
+				const response = await locationsAreasList({
+					query: {
+						search: query,
+						page_size: 10,
+					},
+				})
+				const options = (response.data?.results || []).map((area) => ({
+					label: area.area_name,
+					value: area.id,
+				}))
+				areaOptions.value = options
+				if (selectedAreaId.value && !options.some((item) => item.value === selectedAreaId.value)) {
+					selectedAreaId.value = undefined
+				}
+			} catch {
+				areaOptions.value = []
+			} finally {
+				areaLookupLoading.value = false
+			}
+		}, 300)
+	}
+)
+
+onBeforeUnmount(() => {
+	stopIntentPing()
+	if (areaSearchDebounceTimer) {
+		clearTimeout(areaSearchDebounceTimer)
+		areaSearchDebounceTimer = null
+	}
+})
+
+const lockAreaFromEventSelection = async () => {
+	if (!currentAttendee.value || !selectedAreaId.value) {
+		toast.add({ title: 'Area lookup', description: 'Select an area first.', color: 'amber' })
+		return
+	}
+
+	const selectedArea = areaOptions.value.find((item) => item.value === selectedAreaId.value)
+	store.setAreaFrom(store.currentIndex, selectedAreaId.value)
+	if (selectedArea?.label) {
+		toast.add({ title: 'Area locked', description: `${selectedArea.label} has been set for this attendee.`, color: 'green' })
+		return
+	}
+	toast.add({ title: 'Area locked', description: 'Area has been set for this attendee.', color: 'green' })
+}
+
+const clearAreaFrom = () => {
+	if (!currentAttendee.value) return
+	store.setAreaFrom(store.currentIndex, null)
+}
+
+const handleNext = async () => {
 	if (!canContinue.value) return
+	if (!(await pingBookingIntent(true))) return
 
 	if (activeStepIndex.value < attendeeStepCount - 1) {
 		activeStepIndex.value += 1
@@ -1057,7 +1278,9 @@ const handleNext = () => {
 	}
 }
 
-const handleBack = () => {
+const handleBack = async () => {
+	if (!(await pingBookingIntent(true))) return
+
 	if (activeStepIndex.value > 0 && activeStepIndex.value <= attendeeStepCount - 1) {
 		activeStepIndex.value -= 1
 		return
@@ -1077,13 +1300,15 @@ const handleBack = () => {
 	goBack()
 }
 
-const jumpToAttendee = (index: number) => {
+const jumpToAttendee = async (index: number) => {
+	if (!(await pingBookingIntent(true))) return
 	store.setCurrentIndex(index)
 	activeStepIndex.value = 0
 }
 
 const handleCheckout = async () => {
 	if (!canContinue.value || !store.bookingIntentId || !selectedPaymentMethodId.value) return
+	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
 

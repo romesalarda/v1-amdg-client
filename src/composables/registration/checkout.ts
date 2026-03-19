@@ -96,7 +96,7 @@ const buildAttendeeDraft = (attendee: AttendeeDraft): AttendeeDraftRequest => ({
   date_of_birth: attendee.date_of_birth,
   gender: attendee.gender ?? null,
   relationship_to_user: attendee.relationship_to_user ?? 'other',
-  area_from: attendee.area_from ?? null,
+  area_from: attendee.area_from ?? 0,
   personal_info: buildPersonalInfo(attendee.personalInfo),
   consents: attendee.consents.length ? buildConsents(attendee.consents) : undefined,
   question_answers: attendee.questionAnswers.length ? buildQuestionAnswers(attendee.questionAnswers) : undefined,

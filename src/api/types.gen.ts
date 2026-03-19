@@ -664,7 +664,7 @@ export type AttendeeDraftRequest = {
      * * `other` - other
      */
     relationship_to_user: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
-    area_from?: number | null;
+    area_from: number;
     personal_info?: AttendeePersonalInfoDraftRequest;
     consents?: Array<AttendeeConsentDraftRequest>;
     question_answers?: Array<EventQuestionAnswerDraftRequest>;
@@ -25459,6 +25459,47 @@ export type BookingsCheckoutResponses = {
 };
 
 export type BookingsCheckoutResponse = BookingsCheckoutResponses[keyof BookingsCheckoutResponses];
+
+export type BookingsListPingIntentRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Booking intent ID to ping
+         */
+        intent?: string;
+    };
+    url: '/api/bookings/list/ping-intent/';
+};
+
+export type BookingsListPingIntentRetrieveErrors = {
+    /**
+     * Missing intent query parameter
+     */
+    400: unknown;
+    /**
+     * Booking intent not found
+     */
+    404: unknown;
+};
+
+export type BookingsListPingIntentRetrieveResponses = {
+    /**
+     * Booking intent status
+     */
+    200: {
+        intent?: string;
+        exists?: boolean;
+        is_active?: boolean;
+        is_expired?: boolean;
+        status?: string;
+        expires_at?: string | null;
+        seconds_remaining?: number;
+        redirect_required?: boolean;
+    };
+};
+
+export type BookingsListPingIntentRetrieveResponse = BookingsListPingIntentRetrieveResponses[keyof BookingsListPingIntentRetrieveResponses];
 
 export type BookingsPackagesListData = {
     body?: never;
