@@ -286,8 +286,8 @@ const topAreas = computed(() => {
     .map((row) => {
       const data = row as Record<string, unknown>
       return {
-        name: toLabel(data.area_name ?? data.name),
-        count: toNumber(data.value ?? data.count),
+        name: toLabel(data.label),
+        count: toNumber(data.value),
       }
     })
     .sort((a, b) => b.count - a.count)

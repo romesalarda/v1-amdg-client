@@ -67,9 +67,74 @@
 
                     <div v-if="item.key === 'current-leaders'" class="mt-8">
                         <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-                            <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Current Leaders</h2>
-                                <p class="text-sm text-deep-navy/60 mt-2 font-medium">Active leader assignments in this organisation</p>
+                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 space-y-6">
+                                <div>
+                                    <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Current Leaders</h2>
+                                    <p class="text-sm text-deep-navy/60 mt-2 font-medium">Active leader assignments in this organisation</p>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                                    <div>
+                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                            Location Type
+                                        </label>
+                                        <select
+                                            v-model="selectedLocationType"
+                                            class="w-full px-4 py-3 border-2 border-deep-navy/20 rounded-xl text-xs font-black uppercase tracking-wider text-deep-navy bg-white"
+                                        >
+                                            <option v-for="option in locationTypeOptions" :key="option.value" :value="option.value">
+                                                {{ option.label }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                            Location
+                                        </label>
+                                        <select
+                                            v-model="selectedLocationId"
+                                            class="w-full px-4 py-3 border-2 border-deep-navy/20 rounded-xl text-xs font-black uppercase tracking-wider text-deep-navy bg-white"
+                                            :disabled="selectedLocations.length === 0"
+                                        >
+                                            <option :value="null">All Locations</option>
+                                            <option v-for="location in selectedLocations" :key="location.id" :value="location.id">
+                                                {{ location.label }}
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="lg:col-span-2">
+                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                            Search Leaders
+                                        </label>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                <svg class="h-4 w-4 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                                </svg>
+                                            </div>
+                                            <input
+                                                v-model="leaderSearchInput"
+                                                type="text"
+                                                placeholder="Search by name or email..."
+                                                class="w-full pl-10 pr-4 py-3 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-sm"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div v-if="isLeaderFilteringActive" class="flex items-center justify-between">
+                                    <p class="text-xs text-deep-navy/50 font-medium">
+                                        Filters are active. Showing {{ leadersTotalCount }} matching leaders.
+                                    </p>
+                                    <button
+                                        class="px-4 py-2 border-2 border-deep-navy/30 text-deep-navy rounded-xl font-black text-xs uppercase tracking-wider hover:bg-deep-navy/5 transition-all"
+                                        @click="resetLeaderFilters"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                </div>
                             </div>
 
                             <div v-if="isLoadingLeaders" class="p-8 space-y-3">
@@ -102,6 +167,24 @@
 
                             <div v-else class="px-8 py-12 text-center">
                                 <p class="text-sm font-bold text-deep-navy/60">No leaders assigned yet</p>
+                            </div>
+
+                            <div v-if="!isLoadingLeaders && leadersTotalCount > 0" class="px-6 py-4 border-t border-deep-navy/10 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                                <div class="flex items-center gap-3">
+                                    <select
+                                        v-model="leadersPageSize"
+                                        class="px-3 py-1.5 border-2 border-deep-navy/20 rounded-lg text-xs font-black uppercase tracking-wider text-deep-navy"
+                                    >
+                                        <option :value="10">10 per page</option>
+                                        <option :value="25">25 per page</option>
+                                        <option :value="50">50 per page</option>
+                                        <option :value="100">100 per page</option>
+                                    </select>
+                                    <span class="text-xs text-deep-navy/60 font-medium">
+                                        Showing {{ leadersFrom }} to {{ leadersTo }} of {{ leadersTotalCount }}
+                                    </span>
+                                </div>
+                                <UPagination v-model="leadersPage" :page-count="leadersPageSize" :total="leadersTotalCount" :max="7" />
                             </div>
                         </div>
                     </div>
@@ -142,12 +225,13 @@
         </div>
 
         <UModal v-model="isInviteModalOpen" prevent-focus>
-            <InviteLeaderModal :organisation-id="organisationId" :leaders="leaders" :pending-invites="pendingInvites" />
+            <InviteLeaderModal :organisation-id="organisationId" :leaders="leadersSnapshot" :pending-invites="pendingInvites" />
         </UModal>
     </CommunitiesManagementLayout>
 </template>
 
 <script setup lang="ts">
+import { useDebounceFn } from '@vueuse/core'
 import { formatDate } from '~/utils/time'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { useOrganisationLeaders, useDeleteOrganisationLeader } from '~/composables/resources/organisation/organisationLeaders'
@@ -155,6 +239,10 @@ import {
     useOrganisationLeaderInvites,
     useDeleteOrganisationLeaderInvite,
 } from '~/composables/resources/organisation/organisationLeaderInvites'
+import { useLocationCountries } from '~/composables/resources/locations/locationCountries'
+import { useLocationClusters } from '~/composables/resources/locations/locationClusters'
+import { useLocationChapters } from '~/composables/resources/locations/locationChapters'
+import { useLocationAreas } from '~/composables/resources/locations/locationAreas'
 import InviteLeaderModal from '~/components/communities/InviteLeaderModal.vue'
 
 definePageMeta({
@@ -177,12 +265,135 @@ const organisation = computed(() => organisationData.value?.data)
 const isInviteModalOpen = ref(false)
 const showInviteHistory = ref(false)
 
-const { data: leadersData, isLoading: isLoadingLeaders } = useOrganisationLeaders(computed(() => ({
+type LocationType = 'all' | 'country' | 'cluster' | 'chapter' | 'area'
+
+const locationTypeOptions: Array<{ value: LocationType; label: string }> = [
+    { value: 'all', label: 'All Types' },
+    { value: 'area', label: 'Area' },
+    { value: 'chapter', label: 'Chapter' },
+    { value: 'cluster', label: 'Cluster' },
+    { value: 'country', label: 'Country' },
+]
+
+const selectedLocationType = ref<LocationType>('all')
+const selectedLocationId = ref<number | null>(null)
+
+const leaderSearchInput = ref('')
+const debouncedLeaderSearch = ref('')
+const updateLeaderSearch = useDebounceFn((value: string) => {
+    debouncedLeaderSearch.value = value.trim()
+}, 350)
+
+watch(leaderSearchInput, (value) => {
+    updateLeaderSearch(value)
+})
+
+const { data: countriesData } = useLocationCountries(computed(() => ({ page_size: 300 })))
+const { data: clustersData } = useLocationClusters(computed(() => ({ page_size: 300 })))
+const { data: chaptersData } = useLocationChapters(computed(() => ({ page_size: 300 })))
+const { data: areasData } = useLocationAreas(computed(() => ({ page_size: 300 })))
+
+const selectedLocations = computed(() => {
+    if (selectedLocationType.value === 'country') {
+        const countries = countriesData.value?.data?.results || []
+        return countries.map((country: any) => ({
+            id: country.id,
+            label: country.country_name || country.country || `Country ${country.id}`,
+        }))
+    }
+
+    if (selectedLocationType.value === 'cluster') {
+        const clusters = clustersData.value?.data?.results || []
+        return clusters.map((cluster: any) => ({
+            id: cluster.id,
+            label: cluster.cluster_name || `Cluster ${cluster.id}`,
+        }))
+    }
+
+    if (selectedLocationType.value === 'chapter') {
+        const chapters = chaptersData.value?.data?.results || []
+        return chapters.map((chapter: any) => ({
+            id: chapter.id,
+            label: chapter.chapter_name || `Chapter ${chapter.id}`,
+        }))
+    }
+
+    if (selectedLocationType.value === 'area') {
+        const areas = areasData.value?.data?.results || []
+        return areas.map((area: any) => ({
+            id: area.id,
+            label: area.area_name || `Area ${area.id}`,
+        }))
+    }
+
+    return []
+})
+
+const leadersPage = ref(1)
+const leadersPageSize = ref(10)
+
+watch(selectedLocationType, () => {
+    selectedLocationId.value = null
+    leadersPage.value = 1
+})
+
+watch([selectedLocationId, debouncedLeaderSearch], () => {
+    leadersPage.value = 1
+})
+
+watch(leadersPageSize, () => {
+    leadersPage.value = 1
+})
+
+const leadersQuery = computed(() => {
+    const query: Record<string, any> = {
+        organisation: organisationId.value,
+        page: leadersPage.value,
+        page_size: leadersPageSize.value,
+    }
+
+    if (selectedLocationType.value !== 'all') {
+        query.location_type = selectedLocationType.value
+    }
+
+    if (selectedLocationId.value) {
+        query.location_id = selectedLocationId.value
+    }
+
+    if (debouncedLeaderSearch.value.length >= 2) {
+        query.search = debouncedLeaderSearch.value
+    }
+
+    return query
+})
+
+const { data: leadersData, isLoading: isLoadingLeaders } = useOrganisationLeaders(leadersQuery)
+
+const leaders = computed(() => leadersData.value?.data?.results || [])
+const leadersTotalCount = computed(() => leadersData.value?.data?.count || 0)
+const leadersFrom = computed(() => leadersTotalCount.value === 0 ? 0 : (leadersPage.value - 1) * leadersPageSize.value + 1)
+const leadersTo = computed(() => Math.min(leadersPage.value * leadersPageSize.value, leadersTotalCount.value))
+
+const { data: leadersSnapshotData } = useOrganisationLeaders(computed(() => ({
     organisation: organisationId.value,
     page_size: 200,
 })))
 
-const leaders = computed(() => leadersData.value?.data?.results || [])
+const leadersSnapshot = computed(() => leadersSnapshotData.value?.data?.results || [])
+
+const isLeaderFilteringActive = computed(() => {
+    return selectedLocationType.value !== 'all'
+        || !!selectedLocationId.value
+        || debouncedLeaderSearch.value.length >= 2
+})
+
+const resetLeaderFilters = () => {
+    selectedLocationType.value = 'all'
+    selectedLocationId.value = null
+    leaderSearchInput.value = ''
+    debouncedLeaderSearch.value = ''
+    leadersPage.value = 1
+}
 
 const { data: invitesData, isLoading: isLoadingInvites } = useOrganisationLeaderInvites(computed(() => ({
     organisation: organisationId.value,
@@ -265,7 +476,7 @@ const historyItems = computed(() => {
         }
     })
 
-    const leaderHistory = leaders.value.map((leader: any) => ({
+    const leaderHistory = leadersSnapshot.value.map((leader: any) => ({
         key: `leader-${leader.id}`,
         date: leader.added_at,
         title: 'Leader Assignment',
