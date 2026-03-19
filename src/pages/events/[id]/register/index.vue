@@ -214,7 +214,7 @@
 										placeholder="Select gender"
 									/>
 								</div>
-								<div class="sm:col-span-2">
+								<div v-if="showRelationshipField" class="sm:col-span-2">
 									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you</label>
 									<USelectMenu
 										v-model="currentAttendee.relationship_to_user"
@@ -224,6 +224,9 @@
 										placeholder="Select relationship"
 										:disabled="isRegistrarSelf"
 									/>
+								</div>
+								<div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+									Relationship is set to <span class="font-bold">Self</span> for this registration mode.
 								</div>
 							</div>
 						</div>
@@ -476,20 +479,60 @@
 									option-attribute="label"
 									placeholder="Select a payment method"
 								/>
+								<p v-else class="text-sm text-gray-500">No payment methods available for this event.</p>
 							</div>
 
-							<div v-if="checkoutResult" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
-								<p class="font-semibold">Checkout complete</p>
-								<p v-if="checkoutResult.booking_reference" class="mt-1">Reference: {{ checkoutResult.booking_reference }}</p>
-								<p v-if="checkoutResult.bank_transfer_reference" class="mt-1">
-									Bank transfer reference: {{ checkoutResult.bank_transfer_reference }}
-								</p>
-								<p v-if="checkoutResult.bank_transfer_instructions" class="mt-1">
-									{{ checkoutResult.bank_transfer_instructions }}
-								</p>
-								<p v-if="checkoutResult.stripe_client_secret" class="mt-1">
-									Stripe payment required. Client secret: {{ checkoutResult.stripe_client_secret }}
-								</p>
+							<div v-if="selectedPaymentMethod" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+								<div class="flex items-center justify-between gap-3">
+									<p class="text-sm font-semibold text-slate-900">{{ selectedPaymentMethod.title }}</p>
+									<span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
+										{{ paymentMethodTypeLabel }}
+									</span>
+								</div>
+								<div v-if="isBankTransferMethod" class="mt-4 grid gap-3 sm:grid-cols-2">
+									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
+										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account name</p>
+										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_name || 'TBA' }}</p>
+									</div>
+									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
+										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Sort code</p>
+										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.sort_code || 'TBA' }}</p>
+									</div>
+									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
+										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account number</p>
+										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_number || 'TBA' }}</p>
+									</div>
+								</div>
+
+								<div v-else-if="isStripeMethod" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+									Card payments will be processed securely through Stripe after submitting checkout.
+								</div>
+							</div>
+
+							<div class="rounded-xl border border-slate-200 bg-white p-4">
+								<div class="flex items-center justify-between">
+									<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
+									<p class="text-xs text-slate-500">Per attendee</p>
+								</div>
+								<div class="mt-3 space-y-2">
+									<div
+										v-for="item in attendeePaymentBreakdown"
+										:key="item.index"
+										class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
+									>
+										<div>
+											<p class="font-semibold text-slate-800">{{ item.name }}</p>
+											<p class="text-xs text-slate-500">{{ item.packageName }}</p>
+										</div>
+										<p class="font-semibold text-slate-900">{{ formatMoney(item.amount, item.currency) }}</p>
+									</div>
+								</div>
+								<div class="mt-4 border-t border-slate-100 pt-3">
+									<div class="flex items-center justify-between text-sm font-bold text-slate-900">
+										<span>Total</span>
+										<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
+									</div>
+								</div>
 							</div>
 						</div>
 									<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
@@ -523,6 +566,47 @@
 			</template>
 				</div>
 	</div>
+
+	<UModal v-model="showCheckoutSuccessModal" :ui="{ width: 'sm:max-w-3xl' }">
+		<div class="space-y-6 p-6 md:p-8">
+			<div class="text-center">
+				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
+					<UIcon name="i-heroicons-check" class="h-9 w-9 text-emerald-600" />
+				</div>
+				<h3 class="mt-4 text-2xl font-black text-slate-900">Registration Complete</h3>
+				<p class="mt-2 text-sm text-slate-600">
+					You're going to {{ event?.title || 'this event' }}.
+				</p>
+			</div>
+
+			<div class="grid gap-3 md:grid-cols-2">
+				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Booking reference</p>
+					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.booking_reference || 'N/A' }}</p>
+				</div>
+				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Payment reference</p>
+					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.payment_reference || 'N/A' }}</p>
+				</div>
+				<div v-if="checkoutResult?.bank_transfer_reference" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Bank transfer reference</p>
+					<p class="mt-1 text-base font-semibold text-blue-900">{{ checkoutResult.bank_transfer_reference }}</p>
+				</div>
+				<div v-if="checkoutResult?.bank_transfer_instructions" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Transfer instructions</p>
+					<p class="mt-1 text-sm text-blue-900">{{ checkoutResult.bank_transfer_instructions }}</p>
+				</div>
+				<div v-if="checkoutResult?.stripe_client_secret" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 md:col-span-2">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">Stripe next step</p>
+					<p class="mt-1 text-sm text-emerald-900">Your booking is created. Complete card payment using the provided Stripe flow.</p>
+				</div>
+			</div>
+
+			<div class="flex justify-end">
+				<UButton color="primary" @click="showCheckoutSuccessModal = false">Close</UButton>
+			</div>
+		</div>
+	</UModal>
 </template>
 
 <script setup lang="ts">
@@ -553,9 +637,26 @@ const store = useRegistrationStore()
 
 const eventId = computed(() => String(route.params.id || ''))
 const ticketCount = computed(() => Number(route.query.tickets || 1))
+const registrationMode = computed(() => {
+	const mode = String(route.query.mode || '').toLowerCase()
+	if (mode === 'multiple') return 'multiple'
+	if (mode === 'self') return 'self'
+	return Number(route.query.tickets || 1) > 1 ? 'multiple' : 'self'
+})
 const registrarAttending = computed(() => {
-	const attending = String(route.query.o || 'true')
-	return attending === 'true' || attending === '1'
+	if (route.query.uia !== undefined) {
+		const attending = String(route.query.uia).toLowerCase()
+		return attending === 'true' || attending === '1'
+	}
+
+	if (route.query.o !== undefined) {
+		// Legacy behavior: o=false used to mean registrar is attending.
+		const legacy = String(route.query.o).toLowerCase()
+		if (legacy === 'false' || legacy === '0') return true
+		if (legacy === 'true' || legacy === '1') return false
+	}
+
+	return true
 })
 
 watchEffect(() => {
@@ -632,7 +733,15 @@ const activeStepIndex = ref(0)
 const currentAttendee = computed(() => store.attendees[store.currentIndex])
 const currentAttendeeNumber = computed(() => store.currentIndex + 1)
 const isRegistrarSelf = computed(() => store.registrarAttending && store.currentIndex === 0)
+const showRelationshipField = computed(() => !(registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1))
 const stepProgressPercent = computed(() => ((activeStepIndex.value + 1) / steps.length) * 100)
+
+watchEffect(() => {
+	if (!currentAttendee.value) return
+	if (registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1) {
+		currentAttendee.value.relationship_to_user = 'self'
+	}
+})
 
 const attendeeDisplayName = (attendee?: AttendeeDraft | null, index?: number) => {
 	if (!attendee) return 'Attendee'
@@ -739,19 +848,66 @@ const packageById = (packageId?: number) => allPackages.value.find((pkg) => pkg.
 const paymentMethodsQuery = usePaymentMethods(
 	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
 )
+const paymentMethods = computed(() => paymentMethodsQuery.data.value?.data?.results || [])
 const paymentMethodOptions = computed(() =>
-	(paymentMethodsQuery.data.value?.data?.results || []).map((method) => ({
+	paymentMethods.value.map((method) => ({
 		label: method.title,
 		value: method.id,
 	}))
 )
 const selectedPaymentMethodId = ref<number | undefined>(undefined)
+const selectedPaymentMethod = computed(() => paymentMethods.value.find((method) => method.id === selectedPaymentMethodId.value))
+
+const paymentMethodTypeLabel = computed(() => {
+	if (!selectedPaymentMethod.value?.method_type) return 'Method'
+	if (selectedPaymentMethod.value.method_type === 'BANK_TRANSFER') return 'Bank transfer'
+	if (selectedPaymentMethod.value.method_type === 'STRIPE') return 'Stripe'
+	if (selectedPaymentMethod.value.method_type === 'CASH') return 'Cash'
+	return selectedPaymentMethod.value.method_type
+})
+
+const isBankTransferMethod = computed(() => selectedPaymentMethod.value?.method_type === 'BANK_TRANSFER')
+const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+
+const bankDetails = computed(() => {
+	const details = selectedPaymentMethod.value?.provided_details as Record<string, unknown> | undefined
+	return {
+		account_name: typeof details?.account_name === 'string' ? details.account_name : '',
+		sort_code: typeof details?.sort_code === 'string' ? details.sort_code : '',
+		account_number: typeof details?.account_number === 'string' ? details.account_number : '',
+	}
+})
 
 const checkoutMutation = useCheckoutBooking()
 const idempotencyKey = ref(createIdempotencyKey())
 
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
+const showCheckoutSuccessModal = ref(false)
+
+const attendeePaymentBreakdown = computed(() =>
+	store.attendees.map((attendee, index) => {
+		const pkg = packageById(attendee.packageId)
+		return {
+			index,
+			name: attendeeDisplayName(attendee, index),
+			packageName: pkg?.name || 'No package selected',
+			amount: Number(pkg?.modified_amount || 0),
+			currency: pkg?.base_amount_currency || checkoutResult.value?.currency || 'GBP',
+		}
+	})
+)
+
+const paymentBreakdownTotal = computed(() => {
+	const amount = attendeePaymentBreakdown.value.reduce((sum, item) => sum + item.amount, 0)
+	const currency = attendeePaymentBreakdown.value.find((item) => item.currency)?.currency || checkoutResult.value?.currency || 'GBP'
+	return { amount, currency }
+})
+
+const formatMoney = (value: number | string, currency: string = 'GBP') => {
+	const amount = typeof value === 'number' ? value : Number(value || 0)
+	return `${amount.toFixed(2)} ${currency}`
+}
 
 const requiredConsentsMissing = computed(() => {
 	if (!consents.value.length) return 0
@@ -942,6 +1098,7 @@ const handleCheckout = async () => {
 			idempotencyKey: idempotencyKey.value,
 		})
 		checkoutResult.value = response.data
+		showCheckoutSuccessModal.value = true
 		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
 	} catch (error) {
 		console.error('Checkout failed', error)

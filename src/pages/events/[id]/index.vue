@@ -108,7 +108,6 @@
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Cost</p>
                 <p class="font-black text-deep-navy truncate">
-                  {{ event.maximum_attendance ? `${event.maximum_attendance.toLocaleString()} Cap` : 'Free Entry' }}
                 </p>
               </div>
             </div>
@@ -339,29 +338,75 @@
       <div>
         <h3 class="text-lg font-black text-deep-navy uppercase tracking-widest">Start Registration</h3>
         <p class="text-sm text-deep-navy/60 mt-2">
-          Tell us how many people you are registering and whether you are attending.
+      Tell us who is being registered so we can start with the right flow.
         </p>
       </div>
 
       <div class="space-y-4">
-        <div>
-          <label class="block text-xs font-black uppercase tracking-widest text-deep-navy/60 mb-2">
-            Number of attendees
-          </label>
-          <input
-            v-model.number="ticketCount"
-            type="number"
-            min="1"
-            class="w-full rounded-xl border border-deep-navy/20 bg-white px-4 py-3 text-sm text-deep-navy focus:border-deep-navy focus:outline-none focus:ring-2 focus:ring-deep-navy/20"
-          />
-        </div>
+    <div class="rounded-xl border border-deep-navy/10 p-4">
+      <p class="text-sm font-black text-deep-navy uppercase tracking-widest">Will you as registrar be attending?</p>
+      <p class="text-xs text-deep-navy/60 mt-1">If yes, your registration is included automatically.</p>
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          @click="selectRegistrarAttendance(true)"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors"
+          :class="registrarAttending ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
+        >
+          Yes
+        </button>
+        <button
+          type="button"
+          @click="selectRegistrarAttendance(false)"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors"
+          :class="!registrarAttending ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
+        >
+          No
+        </button>
+      </div>
+    </div>
 
-        <div class="flex items-center justify-between rounded-xl border border-deep-navy/10 p-4">
-          <div>
-            <p class="text-sm font-black text-deep-navy uppercase tracking-widest">Are you attending?</p>
-            <p class="text-xs text-deep-navy/60 mt-1">If not, you will register others only.</p>
-          </div>
-          <UToggle v-model="isAttending" />
+    <div class="rounded-xl border border-deep-navy/10 p-4">
+      <p class="text-sm font-black text-deep-navy uppercase tracking-widest">Are you registering other people?</p>
+      <p class="text-xs text-deep-navy/60 mt-1">Enable this to include family or friends in this booking.</p>
+      <div class="mt-3 grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          @click="selectRegisteringOthers(true)"
+          :disabled="!registrarAttending"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          :class="registeringOthers ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
+        >
+          Yes
+        </button>
+        <button
+          type="button"
+          @click="selectRegisteringOthers(false)"
+          :disabled="!registrarAttending"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-60"
+          :class="!registeringOthers ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
+        >
+          No
+        </button>
+      </div>
+    </div>
+
+    <div v-if="registeringOthers || !registrarAttending">
+      <label class="block text-xs font-black uppercase tracking-widest text-deep-navy/60 mb-2">
+      {{ registrarAttending ? 'How many additional attendees?' : 'How many attendees are you registering?' }}
+      </label>
+      <input
+      v-model.number="otherAttendeeCount"
+      type="number"
+      :min="registrarAttending ? 1 : 1"
+      class="w-full rounded-xl border border-deep-navy/20 bg-white px-4 py-3 text-sm text-deep-navy focus:border-deep-navy focus:outline-none focus:ring-2 focus:ring-deep-navy/20"
+      />
+    </div>
+
+    <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Registration summary</p>
+      <p class="mt-2 text-sm font-bold text-deep-navy">Total attendee slots: {{ calculatedTicketCount }}</p>
+      <p class="mt-1 text-xs text-deep-navy/60">Mode: {{ registrationMode }}</p>
         </div>
       </div>
 
@@ -398,8 +443,47 @@ const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
 
 const showRegistrationModal = ref(false)
-const ticketCount = ref(1)
-const isAttending = ref(true)
+const registrarAttending = ref(true)
+const registeringOthers = ref(false)
+const otherAttendeeCount = ref(1)
+
+const calculatedTicketCount = computed(() => {
+  if (!registrarAttending.value) {
+    return Math.max(1, Number(otherAttendeeCount.value || 1))
+  }
+  if (!registeringOthers.value) {
+    return 1
+  }
+  return 1 + Math.max(1, Number(otherAttendeeCount.value || 1))
+})
+
+const registrationMode = computed(() => {
+  return calculatedTicketCount.value === 1 && registrarAttending.value ? 'self' : 'multiple'
+})
+
+watchEffect(() => {
+  if (!registrarAttending.value) {
+    registeringOthers.value = true
+  }
+  if (registeringOthers.value || !registrarAttending.value) {
+    otherAttendeeCount.value = Math.max(1, Number(otherAttendeeCount.value || 1))
+  }
+})
+
+const selectRegistrarAttendance = (attending: boolean) => {
+  registrarAttending.value = attending
+  if (!attending) {
+    registeringOthers.value = true
+  }
+}
+
+const selectRegisteringOthers = (value: boolean) => {
+  if (!registrarAttending.value) {
+    registeringOthers.value = true
+    return
+  }
+  registeringOthers.value = value
+}
 
 // Setup countdown timer
 const { countdown } = useCountdown(
@@ -434,20 +518,26 @@ const openRegistrationModal = () => {
     return
   }
 
-  ticketCount.value = Math.max(1, Number(event.value?.maximum_attendance ? 1 : ticketCount.value))
-  isAttending.value = true
+  registrarAttending.value = true
+  registeringOthers.value = false
+  otherAttendeeCount.value = 1
   showRegistrationModal.value = true
 }
 
 const startRegistration = () => {
-  const count = Math.max(1, Number(ticketCount.value || 1))
+  if (!registrarAttending.value) {
+    registeringOthers.value = true
+  }
+
+  const count = calculatedTicketCount.value
   showRegistrationModal.value = false
 
   navigateTo({
     path: `/events/${eventId.value}/register`,
     query: {
       tickets: String(count),
-      o: isAttending.value ? 'false' : 'true',
+      mode: registrationMode.value,
+      uia: registrarAttending.value ? 'true' : 'false',
     },
   })
 }
