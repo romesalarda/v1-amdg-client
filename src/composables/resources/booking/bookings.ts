@@ -103,7 +103,16 @@ export function useCheckoutBooking() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: BookingsCheckoutData['body']) => bookingsCheckout({ body }),
+    mutationFn: (input: BookingsCheckoutData['body'] | { body: BookingsCheckoutData['body']; idempotencyKey?: string }) => {
+      if ('body' in input) {
+        return bookingsCheckout({
+          body: input.body,
+          headers: input.idempotencyKey ? { 'Idempotency-Key': input.idempotencyKey } : undefined,
+        })
+      }
+
+      return bookingsCheckout({ body: input })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },

@@ -22,13 +22,17 @@ const QUERY_KEY = ['eventQuestions'] as const
 /**
  * List all event questions
  */
-export function useEventQuestions(params?: MaybeRefOrGetter<EventQuestionsListData['query'] | undefined>) {
+export function useEventQuestions(
+  params?: MaybeRefOrGetter<EventQuestionsListData['query'] | undefined>,
+  options?: { enabled?: MaybeRefOrGetter<boolean> },
+) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
       return eventQuestionsList(queryParams ? { query: queryParams } : undefined)
     },
+    enabled: () => (options?.enabled ? toValue(options.enabled) : true),
   })
 }
 

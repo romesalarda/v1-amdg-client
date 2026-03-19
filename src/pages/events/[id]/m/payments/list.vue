@@ -338,21 +338,6 @@
                   </select>
                 </div>
 
-                <!-- Descriptor Filter -->
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-2">Descriptor</label>
-                  <select
-                    v-model="paymentFilters.descriptor"
-                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value="">All</option>
-                    <option value="sponsorship">Sponsor</option>
-                    <option value="donation">Donation</option>
-                    <option value="booking">Booking</option>
-                    <option value="ticket">Ticket</option>
-                  </select>
-                </div>
-
                 <!-- Filter Actions -->
                 <div class="flex items-end gap-2">
                   <button
@@ -381,9 +366,6 @@
                   </th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Reference
-                  </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                    Descriptor
                   </th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Date
@@ -422,11 +404,6 @@
                   <td class="px-4 py-3">
                     <div class="font-mono text-sm font-semibold text-gray-900">
                       {{ payment.payment_reference }}
-                    </div>
-                  </td>
-                  <td class="px-4 py-3">
-                    <div class="font-mono text-sm font-semibold text-gray-900">
-                      {{ payment.descriptor?.toUpperCase()  || 'GENERAL' }}
                     </div>
                   </td>
                   <td class="px-4 py-3">
@@ -742,7 +719,6 @@ const paymentFilters = reactive({
   amount_min: null as number | null,
   amount_max: null as number | null,
   has_refunds: '',
-  descriptor: '',
 })
 
 // Computed query params for API
@@ -793,10 +769,6 @@ const paymentsQueryParams = computed(() => {
 
   if (quickFilters.has_refunds) {
     params.has_refunds = true
-  }
-
-  if (paymentFilters.descriptor) {
-    params.descriptor = paymentFilters.descriptor
   }
 
   return params

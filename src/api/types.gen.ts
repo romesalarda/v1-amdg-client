@@ -429,7 +429,11 @@ export type AttendeeCheckoutRequest = {
     /**
      * UUID of the attendee this selection is for
      */
-    attendee_id: string;
+    attendee_id?: string;
+    /**
+     * Draft attendee data to create during checkout
+     */
+    attendee?: AttendeeDraftRequest;
     /**
      * ID of the BookingPackage selected for this attendee
      */
@@ -464,6 +468,11 @@ export type AttendeeConsent = {
         attendee?: string;
         consent?: string;
     };
+};
+
+export type AttendeeConsentDraftRequest = {
+    consent_id: number;
+    consent_given?: boolean;
 };
 
 /**
@@ -636,6 +645,29 @@ export type AttendeeDietaryRequirementRequest = {
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
     verified_by?: number | null;
+};
+
+export type AttendeeDraftRequest = {
+    first_name: string;
+    last_name: string;
+    email?: string | null;
+    phone_number?: string | null;
+    date_of_birth: string;
+    gender?: string | null;
+    /**
+     * * `self` - self
+     * * `spouse` - spouse
+     * * `child` - child
+     * * `friend` - friend
+     * * `parent` - parent
+     * * `sibling` - sibling
+     * * `other` - other
+     */
+    relationship_to_user: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
+    area_from?: number | null;
+    personal_info?: AttendeePersonalInfoDraftRequest;
+    consents?: Array<AttendeeConsentDraftRequest>;
+    question_answers?: Array<EventQuestionAnswerDraftRequest>;
 };
 
 /**
@@ -967,6 +999,13 @@ export type AttendeeOverviewStats = {
     personal_info: {
         [key: string]: unknown;
     };
+};
+
+export type AttendeePersonalInfoDraftRequest = {
+    dietary_requirements?: Array<PersonalInfoItemRequest>;
+    medical_conditions?: Array<MedicalConditionItemRequest>;
+    accessibility_requirements?: Array<PersonalInfoItemRequest>;
+    emergency_contact?: EmergencyContactDraftRequest;
 };
 
 /**
@@ -1999,6 +2038,10 @@ export type CheckoutRequest = {
      * ID of the PaymentMethod to use
      */
     payment_method_id: number;
+    /**
+     * Stripe PaymentIntent ID when payment is already confirmed
+     */
+    stripe_payment_intent_id?: string;
     /**
      * List of attendee selections with packages and products
      */
@@ -4124,6 +4167,23 @@ export type EmergencyContact = {
     };
 };
 
+export type EmergencyContactDraftRequest = {
+    first_name: string;
+    last_name: string;
+    /**
+     * * `parent` - parent
+     * * `sibling` - sibling
+     * * `child` - child
+     * * `spouse` - spouse
+     * * `friend` - friend
+     * * `other` - other
+     */
+    relationship: 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other';
+    phone_number: string;
+    email?: string | null;
+    primary_contact?: boolean;
+};
+
 /**
  * Serializer for EmergencyContact.
  */
@@ -6206,6 +6266,14 @@ export type EventQuestionAnswerChoice = {
 export type EventQuestionAnswerChoiceRequest = {
     answer: number;
     option: number;
+};
+
+export type EventQuestionAnswerDraftRequest = {
+    question_id: string;
+    answer_text?: string | null;
+    selected_option_ids?: Array<number>;
+    upload_resource_id?: number;
+    upload_url?: string;
 };
 
 /**
@@ -9007,6 +9075,18 @@ export type MedicalCondition = {
     readonly _links: {
         self?: string;
     };
+};
+
+export type MedicalConditionItemRequest = {
+    id: number;
+    details?: string | null;
+    notes?: string | null;
+    /**
+     * * `mild` - mild
+     * * `moderate` - moderate
+     * * `severe` - severe
+     */
+    severity?: 'mild' | 'moderate' | 'severe' | null;
 };
 
 /**
@@ -14041,6 +14121,12 @@ export type PersonalInfoCombined = {
     emergency_contacts: {
         [key: string]: unknown;
     };
+};
+
+export type PersonalInfoItemRequest = {
+    id: number;
+    details?: string | null;
+    notes?: string | null;
 };
 
 /**
@@ -25123,13 +25209,14 @@ export type BookingsListListResponse = BookingsListListResponses[keyof BookingsL
 
 export type BookingsListCreateData = {
     body?: BookingCreateRequest;
-    path?: never;
-    query?: {
+    headers?: {
         /**
-         * UUID of the booking intent. Required for non-admin users.
+         * Optional idempotency key to make checkout retries safe
          */
-        intent?: string;
+        'Idempotency-Key'?: string;
     };
+    path?: never;
+    query?: never;
     url: '/api/bookings/list/';
 };
 
@@ -30082,6 +30169,55 @@ export type EventQuestionAnswersSubmitFormCreateResponses = {
 };
 
 export type EventQuestionAnswersSubmitFormCreateResponse = EventQuestionAnswersSubmitFormCreateResponses[keyof EventQuestionAnswersSubmitFormCreateResponses];
+
+export type EventQuestionAnswersUploadCreateData = {
+    body?: {
+        /**
+         * Event UUID the upload belongs to
+         */
+        event_id: string;
+        /**
+         * Optional name for the resource (defaults to file name)
+         */
+        name?: string;
+        /**
+         * Optional description for the upload
+         */
+        description?: string;
+        /**
+         * Resource type (DOCUMENT for files, IMAGE for images)
+         */
+        resource_type?: 'DOCUMENT' | 'IMAGE' | 'OTHER';
+        /**
+         * File upload for DOCUMENT/OTHER types
+         */
+        file?: Blob | File;
+        /**
+         * Image upload for IMAGE type
+         */
+        image?: Blob | File;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/event/question-answers/upload/';
+};
+
+export type EventQuestionAnswersUploadCreateErrors = {
+    /**
+     * Validation errors
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type EventQuestionAnswersUploadCreateResponses = {
+    201: Resource;
+};
+
+export type EventQuestionAnswersUploadCreateResponse = EventQuestionAnswersUploadCreateResponses[keyof EventQuestionAnswersUploadCreateResponses];
 
 export type EventQuestionOptionsListData = {
     body?: never;

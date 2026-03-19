@@ -241,6 +241,7 @@
                 <button
                   :disabled="countdown.isExpired || event.status !== 'OPEN'"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  @click="openRegistrationModal"
                 >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
@@ -332,6 +333,44 @@
       </div>
     </div>
   </div>
+
+  <UModal v-model="showRegistrationModal" :ui="{ width: 'sm:max-w-lg' }">
+    <div class="p-6 space-y-6">
+      <div>
+        <h3 class="text-lg font-black text-deep-navy uppercase tracking-widest">Start Registration</h3>
+        <p class="text-sm text-deep-navy/60 mt-2">
+          Tell us how many people you are registering and whether you are attending.
+        </p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-black uppercase tracking-widest text-deep-navy/60 mb-2">
+            Number of attendees
+          </label>
+          <input
+            v-model.number="ticketCount"
+            type="number"
+            min="1"
+            class="w-full rounded-xl border border-deep-navy/20 bg-white px-4 py-3 text-sm text-deep-navy focus:border-deep-navy focus:outline-none focus:ring-2 focus:ring-deep-navy/20"
+          />
+        </div>
+
+        <div class="flex items-center justify-between rounded-xl border border-deep-navy/10 p-4">
+          <div>
+            <p class="text-sm font-black text-deep-navy uppercase tracking-widest">Are you attending?</p>
+            <p class="text-xs text-deep-navy/60 mt-1">If not, you will register others only.</p>
+          </div>
+          <UToggle v-model="isAttending" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <UButton color="gray" variant="ghost" @click="showRegistrationModal = false">Cancel</UButton>
+        <UButton color="primary" @click="startRegistration">Continue</UButton>
+      </div>
+    </div>
+  </UModal>
 </template>
 
 <script setup lang="ts">
@@ -357,6 +396,10 @@ const { data: venuesData } = useEventVenues(computed(() => ({
 })))
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
+
+const showRegistrationModal = ref(false)
+const ticketCount = ref(1)
+const isAttending = ref(true)
 
 // Setup countdown timer
 const { countdown } = useCountdown(
@@ -384,6 +427,29 @@ const getStatusClass = (status?: string) => {
     default:
       return 'bg-gray-500/20 text-gray-600 border border-gray-500/40'
   }
+}
+
+const openRegistrationModal = () => {
+  if (countdown.value.isExpired || event.value?.status !== 'OPEN') {
+    return
+  }
+
+  ticketCount.value = Math.max(1, Number(event.value?.maximum_attendance ? 1 : ticketCount.value))
+  isAttending.value = true
+  showRegistrationModal.value = true
+}
+
+const startRegistration = () => {
+  const count = Math.max(1, Number(ticketCount.value || 1))
+  showRegistrationModal.value = false
+
+  navigateTo({
+    path: `/events/${eventId.value}/register`,
+    query: {
+      tickets: String(count),
+      o: isAttending.value ? 'false' : 'true',
+    },
+  })
 }
 
 // Set page metadata

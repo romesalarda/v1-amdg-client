@@ -118,34 +118,36 @@
           </div>
 
           <!-- Edit Form -->
-          <form v-else @submit.prevent="handleSaveAnswer(question)" class="space-y-3">
+          <div v-else class="space-y-3">
             <!-- Short Answer -->
             <div v-if="question.question_type === 'short_answer'">
               <input
-                v-model="editingAnswer.answer_text"
+                v-model="answerText"
                 type="text"
                 required
                 placeholder="Enter your answer"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
               />
+              <p v-if="answerTextError" class="mt-1 text-xs text-red-600">{{ answerTextError }}</p>
             </div>
 
             <!-- Long Answer -->
             <div v-else-if="question.question_type === 'long_answer'">
               <textarea
-                v-model="editingAnswer.answer_text"
+                v-model="answerText"
                 required
                 rows="4"
                 placeholder="Enter your answer"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
               ></textarea>
+              <p v-if="answerTextError" class="mt-1 text-xs text-red-600">{{ answerTextError }}</p>
             </div>
 
             <!-- Slider -->
             <div v-else-if="question.question_type === 'slider'">
               <div class="space-y-2">
                 <input
-                  v-model.number="editingAnswer.answer_text"
+                  v-model.number="answerText"
                   type="range"
                   :min="question.min_value || 0"
                   :max="question.max_value || 100"
@@ -153,9 +155,10 @@
                 />
                 <div class="flex justify-between text-xs text-gray-600">
                   <span>{{ question.min_value || 0 }}</span>
-                  <span class="font-semibold text-primary">{{ editingAnswer.answer_text }}</span>
+                  <span class="font-semibold text-primary">{{ answerText }}</span>
                   <span>{{ question.max_value || 100 }}</span>
                 </div>
+                <p v-if="answerTextError" class="mt-1 text-xs text-red-600">{{ answerTextError }}</p>
               </div>
             </div>
 
@@ -166,16 +169,17 @@
                   v-for="option in question.options"
                   :key="option.id"
                   class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  :class="{ 'bg-primary/5 border-primary': editingAnswer.selected_options === option.id }"
+                  :class="{ 'bg-primary/5 border-primary': selectedOptions === option.id }"
                 >
                   <input
-                    v-model="editingAnswer.selected_options"
+                    v-model="selectedOptions"
                     type="radio"
                     :value="option.id"
                     class="w-4 h-4 text-primary border-gray-300 focus:ring-primary/20"
                   />
                   <span class="text-sm text-gray-900">{{ option.option_text }}</span>
                 </label>
+                <p v-if="selectedOptionsError" class="mt-1 text-xs text-red-600">{{ selectedOptionsError }}</p>
               </div>
             </div>
 
@@ -186,43 +190,49 @@
                   v-for="option in question.options"
                   :key="option.id"
                   class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
-                  :class="{ 'bg-primary/5 border-primary': Array.isArray(editingAnswer.selected_options) && editingAnswer.selected_options.includes(option.id) }"
+                  :class="{ 'bg-primary/5 border-primary': Array.isArray(selectedOptions) && selectedOptions.includes(option.id) }"
                 >
                   <input
-                    v-model="editingAnswer.selected_options"
+                    v-model="selectedOptions"
                     type="checkbox"
                     :value="option.id"
                     class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/20"
                   />
                   <span class="text-sm text-gray-900">{{ option.option_text }}</span>
                 </label>
+                <p v-if="selectedOptionsError" class="mt-1 text-xs text-red-600">{{ selectedOptionsError }}</p>
               </div>
             </div>
 
-            <!-- Upload (placeholder) -->
+            <!-- Upload -->
             <div v-else-if="question.question_type === 'upload'">
               <div class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
                 <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <p class="text-xs text-gray-500">File upload not yet implemented</p>
+                <p class="text-xs text-gray-500">Upload a file or provide a link</p>
                 <input
-                  v-model="editingAnswer.answer_text"
-                  type="text"
-                  placeholder="Enter file URL or description"
-                  class="mt-2 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                  type="file"
+                  class="mt-3 w-full text-xs"
+                  @change="handleUploadFile"
+                  :disabled="!isDraftMode || uploadAnswerMutation.isPending.value"
                 />
+                <p v-if="uploadResourceId" class="mt-2 text-xs text-emerald-600">
+                  File uploaded and ready to submit.
+                </p>
+                <input
+                  v-model="uploadUrl"
+                  type="text"
+                  placeholder="Or paste a file URL"
+                  class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                />
+                <p v-if="uploadError" class="mt-1 text-xs text-red-600">{{ uploadError }}</p>
               </div>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex gap-2 pt-2">
-              <UButton
-                type="submit"
-                size="sm"
-                color="green"
-                :loading="isSaving"
-              >
-                Save Answer
-              </UButton>
+            <div class="flex items-center justify-between gap-2 pt-2">
+              <p v-if="saveError" class="text-xs text-red-600">{{ saveError }}</p>
+              <p v-else-if="isSaving" class="text-xs text-gray-500">Saving...</p>
+              <p v-else-if="lastSavedAt" class="text-xs text-gray-500">Saved</p>
               <UButton
                 type="button"
                 @click="cancelEditing"
@@ -230,10 +240,10 @@
                 color="gray"
                 variant="soft"
               >
-                Cancel
+                Done
               </UButton>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -241,19 +251,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import type { Ref, ComputedRef } from 'vue'
+import { ref, computed, watch, nextTick } from 'vue'
+import { toTypedSchema } from '@vee-validate/zod'
+import { useField, useForm } from 'vee-validate'
+import { z } from 'zod'
+import { useDebounceFn } from '@vueuse/core'
 import { useToast } from '#ui/composables/useToast'
-import type { EventQuestion, EventQuestionAnswer, EventQuestionOption, EventDetail } from '~/api/types.gen'
+import type { EventQuestion, EventQuestionOption, EventDetail } from '~/api/types.gen'
+import type { EventQuestionAnswerDraft } from '~/stores/registration'
 
 // Composables
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import {
   useEventQuestionAnswers,
   useCreateEventQuestionAnswer,
-  useUpdateEventQuestionAnswer,
   usePartialUpdateEventQuestionAnswer,
-  useDeleteEventQuestionAnswer
+  useDeleteEventQuestionAnswer,
+  useUploadEventQuestionAnswer
 } from '~/composables/resources/events/eventQuestionAnswers'
 import {
   useEventAnswerChoices,
@@ -264,11 +278,19 @@ import {
 // Props
 const props = defineProps<{
   event: EventDetail
-  attendeeId: string
+  attendeeId?: string
+  modelValue?: EventQuestionAnswerDraft[]
+}>()
+
+const emit = defineEmits<{
+  (event: 'update:modelValue', value: EventQuestionAnswerDraft[]): void
 }>()
 
 // Composables
 const toast = useToast()
+const uploadAnswerMutation = useUploadEventQuestionAnswer()
+
+const isDraftMode = computed(() => props.modelValue !== undefined)
 
 // Data Queries
 const eventQuestions = useEventQuestions(computed(() => ({
@@ -276,14 +298,16 @@ const eventQuestions = useEventQuestions(computed(() => ({
   page_size: 100
 })))
 
-const attendeeAnswers = useEventQuestionAnswers(computed(() => ({
-  attendee_id: props.attendeeId,
-  page_size: 100
-})))
+const attendeeAnswers = useEventQuestionAnswers(
+  computed(() => (props.attendeeId ? {
+    attendee_id: props.attendeeId,
+    page_size: 100
+  } : undefined)),
+  { enabled: computed(() => !!props.attendeeId && !isDraftMode.value) }
+)
 
 // Mutations
 const createAnswerMutation = useCreateEventQuestionAnswer()
-const updateAnswerMutation = useUpdateEventQuestionAnswer()
 const partialUpdateAnswerMutation = usePartialUpdateEventQuestionAnswer()
 const deleteAnswerMutation = useDeleteEventQuestionAnswer()
 const createAnswerChoiceMutation = useCreateEventAnswerChoice()
@@ -291,14 +315,85 @@ const deleteAnswerChoiceMutation = useDeleteEventAnswerChoice()
 
 // State
 const editingQuestionId = ref<string | null>(null)
-const editingAnswer = ref<{
-  answer_text: string
-  selected_options: number[] | number | null
-}>({
-  answer_text: '',
-  selected_options: []
-})
+const currentQuestion = ref<EventQuestion | null>(null)
 const isSaving = ref(false)
+const lastSavedAt = ref<Date | null>(null)
+const saveError = ref<string | null>(null)
+const isHydrating = ref(false)
+
+const buildQuestionSchema = (question: EventQuestion | null) => {
+  const base = z.object({
+    answer_text: z.union([z.string(), z.number()]).optional(),
+    selected_options: z.union([z.number(), z.array(z.number())]).nullable().optional(),
+    upload_url: z.string().optional(),
+    upload_resource_id: z.number().optional(),
+  })
+
+  if (!question) return base
+
+  if (question.question_type === 'short_answer' || question.question_type === 'long_answer') {
+    return base.extend({
+      answer_text: z.string().trim().min(1, 'Please provide an answer'),
+    })
+  }
+
+  if (question.question_type === 'slider') {
+    return base.extend({
+      answer_text: z.number({ required_error: 'Select a value' }),
+    })
+  }
+
+  if (question.question_type === 'single_choice') {
+    return base.extend({
+      selected_options: z.number({ required_error: 'Select an option' }),
+    })
+  }
+
+  if (question.question_type === 'multiple_choice') {
+    return base.extend({
+      selected_options: z.array(z.number()).min(1, 'Select at least one option'),
+    })
+  }
+
+  if (question.question_type === 'upload') {
+    return base.refine((values) => {
+      const hasUpload = Boolean(values.upload_resource_id) || (values.upload_url?.trim().length ?? 0) > 0
+      const hasAnswer =
+        typeof values.answer_text === 'string'
+          ? values.answer_text.trim().length > 0
+          : typeof values.answer_text === 'number'
+      return isDraftMode.value ? hasUpload : (hasUpload || hasAnswer)
+    }, {
+      message: 'Please upload a file or provide a link',
+      path: ['upload_url'],
+    })
+  }
+
+  return base
+}
+
+const validationSchema = computed(() => toTypedSchema(buildQuestionSchema(currentQuestion.value)))
+const { validate, resetForm, setFieldValue } = useForm<{
+  answer_text?: string | number
+  selected_options?: number[] | number | null
+  upload_url?: string
+  upload_resource_id?: number
+}>({
+  validationSchema,
+  initialValues: {
+    answer_text: '',
+    selected_options: [],
+    upload_url: '',
+    upload_resource_id: undefined,
+  },
+})
+
+const { value: answerText, errorMessage: answerTextError } = useField<string | number | undefined>('answer_text')
+const { value: selectedOptions, errorMessage: selectedOptionsError } = useField<number[] | number | null>('selected_options')
+const { value: uploadUrl, errorMessage: uploadUrlError } = useField<string | undefined>('upload_url')
+const { value: uploadResourceId, errorMessage: uploadResourceIdError } = useField<number | undefined>('upload_resource_id')
+
+const uploadError = computed(() => uploadUrlError.value || uploadResourceIdError.value)
 
 // Watcher to refetch answers when mutations succeed
 watch(
@@ -311,50 +406,117 @@ watch(
   ],
   () => {
     // Refetch attendee answers when any mutation succeeds
-    attendeeAnswers.refetch()
+    if (!isDraftMode.value) {
+      attendeeAnswers.refetch()
+    }
   }
 )
 
+watch(
+  () => [answerText.value, selectedOptions.value, uploadUrl.value, uploadResourceId.value],
+  () => {
+    if (!editingQuestionId.value) return
+    if (isHydrating.value) return
+    debouncedSave()
+  },
+  { deep: true }
+)
+
 // Computed
-const isLoading = computed(() => eventQuestions.isLoading.value || attendeeAnswers.isLoading.value)
+const isLoading = computed(() => eventQuestions.isLoading.value || (!isDraftMode.value && attendeeAnswers.isLoading.value))
 
 const sortedQuestions = computed(() => {
   const questions = eventQuestions.data.value?.data?.results || []
   return [...questions].sort((a, b) => (a.order || 0) - (b.order || 0))
 })
 
+const draftAnswers = computed(() => props.modelValue ?? [])
+
 const answersMap = computed(() => {
+  if (isDraftMode.value) {
+    const map = new Map<string, EventQuestionAnswerDraft>()
+    draftAnswers.value.forEach((answer) => {
+      map.set(answer.questionId, answer)
+    })
+    return map
+  }
+
   const answers = attendeeAnswers.data.value?.data?.results || []
   const map = new Map<string, any>()
-  answers.forEach(answer => {
+  answers.forEach((answer) => {
     map.set(answer.question, answer)
   })
   return map
 })
 
 const totalQuestionsCount = computed(() => sortedQuestions.value.length)
-const answeredCount = computed(() => answersMap.value.size)
+const hasQuestionAnswerContent = (answer: EventQuestionAnswerDraft): boolean => {
+  if (typeof answer.answerText === 'string' && answer.answerText.trim().length > 0) return true
+  if (typeof answer.answerText === 'number') return true
+  if (answer.selectedOptionIds && answer.selectedOptionIds.length > 0) return true
+  if (answer.uploadResourceId) return true
+  if (answer.uploadUrl) return true
+  return false
+}
+
+const answeredCount = computed(() => {
+  if (isDraftMode.value) {
+    return draftAnswers.value.filter((answer) => hasQuestionAnswerContent(answer)).length
+  }
+  return answersMap.value.size
+})
+
 const unansweredRequiredCount = computed(() => {
+  if (isDraftMode.value) {
+    return sortedQuestions.value.filter((question) => {
+      if (!question.required) return false
+      const answer = answersMap.value.get(question.id)
+      if (!answer) return true
+      return !hasQuestionAnswerContent(answer)
+    }).length
+  }
   return sortedQuestions.value.filter(q => q.required && !answersMap.value.has(q.id)).length
 })
 
 // Methods
 const hasAnswer = (questionId: string): boolean => {
-  return answersMap.value.has(questionId)
+  const answer = answersMap.value.get(questionId)
+  if (!answer) return false
+  if (isDraftMode.value) {
+    return hasQuestionAnswerContent(answer)
+  }
+  return true
 }
 
 const getAnswer = (questionId: string) => {
-  return answersMap.value.get(questionId)
+  const answer = answersMap.value.get(questionId)
+  if (!answer) return null
+  if (isDraftMode.value) {
+    return {
+      answer_text: answer.answerText ?? '',
+      selected_option_ids: answer.selectedOptionIds ?? [],
+      upload_resource_id: answer.uploadResourceId,
+      upload_url: answer.uploadUrl
+    }
+  }
+  return answer
 }
 
 const getSelectedOptions = (questionId: string): EventQuestionOption[] => {
   const answer = getAnswer(questionId)
-  if (!answer || !answer.selected_options) return []
+  if (!answer) return []
   
   const question = sortedQuestions.value.find(q => q.id === questionId)
   if (!question || !question.options) return []
   
-  return question.options.filter(opt => 
+  if (isDraftMode.value) {
+    const selectedIds = answer.selected_option_ids || []
+    return question.options.filter(opt => selectedIds.includes(opt.id))
+  }
+
+  if (!answer.selected_options) return []
+
+  return question.options.filter(opt =>
     answer.selected_options.some((selOpt: any) => selOpt.option === opt.id)
   )
 }
@@ -383,174 +545,279 @@ const formatQuestionType = (type: string): string => {
   return typeMap[type] || type
 }
 
-const startEditing = (question: EventQuestion) => {
+const startEditing = async (question: EventQuestion) => {
   editingQuestionId.value = question.id
-  
+  currentQuestion.value = question
+  saveError.value = null
+  lastSavedAt.value = null
+  isHydrating.value = true
+
   const existingAnswer = getAnswer(question.id)
-  
+
   if (existingAnswer) {
-    // Edit mode
     if (question.question_type === 'single_choice') {
-      // For single choice, store as single value (not array)
-      editingAnswer.value = {
-        answer_text: existingAnswer.answer_text || '',
-        selected_options: existingAnswer.selected_options?.[0]?.option || null as any
-      }
+      resetForm({
+        values: {
+          answer_text: existingAnswer.answer_text || '',
+          selected_options: isDraftMode.value
+            ? (existingAnswer.selected_option_ids?.[0] ?? null as any)
+            : existingAnswer.selected_options?.[0]?.option || null as any,
+          upload_url: existingAnswer.upload_url || '',
+          upload_resource_id: existingAnswer.upload_resource_id,
+        },
+      })
     } else if (question.question_type === 'multiple_choice') {
-      // For multiple choice, store as array
-      editingAnswer.value = {
-        answer_text: existingAnswer.answer_text || '',
-        selected_options: existingAnswer.selected_options?.map((opt: any) => opt.option) || []
-      }
+      resetForm({
+        values: {
+          answer_text: existingAnswer.answer_text || '',
+          selected_options: isDraftMode.value
+            ? (existingAnswer.selected_option_ids || [])
+            : existingAnswer.selected_options?.map((opt: any) => opt.option) || [],
+          upload_url: existingAnswer.upload_url || '',
+          upload_resource_id: existingAnswer.upload_resource_id,
+        },
+      })
+    } else if (question.question_type === 'upload') {
+      resetForm({
+        values: {
+          answer_text: existingAnswer.answer_text || '',
+          selected_options: [],
+          upload_url: existingAnswer.upload_url || '',
+          upload_resource_id: existingAnswer.upload_resource_id,
+        },
+      })
+    } else if (question.question_type === 'slider') {
+      resetForm({
+        values: {
+          answer_text: Number(existingAnswer.answer_text || question.min_value || 0),
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     } else {
-      editingAnswer.value = {
-        answer_text: existingAnswer.answer_text || '',
-        selected_options: []
-      }
+      resetForm({
+        values: {
+          answer_text: existingAnswer.answer_text || '',
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     }
   } else {
-    // Add mode
     if (question.question_type === 'slider') {
-      editingAnswer.value = {
-        answer_text: String(question.min_value || 0),
-        selected_options: []
-      }
+      resetForm({
+        values: {
+          answer_text: Number(question.min_value || 0),
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     } else if (question.question_type === 'single_choice') {
-      editingAnswer.value = {
-        answer_text: '',
-        selected_options: null as any // Will hold single option ID for radio
-      }
+      resetForm({
+        values: {
+          answer_text: '',
+          selected_options: null as any,
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     } else if (question.question_type === 'multiple_choice') {
-      editingAnswer.value = {
-        answer_text: '',
-        selected_options: [] // Array for checkboxes
-      }
+      resetForm({
+        values: {
+          answer_text: '',
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
+    } else if (question.question_type === 'upload') {
+      resetForm({
+        values: {
+          answer_text: '',
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     } else {
-      editingAnswer.value = {
-        answer_text: '',
-        selected_options: []
-      }
+      resetForm({
+        values: {
+          answer_text: '',
+          selected_options: [],
+          upload_url: '',
+          upload_resource_id: undefined,
+        },
+      })
     }
   }
+
+  await nextTick()
+  isHydrating.value = false
 }
 
 const cancelEditing = () => {
   editingQuestionId.value = null
-  editingAnswer.value = {
-    answer_text: '',
-    selected_options: []
-  }
+  currentQuestion.value = null
+  resetForm()
 }
 
-const handleSaveAnswer = async (question: EventQuestion) => {
+const updateDraftAnswers = (nextAnswers: EventQuestionAnswerDraft[]) => {
+  emit('update:modelValue', nextAnswers)
+}
+
+const upsertDraftAnswer = (questionId: string, update: Partial<EventQuestionAnswerDraft>) => {
+  const nextAnswers = [...draftAnswers.value]
+  const existingIndex = nextAnswers.findIndex((answer) => answer.questionId === questionId)
+  const merged = { questionId, ...update } as EventQuestionAnswerDraft
+
+  if (existingIndex >= 0) {
+    nextAnswers[existingIndex] = { ...nextAnswers[existingIndex], ...merged }
+  } else {
+    nextAnswers.push(merged)
+  }
+
+  updateDraftAnswers(nextAnswers)
+}
+
+const saveCurrentAnswer = async () => {
+  if (!currentQuestion.value) return
+  if (!editingQuestionId.value) return
+  if (isHydrating.value) return
+
+  const question = currentQuestion.value
+  const validation = await validate()
+  if (!validation.valid) return
+
   isSaving.value = true
-  
+  saveError.value = null
+
   try {
     const existingAnswer = getAnswer(question.id)
     const isChoice = isChoiceQuestion(question.question_type || '')
-    
-    // Prepare answer text based on question type
-    let answerText = editingAnswer.value.answer_text
+
+    let answerTextValue = answerText.value
     let selectedOptionIds: number[] = []
-    
-    // For choice questions, validate and prepare option IDs
+
     if (isChoice) {
-      const selectedOptions = editingAnswer.value.selected_options
-      
-      // Check if any option is selected
-      if (!selectedOptions || (Array.isArray(selectedOptions) && selectedOptions.length === 0)) {
-        toast.add({ title: 'Error', description: 'Please select at least one option', color: 'red' })
-        isSaving.value = false
-        return
+      if (Array.isArray(selectedOptions.value)) {
+        selectedOptionIds = selectedOptions.value
+        answerTextValue = selectedOptions.value.join(',')
+      } else if (typeof selectedOptions.value === 'number') {
+        selectedOptionIds = [selectedOptions.value]
+        answerTextValue = String(selectedOptions.value)
       }
-      
-      // For single choice (radio), selectedOptions is a single value, not array
-      // For multiple choice (checkbox), it's an array
-      if (Array.isArray(selectedOptions)) {
-        selectedOptionIds = selectedOptions
-        answerText = selectedOptions.join(',')
-      } else {
-        selectedOptionIds = [selectedOptions]
-        answerText = String(selectedOptions)
-      }
-    } else if (!answerText && question.question_type !== 'upload') {
-      toast.add({ title: 'Error', description: 'Please provide an answer', color: 'red' })
-      isSaving.value = false
+    }
+
+    const answerTextString = typeof answerTextValue === 'number'
+      ? String(answerTextValue)
+      : (answerTextValue || '')
+
+    if (isDraftMode.value) {
+      upsertDraftAnswer(question.id, {
+        answerText: answerTextString || undefined,
+        selectedOptionIds: isChoice ? selectedOptionIds : undefined,
+        uploadResourceId: uploadResourceId.value,
+        uploadUrl: uploadUrl.value || undefined,
+      })
+
+      lastSavedAt.value = new Date()
       return
     }
-    
+
     let answerId: number
-    
+
     if (existingAnswer) {
-      // Update existing answer
       await partialUpdateAnswerMutation.mutateAsync({
         answerId: existingAnswer.id,
         body: {
           question: question.id,
           attendee: props.attendeeId,
-          answer_text: answerText,
+          answer_text: answerTextString,
         }
       })
       answerId = existingAnswer.id
     } else {
-      // Create new answer
       const response = await createAnswerMutation.mutateAsync({
         question: question.id,
-        attendee: props.attendeeId,
-        answer_text: answerText
+        attendee: props.attendeeId as string,
+        answer_text: answerTextString,
       })
       answerId = response.data?.id || 0
       if (!answerId) {
         throw new Error('Failed to get answer ID from response')
       }
     }
-    
-    // For choice questions, manage answer choices
+
     if (isChoice) {
-      // Get existing choices
       const existingChoices = existingAnswer?.selected_options || []
       const existingOptionIds = existingChoices.map((choice: any) => choice.option)
-      
-      // Determine which choices to add and remove
       const optionsToAdd = selectedOptionIds.filter(id => !existingOptionIds.includes(id))
       const optionsToRemove = existingChoices.filter((choice: any) => !selectedOptionIds.includes(choice.option))
-      
-      // Delete removed choices
+
       for (const choice of optionsToRemove) {
         await deleteAnswerChoiceMutation.mutateAsync(choice.id)
       }
-      
-      // Create new choices
+
       for (const optionId of optionsToAdd) {
         await createAnswerChoiceMutation.mutateAsync({
           answer: answerId,
-          option: optionId
+          option: optionId,
         })
       }
     }
-    
-    toast.add({ title: 'Success', description: existingAnswer ? 'Answer updated' : 'Answer added', color: 'green' })
-    cancelEditing()
+
+    lastSavedAt.value = new Date()
   } catch (error) {
     console.error('Failed to save answer:', error)
-    toast.add({ title: 'Error', description: 'Failed to save answer', color: 'red' })
+    saveError.value = 'Failed to save answer'
   } finally {
     isSaving.value = false
   }
 }
+
+const debouncedSave = useDebounceFn(saveCurrentAnswer, 500)
 
 const handleDeleteAnswer = async (questionId: string) => {
   const answer = getAnswer(questionId)
   if (!answer) return
   
   if (!confirm('Are you sure you want to delete this answer?')) return
-  
+
+  if (isDraftMode.value) {
+    const nextAnswers = draftAnswers.value.filter((draft) => draft.questionId !== questionId)
+    updateDraftAnswers(nextAnswers)
+    toast.add({ title: 'Success', description: 'Answer deleted', color: 'green' })
+    return
+  }
+
   try {
     await deleteAnswerMutation.mutateAsync(answer.id)
     toast.add({ title: 'Success', description: 'Answer deleted', color: 'green' })
   } catch (error) {
     console.error('Failed to delete answer:', error)
     toast.add({ title: 'Error', description: 'Failed to delete answer', color: 'red' })
+  }
+}
+
+const handleUploadFile = async (event: Event) => {
+  if (!isDraftMode.value) return
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const formData = new FormData()
+  formData.append('file', file)
+
+  try {
+    const response = await uploadAnswerMutation.mutateAsync(formData)
+    setFieldValue('upload_resource_id', response.id)
+    toast.add({ title: 'Uploaded', description: 'File uploaded successfully.', color: 'green' })
+  } catch (error) {
+    console.error('Failed to upload file:', error)
+    toast.add({ title: 'Error', description: 'Failed to upload file.', color: 'red' })
   }
 }
 </script>

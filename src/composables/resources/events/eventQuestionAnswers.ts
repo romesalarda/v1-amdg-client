@@ -15,20 +15,26 @@ import type {
   EventQuestionAnswersUpdateData,
   EventQuestionAnswersPartialUpdateData,
   EventQuestionAnswersDestroyData,
+  Resource,
 } from '~/api/types.gen'
+import { uploadMultipart } from '~/utils/upload'
 
 const QUERY_KEY = ['eventQuestionAnswers'] as const
 
 /**
  * List all event question answers
  */
-export function useEventQuestionAnswers(params?: MaybeRefOrGetter<EventQuestionAnswersListData['query'] | undefined>) {
+export function useEventQuestionAnswers(
+  params?: MaybeRefOrGetter<EventQuestionAnswersListData['query'] | undefined>,
+  options?: { enabled?: MaybeRefOrGetter<boolean> },
+) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
       return eventQuestionAnswersList(queryParams ? { query: queryParams } : undefined)
     },
+    enabled: () => (options?.enabled ? toValue(options.enabled) : true),
   })
 }
 
@@ -110,5 +116,15 @@ export function useDeleteEventQuestionAnswer() {
         queryKey: [...QUERY_KEY, 'detail', answerId],
       })
     },
+  })
+}
+
+/**
+ * Upload a file for an event question answer (returns a Resource)
+ */
+export function useUploadEventQuestionAnswer() {
+  return useMutation({
+    mutationFn: (formData: FormData) =>
+      uploadMultipart<Resource>('/api/event/question-answers/upload/', formData, { method: 'POST' }),
   })
 }
