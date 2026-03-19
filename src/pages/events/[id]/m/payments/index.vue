@@ -74,6 +74,18 @@
                   <p class="text-xs text-navy-400">Accept sponsorships from organizations or individuals</p>
                 </div>
               </label>
+              <label class="flex items-start gap-3 p-4 bg-mist-blue/40 rounded-xl hover:bg-mist-blue/60 transition-colors cursor-pointer">
+                <input
+                  type="checkbox"
+                  v-model="settingsForm.requires_invite_acceptance_for_checkout"
+                  class="mt-0.5 h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0"
+                  :disabled="!canEditPaymentMethods"
+                />
+                <div>
+                  <p class="text-sm font-semibold text-navy-900">Requires Invite Acceptance</p>
+                  <p class="text-xs text-navy-400">Attendees must accept an invite before checking out</p>
+                </div>
+              </label>
             </div>
 
             <div class="flex justify-end gap-2 pt-2" v-if="canEditPaymentMethods">
@@ -229,6 +241,15 @@
                 :class="settingsForm.accepting_sponsorships_enabled ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
               >
                 {{ settingsForm.accepting_sponsorships_enabled ? 'Enabled' : 'Disabled' }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-sm text-navy-600">Sponsorships require invite</span>
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                :class="settingsForm.requires_invite_acceptance_for_checkout ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-500'"
+              >
+                {{ settingsForm.requires_invite_acceptance_for_checkout ? 'Enabled' : 'Disabled' }}
               </span>
             </div>
           </div>
@@ -411,6 +432,7 @@ const settingsForm = reactive({
   product_selling_enabled: false,
   donation_enabled: false,
   accepting_sponsorships_enabled: false,
+  requires_invite_acceptance_for_checkout: false
 })
 
 // Watch settings data and populate form
@@ -420,6 +442,7 @@ watch(settings, (newSettings) => {
     settingsForm.product_selling_enabled = newSettings?.product_selling_enabled || false
     settingsForm.donation_enabled = newSettings?.donation_enabled || false
     settingsForm.accepting_sponsorships_enabled = newSettings?.accepting_sponsorships_enabled || false
+    settingsForm.requires_invite_acceptance_for_checkout = newSettings?.requires_invite_acceptance_for_checkout || false
   }
 }, { immediate: true })
 
