@@ -9,16 +9,24 @@ import {
   organisationsSponsorInvitesAcceptByTokenCreate,
   organisationsSponsorInvitesDeclineByTokenCreate,
   organisationsSponsorsCheckoutCreate,
+  organisationsSponsorsInboundList,
+  organisationsSponsorsOutboundList,
   organisationsSponsorsPaymentHistoryRetrieve,
+  organisationsStatisticsSponsorsFlowRetrieve,
 } from '~/api/sdk.gen'
 import type {
+  EventSponsorLedger,
   EventListSponsorableListData,
   EventSponsorCheckoutRequest,
   EventSponsorInviteCreateUpdateRequest,
   EventSponsorInviteList,
+  OrganisationSponsorFlowStatistics,
   OrganisationsSponsorInvitesListData,
   OrganisationsSponsorsCheckoutCreateResponse,
+  OrganisationsSponsorsInboundListData,
+  OrganisationsSponsorsOutboundListData,
   OrganisationsSponsorsPaymentHistoryRetrieveData,
+  OrganisationsStatisticsSponsorsFlowRetrieveData,
   SponsorableEventList,
   SponsorshipPaymentHistory,
 } from '~/api/types.gen'
@@ -26,6 +34,8 @@ import type {
 const INVITES_QUERY_KEY = ['organisationSponsorInvites'] as const
 const SPONSORABLE_EVENTS_QUERY_KEY = ['sponsorableEvents'] as const
 const SPONSORSHIP_PAYMENT_HISTORY_QUERY_KEY = ['sponsorshipPaymentHistory'] as const
+const SPONSOR_LEDGER_QUERY_KEY = ['organisationSponsorLedger'] as const
+const SPONSOR_FLOW_QUERY_KEY = ['organisationSponsorFlow'] as const
 
 export type SponsorCheckoutResponse = OrganisationsSponsorsCheckoutCreateResponse & {
   sponsor_id?: string
@@ -115,6 +125,85 @@ export function useOrganisationSponsorshipPaymentHistory(
 
       const response = await organisationsSponsorsPaymentHistoryRetrieve({ query: queryParams })
       return (response?.data || null) as SponsorshipPaymentHistory | null
+    },
+  })
+}
+
+export function useOrganisationInboundSponsors(
+  params?: MaybeRefOrGetter<OrganisationsSponsorsInboundListData['query'] | undefined>,
+) {
+  return useQuery({
+    queryKey: [...SPONSOR_LEDGER_QUERY_KEY, 'inbound', params] as const,
+    enabled: computed(() => {
+      const value = toValue(params)
+      return !!value?.organisation_id
+    }),
+    queryFn: async () => {
+      const queryParams = toValue(params)
+      if (!queryParams?.organisation_id) {
+        return { raw: null, rows: [], count: 0, next: null, previous: null }
+      }
+
+      const response = await organisationsSponsorsInboundList({ query: queryParams })
+      const normalized = normalizePaginatedPayload<EventSponsorLedger>(response?.data)
+
+      return {
+        raw: response,
+        rows: normalized.results,
+        count: normalized.count,
+        next: normalized.next,
+        previous: normalized.previous,
+      }
+    },
+  })
+}
+
+export function useOrganisationOutboundSponsors(
+  params?: MaybeRefOrGetter<OrganisationsSponsorsOutboundListData['query'] | undefined>,
+) {
+  return useQuery({
+    queryKey: [...SPONSOR_LEDGER_QUERY_KEY, 'outbound', params] as const,
+    enabled: computed(() => {
+      const value = toValue(params)
+      return !!value?.organisation_id
+    }),
+    queryFn: async () => {
+      const queryParams = toValue(params)
+      if (!queryParams?.organisation_id) {
+        return { raw: null, rows: [], count: 0, next: null, previous: null }
+      }
+
+      const response = await organisationsSponsorsOutboundList({ query: queryParams })
+      const normalized = normalizePaginatedPayload<EventSponsorLedger>(response?.data)
+
+      return {
+        raw: response,
+        rows: normalized.results,
+        count: normalized.count,
+        next: normalized.next,
+        previous: normalized.previous,
+      }
+    },
+  })
+}
+
+export function useOrganisationSponsorFlowStatistics(
+  params?: MaybeRefOrGetter<OrganisationsStatisticsSponsorsFlowRetrieveData['query'] | undefined>,
+) {
+  return useQuery({
+    queryKey: [...SPONSOR_FLOW_QUERY_KEY, params] as const,
+    enabled: computed(() => {
+      const value = toValue(params)
+      return !!value?.organisation_id
+    }),
+    queryFn: async () => {
+      const queryParams = toValue(params)
+      if (!queryParams?.organisation_id) {
+        return null
+      }
+
+      const response = await organisationsStatisticsSponsorsFlowRetrieve({ query: queryParams })
+      return (response?.data || null) as OrganisationSponsorFlowStatistics | null
     },
   })
 }

@@ -7917,6 +7917,30 @@ export type EventSponsorInviteList = {
 };
 
 /**
+ * Serializer for inbound/outbound sponsor list rows.
+ */
+export type EventSponsorLedger = {
+    readonly sponsor_id: string;
+    readonly name: string;
+    readonly description: string | null;
+    readonly organisation_id: number;
+    readonly organisation_title: string;
+    readonly event_id: string;
+    readonly event_title: string;
+    readonly package_id: string;
+    readonly package_name: string;
+    readonly chapter_location: number | null;
+    readonly added_at: string;
+    readonly added_by: number | null;
+    readonly updated_at: string;
+    readonly payment: {
+        payment_id?: string;
+        payment_reference?: string;
+        base_amount?: string;
+    } | null;
+};
+
+/**
  * List serializer for EventSponsor.
  */
 export type EventSponsorList = {
@@ -9746,6 +9770,37 @@ export type OrganisationPaymentSourcesStatistics = {
 };
 
 /**
+ * Inbound/outbound sponsorship flow statistics.
+ */
+export type OrganisationSponsorFlowStatistics = {
+    inbound_summary: {
+        [key: string]: unknown;
+    };
+    outbound_summary: {
+        [key: string]: unknown;
+    };
+    net_summary: {
+        [key: string]: unknown;
+    };
+    inbound_by_sponsor: Array<{
+        [key: string]: unknown;
+    }>;
+    inbound_by_event: Array<{
+        [key: string]: unknown;
+    }>;
+    outbound_by_event: Array<{
+        [key: string]: unknown;
+    }>;
+    generated_at: string;
+    scope: {
+        [key: string]: unknown;
+    };
+    filters_applied: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Base serializer supporting raw and ECharts response modes.
  */
 export type OrganisationSponsorInviteConversionStatistics = {
@@ -10369,6 +10424,13 @@ export type PaginatedEventSponsorInviteListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventSponsorInviteList>;
+};
+
+export type PaginatedEventSponsorLedgerList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventSponsorLedger>;
 };
 
 export type PaginatedEventSponsorListList = {
@@ -19910,6 +19972,13 @@ export type EventSponsorInviteListWritable = {
 };
 
 /**
+ * Serializer for inbound/outbound sponsor list rows.
+ */
+export type EventSponsorLedgerWritable = {
+    [key: string]: unknown;
+};
+
+/**
  * List serializer for EventSponsor.
  */
 export type EventSponsorListWritable = {
@@ -20822,6 +20891,13 @@ export type PaginatedEventSponsorInviteListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventSponsorInviteListWritable>;
+};
+
+export type PaginatedEventSponsorLedgerListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventSponsorLedgerWritable>;
 };
 
 export type PaginatedEventSponsorListListWritable = {
@@ -37360,6 +37436,156 @@ export type OrganisationsSponsorsCheckoutCreateResponses = {
 
 export type OrganisationsSponsorsCheckoutCreateResponse = OrganisationsSponsorsCheckoutCreateResponses[keyof OrganisationsSponsorsCheckoutCreateResponses];
 
+export type OrganisationsSponsorsInboundListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter sponsors added after this date
+         */
+        added_after?: string;
+        /**
+         * Filter sponsors added before this date
+         */
+        added_before?: string;
+        /**
+         * Filter by who added the sponsor
+         */
+        added_by?: number;
+        /**
+         * Filter by chapter location ID
+         */
+        chapter_location_id?: number;
+        /**
+         * Event public UUID.
+         */
+        event_id?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Organisation ID.
+         */
+        organisation_id: number;
+        /**
+         * Filter by selected package UUID
+         */
+        package_id?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by whether sponsorship has been processed
+         */
+        processed?: boolean;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Sponsor organisation ID.
+         */
+        sponsor_organisation_id?: number;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: 'pending' | 'processed' | 'rejected' | 'verified';
+    };
+    url: '/api/organisations/sponsors/inbound/';
+};
+
+export type OrganisationsSponsorsInboundListResponses = {
+    200: PaginatedEventSponsorLedgerList;
+};
+
+export type OrganisationsSponsorsInboundListResponse = OrganisationsSponsorsInboundListResponses[keyof OrganisationsSponsorsInboundListResponses];
+
+export type OrganisationsSponsorsOutboundListData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter sponsors added after this date
+         */
+        added_after?: string;
+        /**
+         * Filter sponsors added before this date
+         */
+        added_before?: string;
+        /**
+         * Filter by who added the sponsor
+         */
+        added_by?: number;
+        /**
+         * Filter by chapter location ID
+         */
+        chapter_location_id?: number;
+        /**
+         * Event public UUID.
+         */
+        event_id?: string;
+        /**
+         * Event organisation ID.
+         */
+        event_organisation_id?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Organisation ID.
+         */
+        organisation_id: number;
+        /**
+         * Filter by selected package UUID
+         */
+        package_id?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by whether sponsorship has been processed
+         */
+        processed?: boolean;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: 'pending' | 'processed' | 'rejected' | 'verified';
+    };
+    url: '/api/organisations/sponsors/outbound/';
+};
+
+export type OrganisationsSponsorsOutboundListResponses = {
+    200: PaginatedEventSponsorLedgerList;
+};
+
+export type OrganisationsSponsorsOutboundListResponse = OrganisationsSponsorsOutboundListResponses[keyof OrganisationsSponsorsOutboundListResponses];
+
 export type OrganisationsSponsorsPaymentHistoryRetrieveData = {
     body?: never;
     path?: never;
@@ -37631,6 +37857,40 @@ export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses =
 };
 
 export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponse = OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses[keyof OrganisationsStatisticsSponsorPackagesPerformanceRetrieveResponses];
+
+export type OrganisationsStatisticsSponsorsFlowRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Start date filter (YYYY-MM-DD).
+         */
+        date_from?: string;
+        /**
+         * End date filter (YYYY-MM-DD).
+         */
+        date_to?: string;
+        /**
+         * Event public UUID filter.
+         */
+        event_id?: string;
+        /**
+         * Response format. raw (default) or echarts.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/sponsors-flow/';
+};
+
+export type OrganisationsStatisticsSponsorsFlowRetrieveResponses = {
+    200: OrganisationSponsorFlowStatistics;
+};
+
+export type OrganisationsStatisticsSponsorsFlowRetrieveResponse = OrganisationsStatisticsSponsorsFlowRetrieveResponses[keyof OrganisationsStatisticsSponsorsFlowRetrieveResponses];
 
 export type OrganisationsStatisticsSponsorsOverviewRetrieveData = {
     body?: never;
