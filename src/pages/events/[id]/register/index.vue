@@ -1,50 +1,187 @@
 <template>
-	<div class="min-h-screen bg-gray-50">
-		<div class="mx-auto max-w-5xl space-y-6 px-4 py-8">
-			<div class="rounded-2xl border bg-white p-6 shadow-sm">
-				<div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-					<div>
-						<p class="text-xs font-semibold uppercase tracking-widest text-gray-500">Registration</p>
-						<h1 class="text-2xl font-bold text-gray-900">
-							{{ event?.title || 'Event Registration' }}
-						</h1>
-						<p class="mt-1 text-sm text-gray-600" v-if="store.ticketCount">
-							Attendee {{ currentAttendeeNumber }} of {{ store.ticketCount }}
-						</p>
+	<div class="min-h-screen bg-slate-100 text-slate-900">
+		<header class="relative h-[32vh] min-h-[280px] w-full overflow-hidden">
+			<img :src="heroImageSrc" alt="Registration hero" class="absolute inset-0 h-full w-full object-cover" />
+			<div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/45 to-slate-900/20"></div>
+
+			<div class="absolute inset-x-0 top-0 z-10 p-6 md:p-8">
+				<div class="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4">
+					<div class="text-2xl font-black tracking-tight text-white md:text-3xl">AMDG</div>
+					<div class="flex items-center gap-3">
+						<div class="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 md:block">
+							Registration flow
+						</div>
+						<UButton color="white" variant="soft" @click="goBack">Back to event</UButton>
 					</div>
-					<UButton color="gray" variant="ghost" @click="goBack">Back to event</UButton>
 				</div>
 			</div>
 
-			<div class="rounded-2xl border bg-white p-6 shadow-sm">
-				<div v-if="eventLoading" class="text-sm text-gray-500">Loading event details...</div>
-				<div v-else-if="!event" class="text-sm text-red-600">Event not found.</div>
-				<div v-else class="space-y-6">
-					<div class="flex flex-wrap gap-2">
+			<div class="absolute inset-x-0 bottom-0 z-10 px-6 pb-8 md:px-8 md:pb-10">
+				<div class="mx-auto w-full max-w-[1200px]">
+					<span class="inline-block rounded-full bg-blue-500/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white">
+						Step {{ activeStepIndex + 1 }} of {{ steps.length }}
+					</span>
+					<h1 class="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">
+						{{ event?.title || 'Event Registration' }}
+					</h1>
+					<p class="mt-2 text-sm font-semibold uppercase tracking-wider text-white/80">
+						Attendee {{ currentAttendeeNumber }} of {{ store.ticketCount || 1 }}
+					</p>
+					<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20 md:max-w-lg">
 						<div
-							v-for="(label, index) in steps"
-							:key="label"
-							class="rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-widest"
-							:class="
-								index === activeStepIndex
-									? 'border-primary bg-primary/10 text-primary'
-									: 'border-gray-200 text-gray-500'
-							"
-						>
-							{{ label }}
+							class="h-full rounded-full bg-blue-400 transition-all duration-500 ease-out"
+							:style="{ width: `${stepProgressPercent}%` }"
+						></div>
+					</div>
+				</div>
+			</div>
+		</header>
+
+		<section class="sticky top-0 z-20 border-y border-slate-200 bg-white/95 backdrop-blur">
+			<div class="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-4 px-6 py-4">
+				<div class="flex flex-wrap items-center gap-x-8 gap-y-3">
+					<div class="flex items-center gap-2">
+						<UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-slate-400" />
+						<div>
+							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Date</p>
+							<p class="text-sm font-bold text-slate-700">{{ reminderDate }}</p>
 						</div>
 					</div>
+					<div class="flex items-center gap-2">
+						<UIcon name="i-heroicons-clock" class="h-5 w-5 text-slate-400" />
+						<div>
+							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Time</p>
+							<p class="text-sm font-bold text-slate-700">{{ reminderTime }}</p>
+						</div>
+					</div>
+					<div class="flex items-center gap-2">
+						<UIcon name="i-heroicons-map-pin" class="h-5 w-5 text-slate-400" />
+						<div>
+							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Location</p>
+							<p class="text-sm font-bold text-slate-700">{{ reminderLocation }}</p>
+						</div>
+					</div>
+				</div>
+				<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
+					Editing attendee {{ currentAttendeeNumber }}
+				</div>
+			</div>
+		</section>
 
-					<div v-if="!currentAttendee" class="text-sm text-gray-500">
-						Preparing registration details...
+		<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-6 py-8 lg:flex-row lg:py-10">
+			<div v-if="eventLoading" class="w-full rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
+				Loading event details...
+			</div>
+			<div v-else-if="!event" class="w-full rounded-2xl border border-red-200 bg-red-50 p-6 text-sm text-red-600 shadow-sm">
+				Event not found.
+			</div>
+			<template v-else>
+				<aside class="w-full space-y-4 lg:w-80 lg:flex-shrink-0">
+					<div>
+						<p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Registration group</p>
 					</div>
 
-					<div v-else>
-						<div v-if="activeStepIndex === 0" class="space-y-6">
+					<button
+						v-for="(attendee, index) in store.attendees"
+						:key="index"
+						type="button"
+						@click="jumpToAttendee(index)"
+						class="w-full rounded-2xl border p-4 text-left transition-all duration-300"
+						:class="attendeeSidebarCardClass(index, attendee)"
+					>
+						<div class="flex items-start justify-between gap-3">
 							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
-								<p class="text-sm text-gray-600">Tell us who will be attending.</p>
+								<p class="text-base font-black text-slate-900">
+									{{ attendeeDisplayName(attendee, index) }}
+								</p>
+								<p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+									{{ attendeeStepSummary(index) }}
+								</p>
 							</div>
+							<span
+								class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider"
+								:class="attendeeStatusBadgeClass(index, attendee)"
+							>
+								{{ attendeeStatusLabel(index, attendee) }}
+							</span>
+						</div>
+					</button>
+
+					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+						<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Current attendee snapshot</p>
+						<div v-if="currentAttendee" class="mt-3 space-y-2">
+							<p class="text-sm font-bold text-slate-800">{{ attendeeDisplayName(currentAttendee, store.currentIndex) }}</p>
+							<p class="text-xs text-slate-600">
+								Email: {{ currentAttendee.email || 'Not provided yet' }}
+							</p>
+							<p class="text-xs text-slate-600">
+								DOB: {{ currentAttendee.date_of_birth || 'Not provided yet' }}
+							</p>
+							<p class="text-xs text-slate-600">
+								Package: {{ packageById(currentAttendee.packageId)?.name || 'Not selected' }}
+							</p>
+						</div>
+						<p class="mt-3 text-[11px] leading-relaxed text-slate-500">
+							Keep medical, dietary, and emergency details accurate to support safe event safeguarding.
+						</p>
+					</div>
+				</aside>
+
+				<main class="min-w-0 flex-1">
+					<div class="rounded-3xl border-2 border-slate-900/80 bg-white shadow-[10px_10px_0px_0px_rgba(15,23,42,0.2)]">
+						<div class="p-6 md:p-10">
+							<div class="border-b border-slate-100 pb-6">
+								<h2 class="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">
+									Details for {{ attendeeDisplayName(currentAttendee, store.currentIndex) }}
+								</h2>
+								<p class="mt-2 text-sm text-slate-500">Complete each step to prepare this attendee for checkout.</p>
+							</div>
+
+							<div class="mt-6 overflow-x-auto pb-2">
+								<ol class="flex min-w-max items-center gap-2 md:gap-3">
+									<li
+										v-for="(label, index) in steps"
+										:key="label"
+										class="flex items-center"
+									>
+										<div class="flex items-center gap-2">
+											<div
+												class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
+												:class="
+													index === activeStepIndex
+														? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
+														: index < activeStepIndex
+															? 'border-emerald-500 bg-emerald-500 text-white'
+															: 'border-slate-300 bg-white text-slate-500'
+												"
+											>
+												{{ index + 1 }}
+											</div>
+											<p
+												class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
+												:class="index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
+											>
+												{{ label }}
+											</p>
+										</div>
+										<div
+											v-if="index < steps.length - 1"
+											class="mx-2 h-px w-6 md:w-10"
+											:class="index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
+										></div>
+									</li>
+								</ol>
+							</div>
+
+							<div v-if="!currentAttendee" class="mt-8 text-sm text-slate-500">Preparing registration details...</div>
+
+							<Transition name="step-fade" mode="out-in">
+								<div v-if="currentAttendee" :key="`step-${store.currentIndex}-${activeStepIndex}`" class="mt-8 space-y-6">
+									<div v-if="activeStepIndex === 0" class="space-y-6">
+										<div>
+											<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
+											<p class="text-sm text-gray-600">Tell us who will be attending.</p>
+										</div>
 
 							<div class="grid gap-4 sm:grid-cols-2">
 								<div>
@@ -91,7 +228,7 @@
 							</div>
 						</div>
 
-						<div v-else-if="activeStepIndex === 1" class="space-y-6">
+									<div v-else-if="activeStepIndex === 1" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Event questions</h2>
 								<p class="text-sm text-gray-600">Answer any questions the organizer added.</p>
@@ -103,7 +240,7 @@
 							/>
 						</div>
 
-						<div v-else-if="activeStepIndex === 2" class="space-y-6">
+									<div v-else-if="activeStepIndex === 2" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Personal info</h2>
 								<p class="text-sm text-gray-600">Add any dietary, medical, or accessibility needs.</p>
@@ -222,7 +359,7 @@
 							</div>
 						</div>
 
-						<div v-else-if="activeStepIndex === 3" class="space-y-6">
+									<div v-else-if="activeStepIndex === 3" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Ticket package</h2>
 								<p class="text-sm text-gray-600">Choose the package for this attendee.</p>
@@ -253,7 +390,7 @@
 							<p v-else class="text-sm text-gray-500">No packages available for this attendee.</p>
 						</div>
 
-						<div v-else-if="activeStepIndex === 4" class="space-y-6">
+									<div v-else-if="activeStepIndex === 4" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Products</h2>
 								<p class="text-sm text-gray-600">Optional add-ons will appear here when available.</p>
@@ -263,7 +400,7 @@
 							</div>
 						</div>
 
-						<div v-else-if="activeStepIndex === 5" class="space-y-6">
+									<div v-else-if="activeStepIndex === 5" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Consents</h2>
 								<p class="text-sm text-gray-600">Review and accept event consents.</p>
@@ -301,7 +438,7 @@
 							<p v-else class="text-sm text-gray-500">No consents required for this event.</p>
 						</div>
 
-						<div v-else-if="activeStepIndex === reviewStepIndex" class="space-y-6">
+									<div v-else-if="activeStepIndex === reviewStepIndex" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Review and pay</h2>
 								<p class="text-sm text-gray-600">Confirm attendee selections and choose a payment method.</p>
@@ -355,34 +492,36 @@
 								</p>
 							</div>
 						</div>
-					</div>
-
-					<div class="flex flex-wrap items-center justify-between gap-3 border-t pt-6">
-						<UButton color="gray" variant="ghost" @click="handleBack">Back</UButton>
-						<div class="flex items-center gap-3">
-							<UButton
-								v-if="activeStepIndex === reviewStepIndex"
-								color="primary"
-								:loading="isSaving"
-								:disabled="!canContinue"
-								@click="handleCheckout"
-							>
-								Complete registration
-							</UButton>
-							<UButton
-								v-else
-								color="primary"
-								:loading="isSaving"
-								:disabled="!canContinue"
-								@click="handleNext"
-							>
-								{{ primaryActionLabel }}
-							</UButton>
+									<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
+										<UButton color="gray" variant="ghost" @click="handleBack">Back</UButton>
+										<div class="flex items-center gap-3">
+											<UButton
+												v-if="activeStepIndex === reviewStepIndex"
+												color="primary"
+												:loading="isSaving"
+												:disabled="!canContinue"
+												@click="handleCheckout"
+											>
+												Complete registration
+											</UButton>
+											<UButton
+												v-else
+												color="primary"
+												:loading="isSaving"
+												:disabled="!canContinue"
+												@click="handleNext"
+											>
+												{{ primaryActionLabel }}
+											</UButton>
+										</div>
+									</div>
+								</div>
+							</Transition>
 						</div>
 					</div>
+				</main>
+			</template>
 				</div>
-			</div>
-		</div>
 	</div>
 </template>
 
@@ -392,6 +531,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useEvent } from '~/composables/resources/events/events'
+import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import { useCreateBookingIntent } from '~/composables/resources/booking/bookingIntents'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
@@ -402,6 +542,8 @@ import { useBookingPackages } from '~/composables/resources/booking/bookingPacka
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { buildCheckoutPayload, createIdempotencyKey } from '~/composables/registration/checkout'
+import { resolveImageUrl } from '~/utils/image'
+import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
 
 const route = useRoute()
@@ -427,6 +569,27 @@ const eventQuery = useEvent(eventId)
 const event = computed(() => eventQuery.data.value?.data || null)
 const event_uuid = computed(() => event.value?.event_id || '')
 const eventLoading = computed(() => eventQuery.isLoading.value)
+const { data: eventVenuesData } = useEventVenues(
+	computed(() => ({
+		event__event_id: eventId.value,
+	}))
+)
+const primaryVenue = computed(() => eventVenuesData.value?.data?.results?.[0] || null)
+
+const fallbackHeroImage = '/assets/images/hero-cathedral.png'
+const heroImageSrc = computed(() => resolveImageUrl(event.value?.main_landing_image?.image, fallbackHeroImage))
+const reminderDate = computed(() => (event.value?.start_datetime ? formatDate(event.value.start_datetime, 'MMM d, yyyy') : 'TBA'))
+const reminderTime = computed(() => {
+	if (!event.value?.start_datetime) return 'TBA'
+	const start = formatTime(event.value.start_datetime, event.value?.timezone)
+	if (!event.value?.end_datetime) return start
+	return `${start} - ${formatTime(event.value.end_datetime, event.value?.timezone)}`
+})
+const reminderLocation = computed(() => {
+	if (primaryVenue.value?.venue_name) return primaryVenue.value.venue_name
+	if (event.value?.organisation_name) return event.value.organisation_name
+	return 'Location TBA'
+})
 
 const bookingIntentMutation = useCreateBookingIntent()
 const isCreatingIntent = ref(false)
@@ -469,6 +632,48 @@ const activeStepIndex = ref(0)
 const currentAttendee = computed(() => store.attendees[store.currentIndex])
 const currentAttendeeNumber = computed(() => store.currentIndex + 1)
 const isRegistrarSelf = computed(() => store.registrarAttending && store.currentIndex === 0)
+const stepProgressPercent = computed(() => ((activeStepIndex.value + 1) / steps.length) * 100)
+
+const attendeeDisplayName = (attendee?: AttendeeDraft | null, index?: number) => {
+	if (!attendee) return 'Attendee'
+	const fullName = `${attendee.first_name || ''} ${attendee.last_name || ''}`.trim()
+	if (fullName) return fullName
+	if (typeof index === 'number') return `Attendee ${index + 1}`
+	return 'Attendee'
+}
+
+const attendeeStatusLabel = (index: number, attendee: AttendeeDraft) => {
+	if (index === store.currentIndex) return 'Editing'
+	if (isAttendeeReady(attendee)) return 'Ready'
+	if (index < store.currentIndex) return 'Needs info'
+	return 'Queued'
+}
+
+const attendeeStatusBadgeClass = (index: number, attendee: AttendeeDraft) => {
+	if (index === store.currentIndex) return 'bg-blue-100 text-blue-700'
+	if (isAttendeeReady(attendee)) return 'bg-emerald-100 text-emerald-700'
+	if (index < store.currentIndex) return 'bg-amber-100 text-amber-700'
+	return 'bg-slate-100 text-slate-500'
+}
+
+const attendeeSidebarCardClass = (index: number, attendee: AttendeeDraft) => {
+	if (index === store.currentIndex) {
+		return 'border-slate-900 bg-white shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)]'
+	}
+	if (isAttendeeReady(attendee)) {
+		return 'border-emerald-200 bg-emerald-50 hover:border-emerald-300'
+	}
+	if (index < store.currentIndex) {
+		return 'border-amber-200 bg-amber-50 hover:border-amber-300'
+	}
+	return 'border-slate-200 bg-slate-50/90 hover:border-slate-300'
+}
+
+const attendeeStepSummary = (index: number) => {
+	if (index === store.currentIndex) return steps[activeStepIndex.value] || 'In progress'
+	if (index < store.currentIndex) return 'Previously edited'
+	return 'Waiting'
+}
 
 const relationshipOptions = [
 	{ label: 'Self', value: 'self' },
@@ -754,3 +959,16 @@ const goBack = () => {
 	router.back()
 }
 </script>
+
+<style scoped>
+.step-fade-enter-active,
+.step-fade-leave-active {
+	transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.step-fade-enter-from,
+.step-fade-leave-to {
+	opacity: 0;
+	transform: translateY(8px);
+}
+</style>
