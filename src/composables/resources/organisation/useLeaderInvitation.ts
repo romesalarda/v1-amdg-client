@@ -116,6 +116,13 @@ export function useLeaderInvitation(organisationId: ComputedRef<number>, leaders
         return leaders.value.some((leader: any) => leader.user === userId)
     }
 
+    const isAlreadyLeaderForLocation = (userId: number, locationId: number | null) => {
+        if (!locationId) {
+            return false
+        }
+        return leaders.value.some((leader: any) => leader.user === userId && leader.location === locationId)
+    }
+
     const inviteLeader = (userId: number) => {
         if (!selectedLocationId.value) {
             $notyf.error('Please select a location before inviting leaders.')
@@ -169,6 +176,7 @@ export function useLeaderInvitation(organisationId: ComputedRef<number>, leaders
         invitingUserId,
         hasPendingInviteForCandidate,
         isAlreadyLeader,
+        isAlreadyLeaderForLocation,
         inviteLeader,
     }
 }

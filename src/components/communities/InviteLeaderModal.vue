@@ -82,7 +82,7 @@
                             Invited
                         </span>
                         <span
-                            v-else-if="isAlreadyLeader(candidate.id)"
+                            v-else-if="isAlreadyLeaderForLocation(candidate.id, selectedLocationId)"
                             class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-600 text-white"
                         >
                             Leader
@@ -132,6 +132,7 @@ const {
     invitingUserId,
     hasPendingInviteForCandidate,
     isAlreadyLeader,
+    isAlreadyLeaderForLocation,
     inviteLeader,
 } = useLeaderInvitation(computed(() => props.organisationId), computed(() => props.leaders), computed(() => props.pendingInvites))
 </script>
