@@ -2,19 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsRelativeAreasList,
-  locationsLocationsRelativeAreasRetrieve,
-  locationsLocationsRelativeAreasCreate,
-  locationsLocationsRelativeAreasUpdate,
-  locationsLocationsRelativeAreasPartialUpdate,
-  locationsLocationsRelativeAreasDestroy,
+  locationsRelativeAreasList,
+  locationsRelativeAreasRetrieve,
+  locationsRelativeAreasCreate,
+  locationsRelativeAreasUpdate,
+  locationsRelativeAreasPartialUpdate,
+  locationsRelativeAreasDestroy,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsRelativeAreasListData,
-  LocationsLocationsRelativeAreasCreateData,
-  LocationsLocationsRelativeAreasUpdateData,
-  LocationsLocationsRelativeAreasPartialUpdateData,
-  LocationsLocationsRelativeAreasDestroyData,
+  LocationsRelativeAreasListData,
+  LocationsRelativeAreasCreateData,
+  LocationsRelativeAreasUpdateData,
+  LocationsRelativeAreasPartialUpdateData,
+  LocationsRelativeAreasDestroyData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationRelativeAreas'] as const
@@ -22,12 +22,12 @@ const QUERY_KEY = ['locationRelativeAreas'] as const
 /**
  * List all relative search areas
  */
-export function useLocationRelativeAreas(params?: MaybeRefOrGetter<LocationsLocationsRelativeAreasListData['query'] | undefined>) {
+export function useLocationRelativeAreas(params?: MaybeRefOrGetter<LocationsRelativeAreasListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsRelativeAreasList(queryParams ? { query: queryParams } : undefined)
+      return locationsRelativeAreasList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -40,7 +40,7 @@ export function useLocationRelativeArea(relativeAreaId: MaybeRefOrGetter<number>
     queryKey: [...QUERY_KEY, 'detail', relativeAreaId] as const,
     queryFn: () => {
       const id = toValue(relativeAreaId)
-      return locationsLocationsRelativeAreasRetrieve({ path: { id } })
+      return locationsRelativeAreasRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(relativeAreaId),
   })
@@ -53,7 +53,7 @@ export function useCreateLocationRelativeArea() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsRelativeAreasCreateData['body']) => locationsLocationsRelativeAreasCreate({ body }),
+    mutationFn: (body: LocationsRelativeAreasCreateData['body']) => locationsRelativeAreasCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -67,8 +67,8 @@ export function useUpdateLocationRelativeArea() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ relativeAreaId, body }: { relativeAreaId: number; body: LocationsLocationsRelativeAreasUpdateData['body'] }) =>
-      locationsLocationsRelativeAreasUpdate({ path: { id: relativeAreaId }, body }),
+    mutationFn: ({ relativeAreaId, body }: { relativeAreaId: number; body: LocationsRelativeAreasUpdateData['body'] }) =>
+      locationsRelativeAreasUpdate({ path: { id: relativeAreaId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -85,8 +85,8 @@ export function usePartialUpdateLocationRelativeArea() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ relativeAreaId, body }: { relativeAreaId: number; body?: LocationsLocationsRelativeAreasPartialUpdateData['body'] }) =>
-      locationsLocationsRelativeAreasPartialUpdate({ path: { id: relativeAreaId }, body }),
+    mutationFn: ({ relativeAreaId, body }: { relativeAreaId: number; body?: LocationsRelativeAreasPartialUpdateData['body'] }) =>
+      locationsRelativeAreasPartialUpdate({ path: { id: relativeAreaId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteLocationRelativeArea() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (relativeAreaId: number) => locationsLocationsRelativeAreasDestroy({ path: { id: relativeAreaId } }),
+    mutationFn: (relativeAreaId: number) => locationsRelativeAreasDestroy({ path: { id: relativeAreaId } }),
     onSuccess: (_, relativeAreaId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

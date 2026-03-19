@@ -2,19 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsPoisList,
-  locationsLocationsPoisRetrieve,
-  locationsLocationsPoisCreate,
-  locationsLocationsPoisUpdate,
-  locationsLocationsPoisPartialUpdate,
-  locationsLocationsPoisDestroy,
+  locationsPoisList,
+  locationsPoisRetrieve,
+  locationsPoisCreate,
+  locationsPoisUpdate,
+  locationsPoisPartialUpdate,
+  locationsPoisDestroy,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsPoisListData,
-  LocationsLocationsPoisCreateData,
-  LocationsLocationsPoisUpdateData,
-  LocationsLocationsPoisPartialUpdateData,
-  LocationsLocationsPoisDestroyData,
+  LocationsPoisListData,
+  LocationsPoisCreateData,
+  LocationsPoisUpdateData,
+  LocationsPoisPartialUpdateData,
+  LocationsPoisDestroyData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationPois'] as const
@@ -22,12 +22,12 @@ const QUERY_KEY = ['locationPois'] as const
 /**
  * List all points of interest
  */
-export function useLocationPois(params?: MaybeRefOrGetter<LocationsLocationsPoisListData['query'] | undefined>) {
+export function useLocationPois(params?: MaybeRefOrGetter<LocationsPoisListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsPoisList(queryParams ? { query: queryParams } : undefined)
+      return locationsPoisList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -40,7 +40,7 @@ export function useLocationPoi(poiId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'detail', poiId] as const,
     queryFn: () => {
       const id = toValue(poiId)
-      return locationsLocationsPoisRetrieve({ path: { id } })
+      return locationsPoisRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(poiId),
   })
@@ -53,7 +53,7 @@ export function useCreateLocationPoi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsPoisCreateData['body']) => locationsLocationsPoisCreate({ body }),
+    mutationFn: (body: LocationsPoisCreateData['body']) => locationsPoisCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -67,8 +67,8 @@ export function useUpdateLocationPoi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ poiId, body }: { poiId: number; body: LocationsLocationsPoisUpdateData['body'] }) =>
-      locationsLocationsPoisUpdate({ path: { id: poiId }, body }),
+    mutationFn: ({ poiId, body }: { poiId: number; body: LocationsPoisUpdateData['body'] }) =>
+      locationsPoisUpdate({ path: { id: poiId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -85,8 +85,8 @@ export function usePartialUpdateLocationPoi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ poiId, body }: { poiId: number; body?: LocationsLocationsPoisPartialUpdateData['body'] }) =>
-      locationsLocationsPoisPartialUpdate({ path: { id: poiId }, body }),
+    mutationFn: ({ poiId, body }: { poiId: number; body?: LocationsPoisPartialUpdateData['body'] }) =>
+      locationsPoisPartialUpdate({ path: { id: poiId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteLocationPoi() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (poiId: number) => locationsLocationsPoisDestroy({ path: { id: poiId } }),
+    mutationFn: (poiId: number) => locationsPoisDestroy({ path: { id: poiId } }),
     onSuccess: (_, poiId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

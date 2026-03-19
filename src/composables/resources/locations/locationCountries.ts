@@ -2,21 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsCountriesList,
-  locationsLocationsCountriesRetrieve,
-  locationsLocationsCountriesCreate,
-  locationsLocationsCountriesUpdate,
-  locationsLocationsCountriesPartialUpdate,
-  locationsLocationsCountriesDestroy,
-  locationsLocationsCountriesClustersList,
+  locationsCountriesList,
+  locationsCountriesRetrieve,
+  locationsCountriesCreate,
+  locationsCountriesUpdate,
+  locationsCountriesPartialUpdate,
+  locationsCountriesDestroy,
+  locationsCountriesClustersList,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsCountriesListData,
-  LocationsLocationsCountriesCreateData,
-  LocationsLocationsCountriesUpdateData,
-  LocationsLocationsCountriesPartialUpdateData,
-  LocationsLocationsCountriesDestroyData,
-  LocationsLocationsCountriesClustersListData,
+  LocationsCountriesListData,
+  LocationsCountriesCreateData,
+  LocationsCountriesUpdateData,
+  LocationsCountriesPartialUpdateData,
+  LocationsCountriesDestroyData,
+  LocationsCountriesClustersListData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationCountries'] as const
@@ -24,12 +24,12 @@ const QUERY_KEY = ['locationCountries'] as const
 /**
  * List all country locations
  */
-export function useLocationCountries(params?: MaybeRefOrGetter<LocationsLocationsCountriesListData['query'] | undefined>) {
+export function useLocationCountries(params?: MaybeRefOrGetter<LocationsCountriesListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsCountriesList(queryParams ? { query: queryParams } : undefined)
+      return locationsCountriesList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -42,7 +42,7 @@ export function useLocationCountry(countryId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'detail', countryId] as const,
     queryFn: () => {
       const id = toValue(countryId)
-      return locationsLocationsCountriesRetrieve({ path: { id } })
+      return locationsCountriesRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(countryId),
   })
@@ -56,7 +56,7 @@ export function useLocationCountryClusters(countryId: MaybeRefOrGetter<number>) 
     queryKey: [...QUERY_KEY, 'clusters', countryId] as const,
     queryFn: () => {
       const id = toValue(countryId)
-      return locationsLocationsCountriesClustersList({ path: { id } })
+      return locationsCountriesClustersList({ path: { id } })
     },
     enabled: () => !!toValue(countryId),
   })
@@ -69,7 +69,7 @@ export function useCreateLocationCountry() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsCountriesCreateData['body']) => locationsLocationsCountriesCreate({ body }),
+    mutationFn: (body: LocationsCountriesCreateData['body']) => locationsCountriesCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -83,8 +83,8 @@ export function useUpdateLocationCountry() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ countryId, body }: { countryId: number; body: LocationsLocationsCountriesUpdateData['body'] }) =>
-      locationsLocationsCountriesUpdate({ path: { id: countryId }, body }),
+    mutationFn: ({ countryId, body }: { countryId: number; body: LocationsCountriesUpdateData['body'] }) =>
+      locationsCountriesUpdate({ path: { id: countryId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -101,8 +101,8 @@ export function usePartialUpdateLocationCountry() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ countryId, body }: { countryId: number; body?: LocationsLocationsCountriesPartialUpdateData['body'] }) =>
-      locationsLocationsCountriesPartialUpdate({ path: { id: countryId }, body }),
+    mutationFn: ({ countryId, body }: { countryId: number; body?: LocationsCountriesPartialUpdateData['body'] }) =>
+      locationsCountriesPartialUpdate({ path: { id: countryId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -119,7 +119,7 @@ export function useDeleteLocationCountry() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (countryId: number) => locationsLocationsCountriesDestroy({ path: { id: countryId } }),
+    mutationFn: (countryId: number) => locationsCountriesDestroy({ path: { id: countryId } }),
     onSuccess: (_, countryId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

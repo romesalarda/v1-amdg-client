@@ -2,23 +2,23 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsVenuesList,
-  locationsLocationsVenuesRetrieve,
-  locationsLocationsVenuesCreate,
-  locationsLocationsVenuesUpdate,
-  locationsLocationsVenuesPartialUpdate,
-  locationsLocationsVenuesDestroy,
-  locationsLocationsVenuesContactsList,
-  locationsLocationsVenuesRoomsList,
+  locationsVenuesList,
+  locationsVenuesRetrieve,
+  locationsVenuesCreate,
+  locationsVenuesUpdate,
+  locationsVenuesPartialUpdate,
+  locationsVenuesDestroy,
+  locationsVenuesContactsList,
+  locationsVenuesRoomsList,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsVenuesListData,
-  LocationsLocationsVenuesCreateData,
-  LocationsLocationsVenuesUpdateData,
-  LocationsLocationsVenuesPartialUpdateData,
-  LocationsLocationsVenuesDestroyData,
-  LocationsLocationsVenuesContactsListData,
-  LocationsLocationsVenuesRoomsListData,
+  LocationsVenuesListData,
+  LocationsVenuesCreateData,
+  LocationsVenuesUpdateData,
+  LocationsVenuesPartialUpdateData,
+  LocationsVenuesDestroyData,
+  LocationsVenuesContactsListData,
+  LocationsVenuesRoomsListData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationVenues'] as const
@@ -26,12 +26,12 @@ const QUERY_KEY = ['locationVenues'] as const
 /**
  * List all venues
  */
-export function useLocationVenues(params?: MaybeRefOrGetter<LocationsLocationsVenuesListData['query'] | undefined>) {
+export function useLocationVenues(params?: MaybeRefOrGetter<LocationsVenuesListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsVenuesList(queryParams ? { query: queryParams } : undefined)
+      return locationsVenuesList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -44,7 +44,7 @@ export function useLocationVenue(venueId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'detail', venueId] as const,
     queryFn: () => {
       const id = toValue(venueId)
-      return locationsLocationsVenuesRetrieve({ path: { id } })
+      return locationsVenuesRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(venueId),
   })
@@ -58,7 +58,7 @@ export function useLocationVenueContacts(venueId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'contacts', venueId] as const,
     queryFn: () => {
       const id = toValue(venueId)
-      return locationsLocationsVenuesContactsList({ path: { id } })
+      return locationsVenuesContactsList({ path: { id } })
     },
     enabled: () => !!toValue(venueId),
   })
@@ -72,7 +72,7 @@ export function useLocationVenueRooms(venueId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'rooms', venueId] as const,
     queryFn: () => {
       const id = toValue(venueId)
-      return locationsLocationsVenuesRoomsList({ path: { id } })
+      return locationsVenuesRoomsList({ path: { id } })
     },
     enabled: () => !!toValue(venueId),
   })
@@ -85,7 +85,7 @@ export function useCreateLocationVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsVenuesCreateData['body']) => locationsLocationsVenuesCreate({ body }),
+    mutationFn: (body: LocationsVenuesCreateData['body']) => locationsVenuesCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -99,8 +99,8 @@ export function useUpdateLocationVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ venueId, body }: { venueId: number; body: LocationsLocationsVenuesUpdateData['body'] }) =>
-      locationsLocationsVenuesUpdate({ path: { id: venueId }, body }),
+    mutationFn: ({ venueId, body }: { venueId: number; body: LocationsVenuesUpdateData['body'] }) =>
+      locationsVenuesUpdate({ path: { id: venueId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -117,8 +117,8 @@ export function usePartialUpdateLocationVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ venueId, body }: { venueId: number; body?: LocationsLocationsVenuesPartialUpdateData['body'] }) =>
-      locationsLocationsVenuesPartialUpdate({ path: { id: venueId }, body }),
+    mutationFn: ({ venueId, body }: { venueId: number; body?: LocationsVenuesPartialUpdateData['body'] }) =>
+      locationsVenuesPartialUpdate({ path: { id: venueId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -135,7 +135,7 @@ export function useDeleteLocationVenue() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (venueId: number) => locationsLocationsVenuesDestroy({ path: { id: venueId } }),
+    mutationFn: (venueId: number) => locationsVenuesDestroy({ path: { id: venueId } }),
     onSuccess: (_, venueId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

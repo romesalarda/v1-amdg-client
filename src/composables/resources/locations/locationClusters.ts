@@ -2,21 +2,21 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsClustersList,
-  locationsLocationsClustersRetrieve,
-  locationsLocationsClustersCreate,
-  locationsLocationsClustersUpdate,
-  locationsLocationsClustersPartialUpdate,
-  locationsLocationsClustersDestroy,
-  locationsLocationsClustersChaptersList,
+  locationsClustersList,
+  locationsClustersRetrieve,
+  locationsClustersCreate,
+  locationsClustersUpdate,
+  locationsClustersPartialUpdate,
+  locationsClustersDestroy,
+  locationsClustersChaptersList,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsClustersListData,
-  LocationsLocationsClustersCreateData,
-  LocationsLocationsClustersUpdateData,
-  LocationsLocationsClustersPartialUpdateData,
-  LocationsLocationsClustersDestroyData,
-  LocationsLocationsClustersChaptersListData,
+  LocationsClustersListData,
+  LocationsClustersCreateData,
+  LocationsClustersUpdateData,
+  LocationsClustersPartialUpdateData,
+  LocationsClustersDestroyData,
+  LocationsClustersChaptersListData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationClusters'] as const
@@ -24,12 +24,12 @@ const QUERY_KEY = ['locationClusters'] as const
 /**
  * List all cluster locations
  */
-export function useLocationClusters(params?: MaybeRefOrGetter<LocationsLocationsClustersListData['query'] | undefined>) {
+export function useLocationClusters(params?: MaybeRefOrGetter<LocationsClustersListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsClustersList(queryParams ? { query: queryParams } : undefined)
+      return locationsClustersList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -42,7 +42,7 @@ export function useLocationCluster(clusterId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'detail', clusterId] as const,
     queryFn: () => {
       const id = toValue(clusterId)
-      return locationsLocationsClustersRetrieve({ path: { id } })
+      return locationsClustersRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(clusterId),
   })
@@ -56,7 +56,7 @@ export function useLocationClusterChapters(clusterId: MaybeRefOrGetter<number>) 
     queryKey: [...QUERY_KEY, 'chapters', clusterId] as const,
     queryFn: () => {
       const id = toValue(clusterId)
-      return locationsLocationsClustersChaptersList({ path: { id } })
+      return locationsClustersChaptersList({ path: { id } })
     },
     enabled: () => !!toValue(clusterId),
   })
@@ -69,7 +69,7 @@ export function useCreateLocationCluster() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsClustersCreateData['body']) => locationsLocationsClustersCreate({ body }),
+    mutationFn: (body: LocationsClustersCreateData['body']) => locationsClustersCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -83,8 +83,8 @@ export function useUpdateLocationCluster() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clusterId, body }: { clusterId: number; body: LocationsLocationsClustersUpdateData['body'] }) =>
-      locationsLocationsClustersUpdate({ path: { id: clusterId }, body }),
+    mutationFn: ({ clusterId, body }: { clusterId: number; body: LocationsClustersUpdateData['body'] }) =>
+      locationsClustersUpdate({ path: { id: clusterId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -101,8 +101,8 @@ export function usePartialUpdateLocationCluster() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ clusterId, body }: { clusterId: number; body?: LocationsLocationsClustersPartialUpdateData['body'] }) =>
-      locationsLocationsClustersPartialUpdate({ path: { id: clusterId }, body }),
+    mutationFn: ({ clusterId, body }: { clusterId: number; body?: LocationsClustersPartialUpdateData['body'] }) =>
+      locationsClustersPartialUpdate({ path: { id: clusterId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -119,7 +119,7 @@ export function useDeleteLocationCluster() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (clusterId: number) => locationsLocationsClustersDestroy({ path: { id: clusterId } }),
+    mutationFn: (clusterId: number) => locationsClustersDestroy({ path: { id: clusterId } }),
     onSuccess: (_, clusterId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

@@ -2,19 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsRoomsList,
-  locationsLocationsRoomsRetrieve,
-  locationsLocationsRoomsCreate,
-  locationsLocationsRoomsUpdate,
-  locationsLocationsRoomsPartialUpdate,
-  locationsLocationsRoomsDestroy,
+  locationsRoomsList,
+  locationsRoomsRetrieve,
+  locationsRoomsCreate,
+  locationsRoomsUpdate,
+  locationsRoomsPartialUpdate,
+  locationsRoomsDestroy,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsRoomsListData,
-  LocationsLocationsRoomsCreateData,
-  LocationsLocationsRoomsUpdateData,
-  LocationsLocationsRoomsPartialUpdateData,
-  LocationsLocationsRoomsDestroyData,
+  LocationsRoomsListData,
+  LocationsRoomsCreateData,
+  LocationsRoomsUpdateData,
+  LocationsRoomsPartialUpdateData,
+  LocationsRoomsDestroyData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationRooms'] as const
@@ -22,12 +22,12 @@ const QUERY_KEY = ['locationRooms'] as const
 /**
  * List all venue rooms
  */
-export function useLocationRooms(params?: MaybeRefOrGetter<LocationsLocationsRoomsListData['query'] | undefined>) {
+export function useLocationRooms(params?: MaybeRefOrGetter<LocationsRoomsListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsRoomsList(queryParams ? { query: queryParams } : undefined)
+      return locationsRoomsList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -40,7 +40,7 @@ export function useLocationRoom(roomId: MaybeRefOrGetter<number>) {
     queryKey: [...QUERY_KEY, 'detail', roomId] as const,
     queryFn: () => {
       const id = toValue(roomId)
-      return locationsLocationsRoomsRetrieve({ path: { id } })
+      return locationsRoomsRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(roomId),
   })
@@ -53,7 +53,7 @@ export function useCreateLocationRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsRoomsCreateData['body']) => locationsLocationsRoomsCreate({ body }),
+    mutationFn: (body: LocationsRoomsCreateData['body']) => locationsRoomsCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -67,8 +67,8 @@ export function useUpdateLocationRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roomId, body }: { roomId: number; body: LocationsLocationsRoomsUpdateData['body'] }) =>
-      locationsLocationsRoomsUpdate({ path: { id: roomId }, body }),
+    mutationFn: ({ roomId, body }: { roomId: number; body: LocationsRoomsUpdateData['body'] }) =>
+      locationsRoomsUpdate({ path: { id: roomId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -85,8 +85,8 @@ export function usePartialUpdateLocationRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ roomId, body }: { roomId: number; body?: LocationsLocationsRoomsPartialUpdateData['body'] }) =>
-      locationsLocationsRoomsPartialUpdate({ path: { id: roomId }, body }),
+    mutationFn: ({ roomId, body }: { roomId: number; body?: LocationsRoomsPartialUpdateData['body'] }) =>
+      locationsRoomsPartialUpdate({ path: { id: roomId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteLocationRoom() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (roomId: number) => locationsLocationsRoomsDestroy({ path: { id: roomId } }),
+    mutationFn: (roomId: number) => locationsRoomsDestroy({ path: { id: roomId } }),
     onSuccess: (_, roomId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

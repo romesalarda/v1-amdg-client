@@ -99,73 +99,30 @@
 				</section>
 
 				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-						<UIcon name="i-heroicons-map" class="w-5 h-5 text-primary" />
-						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Area</h3>
-					</div>
-					<div class="p-6">
-						<v-chart
-							v-if="areaDistributionOption"
-							:option="areaDistributionOption"
-							:autoresize="true"
-							class="h-80"
-						/>
-						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
-							No area distribution data available.
+					<div class="px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-3">
+						<div class="flex items-center gap-2">
+							<UIcon name="i-heroicons-map" class="w-5 h-5 text-primary" />
+							<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Location</h3>
+						</div>
+						<div class="flex items-center gap-2 text-xs font-semibold text-gray-500">
+							<span>View:</span>
+							<USelectMenu
+								v-model="selectedLocationType"
+								:options="locationTypeOptions"
+								value-attribute="value"
+								option-attribute="label"
+							/>
 						</div>
 					</div>
-				</section>
-
-				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-						<UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-primary" />
-						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Chapter</h3>
-					</div>
 					<div class="p-6">
 						<v-chart
-							v-if="chapterDistributionOption"
-							:option="chapterDistributionOption"
+							v-if="locationDistributionOption"
+							:option="locationDistributionOption"
 							:autoresize="true"
 							class="h-80"
 						/>
 						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
-							No chapter distribution data available.
-						</div>
-					</div>
-				</section>
-
-				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-						<UIcon name="i-heroicons-map" class="w-5 h-5 text-primary" />
-						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Cluster</h3>
-					</div>
-					<div class="p-6">
-						<v-chart
-							v-if="clusterDistributionOption"
-							:option="clusterDistributionOption"
-							:autoresize="true"
-							class="h-80"
-						/>
-						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
-							No cluster distribution data available.
-						</div>
-					</div>
-				</section>
-
-				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-						<UIcon name="i-heroicons-flag" class="w-5 h-5 text-primary" />
-						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Country</h3>
-					</div>
-					<div class="p-6">
-						<v-chart
-							v-if="countryDistributionOption"
-							:option="countryDistributionOption"
-							:autoresize="true"
-							class="h-80"
-						/>
-						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
-							No country distribution data available.
+							No {{ selectedLocationLabel }} distribution data available.
 						</div>
 					</div>
 				</section>
@@ -310,38 +267,30 @@ const buildLocationRows = (rows: unknown) => {
 		.slice(0, 10)
 }
 
-const buildDistributionOption = (rows: { name: string; count: number }[], color: string) => {
+const buildLocationPieOption = (rows: { name: string; count: number }[]) => {
 	if (!rows.length) return null
 
 	return {
+		color: ['#2563eb', '#0ea5e9', '#22c55e', '#f97316', '#facc15', '#a855f7', '#14b8a6', '#f43f5e', '#6366f1', '#64748b'],
 		tooltip: {
-			trigger: 'axis',
-			axisPointer: { type: 'shadow' },
+			trigger: 'item',
+			formatter: '{b}: {c} ({d}%)',
 		},
-		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
-			containLabel: true,
-		},
-		xAxis: {
-			type: 'value',
-		},
-		yAxis: {
-			type: 'category',
-			data: rows.map((item) => item.name),
+		legend: {
+			bottom: 0,
+			left: 'center',
 		},
 		series: [
 			{
-				type: 'bar',
-				data: rows.map((item) => item.count),
-				itemStyle: {
-					color,
-				},
+				type: 'pie',
+				radius: ['35%', '70%'],
 				label: {
-					show: true,
-					position: 'right',
+					formatter: '{b}',
 				},
+				data: rows.map((item) => ({
+					name: item.name,
+					value: item.count,
+				})),
 			},
 		],
 	}
@@ -452,6 +401,38 @@ const chapterRows = computed(() => buildLocationRows(leaderDistribution.value?.c
 const clusterRows = computed(() => buildLocationRows(leaderDistribution.value?.cluster_distribution))
 const countryRows = computed(() => buildLocationRows(leaderDistribution.value?.country_distribution))
 
+const locationTypeOptions = [
+	{ label: 'Area', value: 'area' },
+	{ label: 'Chapter', value: 'chapter' },
+	{ label: 'Cluster', value: 'cluster' },
+	{ label: 'Country', value: 'country' },
+]
+
+const selectedLocationType = ref<string>('area')
+
+const locationTypeEntries = computed(() => [
+	{ key: 'area', label: 'Area', rows: areaRows.value },
+	{ key: 'chapter', label: 'Chapter', rows: chapterRows.value },
+	{ key: 'cluster', label: 'Cluster', rows: clusterRows.value },
+	{ key: 'country', label: 'Country', rows: countryRows.value },
+])
+
+const selectedLocationEntry = computed(() =>
+	locationTypeEntries.value.find((item) => item.key === selectedLocationType.value) ?? locationTypeEntries.value[0]
+)
+
+const selectedLocationLabel = computed(() => selectedLocationEntry.value?.label ?? 'Location')
+
+watchEffect(() => {
+	const current = selectedLocationEntry.value
+	if (!current) return
+	if (current.rows.length) return
+	const fallback = locationTypeEntries.value.find((item) => item.rows.length)
+	if (fallback && fallback.key !== selectedLocationType.value) {
+		selectedLocationType.value = fallback.key
+	}
+})
+
 const paymentSourceRows = computed(() => {
 	const rows = paymentSourcesData.value?.data?.sources
 	if (!Array.isArray(rows)) return []
@@ -518,10 +499,7 @@ const leaderDistributionOption = computed(() => {
 	}
 })
 
-const areaDistributionOption = computed(() => buildDistributionOption(areaRows.value, '#2563eb'))
-const chapterDistributionOption = computed(() => buildDistributionOption(chapterRows.value, '#0ea5e9'))
-const clusterDistributionOption = computed(() => buildDistributionOption(clusterRows.value, '#7c3aed'))
-const countryDistributionOption = computed(() => buildDistributionOption(countryRows.value, '#16a34a'))
+const locationDistributionOption = computed(() => buildLocationPieOption(selectedLocationEntry.value?.rows ?? []))
 
 const paymentSourcesOption = computed(() => {
 	if (!paymentSourceRows.value.length) return null

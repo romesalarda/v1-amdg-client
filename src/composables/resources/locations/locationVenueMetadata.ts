@@ -2,19 +2,19 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  locationsLocationsVenueMetadataList,
-  locationsLocationsVenueMetadataRetrieve,
-  locationsLocationsVenueMetadataCreate,
-  locationsLocationsVenueMetadataUpdate,
-  locationsLocationsVenueMetadataPartialUpdate,
-  locationsLocationsVenueMetadataDestroy,
+  locationsVenueMetadataList,
+  locationsVenueMetadataRetrieve,
+  locationsVenueMetadataCreate,
+  locationsVenueMetadataUpdate,
+  locationsVenueMetadataPartialUpdate,
+  locationsVenueMetadataDestroy,
 } from '~/api/sdk.gen'
 import type {
-  LocationsLocationsVenueMetadataListData,
-  LocationsLocationsVenueMetadataCreateData,
-  LocationsLocationsVenueMetadataUpdateData,
-  LocationsLocationsVenueMetadataPartialUpdateData,
-  LocationsLocationsVenueMetadataDestroyData,
+  LocationsVenueMetadataListData,
+  LocationsVenueMetadataCreateData,
+  LocationsVenueMetadataUpdateData,
+  LocationsVenueMetadataPartialUpdateData,
+  LocationsVenueMetadataDestroyData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['locationVenueMetadata'] as const
@@ -22,12 +22,12 @@ const QUERY_KEY = ['locationVenueMetadata'] as const
 /**
  * List all venue metadata
  */
-export function useLocationVenueMetadata(params?: MaybeRefOrGetter<LocationsLocationsVenueMetadataListData['query'] | undefined>) {
+export function useLocationVenueMetadata(params?: MaybeRefOrGetter<LocationsVenueMetadataListData['query'] | undefined>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', params] as const,
     queryFn: () => {
       const queryParams = toValue(params)
-      return locationsLocationsVenueMetadataList(queryParams ? { query: queryParams } : undefined)
+      return locationsVenueMetadataList(queryParams ? { query: queryParams } : undefined)
     },
   })
 }
@@ -40,7 +40,7 @@ export function useLocationVenueMetadataEntry(metadataId: MaybeRefOrGetter<numbe
     queryKey: [...QUERY_KEY, 'detail', metadataId] as const,
     queryFn: () => {
       const id = toValue(metadataId)
-      return locationsLocationsVenueMetadataRetrieve({ path: { id } })
+      return locationsVenueMetadataRetrieve({ path: { id } })
     },
     enabled: () => !!toValue(metadataId),
   })
@@ -53,7 +53,7 @@ export function useCreateLocationVenueMetadata() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (body: LocationsLocationsVenueMetadataCreateData['body']) => locationsLocationsVenueMetadataCreate({ body }),
+    mutationFn: (body: LocationsVenueMetadataCreateData['body']) => locationsVenueMetadataCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },
@@ -67,8 +67,8 @@ export function useUpdateLocationVenueMetadata() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ metadataId, body }: { metadataId: number; body: LocationsLocationsVenueMetadataUpdateData['body'] }) =>
-      locationsLocationsVenueMetadataUpdate({ path: { id: metadataId }, body }),
+    mutationFn: ({ metadataId, body }: { metadataId: number; body: LocationsVenueMetadataUpdateData['body'] }) =>
+      locationsVenueMetadataUpdate({ path: { id: metadataId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -85,8 +85,8 @@ export function usePartialUpdateLocationVenueMetadata() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ metadataId, body }: { metadataId: number; body?: LocationsLocationsVenueMetadataPartialUpdateData['body'] }) =>
-      locationsLocationsVenueMetadataPartialUpdate({ path: { id: metadataId }, body }),
+    mutationFn: ({ metadataId, body }: { metadataId: number; body?: LocationsVenueMetadataPartialUpdateData['body'] }) =>
+      locationsVenueMetadataPartialUpdate({ path: { id: metadataId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -103,7 +103,7 @@ export function useDeleteLocationVenueMetadata() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (metadataId: number) => locationsLocationsVenueMetadataDestroy({ path: { id: metadataId } }),
+    mutationFn: (metadataId: number) => locationsVenueMetadataDestroy({ path: { id: metadataId } }),
     onSuccess: (_, metadataId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

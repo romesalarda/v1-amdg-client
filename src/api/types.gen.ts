@@ -9641,6 +9641,15 @@ export type OrganisationLeaderDistributionStatistics = {
     area_distribution: Array<{
         [key: string]: unknown;
     }>;
+    cluster_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    chapter_distribution: Array<{
+        [key: string]: unknown;
+    }>;
+    country_distribution: Array<{
+        [key: string]: unknown;
+    }>;
     generated_at: string;
     scope: {
         [key: string]: unknown;
@@ -32337,7 +32346,7 @@ export type HealthRetrieveResponses = {
 
 export type HealthRetrieveResponse = HealthRetrieveResponses[keyof HealthRetrieveResponses];
 
-export type LocationsLocationsAreasListData = {
+export type LocationsAreasListData = {
     body?: never;
     path?: never;
     query?: {
@@ -32399,29 +32408,29 @@ export type LocationsLocationsAreasListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/areas/';
+    url: '/api/locations/areas/';
 };
 
-export type LocationsLocationsAreasListResponses = {
+export type LocationsAreasListResponses = {
     200: PaginatedAreaLocationListList;
 };
 
-export type LocationsLocationsAreasListResponse = LocationsLocationsAreasListResponses[keyof LocationsLocationsAreasListResponses];
+export type LocationsAreasListResponse = LocationsAreasListResponses[keyof LocationsAreasListResponses];
 
-export type LocationsLocationsAreasCreateData = {
+export type LocationsAreasCreateData = {
     body: AreaLocationCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/areas/';
+    url: '/api/locations/areas/';
 };
 
-export type LocationsLocationsAreasCreateResponses = {
+export type LocationsAreasCreateResponses = {
     201: AreaLocationCreateUpdate;
 };
 
-export type LocationsLocationsAreasCreateResponse = LocationsLocationsAreasCreateResponses[keyof LocationsLocationsAreasCreateResponses];
+export type LocationsAreasCreateResponse = LocationsAreasCreateResponses[keyof LocationsAreasCreateResponses];
 
-export type LocationsLocationsAreasDestroyData = {
+export type LocationsAreasDestroyData = {
     body?: never;
     path: {
         /**
@@ -32430,19 +32439,19 @@ export type LocationsLocationsAreasDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/';
+    url: '/api/locations/areas/{id}/';
 };
 
-export type LocationsLocationsAreasDestroyResponses = {
+export type LocationsAreasDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsAreasDestroyResponse = LocationsLocationsAreasDestroyResponses[keyof LocationsLocationsAreasDestroyResponses];
+export type LocationsAreasDestroyResponse = LocationsAreasDestroyResponses[keyof LocationsAreasDestroyResponses];
 
-export type LocationsLocationsAreasRetrieveData = {
+export type LocationsAreasRetrieveData = {
     body?: never;
     path: {
         /**
@@ -32451,16 +32460,16 @@ export type LocationsLocationsAreasRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/';
+    url: '/api/locations/areas/{id}/';
 };
 
-export type LocationsLocationsAreasRetrieveResponses = {
+export type LocationsAreasRetrieveResponses = {
     200: AreaLocationDetail;
 };
 
-export type LocationsLocationsAreasRetrieveResponse = LocationsLocationsAreasRetrieveResponses[keyof LocationsLocationsAreasRetrieveResponses];
+export type LocationsAreasRetrieveResponse = LocationsAreasRetrieveResponses[keyof LocationsAreasRetrieveResponses];
 
-export type LocationsLocationsAreasPartialUpdateData = {
+export type LocationsAreasPartialUpdateData = {
     body?: PatchedAreaLocationCreateUpdateRequest;
     path: {
         /**
@@ -32469,16 +32478,16 @@ export type LocationsLocationsAreasPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/';
+    url: '/api/locations/areas/{id}/';
 };
 
-export type LocationsLocationsAreasPartialUpdateResponses = {
+export type LocationsAreasPartialUpdateResponses = {
     200: AreaLocationCreateUpdate;
 };
 
-export type LocationsLocationsAreasPartialUpdateResponse = LocationsLocationsAreasPartialUpdateResponses[keyof LocationsLocationsAreasPartialUpdateResponses];
+export type LocationsAreasPartialUpdateResponse = LocationsAreasPartialUpdateResponses[keyof LocationsAreasPartialUpdateResponses];
 
-export type LocationsLocationsAreasUpdateData = {
+export type LocationsAreasUpdateData = {
     body: AreaLocationCreateUpdateRequest;
     path: {
         /**
@@ -32487,16 +32496,16 @@ export type LocationsLocationsAreasUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/';
+    url: '/api/locations/areas/{id}/';
 };
 
-export type LocationsLocationsAreasUpdateResponses = {
+export type LocationsAreasUpdateResponses = {
     200: AreaLocationCreateUpdate;
 };
 
-export type LocationsLocationsAreasUpdateResponse = LocationsLocationsAreasUpdateResponses[keyof LocationsLocationsAreasUpdateResponses];
+export type LocationsAreasUpdateResponse = LocationsAreasUpdateResponses[keyof LocationsAreasUpdateResponses];
 
-export type LocationsLocationsAreasAddLeaderCreateData = {
+export type LocationsAreasAddLeaderCreateData = {
     body?: {
         user_id: number;
         organisation_id: number;
@@ -32509,10 +32518,10 @@ export type LocationsLocationsAreasAddLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/add-leader/';
+    url: '/api/locations/areas/{id}/add-leader/';
 };
 
-export type LocationsLocationsAreasAddLeaderCreateErrors = {
+export type LocationsAreasAddLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -32527,14 +32536,14 @@ export type LocationsLocationsAreasAddLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsAreasAddLeaderCreateResponses = {
+export type LocationsAreasAddLeaderCreateResponses = {
     /**
      * Leader added successfully
      */
     201: unknown;
 };
 
-export type LocationsLocationsAreasRelativeAreasListData = {
+export type LocationsAreasRelativeAreasListData = {
     body?: never;
     path: {
         /**
@@ -32601,16 +32610,16 @@ export type LocationsLocationsAreasRelativeAreasListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/areas/{id}/relative_areas/';
+    url: '/api/locations/areas/{id}/relative_areas/';
 };
 
-export type LocationsLocationsAreasRelativeAreasListResponses = {
+export type LocationsAreasRelativeAreasListResponses = {
     200: PaginatedRelativeAreaList;
 };
 
-export type LocationsLocationsAreasRelativeAreasListResponse = LocationsLocationsAreasRelativeAreasListResponses[keyof LocationsLocationsAreasRelativeAreasListResponses];
+export type LocationsAreasRelativeAreasListResponse = LocationsAreasRelativeAreasListResponses[keyof LocationsAreasRelativeAreasListResponses];
 
-export type LocationsLocationsAreasRemoveLeaderCreateData = {
+export type LocationsAreasRemoveLeaderCreateData = {
     body?: {
         user_id: number;
     };
@@ -32621,10 +32630,10 @@ export type LocationsLocationsAreasRemoveLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/areas/{id}/remove-leader/';
+    url: '/api/locations/areas/{id}/remove-leader/';
 };
 
-export type LocationsLocationsAreasRemoveLeaderCreateErrors = {
+export type LocationsAreasRemoveLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -32639,14 +32648,14 @@ export type LocationsLocationsAreasRemoveLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsAreasRemoveLeaderCreateResponses = {
+export type LocationsAreasRemoveLeaderCreateResponses = {
     /**
      * Leader removed successfully
      */
     200: unknown;
 };
 
-export type LocationsLocationsChaptersListData = {
+export type LocationsChaptersListData = {
     body?: never;
     path?: never;
     query?: {
@@ -32696,29 +32705,29 @@ export type LocationsLocationsChaptersListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/chapters/';
+    url: '/api/locations/chapters/';
 };
 
-export type LocationsLocationsChaptersListResponses = {
+export type LocationsChaptersListResponses = {
     200: PaginatedChapterLocationListList;
 };
 
-export type LocationsLocationsChaptersListResponse = LocationsLocationsChaptersListResponses[keyof LocationsLocationsChaptersListResponses];
+export type LocationsChaptersListResponse = LocationsChaptersListResponses[keyof LocationsChaptersListResponses];
 
-export type LocationsLocationsChaptersCreateData = {
+export type LocationsChaptersCreateData = {
     body: ChapterLocationCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/chapters/';
+    url: '/api/locations/chapters/';
 };
 
-export type LocationsLocationsChaptersCreateResponses = {
+export type LocationsChaptersCreateResponses = {
     201: ChapterLocationCreateUpdate;
 };
 
-export type LocationsLocationsChaptersCreateResponse = LocationsLocationsChaptersCreateResponses[keyof LocationsLocationsChaptersCreateResponses];
+export type LocationsChaptersCreateResponse = LocationsChaptersCreateResponses[keyof LocationsChaptersCreateResponses];
 
-export type LocationsLocationsChaptersDestroyData = {
+export type LocationsChaptersDestroyData = {
     body?: never;
     path: {
         /**
@@ -32727,19 +32736,19 @@ export type LocationsLocationsChaptersDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/';
+    url: '/api/locations/chapters/{id}/';
 };
 
-export type LocationsLocationsChaptersDestroyResponses = {
+export type LocationsChaptersDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsChaptersDestroyResponse = LocationsLocationsChaptersDestroyResponses[keyof LocationsLocationsChaptersDestroyResponses];
+export type LocationsChaptersDestroyResponse = LocationsChaptersDestroyResponses[keyof LocationsChaptersDestroyResponses];
 
-export type LocationsLocationsChaptersRetrieveData = {
+export type LocationsChaptersRetrieveData = {
     body?: never;
     path: {
         /**
@@ -32748,16 +32757,16 @@ export type LocationsLocationsChaptersRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/';
+    url: '/api/locations/chapters/{id}/';
 };
 
-export type LocationsLocationsChaptersRetrieveResponses = {
+export type LocationsChaptersRetrieveResponses = {
     200: ChapterLocationDetail;
 };
 
-export type LocationsLocationsChaptersRetrieveResponse = LocationsLocationsChaptersRetrieveResponses[keyof LocationsLocationsChaptersRetrieveResponses];
+export type LocationsChaptersRetrieveResponse = LocationsChaptersRetrieveResponses[keyof LocationsChaptersRetrieveResponses];
 
-export type LocationsLocationsChaptersPartialUpdateData = {
+export type LocationsChaptersPartialUpdateData = {
     body?: PatchedChapterLocationCreateUpdateRequest;
     path: {
         /**
@@ -32766,16 +32775,16 @@ export type LocationsLocationsChaptersPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/';
+    url: '/api/locations/chapters/{id}/';
 };
 
-export type LocationsLocationsChaptersPartialUpdateResponses = {
+export type LocationsChaptersPartialUpdateResponses = {
     200: ChapterLocationCreateUpdate;
 };
 
-export type LocationsLocationsChaptersPartialUpdateResponse = LocationsLocationsChaptersPartialUpdateResponses[keyof LocationsLocationsChaptersPartialUpdateResponses];
+export type LocationsChaptersPartialUpdateResponse = LocationsChaptersPartialUpdateResponses[keyof LocationsChaptersPartialUpdateResponses];
 
-export type LocationsLocationsChaptersUpdateData = {
+export type LocationsChaptersUpdateData = {
     body: ChapterLocationCreateUpdateRequest;
     path: {
         /**
@@ -32784,16 +32793,16 @@ export type LocationsLocationsChaptersUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/';
+    url: '/api/locations/chapters/{id}/';
 };
 
-export type LocationsLocationsChaptersUpdateResponses = {
+export type LocationsChaptersUpdateResponses = {
     200: ChapterLocationCreateUpdate;
 };
 
-export type LocationsLocationsChaptersUpdateResponse = LocationsLocationsChaptersUpdateResponses[keyof LocationsLocationsChaptersUpdateResponses];
+export type LocationsChaptersUpdateResponse = LocationsChaptersUpdateResponses[keyof LocationsChaptersUpdateResponses];
 
-export type LocationsLocationsChaptersAddLeaderCreateData = {
+export type LocationsChaptersAddLeaderCreateData = {
     body?: {
         user_id: number;
         organisation_id: number;
@@ -32806,10 +32815,10 @@ export type LocationsLocationsChaptersAddLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/add-leader/';
+    url: '/api/locations/chapters/{id}/add-leader/';
 };
 
-export type LocationsLocationsChaptersAddLeaderCreateErrors = {
+export type LocationsChaptersAddLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -32824,14 +32833,14 @@ export type LocationsLocationsChaptersAddLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsChaptersAddLeaderCreateResponses = {
+export type LocationsChaptersAddLeaderCreateResponses = {
     /**
      * Leader added successfully
      */
     201: unknown;
 };
 
-export type LocationsLocationsChaptersAreasListData = {
+export type LocationsChaptersAreasListData = {
     body?: never;
     path: {
         /**
@@ -32886,16 +32895,16 @@ export type LocationsLocationsChaptersAreasListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/chapters/{id}/areas/';
+    url: '/api/locations/chapters/{id}/areas/';
 };
 
-export type LocationsLocationsChaptersAreasListResponses = {
+export type LocationsChaptersAreasListResponses = {
     200: PaginatedAreaLocationListList;
 };
 
-export type LocationsLocationsChaptersAreasListResponse = LocationsLocationsChaptersAreasListResponses[keyof LocationsLocationsChaptersAreasListResponses];
+export type LocationsChaptersAreasListResponse = LocationsChaptersAreasListResponses[keyof LocationsChaptersAreasListResponses];
 
-export type LocationsLocationsChaptersRemoveLeaderCreateData = {
+export type LocationsChaptersRemoveLeaderCreateData = {
     body?: {
         user_id: number;
     };
@@ -32906,10 +32915,10 @@ export type LocationsLocationsChaptersRemoveLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/chapters/{id}/remove-leader/';
+    url: '/api/locations/chapters/{id}/remove-leader/';
 };
 
-export type LocationsLocationsChaptersRemoveLeaderCreateErrors = {
+export type LocationsChaptersRemoveLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -32924,14 +32933,14 @@ export type LocationsLocationsChaptersRemoveLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsChaptersRemoveLeaderCreateResponses = {
+export type LocationsChaptersRemoveLeaderCreateResponses = {
     /**
      * Leader removed successfully
      */
     200: unknown;
 };
 
-export type LocationsLocationsClustersListData = {
+export type LocationsClustersListData = {
     body?: never;
     path?: never;
     query?: {
@@ -32977,29 +32986,29 @@ export type LocationsLocationsClustersListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/clusters/';
+    url: '/api/locations/clusters/';
 };
 
-export type LocationsLocationsClustersListResponses = {
+export type LocationsClustersListResponses = {
     200: PaginatedClusterLocationListList;
 };
 
-export type LocationsLocationsClustersListResponse = LocationsLocationsClustersListResponses[keyof LocationsLocationsClustersListResponses];
+export type LocationsClustersListResponse = LocationsClustersListResponses[keyof LocationsClustersListResponses];
 
-export type LocationsLocationsClustersCreateData = {
+export type LocationsClustersCreateData = {
     body: ClusterLocationCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/clusters/';
+    url: '/api/locations/clusters/';
 };
 
-export type LocationsLocationsClustersCreateResponses = {
+export type LocationsClustersCreateResponses = {
     201: ClusterLocationCreateUpdate;
 };
 
-export type LocationsLocationsClustersCreateResponse = LocationsLocationsClustersCreateResponses[keyof LocationsLocationsClustersCreateResponses];
+export type LocationsClustersCreateResponse = LocationsClustersCreateResponses[keyof LocationsClustersCreateResponses];
 
-export type LocationsLocationsClustersDestroyData = {
+export type LocationsClustersDestroyData = {
     body?: never;
     path: {
         /**
@@ -33008,19 +33017,19 @@ export type LocationsLocationsClustersDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/';
+    url: '/api/locations/clusters/{id}/';
 };
 
-export type LocationsLocationsClustersDestroyResponses = {
+export type LocationsClustersDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsClustersDestroyResponse = LocationsLocationsClustersDestroyResponses[keyof LocationsLocationsClustersDestroyResponses];
+export type LocationsClustersDestroyResponse = LocationsClustersDestroyResponses[keyof LocationsClustersDestroyResponses];
 
-export type LocationsLocationsClustersRetrieveData = {
+export type LocationsClustersRetrieveData = {
     body?: never;
     path: {
         /**
@@ -33029,16 +33038,16 @@ export type LocationsLocationsClustersRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/';
+    url: '/api/locations/clusters/{id}/';
 };
 
-export type LocationsLocationsClustersRetrieveResponses = {
+export type LocationsClustersRetrieveResponses = {
     200: ClusterLocationDetail;
 };
 
-export type LocationsLocationsClustersRetrieveResponse = LocationsLocationsClustersRetrieveResponses[keyof LocationsLocationsClustersRetrieveResponses];
+export type LocationsClustersRetrieveResponse = LocationsClustersRetrieveResponses[keyof LocationsClustersRetrieveResponses];
 
-export type LocationsLocationsClustersPartialUpdateData = {
+export type LocationsClustersPartialUpdateData = {
     body?: PatchedClusterLocationCreateUpdateRequest;
     path: {
         /**
@@ -33047,16 +33056,16 @@ export type LocationsLocationsClustersPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/';
+    url: '/api/locations/clusters/{id}/';
 };
 
-export type LocationsLocationsClustersPartialUpdateResponses = {
+export type LocationsClustersPartialUpdateResponses = {
     200: ClusterLocationCreateUpdate;
 };
 
-export type LocationsLocationsClustersPartialUpdateResponse = LocationsLocationsClustersPartialUpdateResponses[keyof LocationsLocationsClustersPartialUpdateResponses];
+export type LocationsClustersPartialUpdateResponse = LocationsClustersPartialUpdateResponses[keyof LocationsClustersPartialUpdateResponses];
 
-export type LocationsLocationsClustersUpdateData = {
+export type LocationsClustersUpdateData = {
     body: ClusterLocationCreateUpdateRequest;
     path: {
         /**
@@ -33065,16 +33074,16 @@ export type LocationsLocationsClustersUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/';
+    url: '/api/locations/clusters/{id}/';
 };
 
-export type LocationsLocationsClustersUpdateResponses = {
+export type LocationsClustersUpdateResponses = {
     200: ClusterLocationCreateUpdate;
 };
 
-export type LocationsLocationsClustersUpdateResponse = LocationsLocationsClustersUpdateResponses[keyof LocationsLocationsClustersUpdateResponses];
+export type LocationsClustersUpdateResponse = LocationsClustersUpdateResponses[keyof LocationsClustersUpdateResponses];
 
-export type LocationsLocationsClustersAddLeaderCreateData = {
+export type LocationsClustersAddLeaderCreateData = {
     body?: {
         user_id: number;
         organisation_id: number;
@@ -33087,10 +33096,10 @@ export type LocationsLocationsClustersAddLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/add-leader/';
+    url: '/api/locations/clusters/{id}/add-leader/';
 };
 
-export type LocationsLocationsClustersAddLeaderCreateErrors = {
+export type LocationsClustersAddLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -33105,14 +33114,14 @@ export type LocationsLocationsClustersAddLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsClustersAddLeaderCreateResponses = {
+export type LocationsClustersAddLeaderCreateResponses = {
     /**
      * Leader added successfully
      */
     201: unknown;
 };
 
-export type LocationsLocationsClustersChaptersListData = {
+export type LocationsClustersChaptersListData = {
     body?: never;
     path: {
         /**
@@ -33163,16 +33172,16 @@ export type LocationsLocationsClustersChaptersListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/clusters/{id}/chapters/';
+    url: '/api/locations/clusters/{id}/chapters/';
 };
 
-export type LocationsLocationsClustersChaptersListResponses = {
+export type LocationsClustersChaptersListResponses = {
     200: PaginatedChapterLocationListList;
 };
 
-export type LocationsLocationsClustersChaptersListResponse = LocationsLocationsClustersChaptersListResponses[keyof LocationsLocationsClustersChaptersListResponses];
+export type LocationsClustersChaptersListResponse = LocationsClustersChaptersListResponses[keyof LocationsClustersChaptersListResponses];
 
-export type LocationsLocationsClustersRemoveLeaderCreateData = {
+export type LocationsClustersRemoveLeaderCreateData = {
     body?: {
         user_id: number;
     };
@@ -33183,10 +33192,10 @@ export type LocationsLocationsClustersRemoveLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/clusters/{id}/remove-leader/';
+    url: '/api/locations/clusters/{id}/remove-leader/';
 };
 
-export type LocationsLocationsClustersRemoveLeaderCreateErrors = {
+export type LocationsClustersRemoveLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -33201,14 +33210,14 @@ export type LocationsLocationsClustersRemoveLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsClustersRemoveLeaderCreateResponses = {
+export type LocationsClustersRemoveLeaderCreateResponses = {
     /**
      * Leader removed successfully
      */
     200: unknown;
 };
 
-export type LocationsLocationsCountriesListData = {
+export type LocationsCountriesListData = {
     body?: never;
     path?: never;
     query?: {
@@ -33544,29 +33553,29 @@ export type LocationsLocationsCountriesListData = {
          */
         specific_sector?: 'ANDES' | 'AUSTRALIA_NEWZEALAND' | 'CARIBBEAN' | 'CENTRAL_AFRICA' | 'CENTRAL_AMERICA' | 'CENTRAL_ASIA' | 'CENTRAL_EUROPE' | 'CONO_SUR' | 'EAST_AFRICA' | 'EAST_ASIA' | 'EAST_EUROPE' | 'GULF' | 'LEVANT' | 'MELANESIA' | 'MICRONESIA' | 'NORTH_AFRICA' | 'NORTH_AMERICA' | 'NORTH_EUROPE' | 'PERSIAN' | 'POLYNESIA' | 'SOUTHEAST_ASIA' | 'SOUTH_AFRICA' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'SOUTH_ASIA' | 'SOUTH_EUROPE' | 'WEST_AFRICA' | 'WEST_ASIA' | 'WEST_EUROPE';
     };
-    url: '/api/locations/locations/countries/';
+    url: '/api/locations/countries/';
 };
 
-export type LocationsLocationsCountriesListResponses = {
+export type LocationsCountriesListResponses = {
     200: PaginatedCountryLocationListList;
 };
 
-export type LocationsLocationsCountriesListResponse = LocationsLocationsCountriesListResponses[keyof LocationsLocationsCountriesListResponses];
+export type LocationsCountriesListResponse = LocationsCountriesListResponses[keyof LocationsCountriesListResponses];
 
-export type LocationsLocationsCountriesCreateData = {
+export type LocationsCountriesCreateData = {
     body: CountryLocationCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/countries/';
+    url: '/api/locations/countries/';
 };
 
-export type LocationsLocationsCountriesCreateResponses = {
+export type LocationsCountriesCreateResponses = {
     201: CountryLocationCreateUpdate;
 };
 
-export type LocationsLocationsCountriesCreateResponse = LocationsLocationsCountriesCreateResponses[keyof LocationsLocationsCountriesCreateResponses];
+export type LocationsCountriesCreateResponse = LocationsCountriesCreateResponses[keyof LocationsCountriesCreateResponses];
 
-export type LocationsLocationsCountriesDestroyData = {
+export type LocationsCountriesDestroyData = {
     body?: never;
     path: {
         /**
@@ -33575,19 +33584,19 @@ export type LocationsLocationsCountriesDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/';
+    url: '/api/locations/countries/{id}/';
 };
 
-export type LocationsLocationsCountriesDestroyResponses = {
+export type LocationsCountriesDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsCountriesDestroyResponse = LocationsLocationsCountriesDestroyResponses[keyof LocationsLocationsCountriesDestroyResponses];
+export type LocationsCountriesDestroyResponse = LocationsCountriesDestroyResponses[keyof LocationsCountriesDestroyResponses];
 
-export type LocationsLocationsCountriesRetrieveData = {
+export type LocationsCountriesRetrieveData = {
     body?: never;
     path: {
         /**
@@ -33596,16 +33605,16 @@ export type LocationsLocationsCountriesRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/';
+    url: '/api/locations/countries/{id}/';
 };
 
-export type LocationsLocationsCountriesRetrieveResponses = {
+export type LocationsCountriesRetrieveResponses = {
     200: CountryLocationDetail;
 };
 
-export type LocationsLocationsCountriesRetrieveResponse = LocationsLocationsCountriesRetrieveResponses[keyof LocationsLocationsCountriesRetrieveResponses];
+export type LocationsCountriesRetrieveResponse = LocationsCountriesRetrieveResponses[keyof LocationsCountriesRetrieveResponses];
 
-export type LocationsLocationsCountriesPartialUpdateData = {
+export type LocationsCountriesPartialUpdateData = {
     body?: PatchedCountryLocationCreateUpdateRequest;
     path: {
         /**
@@ -33614,16 +33623,16 @@ export type LocationsLocationsCountriesPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/';
+    url: '/api/locations/countries/{id}/';
 };
 
-export type LocationsLocationsCountriesPartialUpdateResponses = {
+export type LocationsCountriesPartialUpdateResponses = {
     200: CountryLocationCreateUpdate;
 };
 
-export type LocationsLocationsCountriesPartialUpdateResponse = LocationsLocationsCountriesPartialUpdateResponses[keyof LocationsLocationsCountriesPartialUpdateResponses];
+export type LocationsCountriesPartialUpdateResponse = LocationsCountriesPartialUpdateResponses[keyof LocationsCountriesPartialUpdateResponses];
 
-export type LocationsLocationsCountriesUpdateData = {
+export type LocationsCountriesUpdateData = {
     body: CountryLocationCreateUpdateRequest;
     path: {
         /**
@@ -33632,16 +33641,16 @@ export type LocationsLocationsCountriesUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/';
+    url: '/api/locations/countries/{id}/';
 };
 
-export type LocationsLocationsCountriesUpdateResponses = {
+export type LocationsCountriesUpdateResponses = {
     200: CountryLocationCreateUpdate;
 };
 
-export type LocationsLocationsCountriesUpdateResponse = LocationsLocationsCountriesUpdateResponses[keyof LocationsLocationsCountriesUpdateResponses];
+export type LocationsCountriesUpdateResponse = LocationsCountriesUpdateResponses[keyof LocationsCountriesUpdateResponses];
 
-export type LocationsLocationsCountriesAddLeaderCreateData = {
+export type LocationsCountriesAddLeaderCreateData = {
     body?: {
         /**
          * ID of the user to assign as leader
@@ -33663,10 +33672,10 @@ export type LocationsLocationsCountriesAddLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/add-leader/';
+    url: '/api/locations/countries/{id}/add-leader/';
 };
 
-export type LocationsLocationsCountriesAddLeaderCreateErrors = {
+export type LocationsCountriesAddLeaderCreateErrors = {
     /**
      * Invalid data or duplicate assignment
      */
@@ -33681,14 +33690,14 @@ export type LocationsLocationsCountriesAddLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsCountriesAddLeaderCreateResponses = {
+export type LocationsCountriesAddLeaderCreateResponses = {
     /**
      * Leader added successfully
      */
     201: unknown;
 };
 
-export type LocationsLocationsCountriesClustersListData = {
+export type LocationsCountriesClustersListData = {
     body?: never;
     path: {
         /**
@@ -34029,16 +34038,16 @@ export type LocationsLocationsCountriesClustersListData = {
          */
         specific_sector?: 'ANDES' | 'AUSTRALIA_NEWZEALAND' | 'CARIBBEAN' | 'CENTRAL_AFRICA' | 'CENTRAL_AMERICA' | 'CENTRAL_ASIA' | 'CENTRAL_EUROPE' | 'CONO_SUR' | 'EAST_AFRICA' | 'EAST_ASIA' | 'EAST_EUROPE' | 'GULF' | 'LEVANT' | 'MELANESIA' | 'MICRONESIA' | 'NORTH_AFRICA' | 'NORTH_AMERICA' | 'NORTH_EUROPE' | 'PERSIAN' | 'POLYNESIA' | 'SOUTHEAST_ASIA' | 'SOUTH_AFRICA' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'SOUTH_ASIA' | 'SOUTH_EUROPE' | 'WEST_AFRICA' | 'WEST_ASIA' | 'WEST_EUROPE';
     };
-    url: '/api/locations/locations/countries/{id}/clusters/';
+    url: '/api/locations/countries/{id}/clusters/';
 };
 
-export type LocationsLocationsCountriesClustersListResponses = {
+export type LocationsCountriesClustersListResponses = {
     200: PaginatedClusterLocationListList;
 };
 
-export type LocationsLocationsCountriesClustersListResponse = LocationsLocationsCountriesClustersListResponses[keyof LocationsLocationsCountriesClustersListResponses];
+export type LocationsCountriesClustersListResponse = LocationsCountriesClustersListResponses[keyof LocationsCountriesClustersListResponses];
 
-export type LocationsLocationsCountriesRemoveLeaderCreateData = {
+export type LocationsCountriesRemoveLeaderCreateData = {
     body?: {
         /**
          * ID of the user to remove as leader
@@ -34052,10 +34061,10 @@ export type LocationsLocationsCountriesRemoveLeaderCreateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/countries/{id}/remove-leader/';
+    url: '/api/locations/countries/{id}/remove-leader/';
 };
 
-export type LocationsLocationsCountriesRemoveLeaderCreateErrors = {
+export type LocationsCountriesRemoveLeaderCreateErrors = {
     /**
      * Invalid data
      */
@@ -34070,14 +34079,14 @@ export type LocationsLocationsCountriesRemoveLeaderCreateErrors = {
     404: unknown;
 };
 
-export type LocationsLocationsCountriesRemoveLeaderCreateResponses = {
+export type LocationsCountriesRemoveLeaderCreateResponses = {
     /**
      * Leader removed successfully
      */
     200: unknown;
 };
 
-export type LocationsLocationsPoisListData = {
+export type LocationsPoisListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34144,29 +34153,29 @@ export type LocationsLocationsPoisListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/pois/';
+    url: '/api/locations/pois/';
 };
 
-export type LocationsLocationsPoisListResponses = {
+export type LocationsPoisListResponses = {
     200: PaginatedPoiListList;
 };
 
-export type LocationsLocationsPoisListResponse = LocationsLocationsPoisListResponses[keyof LocationsLocationsPoisListResponses];
+export type LocationsPoisListResponse = LocationsPoisListResponses[keyof LocationsPoisListResponses];
 
-export type LocationsLocationsPoisCreateData = {
+export type LocationsPoisCreateData = {
     body: PoiCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/pois/';
+    url: '/api/locations/pois/';
 };
 
-export type LocationsLocationsPoisCreateResponses = {
+export type LocationsPoisCreateResponses = {
     201: PoiCreateUpdate;
 };
 
-export type LocationsLocationsPoisCreateResponse = LocationsLocationsPoisCreateResponses[keyof LocationsLocationsPoisCreateResponses];
+export type LocationsPoisCreateResponse = LocationsPoisCreateResponses[keyof LocationsPoisCreateResponses];
 
-export type LocationsLocationsPoisDestroyData = {
+export type LocationsPoisDestroyData = {
     body?: never;
     path: {
         /**
@@ -34175,19 +34184,19 @@ export type LocationsLocationsPoisDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/pois/{id}/';
+    url: '/api/locations/pois/{id}/';
 };
 
-export type LocationsLocationsPoisDestroyResponses = {
+export type LocationsPoisDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsPoisDestroyResponse = LocationsLocationsPoisDestroyResponses[keyof LocationsLocationsPoisDestroyResponses];
+export type LocationsPoisDestroyResponse = LocationsPoisDestroyResponses[keyof LocationsPoisDestroyResponses];
 
-export type LocationsLocationsPoisRetrieveData = {
+export type LocationsPoisRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34196,16 +34205,16 @@ export type LocationsLocationsPoisRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/pois/{id}/';
+    url: '/api/locations/pois/{id}/';
 };
 
-export type LocationsLocationsPoisRetrieveResponses = {
+export type LocationsPoisRetrieveResponses = {
     200: PoiDetail;
 };
 
-export type LocationsLocationsPoisRetrieveResponse = LocationsLocationsPoisRetrieveResponses[keyof LocationsLocationsPoisRetrieveResponses];
+export type LocationsPoisRetrieveResponse = LocationsPoisRetrieveResponses[keyof LocationsPoisRetrieveResponses];
 
-export type LocationsLocationsPoisPartialUpdateData = {
+export type LocationsPoisPartialUpdateData = {
     body?: PatchedPoiCreateUpdateRequest;
     path: {
         /**
@@ -34214,16 +34223,16 @@ export type LocationsLocationsPoisPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/pois/{id}/';
+    url: '/api/locations/pois/{id}/';
 };
 
-export type LocationsLocationsPoisPartialUpdateResponses = {
+export type LocationsPoisPartialUpdateResponses = {
     200: PoiCreateUpdate;
 };
 
-export type LocationsLocationsPoisPartialUpdateResponse = LocationsLocationsPoisPartialUpdateResponses[keyof LocationsLocationsPoisPartialUpdateResponses];
+export type LocationsPoisPartialUpdateResponse = LocationsPoisPartialUpdateResponses[keyof LocationsPoisPartialUpdateResponses];
 
-export type LocationsLocationsPoisUpdateData = {
+export type LocationsPoisUpdateData = {
     body: PoiCreateUpdateRequest;
     path: {
         /**
@@ -34232,16 +34241,16 @@ export type LocationsLocationsPoisUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/pois/{id}/';
+    url: '/api/locations/pois/{id}/';
 };
 
-export type LocationsLocationsPoisUpdateResponses = {
+export type LocationsPoisUpdateResponses = {
     200: PoiCreateUpdate;
 };
 
-export type LocationsLocationsPoisUpdateResponse = LocationsLocationsPoisUpdateResponses[keyof LocationsLocationsPoisUpdateResponses];
+export type LocationsPoisUpdateResponse = LocationsPoisUpdateResponses[keyof LocationsPoisUpdateResponses];
 
-export type LocationsLocationsRelativeAreasListData = {
+export type LocationsRelativeAreasListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34270,29 +34279,29 @@ export type LocationsLocationsRelativeAreasListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/relative-areas/';
+    url: '/api/locations/relative-areas/';
 };
 
-export type LocationsLocationsRelativeAreasListResponses = {
+export type LocationsRelativeAreasListResponses = {
     200: PaginatedRelativeAreaList;
 };
 
-export type LocationsLocationsRelativeAreasListResponse = LocationsLocationsRelativeAreasListResponses[keyof LocationsLocationsRelativeAreasListResponses];
+export type LocationsRelativeAreasListResponse = LocationsRelativeAreasListResponses[keyof LocationsRelativeAreasListResponses];
 
-export type LocationsLocationsRelativeAreasCreateData = {
+export type LocationsRelativeAreasCreateData = {
     body: RelativeAreaCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/relative-areas/';
+    url: '/api/locations/relative-areas/';
 };
 
-export type LocationsLocationsRelativeAreasCreateResponses = {
+export type LocationsRelativeAreasCreateResponses = {
     201: RelativeAreaCreateUpdate;
 };
 
-export type LocationsLocationsRelativeAreasCreateResponse = LocationsLocationsRelativeAreasCreateResponses[keyof LocationsLocationsRelativeAreasCreateResponses];
+export type LocationsRelativeAreasCreateResponse = LocationsRelativeAreasCreateResponses[keyof LocationsRelativeAreasCreateResponses];
 
-export type LocationsLocationsRelativeAreasDestroyData = {
+export type LocationsRelativeAreasDestroyData = {
     body?: never;
     path: {
         /**
@@ -34301,19 +34310,19 @@ export type LocationsLocationsRelativeAreasDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/relative-areas/{id}/';
+    url: '/api/locations/relative-areas/{id}/';
 };
 
-export type LocationsLocationsRelativeAreasDestroyResponses = {
+export type LocationsRelativeAreasDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsRelativeAreasDestroyResponse = LocationsLocationsRelativeAreasDestroyResponses[keyof LocationsLocationsRelativeAreasDestroyResponses];
+export type LocationsRelativeAreasDestroyResponse = LocationsRelativeAreasDestroyResponses[keyof LocationsRelativeAreasDestroyResponses];
 
-export type LocationsLocationsRelativeAreasRetrieveData = {
+export type LocationsRelativeAreasRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34322,16 +34331,16 @@ export type LocationsLocationsRelativeAreasRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/relative-areas/{id}/';
+    url: '/api/locations/relative-areas/{id}/';
 };
 
-export type LocationsLocationsRelativeAreasRetrieveResponses = {
+export type LocationsRelativeAreasRetrieveResponses = {
     200: RelativeArea;
 };
 
-export type LocationsLocationsRelativeAreasRetrieveResponse = LocationsLocationsRelativeAreasRetrieveResponses[keyof LocationsLocationsRelativeAreasRetrieveResponses];
+export type LocationsRelativeAreasRetrieveResponse = LocationsRelativeAreasRetrieveResponses[keyof LocationsRelativeAreasRetrieveResponses];
 
-export type LocationsLocationsRelativeAreasPartialUpdateData = {
+export type LocationsRelativeAreasPartialUpdateData = {
     body?: PatchedRelativeAreaCreateUpdateRequest;
     path: {
         /**
@@ -34340,16 +34349,16 @@ export type LocationsLocationsRelativeAreasPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/relative-areas/{id}/';
+    url: '/api/locations/relative-areas/{id}/';
 };
 
-export type LocationsLocationsRelativeAreasPartialUpdateResponses = {
+export type LocationsRelativeAreasPartialUpdateResponses = {
     200: RelativeAreaCreateUpdate;
 };
 
-export type LocationsLocationsRelativeAreasPartialUpdateResponse = LocationsLocationsRelativeAreasPartialUpdateResponses[keyof LocationsLocationsRelativeAreasPartialUpdateResponses];
+export type LocationsRelativeAreasPartialUpdateResponse = LocationsRelativeAreasPartialUpdateResponses[keyof LocationsRelativeAreasPartialUpdateResponses];
 
-export type LocationsLocationsRelativeAreasUpdateData = {
+export type LocationsRelativeAreasUpdateData = {
     body: RelativeAreaCreateUpdateRequest;
     path: {
         /**
@@ -34358,16 +34367,16 @@ export type LocationsLocationsRelativeAreasUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/relative-areas/{id}/';
+    url: '/api/locations/relative-areas/{id}/';
 };
 
-export type LocationsLocationsRelativeAreasUpdateResponses = {
+export type LocationsRelativeAreasUpdateResponses = {
     200: RelativeAreaCreateUpdate;
 };
 
-export type LocationsLocationsRelativeAreasUpdateResponse = LocationsLocationsRelativeAreasUpdateResponses[keyof LocationsLocationsRelativeAreasUpdateResponses];
+export type LocationsRelativeAreasUpdateResponse = LocationsRelativeAreasUpdateResponses[keyof LocationsRelativeAreasUpdateResponses];
 
-export type LocationsLocationsRoomsListData = {
+export type LocationsRoomsListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34409,29 +34418,29 @@ export type LocationsLocationsRoomsListData = {
          */
         venue?: number;
     };
-    url: '/api/locations/locations/rooms/';
+    url: '/api/locations/rooms/';
 };
 
-export type LocationsLocationsRoomsListResponses = {
+export type LocationsRoomsListResponses = {
     200: PaginatedRoomVenueList;
 };
 
-export type LocationsLocationsRoomsListResponse = LocationsLocationsRoomsListResponses[keyof LocationsLocationsRoomsListResponses];
+export type LocationsRoomsListResponse = LocationsRoomsListResponses[keyof LocationsRoomsListResponses];
 
-export type LocationsLocationsRoomsCreateData = {
+export type LocationsRoomsCreateData = {
     body: RoomVenueCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/rooms/';
+    url: '/api/locations/rooms/';
 };
 
-export type LocationsLocationsRoomsCreateResponses = {
+export type LocationsRoomsCreateResponses = {
     201: RoomVenueCreateUpdate;
 };
 
-export type LocationsLocationsRoomsCreateResponse = LocationsLocationsRoomsCreateResponses[keyof LocationsLocationsRoomsCreateResponses];
+export type LocationsRoomsCreateResponse = LocationsRoomsCreateResponses[keyof LocationsRoomsCreateResponses];
 
-export type LocationsLocationsRoomsDestroyData = {
+export type LocationsRoomsDestroyData = {
     body?: never;
     path: {
         /**
@@ -34440,19 +34449,19 @@ export type LocationsLocationsRoomsDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/rooms/{id}/';
+    url: '/api/locations/rooms/{id}/';
 };
 
-export type LocationsLocationsRoomsDestroyResponses = {
+export type LocationsRoomsDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsRoomsDestroyResponse = LocationsLocationsRoomsDestroyResponses[keyof LocationsLocationsRoomsDestroyResponses];
+export type LocationsRoomsDestroyResponse = LocationsRoomsDestroyResponses[keyof LocationsRoomsDestroyResponses];
 
-export type LocationsLocationsRoomsRetrieveData = {
+export type LocationsRoomsRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34461,16 +34470,16 @@ export type LocationsLocationsRoomsRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/rooms/{id}/';
+    url: '/api/locations/rooms/{id}/';
 };
 
-export type LocationsLocationsRoomsRetrieveResponses = {
+export type LocationsRoomsRetrieveResponses = {
     200: RoomVenue;
 };
 
-export type LocationsLocationsRoomsRetrieveResponse = LocationsLocationsRoomsRetrieveResponses[keyof LocationsLocationsRoomsRetrieveResponses];
+export type LocationsRoomsRetrieveResponse = LocationsRoomsRetrieveResponses[keyof LocationsRoomsRetrieveResponses];
 
-export type LocationsLocationsRoomsPartialUpdateData = {
+export type LocationsRoomsPartialUpdateData = {
     body?: PatchedRoomVenueCreateUpdateRequest;
     path: {
         /**
@@ -34479,16 +34488,16 @@ export type LocationsLocationsRoomsPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/rooms/{id}/';
+    url: '/api/locations/rooms/{id}/';
 };
 
-export type LocationsLocationsRoomsPartialUpdateResponses = {
+export type LocationsRoomsPartialUpdateResponses = {
     200: RoomVenueCreateUpdate;
 };
 
-export type LocationsLocationsRoomsPartialUpdateResponse = LocationsLocationsRoomsPartialUpdateResponses[keyof LocationsLocationsRoomsPartialUpdateResponses];
+export type LocationsRoomsPartialUpdateResponse = LocationsRoomsPartialUpdateResponses[keyof LocationsRoomsPartialUpdateResponses];
 
-export type LocationsLocationsRoomsUpdateData = {
+export type LocationsRoomsUpdateData = {
     body: RoomVenueCreateUpdateRequest;
     path: {
         /**
@@ -34497,16 +34506,16 @@ export type LocationsLocationsRoomsUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/rooms/{id}/';
+    url: '/api/locations/rooms/{id}/';
 };
 
-export type LocationsLocationsRoomsUpdateResponses = {
+export type LocationsRoomsUpdateResponses = {
     200: RoomVenueCreateUpdate;
 };
 
-export type LocationsLocationsRoomsUpdateResponse = LocationsLocationsRoomsUpdateResponses[keyof LocationsLocationsRoomsUpdateResponses];
+export type LocationsRoomsUpdateResponse = LocationsRoomsUpdateResponses[keyof LocationsRoomsUpdateResponses];
 
-export type LocationsLocationsVenueContactsListData = {
+export type LocationsVenueContactsListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34549,29 +34558,29 @@ export type LocationsLocationsVenueContactsListData = {
          */
         venue?: number;
     };
-    url: '/api/locations/locations/venue-contacts/';
+    url: '/api/locations/venue-contacts/';
 };
 
-export type LocationsLocationsVenueContactsListResponses = {
+export type LocationsVenueContactsListResponses = {
     200: PaginatedVenueContactList;
 };
 
-export type LocationsLocationsVenueContactsListResponse = LocationsLocationsVenueContactsListResponses[keyof LocationsLocationsVenueContactsListResponses];
+export type LocationsVenueContactsListResponse = LocationsVenueContactsListResponses[keyof LocationsVenueContactsListResponses];
 
-export type LocationsLocationsVenueContactsCreateData = {
+export type LocationsVenueContactsCreateData = {
     body: VenueContactCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/venue-contacts/';
+    url: '/api/locations/venue-contacts/';
 };
 
-export type LocationsLocationsVenueContactsCreateResponses = {
+export type LocationsVenueContactsCreateResponses = {
     201: VenueContactCreateUpdate;
 };
 
-export type LocationsLocationsVenueContactsCreateResponse = LocationsLocationsVenueContactsCreateResponses[keyof LocationsLocationsVenueContactsCreateResponses];
+export type LocationsVenueContactsCreateResponse = LocationsVenueContactsCreateResponses[keyof LocationsVenueContactsCreateResponses];
 
-export type LocationsLocationsVenueContactsDestroyData = {
+export type LocationsVenueContactsDestroyData = {
     body?: never;
     path: {
         /**
@@ -34580,19 +34589,19 @@ export type LocationsLocationsVenueContactsDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-contacts/{id}/';
+    url: '/api/locations/venue-contacts/{id}/';
 };
 
-export type LocationsLocationsVenueContactsDestroyResponses = {
+export type LocationsVenueContactsDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsVenueContactsDestroyResponse = LocationsLocationsVenueContactsDestroyResponses[keyof LocationsLocationsVenueContactsDestroyResponses];
+export type LocationsVenueContactsDestroyResponse = LocationsVenueContactsDestroyResponses[keyof LocationsVenueContactsDestroyResponses];
 
-export type LocationsLocationsVenueContactsRetrieveData = {
+export type LocationsVenueContactsRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34601,16 +34610,16 @@ export type LocationsLocationsVenueContactsRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-contacts/{id}/';
+    url: '/api/locations/venue-contacts/{id}/';
 };
 
-export type LocationsLocationsVenueContactsRetrieveResponses = {
+export type LocationsVenueContactsRetrieveResponses = {
     200: VenueContact;
 };
 
-export type LocationsLocationsVenueContactsRetrieveResponse = LocationsLocationsVenueContactsRetrieveResponses[keyof LocationsLocationsVenueContactsRetrieveResponses];
+export type LocationsVenueContactsRetrieveResponse = LocationsVenueContactsRetrieveResponses[keyof LocationsVenueContactsRetrieveResponses];
 
-export type LocationsLocationsVenueContactsPartialUpdateData = {
+export type LocationsVenueContactsPartialUpdateData = {
     body?: PatchedVenueContactCreateUpdateRequest;
     path: {
         /**
@@ -34619,16 +34628,16 @@ export type LocationsLocationsVenueContactsPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-contacts/{id}/';
+    url: '/api/locations/venue-contacts/{id}/';
 };
 
-export type LocationsLocationsVenueContactsPartialUpdateResponses = {
+export type LocationsVenueContactsPartialUpdateResponses = {
     200: VenueContactCreateUpdate;
 };
 
-export type LocationsLocationsVenueContactsPartialUpdateResponse = LocationsLocationsVenueContactsPartialUpdateResponses[keyof LocationsLocationsVenueContactsPartialUpdateResponses];
+export type LocationsVenueContactsPartialUpdateResponse = LocationsVenueContactsPartialUpdateResponses[keyof LocationsVenueContactsPartialUpdateResponses];
 
-export type LocationsLocationsVenueContactsUpdateData = {
+export type LocationsVenueContactsUpdateData = {
     body: VenueContactCreateUpdateRequest;
     path: {
         /**
@@ -34637,16 +34646,16 @@ export type LocationsLocationsVenueContactsUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-contacts/{id}/';
+    url: '/api/locations/venue-contacts/{id}/';
 };
 
-export type LocationsLocationsVenueContactsUpdateResponses = {
+export type LocationsVenueContactsUpdateResponses = {
     200: VenueContactCreateUpdate;
 };
 
-export type LocationsLocationsVenueContactsUpdateResponse = LocationsLocationsVenueContactsUpdateResponses[keyof LocationsLocationsVenueContactsUpdateResponses];
+export type LocationsVenueContactsUpdateResponse = LocationsVenueContactsUpdateResponses[keyof LocationsVenueContactsUpdateResponses];
 
-export type LocationsLocationsVenueMetadataListData = {
+export type LocationsVenueMetadataListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34683,29 +34692,29 @@ export type LocationsLocationsVenueMetadataListData = {
          */
         venue?: number;
     };
-    url: '/api/locations/locations/venue-metadata/';
+    url: '/api/locations/venue-metadata/';
 };
 
-export type LocationsLocationsVenueMetadataListResponses = {
+export type LocationsVenueMetadataListResponses = {
     200: PaginatedVenueMetadataList;
 };
 
-export type LocationsLocationsVenueMetadataListResponse = LocationsLocationsVenueMetadataListResponses[keyof LocationsLocationsVenueMetadataListResponses];
+export type LocationsVenueMetadataListResponse = LocationsVenueMetadataListResponses[keyof LocationsVenueMetadataListResponses];
 
-export type LocationsLocationsVenueMetadataCreateData = {
+export type LocationsVenueMetadataCreateData = {
     body: VenueMetadataCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/venue-metadata/';
+    url: '/api/locations/venue-metadata/';
 };
 
-export type LocationsLocationsVenueMetadataCreateResponses = {
+export type LocationsVenueMetadataCreateResponses = {
     201: VenueMetadataCreateUpdate;
 };
 
-export type LocationsLocationsVenueMetadataCreateResponse = LocationsLocationsVenueMetadataCreateResponses[keyof LocationsLocationsVenueMetadataCreateResponses];
+export type LocationsVenueMetadataCreateResponse = LocationsVenueMetadataCreateResponses[keyof LocationsVenueMetadataCreateResponses];
 
-export type LocationsLocationsVenueMetadataDestroyData = {
+export type LocationsVenueMetadataDestroyData = {
     body?: never;
     path: {
         /**
@@ -34714,19 +34723,19 @@ export type LocationsLocationsVenueMetadataDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-metadata/{id}/';
+    url: '/api/locations/venue-metadata/{id}/';
 };
 
-export type LocationsLocationsVenueMetadataDestroyResponses = {
+export type LocationsVenueMetadataDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsVenueMetadataDestroyResponse = LocationsLocationsVenueMetadataDestroyResponses[keyof LocationsLocationsVenueMetadataDestroyResponses];
+export type LocationsVenueMetadataDestroyResponse = LocationsVenueMetadataDestroyResponses[keyof LocationsVenueMetadataDestroyResponses];
 
-export type LocationsLocationsVenueMetadataRetrieveData = {
+export type LocationsVenueMetadataRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34735,16 +34744,16 @@ export type LocationsLocationsVenueMetadataRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-metadata/{id}/';
+    url: '/api/locations/venue-metadata/{id}/';
 };
 
-export type LocationsLocationsVenueMetadataRetrieveResponses = {
+export type LocationsVenueMetadataRetrieveResponses = {
     200: VenueMetadata;
 };
 
-export type LocationsLocationsVenueMetadataRetrieveResponse = LocationsLocationsVenueMetadataRetrieveResponses[keyof LocationsLocationsVenueMetadataRetrieveResponses];
+export type LocationsVenueMetadataRetrieveResponse = LocationsVenueMetadataRetrieveResponses[keyof LocationsVenueMetadataRetrieveResponses];
 
-export type LocationsLocationsVenueMetadataPartialUpdateData = {
+export type LocationsVenueMetadataPartialUpdateData = {
     body?: PatchedVenueMetadataCreateUpdateRequest;
     path: {
         /**
@@ -34753,16 +34762,16 @@ export type LocationsLocationsVenueMetadataPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-metadata/{id}/';
+    url: '/api/locations/venue-metadata/{id}/';
 };
 
-export type LocationsLocationsVenueMetadataPartialUpdateResponses = {
+export type LocationsVenueMetadataPartialUpdateResponses = {
     200: VenueMetadataCreateUpdate;
 };
 
-export type LocationsLocationsVenueMetadataPartialUpdateResponse = LocationsLocationsVenueMetadataPartialUpdateResponses[keyof LocationsLocationsVenueMetadataPartialUpdateResponses];
+export type LocationsVenueMetadataPartialUpdateResponse = LocationsVenueMetadataPartialUpdateResponses[keyof LocationsVenueMetadataPartialUpdateResponses];
 
-export type LocationsLocationsVenueMetadataUpdateData = {
+export type LocationsVenueMetadataUpdateData = {
     body: VenueMetadataCreateUpdateRequest;
     path: {
         /**
@@ -34771,16 +34780,16 @@ export type LocationsLocationsVenueMetadataUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venue-metadata/{id}/';
+    url: '/api/locations/venue-metadata/{id}/';
 };
 
-export type LocationsLocationsVenueMetadataUpdateResponses = {
+export type LocationsVenueMetadataUpdateResponses = {
     200: VenueMetadataCreateUpdate;
 };
 
-export type LocationsLocationsVenueMetadataUpdateResponse = LocationsLocationsVenueMetadataUpdateResponses[keyof LocationsLocationsVenueMetadataUpdateResponses];
+export type LocationsVenueMetadataUpdateResponse = LocationsVenueMetadataUpdateResponses[keyof LocationsVenueMetadataUpdateResponses];
 
-export type LocationsLocationsVenuesListData = {
+export type LocationsVenuesListData = {
     body?: never;
     path?: never;
     query?: {
@@ -34837,29 +34846,29 @@ export type LocationsLocationsVenuesListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/venues/';
+    url: '/api/locations/venues/';
 };
 
-export type LocationsLocationsVenuesListResponses = {
+export type LocationsVenuesListResponses = {
     200: PaginatedVenueListList;
 };
 
-export type LocationsLocationsVenuesListResponse = LocationsLocationsVenuesListResponses[keyof LocationsLocationsVenuesListResponses];
+export type LocationsVenuesListResponse = LocationsVenuesListResponses[keyof LocationsVenuesListResponses];
 
-export type LocationsLocationsVenuesCreateData = {
+export type LocationsVenuesCreateData = {
     body: VenueCreateUpdateRequest;
     path?: never;
     query?: never;
-    url: '/api/locations/locations/venues/';
+    url: '/api/locations/venues/';
 };
 
-export type LocationsLocationsVenuesCreateResponses = {
+export type LocationsVenuesCreateResponses = {
     201: VenueCreateUpdate;
 };
 
-export type LocationsLocationsVenuesCreateResponse = LocationsLocationsVenuesCreateResponses[keyof LocationsLocationsVenuesCreateResponses];
+export type LocationsVenuesCreateResponse = LocationsVenuesCreateResponses[keyof LocationsVenuesCreateResponses];
 
-export type LocationsLocationsVenuesDestroyData = {
+export type LocationsVenuesDestroyData = {
     body?: never;
     path: {
         /**
@@ -34868,19 +34877,19 @@ export type LocationsLocationsVenuesDestroyData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venues/{id}/';
+    url: '/api/locations/venues/{id}/';
 };
 
-export type LocationsLocationsVenuesDestroyResponses = {
+export type LocationsVenuesDestroyResponses = {
     /**
      * No response body
      */
     204: void;
 };
 
-export type LocationsLocationsVenuesDestroyResponse = LocationsLocationsVenuesDestroyResponses[keyof LocationsLocationsVenuesDestroyResponses];
+export type LocationsVenuesDestroyResponse = LocationsVenuesDestroyResponses[keyof LocationsVenuesDestroyResponses];
 
-export type LocationsLocationsVenuesRetrieveData = {
+export type LocationsVenuesRetrieveData = {
     body?: never;
     path: {
         /**
@@ -34889,16 +34898,16 @@ export type LocationsLocationsVenuesRetrieveData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venues/{id}/';
+    url: '/api/locations/venues/{id}/';
 };
 
-export type LocationsLocationsVenuesRetrieveResponses = {
+export type LocationsVenuesRetrieveResponses = {
     200: VenueDetail;
 };
 
-export type LocationsLocationsVenuesRetrieveResponse = LocationsLocationsVenuesRetrieveResponses[keyof LocationsLocationsVenuesRetrieveResponses];
+export type LocationsVenuesRetrieveResponse = LocationsVenuesRetrieveResponses[keyof LocationsVenuesRetrieveResponses];
 
-export type LocationsLocationsVenuesPartialUpdateData = {
+export type LocationsVenuesPartialUpdateData = {
     body?: PatchedVenueCreateUpdateRequest;
     path: {
         /**
@@ -34907,16 +34916,16 @@ export type LocationsLocationsVenuesPartialUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venues/{id}/';
+    url: '/api/locations/venues/{id}/';
 };
 
-export type LocationsLocationsVenuesPartialUpdateResponses = {
+export type LocationsVenuesPartialUpdateResponses = {
     200: VenueCreateUpdate;
 };
 
-export type LocationsLocationsVenuesPartialUpdateResponse = LocationsLocationsVenuesPartialUpdateResponses[keyof LocationsLocationsVenuesPartialUpdateResponses];
+export type LocationsVenuesPartialUpdateResponse = LocationsVenuesPartialUpdateResponses[keyof LocationsVenuesPartialUpdateResponses];
 
-export type LocationsLocationsVenuesUpdateData = {
+export type LocationsVenuesUpdateData = {
     body: VenueCreateUpdateRequest;
     path: {
         /**
@@ -34925,16 +34934,16 @@ export type LocationsLocationsVenuesUpdateData = {
         id: number;
     };
     query?: never;
-    url: '/api/locations/locations/venues/{id}/';
+    url: '/api/locations/venues/{id}/';
 };
 
-export type LocationsLocationsVenuesUpdateResponses = {
+export type LocationsVenuesUpdateResponses = {
     200: VenueCreateUpdate;
 };
 
-export type LocationsLocationsVenuesUpdateResponse = LocationsLocationsVenuesUpdateResponses[keyof LocationsLocationsVenuesUpdateResponses];
+export type LocationsVenuesUpdateResponse = LocationsVenuesUpdateResponses[keyof LocationsVenuesUpdateResponses];
 
-export type LocationsLocationsVenuesContactsListData = {
+export type LocationsVenuesContactsListData = {
     body?: never;
     path: {
         /**
@@ -34996,16 +35005,16 @@ export type LocationsLocationsVenuesContactsListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/venues/{id}/contacts/';
+    url: '/api/locations/venues/{id}/contacts/';
 };
 
-export type LocationsLocationsVenuesContactsListResponses = {
+export type LocationsVenuesContactsListResponses = {
     200: PaginatedVenueContactList;
 };
 
-export type LocationsLocationsVenuesContactsListResponse = LocationsLocationsVenuesContactsListResponses[keyof LocationsLocationsVenuesContactsListResponses];
+export type LocationsVenuesContactsListResponse = LocationsVenuesContactsListResponses[keyof LocationsVenuesContactsListResponses];
 
-export type LocationsLocationsVenuesRoomsListData = {
+export type LocationsVenuesRoomsListData = {
     body?: never;
     path: {
         /**
@@ -35067,14 +35076,14 @@ export type LocationsLocationsVenuesRoomsListData = {
          */
         search?: string;
     };
-    url: '/api/locations/locations/venues/{id}/rooms/';
+    url: '/api/locations/venues/{id}/rooms/';
 };
 
-export type LocationsLocationsVenuesRoomsListResponses = {
+export type LocationsVenuesRoomsListResponses = {
     200: PaginatedRoomVenueList;
 };
 
-export type LocationsLocationsVenuesRoomsListResponse = LocationsLocationsVenuesRoomsListResponses[keyof LocationsLocationsVenuesRoomsListResponses];
+export type LocationsVenuesRoomsListResponse = LocationsVenuesRoomsListResponses[keyof LocationsVenuesRoomsListResponses];
 
 export type MedicalConditionsListData = {
     body?: never;
