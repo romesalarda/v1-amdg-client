@@ -37433,6 +37433,24 @@ export type OrganisationsStatisticsEventPerformanceRetrieveResponses = {
 
 export type OrganisationsStatisticsEventPerformanceRetrieveResponse = OrganisationsStatisticsEventPerformanceRetrieveResponses[keyof OrganisationsStatisticsEventPerformanceRetrieveResponses];
 
+export type OrganisationsStatisticsEventsOnMapRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/events-on-map/';
+};
+
+export type OrganisationsStatisticsEventsOnMapRetrieveResponses = {
+    200: OrganisationOverviewStatistics;
+};
+
+export type OrganisationsStatisticsEventsOnMapRetrieveResponse = OrganisationsStatisticsEventsOnMapRetrieveResponses[keyof OrganisationsStatisticsEventsOnMapRetrieveResponses];
+
 export type OrganisationsStatisticsLeadersDistributionRetrieveData = {
     body?: never;
     path?: never;
@@ -37454,6 +37472,24 @@ export type OrganisationsStatisticsLeadersDistributionRetrieveResponses = {
 };
 
 export type OrganisationsStatisticsLeadersDistributionRetrieveResponse = OrganisationsStatisticsLeadersDistributionRetrieveResponses[keyof OrganisationsStatisticsLeadersDistributionRetrieveResponses];
+
+export type OrganisationsStatisticsLeadersOnMapRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         */
+        organisation_id?: number;
+    };
+    url: '/api/organisations/statistics/leaders-on-map/';
+};
+
+export type OrganisationsStatisticsLeadersOnMapRetrieveResponses = {
+    200: OrganisationOverviewStatistics;
+};
+
+export type OrganisationsStatisticsLeadersOnMapRetrieveResponse = OrganisationsStatisticsLeadersOnMapRetrieveResponses[keyof OrganisationsStatisticsLeadersOnMapRetrieveResponses];
 
 export type OrganisationsStatisticsOverviewRetrieveData = {
     body?: never;

@@ -65,6 +65,20 @@
 				One or more statistics blocks failed to load. The visible data may be incomplete.
 			</div>
 
+			<section class="border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+				<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+					<UIcon name="i-heroicons-globe-alt" class="w-5 h-5 text-primary" />
+					<h3 class="text-sm font-black text-primary uppercase tracking-widest">Global Distribution</h3>
+				</div>
+				<div class="p-6">
+					<DistributionMap
+						:is-loading="isMapLoading"
+						:events-geo-json="eventsGeoJson"
+						:leaders-geo-json="leadersGeoJson"
+					/>
+				</div>
+			</section>
+
 			<div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
 				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
 					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
@@ -98,6 +112,60 @@
 						/>
 						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
 							No area distribution data available.
+						</div>
+					</div>
+				</section>
+
+				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+						<UIcon name="i-heroicons-map-pin" class="w-5 h-5 text-primary" />
+						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Chapter</h3>
+					</div>
+					<div class="p-6">
+						<v-chart
+							v-if="chapterDistributionOption"
+							:option="chapterDistributionOption"
+							:autoresize="true"
+							class="h-80"
+						/>
+						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
+							No chapter distribution data available.
+						</div>
+					</div>
+				</section>
+
+				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+						<UIcon name="i-heroicons-map" class="w-5 h-5 text-primary" />
+						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Cluster</h3>
+					</div>
+					<div class="p-6">
+						<v-chart
+							v-if="clusterDistributionOption"
+							:option="clusterDistributionOption"
+							:autoresize="true"
+							class="h-80"
+						/>
+						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
+							No cluster distribution data available.
+						</div>
+					</div>
+				</section>
+
+				<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+					<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+						<UIcon name="i-heroicons-flag" class="w-5 h-5 text-primary" />
+						<h3 class="text-sm font-black text-primary uppercase tracking-widest">Leaders by Country</h3>
+					</div>
+					<div class="p-6">
+						<v-chart
+							v-if="countryDistributionOption"
+							:option="countryDistributionOption"
+							:autoresize="true"
+							class="h-80"
+						/>
+						<div v-else class="h-80 flex items-center justify-center text-sm text-gray-500">
+							No country distribution data available.
 						</div>
 					</div>
 				</section>
@@ -184,12 +252,16 @@ import {
 	GridComponent,
 } from 'echarts/components'
 import { formatMoney } from '~/utils/money'
+import type { FeatureCollection, Geometry, GeoJsonProperties } from 'geojson'
+import DistributionMap from '~/components/statistics/DistributionMap.vue'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import {
 	useOrganisationOverviewStatistics,
 	useOrganisationLeadersDistributionStatistics,
 	useOrganisationEventPerformanceStatistics,
 	useOrganisationPaymentsBySourceStatistics,
+	useOrganisationEventsOnMapStatistics,
+	useOrganisationLeadersOnMapStatistics,
 } from '~/composables/statistics/organisations/organisation-statistics'
 
 use([
@@ -221,6 +293,58 @@ const toNumber = (value: unknown): number => {
 const toLabel = (value: unknown, fallback = 'Unknown'): string => {
 	if (typeof value === 'string' && value.trim().length) return value
 	return fallback
+}
+
+const buildLocationRows = (rows: unknown) => {
+	if (!Array.isArray(rows)) return []
+
+	return rows
+		.map((row) => {
+			const data = row as Record<string, unknown>
+			return {
+				name: toLabel(data.label ?? data.name),
+				count: toNumber(data.value ?? data.count),
+			}
+		})
+		.sort((a, b) => b.count - a.count)
+		.slice(0, 10)
+}
+
+const buildDistributionOption = (rows: { name: string; count: number }[], color: string) => {
+	if (!rows.length) return null
+
+	return {
+		tooltip: {
+			trigger: 'axis',
+			axisPointer: { type: 'shadow' },
+		},
+		grid: {
+			left: '3%',
+			right: '4%',
+			bottom: '3%',
+			containLabel: true,
+		},
+		xAxis: {
+			type: 'value',
+		},
+		yAxis: {
+			type: 'category',
+			data: rows.map((item) => item.name),
+		},
+		series: [
+			{
+				type: 'bar',
+				data: rows.map((item) => item.count),
+				itemStyle: {
+					color,
+				},
+				label: {
+					show: true,
+					position: 'right',
+				},
+			},
+		],
+	}
 }
 
 const baseQuery = computed(() => ({
@@ -265,7 +389,29 @@ const {
 	refetch: refetchPaymentSources,
 } = useOrganisationPaymentsBySourceStatistics(baseQuery)
 
+const {
+	data: eventsOnMapData,
+	isFetching: isFetchingEventsOnMap,
+	refetch: refetchEventsOnMap,
+} = useOrganisationEventsOnMapStatistics(baseQuery)
+
+const {
+	data: leadersOnMapData,
+	isFetching: isFetchingLeadersOnMap,
+	refetch: refetchLeadersOnMap,
+} = useOrganisationLeadersOnMapStatistics(baseQuery)
+
 const overview = computed(() => overviewData.value?.data)
+const eventsGeoJson = computed(() =>
+	(eventsOnMapData.value?.data ?? null) as FeatureCollection<Geometry, GeoJsonProperties> | null
+)
+const leadersGeoJson = computed(() =>
+	(leadersOnMapData.value?.data ?? null) as FeatureCollection<Geometry, GeoJsonProperties> | null
+)
+const isMapLoading = computed(() =>
+	(!eventsGeoJson.value && !leadersGeoJson.value) &&
+	(isFetchingEventsOnMap.value || isFetchingLeadersOnMap.value)
+)
 
 const topEvents = computed(() => {
 	const rows = eventPerformanceData.value?.data?.events
@@ -300,21 +446,11 @@ const locationTypeRows = computed(() => {
 		.sort((a, b) => b.count - a.count)
 })
 
-const areaRows = computed(() => {
-	const rows = leaderDistributionData.value?.data?.area_distribution
-	if (!Array.isArray(rows)) return []
-
-	return rows
-		.map((row) => {
-			const data = row as Record<string, unknown>
-			return {
-				name: toLabel(data.area_name ?? data.name),
-				count: toNumber(data.leader_count ?? data.count),
-			}
-		})
-		.sort((a, b) => b.count - a.count)
-		.slice(0, 10)
-})
+const leaderDistribution = computed(() => leaderDistributionData.value?.data as Record<string, unknown> | undefined)
+const areaRows = computed(() => buildLocationRows(leaderDistribution.value?.area_distribution))
+const chapterRows = computed(() => buildLocationRows(leaderDistribution.value?.chapter_distribution))
+const clusterRows = computed(() => buildLocationRows(leaderDistribution.value?.cluster_distribution))
+const countryRows = computed(() => buildLocationRows(leaderDistribution.value?.country_distribution))
 
 const paymentSourceRows = computed(() => {
 	const rows = paymentSourcesData.value?.data?.sources
@@ -337,7 +473,9 @@ const isRefreshing = computed(() =>
 	isFetchingOverview.value ||
 	isFetchingLeaders.value ||
 	isFetchingEventPerformance.value ||
-	isFetchingPaymentSources.value
+	isFetchingPaymentSources.value ||
+	isFetchingEventsOnMap.value ||
+	isFetchingLeadersOnMap.value
 )
 
 const hasAnyError = computed(() =>
@@ -350,6 +488,8 @@ const refreshAll = async () => {
 		refetchLeaders(),
 		refetchEventPerformance(),
 		refetchPaymentSources(),
+		refetchEventsOnMap(),
+		refetchLeadersOnMap(),
 	])
 }
 
@@ -378,42 +518,10 @@ const leaderDistributionOption = computed(() => {
 	}
 })
 
-const areaDistributionOption = computed(() => {
-	if (!areaRows.value.length) return null
-
-	return {
-		tooltip: {
-			trigger: 'axis',
-			axisPointer: { type: 'shadow' },
-		},
-		grid: {
-			left: '3%',
-			right: '4%',
-			bottom: '3%',
-			containLabel: true,
-		},
-		xAxis: {
-			type: 'value',
-		},
-		yAxis: {
-			type: 'category',
-			data: areaRows.value.map((item) => item.name),
-		},
-		series: [
-			{
-				type: 'bar',
-				data: areaRows.value.map((item) => item.count),
-				itemStyle: {
-					color: '#2563eb',
-				},
-				label: {
-					show: true,
-					position: 'right',
-				},
-			},
-		],
-	}
-})
+const areaDistributionOption = computed(() => buildDistributionOption(areaRows.value, '#2563eb'))
+const chapterDistributionOption = computed(() => buildDistributionOption(chapterRows.value, '#0ea5e9'))
+const clusterDistributionOption = computed(() => buildDistributionOption(clusterRows.value, '#7c3aed'))
+const countryDistributionOption = computed(() => buildDistributionOption(countryRows.value, '#16a34a'))
 
 const paymentSourcesOption = computed(() => {
 	if (!paymentSourceRows.value.length) return null

@@ -9,6 +9,8 @@ import {
   organisationsStatisticsSponsorsOverviewRetrieve,
   organisationsStatisticsSponsorPackagesPerformanceRetrieve,
   organisationsStatisticsSponsorInviteConversionRetrieve,
+  organisationsStatisticsEventsOnMapRetrieve,
+  organisationsStatisticsLeadersOnMapRetrieve,
 } from '~/api/sdk.gen'
 import type {
   OrganisationsStatisticsOverviewRetrieveData,
@@ -18,6 +20,8 @@ import type {
   OrganisationsStatisticsSponsorsOverviewRetrieveData,
   OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData,
   OrganisationsStatisticsSponsorInviteConversionRetrieveData,
+  OrganisationsStatisticsEventsOnMapRetrieveData,
+  OrganisationsStatisticsLeadersOnMapRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['organisations', 'statistics'] as const
@@ -30,6 +34,9 @@ type PaymentSourcesQuery = OrganisationsStatisticsPaymentsBySourceRetrieveData['
 type SponsorsOverviewQuery = OrganisationsStatisticsSponsorsOverviewRetrieveData['query']
 type SponsorPackagesPerformanceQuery = OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData['query']
 type SponsorInviteConversionQuery = OrganisationsStatisticsSponsorInviteConversionRetrieveData['query']
+type EventsOnMapQuery = OrganisationsStatisticsEventsOnMapRetrieveData['query']
+type LeadersOnMapQuery = OrganisationsStatisticsLeadersOnMapRetrieveData['query']
+
 
 /**
  * Overview metrics for organisation, events, attendance, members and payments.
@@ -163,3 +170,42 @@ export function useOrganisationSponsorInviteConversionStatistics(
     refetchInterval: REFRESH_INTERVAL_MS,
   })
 }
+
+/**
+ * GeoJSON FeatureCollection of events for map display.
+ */
+export function useOrganisationEventsOnMapStatistics(
+  params?: MaybeRefOrGetter<EventsOnMapQuery | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'events-on-map', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return organisationsStatisticsEventsOnMapRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+    staleTime: 30 * 1000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  })
+}
+
+/**
+ * GeoJSON FeatureCollection of leaders for map display.
+ */
+export function useOrganisationLeadersOnMapStatistics(
+  params?: MaybeRefOrGetter<LeadersOnMapQuery | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'leaders-on-map', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return organisationsStatisticsLeadersOnMapRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+    staleTime: 30 * 1000,
+    refetchInterval: REFRESH_INTERVAL_MS,
+  })
+}
+
