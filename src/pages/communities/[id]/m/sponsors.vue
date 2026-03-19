@@ -493,7 +493,7 @@
 						</div>
 					</div>
 
-					<div class="space-y-4">
+					<div class="space-y-4" v-if="activeStep == 3">
 						<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-deep-navy/5">
 							<p class="text-xs font-black uppercase tracking-wider text-deep-navy/60">Review Sponsorship</p>
 							<div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -592,6 +592,17 @@
 											<span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-700 text-[10px] font-black uppercase tracking-wider">{{ item.status }}</span>
 											<span class="text-xs font-black text-deep-navy uppercase tracking-wider">{{ formatMoney(item.amount, item.currency) }}</span>
 										</div>
+									</div>
+									<div class="" v-if="item.status == 'PENDING'">
+										<p class="text-xs font-bold uppercase tracking-wider text-deep-navy/70 mt-2">Payment Instructions:</p>
+										<div v-if="item.method_type === 'STRIPE'">
+											<p class="text-xs font-medium text-deep-navy/70">As this is via stripe, no payment actions are required</p>
+										</div>
+										<div v-else>
+											<pre class="mt-1 text-xs text-deep-navy/70 whitespace-pre-wrap">{{ item.method_provided_details }}</pre>
+											<p class="text-deep-navy/80">Ensure you use this bank transfer reference in your transfer reference otherwise your payment may not be processed.</p>
+											<p class="text-deep-navy">Bank transfer reference: <b>{{ item.bank_transfer_reference }}</b></p>
+										</div>		
 									</div>
 								</div>
 							</div>

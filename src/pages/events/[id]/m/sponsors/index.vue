@@ -424,7 +424,7 @@
 									</td>
 									<td class="px-6 py-4 text-sm text-navy-700">{{ invite.organisation_name || 'Not linked' }}</td>
 									<td class="px-6 py-4 text-sm text-navy-700">{{ formatInviteDate(invite.sent_at) }}</td>
-									<td class="px-6 py-4 text-xs font-mono text-navy-700">{{ invite.token }}</td>
+									<td class="px-6 py-4 text-xs font-mono text-navy-700">{{ invite.token.slice(0, 10) + '...' }}</td>
 									<td class="px-6 py-4">
 										<div class="flex items-center justify-end gap-2">
 											<button

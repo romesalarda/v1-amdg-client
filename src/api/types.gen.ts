@@ -13614,6 +13614,10 @@ export type PaymentDetail = {
         event?: string;
         method?: string;
     };
+    /**
+     * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
+     */
+    readonly descriptor: string | null;
     description?: string | null;
     readonly base_amount: string;
     readonly base_amount_currency: string | null;
@@ -13639,6 +13643,7 @@ export type PaymentDetail = {
      */
     readonly history_actions: Array<unknown>;
     readonly updated_at: string;
+    target_type?: number | null;
 };
 
 /**
@@ -13732,6 +13737,10 @@ export type PaymentList = {
         event?: string;
         method?: string;
     };
+    /**
+     * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
+     */
+    readonly descriptor: string | null;
 };
 
 /**
@@ -15645,8 +15654,10 @@ export type SponsorshipPaymentTimelineItem = {
     readonly currency: string;
     readonly method_type: string | null;
     readonly method_title: string | null;
+    readonly method_provided_details: unknown;
     readonly created_at: string;
     readonly updated_at: string;
+    readonly bank_transfer_reference: string | null;
 };
 
 /**
@@ -21438,6 +21449,7 @@ export type PaymentDetailWritable = {
     stripe_charge_id?: string | null;
     bank_transfer_reference?: string | null;
     metadata?: unknown;
+    target_type?: number | null;
 };
 
 /**
@@ -38529,6 +38541,10 @@ export type PaymentsListListData = {
          * Filter payments created on specific date (YYYY-MM-DD)
          */
         created_date?: string;
+        /**
+         * Filter by payment descriptor (e.g., booking, order, ticket, donation, sponsorship)
+         */
+        descriptor?: string;
         /**
          * Filter by event ID
          */
