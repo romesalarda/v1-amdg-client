@@ -145,40 +145,42 @@
 								<p class="mt-2 text-sm text-slate-500">Complete each step to prepare this attendee for checkout.</p>
 							</div>
 
-							<div class="mt-6 overflow-x-auto pb-2">
-								<ol class="flex min-w-max items-center gap-2 md:gap-3">
-									<li
-										v-for="(label, index) in steps"
-										:key="label"
-										class="flex items-center"
-									>
-										<div class="flex items-center gap-2">
-											<div
-												class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
-												:class="
-													index === activeStepIndex
-														? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
-														: index < activeStepIndex
-															? 'border-emerald-500 bg-emerald-500 text-white'
-															: 'border-slate-300 bg-white text-slate-500'
-												"
-											>
-												{{ index + 1 }}
+							<div class="mt-6 overflow-hidden pb-2">
+								<Transition :name="stepperTransitionName" mode="out-in">
+									<ol :key="`step-window-${stepWindowStart}`" class="flex items-center gap-2 md:gap-3">
+										<li
+											v-for="(step, localIndex) in visibleSteps"
+											:key="step.index"
+											class="flex flex-1 items-center"
+										>
+											<div class="flex items-center gap-2">
+												<div
+													class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
+													:class="
+														step.index === activeStepIndex
+															? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
+															: step.index < activeStepIndex
+																? 'border-emerald-500 bg-emerald-500 text-white'
+																: 'border-slate-300 bg-white text-slate-500'
+													"
+												>
+													{{ step.index + 1 }}
+												</div>
+												<p
+													class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
+													:class="step.index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
+												>
+													{{ step.label }}
+												</p>
 											</div>
-											<p
-												class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
-												:class="index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
-											>
-												{{ label }}
-											</p>
-										</div>
-										<div
-											v-if="index < steps.length - 1"
-											class="mx-2 h-px w-6 md:w-10"
-											:class="index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
-										></div>
-									</li>
-								</ol>
+											<div
+												v-if="localIndex < visibleSteps.length - 1"
+												class="mx-2 h-px flex-1"
+												:class="step.index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
+											></div>
+										</li>
+									</ol>
+								</Transition>
 							</div>
 
 							<div v-if="!currentAttendee" class="mt-8 text-sm text-slate-500">Preparing registration details...</div>
@@ -1092,6 +1094,28 @@ const steps = [
 const attendeeStepCount = 6
 const reviewStepIndex = attendeeStepCount
 const activeStepIndex = ref(0)
+const maxVisibleStepperSteps = 3
+const stepperTransitionName = ref('stepper-slide-forward')
+
+const stepWindowStart = computed(() => {
+	if (steps.length <= maxVisibleStepperSteps) return 0
+	if (activeStepIndex.value <= 1) return 0
+	if (activeStepIndex.value >= steps.length - 2) return steps.length - maxVisibleStepperSteps
+	return activeStepIndex.value - 1
+})
+
+const visibleSteps = computed(() => {
+	return steps
+		.slice(stepWindowStart.value, stepWindowStart.value + maxVisibleStepperSteps)
+		.map((label, offset) => ({
+			label,
+			index: stepWindowStart.value + offset,
+		}))
+})
+
+watch(activeStepIndex, (next, previous) => {
+	stepperTransitionName.value = next >= previous ? 'stepper-slide-forward' : 'stepper-slide-back'
+})
 
 const currentAttendee = computed(() => store.attendees[store.currentIndex])
 const currentAttendeeNumber = computed(() => store.currentIndex + 1)
@@ -1836,5 +1860,24 @@ const goBack = () => {
 .step-fade-leave-to {
 	opacity: 0;
 	transform: translateY(8px);
+}
+
+.stepper-slide-forward-enter-active,
+.stepper-slide-forward-leave-active,
+.stepper-slide-back-enter-active,
+.stepper-slide-back-leave-active {
+	transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.stepper-slide-forward-enter-from,
+.stepper-slide-back-leave-to {
+	opacity: 0;
+	transform: translateX(20px);
+}
+
+.stepper-slide-forward-leave-to,
+.stepper-slide-back-enter-from {
+	opacity: 0;
+	transform: translateX(-20px);
 }
 </style>
