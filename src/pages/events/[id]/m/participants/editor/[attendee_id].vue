@@ -1034,7 +1034,7 @@
                     <NuxtLink
                       v-for="siblingAttendee in booking.data.value.data.attendees.filter((a: any) => a.id !== attendeeId)"
                       :key="siblingAttendee.id"
-                      :to="`/events/${eventId}/m/participants/editor/${siblingAttendee.id}_new`"
+                      :to="`/events/${eventId}/m/participants/editor/${siblingAttendee.id}`"
                       class="block p-2 bg-gray-50 rounded-lg hover:bg-primary/5 transition-colors"
                     >
                       <p class="text-xs font-semibold text-primary">{{ siblingAttendee.name }}</p>

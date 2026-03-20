@@ -15,7 +15,7 @@
             v-if="event.main_landing_image?.image"
             :src="resolveImageUrl(event.main_landing_image.image)"
             :alt="event.title"
-            class="w-full h-full object-cover"
+            class="w-full h-full object-contain"
             @error="(e) => onImageError(e)"
           />
           <!-- Placeholder gradient when no image -->
@@ -204,7 +204,7 @@
             <div class="space-y-6">
               <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
                 <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-center text-white/50">
-                  {{ countdown.isExpired ? 'Event Started' : 'Registration Ends In' }}
+                  {{ countdown.isExpired ? 'Event Started' : 'Event Starts In' }}
                 </p>
                 
                 <!-- Countdown Display -->
