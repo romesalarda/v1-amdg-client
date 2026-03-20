@@ -663,6 +663,11 @@ import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
+
+// Use middleware to validate booking intent and URL parameters
+definePageMeta({
+  middleware: 'register',
+})
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
@@ -1103,12 +1108,9 @@ const toggleConsent = (consentId: number, eventTarget: Event) => {
 
 const redirectToEventHome = () => {
 	showIntentExpiredModal.value = false
-	store.bookingIntentId = null
-	if (event.value?.event_id) {
-		router.push({ path: `/events/${event.value.event_id}` })
-		return
-	}
-	router.push({ path: `/events/${eventId.value}` })
+	store.reset()
+	// Redirect to dashboard after intent expiration
+	router.push({ path: '/' })
 }
 
 const markIntentExpired = () => {

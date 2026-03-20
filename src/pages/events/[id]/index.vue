@@ -332,8 +332,55 @@
       </div>
     </div>
   </div>
+  <!-- Booking Intent Wait Screen Modal -->
+  <UModal v-model="showWaitScreen" :prevent-close="isCreatingIntent" :ui="{ width: 'sm:max-w-lg' }">
+    <div class="p-8 space-y-6">
+      <div v-if="isCreatingIntent" class="text-center space-y-4">
+        <div class="flex justify-center">
+          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-deep-navy"></div>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-deep-navy uppercase tracking-widest">Reserving Your Space</h3>
+          <p class="text-sm text-deep-navy/60 mt-2">
+            We're creating your booking intent and reserving {{ calculatedTicketCount }} {{ calculatedTicketCount === 1 ? 'spot' : 'spots' }}...
+          </p>
+        </div>
+      </div>
 
-  <UModal v-model="showRegistrationModal" :ui="{ width: 'sm:max-w-lg' }">
+      <div v-else-if="intentCreationError" class="text-center space-y-4">
+        <div class="flex justify-center">
+          <div class="rounded-full bg-red-100 p-3">
+            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-red-600 uppercase tracking-widest">Reservation Failed</h3>
+          <p class="text-sm text-red-600/70 mt-2">{{ intentCreationError }}</p>
+        </div>
+        <div class="flex items-center justify-end gap-3 pt-4">
+          <UButton color="primary" @click="closeWaitScreen">Try Again</UButton>
+        </div>
+      </div>
+
+      <div v-else class="text-center space-y-4">
+        <div class="flex justify-center">
+          <div class="rounded-full bg-emerald-100 p-3">
+            <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-black text-emerald-600 uppercase tracking-widest">Space Reserved!</h3>
+          <p class="text-sm text-emerald-600/70 mt-2">{{ calculatedTicketCount }} {{ calculatedTicketCount === 1 ? 'spot has' : 'spots have' }} been reserved for 20 minutes.</p>
+        </div>
+      </div>
+    </div>
+  </UModal>
+
+  <!-- Registration Options Modal -->  <UModal v-model="showRegistrationModal" :ui="{ width: 'sm:max-w-lg' }">
     <div class="p-6 space-y-6">
       <div>
         <h3 class="text-lg font-black text-deep-navy uppercase tracking-widest">Start Registration</h3>
@@ -419,8 +466,13 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useToast } from '#ui/composables/useToast'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
+import { useCreateBookingIntent } from '~/composables/resources/booking/bookingIntents'
+import { useRegistrationStore } from '~/stores/registration'
 import { formatDate, useCountdown, formatTime } from '~/utils/time'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 
@@ -442,10 +494,20 @@ const { data: venuesData } = useEventVenues(computed(() => ({
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
 
+// Registration modal state
 const showRegistrationModal = ref(false)
 const registrarAttending = ref(true)
 const registeringOthers = ref(false)
 const otherAttendeeCount = ref(1)
+
+// Booking intent creation state
+const showWaitScreen = ref(false)
+const isCreatingIntent = ref(false)
+const intentCreationError = ref<string | null>(null)
+const createBookingIntentMutation = useCreateBookingIntent()
+const registrationStore = useRegistrationStore()
+const toast = useToast()
+const router = useRouter()
 
 const calculatedTicketCount = computed(() => {
   if (!registrarAttending.value) {
@@ -524,22 +586,69 @@ const openRegistrationModal = () => {
   showRegistrationModal.value = true
 }
 
-const startRegistration = () => {
+const closeWaitScreen = () => {
+  showWaitScreen.value = false
+}
+
+const startRegistration = async () => {
   if (!registrarAttending.value) {
     registeringOthers.value = true
   }
 
   const count = calculatedTicketCount.value
   showRegistrationModal.value = false
+  showWaitScreen.value = true
+  isCreatingIntent.value = true
+  intentCreationError.value = null
 
-  navigateTo({
-    path: `/events/${eventId.value}/register`,
-    query: {
-      tickets: String(count),
-      mode: registrationMode.value,
-      uia: registrarAttending.value ? 'true' : 'false',
-    },
-  })
+  try {
+
+    if (!event.value?.event_id) {
+      throw new Error('Event ID is missing')
+    }
+    // Create the booking intent
+    const response = await createBookingIntentMutation.mutateAsync({
+      event: event.value.event_id,
+      intended_ticket_count: count,
+    })
+
+    const intentId = response.data?.booking_intent_id
+
+    if (!intentId) {
+      throw new Error('No booking intent ID returned')
+    }
+
+    // Initialize the registration store with the intent
+    registrationStore.init(
+      eventId.value,
+      count,
+      registrarAttending.value
+    )
+    registrationStore.setBookingIntentId(intentId)
+
+    // Delayed navigation to allow user to see the success state briefly
+    setTimeout(() => {
+      router.push({
+        path: `/events/${eventId.value}/register`,
+        query: {
+          tickets: String(count),
+          mode: registrationMode.value,
+          uia: registrarAttending.value ? 'true' : 'false',
+        },
+      })
+    }, 1000)
+  } catch (error: any) {
+    isCreatingIntent.value = false
+    const errorMessage = error?.data?.non_field_errors?.[0] ||
+                        error?.message ||
+                        'Failed to create booking intent. Please try again.'
+    intentCreationError.value = errorMessage
+    toast.add({
+      title: 'Registration Failed',
+      description: errorMessage,
+      color: 'red',
+    })
+  }
 }
 
 // Set page metadata
