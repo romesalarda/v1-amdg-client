@@ -55,7 +55,8 @@ type AttendeeDraft = {
   date_of_birth: string
   gender?: string
   relationship_to_user?: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other'
-  area_from?: number | null
+  area_from?: number | null,
+  area_from_name?: string | null,
   questionsComplete?: boolean
   personalInfo: PersonalInfoDraft
   packageId?: number
@@ -82,6 +83,7 @@ const createEmptyAttendee = (): AttendeeDraft => ({
   gender: '',
   relationship_to_user: undefined,
   area_from: null,
+  area_from_name: null,
   questionsComplete: false,
   personalInfo: {
     dietaryRequirements: [],
@@ -140,8 +142,8 @@ export const useRegistrationStore = defineStore('registration', {
     setPersonalInfo(index: number, info: PersonalInfoDraft) {
       this.updateAttendeeDraft(index, { personalInfo: info })
     },
-    setAreaFrom(index: number, areaFrom: number | null) {
-      this.updateAttendeeDraft(index, { area_from: areaFrom })
+    setAreaFrom(index: number, areaFrom: number | null, areaFromName: string | null) {
+      this.updateAttendeeDraft(index, { area_from: areaFrom, area_from_name: areaFromName })
     },
     setPackageId(index: number, packageId: number) {
       this.updateAttendeeDraft(index, { packageId })

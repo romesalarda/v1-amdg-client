@@ -91,11 +91,19 @@
 					>
 						<div class="flex items-start justify-between gap-3">
 							<div>
-								<p class="text-base font-black text-slate-900">
-									{{ attendeeDisplayName(attendee, index) }}
-								</p>
+								<div class="flex items-center gap-2">
+									<p class="text-base font-black text-slate-900">
+										{{ attendeeDisplayName(attendee, index) }}
+									</p>
+									<UBadge v-if="isAttendeeMinor(attendee)" color="amber" variant="subtle" size="xs">
+										Minor
+									</UBadge>
+								</div>
 								<p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
 									{{ attendeeStepSummary(index) }}
+								</p>
+								<p v-if="isAttendeeMinor(attendee) && !minorHasEmergencyContact(attendee)" class="mt-1 text-[10px] font-bold text-red-600 uppercase tracking-wider">
+									⚠ Emergency contact required
 								</p>
 							</div>
 							<span
@@ -180,88 +188,175 @@
 									<div v-if="activeStepIndex === 0" class="space-y-6">
 										<div>
 											<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
-											<p class="text-sm text-gray-600">Tell us who will be attending.</p>
+											<p class="text-sm text-gray-600" v-if="isRegistrarSelf">Please provide <b>YOUR</b> details.</p>
+											<p class="text-sm text-gray-600" v-else>Tell us about this attendee and their relationship to you.</p>
 										</div>
 
 							<div class="grid gap-4 sm:grid-cols-2">
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">First name</label>
-									<UInput v-model="currentAttendee.first_name" placeholder="First name" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.first_name"
+										placeholder="First name"
+										@update:model-value="
+											(val) => {
+												currentAttendee.first_name = val
+												setFieldValue('first_name', val)
+											}
+										"
+										:color="errors.first_name ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
 								</div>
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Last name</label>
-									<UInput v-model="currentAttendee.last_name" placeholder="Last name" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.last_name"
+										placeholder="Last name"
+										@update:model-value="
+											(val) => {
+												currentAttendee.last_name = val
+												setFieldValue('last_name', val)
+											}
+										"
+										:color="errors.last_name ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-									<UInput v-model="currentAttendee.email" type="email" placeholder="email@example.com" />
+									<UInput
+										:model-value="values.email"
+										type="email"
+										placeholder="email@example.com"
+										@update:model-value="
+											(val) => {
+												currentAttendee.email = val
+												setFieldValue('email', val)
+											}
+										"
+										:color="errors.email ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
-									<UInput v-model="currentAttendee.phone_number" placeholder="Phone number" />
+									<UInput
+										:model-value="values.phone_number"
+										placeholder="Phone number"
+										@update:model-value="
+											(val) => {
+												currentAttendee.phone_number = val
+												setFieldValue('phone_number', val)
+											}
+										"
+										:color="errors.phone_number ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.phone_number" class="mt-1 text-xs text-red-500">{{ errors.phone_number }}</p>
 								</div>
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth</label>
-									<UInput v-model="currentAttendee.date_of_birth" type="date" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.date_of_birth"
+										type="date"
+										@update:model-value="
+											(val) => {
+												currentAttendee.date_of_birth = val
+												setFieldValue('date_of_birth', val)
+											}
+										"
+										:color="errors.date_of_birth ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.date_of_birth" class="mt-1 text-xs text-red-500">{{ errors.date_of_birth }}</p>
+									<p v-if="currentAttendeeAge !== null" class="mt-2 text-sm font-medium text-slate-600">
+										Age: <span class="font-bold text-slate-900">{{ currentAttendeeAge }}</span> years old
+									</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
 									<USelectMenu
-										v-model="currentAttendee.gender"
+										:model-value="values.gender"
 										:options="genderOptions"
 										value-attribute="value"
 										option-attribute="label"
 										placeholder="Select gender"
+										@update:model-value="
+											(val) => {
+												currentAttendee.gender = val
+												setFieldValue('gender', val)
+											}
+										"
 									/>
 								</div>
 								<div v-if="showRelationshipField" class="sm:col-span-2">
-									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you</label>
+									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
 									<USelectMenu
-										v-model="currentAttendee.relationship_to_user"
+										:model-value="values.relationship_to_user"
 										:options="relationshipOptions"
 										value-attribute="value"
 										option-attribute="label"
 										placeholder="Select relationship"
+										@update:model-value="
+											(val) => {
+												currentAttendee.relationship_to_user = val
+												setFieldValue('relationship_to_user', val)
+											}
+										"
 										:disabled="isRegistrarSelf"
 									/>
 								</div>
-								<div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+								<!-- <div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
 									Relationship is set to <span class="font-bold">Self</span> for this registration mode.
-								</div>
+								</div> -->
 								<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
-									<p class="text-sm font-semibold text-slate-900">Area from</p>
+									<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
 									<p class="mt-1 text-xs text-slate-600">
-										Search and select an area, then lock an area id for this attendee.
+										Start typing to search for an area, then select from the list.
 									</p>
-									<div class="mt-3 grid gap-3 md:grid-cols-2">
-										<UInput
-											v-model="areaSearch"
-											placeholder="Search area name (min 2 chars)"
-										/>
-										<USelectMenu
-											v-model="selectedAreaId"
-											:options="areaOptions"
-											value-attribute="value"
-											option-attribute="label"
-											placeholder="Select matching area"
-										/>
+									<div class="mt-4">
+										<div class="relative">
+											<UInput
+												v-model="areaSearch"
+												placeholder="Search area name (min 2 chars)"
+												class="w-full"
+											/>
+											<div
+												v-if="areaOptions.length > 0 && areaSearch.length >= 2"
+												class="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg border border-slate-200 bg-white shadow-lg"
+											>
+												<div class="max-h-64 overflow-y-auto">
+													<button
+														v-for="option in areaOptions"
+														:key="option.value"
+														type="button"
+														class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+														:class="option.value === currentAttendee.area_from ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700'"
+														@click="
+															store.setAreaFrom(store.currentIndex, option.value, option.label);
+															areaSearch = option.label;
+															toast.add({ title: 'Area locked', description: `${option.label} has been set for this attendee.`, color: 'green' })
+														"
+													>
+														{{ option.label }}
+													</button>
+												</div>
+											</div>
+										</div>
+										<p v-if="areaLookupLoading" class="mt-2 text-xs text-slate-500">Searching...</p>
 									</div>
-									<div class="mt-3 flex flex-wrap items-center gap-2">
-										<UButton size="xs" :loading="areaLookupLoading" @click="lockAreaFromEventSelection">
-											Find and lock area
-										</UButton>
-										<UButton v-if="hasCurrentAreaFrom" size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
-											Clear area
+									<div v-if="hasCurrentAreaFrom" class="mt-3">
+										<UButton size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
+											Change area
 										</UButton>
 									</div>
 									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-										{{ hasCurrentAreaFrom ? `Locked area ID: ${currentAttendee.area_from}` : 'Area not selected yet.' }}
+										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : '⚠ Select an area to continue.' }}
 									</p>
 								</div>
 							</div>
 						</div>
 
-									<div v-else-if="activeStepIndex === 1" class="space-y-6">
+						<div v-else-if="activeStepIndex === 1" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Event questions</h2>
 								<p class="text-sm text-gray-600">Answer any questions the organizer added.</p>
@@ -273,79 +368,177 @@
 							/>
 						</div>
 
-									<div v-else-if="activeStepIndex === 2" class="space-y-6">
+						<div v-else-if="activeStepIndex === 2" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Personal info</h2>
 								<p class="text-sm text-gray-600">Add any dietary, medical, or accessibility needs.</p>
+								<div v-if="isAttendeeMinor(currentAttendee)" class="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
+									<p class="text-sm font-semibold text-amber-800">⚠️ Emergency contact required</p>
+									<p class="mt-1 text-xs text-amber-700">As this attendee is a minor, an emergency contact is required to continue.</p>
+								</div>
 							</div>
 
 							<div class="grid gap-6">
+								<!-- Dietary Requirements Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
-									<div v-if="dietaryRequirements.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="dietaryRequirements.length" class="mt-3 space-y-3">
+										<div
 											v-for="requirement in dietaryRequirements"
 											:key="requirement.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="requirement.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
-												@change="toggleDietaryRequirement(requirement.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-											/>
-											<span>{{ requirement.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`dietary-${requirement.id}`"
+													:value="requirement.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+													@change="toggleDietaryRequirement(requirement.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`dietary-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ requirement.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.dietaryRequirements)"
+														placeholder="Describe your dietary requirement..."
+														@input="updateDietaryRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and catering team</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No dietary requirements available.</p>
 								</div>
 
+								<!-- Medical Conditions Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Medical conditions</h3>
-									<div v-if="medicalConditions.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="medicalConditions.length" class="mt-3 space-y-3">
+										<div
 											v-for="condition in medicalConditions"
 											:key="condition.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="condition.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
-												@change="toggleMedicalCondition(condition.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary text-gray-900"
-											/>
-											<span>{{ condition.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`medical-${condition.id}`"
+													:value="condition.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
+													@change="toggleMedicalCondition(condition.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`medical-${condition.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ condition.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">Severity</label>
+													<USelectMenu
+														:model-value="currentAttendee.personalInfo.medicalConditions.find(d => d.id === condition.id)?.severity || ''"
+														:options="[
+															{ label: 'Mild', value: 'mild' },
+															{ label: 'Moderate', value: 'moderate' },
+															{ label: 'Severe', value: 'severe' }
+														]"
+														value-attribute="value"
+														option-attribute="label"
+														placeholder="Select severity"
+														@update:model-value="(val) => updateMedicalConditionSeverity(condition.id, val as 'mild' | 'moderate' | 'severe' | null)"
+													/>
+												</div>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(condition.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(condition.id, currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[])"
+														placeholder="Describe the condition..."
+														@input="updateMedicalConditionDetails(condition.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and first aid team</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No medical conditions available.</p>
 								</div>
 
+								<!-- Accessibility Requirements Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Accessibility requirements</h3>
-									<div v-if="accessibilityRequirements.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="accessibilityRequirements.length" class="mt-3 space-y-3">
+										<div
 											v-for="requirement in accessibilityRequirements"
 											:key="requirement.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="requirement.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
-												@change="toggleAccessibilityRequirement(requirement.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-											/>
-											<span>{{ requirement?.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`accessibility-${requirement.id}`"
+													:value="requirement.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+													@change="toggleAccessibilityRequirement(requirement.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`accessibility-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ requirement.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.accessibilityRequirements)"
+														placeholder="Describe your accessibility needs..."
+														@input="updateAccessibilityRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and accessibility team</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No accessibility requirements available.</p>
 								</div>
 
+								<!-- Emergency Contact Section -->
 								<div>
 									<div class="flex items-center justify-between">
-										<h3 class="text-sm font-semibold text-gray-900">Emergency contact</h3>
+										<h3 class="text-sm font-semibold text-gray-900">
+											Emergency contact
+											<span v-if="isAttendeeMinor(currentAttendee)" class="text-red-500">*</span>
+										</h3>
 										<UButton
 											v-if="!currentAttendee?.personalInfo?.emergencyContact"
 											size="xs"
@@ -362,16 +555,25 @@
 										class="mt-3 grid gap-4 sm:grid-cols-2"
 									>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">First name</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.first_name" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.first_name"
+												placeholder="First name"
+											/>
 										</div>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Last name</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.last_name" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.last_name"
+												placeholder="Last name"
+											/>
 										</div>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.phone_number" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">Phone number <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.phone_number"
+												placeholder="Phone number"
+											/>
 										</div>
 										<div>
 											<label class="mb-1 block text-sm font-medium text-gray-700">Relationship</label>
@@ -385,7 +587,11 @@
 										</div>
 										<div class="sm:col-span-2">
 											<label class="mb-1 block text-sm font-medium text-gray-700">Email (optional)</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.email" type="email" />
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.email" 
+												type="email"
+												placeholder="Email address"
+											/>
 										</div>
 									</div>
 								</div>
@@ -663,6 +869,9 @@ import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
+import { useForm } from 'vee-validate'
+import { z } from 'zod'
+import { isMinor, validatePersonalInfoItem } from '~/schemas/registration'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -685,10 +894,67 @@ import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
 
+// Create validation schema for attendee details
+const attendeeValidationSchema = z.object({
+	first_name: z
+		.string()
+		.min(1, 'First name is required')
+		.min(2, 'First name must be at least 2 characters'),
+	last_name: z
+		.string()
+		.min(1, 'Last name is required')
+		.min(2, 'Last name must be at least 2 characters'),
+	email: z
+		.string()
+		.optional()
+		.refine(
+			(val) => !val || /^[^@]+@[^@]+\.[^@]+$/.test(val),
+			'Please enter a valid email address'
+		),
+	phone_number: z
+		.string()
+		.optional()
+		.refine(
+			(val) => !val || /^[+]?[\d\s\-()]{10,}$/i.test(val),
+			'Please enter a valid phone number'
+		),
+	date_of_birth: z
+		.string()
+		.min(1, 'Date of birth is required')
+		.refine(
+			(val) => !val || new Date(val) < new Date(),
+			'Date of birth cannot be in the future'
+		),
+	gender: z.string().optional(),
+	relationship_to_user: z.string().optional(),
+}) as z.ZodType<{
+	first_name: string
+	last_name: string
+	email?: string
+	phone_number?: string
+	date_of_birth: string
+	gender?: string
+	relationship_to_user?: string
+}>
+
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const store = useRegistrationStore()
+
+// Initialize form (will be reset when currentAttendee changes)
+const { values, errors, setFieldValue, resetForm } = useForm({
+	validationSchema: attendeeValidationSchema,
+	initialValues: {
+		first_name: '',
+		last_name: '',
+		email: '',
+		phone_number: '',
+		date_of_birth: '',
+		gender: '',
+		relationship_to_user: '',
+	},
+})
 
 const eventId = computed(() => String(route.params.id || ''))
 const ticketCount = computed(() => Number(route.query.tickets || 1))
@@ -753,7 +1019,6 @@ const isCreatingIntent = ref(false)
 const showIntentExpiredModal = ref(false)
 const areaLookupLoading = ref(false)
 const areaSearch = ref('')
-const selectedAreaId = ref<number | undefined>(undefined)
 const areaOptions = ref<Array<{ label: string; value: number }>>([])
 let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -845,6 +1110,21 @@ const attendeeStepSummary = (index: number) => {
 	if (index === store.currentIndex) return steps[activeStepIndex.value] || 'In progress'
 	if (index < store.currentIndex) return 'Previously edited'
 	return 'Waiting'
+}
+
+/**
+ * Check if an attendee is a minor (under 18 years old)
+ */
+const isAttendeeMinor = (attendee: AttendeeDraft): boolean => {
+	return isMinor(attendee.date_of_birth)
+}
+
+/**
+ * Check if a minor has an emergency contact
+ */
+const minorHasEmergencyContact = (attendee: AttendeeDraft): boolean => {
+	if (!isAttendeeMinor(attendee)) return true // Not a minor, so requirement doesn't apply
+	return !!attendee.personalInfo.emergencyContact && !!attendee.personalInfo.emergencyContact.first_name && !!attendee.personalInfo.emergencyContact.last_name
 }
 
 const relationshipOptions = [
@@ -1016,6 +1296,68 @@ const toggleAccessibilityRequirement = (id: number, eventTarget: Event) => {
 	store.setPersonalInfo(store.currentIndex, { ...currentAttendee.value.personalInfo, accessibilityRequirements: updated })
 }
 
+/**
+ * Update details for a dietary requirement item
+ */
+const updateDietaryRequirementDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.dietaryRequirements.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Update severity for a medical condition item
+ */
+const updateMedicalConditionSeverity = (id: number, severity: 'mild' | 'moderate' | 'severe' | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
+	if (item) {
+		item.severity = severity
+	}
+}
+
+/**
+ * Update details for a medical condition item
+ */
+const updateMedicalConditionDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Update details for an accessibility requirement item
+ */
+const updateAccessibilityRequirementDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.accessibilityRequirements.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Check if an item is "OTHER" (typically indicated by a special ID pattern)
+ * You can customize this based on your backend's "OTHER" ID convention
+ */
+const isOtherOption = (id: number): boolean => {
+	// Customize this based on your actual "OTHER" ID from backend
+	// This is a placeholder - adjust according to your API response
+	return id === -1 || String(id).toLowerCase().includes('other')
+}
+
+/**
+ * Get the details field for a requirement item
+ */
+const getDetailsForItem = (id: number, items: PersonalInfoItemDraft[]): string => {
+	const item = items.find((d) => d.id === id)
+	return item?.details || ''
+}
+
 const hasQuestionAnswerContent = (answer: AttendeeDraft['questionAnswers'][number]) => {
 	if (typeof answer.answerText === 'string' && answer.answerText.trim().length > 0) return true
 	if (typeof answer.answerText === 'number') return true
@@ -1046,20 +1388,29 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasDob = !!attendee.date_of_birth
 	const hasAreaFrom = !!attendee.area_from
 	const hasPackage = !!attendee.packageId
-	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
+	const hasEmergencyContactIfMinor = minorHasEmergencyContact(attendee)
+	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
 }
 
 const canContinue = computed(() => {
 	if (!currentAttendee.value) return false
 	if (activeStepIndex.value === 0) {
-		const hasNames = !!currentAttendee.value.first_name && !!currentAttendee.value.last_name
+		const hasNames = !!values.first_name && !!values.last_name
 		const hasRelationship = !!currentAttendee.value.relationship_to_user || isRegistrarSelf.value
-		const hasDob = !!currentAttendee.value.date_of_birth
+		const hasDob = !!values.date_of_birth
 		const hasAreaFrom = !!currentAttendee.value.area_from
-		return hasNames && hasRelationship && hasDob && hasAreaFrom
+		const hasNoErrors = !hasAttendeeDetailsErrors.value && !errors.value.email && !errors.value.phone_number
+		return hasNames && hasRelationship && hasDob && hasAreaFrom && hasNoErrors
 	}
 	if (activeStepIndex.value === 1) {
 		return attendeeHasRequiredAnswers(currentAttendee.value)
+	}
+	if (activeStepIndex.value === 2) {
+		// Personal info step: enforce emergency contact for minors
+		if (isAttendeeMinor(currentAttendee.value)) {
+			return minorHasEmergencyContact(currentAttendee.value)
+		}
+		return true
 	}
 	if (activeStepIndex.value === 3) {
 		return !!currentAttendee.value.packageId
@@ -1188,7 +1539,6 @@ watch(
 watch(
 	() => store.currentIndex,
 	() => {
-		selectedAreaId.value = undefined
 		areaSearch.value = ''
 		areaOptions.value = []
 	}
@@ -1205,7 +1555,6 @@ watch(
 		const query = term.trim()
 		if (query.length < 2) {
 			areaOptions.value = []
-			selectedAreaId.value = undefined
 			return
 		}
 
@@ -1215,7 +1564,7 @@ watch(
 				const response = await locationsAreasList({
 					query: {
 						search: query,
-						page_size: 10,
+						page_size: 5,
 					},
 				})
 				const options = (response.data?.results || []).map((area) => ({
@@ -1223,9 +1572,6 @@ watch(
 					value: area.id,
 				}))
 				areaOptions.value = options
-				if (selectedAreaId.value && !options.some((item) => item.value === selectedAreaId.value)) {
-					selectedAreaId.value = undefined
-				}
 			} catch {
 				areaOptions.value = []
 			} finally {
@@ -1235,33 +1581,52 @@ watch(
 	}
 )
 
-onBeforeUnmount(() => {
-	stopIntentPing()
-	if (areaSearchDebounceTimer) {
-		clearTimeout(areaSearchDebounceTimer)
-		areaSearchDebounceTimer = null
-	}
-})
-
-const lockAreaFromEventSelection = async () => {
-	if (!currentAttendee.value || !selectedAreaId.value) {
-		toast.add({ title: 'Area lookup', description: 'Select an area first.', color: 'amber' })
-		return
-	}
-
-	const selectedArea = areaOptions.value.find((item) => item.value === selectedAreaId.value)
-	store.setAreaFrom(store.currentIndex, selectedAreaId.value)
-	if (selectedArea?.label) {
-		toast.add({ title: 'Area locked', description: `${selectedArea.label} has been set for this attendee.`, color: 'green' })
-		return
-	}
-	toast.add({ title: 'Area locked', description: 'Area has been set for this attendee.', color: 'green' })
-}
-
 const clearAreaFrom = () => {
 	if (!currentAttendee.value) return
-	store.setAreaFrom(store.currentIndex, null)
+	store.setAreaFrom(store.currentIndex, null, null)
+	areaSearch.value = ''
+	areaOptions.value = []
 }
+
+// Calculate age from date of birth
+const calculateAge = (dateOfBirth: string): number | null => {
+	if (!dateOfBirth) return null
+	const today = new Date()
+	const birthDate = new Date(dateOfBirth)
+	let age = today.getFullYear() - birthDate.getFullYear()
+	const monthDiff = today.getMonth() - birthDate.getMonth()
+	if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+		age--
+	}
+	return age < 0 ? null : age
+}
+
+const currentAttendeeAge = computed(() => {
+	return calculateAge(values.date_of_birth || currentAttendee.value?.date_of_birth || '')
+})
+
+// Track validation errors state
+const hasAttendeeDetailsErrors = computed(() => {
+	if (activeStepIndex.value !== 0) return false
+	// Check for required fields with errors
+	return !!(errors.value.first_name || errors.value.last_name || errors.value.date_of_birth)
+})
+
+// Sync form values when current attendee changes
+watchEffect(() => {
+	if (!currentAttendee.value || activeStepIndex.value !== 0) return
+	resetForm({
+		values: {
+			first_name: currentAttendee.value.first_name || '',
+			last_name: currentAttendee.value.last_name || '',
+			email: currentAttendee.value.email || '',
+			phone_number: currentAttendee.value.phone_number || '',
+			date_of_birth: currentAttendee.value.date_of_birth || '',
+			gender: currentAttendee.value.gender || '',
+			relationship_to_user: currentAttendee.value.relationship_to_user || '',
+		},
+	})
+})
 
 const handleNext = async () => {
 	if (!canContinue.value) return
