@@ -1,5 +1,6 @@
 import type {
   CheckoutRequest,
+  CheckoutPreviewRequest,
   AttendeeCheckoutRequest,
   AttendeeDraftRequest,
   AttendeePersonalInfoDraftRequest,
@@ -117,6 +118,14 @@ export const buildCheckoutPayload = (params: {
   booking_intent_id: params.bookingIntentId,
   payment_method_id: params.paymentMethodId,
   stripe_payment_intent_id: params.stripePaymentIntentId,
+  attendees: params.attendees.map(buildAttendeeCheckout),
+})
+
+export const buildCheckoutPreviewPayload = (params: {
+  bookingIntentId: string
+  attendees: AttendeeDraft[]
+}): CheckoutPreviewRequest => ({
+  booking_intent_id: params.bookingIntentId,
   attendees: params.attendees.map(buildAttendeeCheckout),
 })
 

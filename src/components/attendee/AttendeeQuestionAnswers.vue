@@ -51,8 +51,109 @@
 
         <!-- Answer Display/Edit -->
         <div class="mt-3 pt-3 border-t border-gray-100">
-          <!-- No Answer State -->
-          <div v-if="!hasAnswer(question.id) && !isEditing(question.id)" class="flex items-center justify-between">
+          <!-- Draft Mode: Always-editable, Google Forms style -->
+          <div v-if="isDraftMode" class="space-y-3">
+            <div v-if="question.question_type === 'short_answer'">
+              <input
+                :value="draftAnswerText(question.id)"
+                type="text"
+                placeholder="Enter your answer"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                @input="setDraftAnswerText(question.id, ($event.target as HTMLInputElement).value)"
+              />
+            </div>
+
+            <div v-else-if="question.question_type === 'long_answer'">
+              <textarea
+                :value="draftAnswerText(question.id)"
+                rows="4"
+                placeholder="Enter your answer"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                @input="setDraftAnswerText(question.id, ($event.target as HTMLTextAreaElement).value)"
+              ></textarea>
+            </div>
+
+            <div v-else-if="question.question_type === 'slider'" class="space-y-2">
+              <input
+                :value="draftAnswerNumber(question.id, Number(question.min_value || 0))"
+                type="range"
+                :min="question.min_value || 0"
+                :max="question.max_value || 100"
+                class="w-full"
+                @input="setDraftAnswerText(question.id, String(Number(($event.target as HTMLInputElement).value)))"
+              />
+              <div class="flex justify-between text-xs text-gray-600">
+                <span>{{ question.min_value || 0 }}</span>
+                <span class="font-semibold text-primary">{{ draftAnswerNumber(question.id, Number(question.min_value || 0)) }}</span>
+                <span>{{ question.max_value || 100 }}</span>
+              </div>
+            </div>
+
+            <div v-else-if="question.question_type === 'single_choice'" class="space-y-2">
+              <label
+                v-for="option in question.options"
+                :key="option.id"
+                class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                :class="{ 'bg-primary/5 border-primary': draftSelectedIds(question.id).includes(option.id) }"
+              >
+                <input
+                  type="radio"
+                  :name="`question-${question.id}`"
+                  :value="option.id"
+                  :checked="draftSelectedIds(question.id).includes(option.id)"
+                  class="w-4 h-4 text-primary border-gray-300 focus:ring-primary/20"
+                  @change="setDraftSingleChoice(question.id, option.id)"
+                />
+                <span class="text-sm text-gray-900">{{ option.option_text }}</span>
+              </label>
+            </div>
+
+            <div v-else-if="question.question_type === 'multiple_choice'" class="space-y-2">
+              <label
+                v-for="option in question.options"
+                :key="option.id"
+                class="flex items-center gap-2 p-2 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer"
+                :class="{ 'bg-primary/5 border-primary': draftSelectedIds(question.id).includes(option.id) }"
+              >
+                <input
+                  type="checkbox"
+                  :value="option.id"
+                  :checked="draftSelectedIds(question.id).includes(option.id)"
+                  class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary/20"
+                  @change="toggleDraftMultipleChoice(question.id, option.id, ($event.target as HTMLInputElement).checked)"
+                />
+                <span class="text-sm text-gray-900">{{ option.option_text }}</span>
+              </label>
+            </div>
+
+            <div v-else-if="question.question_type === 'upload'" class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+              <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
+              <p class="text-xs text-gray-500">Upload a file or provide a link</p>
+              <input
+                type="file"
+                class="mt-3 w-full text-xs"
+                @change="handleUploadFile(question.id, $event)"
+                :disabled="uploadAnswerMutation.isPending.value"
+              />
+              <p v-if="Boolean(getDraftAnswer(question.id)?.uploadResourceId)" class="mt-2 text-xs text-emerald-600">
+                File uploaded and ready to submit.
+              </p>
+              <input
+                :value="getDraftAnswer(question.id)?.uploadUrl || ''"
+                type="text"
+                placeholder="Or paste a file URL"
+                class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                @input="setDraftUploadUrl(question.id, ($event.target as HTMLInputElement).value)"
+              />
+            </div>
+
+            <p v-if="question.required && !hasAnswer(question.id)" class="text-xs text-red-600">
+              This question is required.
+            </p>
+          </div>
+
+          <!-- Non-draft mode: existing edit workflow -->
+          <div v-else-if="!hasAnswer(question.id) && !isEditing(question.id)" class="flex items-center justify-between">
             <p class="text-xs text-gray-500 italic">No answer provided</p>
             <UButton
               @click="startEditing(question)"
@@ -65,14 +166,11 @@
             </UButton>
           </div>
 
-          <!-- Existing Answer Display -->
           <div v-else-if="!isEditing(question.id)" class="space-y-2">
-            <!-- Text Answer -->
             <div v-if="isTextQuestion(question.question_type || '')" class="bg-gray-50 rounded-lg p-3">
               <p class="text-sm text-gray-900 whitespace-pre-wrap">{{ getAnswer(question.id)?.answer_text }}</p>
             </div>
 
-            <!-- Slider Answer -->
             <div v-else-if="question.question_type === 'slider'" class="bg-gray-50 rounded-lg p-3">
               <p class="text-sm text-gray-900">
                 <span class="font-semibold">{{ getAnswer(question.id)?.answer_text }}</span>
@@ -80,7 +178,6 @@
               </p>
             </div>
 
-            <!-- Choice Answer -->
             <div v-else-if="isChoiceQuestion(question.question_type || '')" class="bg-gray-50 rounded-lg p-3">
               <div class="flex flex-wrap gap-2">
                 <UBadge
@@ -94,7 +191,6 @@
               </div>
             </div>
 
-            <!-- Edit Button -->
             <div class="flex gap-2 mt-2">
               <UButton
                 @click="startEditing(question)"
@@ -117,7 +213,6 @@
             </div>
           </div>
 
-          <!-- Edit Form -->
           <div v-else class="space-y-3">
             <!-- Short Answer -->
             <div v-if="question.question_type === 'short_answer'">
@@ -212,7 +307,7 @@
                 <input
                   type="file"
                   class="mt-3 w-full text-xs"
-                  @change="handleUploadFile"
+                  @change="handleUploadFile(undefined, $event)"
                   :disabled="!isDraftMode || uploadAnswerMutation.isPending.value"
                 />
                 <p v-if="uploadResourceId" class="mt-2 text-xs text-emerald-600">
@@ -668,6 +763,58 @@ const updateDraftAnswers = (nextAnswers: EventQuestionAnswerDraft[]) => {
   emit('update:modelValue', nextAnswers)
 }
 
+const getDraftAnswer = (questionId: string): EventQuestionAnswerDraft | undefined => {
+  return draftAnswers.value.find((answer) => answer.questionId === questionId)
+}
+
+const draftAnswerText = (questionId: string): string => {
+  return String(getDraftAnswer(questionId)?.answerText || '')
+}
+
+const draftAnswerNumber = (questionId: string, fallback: number): number => {
+  const raw = getDraftAnswer(questionId)?.answerText
+  if (typeof raw === 'number') return raw
+  if (typeof raw === 'string' && raw.trim().length > 0) return Number(raw)
+  return fallback
+}
+
+const draftSelectedIds = (questionId: string): number[] => {
+  return getDraftAnswer(questionId)?.selectedOptionIds || []
+}
+
+const setDraftAnswerText = (questionId: string, text: string) => {
+  const trimmed = text.trim()
+  upsertDraftAnswer(questionId, {
+    answerText: trimmed.length ? text : undefined,
+  })
+}
+
+const setDraftSingleChoice = (questionId: string, optionId: number) => {
+  upsertDraftAnswer(questionId, {
+    selectedOptionIds: [optionId],
+    answerText: String(optionId),
+  })
+}
+
+const toggleDraftMultipleChoice = (questionId: string, optionId: number, checked: boolean) => {
+  const current = draftSelectedIds(questionId)
+  const next = checked
+    ? Array.from(new Set([...current, optionId]))
+    : current.filter((id) => id !== optionId)
+
+  upsertDraftAnswer(questionId, {
+    selectedOptionIds: next,
+    answerText: next.length ? next.join(',') : undefined,
+  })
+}
+
+const setDraftUploadUrl = (questionId: string, value: string) => {
+  const trimmed = value.trim()
+  upsertDraftAnswer(questionId, {
+    uploadUrl: trimmed.length ? value : undefined,
+  })
+}
+
 const upsertDraftAnswer = (questionId: string, update: Partial<EventQuestionAnswerDraft>) => {
   const nextAnswers = [...draftAnswers.value]
   const existingIndex = nextAnswers.findIndex((answer) => answer.questionId === questionId)
@@ -802,8 +949,8 @@ const handleDeleteAnswer = async (questionId: string) => {
   }
 }
 
-const handleUploadFile = async (event: Event) => {
-  if (!isDraftMode.value) return
+const handleUploadFile = async (questionId: string | undefined, event: Event) => {
+  if (!isDraftMode.value || !questionId) return
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
@@ -813,7 +960,9 @@ const handleUploadFile = async (event: Event) => {
 
   try {
     const response = await uploadAnswerMutation.mutateAsync(formData)
-    setFieldValue('upload_resource_id', response.id)
+    upsertDraftAnswer(questionId, {
+      uploadResourceId: response.id,
+    })
     toast.add({ title: 'Uploaded', description: 'File uploaded successfully.', color: 'green' })
   } catch (error) {
     console.error('Failed to upload file:', error)

@@ -76,7 +76,7 @@
 				Event not found.
 			</div>
 			<template v-else>
-				<aside class="w-full space-y-4 lg:w-80 lg:flex-shrink-0">
+				<aside class="w-full space-y-4 lg:w-72 lg:flex-shrink-0">
 					<div>
 						<p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Registration group</p>
 					</div>
@@ -91,11 +91,19 @@
 					>
 						<div class="flex items-start justify-between gap-3">
 							<div>
-								<p class="text-base font-black text-slate-900">
-									{{ attendeeDisplayName(attendee, index) }}
-								</p>
+								<div class="flex items-center gap-2">
+									<p class="text-base font-black text-slate-900">
+										{{ attendeeDisplayName(attendee, index) }}
+									</p>
+									<UBadge v-if="isAttendeeMinor(attendee)" color="amber" variant="subtle" size="xs">
+										Minor
+									</UBadge>
+								</div>
 								<p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
 									{{ attendeeStepSummary(index) }}
+								</p>
+								<p v-if="isAttendeeMinor(attendee) && !minorHasEmergencyContact(attendee)" class="mt-1 text-[10px] font-bold text-red-600 uppercase tracking-wider">
+									⚠ Emergency contact required
 								</p>
 							</div>
 							<span
@@ -137,40 +145,42 @@
 								<p class="mt-2 text-sm text-slate-500">Complete each step to prepare this attendee for checkout.</p>
 							</div>
 
-							<div class="mt-6 overflow-x-auto pb-2">
-								<ol class="flex min-w-max items-center gap-2 md:gap-3">
-									<li
-										v-for="(label, index) in steps"
-										:key="label"
-										class="flex items-center"
-									>
-										<div class="flex items-center gap-2">
-											<div
-												class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
-												:class="
-													index === activeStepIndex
-														? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
-														: index < activeStepIndex
-															? 'border-emerald-500 bg-emerald-500 text-white'
-															: 'border-slate-300 bg-white text-slate-500'
-												"
-											>
-												{{ index + 1 }}
+							<div class="mt-6 overflow-hidden pb-2">
+								<Transition :name="stepperTransitionName" mode="out-in">
+									<ol :key="`step-window-${stepWindowStart}`" class="flex items-center gap-2 md:gap-3">
+										<li
+											v-for="(step, localIndex) in visibleSteps"
+											:key="step.index"
+											class="flex flex-1 items-center"
+										>
+											<div class="flex items-center gap-2">
+												<div
+													class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
+													:class="
+														step.index === activeStepIndex
+															? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
+															: step.index < activeStepIndex
+																? 'border-emerald-500 bg-emerald-500 text-white'
+																: 'border-slate-300 bg-white text-slate-500'
+													"
+												>
+													{{ step.index + 1 }}
+												</div>
+												<p
+													class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
+													:class="step.index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
+												>
+													{{ step.label }}
+												</p>
 											</div>
-											<p
-												class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
-												:class="index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
-											>
-												{{ label }}
-											</p>
-										</div>
-										<div
-											v-if="index < steps.length - 1"
-											class="mx-2 h-px w-6 md:w-10"
-											:class="index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
-										></div>
-									</li>
-								</ol>
+											<div
+												v-if="localIndex < visibleSteps.length - 1"
+												class="mx-2 h-px flex-1"
+												:class="step.index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
+											></div>
+										</li>
+									</ol>
+								</Transition>
 							</div>
 
 							<div v-if="!currentAttendee" class="mt-8 text-sm text-slate-500">Preparing registration details...</div>
@@ -180,88 +190,178 @@
 									<div v-if="activeStepIndex === 0" class="space-y-6">
 										<div>
 											<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
-											<p class="text-sm text-gray-600">Tell us who will be attending.</p>
+											<p class="text-sm text-gray-600" v-if="isRegistrarSelf">Please provide <b>YOUR</b> details.</p>
+											<p class="text-sm text-gray-600" v-else>Tell us about this attendee and their relationship to you.</p>
 										</div>
 
 							<div class="grid gap-4 sm:grid-cols-2">
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">First name</label>
-									<UInput v-model="currentAttendee.first_name" placeholder="First name" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.first_name"
+										placeholder="First name"
+										@update:model-value="
+											(val) => {
+												currentAttendee.first_name = val
+												setFieldValue('first_name', val)
+											}
+										"
+										:color="errors.first_name ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
 								</div>
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Last name</label>
-									<UInput v-model="currentAttendee.last_name" placeholder="Last name" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.last_name"
+										placeholder="Last name"
+										@update:model-value="
+											(val) => {
+												currentAttendee.last_name = val
+												setFieldValue('last_name', val)
+											}
+										"
+										:color="errors.last_name ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-									<UInput v-model="currentAttendee.email" type="email" placeholder="email@example.com" />
+									<UInput
+										:model-value="values.email"
+										type="email"
+										placeholder="email@example.com"
+										@update:model-value="
+											(val) => {
+												currentAttendee.email = val
+												setFieldValue('email', val)
+												void runSafeValidation()
+											}
+										"
+										:color="errors.email ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
-									<UInput v-model="currentAttendee.phone_number" placeholder="Phone number" />
+									<UInput
+										:model-value="values.phone_number"
+										placeholder="Phone number"
+										@update:model-value="
+											(val) => {
+												currentAttendee.phone_number = val
+												setFieldValue('phone_number', val)
+												void runSafeValidation()
+											}
+										"
+										:color="errors.phone_number ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.phone_number" class="mt-1 text-xs text-red-500">{{ errors.phone_number }}</p>
 								</div>
 								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth</label>
-									<UInput v-model="currentAttendee.date_of_birth" type="date" />
+									<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth <span class="text-red-500">*</span></label>
+									<UInput
+										:model-value="values.date_of_birth"
+										type="date"
+										@update:model-value="
+											(val) => {
+												currentAttendee.date_of_birth = val
+												setFieldValue('date_of_birth', val)
+												void runSafeValidation()
+											}
+										"
+										:color="errors.date_of_birth ? 'red' : 'gray'"
+									/>
+									<p v-if="errors.date_of_birth" class="mt-1 text-xs text-red-500">{{ errors.date_of_birth }}</p>
+									<p v-if="currentAttendeeAge !== null" class="mt-2 text-sm font-medium text-slate-600">
+										Age: <span class="font-bold text-slate-900">{{ currentAttendeeAge }}</span> years old
+									</p>
 								</div>
 								<div>
 									<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
 									<USelectMenu
-										v-model="currentAttendee.gender"
+										:model-value="values.gender"
 										:options="genderOptions"
 										value-attribute="value"
 										option-attribute="label"
 										placeholder="Select gender"
+										@update:model-value="
+											(val) => {
+												currentAttendee.gender = val
+												setFieldValue('gender', val)
+											}
+										"
 									/>
 								</div>
 								<div v-if="showRelationshipField" class="sm:col-span-2">
-									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you</label>
+									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
 									<USelectMenu
-										v-model="currentAttendee.relationship_to_user"
+										:model-value="values.relationship_to_user"
 										:options="relationshipOptions"
 										value-attribute="value"
 										option-attribute="label"
 										placeholder="Select relationship"
+										@update:model-value="
+											(val) => {
+												currentAttendee.relationship_to_user = val
+												setFieldValue('relationship_to_user', val)
+											}
+										"
 										:disabled="isRegistrarSelf"
 									/>
 								</div>
-								<div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+								<!-- <div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
 									Relationship is set to <span class="font-bold">Self</span> for this registration mode.
-								</div>
+								</div> -->
 								<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
-									<p class="text-sm font-semibold text-slate-900">Area from</p>
+									<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
 									<p class="mt-1 text-xs text-slate-600">
-										Search and select an area, then lock an area id for this attendee.
+										Start typing to search for an area, then select from the list.
 									</p>
-									<div class="mt-3 grid gap-3 md:grid-cols-2">
-										<UInput
-											v-model="areaSearch"
-											placeholder="Search area name (min 2 chars)"
-										/>
-										<USelectMenu
-											v-model="selectedAreaId"
-											:options="areaOptions"
-											value-attribute="value"
-											option-attribute="label"
-											placeholder="Select matching area"
-										/>
+									<div class="mt-4">
+										<div class="relative">
+											<UInput
+												v-model="areaSearch"
+												placeholder="Search area name (min 2 chars)"
+												class="w-full"
+											/>
+											<div
+												v-if="areaOptions.length > 0 && areaSearch.length >= 2"
+												class="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg border border-slate-200 bg-white shadow-lg"
+											>
+												<div class="max-h-64 overflow-y-auto">
+													<button
+														v-for="option in areaOptions"
+														:key="option.value"
+														type="button"
+														class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+														:class="option.value === currentAttendee.area_from ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700'"
+														@click="
+															store.setAreaFrom(store.currentIndex, option.value, option.label);
+															areaSearch = option.label;
+															toast.add({ title: 'Area locked', description: `${option.label} has been set for this attendee.`, color: 'green' })
+														"
+													>
+														{{ option.label }}
+													</button>
+												</div>
+											</div>
+										</div>
+										<p v-if="areaLookupLoading" class="mt-2 text-xs text-slate-500">Searching...</p>
 									</div>
-									<div class="mt-3 flex flex-wrap items-center gap-2">
-										<UButton size="xs" :loading="areaLookupLoading" @click="lockAreaFromEventSelection">
-											Find and lock area
-										</UButton>
-										<UButton v-if="hasCurrentAreaFrom" size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
-											Clear area
+									<div v-if="hasCurrentAreaFrom" class="mt-3">
+										<UButton size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
+											Change area
 										</UButton>
 									</div>
 									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-										{{ hasCurrentAreaFrom ? `Locked area ID: ${currentAttendee.area_from}` : 'Area not selected yet.' }}
+										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : '⚠ Select an area to continue.' }}
 									</p>
 								</div>
 							</div>
 						</div>
 
-									<div v-else-if="activeStepIndex === 1" class="space-y-6">
+						<div v-else-if="activeStepIndex === 1" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Event questions</h2>
 								<p class="text-sm text-gray-600">Answer any questions the organizer added.</p>
@@ -273,79 +373,195 @@
 							/>
 						</div>
 
-									<div v-else-if="activeStepIndex === 2" class="space-y-6">
+						<div v-else-if="activeStepIndex === 2" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Personal info</h2>
 								<p class="text-sm text-gray-600">Add any dietary, medical, or accessibility needs.</p>
+								<div v-if="isAttendeeMinor(currentAttendee)" class="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
+									<p class="text-sm font-semibold text-amber-800">⚠️ Emergency contact required</p>
+									<p class="mt-1 text-xs text-amber-700">As this attendee is a minor, an emergency contact is required to continue.</p>
+								</div>
 							</div>
 
 							<div class="grid gap-6">
+								<!-- Dietary Requirements Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
-									<div v-if="dietaryRequirements.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="dietaryRequirements.length" class="mt-3 space-y-3">
+										<div
 											v-for="requirement in dietaryRequirements"
 											:key="requirement.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="requirement.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
-												@change="toggleDietaryRequirement(requirement.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-											/>
-											<span>{{ requirement.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`dietary-${requirement.id}`"
+													:value="requirement.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+													@change="toggleDietaryRequirement(requirement.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`dietary-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ requirement.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.dietaryRequirements)"
+														placeholder="Describe your dietary requirement..."
+														@input="updateDietaryRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and catering team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id) }}
+													</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No dietary requirements available.</p>
 								</div>
 
+								<!-- Medical Conditions Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Medical conditions</h3>
-									<div v-if="medicalConditions.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="medicalConditions.length" class="mt-3 space-y-3">
+										<div
 											v-for="condition in medicalConditions"
 											:key="condition.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-900"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="condition.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
-												@change="toggleMedicalCondition(condition.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary text-gray-900"
-											/>
-											<span>{{ condition.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`medical-${condition.id}`"
+													:value="condition.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
+													@change="toggleMedicalCondition(condition.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`medical-${condition.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ condition.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">Severity</label>
+													<USelectMenu
+														:model-value="currentAttendee.personalInfo.medicalConditions.find(d => d.id === condition.id)?.severity || ''"
+														:options="[
+															{ label: 'Mild', value: 'mild' },
+															{ label: 'Moderate', value: 'moderate' },
+															{ label: 'Severe', value: 'severe' }
+														]"
+														value-attribute="value"
+														option-attribute="label"
+														placeholder="Select severity"
+														@update:model-value="(val) => updateMedicalConditionSeverity(condition.id, val as 'mild' | 'moderate' | 'severe' | null)"
+													/>
+												</div>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(condition.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(condition.id, currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[])"
+														placeholder="Describe the condition..."
+														@input="updateMedicalConditionDetails(condition.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and first aid team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id) }}
+													</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No medical conditions available.</p>
 								</div>
 
+								<!-- Accessibility Requirements Section -->
 								<div>
 									<h3 class="text-sm font-semibold text-gray-900">Accessibility requirements</h3>
-									<div v-if="accessibilityRequirements.length" class="mt-3 grid gap-2 sm:grid-cols-2">
-										<label
+									<div v-if="accessibilityRequirements.length" class="mt-3 space-y-3">
+										<div
 											v-for="requirement in accessibilityRequirements"
 											:key="requirement.id"
-											class="flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm"
+											class="rounded-lg border border-gray-200 p-3 transition-all"
 										>
-											<input
-												type="checkbox"
-												:value="requirement.id"
-												:checked="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
-												@change="toggleAccessibilityRequirement(requirement.id, $event)"
-												class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-											/>
-											<span>{{ requirement?.label }}</span>
-										</label>
+											<div class="flex items-center gap-2">
+												<input
+													type="checkbox"
+													:id="`accessibility-${requirement.id}`"
+													:value="requirement.id"
+													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+													@change="toggleAccessibilityRequirement(requirement.id, $event)"
+													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+												/>
+												<label :for="`accessibility-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
+													{{ requirement.label }}
+												</label>
+											</div>
+											<div
+												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
+											>
+												<div>
+													<label class="mb-1 block text-xs font-semibold text-gray-700">
+														Details (public-facing)
+														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+													</label>
+													<textarea
+														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.accessibilityRequirements)"
+														placeholder="Describe your accessibility needs..."
+														@input="updateAccessibilityRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
+														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
+														rows="2"
+													/>
+													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and accessibility team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id) }}
+													</p>
+												</div>
+											</div>
+										</div>
 									</div>
 									<p v-else class="mt-2 text-xs text-gray-500">No accessibility requirements available.</p>
 								</div>
 
+								<!-- Emergency Contact Section -->
 								<div>
 									<div class="flex items-center justify-between">
-										<h3 class="text-sm font-semibold text-gray-900">Emergency contact</h3>
+										<h3 class="text-sm font-semibold text-gray-900">
+											Emergency contact
+											<span v-if="isAttendeeMinor(currentAttendee)" class="text-red-500">*</span>
+										</h3>
 										<UButton
 											v-if="!currentAttendee?.personalInfo?.emergencyContact"
 											size="xs"
@@ -362,16 +578,25 @@
 										class="mt-3 grid gap-4 sm:grid-cols-2"
 									>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">First name</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.first_name" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.first_name"
+												placeholder="First name"
+											/>
 										</div>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Last name</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.last_name" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.last_name"
+												placeholder="Last name"
+											/>
 										</div>
 										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.phone_number" />
+											<label class="mb-1 block text-sm font-medium text-gray-700">Phone number <span class="text-red-500">*</span></label>
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.phone_number"
+												placeholder="Phone number"
+											/>
 										</div>
 										<div>
 											<label class="mb-1 block text-sm font-medium text-gray-700">Relationship</label>
@@ -385,9 +610,19 @@
 										</div>
 										<div class="sm:col-span-2">
 											<label class="mb-1 block text-sm font-medium text-gray-700">Email (optional)</label>
-											<UInput v-model="currentAttendee.personalInfo.emergencyContact.email" type="email" />
+											<UInput 
+												v-model="currentAttendee.personalInfo.emergencyContact.email" 
+												type="email"
+												placeholder="Email address"
+											/>
 										</div>
 									</div>
+									<p
+										v-else-if="isAttendeeMinor(currentAttendee)"
+										class="mt-2 text-xs font-semibold text-red-600"
+									>
+										Emergency contact is required for attendees under 18.
+									</p>
 								</div>
 							</div>
 						</div>
@@ -501,14 +736,31 @@
 
 							<div>
 								<label class="mb-1 block text-sm font-medium text-gray-700">Payment method</label>
-								<USelectMenu
-									v-if="paymentMethodOptions.length"
-									v-model="selectedPaymentMethodId"
-									:options="paymentMethodOptions"
-									value-attribute="value"
-									option-attribute="label"
-									placeholder="Select a payment method"
-								/>
+								<div v-if="paymentMethods.length" class="grid gap-3 sm:grid-cols-1 lg:grid-cols-1">
+									<button
+										v-for="method in paymentMethods"
+										:key="method.id"
+										type="button"
+										class="rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										:class="method.id === selectedPaymentMethodId ? 'border-slate-900 bg-slate-900 text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'"
+										@click="selectedPaymentMethodId = method.id"
+									>
+										<div class="flex items-center justify-between gap-2">
+											<div class="flex items-center gap-2">
+												<UIcon :name="getMethodIcon(method.method_type)" class="h-5 w-5" />
+												<p class="text-sm font-semibold">{{ method.title }}</p>
+											</div>
+											<UIcon
+												v-if="method.id === selectedPaymentMethodId"
+												name="i-heroicons-check-circle"
+												class="h-5 w-5 text-emerald-400"
+											/>
+										</div>
+										<p class="mt-2 text-xs uppercase tracking-[0.14em]" :class="method.id === selectedPaymentMethodId ? 'text-white/80' : 'text-slate-500'">
+											{{ method.method_type?.replace('_', ' ') || 'Method' }}
+										</p>
+									</button>
+								</div>
 								<p v-else class="text-sm text-gray-500">No payment methods available for this event.</p>
 							</div>
 
@@ -534,34 +786,33 @@
 									</div>
 								</div>
 
-								<div v-else-if="isStripeMethod" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-									Card payments will be processed securely through Stripe after submitting checkout.
-								</div>
-							</div>
-
-							<div class="rounded-xl border border-slate-200 bg-white p-4">
-								<div class="flex items-center justify-between">
-									<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
-									<p class="text-xs text-slate-500">Per attendee</p>
-								</div>
-								<div class="mt-3 space-y-2">
-									<div
-										v-for="item in attendeePaymentBreakdown"
-										:key="item.index"
-										class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
-									>
-										<div>
-											<p class="font-semibold text-slate-800">{{ item.name }}</p>
-											<p class="text-xs text-slate-500">{{ item.packageName }}</p>
+								<div v-else-if="isStripeMethod" class="mt-4 space-y-3">
+										<div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+											<div class="flex items-center justify-between gap-2">
+												<p>Enter your card details. Payment is processed securely with Stripe.</p>
+												<div class="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+													<UIcon name="i-heroicons-lock-closed" class="h-3.5 w-3.5" />
+													Secured by Stripe
+												</div>
+											</div>
+									</div>
+										<div v-if="isStripeTestMode" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+											<p class="font-bold uppercase tracking-[0.12em]">Stripe test mode</p>
+											<p class="mt-1">Use card number <span class="font-black">4242 4242 4242 4242</span>, any future expiry date, any CVC.</p>
+											<div class="mt-3">
+												<label class="mb-1 block text-[11px] font-semibold text-amber-900">Stripe publishable key override</label>
+												<UInput v-model="manualStripePublicKey" placeholder="pk_test_..." />
+											</div>
 										</div>
-										<p class="font-semibold text-slate-900">{{ formatMoney(item.amount, item.currency) }}</p>
+										<div v-if="!effectiveStripePublishableKey" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+											Missing Stripe publishable key. Add it in test mode override or Stripe settings.
+										</div>
+									<div class="rounded-lg border border-slate-300 bg-white p-3">
+										<div ref="stripeCardMountRef" class="min-h-[44px]"></div>
 									</div>
-								</div>
-								<div class="mt-4 border-t border-slate-100 pt-3">
-									<div class="flex items-center justify-between text-sm font-bold text-slate-900">
-										<span>Total</span>
-										<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
-									</div>
+									<p v-if="stripeCardError" class="text-xs font-semibold text-red-600">{{ stripeCardError }}</p>
+									<p v-else-if="!stripeCardReady" class="text-xs text-slate-500">Complete card details to enable checkout.</p>
+									<p v-else class="text-xs font-semibold text-emerald-700">Card details ready.</p>
 								</div>
 							</div>
 						</div>
@@ -593,6 +844,71 @@
 						</div>
 					</div>
 				</main>
+
+				<aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0">
+					<div class="space-y-4 lg:sticky lg:top-24">
+						<div class="rounded-2xl border border-slate-900 bg-slate-900 p-4 text-white shadow-lg">
+							<p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/70">Live checkout pricing</p>
+							<p class="mt-2 text-sm text-white/90">Transparent totals powered by server-side pricing rules.</p>
+						</div>
+
+						<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
+								<p class="text-xs text-slate-500">Calculated server-side</p>
+							</div>
+							<p v-if="checkoutPreviewLoading" class="mt-3 text-xs text-slate-500">Refreshing payment breakdown...</p>
+							<p v-else-if="checkoutPreviewError" class="mt-3 text-xs font-semibold text-red-600">{{ checkoutPreviewError }}</p>
+							<div class="mt-3 space-y-2">
+								<div
+									v-for="item in breakdownLines"
+									:key="item.id"
+									class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-sm"
+								>
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="font-semibold text-slate-800">{{ item.name }}</p>
+											<p class="text-xs text-slate-500">{{ item.description }}</p>
+											<p v-if="item.discountHint" class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{{ item.discountHint }}</p>
+										</div>
+										<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
+									</div>
+									<p class="mt-2 text-[11px] text-slate-600">
+										{{ formatMoney(item.originalAmount, item.currency) }}
+										<span class="text-slate-400">-</span>
+										<span class="text-emerald-700">{{ formatMoney(item.discountAmount, item.currency) }}</span>
+										<span class="text-slate-400">=</span>
+										<span class="font-semibold text-slate-800">{{ formatMoney(item.finalAmount, item.currency) }}</span>
+									</p>
+								</div>
+								<p v-if="!breakdownLines.length && !checkoutPreviewLoading" class="text-xs text-slate-500">No payable items selected yet.</p>
+							</div>
+							<div class="mt-4 border-t border-slate-100 pt-3 text-sm">
+								<div class="flex items-center justify-between text-slate-600">
+									<span>Subtotal</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.originalAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-1 flex items-center justify-between text-emerald-700">
+									<span>Total discount</span>
+									<span>-{{ formatMoney(paymentBreakdownTotal.discountAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-2 flex items-center justify-between text-base font-bold text-slate-900">
+									<span>Total due</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<p v-if="isPollingPaymentStatus" class="mt-2 text-xs font-semibold text-amber-700">{{ paymentProcessingMessage || 'Finalizing your payment...' }}</p>
+							</div>
+						</div>
+
+						<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+							<div class="flex items-center gap-2 font-semibold">
+								<UIcon name="i-heroicons-lock-closed" class="h-4 w-4" />
+								Powered and secured by Stripe
+							</div>
+							<p class="mt-1 text-xs text-emerald-700">Card data is tokenized by Stripe and never stored directly in AMDG forms.</p>
+						</div>
+					</div>
+				</aside>
 			</template>
 				</div>
 	</div>
@@ -649,6 +965,10 @@
 					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">Stripe next step</p>
 					<p class="mt-1 text-sm text-emerald-900">Your booking is created. Complete card payment using the provided Stripe flow.</p>
 				</div>
+				<div v-if="isPollingPaymentStatus || paymentProcessingMessage" class="rounded-xl border border-amber-200 bg-amber-50 p-4 md:col-span-2">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Payment processing</p>
+					<p class="mt-1 text-sm text-amber-900">{{ paymentProcessingMessage || 'Waiting for payment confirmation from Stripe...' }}</p>
+				</div>
 			</div>
 
 			<div class="flex justify-end">
@@ -659,10 +979,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+import { z } from 'zod'
+import { isMinor, validatePersonalInfoItem } from '~/schemas/registration'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -679,16 +1003,86 @@ import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
 import { useBookingPackages } from '~/composables/resources/booking/bookingPackages'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
-import { locationsAreasList } from '~/api/sdk.gen'
-import { buildCheckoutPayload, createIdempotencyKey } from '~/composables/registration/checkout'
+import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
+import { useStripeConfig } from '~/composables/resources/common/stripe'
+import { bookingsListRetrieve, locationsAreasList } from '~/api/sdk.gen'
+import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
 import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
+import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+
+// Create validation schema for attendee details
+const attendeeValidationSchema = z.object({
+	first_name: z
+		.string()
+		.min(1, 'First name is required')
+		.min(2, 'First name must be at least 2 characters'),
+	last_name: z
+		.string()
+		.min(1, 'Last name is required')
+		.min(2, 'Last name must be at least 2 characters'),
+	email: z
+		.string()
+		.optional()
+		.refine(
+			(val) => !val || /^[^@]+@[^@]+\.[^@]+$/.test(val),
+			'Please enter a valid email address'
+		),
+	phone_number: z
+		.string()
+		.optional()
+		.refine(
+			(val) => !val || /^[+]?[\d\s\-()]{10,}$/i.test(val),
+			'Please enter a valid phone number'
+		),
+	date_of_birth: z
+		.string()
+		.min(1, 'Date of birth is required')
+		.refine(
+			(val) => !val || new Date(val) < new Date(),
+			'Date of birth cannot be in the future'
+		),
+	gender: z.string().optional(),
+	relationship_to_user: z.string().optional(),
+}) as z.ZodType<{
+	first_name: string
+	last_name: string
+	email?: string
+	phone_number?: string
+	date_of_birth: string
+	gender?: string
+	relationship_to_user?: string
+}>
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const store = useRegistrationStore()
+const runtimeConfig = useRuntimeConfig()
+
+// Initialize form (will be reset when currentAttendee changes)
+const { values, errors, setFieldValue, resetForm, validate } = useForm({
+	validationSchema: toTypedSchema(attendeeValidationSchema),
+	initialValues: {
+		first_name: '',
+		last_name: '',
+		email: '',
+		phone_number: '',
+		date_of_birth: '',
+		gender: '',
+		relationship_to_user: '',
+	},
+})
+
+const runSafeValidation = async () => {
+	try {
+		return await validate()
+	} catch {
+		return { valid: false }
+	}
+}
 
 const eventId = computed(() => String(route.params.id || ''))
 const ticketCount = computed(() => Number(route.query.tickets || 1))
@@ -753,7 +1147,6 @@ const isCreatingIntent = ref(false)
 const showIntentExpiredModal = ref(false)
 const areaLookupLoading = ref(false)
 const areaSearch = ref('')
-const selectedAreaId = ref<number | undefined>(undefined)
 const areaOptions = ref<Array<{ label: string; value: number }>>([])
 let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -791,6 +1184,28 @@ const steps = [
 const attendeeStepCount = 6
 const reviewStepIndex = attendeeStepCount
 const activeStepIndex = ref(0)
+const maxVisibleStepperSteps = 3
+const stepperTransitionName = ref('stepper-slide-forward')
+
+const stepWindowStart = computed(() => {
+	if (steps.length <= maxVisibleStepperSteps) return 0
+	if (activeStepIndex.value <= 1) return 0
+	if (activeStepIndex.value >= steps.length - 2) return steps.length - maxVisibleStepperSteps
+	return activeStepIndex.value - 1
+})
+
+const visibleSteps = computed(() => {
+	return steps
+		.slice(stepWindowStart.value, stepWindowStart.value + maxVisibleStepperSteps)
+		.map((label, offset) => ({
+			label,
+			index: stepWindowStart.value + offset,
+		}))
+})
+
+watch(activeStepIndex, (next, previous) => {
+	stepperTransitionName.value = next >= previous ? 'stepper-slide-forward' : 'stepper-slide-back'
+})
 
 const currentAttendee = computed(() => store.attendees[store.currentIndex])
 const currentAttendeeNumber = computed(() => store.currentIndex + 1)
@@ -847,6 +1262,21 @@ const attendeeStepSummary = (index: number) => {
 	return 'Waiting'
 }
 
+/**
+ * Check if an attendee is a minor (under 18 years old)
+ */
+const isAttendeeMinor = (attendee: AttendeeDraft): boolean => {
+	return isMinor(attendee.date_of_birth)
+}
+
+/**
+ * Check if a minor has an emergency contact
+ */
+const minorHasEmergencyContact = (attendee: AttendeeDraft): boolean => {
+	if (!isAttendeeMinor(attendee)) return true // Not a minor, so requirement doesn't apply
+	return !!attendee.personalInfo.emergencyContact && !!attendee.personalInfo.emergencyContact.first_name && !!attendee.personalInfo.emergencyContact.last_name
+}
+
 const relationshipOptions = [
 	{ label: 'Self', value: 'self' },
 	{ label: 'Spouse', value: 'spouse' },
@@ -867,7 +1297,6 @@ const genderOptions = [
 const emergencyRelationshipOptions = [
 	{ label: 'Parent', value: 'parent' },
 	{ label: 'Sibling', value: 'sibling' },
-	{ label: 'Child', value: 'child' },
 	{ label: 'Spouse', value: 'spouse' },
 	{ label: 'Friend', value: 'friend' },
 	{ label: 'Other', value: 'other' },
@@ -912,25 +1341,71 @@ const paymentMethodsQuery = usePaymentMethods(
 	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
 )
 const paymentMethods = computed(() => paymentMethodsQuery.data.value?.data?.results || [])
-const paymentMethodOptions = computed(() =>
-	paymentMethods.value.map((method) => ({
-		label: method.title,
-		value: method.id,
-	}))
-)
 const selectedPaymentMethodId = ref<number | undefined>(undefined)
 const selectedPaymentMethod = computed(() => paymentMethods.value.find((method) => method.id === selectedPaymentMethodId.value))
+const getMethodIcon = (methodType?: string) => {
+	if (methodType === 'STRIPE') return 'i-heroicons-credit-card'
+	if (methodType === 'BANK_TRANSFER') return 'i-heroicons-building-library'
+	if (methodType === 'CASH') return 'i-heroicons-banknotes'
+	return 'i-heroicons-wallet'
+}
 
 const paymentMethodTypeLabel = computed(() => {
 	if (!selectedPaymentMethod.value?.method_type) return 'Method'
 	if (selectedPaymentMethod.value.method_type === 'BANK_TRANSFER') return 'Bank transfer'
-	if (selectedPaymentMethod.value.method_type === 'STRIPE') return 'Stripe'
+	if (selectedPaymentMethod.value.method_type === 'STRIPE') return 'Card payment'
 	if (selectedPaymentMethod.value.method_type === 'CASH') return 'Cash'
 	return selectedPaymentMethod.value.method_type
 })
 
 const isBankTransferMethod = computed(() => selectedPaymentMethod.value?.method_type === 'BANK_TRANSFER')
 const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+
+type PreviewDiscountLine = {
+	name?: string
+	amount?: string
+}
+
+type PreviewPackage = {
+	package_name?: string
+	final_amount?: string
+	discount_total?: string
+	currency?: string
+	applied_discounts?: PreviewDiscountLine[]
+}
+
+type PreviewProductLine = {
+	product_title?: string
+	quantity?: number
+	line_total?: string
+	currency?: string
+	applied_discounts?: PreviewDiscountLine[]
+}
+
+type PreviewAttendee = {
+	attendee_name?: string
+	package?: PreviewPackage
+	products?: PreviewProductLine[]
+	attendee_total?: string
+	currency?: string
+}
+
+type CheckoutPreviewData = {
+	total_amount?: string
+	currency?: string
+	attendees?: PreviewAttendee[]
+}
+
+type BreakdownLine = {
+	id: string
+	name: string
+	description: string
+	originalAmount: number
+	discountAmount: number
+	finalAmount: number
+	currency: string
+	discountHint?: string
+}
 
 const bankDetails = computed(() => {
 	const details = selectedPaymentMethod.value?.provided_details as Record<string, unknown> | undefined
@@ -941,31 +1416,152 @@ const bankDetails = computed(() => {
 	}
 })
 
+const checkoutPreviewMutation = useCheckoutPreview()
 const checkoutMutation = useCheckoutBooking()
+const stripeConfigQuery = useStripeConfig()
+const isStripeTestMode = computed(() => !!runtimeConfig.public.stripeTestMode)
+const testModeStripePublishableKey = computed(() => String(runtimeConfig.public.stripeTestPublishableKey || '').trim())
+const manualStripePublicKey = ref(testModeStripePublishableKey.value)
+const effectiveStripePublishableKey = computed(() => {
+	const manualKey = manualStripePublicKey.value.trim()
+	if (isStripeTestMode.value && manualKey) {
+		return manualKey
+	}
+	const apiKey = stripeConfigQuery.data.value?.data?.publishable_key?.trim()
+	if (apiKey) {
+		return apiKey
+	}
+	return testModeStripePublishableKey.value
+})
+
 const idempotencyKey = ref(createIdempotencyKey())
 
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
 const showCheckoutSuccessModal = ref(false)
+const checkoutPreview = ref<CheckoutPreviewData | null>(null)
+const checkoutPreviewError = ref('')
+const checkoutPreviewLoading = computed(() => checkoutPreviewMutation.isPending.value)
 
-const attendeePaymentBreakdown = computed(() =>
-	store.attendees.map((attendee, index) => {
-		const pkg = packageById(attendee.packageId)
-		return {
-			index,
-			name: attendeeDisplayName(attendee, index),
-			packageName: pkg?.name || 'No package selected',
-			amount: Number(pkg?.modified_amount || 0),
-			currency: pkg?.base_amount_currency || checkoutResult.value?.currency || 'GBP',
+const stripeCardMountRef = ref<HTMLElement | null>(null)
+const stripeInstance = ref<Stripe | null>(null)
+const stripeElements = ref<StripeElements | null>(null)
+const stripeCardElement = ref<StripeCardElement | null>(null)
+const stripeCardReady = ref(false)
+const stripeCardError = ref('')
+const stripeClientSecret = ref<string | null>(null)
+
+const isPollingPaymentStatus = ref(false)
+const paymentProcessingMessage = ref('')
+
+let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let paymentPollingTimer: ReturnType<typeof setInterval> | null = null
+
+const parseDiscountAmount = (value: string | undefined) => Math.abs(Number(value || 0))
+
+const previewTriggerSignature = computed(() => JSON.stringify(
+	store.attendees.map((attendee) => ({
+		attendeeId: attendee.attendeeId || null,
+		firstName: attendee.first_name,
+		lastName: attendee.last_name,
+		dob: attendee.date_of_birth,
+		relationship: attendee.relationship_to_user || null,
+		areaFrom: attendee.area_from || null,
+		packageId: attendee.packageId || null,
+		products: attendee.productSelections || [],
+		consents: attendee.consents,
+		answers: attendee.questionAnswers,
+	}))
+))
+
+const breakdownLines = computed<BreakdownLine[]>(() => {
+	const previewAttendees = Array.isArray(checkoutPreview.value?.attendees)
+		? checkoutPreview.value!.attendees!
+		: []
+
+	if (!previewAttendees.length) {
+		return store.attendees.map((attendee, index) => {
+			const pkg = packageById(attendee.packageId)
+			const amount = Number(pkg?.modified_amount || 0)
+			const currency = pkg?.base_amount_currency || checkoutResult.value?.currency || 'GBP'
+			return {
+				id: `fallback-${index}`,
+				name: attendeeDisplayName(attendee, index),
+				description: pkg?.name || 'No package selected',
+				originalAmount: amount,
+				discountAmount: 0,
+				finalAmount: amount,
+				currency,
+			}
+		})
+	}
+
+	const lines: BreakdownLine[] = []
+	previewAttendees.forEach((attendee, attendeeIndex) => {
+		const attendeeName = attendee.attendee_name || `Attendee ${attendeeIndex + 1}`
+		const packageLine = attendee.package
+		if (packageLine) {
+			const packageDiscount = parseDiscountAmount(packageLine.discount_total)
+			const packageFinal = Number(packageLine.final_amount || 0)
+			const discountHint = packageLine.applied_discounts?.length
+				? `${packageLine.applied_discounts.length} discount(s)`
+				: undefined
+			lines.push({
+				id: `package-${attendeeIndex}`,
+				name: attendeeName,
+				description: packageLine.package_name || 'Package',
+				originalAmount: packageFinal + packageDiscount,
+				discountAmount: packageDiscount,
+				finalAmount: packageFinal,
+				currency: packageLine.currency || checkoutPreview.value?.currency || 'GBP',
+				discountHint,
+			})
 		}
+
+		attendee.products?.forEach((product, productIndex) => {
+			const productDiscount = (product.applied_discounts || []).reduce((sum, discount) => {
+				return sum + parseDiscountAmount(discount.amount)
+			}, 0)
+			const productFinal = Number(product.line_total || 0)
+			const discountHint = product.applied_discounts?.length
+				? `${product.applied_discounts.length} discount(s)`
+				: undefined
+			lines.push({
+				id: `product-${attendeeIndex}-${productIndex}`,
+				name: `${attendeeName} add-on`,
+				description: `${product.product_title || 'Product'} x${product.quantity || 1}`,
+				originalAmount: productFinal + productDiscount,
+				discountAmount: productDiscount,
+				finalAmount: productFinal,
+				currency: product.currency || checkoutPreview.value?.currency || 'GBP',
+				discountHint,
+			})
+		})
 	})
-)
+
+	return lines
+})
 
 const paymentBreakdownTotal = computed(() => {
-	const amount = attendeePaymentBreakdown.value.reduce((sum, item) => sum + item.amount, 0)
-	const currency = attendeePaymentBreakdown.value.find((item) => item.currency)?.currency || checkoutResult.value?.currency || 'GBP'
-	return { amount, currency }
+	if (checkoutPreview.value?.total_amount) {
+		const computedOriginal = breakdownLines.value.reduce((sum, item) => sum + item.originalAmount, 0)
+		const computedDiscount = breakdownLines.value.reduce((sum, item) => sum + item.discountAmount, 0)
+		return {
+			originalAmount: computedOriginal,
+			discountAmount: computedDiscount,
+			amount: Number(checkoutPreview.value.total_amount || 0),
+			currency: checkoutPreview.value.currency || 'GBP',
+		}
+	}
+
+	const originalAmount = breakdownLines.value.reduce((sum, item) => sum + item.originalAmount, 0)
+	const discountAmount = breakdownLines.value.reduce((sum, item) => sum + item.discountAmount, 0)
+	const amount = breakdownLines.value.reduce((sum, item) => sum + item.finalAmount, 0)
+	const currency = breakdownLines.value.find((item) => item.currency)?.currency || checkoutResult.value?.currency || 'GBP'
+	return { originalAmount, discountAmount, amount, currency }
 })
+
+const showCheckoutPricingSidebar = computed(() => activeStepIndex.value === reviewStepIndex)
 
 const formatMoney = (value: number | string, currency: string = 'GBP') => {
 	const amount = typeof value === 'number' ? value : Number(value || 0)
@@ -981,6 +1577,23 @@ const requiredConsentIds = computed(() => consents.value.filter((consent) => con
 
 const hasPersonalInfoItem = (items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[], id: number) => {
 	return items.some((item) => item.id === id)
+}
+
+const hasValidPersonalInfoItems = (attendee: AttendeeDraft) => {
+	const dietaryValid = attendee.personalInfo.dietaryRequirements.every((item) => validatePersonalInfoItem(item).isValid)
+	const medicalValid = attendee.personalInfo.medicalConditions.every((item) => validatePersonalInfoItem(item).isValid)
+	const accessibilityValid = attendee.personalInfo.accessibilityRequirements.every((item) => validatePersonalInfoItem(item).isValid)
+	return dietaryValid && medicalValid && accessibilityValid
+}
+
+const getPersonalInfoItemValidationError = (
+	items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[],
+	id: number,
+) => {
+	const item = items.find((entry) => entry.id === id)
+	if (!item) return ''
+	const result = validatePersonalInfoItem(item)
+	return result.isValid ? '' : result.error || 'Please provide details for this requirement.'
 }
 
 const updatePersonalInfoItems = <T extends PersonalInfoItemDraft | MedicalConditionItemDraft>(
@@ -1016,6 +1629,68 @@ const toggleAccessibilityRequirement = (id: number, eventTarget: Event) => {
 	store.setPersonalInfo(store.currentIndex, { ...currentAttendee.value.personalInfo, accessibilityRequirements: updated })
 }
 
+/**
+ * Update details for a dietary requirement item
+ */
+const updateDietaryRequirementDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.dietaryRequirements.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Update severity for a medical condition item
+ */
+const updateMedicalConditionSeverity = (id: number, severity: 'mild' | 'moderate' | 'severe' | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
+	if (item) {
+		item.severity = severity
+	}
+}
+
+/**
+ * Update details for a medical condition item
+ */
+const updateMedicalConditionDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Update details for an accessibility requirement item
+ */
+const updateAccessibilityRequirementDetails = (id: number, details: string | null) => {
+	if (!currentAttendee.value) return
+	const item = currentAttendee.value.personalInfo.accessibilityRequirements.find((d) => d.id === id)
+	if (item) {
+		item.details = details && details.trim() !== '' ? details : null
+	}
+}
+
+/**
+ * Check if an item is "OTHER" (typically indicated by a special ID pattern)
+ * You can customize this based on your backend's "OTHER" ID convention
+ */
+const isOtherOption = (id: number): boolean => {
+	// Customize this based on your actual "OTHER" ID from backend
+	// This is a placeholder - adjust according to your API response
+	return id === -1 || String(id).toLowerCase().includes('other')
+}
+
+/**
+ * Get the details field for a requirement item
+ */
+const getDetailsForItem = (id: number, items: PersonalInfoItemDraft[]): string => {
+	const item = items.find((d) => d.id === id)
+	return item?.details || ''
+}
+
 const hasQuestionAnswerContent = (answer: AttendeeDraft['questionAnswers'][number]) => {
 	if (typeof answer.answerText === 'string' && answer.answerText.trim().length > 0) return true
 	if (typeof answer.answerText === 'number') return true
@@ -1046,20 +1721,40 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasDob = !!attendee.date_of_birth
 	const hasAreaFrom = !!attendee.area_from
 	const hasPackage = !!attendee.packageId
-	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
+	const hasEmergencyContactIfMinor = minorHasEmergencyContact(attendee)
+	const hasPersonalInfoValidity = hasValidPersonalInfoItems(attendee)
+	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && hasPersonalInfoValidity && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
 }
 
 const canContinue = computed(() => {
 	if (!currentAttendee.value) return false
 	if (activeStepIndex.value === 0) {
-		const hasNames = !!currentAttendee.value.first_name && !!currentAttendee.value.last_name
+		const hasNames = !!values.first_name && !!values.last_name
 		const hasRelationship = !!currentAttendee.value.relationship_to_user || isRegistrarSelf.value
-		const hasDob = !!currentAttendee.value.date_of_birth
+		const hasDob = !!values.date_of_birth
 		const hasAreaFrom = !!currentAttendee.value.area_from
-		return hasNames && hasRelationship && hasDob && hasAreaFrom
+		const parsed = attendeeValidationSchema.safeParse({
+			first_name: values.first_name || '',
+			last_name: values.last_name || '',
+			email: values.email || '',
+			phone_number: values.phone_number || '',
+			date_of_birth: values.date_of_birth || '',
+			gender: values.gender || '',
+			relationship_to_user: values.relationship_to_user || '',
+		})
+		const hasNoErrors = parsed.success
+		return hasNames && hasRelationship && hasDob && hasAreaFrom && hasNoErrors
 	}
 	if (activeStepIndex.value === 1) {
 		return attendeeHasRequiredAnswers(currentAttendee.value)
+	}
+	if (activeStepIndex.value === 2) {
+		const hasValidPersonalInfo = hasValidPersonalInfoItems(currentAttendee.value)
+		// Personal info step: enforce emergency contact for minors
+		if (isAttendeeMinor(currentAttendee.value)) {
+			return minorHasEmergencyContact(currentAttendee.value) && hasValidPersonalInfo
+		}
+		return hasValidPersonalInfo
 	}
 	if (activeStepIndex.value === 3) {
 		return !!currentAttendee.value.packageId
@@ -1069,10 +1764,62 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		return !!store.bookingIntentId && !!selectedPaymentMethodId.value && allAttendeesReady
+		if (!store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
+			return false
+		}
+		if (isStripeMethod.value) {
+			return stripeCardReady.value && !stripeCardError.value
+		}
+		return true
 	}
 	return true
 })
+
+const getCannotContinueMessage = () => {
+	if (!currentAttendee.value) return 'Please complete required information before continuing.'
+
+	if (activeStepIndex.value === 0) {
+		if (errors.value.first_name) return errors.value.first_name
+		if (errors.value.last_name) return errors.value.last_name
+		if (errors.value.date_of_birth) return errors.value.date_of_birth
+		if (errors.value.email) return errors.value.email
+		if (errors.value.phone_number) return errors.value.phone_number
+		if (!currentAttendee.value.area_from) return 'Please select an area to continue.'
+		if (!currentAttendee.value.relationship_to_user && !isRegistrarSelf.value) return 'Please select relationship to user.'
+		return 'Please complete attendee details to continue.'
+	}
+
+	if (activeStepIndex.value === 1) {
+		return 'Please answer all required event questions before continuing.'
+	}
+
+	if (activeStepIndex.value === 2) {
+		if (isAttendeeMinor(currentAttendee.value) && !minorHasEmergencyContact(currentAttendee.value)) {
+			return 'Emergency contact is required for minors.'
+		}
+		if (!hasValidPersonalInfoItems(currentAttendee.value)) {
+			return 'Please add details for selected OTHER requirements.'
+		}
+		return 'Please complete personal information to continue.'
+	}
+
+	if (activeStepIndex.value === 3) {
+		return 'Please select a ticket package to continue.'
+	}
+
+	if (activeStepIndex.value === 5) {
+		return 'Please accept all required consents before continuing.'
+	}
+
+	if (activeStepIndex.value === reviewStepIndex) {
+		if (isStripeMethod.value && stripeCardError.value) return stripeCardError.value
+		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
+		if (!selectedPaymentMethodId.value) return 'Please choose a payment method.'
+		return 'Some attendees are missing required information.'
+	}
+
+	return 'Please complete required information before continuing.'
+}
 
 const primaryActionLabel = computed(() => {
 	if (activeStepIndex.value === attendeeStepCount - 1) {
@@ -1185,10 +1932,153 @@ watch(
 	{ immediate: true }
 )
 
+const refreshCheckoutPreview = async () => {
+	if (!store.bookingIntentId) return
+	if (activeStepIndex.value !== reviewStepIndex) return
+
+	checkoutPreviewError.value = ''
+	try {
+		const payload = buildCheckoutPreviewPayload({
+			bookingIntentId: store.bookingIntentId,
+			attendees: store.attendees,
+		})
+		const response = await checkoutPreviewMutation.mutateAsync(payload)
+		checkoutPreview.value = (response.data || null) as CheckoutPreviewData | null
+	} catch (error) {
+		checkoutPreview.value = null
+		checkoutPreviewError.value = 'Unable to refresh payment breakdown right now.'
+		console.error('Checkout preview failed', error)
+	}
+}
+
+const scheduleCheckoutPreviewRefresh = () => {
+	if (previewDebounceTimer) {
+		clearTimeout(previewDebounceTimer)
+	}
+	previewDebounceTimer = setTimeout(() => {
+		void refreshCheckoutPreview()
+	}, 350)
+}
+
+watch(
+	[() => activeStepIndex.value, () => store.bookingIntentId, () => selectedPaymentMethodId.value, previewTriggerSignature],
+	() => {
+		if (activeStepIndex.value !== reviewStepIndex) return
+		scheduleCheckoutPreviewRefresh()
+	},
+	{ immediate: true }
+)
+
+const teardownStripeElements = () => {
+	if (stripeCardElement.value) {
+		stripeCardElement.value.unmount()
+		stripeCardElement.value = null
+	}
+	stripeElements.value = null
+	stripeInstance.value = null
+	stripeCardReady.value = false
+	stripeCardError.value = ''
+}
+
+const ensureStripeCardMounted = async () => {
+	if (!isStripeMethod.value || activeStepIndex.value !== reviewStepIndex) return
+	if (stripeCardElement.value) return
+
+	const publishableKey = effectiveStripePublishableKey.value
+	if (!publishableKey) return
+
+	await nextTick()
+	if (!stripeCardMountRef.value) return
+
+	const stripe = await loadStripe(publishableKey)
+	if (!stripe) {
+		stripeCardError.value = 'Could not initialize Stripe card form.'
+		return
+	}
+
+	stripeInstance.value = stripe
+	stripeElements.value = stripe.elements()
+	stripeCardElement.value = stripeElements.value.create('card', {
+		hidePostalCode: true,
+	})
+	stripeCardElement.value.mount(stripeCardMountRef.value)
+	stripeCardElement.value.on('change', (event) => {
+		stripeCardError.value = event.error?.message || ''
+		stripeCardReady.value = !!event.complete && !event.error
+	})
+}
+
+watch(
+	[() => isStripeMethod.value, () => activeStepIndex.value, () => effectiveStripePublishableKey.value],
+	([stripeSelected, step, key], [, , previousKey]) => {
+		if (!stripeSelected || step !== reviewStepIndex) {
+			teardownStripeElements()
+			return
+		}
+		if (key !== previousKey) {
+			teardownStripeElements()
+		}
+		void ensureStripeCardMounted()
+	},
+	{ immediate: true }
+)
+
+const stopPaymentStatusPolling = () => {
+	if (!paymentPollingTimer) return
+	clearInterval(paymentPollingTimer)
+	paymentPollingTimer = null
+	isPollingPaymentStatus.value = false
+}
+
+const startPaymentStatusPolling = (bookingId: number) => {
+	stopPaymentStatusPolling()
+	isPollingPaymentStatus.value = true
+	paymentProcessingMessage.value = 'Processing your card payment and issuing tickets...'
+
+	let attempts = 0
+	const maxAttempts = 20
+
+	paymentPollingTimer = setInterval(async () => {
+		attempts += 1
+		try {
+			const response = await bookingsListRetrieve({ path: { id: bookingId } })
+			const booking = response.data
+			const payments = booking?.payments || []
+			const hasCompletedPayment = payments.some((payment) => payment?.status === 'COMPLETED')
+
+			if (hasCompletedPayment) {
+				stopPaymentStatusPolling()
+				checkoutResult.value = {
+					...checkoutResult.value,
+					status: 'confirmed',
+				}
+				showCheckoutSuccessModal.value = true
+				toast.add({
+					title: 'Payment confirmed',
+					description: 'Your card payment was confirmed and registration is complete.',
+					color: 'green',
+				})
+			}
+		} catch (error) {
+			console.error('Payment status polling failed', error)
+		}
+
+		if (attempts >= maxAttempts) {
+			stopPaymentStatusPolling()
+			paymentProcessingMessage.value = 'Payment is still processing. You can safely refresh this page later.'
+			showCheckoutSuccessModal.value = true
+			toast.add({
+				title: 'Payment processing',
+				description: 'Stripe confirmation completed. Ticket issuance may take a little longer.',
+				color: 'amber',
+			})
+		}
+	}, 3000)
+}
+
 watch(
 	() => store.currentIndex,
 	() => {
-		selectedAreaId.value = undefined
 		areaSearch.value = ''
 		areaOptions.value = []
 	}
@@ -1205,7 +2095,6 @@ watch(
 		const query = term.trim()
 		if (query.length < 2) {
 			areaOptions.value = []
-			selectedAreaId.value = undefined
 			return
 		}
 
@@ -1215,7 +2104,7 @@ watch(
 				const response = await locationsAreasList({
 					query: {
 						search: query,
-						page_size: 10,
+						page_size: 5,
 					},
 				})
 				const options = (response.data?.results || []).map((area) => ({
@@ -1223,9 +2112,6 @@ watch(
 					value: area.id,
 				}))
 				areaOptions.value = options
-				if (selectedAreaId.value && !options.some((item) => item.value === selectedAreaId.value)) {
-					selectedAreaId.value = undefined
-				}
 			} catch {
 				areaOptions.value = []
 			} finally {
@@ -1235,36 +2121,65 @@ watch(
 	}
 )
 
-onBeforeUnmount(() => {
-	stopIntentPing()
-	if (areaSearchDebounceTimer) {
-		clearTimeout(areaSearchDebounceTimer)
-		areaSearchDebounceTimer = null
-	}
-})
-
-const lockAreaFromEventSelection = async () => {
-	if (!currentAttendee.value || !selectedAreaId.value) {
-		toast.add({ title: 'Area lookup', description: 'Select an area first.', color: 'amber' })
-		return
-	}
-
-	const selectedArea = areaOptions.value.find((item) => item.value === selectedAreaId.value)
-	store.setAreaFrom(store.currentIndex, selectedAreaId.value)
-	if (selectedArea?.label) {
-		toast.add({ title: 'Area locked', description: `${selectedArea.label} has been set for this attendee.`, color: 'green' })
-		return
-	}
-	toast.add({ title: 'Area locked', description: 'Area has been set for this attendee.', color: 'green' })
-}
-
 const clearAreaFrom = () => {
 	if (!currentAttendee.value) return
-	store.setAreaFrom(store.currentIndex, null)
+	store.setAreaFrom(store.currentIndex, null, null)
+	areaSearch.value = ''
+	areaOptions.value = []
 }
 
+// Calculate age from date of birth
+const calculateAge = (dateOfBirth: string): number | null => {
+	if (!dateOfBirth) return null
+	const today = new Date()
+	const birthDate = new Date(dateOfBirth)
+	let age = today.getFullYear() - birthDate.getFullYear()
+	const monthDiff = today.getMonth() - birthDate.getMonth()
+	if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+		age--
+	}
+	return age < 0 ? null : age
+}
+
+const currentAttendeeAge = computed(() => {
+	return calculateAge(values.date_of_birth || currentAttendee.value?.date_of_birth || '')
+})
+
+// Track validation errors state
+const hasAttendeeDetailsErrors = computed(() => {
+	if (activeStepIndex.value !== 0) return false
+	// Check for required fields with errors
+	return !!(errors.value.first_name || errors.value.last_name || errors.value.date_of_birth)
+})
+
+// Sync form values when current attendee changes
+watchEffect(() => {
+	if (!currentAttendee.value || activeStepIndex.value !== 0) return
+	resetForm({
+		values: {
+			first_name: currentAttendee.value.first_name || '',
+			last_name: currentAttendee.value.last_name || '',
+			email: currentAttendee.value.email || '',
+			phone_number: currentAttendee.value.phone_number || '',
+			date_of_birth: currentAttendee.value.date_of_birth || '',
+			gender: currentAttendee.value.gender || '',
+			relationship_to_user: currentAttendee.value.relationship_to_user || '',
+		},
+	})
+})
+
 const handleNext = async () => {
-	if (!canContinue.value) return
+	if (activeStepIndex.value === 0) {
+		await runSafeValidation()
+	}
+	if (!canContinue.value) {
+		toast.add({
+			title: 'Cannot continue',
+			description: getCannotContinueMessage(),
+			color: 'red',
+		})
+		return
+	}
 	if (!(await pingBookingIntent(true))) return
 
 	if (activeStepIndex.value < attendeeStepCount - 1) {
@@ -1313,6 +2228,7 @@ const handleCheckout = async () => {
 	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
+	stripeCardError.value = ''
 
 	try {
 		const payload = buildCheckoutPayload({
@@ -1325,6 +2241,57 @@ const handleCheckout = async () => {
 			idempotencyKey: idempotencyKey.value,
 		})
 		checkoutResult.value = response.data
+
+		if (isStripeMethod.value) {
+			stripeClientSecret.value = checkoutResult.value?.stripe_client_secret || null
+			if (!stripeClientSecret.value) {
+				throw new Error('Missing Stripe client secret in checkout response.')
+			}
+
+			await ensureStripeCardMounted()
+			if (!stripeInstance.value || !stripeCardElement.value) {
+				throw new Error('Stripe card form is not ready yet.')
+			}
+
+			const confirmation = await stripeInstance.value.confirmCardPayment(stripeClientSecret.value, {
+				payment_method: {
+					card: stripeCardElement.value,
+					billing_details: {
+						name: attendeeDisplayName(store.attendees[0], 0),
+						email: store.attendees[0]?.email || undefined,
+					},
+				},
+			})
+
+			if (confirmation.error) {
+				stripeCardError.value = confirmation.error.message || 'Card confirmation failed.'
+				toast.add({ title: 'Payment failed', description: stripeCardError.value, color: 'red' })
+				return
+			}
+
+			if (confirmation.paymentIntent?.status === 'succeeded') {
+				const bookingId = Number(checkoutResult.value?.booking_id || 0)
+				if (bookingId > 0) {
+					startPaymentStatusPolling(bookingId)
+				}
+				showCheckoutSuccessModal.value = true
+				toast.add({
+					title: 'Payment confirmed',
+					description: 'Stripe payment confirmed. Finalizing your booking now.',
+					color: 'green',
+				})
+				return
+			}
+
+			toast.add({
+				title: 'Payment processing',
+				description: 'Stripe is still processing your payment.',
+				color: 'amber',
+			})
+			showCheckoutSuccessModal.value = true
+			return
+		}
+
 		showCheckoutSuccessModal.value = true
 		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
 	} catch (error) {
@@ -1334,6 +2301,20 @@ const handleCheckout = async () => {
 		isSaving.value = false
 	}
 }
+
+onBeforeUnmount(() => {
+	if (previewDebounceTimer) {
+		clearTimeout(previewDebounceTimer)
+		previewDebounceTimer = null
+	}
+	if (areaSearchDebounceTimer) {
+		clearTimeout(areaSearchDebounceTimer)
+		areaSearchDebounceTimer = null
+	}
+	stopIntentPing()
+	stopPaymentStatusPolling()
+	teardownStripeElements()
+})
 
 const goBack = () => {
 	if (event.value?.event_id) {
@@ -1354,5 +2335,24 @@ const goBack = () => {
 .step-fade-leave-to {
 	opacity: 0;
 	transform: translateY(8px);
+}
+
+.stepper-slide-forward-enter-active,
+.stepper-slide-forward-leave-active,
+.stepper-slide-back-enter-active,
+.stepper-slide-back-leave-active {
+	transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+.stepper-slide-forward-enter-from,
+.stepper-slide-back-leave-to {
+	opacity: 0;
+	transform: translateX(20px);
+}
+
+.stepper-slide-forward-leave-to,
+.stepper-slide-back-enter-from {
+	opacity: 0;
+	transform: translateX(-20px);
 }
 </style>

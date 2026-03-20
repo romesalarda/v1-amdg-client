@@ -2021,6 +2021,22 @@ export type ChapterLocationList = {
 };
 
 /**
+ * Read-only checkout preview serializer.
+ *
+ * Mirrors checkout attendee payload but does not require a payment method.
+ */
+export type CheckoutPreviewRequest = {
+    /**
+     * UUID of the BookingIntent to preview
+     */
+    booking_intent_id: string;
+    /**
+     * List of attendee selections with packages and products
+     */
+    attendees: Array<AttendeeCheckoutRequest>;
+};
+
+/**
  * Checkout serializer for creating bookings with payments.
  *
  * This serializer:
@@ -25459,6 +25475,36 @@ export type BookingsCheckoutResponses = {
 };
 
 export type BookingsCheckoutResponse = BookingsCheckoutResponses[keyof BookingsCheckoutResponses];
+
+export type BookingsCheckoutPreviewData = {
+    body: CheckoutPreviewRequest;
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/checkout-preview/';
+};
+
+export type BookingsCheckoutPreviewErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type BookingsCheckoutPreviewResponses = {
+    /**
+     * Checkout preview generated
+     */
+    200: {
+        booking_intent_id?: string;
+        event_id?: string;
+        currency?: string;
+        total_amount?: string;
+        soft_stock_reservation?: boolean;
+        attendees?: Array<unknown>;
+    };
+};
+
+export type BookingsCheckoutPreviewResponse = BookingsCheckoutPreviewResponses[keyof BookingsCheckoutPreviewResponses];
 
 export type BookingsListPingIntentRetrieveData = {
     body?: never;
