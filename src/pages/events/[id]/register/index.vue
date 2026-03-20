@@ -233,6 +233,7 @@
 											(val) => {
 												currentAttendee.email = val
 												setFieldValue('email', val)
+												void runSafeValidation()
 											}
 										"
 										:color="errors.email ? 'red' : 'gray'"
@@ -248,6 +249,7 @@
 											(val) => {
 												currentAttendee.phone_number = val
 												setFieldValue('phone_number', val)
+												void runSafeValidation()
 											}
 										"
 										:color="errors.phone_number ? 'red' : 'gray'"
@@ -263,6 +265,7 @@
 											(val) => {
 												currentAttendee.date_of_birth = val
 												setFieldValue('date_of_birth', val)
+												void runSafeValidation()
 											}
 										"
 										:color="errors.date_of_birth ? 'red' : 'gray'"
@@ -418,6 +421,12 @@
 														rows="2"
 													/>
 													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and catering team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id) }}
+													</p>
 												</div>
 											</div>
 										</div>
@@ -479,6 +488,12 @@
 														rows="2"
 													/>
 													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and first aid team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id) }}
+													</p>
 												</div>
 											</div>
 										</div>
@@ -525,6 +540,12 @@
 														rows="2"
 													/>
 													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and accessibility team</p>
+													<p
+														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
+														class="mt-1 text-xs text-red-600"
+													>
+														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id) }}
+													</p>
 												</div>
 											</div>
 										</div>
@@ -594,6 +615,12 @@
 											/>
 										</div>
 									</div>
+									<p
+										v-else-if="isAttendeeMinor(currentAttendee)"
+										class="mt-2 text-xs font-semibold text-red-600"
+									>
+										Emergency contact is required for attendees under 18.
+									</p>
 								</div>
 							</div>
 						</div>
@@ -870,6 +897,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { isMinor, validatePersonalInfoItem } from '~/schemas/registration'
 
@@ -943,8 +971,8 @@ const toast = useToast()
 const store = useRegistrationStore()
 
 // Initialize form (will be reset when currentAttendee changes)
-const { values, errors, setFieldValue, resetForm } = useForm({
-	validationSchema: attendeeValidationSchema,
+const { values, errors, setFieldValue, resetForm, validate } = useForm({
+	validationSchema: toTypedSchema(attendeeValidationSchema),
 	initialValues: {
 		first_name: '',
 		last_name: '',
@@ -955,6 +983,14 @@ const { values, errors, setFieldValue, resetForm } = useForm({
 		relationship_to_user: '',
 	},
 })
+
+const runSafeValidation = async () => {
+	try {
+		return await validate()
+	} catch {
+		return { valid: false }
+	}
+}
 
 const eventId = computed(() => String(route.params.id || ''))
 const ticketCount = computed(() => Number(route.query.tickets || 1))
@@ -1147,7 +1183,6 @@ const genderOptions = [
 const emergencyRelationshipOptions = [
 	{ label: 'Parent', value: 'parent' },
 	{ label: 'Sibling', value: 'sibling' },
-	{ label: 'Child', value: 'child' },
 	{ label: 'Spouse', value: 'spouse' },
 	{ label: 'Friend', value: 'friend' },
 	{ label: 'Other', value: 'other' },
@@ -1261,6 +1296,23 @@ const requiredConsentIds = computed(() => consents.value.filter((consent) => con
 
 const hasPersonalInfoItem = (items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[], id: number) => {
 	return items.some((item) => item.id === id)
+}
+
+const hasValidPersonalInfoItems = (attendee: AttendeeDraft) => {
+	const dietaryValid = attendee.personalInfo.dietaryRequirements.every((item) => validatePersonalInfoItem(item).isValid)
+	const medicalValid = attendee.personalInfo.medicalConditions.every((item) => validatePersonalInfoItem(item).isValid)
+	const accessibilityValid = attendee.personalInfo.accessibilityRequirements.every((item) => validatePersonalInfoItem(item).isValid)
+	return dietaryValid && medicalValid && accessibilityValid
+}
+
+const getPersonalInfoItemValidationError = (
+	items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[],
+	id: number,
+) => {
+	const item = items.find((entry) => entry.id === id)
+	if (!item) return ''
+	const result = validatePersonalInfoItem(item)
+	return result.isValid ? '' : result.error || 'Please provide details for this requirement.'
 }
 
 const updatePersonalInfoItems = <T extends PersonalInfoItemDraft | MedicalConditionItemDraft>(
@@ -1389,7 +1441,8 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasAreaFrom = !!attendee.area_from
 	const hasPackage = !!attendee.packageId
 	const hasEmergencyContactIfMinor = minorHasEmergencyContact(attendee)
-	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
+	const hasPersonalInfoValidity = hasValidPersonalInfoItems(attendee)
+	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && hasPersonalInfoValidity && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
 }
 
 const canContinue = computed(() => {
@@ -1399,18 +1452,28 @@ const canContinue = computed(() => {
 		const hasRelationship = !!currentAttendee.value.relationship_to_user || isRegistrarSelf.value
 		const hasDob = !!values.date_of_birth
 		const hasAreaFrom = !!currentAttendee.value.area_from
-		const hasNoErrors = !hasAttendeeDetailsErrors.value && !errors.value.email && !errors.value.phone_number
+		const parsed = attendeeValidationSchema.safeParse({
+			first_name: values.first_name || '',
+			last_name: values.last_name || '',
+			email: values.email || '',
+			phone_number: values.phone_number || '',
+			date_of_birth: values.date_of_birth || '',
+			gender: values.gender || '',
+			relationship_to_user: values.relationship_to_user || '',
+		})
+		const hasNoErrors = parsed.success
 		return hasNames && hasRelationship && hasDob && hasAreaFrom && hasNoErrors
 	}
 	if (activeStepIndex.value === 1) {
 		return attendeeHasRequiredAnswers(currentAttendee.value)
 	}
 	if (activeStepIndex.value === 2) {
+		const hasValidPersonalInfo = hasValidPersonalInfoItems(currentAttendee.value)
 		// Personal info step: enforce emergency contact for minors
 		if (isAttendeeMinor(currentAttendee.value)) {
-			return minorHasEmergencyContact(currentAttendee.value)
+			return minorHasEmergencyContact(currentAttendee.value) && hasValidPersonalInfo
 		}
-		return true
+		return hasValidPersonalInfo
 	}
 	if (activeStepIndex.value === 3) {
 		return !!currentAttendee.value.packageId
@@ -1424,6 +1487,50 @@ const canContinue = computed(() => {
 	}
 	return true
 })
+
+const getCannotContinueMessage = () => {
+	if (!currentAttendee.value) return 'Please complete required information before continuing.'
+
+	if (activeStepIndex.value === 0) {
+		if (errors.value.first_name) return errors.value.first_name
+		if (errors.value.last_name) return errors.value.last_name
+		if (errors.value.date_of_birth) return errors.value.date_of_birth
+		if (errors.value.email) return errors.value.email
+		if (errors.value.phone_number) return errors.value.phone_number
+		if (!currentAttendee.value.area_from) return 'Please select an area to continue.'
+		if (!currentAttendee.value.relationship_to_user && !isRegistrarSelf.value) return 'Please select relationship to user.'
+		return 'Please complete attendee details to continue.'
+	}
+
+	if (activeStepIndex.value === 1) {
+		return 'Please answer all required event questions before continuing.'
+	}
+
+	if (activeStepIndex.value === 2) {
+		if (isAttendeeMinor(currentAttendee.value) && !minorHasEmergencyContact(currentAttendee.value)) {
+			return 'Emergency contact is required for minors.'
+		}
+		if (!hasValidPersonalInfoItems(currentAttendee.value)) {
+			return 'Please add details for selected OTHER requirements.'
+		}
+		return 'Please complete personal information to continue.'
+	}
+
+	if (activeStepIndex.value === 3) {
+		return 'Please select a ticket package to continue.'
+	}
+
+	if (activeStepIndex.value === 5) {
+		return 'Please accept all required consents before continuing.'
+	}
+
+	if (activeStepIndex.value === reviewStepIndex) {
+		if (!selectedPaymentMethodId.value) return 'Please choose a payment method.'
+		return 'Some attendees are missing required information.'
+	}
+
+	return 'Please complete required information before continuing.'
+}
 
 const primaryActionLabel = computed(() => {
 	if (activeStepIndex.value === attendeeStepCount - 1) {
@@ -1629,7 +1736,17 @@ watchEffect(() => {
 })
 
 const handleNext = async () => {
-	if (!canContinue.value) return
+	if (activeStepIndex.value === 0) {
+		await runSafeValidation()
+	}
+	if (!canContinue.value) {
+		toast.add({
+			title: 'Cannot continue',
+			description: getCannotContinueMessage(),
+			color: 'red',
+		})
+		return
+	}
 	if (!(await pingBookingIntent(true))) return
 
 	if (activeStepIndex.value < attendeeStepCount - 1) {
