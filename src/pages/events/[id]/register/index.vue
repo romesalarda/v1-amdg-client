@@ -1078,7 +1078,7 @@ import { usePaymentMethods } from '~/composables/resources/payments/paymentMetho
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsListRetrieve, locationsAreasList } from '~/api/sdk.gen'
+import { bookingsListRetrieve, locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
 import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
 import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
@@ -2153,7 +2153,7 @@ const stopPaymentStatusPolling = () => {
 	isPollingPaymentStatus.value = false
 }
 
-const startPaymentStatusPolling = (bookingId: number) => {
+const startPaymentStatusPolling = (paymentId: number, bookingId?: number) => {
 	stopPaymentStatusPolling()
 	isPollingPaymentStatus.value = true
 	paymentProcessingMessage.value = 'Processing your card payment and issuing tickets...'
@@ -2164,16 +2164,26 @@ const startPaymentStatusPolling = (bookingId: number) => {
 	paymentPollingTimer = setInterval(async () => {
 		attempts += 1
 		try {
-			const response = await bookingsListRetrieve({ path: { id: bookingId } })
-			const booking = response.data
-			const payments = booking?.payments || []
-			const hasCompletedPayment = payments.some((payment) => payment?.status === 'COMPLETED')
+			const paymentResponse = await paymentsListRetrieve({ path: { payment_id: String(paymentId) } })
+			const paymentData = paymentResponse.data as any
+			const hasCompletedPayment = paymentData?.status === 'COMPLETED'
+			const finalizedBookingId = Number(paymentData?.metadata?.booking_id || bookingId || 0)
 
 			if (hasCompletedPayment) {
+				if (finalizedBookingId > 0) {
+					try {
+						await bookingsListRetrieve({ path: { id: finalizedBookingId } })
+					} catch {
+						// Booking finalization may still be committing. Keep polling.
+						return
+					}
+				}
 				stopPaymentStatusPolling()
 				checkoutResult.value = {
 					...checkoutResult.value,
 					status: 'confirmed',
+					booking_id: finalizedBookingId > 0 ? finalizedBookingId : checkoutResult.value?.booking_id,
+					booking_reference: paymentData?.metadata?.booking_reference || checkoutResult.value?.booking_reference,
 				}
 				showCheckoutSuccessModal.value = true
 				toast.add({
@@ -2394,8 +2404,9 @@ const handleCheckout = async () => {
 
 			if (confirmation.paymentIntent?.status === 'succeeded') {
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
-				if (bookingId > 0) {
-					startPaymentStatusPolling(bookingId)
+				const paymentId = Number(checkoutResult.value?.payment_id || 0)
+				if (paymentId > 0) {
+					startPaymentStatusPolling(paymentId, bookingId > 0 ? bookingId : undefined)
 				}
 				showCheckoutSuccessModal.value = true
 				toast.add({
