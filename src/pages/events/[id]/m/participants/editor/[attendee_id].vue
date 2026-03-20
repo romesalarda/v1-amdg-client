@@ -997,7 +997,7 @@
                         <p class="text-xs text-gray-600">{{ payment.amount }}</p>
                       </div>
                       <UBadge
-                        :color="payment.status === 'completed' ? 'green' : payment.status === 'pending' ? 'amber' : 'red'"
+                        :color="payment.status === 'COMPLETED' ? 'green' : payment.status === 'PENDING' ? 'amber' : 'red'"
                         variant="soft"
                         size="xs"
                       >

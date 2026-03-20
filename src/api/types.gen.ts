@@ -5265,6 +5265,10 @@ export type EventDetail = {
         assigned_roles: Array<string>;
     };
     /**
+     * Returns price range from value_x - value_y if multiple packages, or single value if only one package.
+     */
+    readonly general_price: string;
+    /**
      *  links
      */
     readonly _links: {
@@ -39464,6 +39468,10 @@ export type PaymentsRefundsListData = {
          * Filter by payment ID
          */
         payment?: number;
+        /**
+         * Filter by event UUID (filters refunds for payments associated with the event)
+         */
+        payment__event__event_id?: string;
         /**
          * Filter by payment UUID
          */

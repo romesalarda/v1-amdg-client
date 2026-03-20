@@ -2153,7 +2153,7 @@ const stopPaymentStatusPolling = () => {
 	isPollingPaymentStatus.value = false
 }
 
-const startPaymentStatusPolling = (paymentId: number, bookingId?: number) => {
+const startPaymentStatusPolling = (paymentId: string, bookingId?: number) => {
 	stopPaymentStatusPolling()
 	isPollingPaymentStatus.value = true
 	paymentProcessingMessage.value = 'Processing your card payment and issuing tickets...'
@@ -2164,7 +2164,7 @@ const startPaymentStatusPolling = (paymentId: number, bookingId?: number) => {
 	paymentPollingTimer = setInterval(async () => {
 		attempts += 1
 		try {
-			const paymentResponse = await paymentsListRetrieve({ path: { payment_id: String(paymentId) } })
+			const paymentResponse = await paymentsListRetrieve({ path: { payment_id: paymentId } })
 			const paymentData = paymentResponse.data as any
 			const hasCompletedPayment = paymentData?.status === 'COMPLETED'
 			const finalizedBookingId = Number(paymentData?.metadata?.booking_id || bookingId || 0)
@@ -2404,9 +2404,9 @@ const handleCheckout = async () => {
 
 			if (confirmation.paymentIntent?.status === 'succeeded') {
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
-				const paymentId = Number(checkoutResult.value?.payment_id || 0)
+				const paymentId = checkoutResult.value?.payment_id
 				if (paymentId > 0) {
-					startPaymentStatusPolling(paymentId, bookingId > 0 ? bookingId : undefined)
+					startPaymentStatusPolling(String(paymentId), bookingId > 0 ? bookingId : undefined)
 				}
 				showCheckoutSuccessModal.value = true
 				toast.add({

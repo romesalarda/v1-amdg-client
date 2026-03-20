@@ -70,7 +70,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 
@@ -80,7 +80,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="min-w-0">
-                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Time</p>
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
                 <p class="font-black text-deep-navy truncate">
                   {{ formatTime(event.start_datetime, event.timezone) }}
                 </p>
@@ -108,6 +108,7 @@
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Cost</p>
                 <p class="font-black text-deep-navy truncate">
+                  {{ event.general_price }}
                 </p>
               </div>
             </div>
