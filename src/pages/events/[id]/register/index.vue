@@ -62,8 +62,18 @@
 						</div>
 					</div>
 				</div>
-				<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
-					Editing attendee {{ currentAttendeeNumber }}
+				<div class="flex flex-col items-end gap-2">
+					<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
+						Editing attendee {{ currentAttendeeNumber }}
+					</div>
+					<div
+						v-if="showIntentCountdown"
+						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em]"
+						:class="intentTimerToneClass"
+					>
+						<UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
+						<span>Session expires in {{ intentCountdownLabel }}</span>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -884,6 +894,9 @@
 										<div ref="stripeCardMountRef" class="min-h-[44px]"></div>
 									</div>
 									<p v-if="stripeCardError" class="text-xs font-semibold text-red-600">{{ stripeCardError }}</p>
+									<p v-else-if="stripePaymentAttemptError" class="text-xs font-semibold text-red-600">
+										{{ stripePaymentAttemptError }}
+									</p>
 									<p v-else-if="!stripeCardReady" class="text-xs text-slate-500">Complete card details to enable checkout.</p>
 									<p v-else class="text-xs font-semibold text-emerald-700">Card details ready.</p>
 								</div>
@@ -896,7 +909,7 @@
 												v-if="activeStepIndex === reviewStepIndex"
 												color="primary"
 												:loading="isSaving"
-												:disabled="!canContinue"
+												:disabled="!canContinue || checkoutCompleted"
 												@click="handleCheckout"
 											>
 												Complete registration
@@ -986,7 +999,7 @@
 		</div>
 	</div>
 
-	<UModal v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
+	<UModal v-if="!showCheckoutSuccessModal" v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
 		<div class="space-y-4 p-6 md:p-8">
 			<div class="flex items-start gap-3">
 				<div class="mt-0.5 rounded-full bg-amber-100 p-2">
@@ -1005,47 +1018,22 @@
 		</div>
 	</UModal>
 
-	<UModal v-model="showCheckoutSuccessModal" :ui="{ width: 'sm:max-w-3xl' }">
-		<div class="space-y-6 p-6 md:p-8">
-			<div class="text-center">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-					<UIcon name="i-heroicons-check" class="h-9 w-9 text-emerald-600" />
+	<UModal v-model="showCheckoutSuccessModal" :prevent-close="true" :ui="{ width: 'sm:max-w-5xl' }">
+		<div class="success-modal space-y-8 p-8 md:p-14">
+			<div class="success-glow"></div>
+			<div class="success-pop text-center">
+				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-100/60 md:h-24 md:w-24">
+					<UIcon name="i-heroicons-check" class="h-11 w-11 text-emerald-600 success-check md:h-14 md:w-14" />
 				</div>
-				<h3 class="mt-4 text-2xl font-black text-slate-900">Registration Complete</h3>
-				<p class="mt-2 text-sm text-slate-600">
-					You're going to {{ event?.title || 'this event' }}.
+				<h3 class="mt-5 text-4xl font-black tracking-tight text-slate-900 success-title md:text-5xl">Booking successful</h3>
+				<p class="mt-4 text-lg font-semibold text-slate-600 success-event-lead md:text-2xl">You're going to</p>
+				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
+					{{ event?.title || 'this event' }}
 				</p>
 			</div>
 
-			<div class="grid gap-3 md:grid-cols-2">
-				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Booking reference</p>
-					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.booking_reference || 'N/A' }}</p>
-				</div>
-				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Payment reference</p>
-					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.payment_reference || 'N/A' }}</p>
-				</div>
-				<div v-if="checkoutResult?.bank_transfer_reference" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Bank transfer reference</p>
-					<p class="mt-1 text-base font-semibold text-blue-900">{{ checkoutResult.bank_transfer_reference }}</p>
-				</div>
-				<div v-if="checkoutResult?.bank_transfer_instructions" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Transfer instructions</p>
-					<p class="mt-1 text-sm text-blue-900">{{ checkoutResult.bank_transfer_instructions }}</p>
-				</div>
-				<div v-if="checkoutResult?.stripe_client_secret" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">Stripe next step</p>
-					<p class="mt-1 text-sm text-emerald-900">Your booking is created. Complete card payment using the provided Stripe flow.</p>
-				</div>
-				<div v-if="isPollingPaymentStatus || paymentProcessingMessage" class="rounded-xl border border-amber-200 bg-amber-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Payment processing</p>
-					<p class="mt-1 text-sm text-amber-900">{{ paymentProcessingMessage || 'Waiting for payment confirmation from Stripe...' }}</p>
-				</div>
-			</div>
-
-			<div class="flex justify-end">
-				<UButton color="primary" @click="showCheckoutSuccessModal = false">Close</UButton>
+			<div class="flex justify-center success-cta-wrap">
+				<UButton size="xl" color="primary" @click="closeSuccessModalAndRedirect">View your event dashboard</UButton>
 			</div>
 		</div>
 	</UModal>
@@ -1219,10 +1207,71 @@ const bookingIntentMutation = useCreateBookingIntent()
 const pingBookingIntentMutation = usePingBookingIntent()
 const isCreatingIntent = ref(false)
 const showIntentExpiredModal = ref(false)
+const intentExpiresAtMs = ref<number | null>(null)
+const intentNowMs = ref(Date.now())
 const areaLookupLoading = ref(false)
 const areaSearch = ref('')
 const areaOptions = ref<Array<{ label: string; value: number }>>([])
 let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let intentCountdownTimer: ReturnType<typeof setInterval> | null = null
+
+const setIntentExpiryFromSeconds = (seconds?: number | null) => {
+	if (typeof seconds !== 'number' || Number.isNaN(seconds)) return
+	const safeSeconds = Math.max(0, Math.floor(seconds))
+	intentExpiresAtMs.value = Date.now() + safeSeconds * 1000
+	intentNowMs.value = Date.now()
+}
+
+const setIntentExpiryFromIso = (expiresAt?: string | null) => {
+	if (!expiresAt) return
+	const parsed = new Date(expiresAt).getTime()
+	if (Number.isNaN(parsed)) return
+	intentExpiresAtMs.value = parsed
+	intentNowMs.value = Date.now()
+}
+
+const intentCountdownSeconds = computed(() => {
+	if (!store.bookingIntentId || !intentExpiresAtMs.value || showIntentExpiredModal.value) return null
+	const remaining = Math.ceil((intentExpiresAtMs.value - intentNowMs.value) / 1000)
+	return Math.max(0, remaining)
+})
+
+const showIntentCountdown = computed(() => {
+	return !!store.bookingIntentId && intentCountdownSeconds.value !== null && !showIntentExpiredModal.value
+})
+
+const intentCountdownLabel = computed(() => {
+	const totalSeconds = intentCountdownSeconds.value
+	if (totalSeconds === null) return '--:--'
+	const minutes = Math.floor(totalSeconds / 60)
+	const seconds = totalSeconds % 60
+	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+})
+
+const intentTimerToneClass = computed(() => {
+	const remaining = intentCountdownSeconds.value
+	if (remaining === null || remaining > 300) {
+		return 'border-emerald-300 bg-emerald-50 text-emerald-800'
+	}
+	if (remaining > 120) {
+		return 'border-amber-300 bg-amber-50 text-amber-800'
+	}
+	return 'border-red-300 bg-red-50 text-red-800'
+})
+
+const stopIntentCountdown = () => {
+	if (!intentCountdownTimer) return
+	clearInterval(intentCountdownTimer)
+	intentCountdownTimer = null
+}
+
+const startIntentCountdown = () => {
+	stopIntentCountdown()
+	if (!store.bookingIntentId || !intentExpiresAtMs.value) return
+	intentCountdownTimer = setInterval(() => {
+		intentNowMs.value = Date.now()
+	}, 1000)
+}
 
 watchEffect(() => {
 	if (!event.value || store.bookingIntentId || isCreatingIntent.value) return
@@ -1236,6 +1285,11 @@ watchEffect(() => {
 			const intentId = response.data?.booking_intent_id
 			if (intentId) {
 				store.setBookingIntentId(intentId)
+				setIntentExpiryFromIso((response.data as { expires_at?: string | null })?.expires_at)
+				if (!intentExpiresAtMs.value) {
+					setIntentExpiryFromSeconds(20 * 60)
+				}
+				startIntentCountdown()
 			}
 		})
 		.catch(() => {
@@ -1558,6 +1612,7 @@ const effectiveStripePublishableKey = computed(() => {
 })
 
 const idempotencyKey = ref(createIdempotencyKey())
+const checkoutCompleted = ref(false)
 
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
@@ -1572,6 +1627,7 @@ const stripeElements = ref<StripeElements | null>(null)
 const stripeCardElement = ref<StripeCardElement | null>(null)
 const stripeCardReady = ref(false)
 const stripeCardError = ref('')
+const stripePaymentAttemptError = ref('')
 const stripeClientSecret = ref<string | null>(null)
 
 const isPollingPaymentStatus = ref(false)
@@ -1887,7 +1943,7 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		if (!store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
+		if (checkoutCompleted.value || !store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
 			return false
 		}
 		if (isStripeMethod.value) {
@@ -1979,12 +2035,16 @@ const toggleConsent = (consentId: number, eventTarget: Event) => {
 const redirectToEventHome = () => {
 	showIntentExpiredModal.value = false
 	store.reset()
+	stopIntentCountdown()
 	// Redirect to dashboard after intent expiration
 	router.push({ path: '/' })
 }
 
 const markIntentExpired = () => {
+	if (checkoutCompleted.value) return
+	showCheckoutSuccessModal.value = false
 	showIntentExpiredModal.value = true
+	stopIntentCountdown()
 }
 
 const pingBookingIntent = async (silent: boolean = true) => {
@@ -2004,6 +2064,16 @@ const pingBookingIntent = async (silent: boolean = true) => {
 		const data = response.data as {
 			is_active?: boolean
 			redirect_required?: boolean
+			seconds_remaining?: number
+			expires_at?: string | null
+		}
+
+		setIntentExpiryFromSeconds(data?.seconds_remaining)
+		if (!intentExpiresAtMs.value) {
+			setIntentExpiryFromIso(data?.expires_at)
+		}
+		if (store.bookingIntentId && intentExpiresAtMs.value && !showIntentExpiredModal.value) {
+			startIntentCountdown()
 		}
 
 		if (!data?.is_active || data?.redirect_required) {
@@ -2047,12 +2117,37 @@ watch(
 	(intentId) => {
 		if (!intentId) {
 			stopIntentPing()
+			stopIntentCountdown()
+			intentExpiresAtMs.value = null
 			return
 		}
 		void pingBookingIntent(true)
 		startIntentPing()
+		if (intentExpiresAtMs.value) {
+			startIntentCountdown()
+		}
 	},
 	{ immediate: true }
+)
+
+watch(
+	() => checkoutCompleted.value,
+	(completed) => {
+		if (!completed) return
+		showIntentExpiredModal.value = false
+		stopIntentPing()
+		stopIntentCountdown()
+	}
+)
+
+watch(
+	() => intentCountdownSeconds.value,
+	(seconds) => {
+		if (seconds === null) return
+		if (seconds <= 0) {
+			markIntentExpired()
+		}
+	}
 )
 
 const refreshCheckoutPreview = async () => {
@@ -2128,6 +2223,9 @@ const ensureStripeCardMounted = async () => {
 	stripeCardElement.value.on('change', (event) => {
 		stripeCardError.value = event.error?.message || ''
 		stripeCardReady.value = !!event.complete && !event.error
+		if (stripePaymentAttemptError.value) {
+			stripePaymentAttemptError.value = ''
+		}
 	})
 }
 
@@ -2357,11 +2455,13 @@ const jumpToAttendee = async (index: number) => {
 }
 
 const handleCheckout = async () => {
+	if (checkoutCompleted.value) return
 	if (!canContinue.value || !store.bookingIntentId || !selectedPaymentMethodId.value) return
 	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
 	stripeCardError.value = ''
+	stripePaymentAttemptError.value = ''
 
 	try {
 		const payload = buildCheckoutPayload({
@@ -2397,12 +2497,14 @@ const handleCheckout = async () => {
 			})
 
 			if (confirmation.error) {
-				stripeCardError.value = confirmation.error.message || 'Card confirmation failed.'
-				toast.add({ title: 'Payment failed', description: stripeCardError.value, color: 'red' })
+				stripePaymentAttemptError.value = confirmation.error.message || 'Card confirmation failed.'
+				idempotencyKey.value = createIdempotencyKey()
+				toast.add({ title: 'Payment failed', description: stripePaymentAttemptError.value, color: 'red' })
 				return
 			}
 
 			if (confirmation.paymentIntent?.status === 'succeeded') {
+				checkoutCompleted.value = true
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
 				const paymentId = checkoutResult.value?.payment_id
 				if (paymentId > 0) {
@@ -2422,18 +2524,34 @@ const handleCheckout = async () => {
 				description: 'Stripe is still processing your payment.',
 				color: 'amber',
 			})
+			checkoutCompleted.value = true
 			showCheckoutSuccessModal.value = true
 			return
 		}
 
+		checkoutCompleted.value = true
 		showCheckoutSuccessModal.value = true
 		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
 	} catch (error) {
 		console.error('Checkout failed', error)
+		idempotencyKey.value = createIdempotencyKey()
 		toast.add({ title: 'Error', description: 'Checkout failed. Please try again.', color: 'red' })
 	} finally {
 		isSaving.value = false
 	}
+}
+
+const closeSuccessModalAndRedirect = () => {
+	showCheckoutSuccessModal.value = false
+	showIntentExpiredModal.value = false
+	stopIntentPing()
+	stopIntentCountdown()
+	store.reset()
+	if (event.value?.event_id) {
+		router.push({ path: `/events/${event.value.event_id}/my-booking` })
+		return
+	}
+	router.push({ path: '/events' })
 }
 
 onBeforeUnmount(() => {
@@ -2446,6 +2564,7 @@ onBeforeUnmount(() => {
 		areaSearchDebounceTimer = null
 	}
 	stopIntentPing()
+	stopIntentCountdown()
 	stopPaymentStatusPolling()
 	teardownStripeElements()
 })
@@ -2488,5 +2607,120 @@ const goBack = () => {
 .stepper-slide-back-enter-from {
 	opacity: 0;
 	transform: translateX(-20px);
+}
+
+.success-modal {
+	position: relative;
+	overflow: hidden;
+	background: linear-gradient(180deg, #f8fafc 0%, #ffffff 62%);
+}
+
+.success-glow {
+	pointer-events: none;
+	position: absolute;
+	inset: -90px -10% auto;
+	height: 210px;
+	background: radial-gradient(circle at 50% 30%, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.06) 38%, rgba(255, 255, 255, 0) 70%);
+}
+
+.success-pop {
+	position: relative;
+	animation: successRise 0.75s ease-out;
+}
+
+.success-check {
+	animation: successPulse 1.2s ease-out;
+}
+
+.success-title {
+	animation: successFadeIn 0.9s ease-out;
+}
+
+.success-event-lead {
+	opacity: 0;
+	animation: successFadeIn 0.9s ease-out 0.5s forwards;
+}
+
+.success-event-name {
+	opacity: 0;
+	animation: successFadeIn 1s ease-out 0.8s forwards;
+}
+
+.success-stagger .success-card {
+	opacity: 0;
+	animation: successCardIn 0.65s ease both;
+	animation-delay: 1.15s;
+}
+
+.success-stagger .success-card:nth-child(2) {
+	animation-delay: 1.28s;
+}
+
+.success-stagger .success-card:nth-child(3) {
+	animation-delay: 1.4s;
+}
+
+.success-stagger .success-card:nth-child(4) {
+	animation-delay: 1.52s;
+}
+
+.success-stagger .success-card:nth-child(5) {
+	animation-delay: 1.64s;
+}
+
+.success-stagger .success-card:nth-child(6) {
+	animation-delay: 1.76s;
+}
+
+.success-cta-wrap {
+	opacity: 0;
+	animation: successFadeIn 0.9s ease-out 1.95s forwards;
+}
+
+@keyframes successRise {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes successPulse {
+	0% {
+		transform: scale(0.5) rotate(-12deg);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.14) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes successCardIn {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes successFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 </style>

@@ -454,7 +454,6 @@
     <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
       <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Registration summary</p>
       <p class="mt-2 text-sm font-bold text-deep-navy">Total attendee slots: {{ calculatedTicketCount }}</p>
-      <p class="mt-1 text-xs text-deep-navy/60">Mode: {{ registrationMode }}</p>
         </div>
       </div>
 

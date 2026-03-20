@@ -56,7 +56,6 @@
           No booking status data available
         </div>
       </StatSection>
-
       <!-- Booking Trends --><StatSection 
         title="Booking Trends"
         description="Bookings created over time"
