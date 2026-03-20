@@ -115,7 +115,7 @@
 						</div>
 					</button>
 
-					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5" v-if="!showCheckoutPricingSidebar">
 						<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Current attendee snapshot</p>
 						<div v-if="currentAttendee" class="mt-3 space-y-2">
 							<p class="text-sm font-bold text-slate-800">{{ attendeeDisplayName(currentAttendee, store.currentIndex) }}</p>
@@ -132,6 +132,62 @@
 						<p class="mt-3 text-[11px] leading-relaxed text-slate-500">
 							Keep medical, dietary, and emergency details accurate to support safe event safeguarding.
 						</p>
+					</div>
+					<div class="space-y-4 lg:sticky lg:top-24" v-if="showCheckoutPricingSidebar">
+						<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
+							</div>
+							<p v-if="checkoutPreviewLoading" class="mt-3 text-xs text-slate-500">Refreshing payment breakdown...</p>
+							<p v-else-if="checkoutPreviewError" class="mt-3 text-xs font-semibold text-red-600">{{ checkoutPreviewError }}</p>
+							<div class="mt-3 space-y-2">
+								<div
+									v-for="item in breakdownLines"
+									:key="item.id"
+									class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-sm"
+								>
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="font-semibold text-slate-800">{{ item.name }}</p>
+											<p class="text-xs text-slate-500">{{ item.description }}</p>
+											<p v-if="item.discountHint" class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{{ item.discountHint }}</p>
+										</div>
+										<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
+									</div>
+									<p class="mt-2 text-[11px] text-slate-600">
+										{{ formatMoney(item.originalAmount, item.currency) }}
+										<span class="text-slate-400"> - </span>
+										<span class="text-emerald-700">{{ formatMoney(item.discountAmount, item.currency) }}</span>
+										<span class="text-slate-400"> = </span>
+										<span class="font-semibold text-slate-800">{{ formatMoney(item.finalAmount, item.currency) }}</span>
+									</p>
+								</div>
+								<p v-if="!breakdownLines.length && !checkoutPreviewLoading" class="text-xs text-slate-500">No payable items selected yet.</p>
+							</div>
+							<div class="mt-4 border-t border-slate-100 pt-3 text-sm">
+								<div class="flex items-center justify-between text-slate-600">
+									<span>Subtotal</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.originalAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-1 flex items-center justify-between text-emerald-700">
+									<span>Total discount</span>
+									<span>-{{ formatMoney(paymentBreakdownTotal.discountAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-2 flex items-center justify-between text-base font-bold text-slate-900">
+									<span>Total due</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<p v-if="isPollingPaymentStatus" class="mt-2 text-xs font-semibold text-amber-700">{{ paymentProcessingMessage || 'Finalizing your payment...' }}</p>
+							</div>
+						</div>
+
+						<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+							<div class="flex items-center gap-2 font-semibold">
+								<UIcon name="i-heroicons-lock-closed" class="h-4 w-4" />
+								Powered and secured by Stripe
+							</div>
+							<p class="mt-1 text-xs text-emerald-700">We do not store any card data.</p>
+						</div>
 					</div>
 				</aside>
 
@@ -355,7 +411,7 @@
 										</UButton>
 									</div>
 									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : '⚠ Select an area to continue.' }}
+										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : 'Select an area to continue.' }}
 									</p>
 								</div>
 							</div>
@@ -845,8 +901,8 @@
 					</div>
 				</main>
 
-				<aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0">
-					<div class="space-y-4 lg:sticky lg:top-24">
+				<!-- <aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0"> -->
+					<!-- <div class="space-y-4 lg:sticky lg:top-24">
 						<div class="rounded-2xl border border-slate-900 bg-slate-900 p-4 text-white shadow-lg">
 							<p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/70">Live checkout pricing</p>
 							<p class="mt-2 text-sm text-white/90">Transparent totals powered by server-side pricing rules.</p>
@@ -907,10 +963,10 @@
 							</div>
 							<p class="mt-1 text-xs text-emerald-700">Card data is tokenized by Stripe and never stored directly in AMDG forms.</p>
 						</div>
-					</div>
-				</aside>
+					</div> -->
+				<!-- </aside> -->
 			</template>
-				</div>
+		</div>
 	</div>
 
 	<UModal v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
@@ -1012,6 +1068,7 @@ import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
 import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
+import { formatMoney } from '~/utils/money'
 
 // Create validation schema for attendee details
 const attendeeValidationSchema = z.object({
@@ -1563,10 +1620,10 @@ const paymentBreakdownTotal = computed(() => {
 
 const showCheckoutPricingSidebar = computed(() => activeStepIndex.value === reviewStepIndex)
 
-const formatMoney = (value: number | string, currency: string = 'GBP') => {
-	const amount = typeof value === 'number' ? value : Number(value || 0)
-	return `${amount.toFixed(2)} ${currency}`
-}
+// const formatMoney = (value: number | string, currency: string = 'GBP') => {
+// 	const amount = typeof value === 'number' ? value : Number(value || 0)
+// 	return `${amount.toFixed(2)} ${currency}`
+// }
 
 const requiredConsentsMissing = computed(() => {
 	if (!consents.value.length) return 0
