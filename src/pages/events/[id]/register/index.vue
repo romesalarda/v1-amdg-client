@@ -76,7 +76,7 @@
 				Event not found.
 			</div>
 			<template v-else>
-				<aside class="w-full space-y-4 lg:w-80 lg:flex-shrink-0">
+				<aside class="w-full space-y-4 lg:w-72 lg:flex-shrink-0">
 					<div>
 						<p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Registration group</p>
 					</div>
@@ -736,14 +736,31 @@
 
 							<div>
 								<label class="mb-1 block text-sm font-medium text-gray-700">Payment method</label>
-								<USelectMenu
-									v-if="paymentMethodOptions.length"
-									v-model="selectedPaymentMethodId"
-									:options="paymentMethodOptions"
-									value-attribute="value"
-									option-attribute="label"
-									placeholder="Select a payment method"
-								/>
+								<div v-if="paymentMethods.length" class="grid gap-3 sm:grid-cols-1 lg:grid-cols-1">
+									<button
+										v-for="method in paymentMethods"
+										:key="method.id"
+										type="button"
+										class="rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
+										:class="method.id === selectedPaymentMethodId ? 'border-slate-900 bg-slate-900 text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'"
+										@click="selectedPaymentMethodId = method.id"
+									>
+										<div class="flex items-center justify-between gap-2">
+											<div class="flex items-center gap-2">
+												<UIcon :name="getMethodIcon(method.method_type)" class="h-5 w-5" />
+												<p class="text-sm font-semibold">{{ method.title }}</p>
+											</div>
+											<UIcon
+												v-if="method.id === selectedPaymentMethodId"
+												name="i-heroicons-check-circle"
+												class="h-5 w-5 text-emerald-400"
+											/>
+										</div>
+										<p class="mt-2 text-xs uppercase tracking-[0.14em]" :class="method.id === selectedPaymentMethodId ? 'text-white/80' : 'text-slate-500'">
+											{{ method.method_type?.replace('_', ' ') || 'Method' }}
+										</p>
+									</button>
+								</div>
 								<p v-else class="text-sm text-gray-500">No payment methods available for this event.</p>
 							</div>
 
@@ -769,34 +786,33 @@
 									</div>
 								</div>
 
-								<div v-else-if="isStripeMethod" class="mt-3 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-									Card payments will be processed securely through Stripe after submitting checkout.
-								</div>
-							</div>
-
-							<div class="rounded-xl border border-slate-200 bg-white p-4">
-								<div class="flex items-center justify-between">
-									<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
-									<p class="text-xs text-slate-500">Per attendee</p>
-								</div>
-								<div class="mt-3 space-y-2">
-									<div
-										v-for="item in attendeePaymentBreakdown"
-										:key="item.index"
-										class="flex items-center justify-between rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 text-sm"
-									>
-										<div>
-											<p class="font-semibold text-slate-800">{{ item.name }}</p>
-											<p class="text-xs text-slate-500">{{ item.packageName }}</p>
+								<div v-else-if="isStripeMethod" class="mt-4 space-y-3">
+										<div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+											<div class="flex items-center justify-between gap-2">
+												<p>Enter your card details. Payment is processed securely with Stripe.</p>
+												<div class="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
+													<UIcon name="i-heroicons-lock-closed" class="h-3.5 w-3.5" />
+													Secured by Stripe
+												</div>
+											</div>
+									</div>
+										<div v-if="isStripeTestMode" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
+											<p class="font-bold uppercase tracking-[0.12em]">Stripe test mode</p>
+											<p class="mt-1">Use card number <span class="font-black">4242 4242 4242 4242</span>, any future expiry date, any CVC.</p>
+											<div class="mt-3">
+												<label class="mb-1 block text-[11px] font-semibold text-amber-900">Stripe publishable key override</label>
+												<UInput v-model="manualStripePublicKey" placeholder="pk_test_..." />
+											</div>
 										</div>
-										<p class="font-semibold text-slate-900">{{ formatMoney(item.amount, item.currency) }}</p>
+										<div v-if="!effectiveStripePublishableKey" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+											Missing Stripe publishable key. Add it in test mode override or Stripe settings.
+										</div>
+									<div class="rounded-lg border border-slate-300 bg-white p-3">
+										<div ref="stripeCardMountRef" class="min-h-[44px]"></div>
 									</div>
-								</div>
-								<div class="mt-4 border-t border-slate-100 pt-3">
-									<div class="flex items-center justify-between text-sm font-bold text-slate-900">
-										<span>Total</span>
-										<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
-									</div>
+									<p v-if="stripeCardError" class="text-xs font-semibold text-red-600">{{ stripeCardError }}</p>
+									<p v-else-if="!stripeCardReady" class="text-xs text-slate-500">Complete card details to enable checkout.</p>
+									<p v-else class="text-xs font-semibold text-emerald-700">Card details ready.</p>
 								</div>
 							</div>
 						</div>
@@ -828,6 +844,71 @@
 						</div>
 					</div>
 				</main>
+
+				<aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0">
+					<div class="space-y-4 lg:sticky lg:top-24">
+						<div class="rounded-2xl border border-slate-900 bg-slate-900 p-4 text-white shadow-lg">
+							<p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/70">Live checkout pricing</p>
+							<p class="mt-2 text-sm text-white/90">Transparent totals powered by server-side pricing rules.</p>
+						</div>
+
+						<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
+								<p class="text-xs text-slate-500">Calculated server-side</p>
+							</div>
+							<p v-if="checkoutPreviewLoading" class="mt-3 text-xs text-slate-500">Refreshing payment breakdown...</p>
+							<p v-else-if="checkoutPreviewError" class="mt-3 text-xs font-semibold text-red-600">{{ checkoutPreviewError }}</p>
+							<div class="mt-3 space-y-2">
+								<div
+									v-for="item in breakdownLines"
+									:key="item.id"
+									class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-sm"
+								>
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="font-semibold text-slate-800">{{ item.name }}</p>
+											<p class="text-xs text-slate-500">{{ item.description }}</p>
+											<p v-if="item.discountHint" class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{{ item.discountHint }}</p>
+										</div>
+										<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
+									</div>
+									<p class="mt-2 text-[11px] text-slate-600">
+										{{ formatMoney(item.originalAmount, item.currency) }}
+										<span class="text-slate-400">-</span>
+										<span class="text-emerald-700">{{ formatMoney(item.discountAmount, item.currency) }}</span>
+										<span class="text-slate-400">=</span>
+										<span class="font-semibold text-slate-800">{{ formatMoney(item.finalAmount, item.currency) }}</span>
+									</p>
+								</div>
+								<p v-if="!breakdownLines.length && !checkoutPreviewLoading" class="text-xs text-slate-500">No payable items selected yet.</p>
+							</div>
+							<div class="mt-4 border-t border-slate-100 pt-3 text-sm">
+								<div class="flex items-center justify-between text-slate-600">
+									<span>Subtotal</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.originalAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-1 flex items-center justify-between text-emerald-700">
+									<span>Total discount</span>
+									<span>-{{ formatMoney(paymentBreakdownTotal.discountAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-2 flex items-center justify-between text-base font-bold text-slate-900">
+									<span>Total due</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<p v-if="isPollingPaymentStatus" class="mt-2 text-xs font-semibold text-amber-700">{{ paymentProcessingMessage || 'Finalizing your payment...' }}</p>
+							</div>
+						</div>
+
+						<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+							<div class="flex items-center gap-2 font-semibold">
+								<UIcon name="i-heroicons-lock-closed" class="h-4 w-4" />
+								Powered and secured by Stripe
+							</div>
+							<p class="mt-1 text-xs text-emerald-700">Card data is tokenized by Stripe and never stored directly in AMDG forms.</p>
+						</div>
+					</div>
+				</aside>
 			</template>
 				</div>
 	</div>
@@ -884,6 +965,10 @@
 					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">Stripe next step</p>
 					<p class="mt-1 text-sm text-emerald-900">Your booking is created. Complete card payment using the provided Stripe flow.</p>
 				</div>
+				<div v-if="isPollingPaymentStatus || paymentProcessingMessage" class="rounded-xl border border-amber-200 bg-amber-50 p-4 md:col-span-2">
+					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Payment processing</p>
+					<p class="mt-1 text-sm text-amber-900">{{ paymentProcessingMessage || 'Waiting for payment confirmation from Stripe...' }}</p>
+				</div>
 			</div>
 
 			<div class="flex justify-end">
@@ -894,7 +979,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
@@ -918,11 +1003,15 @@ import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
 import { useBookingPackages } from '~/composables/resources/booking/bookingPackages'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
-import { locationsAreasList } from '~/api/sdk.gen'
-import { buildCheckoutPayload, createIdempotencyKey } from '~/composables/registration/checkout'
+import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
+import { useStripeConfig } from '~/composables/resources/common/stripe'
+import { bookingsListRetrieve, locationsAreasList } from '~/api/sdk.gen'
+import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
 import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
+import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
 
 // Create validation schema for attendee details
 const attendeeValidationSchema = z.object({
@@ -971,6 +1060,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const store = useRegistrationStore()
+const runtimeConfig = useRuntimeConfig()
 
 // Initialize form (will be reset when currentAttendee changes)
 const { values, errors, setFieldValue, resetForm, validate } = useForm({
@@ -1251,25 +1341,71 @@ const paymentMethodsQuery = usePaymentMethods(
 	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
 )
 const paymentMethods = computed(() => paymentMethodsQuery.data.value?.data?.results || [])
-const paymentMethodOptions = computed(() =>
-	paymentMethods.value.map((method) => ({
-		label: method.title,
-		value: method.id,
-	}))
-)
 const selectedPaymentMethodId = ref<number | undefined>(undefined)
 const selectedPaymentMethod = computed(() => paymentMethods.value.find((method) => method.id === selectedPaymentMethodId.value))
+const getMethodIcon = (methodType?: string) => {
+	if (methodType === 'STRIPE') return 'i-heroicons-credit-card'
+	if (methodType === 'BANK_TRANSFER') return 'i-heroicons-building-library'
+	if (methodType === 'CASH') return 'i-heroicons-banknotes'
+	return 'i-heroicons-wallet'
+}
 
 const paymentMethodTypeLabel = computed(() => {
 	if (!selectedPaymentMethod.value?.method_type) return 'Method'
 	if (selectedPaymentMethod.value.method_type === 'BANK_TRANSFER') return 'Bank transfer'
-	if (selectedPaymentMethod.value.method_type === 'STRIPE') return 'Stripe'
+	if (selectedPaymentMethod.value.method_type === 'STRIPE') return 'Card payment'
 	if (selectedPaymentMethod.value.method_type === 'CASH') return 'Cash'
 	return selectedPaymentMethod.value.method_type
 })
 
 const isBankTransferMethod = computed(() => selectedPaymentMethod.value?.method_type === 'BANK_TRANSFER')
 const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+
+type PreviewDiscountLine = {
+	name?: string
+	amount?: string
+}
+
+type PreviewPackage = {
+	package_name?: string
+	final_amount?: string
+	discount_total?: string
+	currency?: string
+	applied_discounts?: PreviewDiscountLine[]
+}
+
+type PreviewProductLine = {
+	product_title?: string
+	quantity?: number
+	line_total?: string
+	currency?: string
+	applied_discounts?: PreviewDiscountLine[]
+}
+
+type PreviewAttendee = {
+	attendee_name?: string
+	package?: PreviewPackage
+	products?: PreviewProductLine[]
+	attendee_total?: string
+	currency?: string
+}
+
+type CheckoutPreviewData = {
+	total_amount?: string
+	currency?: string
+	attendees?: PreviewAttendee[]
+}
+
+type BreakdownLine = {
+	id: string
+	name: string
+	description: string
+	originalAmount: number
+	discountAmount: number
+	finalAmount: number
+	currency: string
+	discountHint?: string
+}
 
 const bankDetails = computed(() => {
 	const details = selectedPaymentMethod.value?.provided_details as Record<string, unknown> | undefined
@@ -1280,31 +1416,152 @@ const bankDetails = computed(() => {
 	}
 })
 
+const checkoutPreviewMutation = useCheckoutPreview()
 const checkoutMutation = useCheckoutBooking()
+const stripeConfigQuery = useStripeConfig()
+const isStripeTestMode = computed(() => !!runtimeConfig.public.stripeTestMode)
+const testModeStripePublishableKey = computed(() => String(runtimeConfig.public.stripeTestPublishableKey || '').trim())
+const manualStripePublicKey = ref(testModeStripePublishableKey.value)
+const effectiveStripePublishableKey = computed(() => {
+	const manualKey = manualStripePublicKey.value.trim()
+	if (isStripeTestMode.value && manualKey) {
+		return manualKey
+	}
+	const apiKey = stripeConfigQuery.data.value?.data?.publishable_key?.trim()
+	if (apiKey) {
+		return apiKey
+	}
+	return testModeStripePublishableKey.value
+})
+
 const idempotencyKey = ref(createIdempotencyKey())
 
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
 const showCheckoutSuccessModal = ref(false)
+const checkoutPreview = ref<CheckoutPreviewData | null>(null)
+const checkoutPreviewError = ref('')
+const checkoutPreviewLoading = computed(() => checkoutPreviewMutation.isPending.value)
 
-const attendeePaymentBreakdown = computed(() =>
-	store.attendees.map((attendee, index) => {
-		const pkg = packageById(attendee.packageId)
-		return {
-			index,
-			name: attendeeDisplayName(attendee, index),
-			packageName: pkg?.name || 'No package selected',
-			amount: Number(pkg?.modified_amount || 0),
-			currency: pkg?.base_amount_currency || checkoutResult.value?.currency || 'GBP',
+const stripeCardMountRef = ref<HTMLElement | null>(null)
+const stripeInstance = ref<Stripe | null>(null)
+const stripeElements = ref<StripeElements | null>(null)
+const stripeCardElement = ref<StripeCardElement | null>(null)
+const stripeCardReady = ref(false)
+const stripeCardError = ref('')
+const stripeClientSecret = ref<string | null>(null)
+
+const isPollingPaymentStatus = ref(false)
+const paymentProcessingMessage = ref('')
+
+let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let paymentPollingTimer: ReturnType<typeof setInterval> | null = null
+
+const parseDiscountAmount = (value: string | undefined) => Math.abs(Number(value || 0))
+
+const previewTriggerSignature = computed(() => JSON.stringify(
+	store.attendees.map((attendee) => ({
+		attendeeId: attendee.attendeeId || null,
+		firstName: attendee.first_name,
+		lastName: attendee.last_name,
+		dob: attendee.date_of_birth,
+		relationship: attendee.relationship_to_user || null,
+		areaFrom: attendee.area_from || null,
+		packageId: attendee.packageId || null,
+		products: attendee.productSelections || [],
+		consents: attendee.consents,
+		answers: attendee.questionAnswers,
+	}))
+))
+
+const breakdownLines = computed<BreakdownLine[]>(() => {
+	const previewAttendees = Array.isArray(checkoutPreview.value?.attendees)
+		? checkoutPreview.value!.attendees!
+		: []
+
+	if (!previewAttendees.length) {
+		return store.attendees.map((attendee, index) => {
+			const pkg = packageById(attendee.packageId)
+			const amount = Number(pkg?.modified_amount || 0)
+			const currency = pkg?.base_amount_currency || checkoutResult.value?.currency || 'GBP'
+			return {
+				id: `fallback-${index}`,
+				name: attendeeDisplayName(attendee, index),
+				description: pkg?.name || 'No package selected',
+				originalAmount: amount,
+				discountAmount: 0,
+				finalAmount: amount,
+				currency,
+			}
+		})
+	}
+
+	const lines: BreakdownLine[] = []
+	previewAttendees.forEach((attendee, attendeeIndex) => {
+		const attendeeName = attendee.attendee_name || `Attendee ${attendeeIndex + 1}`
+		const packageLine = attendee.package
+		if (packageLine) {
+			const packageDiscount = parseDiscountAmount(packageLine.discount_total)
+			const packageFinal = Number(packageLine.final_amount || 0)
+			const discountHint = packageLine.applied_discounts?.length
+				? `${packageLine.applied_discounts.length} discount(s)`
+				: undefined
+			lines.push({
+				id: `package-${attendeeIndex}`,
+				name: attendeeName,
+				description: packageLine.package_name || 'Package',
+				originalAmount: packageFinal + packageDiscount,
+				discountAmount: packageDiscount,
+				finalAmount: packageFinal,
+				currency: packageLine.currency || checkoutPreview.value?.currency || 'GBP',
+				discountHint,
+			})
 		}
+
+		attendee.products?.forEach((product, productIndex) => {
+			const productDiscount = (product.applied_discounts || []).reduce((sum, discount) => {
+				return sum + parseDiscountAmount(discount.amount)
+			}, 0)
+			const productFinal = Number(product.line_total || 0)
+			const discountHint = product.applied_discounts?.length
+				? `${product.applied_discounts.length} discount(s)`
+				: undefined
+			lines.push({
+				id: `product-${attendeeIndex}-${productIndex}`,
+				name: `${attendeeName} add-on`,
+				description: `${product.product_title || 'Product'} x${product.quantity || 1}`,
+				originalAmount: productFinal + productDiscount,
+				discountAmount: productDiscount,
+				finalAmount: productFinal,
+				currency: product.currency || checkoutPreview.value?.currency || 'GBP',
+				discountHint,
+			})
+		})
 	})
-)
+
+	return lines
+})
 
 const paymentBreakdownTotal = computed(() => {
-	const amount = attendeePaymentBreakdown.value.reduce((sum, item) => sum + item.amount, 0)
-	const currency = attendeePaymentBreakdown.value.find((item) => item.currency)?.currency || checkoutResult.value?.currency || 'GBP'
-	return { amount, currency }
+	if (checkoutPreview.value?.total_amount) {
+		const computedOriginal = breakdownLines.value.reduce((sum, item) => sum + item.originalAmount, 0)
+		const computedDiscount = breakdownLines.value.reduce((sum, item) => sum + item.discountAmount, 0)
+		return {
+			originalAmount: computedOriginal,
+			discountAmount: computedDiscount,
+			amount: Number(checkoutPreview.value.total_amount || 0),
+			currency: checkoutPreview.value.currency || 'GBP',
+		}
+	}
+
+	const originalAmount = breakdownLines.value.reduce((sum, item) => sum + item.originalAmount, 0)
+	const discountAmount = breakdownLines.value.reduce((sum, item) => sum + item.discountAmount, 0)
+	const amount = breakdownLines.value.reduce((sum, item) => sum + item.finalAmount, 0)
+	const currency = breakdownLines.value.find((item) => item.currency)?.currency || checkoutResult.value?.currency || 'GBP'
+	return { originalAmount, discountAmount, amount, currency }
 })
+
+const showCheckoutPricingSidebar = computed(() => activeStepIndex.value === reviewStepIndex)
 
 const formatMoney = (value: number | string, currency: string = 'GBP') => {
 	const amount = typeof value === 'number' ? value : Number(value || 0)
@@ -1507,7 +1764,13 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		return !!store.bookingIntentId && !!selectedPaymentMethodId.value && allAttendeesReady
+		if (!store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
+			return false
+		}
+		if (isStripeMethod.value) {
+			return stripeCardReady.value && !stripeCardError.value
+		}
+		return true
 	}
 	return true
 })
@@ -1549,6 +1812,8 @@ const getCannotContinueMessage = () => {
 	}
 
 	if (activeStepIndex.value === reviewStepIndex) {
+		if (isStripeMethod.value && stripeCardError.value) return stripeCardError.value
+		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
 		if (!selectedPaymentMethodId.value) return 'Please choose a payment method.'
 		return 'Some attendees are missing required information.'
 	}
@@ -1666,6 +1931,150 @@ watch(
 	},
 	{ immediate: true }
 )
+
+const refreshCheckoutPreview = async () => {
+	if (!store.bookingIntentId) return
+	if (activeStepIndex.value !== reviewStepIndex) return
+
+	checkoutPreviewError.value = ''
+	try {
+		const payload = buildCheckoutPreviewPayload({
+			bookingIntentId: store.bookingIntentId,
+			attendees: store.attendees,
+		})
+		const response = await checkoutPreviewMutation.mutateAsync(payload)
+		checkoutPreview.value = (response.data || null) as CheckoutPreviewData | null
+	} catch (error) {
+		checkoutPreview.value = null
+		checkoutPreviewError.value = 'Unable to refresh payment breakdown right now.'
+		console.error('Checkout preview failed', error)
+	}
+}
+
+const scheduleCheckoutPreviewRefresh = () => {
+	if (previewDebounceTimer) {
+		clearTimeout(previewDebounceTimer)
+	}
+	previewDebounceTimer = setTimeout(() => {
+		void refreshCheckoutPreview()
+	}, 350)
+}
+
+watch(
+	[() => activeStepIndex.value, () => store.bookingIntentId, () => selectedPaymentMethodId.value, previewTriggerSignature],
+	() => {
+		if (activeStepIndex.value !== reviewStepIndex) return
+		scheduleCheckoutPreviewRefresh()
+	},
+	{ immediate: true }
+)
+
+const teardownStripeElements = () => {
+	if (stripeCardElement.value) {
+		stripeCardElement.value.unmount()
+		stripeCardElement.value = null
+	}
+	stripeElements.value = null
+	stripeInstance.value = null
+	stripeCardReady.value = false
+	stripeCardError.value = ''
+}
+
+const ensureStripeCardMounted = async () => {
+	if (!isStripeMethod.value || activeStepIndex.value !== reviewStepIndex) return
+	if (stripeCardElement.value) return
+
+	const publishableKey = effectiveStripePublishableKey.value
+	if (!publishableKey) return
+
+	await nextTick()
+	if (!stripeCardMountRef.value) return
+
+	const stripe = await loadStripe(publishableKey)
+	if (!stripe) {
+		stripeCardError.value = 'Could not initialize Stripe card form.'
+		return
+	}
+
+	stripeInstance.value = stripe
+	stripeElements.value = stripe.elements()
+	stripeCardElement.value = stripeElements.value.create('card', {
+		hidePostalCode: true,
+	})
+	stripeCardElement.value.mount(stripeCardMountRef.value)
+	stripeCardElement.value.on('change', (event) => {
+		stripeCardError.value = event.error?.message || ''
+		stripeCardReady.value = !!event.complete && !event.error
+	})
+}
+
+watch(
+	[() => isStripeMethod.value, () => activeStepIndex.value, () => effectiveStripePublishableKey.value],
+	([stripeSelected, step, key], [, , previousKey]) => {
+		if (!stripeSelected || step !== reviewStepIndex) {
+			teardownStripeElements()
+			return
+		}
+		if (key !== previousKey) {
+			teardownStripeElements()
+		}
+		void ensureStripeCardMounted()
+	},
+	{ immediate: true }
+)
+
+const stopPaymentStatusPolling = () => {
+	if (!paymentPollingTimer) return
+	clearInterval(paymentPollingTimer)
+	paymentPollingTimer = null
+	isPollingPaymentStatus.value = false
+}
+
+const startPaymentStatusPolling = (bookingId: number) => {
+	stopPaymentStatusPolling()
+	isPollingPaymentStatus.value = true
+	paymentProcessingMessage.value = 'Processing your card payment and issuing tickets...'
+
+	let attempts = 0
+	const maxAttempts = 20
+
+	paymentPollingTimer = setInterval(async () => {
+		attempts += 1
+		try {
+			const response = await bookingsListRetrieve({ path: { id: bookingId } })
+			const booking = response.data
+			const payments = booking?.payments || []
+			const hasCompletedPayment = payments.some((payment) => payment?.status === 'COMPLETED')
+
+			if (hasCompletedPayment) {
+				stopPaymentStatusPolling()
+				checkoutResult.value = {
+					...checkoutResult.value,
+					status: 'confirmed',
+				}
+				showCheckoutSuccessModal.value = true
+				toast.add({
+					title: 'Payment confirmed',
+					description: 'Your card payment was confirmed and registration is complete.',
+					color: 'green',
+				})
+			}
+		} catch (error) {
+			console.error('Payment status polling failed', error)
+		}
+
+		if (attempts >= maxAttempts) {
+			stopPaymentStatusPolling()
+			paymentProcessingMessage.value = 'Payment is still processing. You can safely refresh this page later.'
+			showCheckoutSuccessModal.value = true
+			toast.add({
+				title: 'Payment processing',
+				description: 'Stripe confirmation completed. Ticket issuance may take a little longer.',
+				color: 'amber',
+			})
+		}
+	}, 3000)
+}
 
 watch(
 	() => store.currentIndex,
@@ -1819,6 +2228,7 @@ const handleCheckout = async () => {
 	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
+	stripeCardError.value = ''
 
 	try {
 		const payload = buildCheckoutPayload({
@@ -1831,6 +2241,57 @@ const handleCheckout = async () => {
 			idempotencyKey: idempotencyKey.value,
 		})
 		checkoutResult.value = response.data
+
+		if (isStripeMethod.value) {
+			stripeClientSecret.value = checkoutResult.value?.stripe_client_secret || null
+			if (!stripeClientSecret.value) {
+				throw new Error('Missing Stripe client secret in checkout response.')
+			}
+
+			await ensureStripeCardMounted()
+			if (!stripeInstance.value || !stripeCardElement.value) {
+				throw new Error('Stripe card form is not ready yet.')
+			}
+
+			const confirmation = await stripeInstance.value.confirmCardPayment(stripeClientSecret.value, {
+				payment_method: {
+					card: stripeCardElement.value,
+					billing_details: {
+						name: attendeeDisplayName(store.attendees[0], 0),
+						email: store.attendees[0]?.email || undefined,
+					},
+				},
+			})
+
+			if (confirmation.error) {
+				stripeCardError.value = confirmation.error.message || 'Card confirmation failed.'
+				toast.add({ title: 'Payment failed', description: stripeCardError.value, color: 'red' })
+				return
+			}
+
+			if (confirmation.paymentIntent?.status === 'succeeded') {
+				const bookingId = Number(checkoutResult.value?.booking_id || 0)
+				if (bookingId > 0) {
+					startPaymentStatusPolling(bookingId)
+				}
+				showCheckoutSuccessModal.value = true
+				toast.add({
+					title: 'Payment confirmed',
+					description: 'Stripe payment confirmed. Finalizing your booking now.',
+					color: 'green',
+				})
+				return
+			}
+
+			toast.add({
+				title: 'Payment processing',
+				description: 'Stripe is still processing your payment.',
+				color: 'amber',
+			})
+			showCheckoutSuccessModal.value = true
+			return
+		}
+
 		showCheckoutSuccessModal.value = true
 		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
 	} catch (error) {
@@ -1840,6 +2301,20 @@ const handleCheckout = async () => {
 		isSaving.value = false
 	}
 }
+
+onBeforeUnmount(() => {
+	if (previewDebounceTimer) {
+		clearTimeout(previewDebounceTimer)
+		previewDebounceTimer = null
+	}
+	if (areaSearchDebounceTimer) {
+		clearTimeout(areaSearchDebounceTimer)
+		areaSearchDebounceTimer = null
+	}
+	stopIntentPing()
+	stopPaymentStatusPolling()
+	teardownStripeElements()
+})
 
 const goBack = () => {
 	if (event.value?.event_id) {
