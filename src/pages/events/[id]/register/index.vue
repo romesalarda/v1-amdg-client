@@ -689,9 +689,9 @@
 								<p class="text-sm text-gray-600">Choose the package for this attendee.</p>
 							</div>
 
-							<div v-if="bookingPackages.length" class="grid gap-4 sm:grid-cols-2">
+							<div v-if="availableBookingPackages.length" class="grid gap-4 sm:grid-cols-2">
 								<label
-									v-for="pkg in bookingPackages"
+									v-for="pkg in availableBookingPackages"
 									:key="pkg.id"
 									class="flex cursor-pointer flex-col rounded-xl border p-4 text-sm"
 									:class="pkg.id === currentAttendee.packageId ? 'border-primary bg-primary/5' : 'border-gray-200'"
@@ -711,7 +711,10 @@
 									</p>
 								</label>
 							</div>
-							<p v-else class="text-sm text-gray-500">No packages available for this attendee.</p>
+							<p v-else class="text-sm text-gray-500">No packages are currently available for this attendee.</p>
+							<p v-if="currentAttendee.packageId && !isCurrentAttendeePackageAvailable" class="text-xs font-semibold text-amber-700">
+								The previously selected package is outside its availability window. Please pick another package.
+							</p>
 						</div>
 
 									<div v-else-if="activeStepIndex === 4" class="space-y-6">
@@ -782,6 +785,20 @@
 											<p class="mt-1 text-xs text-gray-600">
 												Package: {{ packageById(attendee.packageId)?.name || 'Not selected' }}
 											</p>
+											<div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													Age {{ calculateAge(attendee.date_of_birth || '') ?? 'N/A' }}
+												</span>
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													{{ attendee.personalInfo.medicalConditions.length }} medical
+												</span>
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													{{ attendee.personalInfo.dietaryRequirements.length }} dietary
+												</span>
+												<span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+													Due {{ formatMoney(attendeeReviewAmount(attendee, index).amount, attendeeReviewAmount(attendee, index).currency) }}
+												</span>
+											</div>
 										</div>
 										<UButton size="xs" color="gray" variant="ghost" @click="jumpToAttendee(index)">
 											Edit
@@ -1394,6 +1411,55 @@ const allPackagesQuery = useBookingPackages(
 const allPackages = computed(() => allPackagesQuery.data.value?.data?.results || [])
 const packageById = (packageId?: number) => allPackages.value.find((pkg) => pkg.id === packageId)
 
+type AvailabilityWindow = {
+	available_from?: string | null
+	available_to?: string | null
+}
+
+const isDateWithinAvailabilityWindow = (window: AvailabilityWindow, now: Date) => {
+	const from = window.available_from ? new Date(window.available_from) : null
+	const to = window.available_to ? new Date(window.available_to) : null
+
+	if (from && Number.isNaN(from.getTime())) return false
+	if (to && Number.isNaN(to.getTime())) return false
+
+	if (from && now < from) return false
+	if (to && now > to) return false
+	return true
+}
+
+const isPackageCurrentlyAvailable = (pkg: any) => {
+	const windows = Array.isArray(pkg?.availability_windows) ? pkg.availability_windows as AvailabilityWindow[] : []
+	if (!windows.length) return true
+	const now = new Date()
+	return windows.some((window) => isDateWithinAvailabilityWindow(window, now))
+}
+
+const availableBookingPackages = computed(() => bookingPackages.value.filter((pkg) => isPackageCurrentlyAvailable(pkg)))
+const isCurrentAttendeePackageAvailable = computed(() => {
+	if (!currentAttendee.value?.packageId) return false
+	const pkg = packageById(currentAttendee.value.packageId)
+	if (!pkg) return false
+	return isPackageCurrentlyAvailable(pkg)
+})
+
+const attendeeReviewAmount = (attendee: AttendeeDraft, index: number) => {
+	const previewAttendees = checkoutPreview.value?.attendees || []
+	const previewAttendee = previewAttendees[index]
+	if (previewAttendee?.attendee_total) {
+		return {
+			amount: Number(previewAttendee.attendee_total || 0),
+			currency: previewAttendee.currency || checkoutPreview.value?.currency || 'GBP',
+		}
+	}
+
+	const pkg = packageById(attendee.packageId)
+	return {
+		amount: Number(pkg?.modified_amount || 0),
+		currency: pkg?.base_amount_currency || checkoutPreview.value?.currency || 'GBP',
+	}
+}
+
 const paymentMethodsQuery = usePaymentMethods(
 	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
 )
@@ -1814,7 +1880,7 @@ const canContinue = computed(() => {
 		return hasValidPersonalInfo
 	}
 	if (activeStepIndex.value === 3) {
-		return !!currentAttendee.value.packageId
+		return !!currentAttendee.value.packageId && isCurrentAttendeePackageAvailable.value
 	}
 	if (activeStepIndex.value === 5) {
 		return requiredConsentsMissing.value === 0
