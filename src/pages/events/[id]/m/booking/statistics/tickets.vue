@@ -250,8 +250,8 @@ const { data: scopeData, isLoading: scopeLoading, error: scopeError } = useTicke
 const ticketStatusChartData = computed<PieChartData[]>(() => {
   if (!statusData.value?.data?.distribution) return []
   return statusData.value.data.distribution.map((item: any) => ({
-    name: formatStatus(item.status),
-    value: item.count,
+    name: formatStatus(item.label),
+    value: item.value,
   }))
 })
 
@@ -273,6 +273,9 @@ const ticketTypesChartData = computed<BarChartData[]>(() => {
 
 // Helper function to format status/scope
 const formatStatus = (text: string) => {
+  if (!text) {
+    return text
+  }
   return text.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
 }
 </script>
