@@ -147,6 +147,7 @@
                   v-model="form.is_active"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
+                  :disabled="variantsData?.data?.count == 0"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Active</div>
@@ -159,6 +160,7 @@
                   v-model="form.verified"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
+                  :disabled="variantsData?.data?.count == 0"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Verified</div>

@@ -603,6 +603,234 @@
             </div>
           </template>
 
+          <!-- Package Products Tab -->
+          <template v-else-if="currentTab === 'package-products'">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-link" class="w-5 h-5 text-primary" />
+                <div>
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Package Products</h2>
+                  <p class="text-xs text-gray-500">Link products to registration packages with quantity and pricing modifier</p>
+                </div>
+              </div>
+
+              <div class="w-full md:w-auto min-w-[260px]">
+                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Booking Package</label>
+                <select
+                  v-model.number="selectedPackageId"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="null">Select a booking package...</option>
+                  <option v-for="pkg in bookingPackages" :key="pkg.id" :value="pkg.id">
+                    {{ pkg.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 space-y-3">
+              <p class="text-xs text-gray-600">
+                Use a negative percentage modifier to discount bundled products. A modifier of -100 makes the linked product free within the package.
+              </p>
+
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div class="md:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Event Product</label>
+                  <select
+                    v-model.number="packageProductForm.productId"
+                    :disabled="!selectedPackageId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-100"
+                  >
+                    <option :value="null">Select product...</option>
+                    <option v-for="product in availableProductsForLinking" :key="product.id" :value="product.id">
+                      {{ product.title }} ({{ product.display_code }})
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Quantity / Attendee</label>
+                  <input
+                    v-model.number="packageProductForm.quantityPerAttendee"
+                    type="number"
+                    min="1"
+                    :disabled="!selectedPackageId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Modifier (%)</label>
+                  <input
+                    v-model="packageProductForm.percentageModifier"
+                    type="number"
+                    step="0.01"
+                    min="-100"
+                    max="100"
+                    :disabled="!selectedPackageId"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-100"
+                  />
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-2">
+                <UButton
+                  size="sm"
+                  variant="ghost"
+                  color="gray"
+                  @click="resetPackageProductForm"
+                  :disabled="!selectedPackageId"
+                >
+                  Reset
+                </UButton>
+                <UButton
+                  size="sm"
+                  color="primary"
+                  icon="i-heroicons-plus"
+                  :loading="createPackageProductMutation.isPending.value"
+                  :disabled="!selectedPackageId"
+                  @click="createPackageProductLink"
+                >
+                  Link Product
+                </UButton>
+              </div>
+            </div>
+
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-3">
+              <div class="relative flex-1 max-w-md">
+                <UIcon name="i-heroicons-magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  v-model="packageProductsSearchQuery"
+                  type="text"
+                  placeholder="Search linked products..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+              <UBadge color="gray" variant="soft">
+                {{ filteredPackageProducts.length }} linked
+              </UBadge>
+            </div>
+
+            <div v-if="bookingPackagesLoading || packageProductsLoading" class="p-6 space-y-3">
+              <div v-for="i in 6" :key="i" class="h-14 bg-gray-100 rounded-lg animate-pulse" />
+            </div>
+
+            <div v-else-if="!selectedPackageId" class="p-12 text-center">
+              <UIcon name="i-heroicons-link" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">Select a package first</h3>
+              <p class="text-sm text-gray-500">Choose a booking package to view and manage linked products.</p>
+            </div>
+
+            <div v-else-if="filteredPackageProducts.length === 0" class="p-12 text-center">
+              <UIcon name="i-heroicons-cube-transparent" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">No linked products</h3>
+              <p class="text-sm text-gray-500">Use the form above to link products to this package.</p>
+            </div>
+
+            <div v-else class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-50">
+                    <th class="py-3 px-4 font-semibold text-gray-700">Product</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Quantity / Attendee</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Base</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Modifier</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Modified</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="row in filteredPackageProducts"
+                    :key="row.id"
+                    class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td class="py-3 px-4">
+                      <div>
+                        <div class="font-semibold text-gray-900">{{ row.product_title }}</div>
+                        <div class="text-xs text-gray-500 font-mono">{{ row.product_display_code }}</div>
+                      </div>
+                    </td>
+
+                    <td class="py-3 px-4">
+                      <template v-if="editingPackageProductId === row.id">
+                        <input
+                          v-model.number="editingPackageProduct.quantityPerAttendee"
+                          type="number"
+                          min="1"
+                          class="w-28 px-2 py-1 border border-gray-300 rounded text-sm"
+                        />
+                      </template>
+                      <template v-else>
+                        {{ row.quantity_per_attendee }}
+                      </template>
+                    </td>
+
+                    <td class="py-3 px-4 font-semibold text-gray-900">{{ row.base_amount }}</td>
+
+                    <td class="py-3 px-4">
+                      <template v-if="editingPackageProductId === row.id">
+                        <input
+                          v-model="editingPackageProduct.percentageModifier"
+                          type="number"
+                          step="0.01"
+                          min="-100"
+                          max="100"
+                          class="w-28 px-2 py-1 border border-gray-300 rounded text-sm"
+                        />
+                      </template>
+                      <template v-else>
+                        <UBadge :color="Number(row.percentage_modifier) < 0 ? 'green' : 'gray'" variant="soft" size="xs">
+                          {{ formatModifier(row.percentage_modifier ?? '0') }}
+                        </UBadge>
+                      </template>
+                    </td>
+
+                    <td class="py-3 px-4 font-semibold text-gray-900">{{ row.modified_amount }}</td>
+
+                    <td class="py-3 px-4">
+                      <div class="flex items-center justify-end gap-1">
+                        <template v-if="editingPackageProductId === row.id">
+                          <UButton
+                            size="xs"
+                            color="primary"
+                            icon="i-heroicons-check"
+                            :loading="updatePackageProductMutation.isPending.value"
+                            @click="savePackageProductEdit(row.id)"
+                          />
+                          <UButton
+                            size="xs"
+                            variant="ghost"
+                            color="gray"
+                            icon="i-heroicons-x-mark"
+                            @click="cancelPackageProductEdit"
+                          />
+                        </template>
+                        <template v-else>
+                          <UButton
+                            size="xs"
+                            variant="ghost"
+                            color="gray"
+                            icon="i-heroicons-pencil"
+                            @click="startPackageProductEdit(row)"
+                          />
+                          <UButton
+                            size="xs"
+                            variant="ghost"
+                            color="red"
+                            icon="i-heroicons-trash"
+                            :loading="deletePackageProductMutation.isPending.value"
+                            @click="deletePackageProductLink(row.id)"
+                          />
+                        </template>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </template>
+
           <!-- Stock Alerts Tab -->
           <template v-else-if="currentTab === 'stock'">
             <!-- Header -->
@@ -817,8 +1045,16 @@
 </template>
 
 <script setup lang="ts">
-import type { ProductList } from '~/api/types.gen'
+import type { BookingPackageList, ProductList } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
+import { useBookingPackages } from '~/composables/resources/booking/bookingPackages'
+import {
+  useBookingPackageProducts,
+  useCreateBookingPackageProduct,
+  useUpdateBookingPackageProduct,
+  useDeleteBookingPackageProduct,
+  type BookingPackageProduct,
+} from '~/composables/resources/booking/bookingProductPackages'
 import { useProducts } from '~/composables/resources/products/products'
 import { useProductCategories } from '~/composables/resources/products/productCategories'
 import { useProductEventCategories } from '~/composables/resources/products/productEventCategories'
@@ -850,6 +1086,7 @@ const currentTab = ref('products')
 const tabs = computed(() => [
   { value: 'products', label: 'Products', icon: 'i-heroicons-cube', badge: totalProducts.value },
   // { value: 'discounts', label: 'Discounts', icon: 'i-heroicons-tag' },
+  { value: 'package-products', label: 'Package Products', icon: 'i-heroicons-link' },
   { value: 'categories', label: 'Categories', icon: 'i-heroicons-folder' },
   { value: 'category-mapping', label: 'Category Mapping', icon: 'i-heroicons-squares-2x2' },
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
@@ -1323,5 +1560,246 @@ function getStockAlertLabel(product: ProductList) {
   if (product.variant_count === 0) return 'No Variants'
   if (product.variant_count <= 2) return 'Low Variants'
   return 'Check Variants'
+}
+
+// ============================================
+// Package Products Management
+// ============================================
+
+const bookingPackagesQuery = computed(() => {
+  const eventId = event.value?.data?.id
+  if (!eventId) return undefined
+
+  return {
+    event: eventId,
+    page_size: 100,
+  }
+})
+
+const { data: bookingPackagesData, isLoading: bookingPackagesLoading } = useBookingPackages(bookingPackagesQuery)
+const bookingPackages = computed<BookingPackageList[]>(() => bookingPackagesData.value?.data?.results || [])
+
+const selectedPackageId = ref<number | null>(null)
+
+watch(bookingPackages, (items) => {
+  if (!selectedPackageId.value && items.length > 0) {
+    selectedPackageId.value = Number(items[0].id)
+  }
+})
+
+const packageProductsSearchQuery = ref('')
+const packageProductForm = reactive({
+  productId: null as number | null,
+  quantityPerAttendee: 1,
+  percentageModifier: '-10.00',
+})
+
+const editingPackageProductId = ref<number | null>(null)
+const editingPackageProduct = reactive({
+  quantityPerAttendee: 1,
+  percentageModifier: '0.00',
+})
+
+const packageProductsQuery = computed(() => {
+  if (!selectedPackageId.value) return undefined
+  return selectedPackageId.value
+})
+
+const {
+  data: packageProductsData,
+  isLoading: packageProductsLoading,
+  refetch: refetchPackageProducts,
+} = useBookingPackageProducts(packageProductsQuery)
+
+const packageProducts = computed<BookingPackageProduct[]>(() => packageProductsData.value?.data?.results || [])
+
+const packageProductsEventProductQuery = computed(() => {
+  const eventId = event.value?.data?.id
+  if (!eventId) return undefined
+
+  return {
+    event: eventId,
+    page_size: 200,
+  }
+})
+
+const { data: packageProductsEventProductsData } = useProducts(packageProductsEventProductQuery)
+const packageProductsEventProducts = computed<ProductList[]>(() => packageProductsEventProductsData.value?.data?.results || [])
+
+const linkedProductIds = computed(() => new Set(packageProducts.value.map(item => Number(item.product))))
+
+const availableProductsForLinking = computed(() =>
+  packageProductsEventProducts.value.filter(product => !linkedProductIds.value.has(Number(product.id)))
+)
+
+const filteredPackageProducts = computed(() => {
+  const query = packageProductsSearchQuery.value.trim().toLowerCase()
+  if (!query) return packageProducts.value
+
+  return packageProducts.value.filter((item) =>
+    item.product_title.toLowerCase().includes(query) ||
+    item.product_display_code.toLowerCase().includes(query)
+  )
+})
+
+const createPackageProductMutation = useCreateBookingPackageProduct()
+const updatePackageProductMutation = useUpdateBookingPackageProduct()
+const deletePackageProductMutation = useDeleteBookingPackageProduct()
+
+function formatModifier(value: string | number) {
+  const numeric = Number(value)
+  if (Number.isNaN(numeric)) return '0.00%'
+  return `${numeric > 0 ? '+' : ''}${numeric.toFixed(2)}%`
+}
+
+function resetPackageProductForm() {
+  packageProductForm.productId = null
+  packageProductForm.quantityPerAttendee = 1
+  packageProductForm.percentageModifier = '-10.00'
+}
+
+async function createPackageProductLink() {
+  if (!selectedPackageId.value) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Select a booking package first',
+      color: 'red',
+    })
+    return
+  }
+
+  if (!packageProductForm.productId) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Select a product to link',
+      color: 'red',
+    })
+    return
+  }
+
+  if (!Number.isFinite(packageProductForm.quantityPerAttendee) || packageProductForm.quantityPerAttendee < 1) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Quantity per attendee must be at least 1',
+      color: 'red',
+    })
+    return
+  }
+
+  if (linkedProductIds.value.has(Number(packageProductForm.productId))) {
+    toast.add({
+      title: 'No changes needed',
+      description: 'This product is already linked to the selected package',
+      color: 'blue',
+    })
+    return
+  }
+
+  try {
+    await createPackageProductMutation.mutateAsync({
+      packageId: selectedPackageId.value,
+      body: {
+        product: Number(packageProductForm.productId),
+        quantity_per_attendee: Number(packageProductForm.quantityPerAttendee),
+        percentage_modifier: Number(packageProductForm.percentageModifier).toFixed(2),
+        booking_package: Number(selectedPackageId.value),
+      },
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Product linked to package',
+      color: 'green',
+    })
+
+    resetPackageProductForm()
+    refetchPackageProducts()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err?.message || 'Failed to link product to package',
+      color: 'red',
+    })
+  }
+}
+
+function startPackageProductEdit(row: BookingPackageProduct) {
+  editingPackageProductId.value = row.id
+  editingPackageProduct.quantityPerAttendee = Number(row.quantity_per_attendee)
+  editingPackageProduct.percentageModifier = Number(row.percentage_modifier).toFixed(2)
+}
+
+function cancelPackageProductEdit() {
+  editingPackageProductId.value = null
+  editingPackageProduct.quantityPerAttendee = 1
+  editingPackageProduct.percentageModifier = '0.00'
+}
+
+async function savePackageProductEdit(packageProductId: number) {
+  if (!selectedPackageId.value) return
+
+  if (!Number.isFinite(editingPackageProduct.quantityPerAttendee) || editingPackageProduct.quantityPerAttendee < 1) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Quantity per attendee must be at least 1',
+      color: 'red',
+    })
+    return
+  }
+
+  try {
+    await updatePackageProductMutation.mutateAsync({
+      packageId: selectedPackageId.value,
+      packageProductId,
+      body: {
+        quantity_per_attendee: Number(editingPackageProduct.quantityPerAttendee),
+        percentage_modifier: Number(editingPackageProduct.percentageModifier).toFixed(2),
+      },
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Linked product updated',
+      color: 'green',
+    })
+
+    cancelPackageProductEdit()
+    refetchPackageProducts()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err?.message || 'Failed to update linked product',
+      color: 'red',
+    })
+  }
+}
+
+async function deletePackageProductLink(packageProductId: number) {
+  if (!selectedPackageId.value) return
+
+  try {
+    await deletePackageProductMutation.mutateAsync({
+      packageId: selectedPackageId.value,
+      packageProductId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Linked product removed from package',
+      color: 'green',
+    })
+
+    if (editingPackageProductId.value === packageProductId) {
+      cancelPackageProductEdit()
+    }
+
+    refetchPackageProducts()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err?.message || 'Failed to remove linked product',
+      color: 'red',
+    })
+  }
 }
 </script>
