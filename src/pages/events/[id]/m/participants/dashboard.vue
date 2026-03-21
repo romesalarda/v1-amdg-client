@@ -159,6 +159,57 @@
             </div>
           </template>
 
+          <!-- Tickets View Statistics -->
+          <template v-else-if="currentView === 'tickets'">
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-ticket" class="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ totalIssuedTickets }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Tickets</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ activeIssuedTickets }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Active Tickets</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-check-badge" class="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ usedIssuedTickets }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Used Tickets</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-no-symbol" class="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ cancelledIssuedTickets }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Cancelled Tickets</div>
+                </div>
+              </div>
+            </div>
+          </template>
+
           <template v-else>
             <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
               <div class="flex items-center gap-3">
@@ -215,11 +266,11 @@
           <!-- Table Header -->
           <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : currentView === 'bookings' ? 'i-heroicons-ticket' : currentView === 'families' ? 'i-heroicons-home-modern' : 'i-heroicons-chart-bar'" class="w-5 h-5 text-primary" />
+              <UIcon :name="currentView === 'attendees' ? 'i-heroicons-user-group' : currentView === 'bookings' ? 'i-heroicons-ticket' : currentView === 'families' ? 'i-heroicons-home-modern' : currentView === 'tickets' ? 'i-heroicons-tag' : 'i-heroicons-chart-bar'" class="w-5 h-5 text-primary" />
               <div class="flex-1">
                 <div class="flex items-center gap-3 mb-1">
                   <h2 class="text-sm font-black text-primary uppercase tracking-widest">
-                    {{ currentView === 'attendees' ? 'Event Participants' : currentView === 'bookings' ? 'Event Bookings' : currentView === 'families' ? 'Event Families' : 'Event Statistics' }}
+                    {{ currentView === 'attendees' ? 'Event Participants' : currentView === 'bookings' ? 'Event Bookings' : currentView === 'families' ? 'Event Families' : currentView === 'tickets' ? 'Event Tickets' : 'Event Statistics' }}
                   </h2>
                   <!-- View Toggle -->
                   <div class="flex bg-gray-100 rounded-lg p-0.5">
@@ -257,6 +308,17 @@
                       Statistics
                     </button>
                     <button
+                      @click="changeView('tickets')"
+                      :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                        currentView === 'tickets'
+                          ? 'bg-white text-primary shadow-sm'
+                          : 'text-gray-600 hover:text-gray-900'
+                      ]"
+                    >
+                      Tickets
+                    </button>
+                    <button
                       @click="changeView('families')"
                       :class="[
                         'px-3 py-1 text-xs font-semibold rounded-md transition-colors',
@@ -278,6 +340,9 @@
                   </template>
                   <template v-else-if="currentView === 'families'">
                     Showing {{ familyGroups.length }} of {{ totalFamilyGroups }} families
+                  </template>
+                  <template v-else-if="currentView === 'tickets'">
+                    Manage ticket types and issued tickets for this event
                   </template>
                   <template v-else>
                     Statistics and analytics for event participants
@@ -327,7 +392,7 @@
           </div>
 
           <!-- Search Bar -->
-          <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <div v-if="currentView !== 'tickets'" class="px-6 py-4 border-b border-gray-100 bg-gray-50">
             <div class="flex items-center gap-3">
               <div class="flex-1">
                 <div class="relative">
@@ -393,7 +458,16 @@
           </div>
 
           <!-- Table -->
-          <div v-if="(currentView === 'attendees' && isLoading) || (currentView === 'bookings' && bookingsLoading) || (currentView === 'families' && familyGroupsLoading)" class="p-6 space-y-3">
+          <div v-if="currentView === 'tickets'">
+            <TicketsTab
+              :event-id="id"
+              :event-pk="event?.data?.id"
+              :event-start-date="event?.data?.start_datetime"
+              :event-end-date="event?.data?.end_datetime"
+            />
+          </div>
+
+          <div v-else-if="(currentView === 'attendees' && isLoading) || (currentView === 'bookings' && bookingsLoading) || (currentView === 'families' && familyGroupsLoading)" class="p-6 space-y-3">
             <div v-for="i in 10" :key="i" class="h-16 bg-gray-100 rounded-lg animate-pulse" />
           </div>
 
@@ -840,16 +914,16 @@
               <p class="text-sm text-gray-900">{{ selectedAttendeeDetails.relationship_display }}</p>
             </div>
           </div>
-
           <div class="pt-4 border-t p-2 m-2">
-            <!-- <UButton
+            <UButton
               block
               variant="solid"
+              class="mb-2"
               color="primary"
-              :to="`/events/${id}/m/participants/editor/${selectedAttendeeDetails.attendee_id}`"
+              :to="`/events/${id}/m/participants/editor/${selectedAttendeeDetails.attendee_id}?tab=booking`"
             >
-              Edit Details
-            </UButton> -->
+              View booking
+            </UButton>
             <UButton
               block
               variant="outline"
@@ -1486,6 +1560,7 @@ import {
   type AttendeePreRemovalSummary,
 } from '~/composables/resources/attendee/attendees'
 import { useBooking, useBookings } from '~/composables/resources/booking/bookings'
+import { useBookingTickets } from '~/composables/resources/booking/bookingTickets'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
@@ -1498,6 +1573,7 @@ import { usePartialUpdateFamilyAttendee, useDeleteFamilyAttendee } from '~/compo
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import RefundRequestModal from '~/components/events/modals/RefundRequestModal.vue'
+import TicketsTab from '~/components/events/participants/TicketsTab.vue'
 import StatisticsIndex from './statistics/index.vue'
 import type { AttendeeList, OrganisationList, BookingList, BookingDetail, FamilyGroupList, FamilyAttendee, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
 
@@ -1547,10 +1623,11 @@ const id = computed(() => route.params.id as string)
 const { data: event } = useEvent(id)
 
 // View toggle state
-const currentView = ref<'attendees' | 'bookings' | 'families' | 'statistics'>(
+const currentView = ref<'attendees' | 'bookings' | 'families' | 'statistics' | 'tickets'>(
   (route.query.view as string) === 'bookings' ? 'bookings' : 
   (route.query.view as string) === 'families' ? 'families' : 
   (route.query.view as string) === 'statistics' ? 'statistics' : 
+  (route.query.view as string) === 'tickets' ? 'tickets' :
   'attendees'
 )
 
@@ -2127,6 +2204,33 @@ const { data: staffData } = useAttendees(computed(() => ({
 })))
 const staffCount = computed(() => staffData.value?.data?.count || 0)
 
+const { data: issuedTicketsStatsData } = useBookingTickets(computed(() => ({
+  event: id.value,
+  page_size: 1,
+})))
+const totalIssuedTickets = computed(() => issuedTicketsStatsData.value?.data?.count || 0)
+
+const { data: activeIssuedTicketsStatsData } = useBookingTickets(computed(() => ({
+  event: id.value,
+  status: ['ACTIVE'],
+  page_size: 1,
+})))
+const activeIssuedTickets = computed(() => activeIssuedTicketsStatsData.value?.data?.count || 0)
+
+const { data: usedIssuedTicketsStatsData } = useBookingTickets(computed(() => ({
+  event: id.value,
+  status: ['USED'],
+  page_size: 1,
+})))
+const usedIssuedTickets = computed(() => usedIssuedTicketsStatsData.value?.data?.count || 0)
+
+const { data: cancelledIssuedTicketsStatsData } = useBookingTickets(computed(() => ({
+  event: id.value,
+  status: ['CANCELLED'],
+  page_size: 1,
+})))
+const cancelledIssuedTickets = computed(() => cancelledIssuedTicketsStatsData.value?.data?.count || 0)
+
 // Active filter count
 const activeFilterCount = computed(() => {
   let count = 0
@@ -2173,6 +2277,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
   if (currentView.value === 'bookings') query.view = 'bookings'
   if (currentView.value === 'families') query.view = 'families'
   if (currentView.value === 'statistics') query.view = 'statistics'
+  if (currentView.value === 'tickets') query.view = 'tickets'
   
   if (filters.value.organisation) query.organisation = filters.value.organisation
   if (filters.value.areaFrom) query.area_from = filters.value.areaFrom
@@ -2240,7 +2345,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
 }, { deep: true })
 
 // Functions
-function changeView(view: 'attendees' | 'bookings' | 'families' | 'statistics') {
+function changeView(view: 'attendees' | 'bookings' | 'families' | 'statistics' | 'tickets') {
   currentView.value = view
   currentPage.value = 1 // Reset to first page
   selectedAttendees.value = [] // Clear selection

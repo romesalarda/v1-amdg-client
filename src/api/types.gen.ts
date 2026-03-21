@@ -27152,6 +27152,10 @@ export type BookingsTicketsListData = {
          */
         booking__reference?: string;
         /**
+         * Filter by event UUID (through attendee's booking)
+         */
+        event?: string;
+        /**
          * Filter tickets issued after this date
          */
         issued_after?: string;

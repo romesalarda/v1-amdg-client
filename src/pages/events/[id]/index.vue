@@ -15,7 +15,7 @@
             v-if="event.main_landing_image?.image"
             :src="resolveImageUrl(event.main_landing_image.image)"
             :alt="event.title"
-            class="w-full h-full object-contain"
+            class="w-full h-full object-cover"
             @error="(e) => onImageError(e)"
           />
           <!-- Placeholder gradient when no image -->
