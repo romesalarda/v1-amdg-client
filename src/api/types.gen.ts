@@ -430,6 +430,7 @@ export type AttendeeCancellationRefundRequestRequest = {
     reason_code?: string;
     override_used_ticket_block?: boolean;
     override_reason?: string;
+    attendee_ids?: Array<string>;
 };
 
 export type AttendeeCancellationRefundResponse = {
@@ -1448,7 +1449,6 @@ export type BookingIntentUpdateRequest = {
  * List serializer for Booking with HATEOAS links.
  */
 export type BookingList = {
-    attendees: boolean;
     readonly id: number;
     readonly booking_reference: string;
     event: number;

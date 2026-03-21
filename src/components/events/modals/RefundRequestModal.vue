@@ -97,6 +97,34 @@
               </p>
             </div>
 
+            <!-- Attendee Selection for Partial Booking Refunds -->
+            <div v-if="refundType === 'partial' && props.isBookingPayment && props.mode === 'attendee' && props.bookingAttendees && props.bookingAttendees.length > 0" class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Select Attendees to Refund
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-48 overflow-y-auto">
+                <div v-for="bookingAttendee in props.bookingAttendees" :key="bookingAttendee.id" class="flex items-center">
+                  <input
+                    :id="`attendee-${bookingAttendee.id}`"
+                    type="checkbox"
+                    :value="bookingAttendee.id"
+                    v-model="selectedAttendeeIds"
+                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label
+                    :for="`attendee-${bookingAttendee.id}`"
+                    class="ml-2 text-sm text-gray-700 cursor-pointer"
+                  >
+                    {{ bookingAttendee.full_name }}
+                  </label>
+                </div>
+              </div>
+              <p v-if="selectedAttendeeIds.length === 0" class="text-xs text-amber-600 mt-1">
+                ⚠ Select at least one attendee to refund
+              </p>
+            </div>
+
             <!-- Reason -->
             <div class="mb-4">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -171,7 +199,10 @@ interface Props {
   mode?: 'payment' | 'attendee'
   attendee?: AttendeeList | null
   paymentId?: string | null
+  bookingId?: number | null
+  bookingAttendees?: Array<{ id: string; full_name: string }> | null
   open: boolean
+  isBookingPayment?: boolean
 }
 
 const props = defineProps<Props>()
@@ -194,6 +225,7 @@ const refundType = ref<'full' | 'partial'>('full')
 const refundAmount = ref<number | null>(null)
 const reason = ref('')
 const isLoading = ref(false)
+const selectedAttendeeIds = ref<string[]>([])
 
 const createRefundMutation = useCreatePaymentRefund()
 const createAttendeeRefundMutation = useRequestAttendeeCancellationRefund()
@@ -207,10 +239,16 @@ const isFormValid = computed(() => {
   
   if (refundType.value === 'partial') {
     const maxAmount = parseFloat(String(payment.value?.amount || props.payment?.amount || '0').replace("£", ""))
-    return hasValidReason && 
-           refundAmount.value !== null && 
+    const hasValidAmount = refundAmount.value !== null && 
            refundAmount.value > 0 && 
            refundAmount.value <= maxAmount
+    
+    // For partial booking refunds, require attendee selection
+    if (props.isBookingPayment && props.mode === 'attendee') {
+      return hasValidReason && hasValidAmount && selectedAttendeeIds.value.length > 0
+    }
+    
+    return hasValidReason && hasValidAmount
   }
   
   return false
@@ -242,12 +280,18 @@ async function handleSubmit() {
         throw new Error('Attendee and payment are required for attendee refund mode')
       }
 
+      // For partial booking refunds, use selected attendees; otherwise use current attendee
+      const attendeeIds = refundType.value === 'partial' && props.isBookingPayment && selectedAttendeeIds.value.length > 0
+        ? selectedAttendeeIds.value
+        : [String(props.attendee.attendee_id)]
+
       await createAttendeeRefundMutation.mutateAsync({
         attendeeId: String(props.attendee.attendee_id),
         body: {
           payment_id: selectedPaymentId.value,
           amount: parseAmount(amount).toFixed(2),
           reason: reason.value.trim(),
+          attendee_ids: attendeeIds,
         },
       })
     } else {
@@ -276,8 +320,10 @@ async function handleSubmit() {
   }
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return 'N/A'
   const date = new Date(dateString)
+  if (isNaN(date.getTime())) return 'N/A'
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -291,6 +337,7 @@ watch(() => props.open, (isOpen) => {
     refundType.value = 'full'
     refundAmount.value = null
     reason.value = ''
+    selectedAttendeeIds.value = []
   }
 })
 </script>

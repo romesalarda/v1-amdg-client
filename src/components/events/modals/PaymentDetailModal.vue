@@ -151,6 +151,12 @@
             </div>
           </section>
 
+          <section>
+            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <pre class="text-xs text-gray-700 whitespace-pre-wrap font-mono">{{ JSON.stringify(paymentData.metadata, null, 2) }}</pre>
+            </div>
+          </section>
+
           <!-- Tickets -->
           <section v-if="paymentData.tickets && paymentData.tickets.length > 0">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">

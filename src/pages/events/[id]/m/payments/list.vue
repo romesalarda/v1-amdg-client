@@ -988,7 +988,7 @@ const stats = computed(() => {
 
   const completed = allPayments.filter((p: any) => p.status === 'COMPLETED')
   const pending = allPayments.filter((p: any) => p.status === 'PENDING')
-  const refunded = allPayments.filter((p: any) => p.status === 'REFUNDED' || p.status === 'PENDING_REFUND')
+  const refunded = allPayments.filter((p: any) => p.status === 'REFUNDED' || p.status === 'PENDING_REFUND' || p.status === 'PARTIALLY_REFUNDED')
   const failed = allPayments.filter((p: any) => p.status === 'FAILED' || p.status === 'CANCELLED')
 
   const pendingVerification = allPayments.filter(
@@ -996,15 +996,15 @@ const stats = computed(() => {
   )
 
   const totalRevenue = completed.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   const pendingAmount = pending.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   const refundedAmount = refunded.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   // Method breakdown

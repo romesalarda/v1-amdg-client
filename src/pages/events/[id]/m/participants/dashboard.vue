@@ -1469,6 +1469,8 @@
       mode="attendee"
       :attendee="selectedDeleteAttendee"
       :payment-id="selectedRefundPaymentId"
+      :is-booking-payment="isSelectedRefundBookingPayment"
+      :booking-attendees="selectedRefundBookingAttendees"
       @close="showRefundModal = false"
       @created="handleAttendeeRefundCreated"
     />
@@ -1580,6 +1582,8 @@ const showPreRemovalModal = ref(false)
 const selectedDeleteAttendee = ref<ExtendedAttendeeList | null>(null)
 const showRefundModal = ref(false)
 const selectedRefundPaymentId = ref<string | null>(null)
+const isSelectedRefundBookingPayment = ref(false)
+const selectedRefundBookingAttendees = ref<Array<{ id: string; full_name: string }> | null>(null)
 
 // Create attendee form state
 const newAttendeeForm = ref<AttendeeCreateRequest>({
@@ -1906,7 +1910,7 @@ const areas = computed(() => areasData.value?.data?.results || [])
 const eventBookings = computed<ExtendedBookingList[]>(() => {
   const results = eventBookingsData.value?.data?.results || []
 
-  return (results as BookingList[]).map(({ attendees: _attendees, ...booking }) => ({
+  return (results as BookingList[]).map((booking) => ({
     ...booking,
   }))
 })
@@ -2561,6 +2565,29 @@ function openAttendeeRefundModalFromPreRemoval() {
     })
     return
   }
+
+  // Check if there's a BOOKING blocker in the pre-removal summary
+  const hasBookingBlocker = preRemovalSummary.value?.blockers.some(b => 
+    b.code === 'booking' || b.message?.toLowerCase().includes('booking')
+  )
+  
+  if (!hasBookingBlocker) {
+    // No booking associated, so this is a simple payment refund
+    isSelectedRefundBookingPayment.value = false
+    selectedRefundBookingAttendees.value = null
+    showRefundModal.value = true
+    return
+  }
+
+  // This attendee is part of a booking
+  // Try to find the booking from the attendee's booking association
+  // For now, we'll check if the attendee has a booking_id field or look in eventBookings
+  isSelectedRefundBookingPayment.value = true
+  
+  // Try to get attendees from the booking if available
+  // If selectedDeleteAttendee has booking info, we could fetch those attendees
+  // For now, we'll pass null and let the modal handle it gracefully
+  selectedRefundBookingAttendees.value = null
 
   showRefundModal.value = true
 }
