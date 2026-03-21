@@ -400,20 +400,10 @@
               <div class="flex items-center gap-3">
                 <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
                 <div>
-                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Product Categories</h2>
-                  <p class="text-xs text-gray-500">Link existing categories to this event</p>
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Category Assignments</h2>
+                  <p class="text-xs text-gray-500">Read-only category scopes available for product assignments</p>
                 </div>
               </div>
-              
-              <UButton
-                size="sm"
-                variant="solid"
-                color="primary"
-                icon="i-heroicons-plus"
-                @click="openCategoryModal()"
-              >
-                Add Category
-              </UButton>
             </div>
 
             <!-- Categories Loading State -->
@@ -428,51 +418,188 @@
                 :key="category.id"
                 class="bg-white border border-gray-200 rounded-xl p-5 hover:border-primary/50 hover:shadow-md transition-all"
               >
-                <div class="flex items-start justify-between mb-3">
-                  <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
-                    </div>
-                    <div class="flex-1">
-                      <h3 class="font-semibold text-gray-900">{{ category.name }}</h3>
-                      <p v-if="category.product_count !== undefined" class="text-xs text-gray-500 mt-0.5">
-                        {{ category.product_count }} product{{ category.product_count !== 1 ? 's' : '' }}
-                      </p>
-                    </div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <UIcon name="i-heroicons-folder" class="w-5 h-5 text-primary" />
                   </div>
-                  
-                  <div class="flex items-center gap-1">
-                    <UButton
-                      size="xs"
-                      variant="ghost"
-                      color="red"
-                      icon="i-heroicons-trash"
-                      @click="handleDeleteCategory(category.id)"
-                      :loading="deletingCategoryId === category.id"
-                      title="Remove from event"
-                    />
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-gray-900">{{ category.name }}</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">
+                      {{ categoryProductCounts[category.id] || 0 }} mapped product{{ (categoryProductCounts[category.id] || 0) !== 1 ? 's' : '' }}
+                    </p>
                   </div>
                 </div>
-                
-                <p v-if="category.description" class="text-sm text-gray-600 line-clamp-2">
-                  {{ category.description }}
-                </p>
-                <p v-else class="text-sm text-gray-400 italic">No description</p>
+
+                <UBadge color="gray" variant="soft" size="xs">Assignment Only</UBadge>
               </div>
             </div>
 
             <!-- Empty State -->
             <div v-else class="p-12 text-center">
               <UIcon name="i-heroicons-folder" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 class="text-lg font-semibold text-gray-900 mb-2">No categories yet</h3>
-              <p class="text-sm text-gray-500 mb-4">Add existing categories to organize your event's products</p>
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">No category assignments yet</h3>
+              <p class="text-sm text-gray-500 mb-4">Use the Category Mapping tab to assign products to existing event categories.</p>
+            </div>
+          </template>
+
+          <!-- Category Mapping Tab -->
+          <template v-else-if="currentTab === 'category-mapping'">
+            <!-- Header -->
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+              <div class="flex items-center gap-3">
+                <UIcon name="i-heroicons-squares-2x2" class="w-5 h-5 text-primary" />
+                <div>
+                  <h2 class="text-sm font-black text-primary uppercase tracking-widest">Category Mapping</h2>
+                  <p class="text-xs text-gray-500">Assign one category to multiple products in one action</p>
+                </div>
+              </div>
+
+              <div class="w-full md:w-auto min-w-[260px]">
+                <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1">Target Category</label>
+                <select
+                  v-model.number="categoryMappingSelectedCategoryId"
+                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option :value="null">Select a category...</option>
+                  <option
+                    v-for="category in categories"
+                    :key="category.id"
+                    :value="category.id"
+                  >
+                    {{ category.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center gap-3 flex-wrap">
+              <div class="relative flex-1 min-w-[260px]">
+                <UIcon name="i-heroicons-magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  v-model="categoryMappingSearchQuery"
+                  type="text"
+                  placeholder="Search products by title, display code, or category..."
+                  class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+
+              <UBadge color="gray" variant="soft">
+                {{ categoryMappingSelectedProductIds.length }} selected
+              </UBadge>
+
               <UButton
-                color="primary"
-                icon="i-heroicons-plus"
-                @click="openCategoryModal()"
+                size="sm"
+                variant="ghost"
+                color="gray"
+                @click="clearCategoryMappingSelection"
+                :disabled="categoryMappingSelectedProductIds.length === 0"
               >
-                Add First Category
+                Clear Selection
               </UButton>
+
+              <UButton
+                size="sm"
+                variant="solid"
+                color="primary"
+                icon="i-heroicons-link"
+                :loading="bulkAssignCategoryMutation.isPending.value"
+                :disabled="!categoryMappingSelectedCategoryId || categoryMappingSelectedProductIds.length === 0"
+                @click="assignCategoryToSelectedProducts"
+              >
+                Assign Category
+              </UButton>
+
+              <UButton
+                size="sm"
+                variant="outline"
+                color="red"
+                icon="i-heroicons-link-slash"
+                :loading="bulkRemoveCategoryMutation.isPending.value"
+                :disabled="!categoryMappingSelectedCategoryId || categoryMappingSelectedProductIds.length === 0"
+                @click="removeCategoryFromSelectedProducts"
+              >
+                Remove Category
+              </UButton>
+            </div>
+
+            <!-- Loading -->
+            <div v-if="categoryMappingProductsLoading" class="p-6 space-y-3">
+              <div v-for="i in 8" :key="i" class="h-14 bg-gray-100 rounded-lg animate-pulse" />
+            </div>
+
+            <!-- Empty -->
+            <div v-else-if="categoryMappingProducts.length === 0" class="p-12 text-center">
+              <UIcon name="i-heroicons-cube" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 class="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+              <p class="text-sm text-gray-500">Try a different search query or add products first.</p>
+            </div>
+
+            <!-- Product Mapping Table -->
+            <div v-else class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead>
+                  <tr class="border-b border-gray-200 bg-gray-50">
+                    <th class="py-3 px-4">
+                      <input
+                        v-model="allCategoryMappingProductsSelected"
+                        type="checkbox"
+                        class="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                    </th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Product</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Current Categories</th>
+                    <th class="py-3 px-4 font-semibold text-gray-700">Mapping Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="product in categoryMappingProducts"
+                    :key="product.product_id"
+                    class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+                  >
+                    <td class="py-3 px-4">
+                      <input
+                        v-model="categoryMappingSelectedProductIds"
+                        type="checkbox"
+                        :value="product.product_id"
+                        class="rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                    </td>
+                    <td class="py-3 px-4">
+                      <div>
+                        <div class="font-semibold text-gray-900">{{ product.title }}</div>
+                        <div class="text-xs text-gray-500 font-mono">{{ product.display_code }}</div>
+                      </div>
+                    </td>
+                    <td class="py-3 px-4">
+                      <div v-if="product.categories.length" class="flex flex-wrap gap-1">
+                        <UBadge
+                          v-for="(categoryName, index) in product.categories"
+                          :key="`${product.product_id}-${index}`"
+                          color="gray"
+                          variant="soft"
+                          size="xs"
+                        >
+                          {{ categoryName }}
+                        </UBadge>
+                      </div>
+                      <p v-else class="text-xs text-gray-400 italic">No categories</p>
+                    </td>
+                    <td class="py-3 px-4">
+                      <UBadge
+                        v-if="isCategoryAssignedToProduct(product)"
+                        color="green"
+                        variant="soft"
+                        size="xs"
+                      >
+                        Already Assigned
+                      </UBadge>
+                      <span v-else class="text-xs text-gray-500">Not assigned</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </template>
 
@@ -686,94 +813,16 @@
       </div>
     </div>
 
-    <!-- Category Modal -->
-    <UModal v-model="showCategoryModal" :ui="{ width: 'max-w-2xl' }">
-      <div class="p-6">
-        <h3 class="text-xl font-bold text-gray-900 mb-6">
-          Add Category to Event
-        </h3>
-
-        <div class="space-y-5">
-          <!-- Search Bar -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Search Categories</label>
-            <input
-              v-model="categorySearchQuery"
-              type="text"
-              placeholder="Search by name or description..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
-
-          <!-- Loading State -->
-          <div v-if="allCategoriesLoading" class="space-y-2">
-            <USkeleton class="h-20 w-full" v-for="i in 3" :key="i" />
-          </div>
-
-          <!-- Categories List -->
-          <div v-else-if="filteredCategories.length > 0" class="space-y-2 max-h-96 overflow-y-auto">
-            <label
-              v-for="category in filteredCategories"
-              :key="category.id"
-              class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
-              :class="selectedCategoryId === category.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-            >
-              <input
-                v-model="selectedCategoryId"
-                type="radio"
-                :value="category.id"
-                class="mt-1 text-primary focus:ring-primary"
-              />
-              <div class="flex-1">
-                <div class="font-semibold text-gray-900">{{ category.name }}</div>
-                <p v-if="category.description" class="text-sm text-gray-600 mt-1">
-                  {{ category.description }}
-                </p>
-                <p v-else class="text-sm text-gray-400 italic mt-1">No description</p>
-              </div>
-            </label>
-          </div>
-
-          <!-- Empty State -->
-          <div v-else class="text-center py-8 text-gray-500">
-            <UIcon name="i-heroicons-magnifying-glass" class="w-12 h-12 text-gray-300 mx-auto mb-3" />
-            <p class="text-sm">{{ categorySearchQuery ? 'No categories match your search' : 'All categories have been added to this event' }}</p>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
-          <UButton
-            class="flex-1"
-            variant="outline"
-            color="gray"
-            @click="closeCategoryModal"
-          >
-            Cancel
-          </UButton>
-          <UButton
-            class="flex-1"
-            variant="solid"
-            color="primary"
-            icon="i-heroicons-check"
-            :loading="createEventCategory.isPending.value"
-            :disabled="!selectedCategoryId"
-            @click="submitCategoryForm"
-          >
-            Add Category
-          </UButton>
-        </div>
-      </div>
-    </UModal>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
-import type { ProductList, ProductCategory } from '~/api/types.gen'
+import type { ProductList } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useProducts } from '~/composables/resources/products/products'
 import { useProductCategories } from '~/composables/resources/products/productCategories'
-import { useProductEventCategories, useCreateProductEventCategory, useDeleteProductEventCategory } from '~/composables/resources/products/productEventCategories'
+import { useProductEventCategories } from '~/composables/resources/products/productEventCategories'
+import { useBulkAssignCategoryToProducts, useBulkRemoveCategoryFromProducts } from '~/composables/resources/products/productCategoryAssignments'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import StatisticsIndex from './statistics/index.vue'
 import { 
@@ -802,6 +851,7 @@ const tabs = computed(() => [
   { value: 'products', label: 'Products', icon: 'i-heroicons-cube', badge: totalProducts.value },
   // { value: 'discounts', label: 'Discounts', icon: 'i-heroicons-tag' },
   { value: 'categories', label: 'Categories', icon: 'i-heroicons-folder' },
+  { value: 'category-mapping', label: 'Category Mapping', icon: 'i-heroicons-squares-2x2' },
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
   { value: 'statistics', label: 'Statistics', icon: 'i-heroicons-chart-bar' },
 ])
@@ -987,10 +1037,11 @@ function getProductStockStatus(product: ProductList) {
 // ============================================
 
 // Fetch EventCategories for this event (associations between event and categories)
-const { data: eventCategoriesData, isLoading: categoriesLoading, refetch: refetchCategories } = useProductEventCategories(
+const { data: eventCategoriesData, isLoading: categoriesLoadingEventCategories } = useProductEventCategories(
   computed(() => {
     const eventId = event.value?.data?.id
     if (!eventId) return undefined
+
     return {
       event: eventId,
       page_size: 100,
@@ -1000,130 +1051,247 @@ const { data: eventCategoriesData, isLoading: categoriesLoading, refetch: refetc
 
 const eventCategories = computed(() => eventCategoriesData.value?.data?.results || [])
 
-// Fetch ALL available categories for selection
-const { data: allCategoriesData, isLoading: allCategoriesLoading } = useProductCategories(
+// Fetch global categories for selection.
+const { data: productCategoriesData, isLoading: productCategoriesLoading } = useProductCategories(
   computed(() => ({
     page_size: 100,
   }))
 )
 
-const allCategories = computed(() => allCategoriesData.value?.data?.results || [])
+const categories = computed(() => productCategoriesData.value?.data?.results || [])
+const categoriesLoading = computed(() => categoriesLoadingEventCategories.value || productCategoriesLoading.value)
 
-// Extract the actual categories from the event-category associations
-// by looking up the full category object from allCategories
-const categories = computed(() => {
-  const categoryMap = new Map(allCategories.value.map(c => [c.id, c]))
-  return eventCategories.value
-    .map(ec => categoryMap.get(ec.category as number))
-    .filter((c): c is NonNullable<typeof c> => c !== undefined)
+const categoryProductCounts = computed(() => {
+  const counts: Record<number, number> = {}
+
+  eventCategories.value.forEach((association: any) => {
+    const categoryId = Number(association.category)
+    if (!Number.isFinite(categoryId) || categoryId <= 0) return
+
+    if (!counts[categoryId]) counts[categoryId] = 0
+    if (association.product) counts[categoryId] += 1
+  })
+
+  return counts
 })
 
-// Filter out categories already added to this event
-const availableCategories = computed(() => {
-  const existingCategoryIds = new Set(eventCategories.value.map(ec => ec.category as number))
-  return allCategories.value.filter(c => !existingCategoryIds.has(c.id))
-})
-
-// Category modal state
-const showCategoryModal = ref(false)
-const selectedCategoryId = ref<number | null>(null)
-const categorySearchQuery = ref('')
-const deletingCategoryId = ref<number | null>(null)
-
-// Category mutations
-const createEventCategory = useCreateProductEventCategory()
-const deleteEventCategory = useDeleteProductEventCategory()
+const bulkAssignCategoryMutation = useBulkAssignCategoryToProducts()
+const bulkRemoveCategoryMutation = useBulkRemoveCategoryFromProducts()
 const toast = useToast()
 
-// Filtered categories for search
-const filteredCategories = computed(() => {
-  if (!categorySearchQuery.value) return availableCategories.value
-  const query = categorySearchQuery.value.toLowerCase()
-  return availableCategories.value.filter(c => 
-    c.name.toLowerCase().includes(query) || 
-    c.description?.toLowerCase().includes(query)
-  )
+// ============================================
+// Category Mapping (Category -> Products)
+// ============================================
+
+const categoryMappingSearchQuery = ref('')
+const categoryMappingSelectedCategoryId = ref<number | null>(null)
+const categoryMappingSelectedProductIds = ref<string[]>([])
+
+const categoryMappingProductsQuery = computed(() => {
+  const eventId = event.value?.data?.id
+  if (!eventId) return undefined
+
+  return {
+    event: eventId,
+    page_size: 100,
+    ...(categoryMappingSearchQuery.value
+      ? { search: categoryMappingSearchQuery.value }
+      : {}),
+  }
 })
 
-function openCategoryModal() {
-  selectedCategoryId.value = null
-  categorySearchQuery.value = ''
-  showCategoryModal.value = true
+const { data: categoryMappingProductsData, isLoading: categoryMappingProductsLoading, refetch: refetchCategoryMappingProducts } = useProducts(categoryMappingProductsQuery)
+
+const categoryMappingProducts = computed(() => categoryMappingProductsData.value?.data?.results || [])
+
+const allCategoryMappingProductsSelected = computed({
+  get: () =>
+    categoryMappingProducts.value.length > 0 &&
+    categoryMappingProducts.value.every(product =>
+      categoryMappingSelectedProductIds.value.includes(product.product_id as string)
+    ),
+  set: (checked: boolean) => {
+    categoryMappingSelectedProductIds.value = checked
+      ? categoryMappingProducts.value.map(product => product.product_id as string)
+      : []
+  },
+})
+
+function clearCategoryMappingSelection() {
+  categoryMappingSelectedProductIds.value = []
 }
 
-function closeCategoryModal() {
-  showCategoryModal.value = false
-  selectedCategoryId.value = null
-  categorySearchQuery.value = ''
+function isCategoryAssignedToProduct(product: ProductList) {
+  const selectedCategoryId = Number(categoryMappingSelectedCategoryId.value)
+  if (!Number.isFinite(selectedCategoryId) || selectedCategoryId <= 0) return false
+
+  return eventCategories.value.some((association: any) =>
+    Number(association.category) === selectedCategoryId &&
+    Number(association.product) === Number(product.id)
+  )
 }
 
-async function submitCategoryForm() {
-  // Validation
-  if (!selectedCategoryId.value) {
+async function assignCategoryToSelectedProducts() {
+  const selectedCategoryId = Number(categoryMappingSelectedCategoryId.value)
+
+  if (!Number.isFinite(selectedCategoryId) || selectedCategoryId <= 0) {
     toast.add({
       title: 'Validation Error',
-      description: 'Please select a category',
+      description: 'Select a category first',
       color: 'red',
     })
     return
   }
 
-  try {
-    // Create EventCategory association
-    if (!event.value?.data?.id) throw new Error('Event ID is missing')
-    
-    await createEventCategory.mutateAsync({
-      event: event.value?.data?.id,
-      category: selectedCategoryId.value,
+  if (categoryMappingSelectedProductIds.value.length === 0) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Select at least one product',
+      color: 'red',
     })
+    return
+  }
+
+  const eventId = Number(event.value?.data?.id)
+  if (!Number.isFinite(eventId) || eventId <= 0) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Event context is missing',
+      color: 'red',
+    })
+    return
+  }
+
+  const updates = categoryMappingSelectedProductIds.value
+    .map((productId) => {
+      const product = categoryMappingProducts.value.find(p => p.product_id === productId)
+      if (!product) return null
+
+      return {
+        productId,
+        productPk: Number(product.id),
+      }
+    })
+    .filter((update): update is { productId: string; productPk: number } => update !== null)
+
+  const existingAssociationKeys = new Set(
+    eventCategories.value
+      .filter((association: any) => Number(association.category) === selectedCategoryId && association.product)
+      .map((association: any) => `${Number(association.product)}-${Number(association.category)}`)
+  )
+
+  const productsNeedingUpdate = updates.filter(
+    (update) => !existingAssociationKeys.has(`${update.productPk}-${selectedCategoryId}`)
+  )
+
+  if (updates.length === 0) {
+    toast.add({
+      title: 'No valid products',
+      description: 'Could not prepare category updates for selected products',
+      color: 'red',
+    })
+    return
+  }
+
+  if (productsNeedingUpdate.length === 0) {
+    toast.add({
+      title: 'No changes needed',
+      description: 'All selected products already have this category',
+      color: 'blue',
+    })
+    return
+  }
+
+  try {
+    const result = await bulkAssignCategoryMutation.mutateAsync({
+      eventId,
+      categoryId: selectedCategoryId,
+      products: productsNeedingUpdate.map(update => ({ productPk: update.productPk })),
+    })
+
+    const skippedCount = result?.skippedCount || 0
+    const updatedCount = result?.updatedCount || productsNeedingUpdate.length
 
     toast.add({
       title: 'Success',
-      description: 'Category added to event successfully',
+      description: skippedCount > 0
+        ? `Category assigned to ${updatedCount} product${updatedCount === 1 ? '' : 's'} (${skippedCount} already mapped)`
+        : `Category assigned to ${updatedCount} product${updatedCount === 1 ? '' : 's'}`,
       color: 'green',
     })
 
-    refetchCategories()
-    closeCategoryModal()
+    clearCategoryMappingSelection()
+    refetchCategoryMappingProducts()
   } catch (err: any) {
     toast.add({
       title: 'Error',
-      description: err.message || 'Failed to add category',
+      description: err?.message || 'Failed to assign category to selected products',
       color: 'red',
     })
   }
 }
 
-async function handleDeleteCategory(categoryId: number) {
-  // Find the EventCategory association ID
-  // ec.category is just the category ID (number), not the full object
-  const eventCategory = eventCategories.value.find(ec => ec.category === categoryId)
-  if (!eventCategory) return
+async function removeCategoryFromSelectedProducts() {
+  const selectedCategoryId = Number(categoryMappingSelectedCategoryId.value)
 
-  if (!confirm('Are you sure you want to remove this category from this event? The category itself will not be deleted.')) return
+  if (!Number.isFinite(selectedCategoryId) || selectedCategoryId <= 0) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Select a category first',
+      color: 'red',
+    })
+    return
+  }
 
-  deletingCategoryId.value = categoryId
+  if (categoryMappingSelectedProductIds.value.length === 0) {
+    toast.add({
+      title: 'Validation Error',
+      description: 'Select at least one product',
+      color: 'red',
+    })
+    return
+  }
+
+  const selectedProductDbIds = new Set(
+    categoryMappingProducts.value
+      .filter(product => categoryMappingSelectedProductIds.value.includes(product.product_id as string))
+      .map(product => Number(product.id))
+      .filter(productId => Number.isFinite(productId) && productId > 0)
+  )
+
+  const associationIds = eventCategories.value
+    .filter((association: any) =>
+      Number(association.category) === selectedCategoryId &&
+      selectedProductDbIds.has(Number(association.product))
+    )
+    .map((association: any) => String(association.id))
+
+  if (associationIds.length === 0) {
+    toast.add({
+      title: 'No changes needed',
+      description: 'No matching category assignments found for selected products',
+      color: 'blue',
+    })
+    return
+  }
 
   try {
-    // Delete the EventCategory association (not the global category)
-    // eventCategory.id is a UUID string
-    await deleteEventCategory.mutateAsync(String(eventCategory.id))
+    const result = await bulkRemoveCategoryMutation.mutateAsync({ associationIds })
 
     toast.add({
       title: 'Success',
-      description: 'Category removed from event successfully',
+      description: `Category removed from ${result.removedCount} product${result.removedCount === 1 ? '' : 's'}`,
       color: 'green',
     })
 
-    refetchCategories()
+    clearCategoryMappingSelection()
+    refetchCategoryMappingProducts()
   } catch (err: any) {
     toast.add({
       title: 'Error',
-      description: err.message || 'Failed to remove category',
+      description: err?.message || 'Failed to remove category from selected products',
       color: 'red',
     })
-  } finally {
-    deletingCategoryId.value = null
   }
 }
 

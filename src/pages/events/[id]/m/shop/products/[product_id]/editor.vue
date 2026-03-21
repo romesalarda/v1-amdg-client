@@ -1376,7 +1376,7 @@
               icon="i-heroicons-check"
               :loading="isSaving"
               :disabled="hasNewVariantDuplicates"
-              v-if="!(!hasUnsavedChanges && newVariants.length === 0)"
+              v-if="!(!hasUnsavedChanges && newVariants.length === 0) || isNewProduct"
               @click="saveAll"
             >
               {{ isNewProduct ? 'Create Product' : 'Save Changes' }}

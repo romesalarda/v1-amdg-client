@@ -6175,6 +6175,8 @@ export type EventProductCategory = {
      */
     category: number;
     readonly category_name: string;
+    product: number | null;
+    readonly product_id: string | null;
     readonly added_at: string;
     /**
      *  links
@@ -6195,6 +6197,10 @@ export type EventProductCategoryCreateUpdate = {
      * Product Category
      */
     category: number;
+    /**
+     * Optional product ID for product-specific category mapping
+     */
+    product?: number | null;
 };
 
 /**
@@ -6206,6 +6212,10 @@ export type EventProductCategoryCreateUpdateRequest = {
      * Product Category
      */
     category: number;
+    /**
+     * Optional product ID for product-specific category mapping
+     */
+    product?: number | null;
 };
 
 /**
@@ -19343,6 +19353,7 @@ export type EventProductCategoryWritable = {
      * Product Category
      */
     category: number;
+    product: number | null;
 };
 
 /**
