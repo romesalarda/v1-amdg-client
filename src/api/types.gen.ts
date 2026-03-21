@@ -5288,6 +5288,10 @@ export type EventDetail = {
      * Returns price range from value_x - value_y if multiple packages, or single value if only one package.
      */
     readonly general_price: string;
+    readonly outstanding_tasks: Array<EventOutstandingTask>;
+    readonly can_event_be_published: boolean;
+    readonly registration_open_date: string;
+    readonly registration_close_date: string;
     /**
      *  links
      */
@@ -6030,6 +6034,13 @@ export type EventList = {
          */
         settings: string;
     };
+};
+
+export type EventOutstandingTask = {
+    readonly title: string;
+    readonly description: string;
+    readonly hint: string;
+    readonly code: string;
 };
 
 /**
@@ -13726,6 +13737,7 @@ export type PaymentDetail = {
      * Final modified payment amount
      */
     readonly amount: string;
+    readonly amount_currency: string;
     readonly created_at: string;
     /**
      *  links
@@ -13739,9 +13751,13 @@ export type PaymentDetail = {
     /**
      * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
      */
-    readonly descriptor: string | null;
-    description?: string | null;
+    readonly descriptor: string;
     readonly base_amount: string;
+    /**
+     * Base amount as float for easier frontend handling
+     */
+    readonly amount_value: number;
+    description?: string | null;
     readonly base_amount_currency: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -13850,6 +13866,7 @@ export type PaymentList = {
      * Final modified payment amount
      */
     readonly amount: string;
+    readonly amount_currency: string;
     readonly created_at: string;
     /**
      *  links
@@ -13863,7 +13880,12 @@ export type PaymentList = {
     /**
      * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
      */
-    readonly descriptor: string | null;
+    readonly descriptor: string;
+    base_amount?: string | null;
+    /**
+     * Base amount as float for easier frontend handling
+     */
+    readonly amount_value: number;
 };
 
 /**
@@ -21616,6 +21638,7 @@ export type PaymentListWritable = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
+    base_amount?: string | null;
 };
 
 /**

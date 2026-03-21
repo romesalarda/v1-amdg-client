@@ -239,7 +239,7 @@
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || event.status !== 'OPEN'"
+                  :disabled="countdown.isExpired || !event.can_participants_register"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
