@@ -422,6 +422,25 @@ export type AttendeeAlternativeSigninList = {
     };
 };
 
+export type AttendeeCancellationRefundRequestRequest = {
+    payment_id: string;
+    amount: string;
+    amount_currency?: string;
+    reason: string;
+    reason_code?: string;
+    override_used_ticket_block?: boolean;
+    override_reason?: string;
+};
+
+export type AttendeeCancellationRefundResponse = {
+    refund_id: string;
+    tracking_reference: string;
+    verification_status: string;
+    payment_id: string;
+    amount: string;
+    selected_attendee_ids: Array<string>;
+};
+
 /**
  * Serializer for a single attendee's package and product selections.
  */
@@ -1429,6 +1448,7 @@ export type BookingIntentUpdateRequest = {
  * List serializer for Booking with HATEOAS links.
  */
 export type BookingList = {
+    attendees: boolean;
     readonly id: number;
     readonly booking_reference: string;
     event: number;
@@ -13354,8 +13374,9 @@ export type PatchedPaymentUpdateRequest = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
@@ -13698,8 +13719,9 @@ export type PaymentDetail = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     /**
      * Final modified payment amount
      */
@@ -13821,8 +13843,9 @@ export type PaymentList = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     /**
      * Final modified payment amount
      */
@@ -14090,8 +14113,9 @@ export type PaymentUpdate = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
@@ -14111,8 +14135,9 @@ export type PaymentUpdateRequest = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
@@ -21544,8 +21569,9 @@ export type PaymentDetailWritable = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -21587,8 +21613,9 @@ export type PaymentListWritable = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
 };
 
 /**
@@ -22177,6 +22204,25 @@ export type RefundRequestCreateWritable = {
     payment: string;
     amount: string;
     reason: string;
+};
+
+/**
+ * Create serializer for RefundRequest with validation.
+ */
+export type RefundRequestCreateRequestWritable = {
+    payment: string;
+    amount: string;
+    reason: string;
+    /**
+     * Required for PARTIAL booking refunds. List of attendee UUIDs to refund.
+     */
+    attendee_ids?: Array<string>;
+    /**
+     * Short reason code for immutable audit metadata.
+     */
+    reason_code?: string;
+    override_used_ticket_block?: boolean;
+    override_reason?: string;
 };
 
 /**
@@ -23292,8 +23338,9 @@ export type AttendeesListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        payment_status?: 'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED';
+        payment_status?: 'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED';
         /**
          * Payment target type
          *
@@ -24128,6 +24175,48 @@ export type AttendeesOrganisationsRetrieveResponses = {
 };
 
 export type AttendeesOrganisationsRetrieveResponse = AttendeesOrganisationsRetrieveResponses[keyof AttendeesOrganisationsRetrieveResponses];
+
+export type AttendeesPreRemovalSummaryRetrieveData = {
+    body?: never;
+    path: {
+        attendee_id: string;
+    };
+    query?: never;
+    url: '/api/attendees/{attendee_id}/pre-removal-summary/';
+};
+
+export type AttendeesPreRemovalSummaryRetrieveResponses = {
+    /**
+     * Comprehensive pre-removal summary payload
+     */
+    200: unknown;
+};
+
+export type AttendeesRequestCancellationRefundCreateData = {
+    body: AttendeeCancellationRefundRequestRequest;
+    path: {
+        attendee_id: string;
+    };
+    query?: never;
+    url: '/api/attendees/{attendee_id}/request-cancellation-refund/';
+};
+
+export type AttendeesRequestCancellationRefundCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type AttendeesRequestCancellationRefundCreateResponses = {
+    201: AttendeeCancellationRefundResponse;
+};
+
+export type AttendeesRequestCancellationRefundCreateResponse = AttendeesRequestCancellationRefundCreateResponses[keyof AttendeesRequestCancellationRefundCreateResponses];
 
 export type AttendeesStatisticsListData = {
     body?: never;
@@ -38838,8 +38927,9 @@ export type PaymentsListListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        status?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
+        status?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
         /**
          * Filter by multiple statuses (comma-separated)
          *
@@ -38850,8 +38940,9 @@ export type PaymentsListListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        status__in?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
+        status__in?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
         /**
          * Filter by target object ID
          */
@@ -39532,7 +39623,7 @@ export type PaymentsRefundsListResponses = {
 export type PaymentsRefundsListResponse = PaymentsRefundsListResponses[keyof PaymentsRefundsListResponses];
 
 export type PaymentsRefundsCreateData = {
-    body: RefundRequestCreateRequest;
+    body: RefundRequestCreateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/payments/refunds/';

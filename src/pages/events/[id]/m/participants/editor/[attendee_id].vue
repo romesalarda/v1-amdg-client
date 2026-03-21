@@ -996,13 +996,21 @@
                         <p class="text-xs font-semibold text-gray-900">{{ payment.payment_reference }}</p>
                         <p class="text-xs text-gray-600">{{ payment.amount }}</p>
                       </div>
-                      <UBadge
-                        :color="payment.status === 'COMPLETED' ? 'green' : payment.status === 'PENDING' ? 'amber' : 'red'"
-                        variant="soft"
-                        size="xs"
-                      >
-                        {{ payment.status }}
-                      </UBadge>
+                      <div class="flex">
+                          <UBadge
+                          :color="payment.status === 'COMPLETED' ? 'green' : payment.status === 'PENDING' ? 'amber' : 'red'"
+                          variant="soft"
+                          size="xs"
+                        >
+                          {{ payment.status }}
+                        </UBadge>
+                        <NuxtLink
+                          :to="`/events/${eventId}/m/payments/list?search=${payment.payment_reference}`"
+                          class="ml-4 text-xs text-primary hover:underline"
+                        >
+                          View Payment
+                        </NuxtLink>
+                      </div>
                     </div>
                   </div>
                 </div>

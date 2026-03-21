@@ -7,15 +7,64 @@ import {
   attendeesCreate,
   attendeesUpdate,
   attendeesDestroy,
+  attendeesPreRemovalSummaryRetrieve,
+  attendeesRequestCancellationRefundCreate,
 } from '~/api/sdk.gen'
 import type {
   AttendeesListData,
   AttendeesCreateData,
   AttendeesUpdateData,
   AttendeesDestroyData,
+  AttendeesRequestCancellationRefundCreateData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['attendees'] as const
+
+export interface AttendeePreRemovalBlockerItem {
+  payment_id?: string
+  payment_reference?: string
+  status?: string
+  ticket_id?: string
+  ticket_code?: string
+  ticket_type?: string | null
+  order_id?: string
+  order_reference?: string | null
+  event_id?: string
+  event_title?: string
+  check_in_time?: string | null
+}
+
+export interface AttendeePreRemovalBlocker {
+  code: string
+  severity: 'critical' | 'high' | 'medium' | 'low'
+  count: number
+  message: string
+  items: AttendeePreRemovalBlockerItem[]
+  action_hint: string
+}
+
+export interface AttendeePreRemovalSummary {
+  attendee: {
+    attendee_id: string
+    attendee_display_id: string
+    full_name: string
+  }
+  can_delete: boolean
+  blockers: AttendeePreRemovalBlocker[]
+  summary_counts: {
+    linked_payments: number
+    outstanding_payments: number
+    active_refund_requests: number
+    active_tickets: number
+    unresolved_orders: number
+    open_attendance: number
+    family_memberships: number
+  }
+  suggested_actions: Array<{
+    code: string
+    message: string
+  }>
+}
 
 /**
  * List all attendees
@@ -89,6 +138,44 @@ export function useDeleteAttendee() {
       queryClient.removeQueries({
         queryKey: [...QUERY_KEY, 'detail', attendeeId],
       })
+    },
+  })
+}
+
+/**
+ * Get pre-removal summary and blockers before deleting an attendee
+ */
+export function useAttendeePreRemovalSummary(attendeeId: MaybeRefOrGetter<string>) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'pre-removal-summary', attendeeId] as const,
+    queryFn: async () => {
+      const id = toValue(attendeeId)
+      const response = await attendeesPreRemovalSummaryRetrieve({ path: { attendee_id: id } })
+      return response as { data: AttendeePreRemovalSummary }
+    },
+    enabled: () => !!toValue(attendeeId),
+  })
+}
+
+/**
+ * Request attendee-scoped cancellation refund
+ */
+export function useRequestAttendeeCancellationRefund() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ attendeeId, body }: { attendeeId: string; body: AttendeesRequestCancellationRefundCreateData['body'] }) =>
+      attendeesRequestCancellationRefundCreate({ path: { attendee_id: attendeeId }, body }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.attendeeId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'pre-removal-summary', variables.attendeeId],
+      })
+      queryClient.invalidateQueries({ queryKey: ['payments'] })
+      queryClient.invalidateQueries({ queryKey: ['paymentRefunds'] })
     },
   })
 }

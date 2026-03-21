@@ -8,7 +8,9 @@
           <span class="material-symbols-outlined text-blue-600">undo</span>
           <div class="flex-1">
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Initiate Refund Request</h3>
-            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ payment?.payment_reference }}</p>
+            <p class="text-xs text-gray-500 mt-0.5 font-mono">
+              {{ props.mode === 'attendee' ? selectedPaymentId : payment?.payment_reference }}
+            </p>
           </div>
           <button
             @click="$emit('close')"
@@ -31,8 +33,8 @@
               <span class="font-medium text-gray-900">{{ formatDate(payment?.created_at || '') }}</span>
             </div>
             <div class="flex justify-between text-sm mt-1">
-              <span class="text-gray-600">User:</span>
-              <span class="font-medium text-gray-900">{{ payment?.user_name }}</span>
+              <span class="text-gray-600">{{ props.mode === 'attendee' ? 'Attendee:' : 'User:' }}</span>
+              <span class="font-medium text-gray-900">{{ props.mode === 'attendee' ? props.attendee?.full_name : payment?.user_name }}</span>
             </div>
           </div>
 
@@ -159,11 +161,16 @@
 
 <script setup lang="ts">
 import { useCreatePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
+import { useRequestAttendeeCancellationRefund } from '~/composables/resources/attendee/attendees'
 import { usePayment } from '~/composables/resources/payments/payments'
 import { parseAmount } from '~/utils/money'
+import type { AttendeeList } from '~/api/types.gen'
 
 interface Props {
-  payment: any
+  payment?: any
+  mode?: 'payment' | 'attendee'
+  attendee?: AttendeeList | null
+  paymentId?: string | null
   open: boolean
 }
 
@@ -172,7 +179,14 @@ const emit = defineEmits(['close', 'created'])
 
 const toast = useToast()
 
-const { data: paymentData } = usePayment(props.payment.payment_id)
+const selectedPaymentId = computed(() => {
+  if (props.mode === 'attendee') {
+    return props.paymentId || ''
+  }
+  return props.payment?.payment_id || ''
+})
+
+const { data: paymentData } = usePayment(selectedPaymentId)
 
 const payment = computed(() => paymentData.value?.data)
 
@@ -182,6 +196,7 @@ const reason = ref('')
 const isLoading = ref(false)
 
 const createRefundMutation = useCreatePaymentRefund()
+const createAttendeeRefundMutation = useRequestAttendeeCancellationRefund()
 
 const isFormValid = computed(() => {
   const hasValidReason = reason.value.length >= 10 && reason.value.length <= 1000
@@ -191,7 +206,7 @@ const isFormValid = computed(() => {
   }
   
   if (refundType.value === 'partial') {
-    const maxAmount = parseFloat(props.payment.modified_amount || '0')
+    const maxAmount = parseFloat(String(payment.value?.amount || props.payment?.amount || '0').replace("£", ""))
     return hasValidReason && 
            refundAmount.value !== null && 
            refundAmount.value > 0 && 
@@ -215,19 +230,33 @@ async function handleSubmit() {
 
   try {
     const amount = refundType.value === 'full' 
-      ? payment.value?.amount 
+      ? (payment.value?.amount || props.payment?.amount)
       : refundAmount.value?.toString()
 
     if (!amount) {
       throw new Error('Refund amount is required')
     }
 
-    await createRefundMutation.mutateAsync({
-      payment: props.payment.payment_id,
-      amount: parseAmount(amount) as any,
-      // amount_currency: payment.value?.amount_currency || 'GBP',
-      reason: reason.value.trim(),
-    })
+    if (props.mode === 'attendee') {
+      if (!props.attendee?.attendee_id || !selectedPaymentId.value) {
+        throw new Error('Attendee and payment are required for attendee refund mode')
+      }
+
+      await createAttendeeRefundMutation.mutateAsync({
+        attendeeId: String(props.attendee.attendee_id),
+        body: {
+          payment_id: selectedPaymentId.value,
+          amount: parseAmount(amount).toFixed(2),
+          reason: reason.value.trim(),
+        },
+      })
+    } else {
+      await createRefundMutation.mutateAsync({
+        payment: props.payment?.payment_id,
+        amount: parseAmount(amount) as any,
+        reason: reason.value.trim(),
+      })
+    }
 
     toast.add({
       title: 'Refund Request Created',

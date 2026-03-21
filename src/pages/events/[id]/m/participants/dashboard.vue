@@ -556,6 +556,14 @@
                         :to="`/events/${id}/m/participants/editor/${attendee.attendee_id}`"
                         title="Edit details"
                       />
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="red"
+                        icon="i-heroicons-trash"
+                        title="Remove attendee"
+                        @click="openPreRemovalModal(attendee)"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -857,10 +865,10 @@
 
     <!-- Booking Details Modal -->
     <UModal v-model="showBookingDetailsModal">
-      <div v-if="selectedBooking" class="p-6">
+      <div class="p-6">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <h3 class="text-xl font-bold text-gray-900 font-mono">{{ selectedBooking.booking_reference }}</h3>
+            <h3 class="text-xl font-bold text-gray-900 font-mono">{{ selectedBooking?.booking_reference || 'Booking details' }}</h3>
             <p class="text-sm text-gray-500">Booking Details</p>
           </div>
           <UButton
@@ -871,7 +879,11 @@
           />
         </div>
 
-        <div class="space-y-4">
+        <div v-if="selectedBookingLoading" class="space-y-2">
+          <div v-for="i in 4" :key="i" class="h-12 bg-gray-100 rounded-lg animate-pulse" />
+        </div>
+
+        <div v-else-if="selectedBooking" class="space-y-4">
           <div class="grid grid-cols-2 gap-4 pt-4 border-t">
             <div>
               <p class="text-xs font-semibold text-gray-500 uppercase">Made By</p>
@@ -892,13 +904,13 @@
             <div class="space-y-2 max-h-48 overflow-y-auto">
               <NuxtLink
                 v-for="attendee in selectedBooking.attendees"
-                :key="attendee.attendee_id"
-                :to="`/events/${id}/m/participants/editor/${attendee.attendee_id}`"
+                :key="attendee.id"
+                :to="attendee.id ? `/events/${id}/m/participants/editor/${attendee.id}` : '#'"
                 class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg border border-gray-200 transition-colors"
               >
                 <div>
-                  <p class="text-sm font-medium text-gray-900">{{ attendee.full_name }}</p>
-                  <p class="text-xs text-gray-500">{{ attendee.attendee_display_id }}</p>
+                  <p class="text-sm font-medium text-gray-900">{{ attendee.name || 'Unknown attendee' }}</p>
+                  <p class="text-xs text-gray-500">{{ attendee.display_id || 'No attendee ID' }}</p>
                 </div>
                 <UIcon name="i-heroicons-chevron-right" class="w-4 h-4 text-gray-400" />
               </NuxtLink>
@@ -908,23 +920,28 @@
           <div v-if="selectedBooking.payments && selectedBooking.payments.length > 0" class="pt-4 border-t">
             <p class="text-xs font-semibold text-gray-500 uppercase mb-2">Payments</p>
             <div class="space-y-2">
-              <div
+              <button
                 v-for="payment in selectedBooking.payments"
                 :key="payment.payment_id"
-                class="flex items-center justify-between p-2 bg-gray-50 rounded-lg"
+                type="button"
+                class="w-full flex items-center justify-between p-2 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors text-left"
+                @click="goToPaymentListFromBooking(payment.payment_reference)"
               >
                 <div>
-                  <p class="text-sm font-medium text-gray-900">£{{ payment.amount }}</p>
-                  <p class="text-xs text-gray-500">{{ payment.payment_method }}</p>
+                  <p class="text-sm font-medium text-gray-900">{{ payment.payment_reference || payment.payment_id }}</p>
+                  <p class="text-xs text-gray-500">{{ payment.amount ? `${payment.amount}` : 'Amount unavailable' }}</p>
                 </div>
-                <UBadge 
-                  :color="payment.status === 'completed' ? 'green' : payment.status === 'pending' ? 'amber' : 'red'"
-                  variant="soft"
-                  size="xs"
-                >
-                  {{ payment.status }}
-                </UBadge>
-              </div>
+                <div class="flex items-center gap-2">
+                  <UBadge
+                    :color="payment.status === 'COMPLETED' ? 'green' : payment.status === 'PENDING' ? 'amber' : 'red'"
+                    variant="soft"
+                    size="xs"
+                  >
+                    {{ payment.status || 'UNKNOWN' }}
+                  </UBadge>
+                  <UIcon name="i-heroicons-arrow-top-right-on-square" class="w-4 h-4 text-gray-400" />
+                </div>
+              </button>
             </div>
           </div>
 
@@ -938,14 +955,14 @@
               >
                 <div>
                   <p class="text-sm font-medium text-gray-900 font-mono">{{ ticket.ticket_code }}</p>
-                  <p class="text-xs text-gray-500">{{ ticket.ticket_type_name }}</p>
+                  <p class="text-xs text-gray-500">{{ ticket.attendee_name }}</p>
                 </div>
-                <UBadge 
-                  :color="ticket.is_used ? 'gray' : 'green'"
+                <UBadge
+                  :color="ticket.status === 'USED' ? 'gray' : ticket.status === 'ACTIVE' ? 'green' : 'red'"
                   variant="soft"
                   size="xs"
                 >
-                  {{ ticket.is_used ? 'Used' : 'Available' }}
+                  {{ ticket.status || 'UNKNOWN' }}
                 </UBadge>
               </div>
             </div>
@@ -961,6 +978,10 @@
               Close
             </UButton>
           </div>
+        </div>
+
+        <div v-else class="text-sm text-gray-500 pt-4 border-t">
+          Unable to load booking details.
         </div>
       </div>
     </UModal>
@@ -1237,7 +1258,7 @@
                 >
                   {{ booking.booking_reference }} - {{ booking.made_by_name || 'N/A' }} ({{ booking.attendee_count }} attendee{{ booking.attendee_count !== 1 ? 's' : '' }})
                   <template v-if="booking.attendees && booking.attendees.length > 0">
-                    - {{ booking.attendees.map(a => a.full_name).join(', ') }}
+                    - {{ booking.attendees.map(a => a.full_name || '').filter(Boolean).join(', ') }}
                   </template>
                 </option>
               </select>
@@ -1316,12 +1337,153 @@
         </form>
       </div>
     </UModal>
+
+    <!-- Pre-removal Summary Modal -->
+    <UModal v-model="showPreRemovalModal" :ui="{ width: 'sm:max-w-3xl' }">
+      <div class="p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h3 class="text-xl font-bold text-gray-900">Pre-removal summary</h3>
+            <p class="text-sm text-gray-500">
+              {{ selectedDeleteAttendee?.full_name }} ({{ selectedDeleteAttendee?.attendee_display_id }})
+            </p>
+          </div>
+          <UButton
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            @click="showPreRemovalModal = false"
+          />
+        </div>
+
+        <div v-if="preRemovalSummaryLoading" class="space-y-2">
+          <div v-for="i in 4" :key="i" class="h-12 bg-gray-100 rounded-lg animate-pulse" />
+        </div>
+
+        <div v-else-if="preRemovalSummaryError" class="p-4 border border-red-200 bg-red-50 rounded-lg text-sm text-red-700">
+          Unable to load pre-removal summary. Please try again.
+        </div>
+
+        <div v-else-if="preRemovalSummary" class="space-y-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Linked Payments</div>
+              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.linked_payments }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Active Tickets</div>
+              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.active_tickets }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Unresolved Orders</div>
+              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.unresolved_orders }}</div>
+            </div>
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div class="text-xs text-gray-500">Open Attendance</div>
+              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.open_attendance }}</div>
+            </div>
+          </div>
+
+          <div
+            :class="[
+              'p-4 rounded-lg border text-sm',
+              preRemovalSummary.can_delete
+                ? 'bg-green-50 border-green-200 text-green-800'
+                : 'bg-amber-50 border-amber-200 text-amber-800'
+            ]"
+          >
+            <span v-if="preRemovalSummary.can_delete">This attendee can be safely deleted.</span>
+            <span v-else>Deletion is blocked until the listed blockers are resolved.</span>
+          </div>
+
+          <div v-if="preRemovalSummary.blockers.length > 0" class="space-y-2">
+            <h4 class="text-xs font-semibold uppercase text-gray-500">Blockers</h4>
+            <div
+              v-for="blocker in preRemovalSummary.blockers"
+              :key="blocker.code"
+              class="p-3 border border-gray-200 rounded-lg"
+            >
+              <div class="flex items-center justify-between gap-3 mb-1">
+                <div class="text-sm font-semibold text-gray-900">{{ blocker.message }}</div>
+                <UBadge
+                  :color="blocker.severity === 'critical' ? 'red' : blocker.severity === 'high' ? 'orange' : 'gray'"
+                  variant="soft"
+                  size="xs"
+                >
+                  {{ blocker.severity }}
+                </UBadge>
+              </div>
+              <p class="text-xs text-gray-600">{{ blocker.count }} item(s). {{ blocker.action_hint }}</p>
+            </div>
+          </div>
+
+          <div v-if="!preRemovalSummary.can_delete && linkedPaymentOptions.length > 0" class="p-4 border border-blue-200 bg-blue-50 rounded-lg space-y-2">
+            <h4 class="text-xs font-semibold uppercase text-blue-700">Request attendee refund</h4>
+            <p class="text-xs text-blue-700">Select a linked payment before submitting a refund request.</p>
+            <select
+              v-model="selectedRefundPaymentId"
+              class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+            >
+              <option :value="null">Select payment</option>
+              <option v-for="payment in linkedPaymentOptions" :key="payment.payment_id" :value="payment.payment_id">
+                {{ payment.payment_reference }} ({{ payment.status }})
+              </option>
+            </select>
+
+            <UButton
+              color="blue"
+              variant="solid"
+              :disabled="!canRequestRefundFromPreRemoval"
+              @click="openAttendeeRefundModalFromPreRemoval"
+            >
+              Request Refund
+            </UButton>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <UButton
+              variant="outline"
+              color="gray"
+              class="flex-1"
+              @click="showPreRemovalModal = false"
+            >
+              Cancel
+            </UButton>
+            <UButton
+              color="red"
+              class="flex-1"
+              :disabled="!preRemovalSummary.can_delete || deleteAttendeeMutation.isPending.value"
+              :loading="deleteAttendeeMutation.isPending.value"
+              @click="confirmDeleteAttendee"
+            >
+              Delete Attendee
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </UModal>
+
+    <RefundRequestModal
+      v-if="selectedDeleteAttendee && selectedRefundPaymentId"
+      :open="showRefundModal"
+      mode="attendee"
+      :attendee="selectedDeleteAttendee"
+      :payment-id="selectedRefundPaymentId"
+      @close="showRefundModal = false"
+      @created="handleAttendeeRefundCreated"
+    />
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
-import { useAttendees, useCreateAttendee } from '~/composables/resources/attendee/attendees'
-import { useBookings } from '~/composables/resources/booking/bookings'
+import {
+  useAttendees,
+  useCreateAttendee,
+  useDeleteAttendee,
+  useAttendeePreRemovalSummary,
+  type AttendeePreRemovalSummary,
+} from '~/composables/resources/attendee/attendees'
+import { useBooking, useBookings } from '~/composables/resources/booking/bookings'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
@@ -1333,8 +1495,9 @@ import { useFamilyGroups, useFamilyGroupMembers, usePartialUpdateFamilyGroup } f
 import { usePartialUpdateFamilyAttendee, useDeleteFamilyAttendee } from '~/composables/resources/common/familyAttendees'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
+import RefundRequestModal from '~/components/events/modals/RefundRequestModal.vue'
 import StatisticsIndex from './statistics/index.vue'
-import type { AttendeeList, OrganisationList, BookingList, FamilyGroupList, FamilyAttendee, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
+import type { AttendeeList, OrganisationList, BookingList, BookingDetail, FamilyGroupList, FamilyAttendee, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
 
 // Extended type with additional fields returned by the API but not in the generated types
 interface ExtendedAttendeeList extends AttendeeList {
@@ -1345,30 +1508,17 @@ interface ExtendedAttendeeList extends AttendeeList {
   is_cancelled?: boolean
 }
 
+interface ExtendedBookingList extends Omit<BookingList, 'attendees'> {
+  attendees?: Array<{
+    attendee_id?: number | string
+    attendee_display_id?: string
+    full_name?: string
+  }>
+}
+
 // Extended organisation type
 interface ExtendedOrganisationList extends OrganisationList {
   organisation_name?: string
-}
-
-// Extended booking type
-interface ExtendedBookingList extends BookingList {
-  attendees?: Array<{
-    attendee_id: number
-    attendee_display_id: string
-    full_name: string
-  }>
-  payments?: Array<{
-    payment_id: number
-    amount: number
-    payment_method: string
-    status: string
-  }>
-  tickets?: Array<{
-    ticket_id: number
-    ticket_code: string
-    ticket_type_name: string
-    is_used: boolean
-  }>
 }
 
 type FamilyRelationship = FamilyAttendee['relationship']
@@ -1417,7 +1567,7 @@ const selectAll = ref(false)
 const showDetailsModal = ref(false)
 const selectedAttendeeDetails = ref<ExtendedAttendeeList | null>(null)
 const showBookingDetailsModal = ref(false)
-const selectedBooking = ref<ExtendedBookingList | null>(null)
+const selectedBookingId = ref<number | null>(null)
 const showFamilyMembersModal = ref(false)
 const selectedFamilyGroup = ref<FamilyGroupList | null>(null)
 const editingFamilyName = ref('')
@@ -1426,6 +1576,10 @@ const showFilters = ref(false)
 const showFiltersModal = ref(false)
 const currentFilterTab = ref<'basic' | 'questions' | 'orders' | 'advanced'>('basic')
 const showCreateModal = ref(false)
+const showPreRemovalModal = ref(false)
+const selectedDeleteAttendee = ref<ExtendedAttendeeList | null>(null)
+const showRefundModal = ref(false)
+const selectedRefundPaymentId = ref<string | null>(null)
 
 // Create attendee form state
 const newAttendeeForm = ref<AttendeeCreateRequest>({
@@ -1681,6 +1835,7 @@ const { data: attendeesData, isLoading } = useAttendees(queryParams)
 
 // Fetch bookings
 const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
+const { data: selectedBookingData, isLoading: selectedBookingLoading } = useBooking(computed(() => selectedBookingId.value || 0))
 
 // Fetch family groups and selected group members
 const { data: familyGroupsData, isLoading: familyGroupsLoading, refetch: refetchFamilyGroups } = useFamilyGroups(familyGroupsQueryParams)
@@ -1692,10 +1847,14 @@ const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
 
 // Create attendee mutation
 const createAttendeeMutation = useCreateAttendee()
+const deleteAttendeeMutation = useDeleteAttendee()
 const updateFamilyGroupMutation = usePartialUpdateFamilyGroup()
 const updateFamilyAttendeeMutation = usePartialUpdateFamilyAttendee()
 const deleteFamilyAttendeeMutation = useDeleteFamilyAttendee()
 const toast = useToast()
+
+const selectedDeleteAttendeeId = computed(() => selectedDeleteAttendee.value?.attendee_id || '')
+const { data: preRemovalSummaryData, isLoading: preRemovalSummaryLoading, error: preRemovalSummaryError } = useAttendeePreRemovalSummary(selectedDeleteAttendeeId)
 
 // Fetch organisations for filter dropdown
 const { data: organisationsData } = useOrganisations({ page_size: 100 })
@@ -1719,6 +1878,7 @@ const { data: accessibilityRequirementsData } = useAccessibilityRequirements({ p
 const attendees = computed(() => (attendeesData.value?.data?.results || []) as ExtendedAttendeeList[])
 const totalAttendees = computed(() => attendeesData.value?.data?.count || 0)
 const bookings = computed(() => (bookingsData.value?.data?.results || []) as BookingList[])
+const selectedBooking = computed(() => selectedBookingData.value?.data as BookingDetail | undefined)
 const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
 const familyGroups = computed(() => (familyGroupsData.value?.data?.results || []) as FamilyGroupList[])
 const totalFamilyGroups = computed(() => familyGroupsData.value?.data?.count || 0)
@@ -1743,11 +1903,42 @@ const familiesWithMembers = computed(() => familyGroups.value.filter(group => gr
 const visibleFamilyMembers = computed(() => familyGroups.value.reduce((sum, group) => sum + group.member_count, 0))
 const organisations = computed(() => organisationsData.value?.data?.results || [])
 const areas = computed(() => areasData.value?.data?.results || [])
-const eventBookings = computed(() => (eventBookingsData.value?.data?.results || []) as ExtendedBookingList[])
+const eventBookings = computed<ExtendedBookingList[]>(() => {
+  const results = eventBookingsData.value?.data?.results || []
+
+  return (results as BookingList[]).map(({ attendees: _attendees, ...booking }) => ({
+    ...booking,
+  }))
+})
 const eventQuestions = computed(() => eventQuestionsData.value?.data?.results || [])
 const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.results || [])
 const medicalConditions = computed(() => medicalConditionsData.value?.data?.results || [])
 const accessibilityRequirements = computed(() => accessibilityRequirementsData.value?.data?.results || [])
+const preRemovalSummary = computed(() => preRemovalSummaryData.value?.data as AttendeePreRemovalSummary | undefined)
+const linkedPaymentOptions = computed(() => {
+  const summary = preRemovalSummary.value
+  if (!summary) {
+    return [] as Array<{ payment_id: string; payment_reference: string; status: string }>
+  }
+
+  const paymentMap = new Map<string, { payment_id: string; payment_reference: string; status: string }>()
+  for (const blocker of summary.blockers || []) {
+    for (const item of blocker.items || []) {
+      if (item.payment_id) {
+        paymentMap.set(item.payment_id, {
+          payment_id: item.payment_id,
+          payment_reference: item.payment_reference || item.payment_id,
+          status: item.status || 'unknown',
+        })
+      }
+    }
+  }
+
+  return Array.from(paymentMap.values())
+})
+const canRequestRefundFromPreRemoval = computed(() => {
+  return Boolean(selectedDeleteAttendee.value?.attendee_id && selectedRefundPaymentId.value)
+})
 
 // Create chips for active filters
 const activeFilterChips = computed(() => {
@@ -1886,9 +2077,7 @@ const filteredBookings = computed(() => {
     
     // Search by attendee names if available
     if (booking.attendees && Array.isArray(booking.attendees)) {
-      return booking.attendees.some(attendee => 
-        attendee.full_name?.toLowerCase().includes(query)
-      )
+      return booking.attendees.some(attendee => attendee.full_name?.toLowerCase().includes(query))
     }
     
     return false
@@ -2306,9 +2495,83 @@ function viewAttendeeDetails(attendee: ExtendedAttendeeList) {
   showDetailsModal.value = true
 }
 
-function viewBookingDetails(booking: ExtendedBookingList) {
-  selectedBooking.value = booking
+function viewBookingDetails(booking: BookingList) {
+  selectedBookingId.value = booking.id
   showBookingDetailsModal.value = true
+}
+
+function goToPaymentListFromBooking(paymentReference?: string) {
+  if (!paymentReference) {
+    return
+  }
+
+  showBookingDetailsModal.value = false
+  router.push({
+    path: `/events/${id.value}/m/payments/list`,
+    query: { search: paymentReference },
+  })
+}
+
+function openPreRemovalModal(attendee: ExtendedAttendeeList) {
+  selectedDeleteAttendee.value = attendee
+  selectedRefundPaymentId.value = null
+  showPreRemovalModal.value = true
+}
+
+async function confirmDeleteAttendee() {
+  if (!selectedDeleteAttendee.value) {
+    return
+  }
+
+  const summary = preRemovalSummary.value
+  if (!summary?.can_delete) {
+    toast.add({
+      title: 'Deletion blocked',
+      description: 'Resolve blockers before deleting this attendee.',
+      color: 'orange',
+    })
+    return
+  }
+
+  try {
+    await deleteAttendeeMutation.mutateAsync(selectedDeleteAttendee.value.attendee_id)
+    toast.add({
+      title: 'Attendee removed',
+      description: 'The attendee has been removed successfully.',
+      color: 'green',
+    })
+    showPreRemovalModal.value = false
+    selectedDeleteAttendee.value = null
+  } catch (error: any) {
+    const message = error?.message || 'Unable to remove attendee.'
+    toast.add({
+      title: 'Delete failed',
+      description: message,
+      color: 'red',
+    })
+  }
+}
+
+function openAttendeeRefundModalFromPreRemoval() {
+  if (!selectedRefundPaymentId.value || !selectedDeleteAttendee.value) {
+    toast.add({
+      title: 'Payment required',
+      description: 'Select a linked payment before requesting refund.',
+      color: 'orange',
+    })
+    return
+  }
+
+  showRefundModal.value = true
+}
+
+function handleAttendeeRefundCreated() {
+  showRefundModal.value = false
+  toast.add({
+    title: 'Refund request created',
+    description: 'Refund request has been submitted for review.',
+    color: 'green',
+  })
 }
 
 function exportToCSV() {
@@ -2353,6 +2616,21 @@ watch(selectedAttendees, (newVal) => {
 watch(currentPage, () => {
   selectedAttendees.value = []
   selectAll.value = false
+})
+
+watch(showPreRemovalModal, (isOpen) => {
+  if (!isOpen) {
+    selectedRefundPaymentId.value = null
+    showRefundModal.value = false
+  }
+})
+
+watch(showBookingDetailsModal, (isOpen) => {
+  if (isOpen) {
+    return
+  }
+
+  selectedBookingId.value = null
 })
 
 // Create attendee functions
