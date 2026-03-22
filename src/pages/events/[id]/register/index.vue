@@ -728,115 +728,145 @@
 						</div>
 
 									<div v-else-if="activeStepIndex === 4" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Products</h2>
-										<p class="text-sm text-gray-600">Optional add-ons linked to the selected package.</p>
-							</div>
+										<div>
+											<h2 class="text-lg font-semibold text-gray-900">Products</h2>
+											<p class="text-sm text-gray-600">Optional add-ons linked to the selected package.</p>
+										</div>
 
-									<p v-if="!currentAttendee?.packageId" class="text-sm text-gray-500">
-										Select a package first to see available products.
-									</p>
-									<p v-else-if="packageProductsLoading" class="text-sm text-gray-500">
-										Loading package products...
-									</p>
-									<p v-else-if="packageProductsError" class="text-sm font-semibold text-red-600">
-										{{ packageProductsError }}
-									</p>
+										<p v-if="!currentAttendee?.packageId" class="text-sm text-gray-500">
+											Select a package first to see available products.
+										</p>
+										<p v-else-if="packageProductsLoading" class="text-sm text-gray-500">
+											Loading package products...
+										</p>
+										<p v-else-if="packageProductsError" class="text-sm font-semibold text-red-600">
+											{{ packageProductsError }}
+										</p>
 
-									<div v-else-if="currentPackageProducts.length" class="space-y-4">
-										<div
-											v-for="packageProduct in currentPackageProducts"
-											:key="packageProduct.id"
-											class="rounded-xl border border-gray-200 p-4"
-										>
-											<div class="flex flex-wrap items-start justify-between gap-3">
-												<div>
-													<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
-													<p class="mt-1 text-xs text-gray-600">
-														Bundle price from {{ packageProduct.modifiedAmount }} {{ packageProduct.currency }}
-													</p>
+										<div v-else-if="currentPackageProducts.length" class="space-y-4">
+											<div
+												v-for="packageProduct in currentPackageProducts"
+												:key="packageProduct.id"
+												class="rounded-xl border border-gray-200 p-4"
+											>
+												<div class="flex flex-wrap items-start justify-between gap-3">
+													<div>
+														<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
+														<p class="mt-1 text-xs text-gray-600">Choose a variant below. Bundle pricing is applied at checkout.</p>
+													</div>
+													<UBadge color="gray" variant="soft" size="xs">
+														Max {{ packageProduct.quantityPerAttendee }}
+													</UBadge>
 												</div>
-												<UBadge color="gray" variant="soft" size="xs">
-													Max {{ packageProduct.quantityPerAttendee }}
-												</UBadge>
-											</div>
 
-											<div class="mt-4 grid gap-3 sm:grid-cols-2">
-												<div>
-													<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Variant</label>
-													<select
-														class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
-														:value="getSelectionForPackageProduct(packageProduct.id)?.variantId || ''"
-														:disabled="!hasAnyVariantsForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
-														@change="handlePackageProductVariantChange(packageProduct.id, $event)"
+												<div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+													<img
+														:src="getPackageProductImageSrc(packageProduct)"
+														:alt="`${packageProduct.productTitle} image`"
+														class="h-44 w-full object-cover"
+													/>
+												</div>
+
+												<div class="mt-4">
+													<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Select variant</label>
+													<div
+														v-if="hasAnyVariantsForPackageProduct(packageProduct.id)"
+														class="grid gap-2 sm:grid-cols-2"
 													>
-														<option value="">Select a variant</option>
-														<option
+														<button
 															v-for="variant in getVariantsForPackageProduct(packageProduct.id)"
 															:key="variant.variantId"
-															:value="variant.variantId"
+															type="button"
+															class="rounded-xl border px-3 py-3 text-left transition"
+															:class="[
+																getSelectionForPackageProduct(packageProduct.id)?.variantId === variant.variantId
+																	? 'border-blue-500 bg-blue-50 shadow-sm'
+																	: 'border-slate-200 bg-white hover:border-slate-300',
+																(!variant.isActive || variant.stockQuantity <= 0) ? 'cursor-not-allowed opacity-60' : ''
+															]"
 															:disabled="!variant.isActive || variant.stockQuantity <= 0"
+															@click="setPackageProductVariantSelection(packageProduct.id, variant.variantId)"
 														>
-															{{ variantOptionLabel(variant, packageProduct.currency) }}
-														</option>
-													</select>
-													<p v-if="!hasAnyVariantsForPackageProduct(packageProduct.id)" class="mt-1 text-xs font-semibold text-amber-700">
+															<div class="flex items-center justify-between gap-2">
+																<p class="text-sm font-semibold text-slate-900">{{ variant.sizeDisplay }} {{ variant.color }}</p>
+																<UBadge size="xs" :color="variant.stockQuantity > 0 ? 'emerald' : 'gray'" variant="soft">
+																	{{ variant.stockQuantity > 0 ? `${variant.stockQuantity} left` : 'Unavailable' }}
+																</UBadge>
+															</div>
+															<p class="mt-1 text-xs text-slate-500">
+																Standard {{ formatMoney(Number(variant.finalPrice || 0), packageProduct.currency) }}
+															</p>
+															<p class="mt-1 text-xs font-semibold text-emerald-700">
+																Bundle est. {{ formatMoney(getBundledVariantEstimate(packageProduct, variant), packageProduct.currency) }}
+															</p>
+														</button>
+													</div>
+
+													<p v-if="!hasAnyVariantsForPackageProduct(packageProduct.id)" class="mt-2 text-xs font-semibold text-amber-700">
 														No variants are currently available for this product.
 													</p>
-													<p
-														v-else-if="!hasSelectableVariantsForPackageProduct(packageProduct.id)"
-														class="mt-1 text-xs font-semibold text-amber-700"
-													>
+													<p v-else-if="!hasSelectableVariantsForPackageProduct(packageProduct.id)" class="mt-2 text-xs font-semibold text-amber-700">
 														All listed variants are currently unavailable.
 													</p>
 												</div>
 
-												<div>
-													<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
-													<UInput
-														type="number"
-														:min="1"
-														:max="packageProduct.quantityPerAttendee"
+												<div class="mt-4 grid gap-3 sm:grid-cols-2">
+													<div>
+														<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
+														<UInput
+															type="number"
+															:min="1"
+															:max="packageProduct.quantityPerAttendee"
+															:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
+															:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
+															@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
+														/>
+														<p class="mt-1 text-xs text-slate-500">Up to {{ packageProduct.quantityPerAttendee }} per attendee.</p>
+													</div>
+													<div class="flex items-end">
+														<div class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
+															<p class="font-semibold text-slate-700">Selected pricing preview</p>
+															<p v-if="getSelectedBundledVariantEstimate(packageProduct) !== null">
+																{{ formatMoney(getSelectedBundledVariantEstimate(packageProduct) || 0, packageProduct.currency) }} per unit (est.)
+															</p>
+															<p v-else>Select a variant to preview bundled price.</p>
+														</div>
+													</div>
+												</div>
+
+												<div class="mt-3 flex justify-end">
+													<UButton
+														size="xs"
+														color="gray"
+														variant="ghost"
 														:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
-														:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
-														@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
-													/>
+														@click="removePackageProductSelection(packageProduct.id)"
+													>
+														Remove
+													</UButton>
 												</div>
 											</div>
 
-											<div class="mt-3 flex justify-end">
-												<UButton
-													size="xs"
-													color="gray"
-													variant="ghost"
-													:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
-													@click="removePackageProductSelection(packageProduct.id)"
-												>
-													Remove
-												</UButton>
+											<div v-if="selectedAddOnsSummary.length" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+												<p class="text-sm font-semibold text-slate-900">Selected add-ons</p>
+												<ul class="mt-2 space-y-2">
+													<li
+														v-for="row in selectedAddOnsSummary"
+														:key="`${row.packageProductId}-${row.variantLabel}`"
+														class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+													>
+														<div class="text-slate-700">
+															<p class="font-semibold text-slate-900">{{ row.productTitle }}</p>
+															<p>{{ row.variantLabel }}</p>
+														</div>
+														<p class="font-semibold text-slate-800">x{{ row.quantity }}</p>
+													</li>
+												</ul>
 											</div>
 										</div>
 
-										<div v-if="selectedAddOnsSummary.length" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-											<p class="text-sm font-semibold text-slate-900">Selected add-ons</p>
-											<ul class="mt-2 space-y-2">
-												<li
-													v-for="row in selectedAddOnsSummary"
-													:key="`${row.packageProductId}-${row.variantLabel}`"
-													class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
-												>
-													<div class="text-slate-700">
-														<p class="font-semibold text-slate-900">{{ row.productTitle }}</p>
-														<p>{{ row.variantLabel }}</p>
-													</div>
-													<p class="font-semibold text-slate-800">x{{ row.quantity }}</p>
-												</li>
-											</ul>
-										</div>
+										<p v-else class="text-sm text-gray-500">No package products available for this package.</p>
 									</div>
-
-									<p v-else class="text-sm text-gray-500">No package products available for this package.</p>
-						</div>
 
 									<div v-else-if="activeStepIndex === 5" class="space-y-6">
 							<div>
@@ -1167,9 +1197,9 @@ import { usePaymentMethods } from '~/composables/resources/payments/paymentMetho
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
+import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
-import { resolveImageUrl } from '~/utils/image'
+import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, MedicalConditionItemDraft, PersonalInfoItemDraft, ProductSelectionDraft } from '~/stores/registration'
 import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
@@ -1603,8 +1633,10 @@ type PackageProductRow = {
 	productPublicId: string
 	productTitle: string
 	quantityPerAttendee: number
+	baseAmount: string
 	modifiedAmount: string
 	currency: string
+	imageUrl: string | null
 }
 
 type VariantRow = {
@@ -1638,6 +1670,10 @@ const getSelectionForPackageProduct = (packageProductId: number) => {
 	return (currentAttendeeProductSelections.value || []).find((selection) => selection.packageProductId === packageProductId)
 }
 
+const getPackageProductImageSrc = (packageProduct: PackageProductRow) => {
+	return resolveImageUrl(packageProduct.imageUrl)
+}
+
 const getVariantsForPackageProduct = (packageProductId: number): VariantRow[] => {
 	return packageProductVariants.value[packageProductId] || []
 }
@@ -1648,6 +1684,32 @@ const hasAnyVariantsForPackageProduct = (packageProductId: number): boolean => {
 
 const hasSelectableVariantsForPackageProduct = (packageProductId: number): boolean => {
 	return getVariantsForPackageProduct(packageProductId).some((variant) => variant.isActive && variant.stockQuantity > 0)
+}
+
+const getBundleMultiplier = (packageProduct: PackageProductRow): number => {
+	const base = Number(packageProduct.baseAmount || 0)
+	const modified = Number(packageProduct.modifiedAmount || 0)
+	if (!Number.isFinite(base) || base <= 0) return 1
+	if (!Number.isFinite(modified) || modified < 0) return 1
+	return modified / base
+}
+
+const getBundledVariantEstimate = (packageProduct: PackageProductRow, variant: VariantRow): number => {
+	const standard = Number(variant.finalPrice || 0)
+	if (!Number.isFinite(standard) || standard < 0) return 0
+	return standard * getBundleMultiplier(packageProduct)
+}
+
+const getSelectedVariantForPackageProduct = (packageProductId: number): VariantRow | undefined => {
+	const selection = getSelectionForPackageProduct(packageProductId)
+	if (!selection) return undefined
+	return getVariantsForPackageProduct(packageProductId).find((variant) => variant.variantId === selection.variantId)
+}
+
+const getSelectedBundledVariantEstimate = (packageProduct: PackageProductRow): number | null => {
+	const selectedVariant = getSelectedVariantForPackageProduct(packageProduct.id)
+	if (!selectedVariant) return null
+	return getBundledVariantEstimate(packageProduct, selectedVariant)
 }
 
 type SelectedAddOnSummaryRow = {
@@ -1742,43 +1804,76 @@ const loadPackageProductsForCurrentAttendee = async () => {
 		const packageResponse = await bookingsPackageProductsList({ path: { id: packageId } })
 		if (loadVersion !== packageProductLoadVersion) return
 
-		const products = (packageResponse.data?.results || []).map((row: any) => ({
-			id: Number(row.id),
-			productPublicId: String(row.product_public_id || ''),
-			productTitle: String(row.product_title || 'Product'),
-			quantityPerAttendee: Math.max(1, Number(row.quantity_per_attendee || 1)),
-			modifiedAmount: String(row.modified_amount || '0.00'),
-			currency: String(row.base_amount_currency || 'GBP'),
-		}))
+		const products = (packageResponse.data?.results || []).map((row: any) => {
+			// Try multiple field names to find the product ID
+			const productPublicId = String(row.product_public_id || row.product_id || row.product || '').trim()
+			
+			return {
+				id: Number(row.id),
+				productPublicId,
+				productTitle: String(row.product_title || 'Product'),
+				quantityPerAttendee: Math.max(1, Number(row.quantity_per_attendee || 1)),
+				baseAmount: String(row.base_amount || '0.00'),
+				modifiedAmount: String(row.modified_amount || '0.00'),
+				currency: String(row.base_amount_currency || 'GBP'),
+				imageUrl: null,
+			}
+		})
 
-		currentPackageProducts.value = products
-
-		const variantEntries = await Promise.all(products.map(async (product) => {
-			if (!product.productPublicId) return [product.id, []] as const
+		const packageProductLookups = await Promise.all(products.map(async (product): Promise<[number, { variants: VariantRow[]; imageUrl: string | null }]> => {
+			if (!product.productPublicId) {
+				console.warn(`[Package Product] No product ID found for package product ${product.id}`)
+				return [product.id, { variants: [], imageUrl: null }]
+			}
 			try {
-				const response = await productsListVariantsList({
-					path: { product_product_id: product.productPublicId },
-					query: { page_size: 200 },
-				})
-				const variants = (response.data?.results || []).map((variant: any) => ({
-					variantId: String(variant.variant_id),
+				const [variantsResponse, productResponse] = await Promise.all([
+					productsListVariantsList({
+						path: { product_product_id: product.productPublicId },
+						query: { page_size: 200 },
+					}),
+					productsListRetrieve({
+						path: { product_id: product.productPublicId },
+					}),
+				])
+
+				const variants = (variantsResponse.data?.results || []).map((variant: any) => ({
+					variantId: String(variant.variant_id || variant.id || ''),
 					sizeDisplay: String(variant.size_display || variant.size || 'Variant'),
 					color: String(variant.color || ''),
 					finalPrice: String(variant.final_price || variant.modified_amount || product.modifiedAmount),
 					stockQuantity: Number(variant.stock_quantity || 0),
 					isActive: !!variant.is_active,
 				}))
-				return [product.id, variants] as const
-			} catch {
-				return [product.id, []] as const
+
+				const detail = productResponse.data
+				const mainImage = detail?.main_image?.url || detail?.images?.main?.url || null
+				
+				if (mainImage) {
+					console.log(`[Package Product] Found image for product ${product.productPublicId}: ${mainImage}`)
+				}
+				
+				return [product.id, { variants, imageUrl: mainImage }]
+			} catch (error) {
+				console.error(`[Package Product] Failed to fetch details for product ${product.productPublicId}:`, error)
+				return [product.id, { variants: [], imageUrl: null }]
 			}
 		}))
 
 		if (loadVersion !== packageProductLoadVersion) return
 
-		packageProductVariants.value = Object.fromEntries(variantEntries)
+		packageProductVariants.value = Object.fromEntries(
+			packageProductLookups.map(([productId, row]) => [productId, row.variants])
+		)
 
-		const validProductIds = new Set(products.map((product) => product.id))
+		currentPackageProducts.value = products.map((product) => {
+			const lookup = packageProductLookups.find(([productId]) => productId === product.id)?.[1]
+			return {
+				...product,
+				imageUrl: lookup?.imageUrl || null,
+			}
+		})
+
+		const validProductIds = new Set(currentPackageProducts.value.map((product) => product.id))
 		const normalized = (attendee?.productSelections || []).filter((selection) => {
 			if (!validProductIds.has(selection.packageProductId)) return false
 			const variants = packageProductVariants.value[selection.packageProductId] || []
@@ -1786,7 +1881,7 @@ const loadPackageProductsForCurrentAttendee = async () => {
 				return variant.variantId === selection.variantId && variant.isActive && variant.stockQuantity > 0
 			})
 		}).map((selection) => {
-			const pkg = products.find((row) => row.id === selection.packageProductId)
+			const pkg = currentPackageProducts.value.find((row) => row.id === selection.packageProductId)
 			if (!pkg) return selection
 			return {
 				...selection,

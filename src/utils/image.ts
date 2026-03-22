@@ -15,8 +15,8 @@ export function resolveImageUrl(
     return fallback;
   }
 
-  // If already absolute URL, return as-is
-  if (src.startsWith('http://') || src.startsWith('https://')) {
+  // If already absolute URL or data URI, return as-is
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
     return src;
   }
 
