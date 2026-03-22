@@ -1692,14 +1692,14 @@
             <div v-if="currentTab === 'orders'">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-xs font-black text-primary uppercase tracking-widest">Orders & Order Items</h3>
-                <UButton
+                <!-- <UButton
                   @click="showCreateOrderForm = true"
                   size="xs"
                   color="primary"
                   icon="i-heroicons-plus"
                 >
                   Create Order
-                </UButton>
+                </UButton> -->
               </div>
 
               <!-- Create Order Form -->
@@ -1768,15 +1768,6 @@
                         >
                           Cancel Order
                         </UButton>
-                        <UButton
-                          @click="deleteOrder(order.id)"
-                          size="xs"
-                          color="red"
-                          variant="ghost"
-                          icon="i-heroicons-trash"
-                        >
-                          Delete
-                        </UButton>
                       </div>
                     </div>
                     <div class="mt-1 text-xs text-gray-500">
@@ -1844,7 +1835,6 @@
                         </div>
                       </form>
                     </div>
-
                     <!-- Items Table -->
                     <div v-if="!(order as any).order_items?.length" class="text-center py-4 text-gray-500 text-xs">
                       No items in this order
@@ -1853,15 +1843,58 @@
                       <div
                         v-for="item in (order as any).order_items"
                         :key="item.id"
-                        class="flex items-center justify-between p-2 bg-gray-50 rounded-lg border border-gray-200"
+                        class="p-3 bg-gray-50 rounded-xl border border-gray-200"
                       >
-                        <div class="flex-1">
-                          <p class="text-xs font-semibold text-gray-900">
-                            Product Variant ID: {{ item.product_variant || 'N/A' }}
-                          </p>
-                          <p class="text-xs text-gray-600">
-                            Quantity: {{ item.quantity }} × {{ item.unit_price }} =  <span class="font-bold">{{ item.total_price }}</span>
-                          </p>
+                        <div class="flex items-start gap-3">
+                          <div class="w-14 h-14 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
+                            <img
+                              v-if="getOrderItemImageUrl(item)"
+                              :src="getOrderItemImageUrl(item) || ''"
+                              :alt="getOrderItemTitle(item)"
+                              class="w-full h-full object-cover"
+                            />
+                            <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
+                              <UIcon name="i-heroicons-photo" class="w-5 h-5" />
+                            </div>
+                          </div>
+
+                          <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2">
+                              <div>
+                                <p class="text-sm font-semibold text-gray-900 truncate">
+                                  {{ getOrderItemTitle(item) }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-0.5">
+                                  {{ getOrderItemCode(item) }}
+                                </p>
+                              </div>
+                              <span class="text-sm font-bold text-primary whitespace-nowrap">{{ item.total_price }}</span>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-2 mt-2">
+                              <UBadge size="xs" color="gray" variant="soft">
+                                Qty {{ item.quantity }}
+                              </UBadge>
+                              <UBadge size="xs" color="gray" variant="soft">
+                                Unit {{ item.unit_price }}
+                              </UBadge>
+                              <UBadge
+                                v-if="getOrderItemSize(item)"
+                                size="xs"
+                                color="blue"
+                                variant="soft"
+                              >
+                                Size {{ getOrderItemSize(item) }}
+                              </UBadge>
+                              <span
+                                v-if="getOrderItemColor(item)"
+                                class="inline-flex items-center gap-1.5 px-2 py-1 rounded-full border border-gray-200 bg-white text-xs text-gray-700"
+                              >
+                                <span class="w-2.5 h-2.5 rounded-full border border-gray-300" :style="getOrderItemColorStyle(item)" />
+                                {{ getOrderItemColor(item) }}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -3351,6 +3384,45 @@ const resetOrderItemForm = () => {
     product_variant_id: '',
     quantity: 1,
   }
+}
+
+const getOrderItemDetails = (item: any): Record<string, any> | null => {
+  const details = item?.product_variant_details
+  if (!details || typeof details !== 'object') return null
+  return details as Record<string, any>
+}
+
+const getOrderItemTitle = (item: any): string => {
+  const details = getOrderItemDetails(item)
+  return details?.product_title || `Variant ${details?.variant_id || item?.product_variant || 'N/A'}`
+}
+
+const getOrderItemCode = (item: any): string => {
+  const details = getOrderItemDetails(item)
+  if (details?.product_display_code) return String(details.product_display_code)
+  if (details?.variant_id) return `Variant ${details.variant_id}`
+  return `Variant ${item?.product_variant || 'N/A'}`
+}
+
+const getOrderItemImageUrl = (item: any): string | null => {
+  const details = getOrderItemDetails(item)
+  return details?.image_url || details?.variant_image_url || details?.product_image_url || null
+}
+
+const getOrderItemSize = (item: any): string | null => {
+  const details = getOrderItemDetails(item)
+  return details?.size || null
+}
+
+const getOrderItemColor = (item: any): string | null => {
+  const details = getOrderItemDetails(item)
+  return details?.color || null
+}
+
+const getOrderItemColorStyle = (item: any): Record<string, string> | undefined => {
+  const color = getOrderItemColor(item)
+  if (!color) return undefined
+  return { backgroundColor: color }
 }
 
 // ====================

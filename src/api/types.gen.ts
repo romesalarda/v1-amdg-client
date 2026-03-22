@@ -9325,6 +9325,7 @@ export type OrderList = {
         customer?: string;
         attendee?: string;
     };
+    readonly order_items: Array<OrderItem>;
 };
 
 /**

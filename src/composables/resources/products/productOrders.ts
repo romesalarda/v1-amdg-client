@@ -15,6 +15,7 @@ import {
   productsOrdersSubmitCreate,
 } from '~/api/sdk.gen'
 import type {
+  OrderUpdateRequest,
   ProductsOrdersListData,
   ProductsOrdersCreateData,
   ProductsOrdersUpdateData,
@@ -45,7 +46,7 @@ export function useProductOrders(params?: MaybeRefOrGetter<ProductsOrdersListDat
 /**
  * Get a single order by ID
  */
-export function useProductOrder(orderId: MaybeRefOrGetter<String>) {
+export function useProductOrder(orderId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', orderId] as const,
     queryFn: () => {
@@ -53,6 +54,33 @@ export function useProductOrder(orderId: MaybeRefOrGetter<String>) {
       return productsOrdersRetrieve({ path: { order_id: String(id) } })
     },
     enabled: () => !!toValue(orderId),
+  })
+}
+
+/**
+ * Update only order status using partial update
+ */
+export function useUpdateProductOrderStatus() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      status,
+    }: {
+      orderId: string | number
+      status: NonNullable<OrderUpdateRequest['status']>
+    }) =>
+      productsOrdersPartialUpdate({
+        path: { order_id: String(orderId) },
+        body: { status },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
   })
 }
 
@@ -113,7 +141,7 @@ export function useDeleteProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (orderId: number) => productsOrdersDestroy({ path: { order_id: String(orderId) } }),
+    mutationFn: (orderId: string | number) => productsOrdersDestroy({ path: { order_id: String(orderId) } }),
     onSuccess: (_, orderId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({
@@ -148,7 +176,7 @@ export function useCancelProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (orderId: number) => productsOrdersCancelCreate({ path: { order_id: String(orderId) } }),
+    mutationFn: (orderId: string | number) => productsOrdersCancelCreate({ path: { order_id: String(orderId) } }),
     onSuccess: (_, orderId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -183,7 +211,7 @@ export function useCompleteProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (orderId: number) => productsOrdersCompleteCreate({ path: { order_id: String(orderId) } }),
+    mutationFn: (orderId: string | number) => productsOrdersCompleteCreate({ path: { order_id: String(orderId) } }),
     onSuccess: (_, orderId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -200,7 +228,7 @@ export function useSubmitProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (orderId: number) => productsOrdersSubmitCreate({ path: { order_id: String(orderId) } }),
+    mutationFn: (orderId: string | number) => productsOrdersSubmitCreate({ path: { order_id: String(orderId) } }),
     onSuccess: (_, orderId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

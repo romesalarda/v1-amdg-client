@@ -48,6 +48,8 @@
                   variant="solid"
                   color="blue"
                   icon="i-heroicons-arrow-right"
+                  :loading="isTransitioning"
+                  :disabled="isTransitioning"
                   @click="handleStatusTransition"
                 >
                   {{ getNextStatusLabel(order.status!) }}
@@ -58,6 +60,7 @@
                   variant="outline"
                   color="red"
                   icon="i-heroicons-x-mark"
+                  :disabled="isTransitioning"
                   @click="handleCancelOrder"
                 >
                   Cancel Order
@@ -83,7 +86,7 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Order total</p>
-              <p class="mt-1 text-2xl font-black text-primary">{{ formatMoney(order.total_amount, 'GBP') }}</p>
+              <p class="mt-1 text-2xl font-black text-primary">{{ order.total_amount }}</p>
             </div>
           </div>
         </section>
@@ -110,15 +113,31 @@
                   class="rounded-xl border border-slate-200 bg-slate-50 p-4"
                 >
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
+                    <div class="flex items-start gap-3">
+                      <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        <img
+                          v-if="getProductVariantDetails(item)?.image_url"
+                          :src="getProductVariantDetails(item)?.image_url || ''"
+                          :alt="getProductVariantDetails(item)?.product_title || 'Product variant image'"
+                          class="h-full w-full object-cover"
+                        />
+                        <div v-else class="flex h-full w-full items-center justify-center text-slate-300">
+                          <UIcon name="i-heroicons-photo" class="h-5 w-5" />
+                        </div>
+                      </div>
+
+                      <div>
                       <p class="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Line {{ index + 1 }}</p>
                       <p class="mt-1 text-sm font-semibold text-slate-900">
-                        {{ `Product Variant #${item.product_variant || 'N/A'}` }}
+                        {{ getProductVariantDetails(item)?.product_title || `Product Variant #${item.product_variant || 'N/A'}` }}
                       </p>
                       <p class="text-xs text-slate-500">
-                        Variant ID: {{ item.product_variant || 'N/A' }}
+                        Variant: {{ getProductVariantDetails(item)?.variant_id || item.product_variant || 'N/A' }}
+                        <span v-if="getProductVariantDetails(item)?.size"> • Size {{ getProductVariantDetails(item)?.size }}</span>
+                        <span v-if="getProductVariantDetails(item)?.color"> • Color {{ getProductVariantDetails(item)?.color }}</span>
                       </p>
                       <p class="mt-1 text-xs text-slate-500">Item ID: {{ item.id }}</p>
+                      </div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-right text-xs sm:min-w-[230px]">
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
@@ -127,11 +146,11 @@
                       </div>
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
                         <p class="font-bold uppercase tracking-wide text-slate-400">Unit</p>
-                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ formatMoney(item.unit_price, 'GBP') }}</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ item.unit_price}}</p>
                       </div>
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
                         <p class="font-bold uppercase tracking-wide text-slate-400">Total</p>
-                        <p class="mt-1 text-sm font-black text-primary">{{ formatMoney(item.total_price, 'GBP') }}</p>
+                        <p class="mt-1 text-sm font-black text-primary">{{ item.total_price }}</p>
                       </div>
                     </div>
                   </div>
@@ -141,7 +160,7 @@
               <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
                 <div class="flex items-center justify-end gap-3">
                   <p class="text-sm font-semibold text-slate-700">Order Total</p>
-                  <p class="text-xl font-black text-primary">{{ formatMoney(order.total_amount, 'GBP') }}</p>
+                  <p class="text-xl font-black text-primary">{{ order.total_amount }}</p>
                 </div>
               </div>
             </div>
@@ -194,9 +213,32 @@
               <div class="space-y-4 p-5">
                 <div>
                   <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Payment</p>
-                  <div v-if="order.payment" class="mt-1 flex items-center gap-2 text-sm text-slate-900">
-                    <UIcon name="i-heroicons-credit-card" class="h-4 w-4 text-emerald-600" />
-                    Payment ID: {{ order.payment }}
+                  <div v-if="order.payment" class="mt-1 space-y-2 text-sm text-slate-900">
+                    <div class="flex items-center gap-2">
+                      <UIcon name="i-heroicons-credit-card" class="h-4 w-4 text-emerald-600" />
+                      Payment Link ID: {{ order.payment }}
+                    </div>
+                    <div v-if="paymentDetails?.payment_id" class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
+                      <p class="text-slate-500">Payment UUID</p>
+                      <p class="font-mono text-slate-900 break-all">{{ paymentDetails.payment_id }}</p>
+                    </div>
+                    <div v-if="paymentDetails?.payment_reference" class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
+                      <p class="text-slate-500">Payment Reference</p>
+                      <p class="font-mono text-slate-900">{{ paymentDetails.payment_reference }}</p>
+                    </div>
+                    <div v-if="paymentDetails?.status" class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
+                      <p class="text-slate-500">Payment Status</p>
+                      <p class="font-semibold uppercase tracking-wide text-slate-900">{{ paymentDetails.status }}</p>
+                    </div>
+                    <UButton
+                      size="xs"
+                      variant="soft"
+                      color="blue"
+                      icon="i-heroicons-arrow-top-right-on-square"
+                      @click="goToLinkedPayment"
+                    >
+                      Open in Payments List
+                    </UButton>
                   </div>
                   <p v-else class="mt-1 text-sm text-slate-500">No payment linked</p>
                 </div>
@@ -229,9 +271,8 @@
                     View Customer
                   </a>
                   <a
-                    v-if="order._links.attendee"
-                    :href="order._links.attendee"
-                    target="_blank"
+                    v-if="order.attendee"
+                    :href="`/events/${eventId}/m/attendees/${order.attendee}`"
                     class="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-800"
                   >
                     <UIcon name="i-heroicons-ticket" class="h-4 w-4" />
@@ -249,8 +290,9 @@
 
 <script setup lang="ts">
 import { DateTime } from 'luxon'
+import type { OrderDetail, OrderItem } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
-import { useProductOrder, useCancelProductOrder, useCompleteProductOrder } from '~/composables/resources/products/productOrders'
+import { useProductOrder, useCancelProductOrder, useCompleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { orderStatusColors } from '~/schemas/events/productConstants'
 import { formatMoney } from '~/utils/money'
@@ -265,6 +307,21 @@ const route = useRoute()
 const eventId = computed(() => route.params.id as string)
 const orderId = computed(() => route.params.order_id as string)
 const toast = useToast()
+type OrderStatus = NonNullable<OrderDetail['status']>
+
+type VariantDetails = {
+  variant_id?: string
+  product_title?: string
+  size?: string | null
+  color?: string | null
+  image_url?: string | null
+}
+
+type PaymentDetails = {
+  payment_id?: string
+  payment_reference?: string
+  status?: string
+}
 
 // Event Data
 const { data: event } = useEvent(eventId)
@@ -276,6 +333,27 @@ const order = computed(() => orderData.value?.data)
 // Mutations
 const { mutateAsync: cancelOrderMutation } = useCancelProductOrder()
 const { mutateAsync: completeOrderMutation } = useCompleteProductOrder()
+const { mutateAsync: updateOrderStatusMutation } = useUpdateProductOrderStatus()
+const isTransitioning = ref(false)
+
+const paymentDetails = computed<PaymentDetails | null>(() => {
+  const raw = orderData.value?.data as unknown
+  if (!raw || typeof raw !== 'object') {
+    return null
+  }
+
+  const maybeDetails = (raw as { payment_details?: unknown }).payment_details
+  if (!maybeDetails || typeof maybeDetails !== 'object') {
+    return null
+  }
+
+  const details = maybeDetails as Record<string, unknown>
+  return {
+    payment_id: typeof details.payment_id === 'string' ? details.payment_id : undefined,
+    payment_reference: typeof details.payment_reference === 'string' ? details.payment_reference : undefined,
+    status: typeof details.status === 'string' ? details.status : undefined,
+  }
+})
 
 // Helpers
 function getOrderStatusColor(status: string): string {
@@ -296,52 +374,96 @@ function formatRelativeTime(dateString: string): string {
   }
 }
 
-function canTransitionStatus(status: string): boolean {
+function canTransitionStatus(status: OrderStatus | undefined): boolean {
+  if (!status) return false
   return ['pending', 'processing'].includes(status)
 }
 
-function canCancelOrder(status: string): boolean {
+function canCancelOrder(status: OrderStatus | undefined): boolean {
+  if (!status) return false
   return ['draft', 'pending', 'processing'].includes(status)
 }
 
-function getNextStatusLabel(status: string): string {
+function getNextStatusLabel(status: OrderStatus | undefined): string {
   if (status === 'pending') return 'Mark as Processing'
   if (status === 'processing') return 'Mark as Completed'
   return 'Update Status'
 }
 
+function getProductVariantDetails(item: OrderItem): VariantDetails | null {
+  const maybeDetails = (item as unknown as { product_variant_details?: unknown }).product_variant_details
+  if (!maybeDetails || typeof maybeDetails !== 'object') {
+    return null
+  }
+
+  const details = maybeDetails as Record<string, unknown>
+  return {
+    variant_id: typeof details.variant_id === 'string' ? details.variant_id : undefined,
+    product_title: typeof details.product_title === 'string' ? details.product_title : undefined,
+    size: typeof details.size === 'string' ? details.size : null,
+    color: typeof details.color === 'string' ? details.color : null,
+    image_url: typeof details.image_url === 'string' ? details.image_url : null,
+  }
+}
+
+function goToLinkedPayment() {
+  const linkedPaymentId = paymentDetails.value?.payment_id
+  const linkedPaymentReference = paymentDetails.value?.payment_reference
+
+  if (linkedPaymentReference) {
+    navigateTo(`/events/${eventId.value}/m/payments/list?search=${encodeURIComponent(linkedPaymentReference)}`)
+    return
+  }
+
+  if (order.value?.payment) {
+    navigateTo(`/events/${eventId.value}/m/payments/list?search=${encodeURIComponent(String(order.value.payment))}`)
+  }
+}
+
 // Actions
 async function handleStatusTransition() {
-  if (!order.value) return
+  if (!order.value || isTransitioning.value) return
 
   const status = order.value.status
   
   try {
+    isTransitioning.value = true
+
     if (status === 'processing') {
       // Transition to completed
-      await completeOrderMutation(Number(order.value.id))
+      await completeOrderMutation(order.value.order_id)
       toast.add({
         title: 'Order completed',
         description: `Order ${order.value.order_reference_id} has been marked as completed.`,
         color: 'green',
       })
+    } else if (status === 'pending') {
+      await updateOrderStatusMutation({
+        orderId: order.value.order_id,
+        status: 'processing',
+      })
+      toast.add({
+        title: 'Order updated',
+        description: `Order ${order.value.order_reference_id} has been marked as processing.`,
+        color: 'green',
+      })
     } else {
-      // For pending -> processing, we'd need a different mutation
-      // For now, show a message
       toast.add({
         title: 'Status transition',
-        description: 'Backend endpoint for this transition needs to be implemented.',
-        color: 'blue',
+        description: 'This order status cannot be transitioned from this screen.',
+        color: 'amber',
       })
     }
     
-    refetch()
-  } catch (error) {
+    await refetch()
+  } catch {
     toast.add({
       title: 'Error',
       description: 'Failed to update order status. Please try again.',
       color: 'red',
     })
+  } finally {
+    isTransitioning.value = false
   }
 }
 
@@ -353,7 +475,7 @@ async function handleCancelOrder() {
   }
 
   try {
-    await cancelOrderMutation(Number(order.value.id))
+    await cancelOrderMutation(order.value.order_id)
     toast.add({
       title: 'Order cancelled',
       description: `Order ${order.value.order_reference_id} has been cancelled.`,

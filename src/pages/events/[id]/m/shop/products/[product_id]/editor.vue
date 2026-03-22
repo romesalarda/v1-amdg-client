@@ -425,7 +425,7 @@
                         <div class="text-sm text-gray-500 mt-1">
                           Stock: {{ variant.stock_quantity }}
                           <span v-if="variant.max_stock_quantity"> / {{ variant.max_stock_quantity }}</span>
-                           • £{{ variant.final_price }}
+                           • {{ variant.final_price }}
                           <UBadge v-if="variant.percentage_modifier && parseFloat(variant.percentage_modifier) !== 0" color="blue" variant="soft" size="xs" class="ml-2">
                             {{ parseFloat(variant.percentage_modifier) > 0 ? '+' : '' }}{{ variant.percentage_modifier }}%
                           </UBadge>

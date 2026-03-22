@@ -6,7 +6,7 @@
         
         <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <!-- Statistics Cards -->
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b border-gray-100 bg-gray-50">
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4 p-6 border-b border-gray-100 bg-gray-50">
             <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -25,8 +25,20 @@
                   <UIcon name="i-heroicons-currency-pound" class="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
+                  <div class="text-2xl font-black text-deep-navy">{{ formatMoney(pageGrossAmount, 'GBP') }}</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Page Gross</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <UIcon name="i-heroicons-banknotes" class="w-5 h-5 text-violet-600" />
+                </div>
+                <div>
                   <div class="text-2xl font-black text-deep-navy">{{ formatMoney(totalRevenue, 'GBP') }}</div>
-                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Revenue</div>
+                  <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Completed Revenue</div>
                 </div>
               </div>
             </div>
@@ -309,7 +321,7 @@
                     </UBadge>
                   </td>
                   <td class="py-3 px-4 font-semibold text-gray-900">
-                    {{ formatMoney(order.total_amount, 'GBP') }}
+                    {{ order.total_amount }}
                   </td>
                   <td class="py-3 px-4">
                     <UBadge 
@@ -337,8 +349,8 @@
                       
                       <!-- Status Transition Dropdown -->
                       <UDropdown 
-                        v-if="getAvailableTransitions(order.status!).length > 0"
-                        :items="[getAvailableTransitions(order.status!)]"
+                        v-if="getAvailableTransitions(order).length > 0"
+                        :items="[getAvailableTransitions(order)]"
                         :popper="{ placement: 'bottom-end' }"
                       >
                         <UButton
@@ -346,6 +358,8 @@
                           variant="ghost"
                           color="blue"
                           icon="i-heroicons-arrow-path"
+                          :loading="transitioningOrderId === order.order_id"
+                          :disabled="transitioningOrderId === order.order_id"
                           title="Change status"
                         />
                       </UDropdown>
@@ -356,6 +370,7 @@
                         variant="ghost"
                         color="red"
                         icon="i-heroicons-x-mark"
+                        :disabled="transitioningOrderId === order.order_id"
                         @click="cancelOrder(order)"
                         title="Cancel order"
                       />
@@ -488,9 +503,9 @@
 
 <script setup lang="ts">
 import { DateTime } from 'luxon'
-import type { OrderList } from '~/api/types.gen'
+import type { OrderList, ProductsOrdersListData } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
-import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
+import { useProductOrders, useCancelProductOrder, useCompleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { orderStatusColors } from '~/schemas/events/productConstants'
 import { formatMoney } from '~/utils/money'
@@ -504,6 +519,9 @@ definePageMeta({
 const route = useRoute()
 const id = computed(() => route.params.id as string)
 const toast = useToast()
+type OrderStatus = NonNullable<OrderList['status']>
+
+const DEFAULT_FILTER_STATUSES: OrderStatus[] = ['pending', 'processing', 'completed']
 
 // Event Data
 const { data: event } = useEvent(id)
@@ -527,7 +545,7 @@ watch(searchQuery, (newValue) => {
 // Filters
 const showFilters = ref(false)
 const filters = reactive({
-  statuses: ['pending', 'processing', 'completed'] as string[], // Exclude 'draft' by default
+  statuses: [...DEFAULT_FILTER_STATUSES] as OrderStatus[], // Exclude 'draft' by default
   createdAfter: null as string | null,
   createdBefore: null as string | null,
   minAmount: null as number | null,
@@ -535,7 +553,7 @@ const filters = reactive({
   hasPayment: false,
 })
 
-const availableStatuses = [
+const availableStatuses: Array<{ value: OrderStatus; label: string }> = [
   { value: 'draft', label: 'Draft' },
   { value: 'pending', label: 'Pending' },
   { value: 'processing', label: 'Processing' },
@@ -560,7 +578,7 @@ function setSorting(field: string) {
 
 // Computed query parameters for API
 const queryParams = computed(() => {
-  const params: any = {
+  const params: NonNullable<ProductsOrdersListData['query']> = {
     event: event.value?.data?.id,
     page: currentPage.value,
     page_size: pageSize.value,
@@ -577,9 +595,9 @@ const queryParams = computed(() => {
   }
 
   // Status filters
-  // if (filters.statuses.length > 0) {
-  //   params.status__in = filters.statuses.join(',')
-  // }
+  if (filters.statuses.length > 0) {
+    params.status__in = [...filters.statuses]
+  }
 
   // Date filters
   if (filters.createdAfter) {
@@ -630,9 +648,21 @@ const totalRevenue = computed(() => {
     .reduce((sum: number, o: OrderList) => sum + parseFloat(o.total_amount), 0)
 })
 
+const pageGrossAmount = computed(() => {
+  return orders.value.reduce((sum: number, o: OrderList) => sum + parseFloat(o.total_amount.slice(1)), 0)
+})
+
+const hasDefaultStatuses = computed(() => {
+  if (filters.statuses.length !== DEFAULT_FILTER_STATUSES.length) {
+    return false
+  }
+
+  return DEFAULT_FILTER_STATUSES.every((status) => filters.statuses.includes(status))
+})
+
 const activeFilterCount = computed(() => {
   let count = 0
-  if (filters.statuses.length !== 3) count++ // Not default
+  if (!hasDefaultStatuses.value) count++
   if (filters.createdAfter) count++
   if (filters.createdBefore) count++
   if (filters.minAmount !== null) count++
@@ -643,7 +673,7 @@ const activeFilterCount = computed(() => {
 
 function clearAllFilters() {
   searchQuery.value = ''
-  filters.statuses = ['pending', 'processing', 'completed']
+  filters.statuses = [...DEFAULT_FILTER_STATUSES]
   filters.createdAfter = null
   filters.createdBefore = null
   filters.minAmount = null
@@ -678,26 +708,84 @@ function viewOrderDetail(order: OrderList) {
   navigateTo(`/events/${id.value}/m/shop/orders/${order.order_id}/detail`)
 }
 
-function canTransitionStatus(status: string): boolean {
+function canTransitionStatus(status: OrderStatus | undefined): boolean {
+  if (!status) return false
   return ['pending', 'processing'].includes(status)
 }
 
-function canCancelOrder(status: string): boolean {
+function canCancelOrder(status: OrderStatus | undefined): boolean {
+  if (!status) return false
   return ['draft', 'pending', 'processing'].includes(status)
 }
 
-function getAvailableTransitions(status: string) {
-  const transitions: any[] = []
+const transitioningOrderId = ref<string | null>(null)
+
+const { mutateAsync: updateOrderStatusMutation } = useUpdateProductOrderStatus()
+const { mutateAsync: completeOrderMutation } = useCompleteProductOrder()
+const { mutateAsync: cancelOrderMutation } = useCancelProductOrder()
+
+async function transitionOrderToProcessing(order: OrderList) {
+  if (transitioningOrderId.value) return
+
+  try {
+    transitioningOrderId.value = order.order_id
+    await updateOrderStatusMutation({
+      orderId: order.order_id,
+      status: 'processing',
+    })
+    toast.add({
+      title: 'Order updated',
+      description: `Order ${order.order_reference_id} has been marked as processing.`,
+      color: 'green',
+    })
+    await refetch()
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to update order status. Please try again.',
+      color: 'red',
+    })
+  } finally {
+    transitioningOrderId.value = null
+  }
+}
+
+async function transitionOrderToCompleted(order: OrderList) {
+  if (transitioningOrderId.value) return
+
+  try {
+    transitioningOrderId.value = order.order_id
+    await completeOrderMutation(order.order_id)
+    toast.add({
+      title: 'Order completed',
+      description: `Order ${order.order_reference_id} has been marked as completed.`,
+      color: 'green',
+    })
+    await refetch()
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to complete order. Please try again.',
+      color: 'red',
+    })
+  } finally {
+    transitioningOrderId.value = null
+  }
+}
+
+function getAvailableTransitions(order: OrderList) {
+  const status = order.status
+  const transitions: Array<{ label: string; icon: string; click: () => Promise<void> }> = []
+
+  if (!status) {
+    return transitions
+  }
 
   if (status === 'pending') {
     transitions.push({
       label: 'Mark as Processing',
       icon: 'i-heroicons-arrow-path',
-      click: () => toast.add({
-        title: 'Feature in development',
-        description: 'Status transitions will be available in the next update.',
-        color: 'blue',
-      })
+      click: () => transitionOrderToProcessing(order),
     })
   }
 
@@ -705,18 +793,12 @@ function getAvailableTransitions(status: string) {
     transitions.push({
       label: 'Mark as Completed',
       icon: 'i-heroicons-check-circle',
-      click: () => toast.add({
-        title: 'Feature in development',
-        description: 'Status transitions will be available in the next update.',
-        color: 'blue',
-      })
+      click: () => transitionOrderToCompleted(order),
     })
   }
 
   return transitions
 }
-
-const { mutateAsync: cancelOrderMutation } = useCancelProductOrder()
 
 async function cancelOrder(order: OrderList) {
   if (!confirm(`Are you sure you want to cancel order ${order.order_reference_id}?`)) {
@@ -724,7 +806,7 @@ async function cancelOrder(order: OrderList) {
   }
 
   try {
-    await cancelOrderMutation(Number(order.id))
+    await cancelOrderMutation(order.order_id)
     toast.add({
       title: 'Order cancelled',
       description: `Order ${order.order_reference_id} has been cancelled.`,
@@ -755,7 +837,7 @@ function bulkCancelOrders() {
     if (!order) return
     
     try {
-      await cancelOrderMutation(Number(order.id))
+      await cancelOrderMutation(order.order_id)
       return { success: true, orderId }
     } catch (error) {
       return { success: false, orderId, error }
