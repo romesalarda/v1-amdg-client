@@ -747,103 +747,168 @@
 											<div
 												v-for="packageProduct in currentPackageProducts"
 												:key="packageProduct.id"
-												class="rounded-xl border border-gray-200 p-4"
+												class="rounded-xl border border-gray-200 overflow-hidden"
 											>
-												<div class="flex flex-wrap items-start justify-between gap-3">
-													<div>
-														<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
-														<p class="mt-1 text-xs text-gray-600">Choose a variant below. Bundle pricing is applied at checkout.</p>
+												<!-- Product Header -->
+												<div class="border-b border-gray-200 bg-white p-4">
+													<div class="flex flex-wrap items-start justify-between gap-3">
+														<div>
+															<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
+															<p class="mt-1 text-xs text-gray-600">Pick a size, then choose your color.</p>
+														</div>
+														<UBadge color="gray" variant="soft" size="xs">
+															Max {{ packageProduct.quantityPerAttendee }}
+														</UBadge>
 													</div>
-													<UBadge color="gray" variant="soft" size="xs">
-														Max {{ packageProduct.quantityPerAttendee }}
-													</UBadge>
 												</div>
 
-												<div class="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-													<img
-														:src="getPackageProductImageSrc(packageProduct)"
-														:alt="`${packageProduct.productTitle} image`"
-														class="h-44 w-full object-cover"
-													/>
-												</div>
-
-												<div class="mt-4">
-													<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Select variant</label>
-													<div
-														v-if="hasAnyVariantsForPackageProduct(packageProduct.id)"
-														class="grid gap-2 sm:grid-cols-2"
-													>
-														<button
-															v-for="variant in getVariantsForPackageProduct(packageProduct.id)"
-															:key="variant.variantId"
-															type="button"
-															class="rounded-xl border px-3 py-3 text-left transition"
-															:class="[
-																getSelectionForPackageProduct(packageProduct.id)?.variantId === variant.variantId
-																	? 'border-blue-500 bg-blue-50 shadow-sm'
-																	: 'border-slate-200 bg-white hover:border-slate-300',
-																(!variant.isActive || variant.stockQuantity <= 0) ? 'cursor-not-allowed opacity-60' : ''
-															]"
-															:disabled="!variant.isActive || variant.stockQuantity <= 0"
-															@click="setPackageProductVariantSelection(packageProduct.id, variant.variantId)"
-														>
-															<div class="flex items-center justify-between gap-2">
-																<p class="text-sm font-semibold text-slate-900">{{ variant.sizeDisplay }} {{ variant.color }}</p>
-																<UBadge size="xs" :color="variant.stockQuantity > 0 ? 'emerald' : 'gray'" variant="soft">
-																	{{ variant.stockQuantity > 0 ? `${variant.stockQuantity} left` : 'Unavailable' }}
-																</UBadge>
-															</div>
-															<p class="mt-1 text-xs text-slate-500">
-																Standard {{ formatMoney(Number(variant.finalPrice || 0), packageProduct.currency) }}
-															</p>
-															<p class="mt-1 text-xs font-semibold text-emerald-700">
-																Bundle est. {{ formatMoney(getBundledVariantEstimate(packageProduct, variant), packageProduct.currency) }}
-															</p>
-														</button>
-													</div>
-
-													<p v-if="!hasAnyVariantsForPackageProduct(packageProduct.id)" class="mt-2 text-xs font-semibold text-amber-700">
-														No variants are currently available for this product.
-													</p>
-													<p v-else-if="!hasSelectableVariantsForPackageProduct(packageProduct.id)" class="mt-2 text-xs font-semibold text-amber-700">
-														All listed variants are currently unavailable.
-													</p>
-												</div>
-
-												<div class="mt-4 grid gap-3 sm:grid-cols-2">
-													<div>
-														<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
-														<UInput
-															type="number"
-															:min="1"
-															:max="packageProduct.quantityPerAttendee"
-															:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
-															:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
-															@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
-														/>
-														<p class="mt-1 text-xs text-slate-500">Up to {{ packageProduct.quantityPerAttendee }} per attendee.</p>
-													</div>
-													<div class="flex items-end">
-														<div class="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-600">
-															<p class="font-semibold text-slate-700">Selected pricing preview</p>
-															<p v-if="getSelectedBundledVariantEstimate(packageProduct) !== null">
-																{{ formatMoney(getSelectedBundledVariantEstimate(packageProduct) || 0, packageProduct.currency) }} per unit (est.)
-															</p>
-															<p v-else>Select a variant to preview bundled price.</p>
+												<!-- Product Content: Image + Selection -->
+												<div class="grid gap-4 p-4 sm:grid-cols-3 lg:grid-cols-4">
+													<!-- Left: Product Image (Portrait) -->
+													<div class="sm:col-span-1">
+														<div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+															<img
+																:src="getPackageProductImageSrc(packageProduct)"
+																:alt="`${packageProduct.productTitle} image`"
+																class="aspect-[3/4] w-full object-cover"
+															/>
 														</div>
 													</div>
-												</div>
 
-												<div class="mt-3 flex justify-end">
-													<UButton
-														size="xs"
-														color="gray"
-														variant="ghost"
-														:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
-														@click="removePackageProductSelection(packageProduct.id)"
-													>
-														Remove
-													</UButton>
+													<!-- Right: Selection Options -->
+													<div class="sm:col-span-2 lg:col-span-3 flex flex-col gap-4">
+														<!-- Step 1: Size Selection -->
+														<div>
+															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 1: Size</label>
+															<div v-if="getUniqueSizesForPackageProduct(packageProduct.id).length" class="flex flex-wrap gap-2">
+																<button
+																	v-for="sizeOption in getUniqueSizesForPackageProduct(packageProduct.id)"
+																	:key="sizeOption.size"
+																	type="button"
+																	class="rounded-lg border px-4 py-2 text-sm font-medium transition"
+																	:class="[
+																		getSelectedSizeForProduct(packageProduct.id) === sizeOption.size
+																			? 'border-blue-500 bg-blue-50 text-blue-700'
+																			: 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+																		!sizeOption.Available ? 'cursor-not-allowed opacity-50' : ''
+																	]"
+																	:disabled="!sizeOption.Available"
+																	@click="setSelectedSizeForProduct(packageProduct.id, sizeOption.size)"
+																>
+																	{{ sizeOption.size }}
+																</button>
+															</div>
+															<p v-else class="text-xs text-amber-700 font-semibold">No sizes available.</p>
+														</div>
+
+														<!-- Step 2: Color Selection (only show if size selected) -->
+														<div v-if="getSelectedSizeForProduct(packageProduct.id)">
+															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 2: Color</label>
+															<div class="flex flex-wrap gap-3">
+																<button
+																	v-for="colorOption in getColorsForPackageProductAndSize(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!)"
+																	:key="colorOption.colorHex"
+																	type="button"
+																	class="flex flex-col items-center gap-1 transition"
+																	:disabled="!colorOption.isActive || colorOption.stockQuantity <= 0"
+																	@click="
+																		() => {
+																			const variantId = getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
+																			if (variantId) {
+																				setPackageProductVariantSelection(packageProduct.id, variantId)
+																			}
+																		}
+																	"
+																>
+																	<!-- Color Swatch -->
+																	<div
+																		class="h-10 w-10 rounded-lg border-2 transition"
+																		:style="{ backgroundColor: colorOption.colorHex }"
+																		:class="[
+																			getSelectionForPackageProduct(packageProduct.id)?.variantId === getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
+																				? 'border-blue-500 ring-2 ring-blue-300'
+																				: 'border-slate-300',
+																			!colorOption.isActive || colorOption.stockQuantity <= 0 ? 'opacity-50' : ''
+																		]"
+																	/>
+																	<!-- Stock Label -->
+																	<span class="text-xs font-semibold" :class="colorOption.stockQuantity > 0 ? 'text-emerald-700' : 'text-slate-500'">
+																		{{ colorOption.stockQuantity > 0 ? `${colorOption.stockQuantity}` : 'Out' }}
+																	</span>
+																</button>
+															</div>
+														</div>
+
+
+														<!-- Quantity and Pricing -->
+														<div v-if="getSelectedSizeForProduct(packageProduct.id)" class="border-t border-slate-200 pt-4 space-y-4">
+															<!-- Quantity Selection -->
+															<div>
+																<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
+																<UInput
+																	type="number"
+																	:min="1"
+																	:max="packageProduct.quantityPerAttendee"
+																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
+																	:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
+																	@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
+																/>
+																<p class="mt-1 text-xs text-slate-500">Up to {{ packageProduct.quantityPerAttendee }} per attendee</p>
+															</div>
+
+															<!-- Price Breakdown -->
+															<div v-if="getSelectionForPackageProduct(packageProduct.id) && getSelectedVariantPriceInfo(packageProduct)" class="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-4 space-y-3">
+																<p class="text-xs font-bold uppercase tracking-wide text-blue-900">Price breakdown</p>
+
+																<!-- Standard vs Bundle Comparison -->
+																<div class="space-y-2">
+																	<div class="flex items-center justify-between">
+																		<span class="text-xs text-slate-700">Standard price per unit</span>
+																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.standardPrice, packageProduct.currency) }}</span>
+																	</div>
+
+																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice !== getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
+																		<span class="text-xs text-emerald-700 font-semibold">Bundle price per unit</span>
+																		<span class="text-sm font-bold text-emerald-700">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
+																	</div>
+
+																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice === getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
+																		<span class="text-xs text-slate-700">Bundle price per unit</span>
+																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
+																	</div>
+																</div>
+
+																<!-- Total Cost -->
+																<div class="border-t border-blue-300 pt-3 flex items-center justify-between">
+																	<div>
+																		<p class="text-xs text-slate-600">Total for {{ getSelectedVariantPriceInfo(packageProduct)!.quantity }} {{ getSelectedVariantPriceInfo(packageProduct)!.quantity === 1 ? 'item' : 'items' }}</p>
+																		<p class="text-xs text-slate-500 mt-0.5">At checkout</p>
+																	</div>
+																	<div class="text-right">
+																		<p class="text-2xl font-black text-blue-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.totalPrice, packageProduct.currency) }}</p>
+																	</div>
+																</div>
+															</div>
+
+															<!-- Action Buttons -->
+															<div class="flex justify-end gap-2">
+																<UButton
+																	size="xs"
+																	color="gray"
+																	variant="ghost"
+																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
+																	@click="removePackageProductSelection(packageProduct.id)"
+																>
+																	Remove
+																</UButton>
+															</div>
+														</div>
+														<!-- Empty State Helper -->
+														<div v-else class="flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-700">
+															<UIcon name="i-heroicons-information-circle" class="h-4 w-4" />
+															<span>Select a size to see available colors.</span>
+														</div>
+													</div>
 												</div>
 											</div>
 
@@ -1678,6 +1743,69 @@ const getVariantsForPackageProduct = (packageProductId: number): VariantRow[] =>
 	return packageProductVariants.value[packageProductId] || []
 }
 
+const selectedProductSizes = ref<Record<number, string | null>>({})
+
+const getUniqueSizesForPackageProduct = (packageProductId: number): Array<{ size: string; Available: boolean }> => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	const sizeMap = new Map<string, boolean>()
+	
+	variants.forEach((variant) => {
+		const hasAvailable = sizeMap.get(variant.sizeDisplay) || (variant.isActive && variant.stockQuantity > 0)
+		sizeMap.set(variant.sizeDisplay, hasAvailable)
+	})
+	
+	return Array.from(sizeMap.entries()).map(([size, available]) => ({
+		size,
+		Available: available,
+	}))
+}
+
+const getColorsForPackageProductAndSize = (packageProductId: number, size: string): Array<{ color: string; colorHex: string; stockQuantity: number; isActive: boolean }> => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	return variants
+		.filter((variant) => variant.sizeDisplay === size)
+		.map((variant) => ({
+			color: variant.color || '#000000',
+			colorHex: variant.color || '#000000',
+			stockQuantity: variant.stockQuantity,
+			isActive: variant.isActive,
+		}))
+		.filter((item, index, arr) => arr.findIndex((v) => v.colorHex === item.colorHex) === index) // Deduplicate by hex
+}
+
+const getVariantIdForPackageProductSizeColor = (packageProductId: number, size: string, colorHex: string): string | null => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	const variant = variants.find(
+		(v) => v.sizeDisplay === size && (v.color === colorHex || (!v.color && colorHex === '#000000'))
+	)
+	return variant?.variantId || null
+}
+
+const setSelectedSizeForProduct = (packageProductId: number, size: string | null) => {
+	selectedProductSizes.value[packageProductId] = size
+}
+
+
+const getSelectedSizeForProduct = (packageProductId: number): string | null => {
+	return selectedProductSizes.value[packageProductId] || null
+}
+
+const getSelectedVariantPriceInfo = (packageProduct: PackageProductRow): { standardPrice: number; bundledPrice: number; quantity: number; totalPrice: number } | null => {
+	const selection = getSelectionForPackageProduct(packageProduct.id)
+	if (!selection) return null
+
+	const standardPrice = Number(packageProduct.baseAmount || 0)
+	const bundledPrice = Number(packageProduct.modifiedAmount || packageProduct.baseAmount || 0)
+	const quantity = Number(selection.quantity || 1)
+	const totalPrice = bundledPrice * quantity
+
+	return {
+		standardPrice,
+		bundledPrice,
+		quantity,
+		totalPrice,
+	}
+}
 const hasAnyVariantsForPackageProduct = (packageProductId: number): boolean => {
 	return getVariantsForPackageProduct(packageProductId).length > 0
 }
