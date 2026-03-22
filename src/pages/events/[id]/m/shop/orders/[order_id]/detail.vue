@@ -376,7 +376,7 @@ const toast = useToast()
 const { data: event } = useEvent(eventId)
 
 // Order Data
-const { data: orderData, isLoading, refetch } = useProductOrder(computed(() => Number(orderId.value)))
+const { data: orderData, isLoading, refetch } = useProductOrder(computed(() => orderId.value))
 const order = computed(() => orderData.value?.data)
 
 // Mutations

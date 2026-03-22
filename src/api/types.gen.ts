@@ -26127,7 +26127,10 @@ export type BookingsPackageProductsDestroyData = {
          * A unique integer value identifying this Booking Package.
          */
         id: number;
-        package_product_id: string;
+        /**
+         * Database ID of the PackageProduct link to delete.
+         */
+        package_product_id: number;
     };
     query?: never;
     url: '/api/bookings/packages/{id}/products/{package_product_id}/';
@@ -26160,7 +26163,10 @@ export type BookingsPackageProductsPartialUpdateData = {
          * A unique integer value identifying this Booking Package.
          */
         id: number;
-        package_product_id: string;
+        /**
+         * Database ID of the PackageProduct link to update.
+         */
+        package_product_id: number;
     };
     query?: never;
     url: '/api/bookings/packages/{id}/products/{package_product_id}/';
@@ -26194,7 +26200,10 @@ export type BookingsPackageProductsUpdateData = {
          * A unique integer value identifying this Booking Package.
          */
         id: number;
-        package_product_id: string;
+        /**
+         * Database ID of the PackageProduct link to update.
+         */
+        package_product_id: number;
     };
     query?: never;
     url: '/api/bookings/packages/{id}/products/{package_product_id}/';

@@ -45,7 +45,7 @@ export function useProductOrders(params?: MaybeRefOrGetter<ProductsOrdersListDat
 /**
  * Get a single order by ID
  */
-export function useProductOrder(orderId: MaybeRefOrGetter<number>) {
+export function useProductOrder(orderId: MaybeRefOrGetter<String>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', orderId] as const,
     queryFn: () => {

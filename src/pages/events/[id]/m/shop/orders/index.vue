@@ -577,9 +577,9 @@ const queryParams = computed(() => {
   }
 
   // Status filters
-  if (filters.statuses.length > 0) {
-    params.status__in = filters.statuses.join(',')
-  }
+  // if (filters.statuses.length > 0) {
+  //   params.status__in = filters.statuses.join(',')
+  // }
 
   // Date filters
   if (filters.createdAfter) {

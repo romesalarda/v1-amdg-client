@@ -730,11 +730,112 @@
 									<div v-else-if="activeStepIndex === 4" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Products</h2>
-								<p class="text-sm text-gray-600">Optional add-ons will appear here when available.</p>
+										<p class="text-sm text-gray-600">Optional add-ons linked to the selected package.</p>
 							</div>
-							<div class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
-								No products available for this event.
-							</div>
+
+									<p v-if="!currentAttendee?.packageId" class="text-sm text-gray-500">
+										Select a package first to see available products.
+									</p>
+									<p v-else-if="packageProductsLoading" class="text-sm text-gray-500">
+										Loading package products...
+									</p>
+									<p v-else-if="packageProductsError" class="text-sm font-semibold text-red-600">
+										{{ packageProductsError }}
+									</p>
+
+									<div v-else-if="currentPackageProducts.length" class="space-y-4">
+										<div
+											v-for="packageProduct in currentPackageProducts"
+											:key="packageProduct.id"
+											class="rounded-xl border border-gray-200 p-4"
+										>
+											<div class="flex flex-wrap items-start justify-between gap-3">
+												<div>
+													<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
+													<p class="mt-1 text-xs text-gray-600">
+														Bundle price from {{ packageProduct.modifiedAmount }} {{ packageProduct.currency }}
+													</p>
+												</div>
+												<UBadge color="gray" variant="soft" size="xs">
+													Max {{ packageProduct.quantityPerAttendee }}
+												</UBadge>
+											</div>
+
+											<div class="mt-4 grid gap-3 sm:grid-cols-2">
+												<div>
+													<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Variant</label>
+													<select
+														class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm"
+														:value="getSelectionForPackageProduct(packageProduct.id)?.variantId || ''"
+														:disabled="!hasAnyVariantsForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
+														@change="handlePackageProductVariantChange(packageProduct.id, $event)"
+													>
+														<option value="">Select a variant</option>
+														<option
+															v-for="variant in getVariantsForPackageProduct(packageProduct.id)"
+															:key="variant.variantId"
+															:value="variant.variantId"
+															:disabled="!variant.isActive || variant.stockQuantity <= 0"
+														>
+															{{ variantOptionLabel(variant, packageProduct.currency) }}
+														</option>
+													</select>
+													<p v-if="!hasAnyVariantsForPackageProduct(packageProduct.id)" class="mt-1 text-xs font-semibold text-amber-700">
+														No variants are currently available for this product.
+													</p>
+													<p
+														v-else-if="!hasSelectableVariantsForPackageProduct(packageProduct.id)"
+														class="mt-1 text-xs font-semibold text-amber-700"
+													>
+														All listed variants are currently unavailable.
+													</p>
+												</div>
+
+												<div>
+													<label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
+													<UInput
+														type="number"
+														:min="1"
+														:max="packageProduct.quantityPerAttendee"
+														:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
+														:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
+														@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
+													/>
+												</div>
+											</div>
+
+											<div class="mt-3 flex justify-end">
+												<UButton
+													size="xs"
+													color="gray"
+													variant="ghost"
+													:disabled="!getSelectionForPackageProduct(packageProduct.id) || !hasSelectableVariantsForPackageProduct(packageProduct.id)"
+													@click="removePackageProductSelection(packageProduct.id)"
+												>
+													Remove
+												</UButton>
+											</div>
+										</div>
+
+										<div v-if="selectedAddOnsSummary.length" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+											<p class="text-sm font-semibold text-slate-900">Selected add-ons</p>
+											<ul class="mt-2 space-y-2">
+												<li
+													v-for="row in selectedAddOnsSummary"
+													:key="`${row.packageProductId}-${row.variantLabel}`"
+													class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+												>
+													<div class="text-slate-700">
+														<p class="font-semibold text-slate-900">{{ row.productTitle }}</p>
+														<p>{{ row.variantLabel }}</p>
+													</div>
+													<p class="font-semibold text-slate-800">x{{ row.quantity }}</p>
+												</li>
+											</ul>
+										</div>
+									</div>
+
+									<p v-else class="text-sm text-gray-500">No package products available for this package.</p>
 						</div>
 
 									<div v-else-if="activeStepIndex === 5" class="space-y-6">
@@ -1066,11 +1167,11 @@ import { usePaymentMethods } from '~/composables/resources/payments/paymentMetho
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsListRetrieve, locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
+import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
 import { resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
-import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
+import type { AttendeeDraft, MedicalConditionItemDraft, PersonalInfoItemDraft, ProductSelectionDraft } from '~/stores/registration'
 import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import { formatMoney } from '~/utils/money'
@@ -1496,6 +1597,218 @@ const isCurrentAttendeePackageAvailable = computed(() => {
 	if (!pkg) return false
 	return isPackageCurrentlyAvailable(pkg)
 })
+
+type PackageProductRow = {
+	id: number
+	productPublicId: string
+	productTitle: string
+	quantityPerAttendee: number
+	modifiedAmount: string
+	currency: string
+}
+
+type VariantRow = {
+	variantId: string
+	sizeDisplay: string
+	color: string
+	finalPrice: string
+	stockQuantity: number
+	isActive: boolean
+}
+
+const packageProductsLoading = ref(false)
+const packageProductsError = ref('')
+const currentPackageProducts = ref<PackageProductRow[]>([])
+const packageProductVariants = ref<Record<number, VariantRow[]>>({})
+let packageProductLoadVersion = 0
+
+const currentAttendeeProductSelections = computed(() => currentAttendee.value?.productSelections || [])
+
+const variantOptionLabel = (variant: VariantRow, currency: string) => {
+	const stockLabel = variant.stockQuantity > 0 ? `${variant.stockQuantity} left` : 'Out of stock'
+	return `${variant.sizeDisplay} ${variant.color} - ${variant.finalPrice} ${currency} (${stockLabel})`
+}
+
+const handlePackageProductVariantChange = (packageProductId: number, event: Event) => {
+	const value = String((event.target as HTMLSelectElement)?.value || '')
+	setPackageProductVariantSelection(packageProductId, value)
+}
+
+const getSelectionForPackageProduct = (packageProductId: number) => {
+	return (currentAttendeeProductSelections.value || []).find((selection) => selection.packageProductId === packageProductId)
+}
+
+const getVariantsForPackageProduct = (packageProductId: number): VariantRow[] => {
+	return packageProductVariants.value[packageProductId] || []
+}
+
+const hasAnyVariantsForPackageProduct = (packageProductId: number): boolean => {
+	return getVariantsForPackageProduct(packageProductId).length > 0
+}
+
+const hasSelectableVariantsForPackageProduct = (packageProductId: number): boolean => {
+	return getVariantsForPackageProduct(packageProductId).some((variant) => variant.isActive && variant.stockQuantity > 0)
+}
+
+type SelectedAddOnSummaryRow = {
+	packageProductId: number
+	productTitle: string
+	variantLabel: string
+	quantity: number
+}
+
+const selectedAddOnsSummary = computed<SelectedAddOnSummaryRow[]>(() => {
+	return (currentAttendeeProductSelections.value || []).map((selection) => {
+		const packageProduct = currentPackageProducts.value.find((row) => row.id === selection.packageProductId)
+		const variant = getVariantsForPackageProduct(selection.packageProductId).find((row) => row.variantId === selection.variantId)
+		const variantLabel = variant
+			? `${variant.sizeDisplay} ${variant.color}`
+			: `Variant ${selection.variantId.slice(0, 8)}`
+
+		return {
+			packageProductId: selection.packageProductId,
+			productTitle: packageProduct?.productTitle || 'Product',
+			variantLabel,
+			quantity: Number(selection.quantity || 1),
+		}
+	})
+})
+
+const setSelectionsForCurrentAttendee = (next: ProductSelectionDraft[]) => {
+	store.setProductSelections(store.currentIndex, next)
+}
+
+const setPackageProductVariantSelection = (packageProductId: number, variantId: string) => {
+	if (!variantId) {
+		removePackageProductSelection(packageProductId)
+		return
+	}
+
+	const existing = currentAttendeeProductSelections.value || []
+	const index = existing.findIndex((selection) => selection.packageProductId === packageProductId)
+	const next = [...existing]
+
+	if (index >= 0) {
+		next[index] = {
+			...next[index],
+			variantId,
+			quantity: Math.max(1, Number(next[index].quantity || 1)),
+		}
+	} else {
+		next.push({ packageProductId, variantId, quantity: 1 })
+	}
+
+	setSelectionsForCurrentAttendee(next)
+}
+
+const setPackageProductQuantity = (packageProductId: number, quantity: number) => {
+	const packageProduct = currentPackageProducts.value.find((row) => row.id === packageProductId)
+	if (!packageProduct) return
+
+	const existing = currentAttendeeProductSelections.value || []
+	const index = existing.findIndex((selection) => selection.packageProductId === packageProductId)
+	if (index < 0) return
+
+	const next = [...existing]
+	next[index] = {
+		...next[index],
+		quantity: Math.min(packageProduct.quantityPerAttendee, Math.max(1, Number(quantity || 1))),
+	}
+	setSelectionsForCurrentAttendee(next)
+}
+
+const removePackageProductSelection = (packageProductId: number) => {
+	const next = (currentAttendeeProductSelections.value || []).filter((selection) => selection.packageProductId !== packageProductId)
+	setSelectionsForCurrentAttendee(next)
+}
+
+const loadPackageProductsForCurrentAttendee = async () => {
+	const attendee = currentAttendee.value
+	const packageId = attendee?.packageId
+	const loadVersion = ++packageProductLoadVersion
+
+	packageProductsError.value = ''
+	if (!packageId) {
+		currentPackageProducts.value = []
+		packageProductVariants.value = {}
+		if (attendee?.productSelections?.length) {
+			setSelectionsForCurrentAttendee([])
+		}
+		return
+	}
+
+	packageProductsLoading.value = true
+	try {
+		const packageResponse = await bookingsPackageProductsList({ path: { id: packageId } })
+		if (loadVersion !== packageProductLoadVersion) return
+
+		const products = (packageResponse.data?.results || []).map((row: any) => ({
+			id: Number(row.id),
+			productPublicId: String(row.product_public_id || ''),
+			productTitle: String(row.product_title || 'Product'),
+			quantityPerAttendee: Math.max(1, Number(row.quantity_per_attendee || 1)),
+			modifiedAmount: String(row.modified_amount || '0.00'),
+			currency: String(row.base_amount_currency || 'GBP'),
+		}))
+
+		currentPackageProducts.value = products
+
+		const variantEntries = await Promise.all(products.map(async (product) => {
+			if (!product.productPublicId) return [product.id, []] as const
+			try {
+				const response = await productsListVariantsList({
+					path: { product_product_id: product.productPublicId },
+					query: { page_size: 200 },
+				})
+				const variants = (response.data?.results || []).map((variant: any) => ({
+					variantId: String(variant.variant_id),
+					sizeDisplay: String(variant.size_display || variant.size || 'Variant'),
+					color: String(variant.color || ''),
+					finalPrice: String(variant.final_price || variant.modified_amount || product.modifiedAmount),
+					stockQuantity: Number(variant.stock_quantity || 0),
+					isActive: !!variant.is_active,
+				}))
+				return [product.id, variants] as const
+			} catch {
+				return [product.id, []] as const
+			}
+		}))
+
+		if (loadVersion !== packageProductLoadVersion) return
+
+		packageProductVariants.value = Object.fromEntries(variantEntries)
+
+		const validProductIds = new Set(products.map((product) => product.id))
+		const normalized = (attendee?.productSelections || []).filter((selection) => {
+			if (!validProductIds.has(selection.packageProductId)) return false
+			const variants = packageProductVariants.value[selection.packageProductId] || []
+			return variants.some((variant) => {
+				return variant.variantId === selection.variantId && variant.isActive && variant.stockQuantity > 0
+			})
+		}).map((selection) => {
+			const pkg = products.find((row) => row.id === selection.packageProductId)
+			if (!pkg) return selection
+			return {
+				...selection,
+				quantity: Math.min(pkg.quantityPerAttendee, Math.max(1, Number(selection.quantity || 1))),
+			}
+		})
+
+		if ((attendee?.productSelections || []).length !== normalized.length) {
+			setSelectionsForCurrentAttendee(normalized)
+		}
+	} catch (error) {
+		if (loadVersion !== packageProductLoadVersion) return
+		currentPackageProducts.value = []
+		packageProductVariants.value = {}
+		packageProductsError.value = 'Unable to load package products right now.'
+		console.error('Failed to load package products', error)
+	} finally {
+		if (loadVersion === packageProductLoadVersion) {
+			packageProductsLoading.value = false
+		}
+	}
+}
 
 const attendeeReviewAmount = (attendee: AttendeeDraft, index: number) => {
 	const previewAttendees = checkoutPreview.value?.attendees || []
@@ -2313,6 +2626,14 @@ watch(
 		areaSearch.value = ''
 		areaOptions.value = []
 	}
+)
+
+watch(
+	[() => store.currentIndex, () => currentAttendee.value?.packageId],
+	() => {
+		void loadPackageProductsForCurrentAttendee()
+	},
+	{ immediate: true }
 )
 
 watch(

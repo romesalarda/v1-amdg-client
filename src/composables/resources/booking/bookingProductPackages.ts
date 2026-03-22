@@ -62,7 +62,7 @@ export function useUpdateBookingPackageProduct() {
       packageProductId: number | string
       body: PatchedPackageProductCreateUpdateRequest
     }) => bookingsPackageProductsPartialUpdate({
-      path: { id: Number(packageId), package_product_id: String(packageProductId) },
+      path: { id: Number(packageId), package_product_id: Number(packageProductId) },
       body,
     }),
     onSuccess: (_, variables) => {
@@ -85,7 +85,7 @@ export function useDeleteBookingPackageProduct() {
       packageId: number | string
       packageProductId: number | string
     }) => bookingsPackageProductsDestroy({
-      path: { id: Number(packageId), package_product_id: String(packageProductId) },
+      path: { id: Number(packageId), package_product_id: Number(packageProductId) },
     }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
