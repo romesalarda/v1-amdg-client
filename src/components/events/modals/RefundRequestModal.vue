@@ -8,7 +8,9 @@
           <span class="material-symbols-outlined text-blue-600">undo</span>
           <div class="flex-1">
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Initiate Refund Request</h3>
-            <p class="text-xs text-gray-500 mt-0.5 font-mono">{{ payment?.payment_reference }}</p>
+            <p class="text-xs text-gray-500 mt-0.5 font-mono">
+              {{ props.mode === 'attendee' ? selectedPaymentId : payment?.payment_reference }}
+            </p>
           </div>
           <button
             @click="$emit('close')"
@@ -31,8 +33,8 @@
               <span class="font-medium text-gray-900">{{ formatDate(payment?.created_at || '') }}</span>
             </div>
             <div class="flex justify-between text-sm mt-1">
-              <span class="text-gray-600">User:</span>
-              <span class="font-medium text-gray-900">{{ payment?.user_name }}</span>
+              <span class="text-gray-600">{{ props.mode === 'attendee' ? 'Attendee:' : 'User:' }}</span>
+              <span class="font-medium text-gray-900">{{ props.mode === 'attendee' ? props.attendee?.full_name : payment?.user_name }}</span>
             </div>
           </div>
 
@@ -92,6 +94,34 @@
               />
               <p class="text-xs text-gray-500 mt-1">
                 Maximum refundable: {{ payment?.amount }}
+              </p>
+            </div>
+
+            <!-- Attendee Selection for Partial Booking Refunds -->
+            <div v-if="refundType === 'partial' && props.isBookingPayment && props.mode === 'attendee' && props.bookingAttendees && props.bookingAttendees.length > 0" class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Select Attendees to Refund
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-48 overflow-y-auto">
+                <div v-for="bookingAttendee in props.bookingAttendees" :key="bookingAttendee.id" class="flex items-center">
+                  <input
+                    :id="`attendee-${bookingAttendee.id}`"
+                    type="checkbox"
+                    :value="bookingAttendee.id"
+                    v-model="selectedAttendeeIds"
+                    class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                  />
+                  <label
+                    :for="`attendee-${bookingAttendee.id}`"
+                    class="ml-2 text-sm text-gray-700 cursor-pointer"
+                  >
+                    {{ bookingAttendee.full_name }}
+                  </label>
+                </div>
+              </div>
+              <p v-if="selectedAttendeeIds.length === 0" class="text-xs text-amber-600 mt-1">
+                ⚠ Select at least one attendee to refund
               </p>
             </div>
 
@@ -159,12 +189,20 @@
 
 <script setup lang="ts">
 import { useCreatePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
+import { useRequestAttendeeCancellationRefund } from '~/composables/resources/attendee/attendees'
 import { usePayment } from '~/composables/resources/payments/payments'
 import { parseAmount } from '~/utils/money'
+import type { AttendeeList } from '~/api/types.gen'
 
 interface Props {
-  payment: any
+  payment?: any
+  mode?: 'payment' | 'attendee'
+  attendee?: AttendeeList | null
+  paymentId?: string | null
+  bookingId?: number | null
+  bookingAttendees?: Array<{ id: string; full_name: string }> | null
   open: boolean
+  isBookingPayment?: boolean
 }
 
 const props = defineProps<Props>()
@@ -172,7 +210,14 @@ const emit = defineEmits(['close', 'created'])
 
 const toast = useToast()
 
-const { data: paymentData } = usePayment(props.payment.payment_id)
+const selectedPaymentId = computed(() => {
+  if (props.mode === 'attendee') {
+    return props.paymentId || ''
+  }
+  return props.payment?.payment_id || ''
+})
+
+const { data: paymentData } = usePayment(selectedPaymentId)
 
 const payment = computed(() => paymentData.value?.data)
 
@@ -180,8 +225,10 @@ const refundType = ref<'full' | 'partial'>('full')
 const refundAmount = ref<number | null>(null)
 const reason = ref('')
 const isLoading = ref(false)
+const selectedAttendeeIds = ref<string[]>([])
 
 const createRefundMutation = useCreatePaymentRefund()
+const createAttendeeRefundMutation = useRequestAttendeeCancellationRefund()
 
 const isFormValid = computed(() => {
   const hasValidReason = reason.value.length >= 10 && reason.value.length <= 1000
@@ -191,11 +238,17 @@ const isFormValid = computed(() => {
   }
   
   if (refundType.value === 'partial') {
-    const maxAmount = parseFloat(props.payment.modified_amount || '0')
-    return hasValidReason && 
-           refundAmount.value !== null && 
+    const maxAmount = parseFloat(String(payment.value?.amount || props.payment?.amount || '0').replace("£", ""))
+    const hasValidAmount = refundAmount.value !== null && 
            refundAmount.value > 0 && 
            refundAmount.value <= maxAmount
+    
+    // For partial booking refunds, require attendee selection
+    if (props.isBookingPayment && props.mode === 'attendee') {
+      return hasValidReason && hasValidAmount && selectedAttendeeIds.value.length > 0
+    }
+    
+    return hasValidReason && hasValidAmount
   }
   
   return false
@@ -215,19 +268,39 @@ async function handleSubmit() {
 
   try {
     const amount = refundType.value === 'full' 
-      ? payment.value?.amount 
+      ? (payment.value?.amount || props.payment?.amount)
       : refundAmount.value?.toString()
 
     if (!amount) {
       throw new Error('Refund amount is required')
     }
 
-    await createRefundMutation.mutateAsync({
-      payment: props.payment.payment_id,
-      amount: parseAmount(amount) as any,
-      // amount_currency: payment.value?.amount_currency || 'GBP',
-      reason: reason.value.trim(),
-    })
+    if (props.mode === 'attendee') {
+      if (!props.attendee?.attendee_id || !selectedPaymentId.value) {
+        throw new Error('Attendee and payment are required for attendee refund mode')
+      }
+
+      // For partial booking refunds, use selected attendees; otherwise use current attendee
+      const attendeeIds = refundType.value === 'partial' && props.isBookingPayment && selectedAttendeeIds.value.length > 0
+        ? selectedAttendeeIds.value
+        : [String(props.attendee.attendee_id)]
+
+      await createAttendeeRefundMutation.mutateAsync({
+        attendeeId: String(props.attendee.attendee_id),
+        body: {
+          payment_id: selectedPaymentId.value,
+          amount: parseAmount(amount).toFixed(2),
+          reason: reason.value.trim(),
+          attendee_ids: attendeeIds,
+        },
+      })
+    } else {
+      await createRefundMutation.mutateAsync({
+        payment: props.payment?.payment_id,
+        amount: parseAmount(amount) as any,
+        reason: reason.value.trim(),
+      })
+    }
 
     toast.add({
       title: 'Refund Request Created',
@@ -247,8 +320,10 @@ async function handleSubmit() {
   }
 }
 
-function formatDate(dateString: string): string {
+function formatDate(dateString: string | undefined): string {
+  if (!dateString) return 'N/A'
   const date = new Date(dateString)
+  if (isNaN(date.getTime())) return 'N/A'
   return new Intl.DateTimeFormat('en-GB', {
     day: '2-digit',
     month: 'short',
@@ -262,6 +337,7 @@ watch(() => props.open, (isOpen) => {
     refundType.value = 'full'
     refundAmount.value = null
     reason.value = ''
+    selectedAttendeeIds.value = []
   }
 })
 </script>

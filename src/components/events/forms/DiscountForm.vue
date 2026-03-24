@@ -56,7 +56,7 @@
             >
               <option value="" disabled>Select a booking package</option>
               <option v-for="pkg in packages" :key="pkg.id" :value="pkg.id">
-                {{ pkg.name }} - ${{ Number(pkg.base_amount).toFixed(2) }}
+                {{ pkg.name }} - {{pkg.base_amount_currency}}{{ Number(pkg.base_amount).toFixed(2) }}
               </option>
             </select>
             <p v-if="packages.length === 0" class="text-xs text-orange-500">

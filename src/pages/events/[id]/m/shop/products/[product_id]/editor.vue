@@ -147,6 +147,7 @@
                   v-model="form.is_active"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
+                  :disabled="variantsData?.data?.count == 0"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Active</div>
@@ -159,6 +160,7 @@
                   v-model="form.verified"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
+                  :disabled="variantsData?.data?.count == 0"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Verified</div>
@@ -423,7 +425,7 @@
                         <div class="text-sm text-gray-500 mt-1">
                           Stock: {{ variant.stock_quantity }}
                           <span v-if="variant.max_stock_quantity"> / {{ variant.max_stock_quantity }}</span>
-                           • £{{ variant.final_price }}
+                           • {{ variant.final_price }}
                           <UBadge v-if="variant.percentage_modifier && parseFloat(variant.percentage_modifier) !== 0" color="blue" variant="soft" size="xs" class="ml-2">
                             {{ parseFloat(variant.percentage_modifier) > 0 ? '+' : '' }}{{ variant.percentage_modifier }}%
                           </UBadge>
@@ -1376,7 +1378,7 @@
               icon="i-heroicons-check"
               :loading="isSaving"
               :disabled="hasNewVariantDuplicates"
-              v-if="!(!hasUnsavedChanges && newVariants.length === 0)"
+              v-if="!(!hasUnsavedChanges && newVariants.length === 0) || isNewProduct"
               @click="saveAll"
             >
               {{ isNewProduct ? 'Create Product' : 'Save Changes' }}

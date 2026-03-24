@@ -70,7 +70,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 
@@ -80,7 +80,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="min-w-0">
-                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Time</p>
+                <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
                 <p class="font-black text-deep-navy truncate">
                   {{ formatTime(event.start_datetime, event.timezone) }}
                 </p>
@@ -108,6 +108,7 @@
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Cost</p>
                 <p class="font-black text-deep-navy truncate">
+                  {{ event.general_price }}
                 </p>
               </div>
             </div>
@@ -203,7 +204,7 @@
             <div class="space-y-6">
               <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
                 <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-center text-white/50">
-                  {{ countdown.isExpired ? 'Event Started' : 'Registration Ends In' }}
+                  {{ countdown.isExpired ? 'Event Started' : 'Event Starts In' }}
                 </p>
                 
                 <!-- Countdown Display -->
@@ -238,7 +239,7 @@
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || event.status !== 'OPEN'"
+                  :disabled="countdown.isExpired || !event.can_participants_register"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
@@ -453,7 +454,6 @@
     <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
       <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">Registration summary</p>
       <p class="mt-2 text-sm font-bold text-deep-navy">Total attendee slots: {{ calculatedTicketCount }}</p>
-      <p class="mt-1 text-xs text-deep-navy/60">Mode: {{ registrationMode }}</p>
         </div>
       </div>
 

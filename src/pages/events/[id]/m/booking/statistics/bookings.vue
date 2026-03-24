@@ -56,7 +56,6 @@
           No booking status data available
         </div>
       </StatSection>
-
       <!-- Booking Trends --><StatSection 
         title="Booking Trends"
         description="Bookings created over time"
@@ -262,8 +261,8 @@ const { data: timelineData, isLoading: timelineLoading, error: timelineError } =
 const bookingStatusChartData = computed<PieChartData[]>(() => {
   if (!statusData.value?.data?.distribution) return []
   return statusData.value.data.distribution.map((item: any) => ({
-    name: formatStatus(item.status),
-    value: item.count,
+    name: formatStatus(item.label),
+    value: item.value,
   }))
 })
 
@@ -279,7 +278,7 @@ const bookingsByPackageChartData = computed<BarChartData[]>(() => {
   if (!packageData.value?.data?.distribution) return []
   return packageData.value.data.distribution.slice(0, 10).map((item: any) => ({
     label: item.package_name || 'Unknown',
-    value: item.count,
+    value: item.ticket_count,
   }))
 })
 

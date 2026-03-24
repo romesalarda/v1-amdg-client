@@ -1,5 +1,6 @@
 export * from './productAvailabilityWindows'
 export * from './productCategories'
+export * from './productCategoryAssignments'
 export * from './productDiscounts'
 export * from './productEventCategories'
 export * from './productImages'

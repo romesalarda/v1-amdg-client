@@ -46,7 +46,7 @@ export function usePayments(params?: MaybeRefOrGetter<PaymentsListListData['quer
 /**
  * Retrieve a single payment by ID
  */
-export function usePayment(paymentId: MaybeRefOrGetter<number>) {
+export function usePayment(paymentId: MaybeRefOrGetter<string | number>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', paymentId] as const,
     queryFn: () => {

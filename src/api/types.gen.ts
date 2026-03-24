@@ -422,6 +422,26 @@ export type AttendeeAlternativeSigninList = {
     };
 };
 
+export type AttendeeCancellationRefundRequestRequest = {
+    payment_id: string;
+    amount: string;
+    amount_currency?: string;
+    reason: string;
+    reason_code?: string;
+    override_used_ticket_block?: boolean;
+    override_reason?: string;
+    attendee_ids?: Array<string>;
+};
+
+export type AttendeeCancellationRefundResponse = {
+    refund_id: string;
+    tracking_reference: string;
+    verification_status: string;
+    payment_id: string;
+    amount: string;
+    selected_attendee_ids: Array<string>;
+};
+
 /**
  * Serializer for a single attendee's package and product selections.
  */
@@ -5265,6 +5285,14 @@ export type EventDetail = {
         assigned_roles: Array<string>;
     };
     /**
+     * Returns price range from value_x - value_y if multiple packages, or single value if only one package.
+     */
+    readonly general_price: string;
+    readonly outstanding_tasks: Array<EventOutstandingTask>;
+    readonly can_event_be_published: boolean;
+    readonly registration_open_date: string;
+    readonly registration_close_date: string;
+    /**
      *  links
      */
     readonly _links: {
@@ -6008,6 +6036,13 @@ export type EventList = {
     };
 };
 
+export type EventOutstandingTask = {
+    readonly title: string;
+    readonly description: string;
+    readonly hint: string;
+    readonly code: string;
+};
+
 /**
  * Serializer for payment status distribution.
  */
@@ -6140,6 +6175,8 @@ export type EventProductCategory = {
      */
     category: number;
     readonly category_name: string;
+    product: number | null;
+    readonly product_id: string | null;
     readonly added_at: string;
     /**
      *  links
@@ -6160,6 +6197,10 @@ export type EventProductCategoryCreateUpdate = {
      * Product Category
      */
     category: number;
+    /**
+     * Optional product ID for product-specific category mapping
+     */
+    product?: number | null;
 };
 
 /**
@@ -6171,6 +6212,10 @@ export type EventProductCategoryCreateUpdateRequest = {
      * Product Category
      */
     category: number;
+    /**
+     * Optional product ID for product-specific category mapping
+     */
+    product?: number | null;
 };
 
 /**
@@ -9280,6 +9325,7 @@ export type OrderList = {
         customer?: string;
         attendee?: string;
     };
+    readonly order_items: Array<OrderItem>;
 };
 
 /**
@@ -10187,6 +10233,43 @@ export type PackagePricingItem = {
 };
 
 /**
+ * Read serializer for products linked to booking packages.
+ */
+export type PackageProduct = {
+    readonly id: number;
+    readonly booking_package: number;
+    product: number;
+    readonly product_public_id: string;
+    readonly product_display_code: string;
+    readonly product_title: string;
+    quantity_per_attendee?: number;
+    readonly base_amount: string;
+    readonly base_amount_currency: string;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+    readonly modified_amount: string;
+    readonly added_at: string;
+    readonly added_by: number | null;
+    readonly added_by_name: string | null;
+    readonly updated_at: string;
+};
+
+/**
+ * Create/update serializer for booking package product links.
+ */
+export type PackageProductCreateUpdateRequest = {
+    booking_package?: number;
+    product: number;
+    quantity_per_attendee?: number;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+};
+
+/**
  * Serializer for package rule distribution.
  */
 export type PackageRuleDistribution = {
@@ -10681,6 +10764,13 @@ export type PaginatedPoiListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<PoiList>;
+};
+
+export type PaginatedPackageProductList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PackageProduct>;
 };
 
 export type PaginatedPaymentHistoryActionList = {
@@ -13322,6 +13412,19 @@ export type PatchedPoiCreateUpdateRequest = {
 };
 
 /**
+ * Create/update serializer for booking package product links.
+ */
+export type PatchedPackageProductCreateUpdateRequest = {
+    booking_package?: number;
+    product?: number;
+    quantity_per_attendee?: number;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+};
+
+/**
  * Create/Update serializer for PaymentMethod with validation.
  */
 export type PatchedPaymentMethodCreateUpdateRequest = {
@@ -13350,24 +13453,14 @@ export type PatchedPaymentUpdateRequest = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
     stripe_payment_intent?: string | null;
     stripe_charge_id?: string | null;
-};
-
-/**
- * Create/Update serializer for ProductCategory with validation.
- */
-export type PatchedProductCategoryCreateUpdateRequest = {
-    /**
-     * Category Name
-     */
-    name?: string;
-    description?: string;
 };
 
 /**
@@ -13694,12 +13787,14 @@ export type PaymentDetail = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     /**
      * Final modified payment amount
      */
     readonly amount: string;
+    readonly amount_currency: string;
     readonly created_at: string;
     /**
      *  links
@@ -13713,9 +13808,13 @@ export type PaymentDetail = {
     /**
      * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
      */
-    readonly descriptor: string | null;
-    description?: string | null;
+    readonly descriptor: string;
     readonly base_amount: string;
+    /**
+     * Base amount as float for easier frontend handling
+     */
+    readonly amount_value: number;
+    description?: string | null;
     readonly base_amount_currency: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -13817,12 +13916,14 @@ export type PaymentList = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     /**
      * Final modified payment amount
      */
     readonly amount: string;
+    readonly amount_currency: string;
     readonly created_at: string;
     /**
      *  links
@@ -13836,7 +13937,12 @@ export type PaymentList = {
     /**
      * Type of the payment target (e.g., booking, order, ticket, donation, sponsorship)
      */
-    readonly descriptor: string | null;
+    readonly descriptor: string;
+    base_amount?: string | null;
+    /**
+     * Base amount as float for easier frontend handling
+     */
+    readonly amount_value: number;
 };
 
 /**
@@ -14086,8 +14192,9 @@ export type PaymentUpdate = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
@@ -14107,8 +14214,9 @@ export type PaymentUpdateRequest = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     method?: number | null;
     description?: string | null;
     metadata?: unknown;
@@ -14165,28 +14273,6 @@ export type ProductCategory = {
         self?: string;
         products?: string;
     };
-};
-
-/**
- * Create/Update serializer for ProductCategory with validation.
- */
-export type ProductCategoryCreateUpdate = {
-    /**
-     * Category Name
-     */
-    name: string;
-    description?: string;
-};
-
-/**
- * Create/Update serializer for ProductCategory with validation.
- */
-export type ProductCategoryCreateUpdateRequest = {
-    /**
-     * Category Name
-     */
-    name: string;
-    description?: string;
 };
 
 /**
@@ -19292,6 +19378,7 @@ export type EventProductCategoryWritable = {
      * Product Category
      */
     category: number;
+    product: number | null;
 };
 
 /**
@@ -20698,6 +20785,18 @@ export type PoiListWritable = {
     created_by?: number | null;
 };
 
+/**
+ * Read serializer for products linked to booking packages.
+ */
+export type PackageProductWritable = {
+    product: number;
+    quantity_per_attendee?: number;
+    /**
+     * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
+     */
+    percentage_modifier?: string;
+};
+
 export type PaginatedAccessibilityRequirementListWritable = {
     count: number;
     next?: string | null;
@@ -21160,6 +21259,13 @@ export type PaginatedPoiListListWritable = {
     results: Array<PoiListWritable>;
 };
 
+export type PaginatedPackageProductListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<PackageProductWritable>;
+};
+
 export type PaginatedPaymentHistoryActionListWritable = {
     count: number;
     next?: string | null;
@@ -21540,8 +21646,9 @@ export type PaymentDetailWritable = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -21583,8 +21690,10 @@ export type PaymentListWritable = {
      * * `FAILED` - Failed
      * * `PENDING_REFUND` - Pending Refund
      * * `REFUNDED` - Refunded
+     * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
-    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED';
+    status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
+    base_amount?: string | null;
 };
 
 /**
@@ -22173,6 +22282,25 @@ export type RefundRequestCreateWritable = {
     payment: string;
     amount: string;
     reason: string;
+};
+
+/**
+ * Create serializer for RefundRequest with validation.
+ */
+export type RefundRequestCreateRequestWritable = {
+    payment: string;
+    amount: string;
+    reason: string;
+    /**
+     * Required for PARTIAL booking refunds. List of attendee UUIDs to refund.
+     */
+    attendee_ids?: Array<string>;
+    /**
+     * Short reason code for immutable audit metadata.
+     */
+    reason_code?: string;
+    override_used_ticket_block?: boolean;
+    override_reason?: string;
 };
 
 /**
@@ -23288,8 +23416,9 @@ export type AttendeesListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        payment_status?: 'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED';
+        payment_status?: 'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED';
         /**
          * Payment target type
          *
@@ -24124,6 +24253,48 @@ export type AttendeesOrganisationsRetrieveResponses = {
 };
 
 export type AttendeesOrganisationsRetrieveResponse = AttendeesOrganisationsRetrieveResponses[keyof AttendeesOrganisationsRetrieveResponses];
+
+export type AttendeesPreRemovalSummaryRetrieveData = {
+    body?: never;
+    path: {
+        attendee_id: string;
+    };
+    query?: never;
+    url: '/api/attendees/{attendee_id}/pre-removal-summary/';
+};
+
+export type AttendeesPreRemovalSummaryRetrieveResponses = {
+    /**
+     * Comprehensive pre-removal summary payload
+     */
+    200: unknown;
+};
+
+export type AttendeesRequestCancellationRefundCreateData = {
+    body: AttendeeCancellationRefundRequestRequest;
+    path: {
+        attendee_id: string;
+    };
+    query?: never;
+    url: '/api/attendees/{attendee_id}/request-cancellation-refund/';
+};
+
+export type AttendeesRequestCancellationRefundCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type AttendeesRequestCancellationRefundCreateResponses = {
+    201: AttendeeCancellationRefundResponse;
+};
+
+export type AttendeesRequestCancellationRefundCreateResponse = AttendeesRequestCancellationRefundCreateResponses[keyof AttendeesRequestCancellationRefundCreateResponses];
 
 export type AttendeesStatisticsListData = {
     body?: never;
@@ -25850,6 +26021,216 @@ export type BookingsPackageAddDiscountResponses = {
     201: unknown;
 };
 
+export type BookingsPackageProductsListData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * Filter packages eligible for specific attendee UUID
+         */
+        eligible_for_attendee?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
+        /**
+         * Filter by active status
+         */
+        is_active?: boolean;
+        /**
+         * Maximum package price
+         */
+        max_price?: number;
+        /**
+         * Minimum package price
+         */
+        min_price?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by ticket type ID
+         */
+        ticket_type?: number;
+        /**
+         * Filter by ticket type scope
+         *
+         * * `FULL_EVENT` - Full Event
+         * * `SINGLE_DAY` - Single Day
+         * * `WORKSHOP_ONLY` - Workshop Only
+         */
+        ticket_type__scope?: 'FULL_EVENT' | 'SINGLE_DAY' | 'WORKSHOP_ONLY';
+    };
+    url: '/api/bookings/packages/{id}/products/';
+};
+
+export type BookingsPackageProductsListResponses = {
+    200: PaginatedPackageProductList;
+};
+
+export type BookingsPackageProductsListResponse = BookingsPackageProductsListResponses[keyof BookingsPackageProductsListResponses];
+
+export type BookingsPackageProductsCreateData = {
+    body: PackageProductCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/products/';
+};
+
+export type BookingsPackageProductsCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type BookingsPackageProductsCreateResponses = {
+    201: PackageProduct;
+};
+
+export type BookingsPackageProductsCreateResponse = BookingsPackageProductsCreateResponses[keyof BookingsPackageProductsCreateResponses];
+
+export type BookingsPackageProductsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+        /**
+         * Database ID of the PackageProduct link to delete.
+         */
+        package_product_id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/products/{package_product_id}/';
+};
+
+export type BookingsPackageProductsDestroyErrors = {
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Package product not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageProductsDestroyResponses = {
+    /**
+     * Deleted successfully
+     */
+    204: void;
+};
+
+export type BookingsPackageProductsDestroyResponse = BookingsPackageProductsDestroyResponses[keyof BookingsPackageProductsDestroyResponses];
+
+export type BookingsPackageProductsPartialUpdateData = {
+    body?: PatchedPackageProductCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+        /**
+         * Database ID of the PackageProduct link to update.
+         */
+        package_product_id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/products/{package_product_id}/';
+};
+
+export type BookingsPackageProductsPartialUpdateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Package product not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageProductsPartialUpdateResponses = {
+    200: PackageProduct;
+};
+
+export type BookingsPackageProductsPartialUpdateResponse = BookingsPackageProductsPartialUpdateResponses[keyof BookingsPackageProductsPartialUpdateResponses];
+
+export type BookingsPackageProductsUpdateData = {
+    body: PackageProductCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Booking Package.
+         */
+        id: number;
+        /**
+         * Database ID of the PackageProduct link to update.
+         */
+        package_product_id: number;
+    };
+    query?: never;
+    url: '/api/bookings/packages/{id}/products/{package_product_id}/';
+};
+
+export type BookingsPackageProductsUpdateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Package product not found
+     */
+    404: unknown;
+};
+
+export type BookingsPackageProductsUpdateResponses = {
+    200: PackageProduct;
+};
+
+export type BookingsPackageProductsUpdateResponse = BookingsPackageProductsUpdateResponses[keyof BookingsPackageProductsUpdateResponses];
+
 export type BookingsPackageRemoveAvailabilityWindowData = {
     body?: never;
     path: {
@@ -27058,6 +27439,10 @@ export type BookingsTicketsListData = {
          * Filter by booking reference
          */
         booking__reference?: string;
+        /**
+         * Filter by event UUID (through attendee's booking)
+         */
+        event?: string;
         /**
          * Filter tickets issued after this date
          */
@@ -38834,8 +39219,9 @@ export type PaymentsListListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        status?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
+        status?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
         /**
          * Filter by multiple statuses (comma-separated)
          *
@@ -38846,8 +39232,9 @@ export type PaymentsListListData = {
          * * `FAILED` - Failed
          * * `PENDING_REFUND` - Pending Refund
          * * `REFUNDED` - Refunded
+         * * `PARTIALLY_REFUNDED` - Partially Refunded
          */
-        status__in?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
+        status__in?: Array<'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED'>;
         /**
          * Filter by target object ID
          */
@@ -39465,6 +39852,10 @@ export type PaymentsRefundsListData = {
          */
         payment?: number;
         /**
+         * Filter by event UUID (filters refunds for payments associated with the event)
+         */
+        payment__event__event_id?: string;
+        /**
          * Filter by payment UUID
          */
         payment__payment_id?: string;
@@ -39524,7 +39915,7 @@ export type PaymentsRefundsListResponses = {
 export type PaymentsRefundsListResponse = PaymentsRefundsListResponses[keyof PaymentsRefundsListResponses];
 
 export type PaymentsRefundsCreateData = {
-    body: RefundRequestCreateRequest;
+    body: RefundRequestCreateRequestWritable;
     path?: never;
     query?: never;
     url: '/api/payments/refunds/';
@@ -40218,40 +40609,6 @@ export type ProductsCategoriesListResponses = {
 
 export type ProductsCategoriesListResponse = ProductsCategoriesListResponses[keyof ProductsCategoriesListResponses];
 
-export type ProductsCategoriesCreateData = {
-    body: ProductCategoryCreateUpdateRequest;
-    path?: never;
-    query?: never;
-    url: '/api/products/categories/';
-};
-
-export type ProductsCategoriesCreateResponses = {
-    201: ProductCategoryCreateUpdate;
-};
-
-export type ProductsCategoriesCreateResponse = ProductsCategoriesCreateResponses[keyof ProductsCategoriesCreateResponses];
-
-export type ProductsCategoriesDestroyData = {
-    body?: never;
-    path: {
-        /**
-         * A unique integer value identifying this Category.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/products/categories/{id}/';
-};
-
-export type ProductsCategoriesDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
-};
-
-export type ProductsCategoriesDestroyResponse = ProductsCategoriesDestroyResponses[keyof ProductsCategoriesDestroyResponses];
-
 export type ProductsCategoriesRetrieveData = {
     body?: never;
     path: {
@@ -40269,42 +40626,6 @@ export type ProductsCategoriesRetrieveResponses = {
 };
 
 export type ProductsCategoriesRetrieveResponse = ProductsCategoriesRetrieveResponses[keyof ProductsCategoriesRetrieveResponses];
-
-export type ProductsCategoriesPartialUpdateData = {
-    body?: PatchedProductCategoryCreateUpdateRequest;
-    path: {
-        /**
-         * A unique integer value identifying this Category.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/products/categories/{id}/';
-};
-
-export type ProductsCategoriesPartialUpdateResponses = {
-    200: ProductCategoryCreateUpdate;
-};
-
-export type ProductsCategoriesPartialUpdateResponse = ProductsCategoriesPartialUpdateResponses[keyof ProductsCategoriesPartialUpdateResponses];
-
-export type ProductsCategoriesUpdateData = {
-    body: ProductCategoryCreateUpdateRequest;
-    path: {
-        /**
-         * A unique integer value identifying this Category.
-         */
-        id: number;
-    };
-    query?: never;
-    url: '/api/products/categories/{id}/';
-};
-
-export type ProductsCategoriesUpdateResponses = {
-    200: ProductCategoryCreateUpdate;
-};
-
-export type ProductsCategoriesUpdateResponse = ProductsCategoriesUpdateResponses[keyof ProductsCategoriesUpdateResponses];
 
 export type ProductsEventCategoriesListData = {
     body?: never;
@@ -40532,7 +40853,6 @@ export type ProductsListCreateData = {
         percentage_modifier?: number;
         verified?: boolean;
         is_active?: boolean;
-        category_ids?: Array<number>;
         main_image?: Blob | File;
         additional_images?: Array<Blob | File>;
     };
@@ -40589,7 +40909,6 @@ export type ProductsListPartialUpdateData = {
         percentage_modifier?: number;
         verified?: boolean;
         is_active?: boolean;
-        category_ids?: Array<number>;
         main_image?: Blob | File;
         additional_images?: Array<Blob | File>;
     };
@@ -40615,7 +40934,6 @@ export type ProductsListUpdateData = {
         percentage_modifier?: number;
         verified?: boolean;
         is_active?: boolean;
-        category_ids?: Array<number>;
         main_image?: Blob | File;
         additional_images?: Array<Blob | File>;
     };

@@ -258,8 +258,8 @@ const ticketStatusChartData = computed<PieChartData[]>(() => {
 const ticketScopeChartData = computed<PieChartData[]>(() => {
   if (!scopeData.value?.data?.distribution) return []
   return scopeData.value.data.distribution.map((item: any) => ({
-    name: formatStatus(item.scope),
-    value: item.count,
+    name: formatStatus(item.label),
+    value: item.value,
   }))
 })
 

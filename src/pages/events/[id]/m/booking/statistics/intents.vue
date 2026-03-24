@@ -47,7 +47,7 @@
             :data="intentStatusChartData"
             height="300px"
             :donut="true"
-            :colors="['#10b981', '#f59e0b', '#ef4444', '#6b7280']"
+            :colors="['#6b7280','#10b981','#f59e0b', '#ef4444', ]"
           />
         </div>
         <div v-else class="text-center text-gray-500 py-8">

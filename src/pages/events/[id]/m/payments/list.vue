@@ -337,6 +337,40 @@
                     <option value="false">No Refunds</option>
                   </select>
                 </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Description</label>
+                  <select
+                    v-model="paymentFilters.descriptor"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  >
+                    <option value="">All</option>
+                    <option value="sponsorship">Sponsorship</option>
+                    <option value="booking">Booking</option>
+                    <option value="donation">Donation</option>
+                    <option value="ticket">Ticket</option>
+                    <option value="order">Order</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Payment ID</label>
+                  <input
+                    v-model="paymentFilters.payment_id"
+                    type="text"
+                    placeholder="pay_123"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-2">Payment Reference</label>
+                  <input
+                    v-model="paymentFilters.payment_reference"
+                    type="text"
+                    placeholder="REF-001"
+                    class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  />
+                </div>
 
                 <!-- Filter Actions -->
                 <div class="flex items-end gap-2">
@@ -366,6 +400,9 @@
                   </th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Reference
+                  </th>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                    Descriptor
                   </th>
                   <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                     Date
@@ -404,6 +441,11 @@
                   <td class="px-4 py-3">
                     <div class="font-mono text-sm font-semibold text-gray-900">
                       {{ payment.payment_reference }}
+                    </div>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="text-sm text-gray-900">
+                      {{ payment.descriptor }}
                     </div>
                   </td>
                   <td class="px-4 py-3">
@@ -464,7 +506,7 @@
                         <span class="material-symbols-outlined text-lg">vertical_align_bottom</span>
                       </button>
                       <button
-                        v-if="payment.status === 'PENDING' && (isBankTransferPayment(payment) || !payment.method_title)"
+                        v-if="payment.status === 'PENDING'"
                         @click="handlePendingVerification(payment)"
                         class="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
                         :title="isBankTransferPayment(payment) ? 'Verify Bank Transfer' : 'Mark as Verified'"
@@ -661,6 +703,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 const id = computed(() => String(route.params.id))
 
@@ -669,6 +712,7 @@ const { data: event } = useEvent(id)
 
 // Tab state
 const activeTab = ref('payments')
+const validTabs = ['payments', 'donations', 'refunds', 'statistics'] as const
 const tabs = computed(() => [
   {
     id: 'payments',
@@ -719,7 +763,137 @@ const paymentFilters = reactive({
   amount_min: null as number | null,
   amount_max: null as number | null,
   has_refunds: '',
+  descriptor: '',
+  payment_id: '',
+  payment_reference: '',
 })
+
+const syncingQuery = ref(false)
+const managedQueryKeys = [
+  'tab',
+  'page',
+  'page_size',
+  'search',
+  'status',
+  'method_type',
+  'date_from',
+  'date_to',
+  'amount_min',
+  'amount_max',
+  'has_refunds',
+  'descriptor',
+  'pending_verification',
+  'has_refunds_quick',
+  'payment_id',
+  'payment_reference',
+] as const
+
+function readQueryString(value: unknown): string {
+  if (Array.isArray(value)) return typeof value[0] === 'string' ? value[0] : ''
+  return typeof value === 'string' ? value : ''
+}
+
+function readQueryNumber(value: unknown): number | null {
+  const raw = readQueryString(value)
+  if (!raw) return null
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function normalizeQuery(query: Record<string, unknown>): Record<string, string> {
+  const normalized: Record<string, string> = {}
+  for (const [key, value] of Object.entries(query)) {
+    if (value == null) continue
+    if (Array.isArray(value)) {
+      if (typeof value[0] === 'string' && value[0]) normalized[key] = value[0]
+      continue
+    }
+    if (typeof value === 'string' && value) normalized[key] = value
+  }
+  return normalized
+}
+
+function applyQueryToState() {
+  const tabQuery = readQueryString(route.query.tab)
+  if (validTabs.includes(tabQuery as (typeof validTabs)[number])) {
+    activeTab.value = tabQuery
+  }
+
+  const page = readQueryNumber(route.query.page)
+  paymentsCurrentPage.value = page && page > 0 ? Math.floor(page) : 1
+
+  const pageSize = readQueryNumber(route.query.page_size)
+  paymentsPageSize.value = pageSize && pageSize > 0 ? Math.floor(pageSize) : 25
+
+  paymentsSearchQuery.value = readQueryString(route.query.search)
+
+  paymentFilters.status = readQueryString(route.query.status)
+  paymentFilters.method_type = readQueryString(route.query.method_type)
+  paymentFilters.date_from = readQueryString(route.query.date_from)
+  paymentFilters.date_to = readQueryString(route.query.date_to)
+  paymentFilters.has_refunds = readQueryString(route.query.has_refunds)
+  paymentFilters.descriptor = readQueryString(route.query.descriptor)
+  paymentFilters.payment_id = readQueryString(route.query.payment_id)
+  paymentFilters.payment_reference = readQueryString(route.query.payment_reference)
+
+  const amountMin = readQueryNumber(route.query.amount_min)
+  const amountMax = readQueryNumber(route.query.amount_max)
+  paymentFilters.amount_min = amountMin
+  paymentFilters.amount_max = amountMax
+
+  quickFilters.pending_verification = readQueryString(route.query.pending_verification) === 'true'
+  quickFilters.has_refunds = readQueryString(route.query.has_refunds_quick) === 'true'
+}
+
+function buildManagedQueryFromState(): Record<string, string> {
+  const query: Record<string, string> = {}
+
+  if (activeTab.value && activeTab.value !== 'payments') query.tab = activeTab.value
+
+  if (paymentsCurrentPage.value > 1) query.page = String(paymentsCurrentPage.value)
+  if (paymentsPageSize.value !== 25) query.page_size = String(paymentsPageSize.value)
+  if (paymentsSearchQuery.value) query.search = paymentsSearchQuery.value
+
+  if (paymentFilters.status) query.status = paymentFilters.status
+  if (paymentFilters.method_type) query.method_type = paymentFilters.method_type
+  if (paymentFilters.date_from) query.date_from = paymentFilters.date_from
+  if (paymentFilters.date_to) query.date_to = paymentFilters.date_to
+  if (paymentFilters.amount_min !== null) query.amount_min = String(paymentFilters.amount_min)
+  if (paymentFilters.amount_max !== null) query.amount_max = String(paymentFilters.amount_max)
+  if (paymentFilters.has_refunds) query.has_refunds = paymentFilters.has_refunds
+  if (paymentFilters.descriptor) query.descriptor = paymentFilters.descriptor
+  if (paymentFilters.payment_id) query.payment_id = paymentFilters.payment_id
+  if (paymentFilters.payment_reference) query.payment_reference = paymentFilters.payment_reference
+
+  if (quickFilters.pending_verification) query.pending_verification = 'true'
+  if (quickFilters.has_refunds) query.has_refunds_quick = 'true'
+
+  return query
+}
+
+async function syncStateToQuery() {
+  if (syncingQuery.value) return
+
+  const currentQuery = normalizeQuery(route.query as Record<string, unknown>)
+  const nextQuery = { ...currentQuery }
+
+  for (const key of managedQueryKeys) {
+    delete nextQuery[key]
+  }
+
+  Object.assign(nextQuery, buildManagedQueryFromState())
+
+  const currentSerialized = JSON.stringify(Object.entries(currentQuery).sort())
+  const nextSerialized = JSON.stringify(Object.entries(nextQuery).sort())
+  if (currentSerialized === nextSerialized) return
+
+  syncingQuery.value = true
+  try {
+    await router.replace({ query: nextQuery })
+  } finally {
+    syncingQuery.value = false
+  }
+}
 
 // Computed query params for API
 const paymentsQueryParams = computed(() => {
@@ -761,6 +935,14 @@ const paymentsQueryParams = computed(() => {
     params.has_refunds = paymentFilters.has_refunds === 'true'
   }
 
+  if (paymentFilters.payment_id) {
+    params.payment_id = paymentFilters.payment_id
+  }
+
+  if (paymentFilters.payment_reference) {
+    params.payment_reference = paymentFilters.payment_reference
+  }
+
   // Quick filters
   if (quickFilters.pending_verification) {
     params.status = 'PENDING'
@@ -769,6 +951,10 @@ const paymentsQueryParams = computed(() => {
 
   if (quickFilters.has_refunds) {
     params.has_refunds = true
+  }
+
+  if (paymentFilters.descriptor) {
+    params.descriptor = paymentFilters.descriptor
   }
 
   return params
@@ -802,7 +988,7 @@ const stats = computed(() => {
 
   const completed = allPayments.filter((p: any) => p.status === 'COMPLETED')
   const pending = allPayments.filter((p: any) => p.status === 'PENDING')
-  const refunded = allPayments.filter((p: any) => p.status === 'REFUNDED' || p.status === 'PENDING_REFUND')
+  const refunded = allPayments.filter((p: any) => p.status === 'REFUNDED' || p.status === 'PENDING_REFUND' || p.status === 'PARTIALLY_REFUNDED')
   const failed = allPayments.filter((p: any) => p.status === 'FAILED' || p.status === 'CANCELLED')
 
   const pendingVerification = allPayments.filter(
@@ -810,15 +996,15 @@ const stats = computed(() => {
   )
 
   const totalRevenue = completed.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   const pendingAmount = pending.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   const refundedAmount = refunded.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.modified_amount || '0')
+    return sum + parseFloat(p.amount.slice(1) || '0')
   }, 0)
 
   // Method breakdown
@@ -850,6 +1036,9 @@ const activeFiltersCount = computed(() => {
   if (paymentFilters.amount_min !== null) count++
   if (paymentFilters.amount_max !== null) count++
   if (paymentFilters.has_refunds) count++
+  if (paymentFilters.descriptor) count++
+  if (paymentFilters.payment_id) count++
+  if (paymentFilters.payment_reference) count++
   return count
 })
 
@@ -892,6 +1081,9 @@ function clearPaymentFilters() {
   paymentFilters.amount_min = null
   paymentFilters.amount_max = null
   paymentFilters.has_refunds = ''
+  paymentFilters.descriptor = ''
+  paymentFilters.payment_id = ''
+  paymentFilters.payment_reference = ''
   quickFilters.pending_verification = false
   quickFilters.has_refunds = false
 }
@@ -1297,4 +1489,38 @@ watch(paymentsPageSize, () => {
 watch(paymentsSearchQuery, () => {
   paymentsCurrentPage.value = 1
 })
+
+watch(
+  () => route.query,
+  () => {
+    if (syncingQuery.value) return
+    applyQueryToState()
+  },
+  { immediate: true }
+)
+
+watch(
+  [
+    activeTab,
+    paymentsCurrentPage,
+    paymentsPageSize,
+    paymentsSearchQuery,
+    () => paymentFilters.status,
+    () => paymentFilters.method_type,
+    () => paymentFilters.date_from,
+    () => paymentFilters.date_to,
+    () => paymentFilters.amount_min,
+    () => paymentFilters.amount_max,
+    () => paymentFilters.has_refunds,
+    () => paymentFilters.descriptor,
+    () => paymentFilters.payment_id,
+    () => paymentFilters.payment_reference,
+    () => quickFilters.pending_verification,
+    () => quickFilters.has_refunds,
+  ],
+  () => {
+    syncStateToQuery()
+  },
+  { deep: false }
+)
 </script>

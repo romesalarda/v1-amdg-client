@@ -123,9 +123,9 @@
                   <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider" :class="getStatusBadgeClass(event?.status)">
                     {{ statusOptions.find(o => o.value === event?.status)?.label || '-' }}
                   </span>
-                  <span v-if="event?.is_approved" class="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-black uppercase tracking-wider border border-green-300">
+                  <!-- <span v-if="event?.is_approved" class="px-3 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-black uppercase tracking-wider border border-green-300">
                     ✓ Authorized
-                  </span>
+                  </span> -->
                 </div>
                 <p class="text-xs text-navy-600 font-medium flex items-center gap-1">
                   <span class="material-symbols-outlined text-sm">info</span>

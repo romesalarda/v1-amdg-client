@@ -62,8 +62,18 @@
 						</div>
 					</div>
 				</div>
-				<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
-					Editing attendee {{ currentAttendeeNumber }}
+				<div class="flex flex-col items-end gap-2">
+					<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
+						Editing attendee {{ currentAttendeeNumber }}
+					</div>
+					<div
+						v-if="showIntentCountdown"
+						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em]"
+						:class="intentTimerToneClass"
+					>
+						<UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
+						<span>Session expires in {{ intentCountdownLabel }}</span>
+					</div>
 				</div>
 			</div>
 		</section>
@@ -115,7 +125,7 @@
 						</div>
 					</button>
 
-					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5">
+					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5" v-if="!showCheckoutPricingSidebar">
 						<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Current attendee snapshot</p>
 						<div v-if="currentAttendee" class="mt-3 space-y-2">
 							<p class="text-sm font-bold text-slate-800">{{ attendeeDisplayName(currentAttendee, store.currentIndex) }}</p>
@@ -132,6 +142,62 @@
 						<p class="mt-3 text-[11px] leading-relaxed text-slate-500">
 							Keep medical, dietary, and emergency details accurate to support safe event safeguarding.
 						</p>
+					</div>
+					<div class="space-y-4 lg:sticky lg:top-24" v-if="showCheckoutPricingSidebar">
+						<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+							<div class="flex items-center justify-between">
+								<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
+							</div>
+							<p v-if="checkoutPreviewLoading" class="mt-3 text-xs text-slate-500">Refreshing payment breakdown...</p>
+							<p v-else-if="checkoutPreviewError" class="mt-3 text-xs font-semibold text-red-600">{{ checkoutPreviewError }}</p>
+							<div class="mt-3 space-y-2">
+								<div
+									v-for="item in breakdownLines"
+									:key="item.id"
+									class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-sm"
+								>
+									<div class="flex items-center justify-between gap-3">
+										<div>
+											<p class="font-semibold text-slate-800">{{ item.name }}</p>
+											<p class="text-xs text-slate-500">{{ item.description }}</p>
+											<p v-if="item.discountHint" class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{{ item.discountHint }}</p>
+										</div>
+										<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
+									</div>
+									<p class="mt-2 text-[11px] text-slate-600">
+										{{ formatMoney(item.originalAmount, item.currency) }}
+										<span class="text-slate-400"> - </span>
+										<span class="text-emerald-700">{{ formatMoney(item.discountAmount, item.currency) }}</span>
+										<span class="text-slate-400"> = </span>
+										<span class="font-semibold text-slate-800">{{ formatMoney(item.finalAmount, item.currency) }}</span>
+									</p>
+								</div>
+								<p v-if="!breakdownLines.length && !checkoutPreviewLoading" class="text-xs text-slate-500">No payable items selected yet.</p>
+							</div>
+							<div class="mt-4 border-t border-slate-100 pt-3 text-sm">
+								<div class="flex items-center justify-between text-slate-600">
+									<span>Subtotal</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.originalAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-1 flex items-center justify-between text-emerald-700">
+									<span>Total discount</span>
+									<span>-{{ formatMoney(paymentBreakdownTotal.discountAmount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<div class="mt-2 flex items-center justify-between text-base font-bold text-slate-900">
+									<span>Total due</span>
+									<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
+								</div>
+								<p v-if="isPollingPaymentStatus" class="mt-2 text-xs font-semibold text-amber-700">{{ paymentProcessingMessage || 'Finalizing your payment...' }}</p>
+							</div>
+						</div>
+
+						<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+							<div class="flex items-center gap-2 font-semibold">
+								<UIcon name="i-heroicons-lock-closed" class="h-4 w-4" />
+								Powered and secured by Stripe
+							</div>
+							<p class="mt-1 text-xs text-emerald-700">We do not store any card data.</p>
+						</div>
 					</div>
 				</aside>
 
@@ -355,7 +421,7 @@
 										</UButton>
 									</div>
 									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : '⚠ Select an area to continue.' }}
+										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : 'Select an area to continue.' }}
 									</p>
 								</div>
 							</div>
@@ -633,9 +699,9 @@
 								<p class="text-sm text-gray-600">Choose the package for this attendee.</p>
 							</div>
 
-							<div v-if="bookingPackages.length" class="grid gap-4 sm:grid-cols-2">
+							<div v-if="availableBookingPackages.length" class="grid gap-4 sm:grid-cols-2">
 								<label
-									v-for="pkg in bookingPackages"
+									v-for="pkg in availableBookingPackages"
 									:key="pkg.id"
 									class="flex cursor-pointer flex-col rounded-xl border p-4 text-sm"
 									:class="pkg.id === currentAttendee.packageId ? 'border-primary bg-primary/5' : 'border-gray-200'"
@@ -655,18 +721,217 @@
 									</p>
 								</label>
 							</div>
-							<p v-else class="text-sm text-gray-500">No packages available for this attendee.</p>
+							<p v-else class="text-sm text-gray-500">No packages are currently available for this attendee.</p>
+							<p v-if="currentAttendee.packageId && !isCurrentAttendeePackageAvailable" class="text-xs font-semibold text-amber-700">
+								The previously selected package is outside its availability window. Please pick another package.
+							</p>
 						</div>
 
 									<div v-else-if="activeStepIndex === 4" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Products</h2>
-								<p class="text-sm text-gray-600">Optional add-ons will appear here when available.</p>
-							</div>
-							<div class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
-								No products available for this event.
-							</div>
-						</div>
+										<div>
+											<h2 class="text-lg font-semibold text-gray-900">Products</h2>
+											<p class="text-sm text-gray-600">Optional add-ons linked to the selected package.</p>
+										</div>
+
+										<p v-if="!currentAttendee?.packageId" class="text-sm text-gray-500">
+											Select a package first to see available products.
+										</p>
+										<p v-else-if="packageProductsLoading" class="text-sm text-gray-500">
+											Loading package products...
+										</p>
+										<p v-else-if="packageProductsError" class="text-sm font-semibold text-red-600">
+											{{ packageProductsError }}
+										</p>
+
+										<div v-else-if="currentPackageProducts.length" class="space-y-4">
+											<div
+												v-for="packageProduct in currentPackageProducts"
+												:key="packageProduct.id"
+												class="rounded-xl border border-gray-200 overflow-hidden"
+											>
+												<!-- Product Header -->
+												<div class="border-b border-gray-200 bg-white p-4">
+													<div class="flex flex-wrap items-start justify-between gap-3">
+														<div>
+															<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
+															<p class="mt-1 text-xs text-gray-600">Pick a size, then choose your color.</p>
+														</div>
+														<UBadge color="gray" variant="soft" size="xs">
+															Max {{ packageProduct.quantityPerAttendee }}
+														</UBadge>
+													</div>
+												</div>
+
+												<!-- Product Content: Image + Selection -->
+												<div class="grid gap-4 p-4 sm:grid-cols-3 lg:grid-cols-4">
+													<!-- Left: Product Image (Portrait) -->
+													<div class="sm:col-span-1">
+														<div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+															<img
+																:src="getPackageProductImageSrc(packageProduct)"
+																:alt="`${packageProduct.productTitle} image`"
+																class="aspect-[3/4] w-full object-cover"
+															/>
+														</div>
+													</div>
+
+													<!-- Right: Selection Options -->
+													<div class="sm:col-span-2 lg:col-span-3 flex flex-col gap-4">
+														<!-- Step 1: Size Selection -->
+														<div>
+															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 1: Size</label>
+															<div v-if="getUniqueSizesForPackageProduct(packageProduct.id).length" class="flex flex-wrap gap-2">
+																<button
+																	v-for="sizeOption in getUniqueSizesForPackageProduct(packageProduct.id)"
+																	:key="sizeOption.size"
+																	type="button"
+																	class="rounded-lg border px-4 py-2 text-sm font-medium transition"
+																	:class="[
+																		getSelectedSizeForProduct(packageProduct.id) === sizeOption.size
+																			? 'border-blue-500 bg-blue-50 text-blue-700'
+																			: 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
+																		!sizeOption.Available ? 'cursor-not-allowed opacity-50' : ''
+																	]"
+																	:disabled="!sizeOption.Available"
+																	@click="setSelectedSizeForProduct(packageProduct.id, sizeOption.size)"
+																>
+																	{{ sizeOption.size }}
+																</button>
+															</div>
+															<p v-else class="text-xs text-amber-700 font-semibold">No sizes available.</p>
+														</div>
+
+														<!-- Step 2: Color Selection (only show if size selected) -->
+														<div v-if="getSelectedSizeForProduct(packageProduct.id)">
+															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 2: Color</label>
+															<div class="flex flex-wrap gap-3">
+																<button
+																	v-for="colorOption in getColorsForPackageProductAndSize(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!)"
+																	:key="colorOption.colorHex"
+																	type="button"
+																	class="flex flex-col items-center gap-1 transition"
+																	:disabled="!colorOption.isActive || colorOption.stockQuantity <= 0"
+																	@click="
+																		() => {
+																			const variantId = getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
+																			if (variantId) {
+																				setPackageProductVariantSelection(packageProduct.id, variantId)
+																			}
+																		}
+																	"
+																>
+																	<!-- Color Swatch -->
+																	<div
+																		class="h-10 w-10 rounded-lg border-2 transition"
+																		:style="{ backgroundColor: colorOption.colorHex }"
+																		:class="[
+																			getSelectionForPackageProduct(packageProduct.id)?.variantId === getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
+																				? 'border-blue-500 ring-2 ring-blue-300'
+																				: 'border-slate-300',
+																			!colorOption.isActive || colorOption.stockQuantity <= 0 ? 'opacity-50' : ''
+																		]"
+																	/>
+																	<!-- Stock Label -->
+																	<span class="text-xs font-semibold" :class="colorOption.stockQuantity > 0 ? 'text-emerald-700' : 'text-slate-500'">
+																		{{ colorOption.stockQuantity > 0 ? `${colorOption.stockQuantity}` : 'Out' }}
+																	</span>
+																</button>
+															</div>
+														</div>
+
+
+														<!-- Quantity and Pricing -->
+														<div v-if="getSelectedSizeForProduct(packageProduct.id)" class="border-t border-slate-200 pt-4 space-y-4">
+															<!-- Quantity Selection -->
+															<div>
+																<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
+																<UInput
+																	type="number"
+																	:min="1"
+																	:max="packageProduct.quantityPerAttendee"
+																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
+																	:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
+																	@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
+																/>
+																<p class="mt-1 text-xs text-slate-500">Up to {{ packageProduct.quantityPerAttendee }} per attendee</p>
+															</div>
+
+															<!-- Price Breakdown -->
+															<div v-if="getSelectionForPackageProduct(packageProduct.id) && getSelectedVariantPriceInfo(packageProduct)" class="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-4 space-y-3">
+																<p class="text-xs font-bold uppercase tracking-wide text-blue-900">Price breakdown</p>
+
+																<!-- Standard vs Bundle Comparison -->
+																<div class="space-y-2">
+																	<div class="flex items-center justify-between">
+																		<span class="text-xs text-slate-700">Standard price per unit</span>
+																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.standardPrice, packageProduct.currency) }}</span>
+																	</div>
+
+																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice !== getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
+																		<span class="text-xs text-emerald-700 font-semibold">Bundle price per unit</span>
+																		<span class="text-sm font-bold text-emerald-700">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
+																	</div>
+
+																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice === getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
+																		<span class="text-xs text-slate-700">Bundle price per unit</span>
+																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
+																	</div>
+																</div>
+
+																<!-- Total Cost -->
+																<div class="border-t border-blue-300 pt-3 flex items-center justify-between">
+																	<div>
+																		<p class="text-xs text-slate-600">Total for {{ getSelectedVariantPriceInfo(packageProduct)!.quantity }} {{ getSelectedVariantPriceInfo(packageProduct)!.quantity === 1 ? 'item' : 'items' }}</p>
+																		<p class="text-xs text-slate-500 mt-0.5">At checkout</p>
+																	</div>
+																	<div class="text-right">
+																		<p class="text-2xl font-black text-blue-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.totalPrice, packageProduct.currency) }}</p>
+																	</div>
+																</div>
+															</div>
+
+															<!-- Action Buttons -->
+															<div class="flex justify-end gap-2">
+																<UButton
+																	size="xs"
+																	color="gray"
+																	variant="ghost"
+																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
+																	@click="removePackageProductSelection(packageProduct.id)"
+																>
+																	Remove
+																</UButton>
+															</div>
+														</div>
+														<!-- Empty State Helper -->
+														<div v-else class="flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-700">
+															<UIcon name="i-heroicons-information-circle" class="h-4 w-4" />
+															<span>Select a size to see available colors.</span>
+														</div>
+													</div>
+												</div>
+											</div>
+
+											<div v-if="selectedAddOnsSummary.length" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+												<p class="text-sm font-semibold text-slate-900">Selected add-ons</p>
+												<ul class="mt-2 space-y-2">
+													<li
+														v-for="row in selectedAddOnsSummary"
+														:key="`${row.packageProductId}-${row.variantLabel}`"
+														class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
+													>
+														<div class="text-slate-700">
+															<p class="font-semibold text-slate-900">{{ row.productTitle }}</p>
+															<p>{{ row.variantLabel }}</p>
+														</div>
+														<p class="font-semibold text-slate-800">x{{ row.quantity }}</p>
+													</li>
+												</ul>
+											</div>
+										</div>
+
+										<p v-else class="text-sm text-gray-500">No package products available for this package.</p>
+									</div>
 
 									<div v-else-if="activeStepIndex === 5" class="space-y-6">
 							<div>
@@ -726,6 +991,20 @@
 											<p class="mt-1 text-xs text-gray-600">
 												Package: {{ packageById(attendee.packageId)?.name || 'Not selected' }}
 											</p>
+											<div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													Age {{ calculateAge(attendee.date_of_birth || '') ?? 'N/A' }}
+												</span>
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													{{ attendee.personalInfo.medicalConditions.length }} medical
+												</span>
+												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
+													{{ attendee.personalInfo.dietaryRequirements.length }} dietary
+												</span>
+												<span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
+													Due {{ formatMoney(attendeeReviewAmount(attendee, index).amount, attendeeReviewAmount(attendee, index).currency) }}
+												</span>
+											</div>
 										</div>
 										<UButton size="xs" color="gray" variant="ghost" @click="jumpToAttendee(index)">
 											Edit
@@ -811,6 +1090,9 @@
 										<div ref="stripeCardMountRef" class="min-h-[44px]"></div>
 									</div>
 									<p v-if="stripeCardError" class="text-xs font-semibold text-red-600">{{ stripeCardError }}</p>
+									<p v-else-if="stripePaymentAttemptError" class="text-xs font-semibold text-red-600">
+										{{ stripePaymentAttemptError }}
+									</p>
 									<p v-else-if="!stripeCardReady" class="text-xs text-slate-500">Complete card details to enable checkout.</p>
 									<p v-else class="text-xs font-semibold text-emerald-700">Card details ready.</p>
 								</div>
@@ -823,7 +1105,7 @@
 												v-if="activeStepIndex === reviewStepIndex"
 												color="primary"
 												:loading="isSaving"
-												:disabled="!canContinue"
+												:disabled="!canContinue || checkoutCompleted"
 												@click="handleCheckout"
 											>
 												Complete registration
@@ -845,8 +1127,8 @@
 					</div>
 				</main>
 
-				<aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0">
-					<div class="space-y-4 lg:sticky lg:top-24">
+				<!-- <aside v-if="showCheckoutPricingSidebar" class="w-full lg:w-80 lg:flex-shrink-0"> -->
+					<!-- <div class="space-y-4 lg:sticky lg:top-24">
 						<div class="rounded-2xl border border-slate-900 bg-slate-900 p-4 text-white shadow-lg">
 							<p class="text-[10px] font-black uppercase tracking-[0.18em] text-white/70">Live checkout pricing</p>
 							<p class="mt-2 text-sm text-white/90">Transparent totals powered by server-side pricing rules.</p>
@@ -907,13 +1189,13 @@
 							</div>
 							<p class="mt-1 text-xs text-emerald-700">Card data is tokenized by Stripe and never stored directly in AMDG forms.</p>
 						</div>
-					</div>
-				</aside>
+					</div> -->
+				<!-- </aside> -->
 			</template>
-				</div>
+		</div>
 	</div>
 
-	<UModal v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
+	<UModal v-if="!showCheckoutSuccessModal" v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
 		<div class="space-y-4 p-6 md:p-8">
 			<div class="flex items-start gap-3">
 				<div class="mt-0.5 rounded-full bg-amber-100 p-2">
@@ -932,47 +1214,22 @@
 		</div>
 	</UModal>
 
-	<UModal v-model="showCheckoutSuccessModal" :ui="{ width: 'sm:max-w-3xl' }">
-		<div class="space-y-6 p-6 md:p-8">
-			<div class="text-center">
-				<div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-					<UIcon name="i-heroicons-check" class="h-9 w-9 text-emerald-600" />
+	<UModal v-model="showCheckoutSuccessModal" :prevent-close="true" :ui="{ width: 'sm:max-w-5xl' }">
+		<div class="success-modal space-y-8 p-8 md:p-14">
+			<div class="success-glow"></div>
+			<div class="success-pop text-center">
+				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-100/60 md:h-24 md:w-24">
+					<UIcon name="i-heroicons-check" class="h-11 w-11 text-emerald-600 success-check md:h-14 md:w-14" />
 				</div>
-				<h3 class="mt-4 text-2xl font-black text-slate-900">Registration Complete</h3>
-				<p class="mt-2 text-sm text-slate-600">
-					You're going to {{ event?.title || 'this event' }}.
+				<h3 class="mt-5 text-4xl font-black tracking-tight text-slate-900 success-title md:text-5xl">Booking successful</h3>
+				<p class="mt-4 text-lg font-semibold text-slate-600 success-event-lead md:text-2xl">You're going to</p>
+				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
+					{{ event?.title || 'this event' }}
 				</p>
 			</div>
 
-			<div class="grid gap-3 md:grid-cols-2">
-				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Booking reference</p>
-					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.booking_reference || 'N/A' }}</p>
-				</div>
-				<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-500">Payment reference</p>
-					<p class="mt-1 text-base font-semibold text-slate-900">{{ checkoutResult?.payment_reference || 'N/A' }}</p>
-				</div>
-				<div v-if="checkoutResult?.bank_transfer_reference" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Bank transfer reference</p>
-					<p class="mt-1 text-base font-semibold text-blue-900">{{ checkoutResult.bank_transfer_reference }}</p>
-				</div>
-				<div v-if="checkoutResult?.bank_transfer_instructions" class="rounded-xl border border-blue-200 bg-blue-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Transfer instructions</p>
-					<p class="mt-1 text-sm text-blue-900">{{ checkoutResult.bank_transfer_instructions }}</p>
-				</div>
-				<div v-if="checkoutResult?.stripe_client_secret" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-emerald-600">Stripe next step</p>
-					<p class="mt-1 text-sm text-emerald-900">Your booking is created. Complete card payment using the provided Stripe flow.</p>
-				</div>
-				<div v-if="isPollingPaymentStatus || paymentProcessingMessage" class="rounded-xl border border-amber-200 bg-amber-50 p-4 md:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Payment processing</p>
-					<p class="mt-1 text-sm text-amber-900">{{ paymentProcessingMessage || 'Waiting for payment confirmation from Stripe...' }}</p>
-				</div>
-			</div>
-
-			<div class="flex justify-end">
-				<UButton color="primary" @click="showCheckoutSuccessModal = false">Close</UButton>
+			<div class="flex justify-center success-cta-wrap">
+				<UButton size="xl" color="primary" @click="closeSuccessModalAndRedirect">View your event dashboard</UButton>
 			</div>
 		</div>
 	</UModal>
@@ -1005,13 +1262,14 @@ import { usePaymentMethods } from '~/composables/resources/payments/paymentMetho
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsListRetrieve, locationsAreasList } from '~/api/sdk.gen'
+import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
-import { resolveImageUrl } from '~/utils/image'
+import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
-import type { AttendeeDraft, PersonalInfoItemDraft, MedicalConditionItemDraft } from '~/stores/registration'
+import type { AttendeeDraft, MedicalConditionItemDraft, PersonalInfoItemDraft, ProductSelectionDraft } from '~/stores/registration'
 import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
+import { formatMoney } from '~/utils/money'
 
 // Create validation schema for attendee details
 const attendeeValidationSchema = z.object({
@@ -1145,10 +1403,71 @@ const bookingIntentMutation = useCreateBookingIntent()
 const pingBookingIntentMutation = usePingBookingIntent()
 const isCreatingIntent = ref(false)
 const showIntentExpiredModal = ref(false)
+const intentExpiresAtMs = ref<number | null>(null)
+const intentNowMs = ref(Date.now())
 const areaLookupLoading = ref(false)
 const areaSearch = ref('')
 const areaOptions = ref<Array<{ label: string; value: number }>>([])
 let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+let intentCountdownTimer: ReturnType<typeof setInterval> | null = null
+
+const setIntentExpiryFromSeconds = (seconds?: number | null) => {
+	if (typeof seconds !== 'number' || Number.isNaN(seconds)) return
+	const safeSeconds = Math.max(0, Math.floor(seconds))
+	intentExpiresAtMs.value = Date.now() + safeSeconds * 1000
+	intentNowMs.value = Date.now()
+}
+
+const setIntentExpiryFromIso = (expiresAt?: string | null) => {
+	if (!expiresAt) return
+	const parsed = new Date(expiresAt).getTime()
+	if (Number.isNaN(parsed)) return
+	intentExpiresAtMs.value = parsed
+	intentNowMs.value = Date.now()
+}
+
+const intentCountdownSeconds = computed(() => {
+	if (!store.bookingIntentId || !intentExpiresAtMs.value || showIntentExpiredModal.value) return null
+	const remaining = Math.ceil((intentExpiresAtMs.value - intentNowMs.value) / 1000)
+	return Math.max(0, remaining)
+})
+
+const showIntentCountdown = computed(() => {
+	return !!store.bookingIntentId && intentCountdownSeconds.value !== null && !showIntentExpiredModal.value
+})
+
+const intentCountdownLabel = computed(() => {
+	const totalSeconds = intentCountdownSeconds.value
+	if (totalSeconds === null) return '--:--'
+	const minutes = Math.floor(totalSeconds / 60)
+	const seconds = totalSeconds % 60
+	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
+})
+
+const intentTimerToneClass = computed(() => {
+	const remaining = intentCountdownSeconds.value
+	if (remaining === null || remaining > 300) {
+		return 'border-emerald-300 bg-emerald-50 text-emerald-800'
+	}
+	if (remaining > 120) {
+		return 'border-amber-300 bg-amber-50 text-amber-800'
+	}
+	return 'border-red-300 bg-red-50 text-red-800'
+})
+
+const stopIntentCountdown = () => {
+	if (!intentCountdownTimer) return
+	clearInterval(intentCountdownTimer)
+	intentCountdownTimer = null
+}
+
+const startIntentCountdown = () => {
+	stopIntentCountdown()
+	if (!store.bookingIntentId || !intentExpiresAtMs.value) return
+	intentCountdownTimer = setInterval(() => {
+		intentNowMs.value = Date.now()
+	}, 1000)
+}
 
 watchEffect(() => {
 	if (!event.value || store.bookingIntentId || isCreatingIntent.value) return
@@ -1162,6 +1481,11 @@ watchEffect(() => {
 			const intentId = response.data?.booking_intent_id
 			if (intentId) {
 				store.setBookingIntentId(intentId)
+				setIntentExpiryFromIso((response.data as { expires_at?: string | null })?.expires_at)
+				if (!intentExpiresAtMs.value) {
+					setIntentExpiryFromSeconds(20 * 60)
+				}
+				startIntentCountdown()
 			}
 		})
 		.catch(() => {
@@ -1337,6 +1661,395 @@ const allPackagesQuery = useBookingPackages(
 const allPackages = computed(() => allPackagesQuery.data.value?.data?.results || [])
 const packageById = (packageId?: number) => allPackages.value.find((pkg) => pkg.id === packageId)
 
+type AvailabilityWindow = {
+	available_from?: string | null
+	available_to?: string | null
+}
+
+const isDateWithinAvailabilityWindow = (window: AvailabilityWindow, now: Date) => {
+	const from = window.available_from ? new Date(window.available_from) : null
+	const to = window.available_to ? new Date(window.available_to) : null
+
+	if (from && Number.isNaN(from.getTime())) return false
+	if (to && Number.isNaN(to.getTime())) return false
+
+	if (from && now < from) return false
+	if (to && now > to) return false
+	return true
+}
+
+const isPackageCurrentlyAvailable = (pkg: any) => {
+	const windows = Array.isArray(pkg?.availability_windows) ? pkg.availability_windows as AvailabilityWindow[] : []
+	if (!windows.length) return true
+	const now = new Date()
+	return windows.some((window) => isDateWithinAvailabilityWindow(window, now))
+}
+
+const availableBookingPackages = computed(() => bookingPackages.value.filter((pkg) => isPackageCurrentlyAvailable(pkg)))
+const isCurrentAttendeePackageAvailable = computed(() => {
+	if (!currentAttendee.value?.packageId) return false
+	const pkg = packageById(currentAttendee.value.packageId)
+	if (!pkg) return false
+	return isPackageCurrentlyAvailable(pkg)
+})
+
+type PackageProductRow = {
+	id: number
+	productPublicId: string
+	productTitle: string
+	quantityPerAttendee: number
+	baseAmount: string
+	modifiedAmount: string
+	currency: string
+	imageUrl: string | null
+}
+
+type VariantRow = {
+	variantId: string
+	sizeDisplay: string
+	color: string
+	finalPrice: string
+	stockQuantity: number
+	isActive: boolean
+}
+
+const packageProductsLoading = ref(false)
+const packageProductsError = ref('')
+const currentPackageProducts = ref<PackageProductRow[]>([])
+const packageProductVariants = ref<Record<number, VariantRow[]>>({})
+let packageProductLoadVersion = 0
+
+const currentAttendeeProductSelections = computed(() => currentAttendee.value?.productSelections || [])
+
+const variantOptionLabel = (variant: VariantRow, currency: string) => {
+	const stockLabel = variant.stockQuantity > 0 ? `${variant.stockQuantity} left` : 'Out of stock'
+	return `${variant.sizeDisplay} ${variant.color} - ${variant.finalPrice} ${currency} (${stockLabel})`
+}
+
+const handlePackageProductVariantChange = (packageProductId: number, event: Event) => {
+	const value = String((event.target as HTMLSelectElement)?.value || '')
+	setPackageProductVariantSelection(packageProductId, value)
+}
+
+const getSelectionForPackageProduct = (packageProductId: number) => {
+	return (currentAttendeeProductSelections.value || []).find((selection) => selection.packageProductId === packageProductId)
+}
+
+const getPackageProductImageSrc = (packageProduct: PackageProductRow) => {
+	return resolveImageUrl(packageProduct.imageUrl)
+}
+
+const getVariantsForPackageProduct = (packageProductId: number): VariantRow[] => {
+	return packageProductVariants.value[packageProductId] || []
+}
+
+const selectedProductSizes = ref<Record<number, string | null>>({})
+
+const getUniqueSizesForPackageProduct = (packageProductId: number): Array<{ size: string; Available: boolean }> => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	const sizeMap = new Map<string, boolean>()
+	
+	variants.forEach((variant) => {
+		const hasAvailable = sizeMap.get(variant.sizeDisplay) || (variant.isActive && variant.stockQuantity > 0)
+		sizeMap.set(variant.sizeDisplay, hasAvailable)
+	})
+	
+	return Array.from(sizeMap.entries()).map(([size, available]) => ({
+		size,
+		Available: available,
+	}))
+}
+
+const getColorsForPackageProductAndSize = (packageProductId: number, size: string): Array<{ color: string; colorHex: string; stockQuantity: number; isActive: boolean }> => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	return variants
+		.filter((variant) => variant.sizeDisplay === size)
+		.map((variant) => ({
+			color: variant.color || '#000000',
+			colorHex: variant.color || '#000000',
+			stockQuantity: variant.stockQuantity,
+			isActive: variant.isActive,
+		}))
+		.filter((item, index, arr) => arr.findIndex((v) => v.colorHex === item.colorHex) === index) // Deduplicate by hex
+}
+
+const getVariantIdForPackageProductSizeColor = (packageProductId: number, size: string, colorHex: string): string | null => {
+	const variants = getVariantsForPackageProduct(packageProductId)
+	const variant = variants.find(
+		(v) => v.sizeDisplay === size && (v.color === colorHex || (!v.color && colorHex === '#000000'))
+	)
+	return variant?.variantId || null
+}
+
+const setSelectedSizeForProduct = (packageProductId: number, size: string | null) => {
+	selectedProductSizes.value[packageProductId] = size
+}
+
+
+const getSelectedSizeForProduct = (packageProductId: number): string | null => {
+	return selectedProductSizes.value[packageProductId] || null
+}
+
+const getSelectedVariantPriceInfo = (packageProduct: PackageProductRow): { standardPrice: number; bundledPrice: number; quantity: number; totalPrice: number } | null => {
+	const selection = getSelectionForPackageProduct(packageProduct.id)
+	if (!selection) return null
+
+	const standardPrice = Number(packageProduct.baseAmount || 0)
+	const bundledPrice = Number(packageProduct.modifiedAmount || packageProduct.baseAmount || 0)
+	const quantity = Number(selection.quantity || 1)
+	const totalPrice = bundledPrice * quantity
+
+	return {
+		standardPrice,
+		bundledPrice,
+		quantity,
+		totalPrice,
+	}
+}
+const hasAnyVariantsForPackageProduct = (packageProductId: number): boolean => {
+	return getVariantsForPackageProduct(packageProductId).length > 0
+}
+
+const hasSelectableVariantsForPackageProduct = (packageProductId: number): boolean => {
+	return getVariantsForPackageProduct(packageProductId).some((variant) => variant.isActive && variant.stockQuantity > 0)
+}
+
+const getBundleMultiplier = (packageProduct: PackageProductRow): number => {
+	const base = Number(packageProduct.baseAmount || 0)
+	const modified = Number(packageProduct.modifiedAmount || 0)
+	if (!Number.isFinite(base) || base <= 0) return 1
+	if (!Number.isFinite(modified) || modified < 0) return 1
+	return modified / base
+}
+
+const getBundledVariantEstimate = (packageProduct: PackageProductRow, variant: VariantRow): number => {
+	const standard = Number(variant.finalPrice || 0)
+	if (!Number.isFinite(standard) || standard < 0) return 0
+	return standard * getBundleMultiplier(packageProduct)
+}
+
+const getSelectedVariantForPackageProduct = (packageProductId: number): VariantRow | undefined => {
+	const selection = getSelectionForPackageProduct(packageProductId)
+	if (!selection) return undefined
+	return getVariantsForPackageProduct(packageProductId).find((variant) => variant.variantId === selection.variantId)
+}
+
+const getSelectedBundledVariantEstimate = (packageProduct: PackageProductRow): number | null => {
+	const selectedVariant = getSelectedVariantForPackageProduct(packageProduct.id)
+	if (!selectedVariant) return null
+	return getBundledVariantEstimate(packageProduct, selectedVariant)
+}
+
+type SelectedAddOnSummaryRow = {
+	packageProductId: number
+	productTitle: string
+	variantLabel: string
+	quantity: number
+}
+
+const selectedAddOnsSummary = computed<SelectedAddOnSummaryRow[]>(() => {
+	return (currentAttendeeProductSelections.value || []).map((selection) => {
+		const packageProduct = currentPackageProducts.value.find((row) => row.id === selection.packageProductId)
+		const variant = getVariantsForPackageProduct(selection.packageProductId).find((row) => row.variantId === selection.variantId)
+		const variantLabel = variant
+			? `${variant.sizeDisplay} ${variant.color}`
+			: `Variant ${selection.variantId.slice(0, 8)}`
+
+		return {
+			packageProductId: selection.packageProductId,
+			productTitle: packageProduct?.productTitle || 'Product',
+			variantLabel,
+			quantity: Number(selection.quantity || 1),
+		}
+	})
+})
+
+const setSelectionsForCurrentAttendee = (next: ProductSelectionDraft[]) => {
+	store.setProductSelections(store.currentIndex, next)
+}
+
+const setPackageProductVariantSelection = (packageProductId: number, variantId: string) => {
+	if (!variantId) {
+		removePackageProductSelection(packageProductId)
+		return
+	}
+
+	const existing = currentAttendeeProductSelections.value || []
+	const index = existing.findIndex((selection) => selection.packageProductId === packageProductId)
+	const next = [...existing]
+
+	if (index >= 0) {
+		next[index] = {
+			...next[index],
+			variantId,
+			quantity: Math.max(1, Number(next[index].quantity || 1)),
+		}
+	} else {
+		next.push({ packageProductId, variantId, quantity: 1 })
+	}
+
+	setSelectionsForCurrentAttendee(next)
+}
+
+const setPackageProductQuantity = (packageProductId: number, quantity: number) => {
+	const packageProduct = currentPackageProducts.value.find((row) => row.id === packageProductId)
+	if (!packageProduct) return
+
+	const existing = currentAttendeeProductSelections.value || []
+	const index = existing.findIndex((selection) => selection.packageProductId === packageProductId)
+	if (index < 0) return
+
+	const next = [...existing]
+	next[index] = {
+		...next[index],
+		quantity: Math.min(packageProduct.quantityPerAttendee, Math.max(1, Number(quantity || 1))),
+	}
+	setSelectionsForCurrentAttendee(next)
+}
+
+const removePackageProductSelection = (packageProductId: number) => {
+	const next = (currentAttendeeProductSelections.value || []).filter((selection) => selection.packageProductId !== packageProductId)
+	setSelectionsForCurrentAttendee(next)
+}
+
+const loadPackageProductsForCurrentAttendee = async () => {
+	const attendee = currentAttendee.value
+	const packageId = attendee?.packageId
+	const loadVersion = ++packageProductLoadVersion
+
+	packageProductsError.value = ''
+	if (!packageId) {
+		currentPackageProducts.value = []
+		packageProductVariants.value = {}
+		if (attendee?.productSelections?.length) {
+			setSelectionsForCurrentAttendee([])
+		}
+		return
+	}
+
+	packageProductsLoading.value = true
+	try {
+		const packageResponse = await bookingsPackageProductsList({ path: { id: packageId } })
+		if (loadVersion !== packageProductLoadVersion) return
+
+		const products = (packageResponse.data?.results || []).map((row: any) => {
+			// Try multiple field names to find the product ID
+			const productPublicId = String(row.product_public_id || row.product_id || row.product || '').trim()
+			
+			return {
+				id: Number(row.id),
+				productPublicId,
+				productTitle: String(row.product_title || 'Product'),
+				quantityPerAttendee: Math.max(1, Number(row.quantity_per_attendee || 1)),
+				baseAmount: String(row.base_amount || '0.00'),
+				modifiedAmount: String(row.modified_amount || '0.00'),
+				currency: String(row.base_amount_currency || 'GBP'),
+				imageUrl: null,
+			}
+		})
+
+		const packageProductLookups = await Promise.all(products.map(async (product): Promise<[number, { variants: VariantRow[]; imageUrl: string | null }]> => {
+			if (!product.productPublicId) {
+				console.warn(`[Package Product] No product ID found for package product ${product.id}`)
+				return [product.id, { variants: [], imageUrl: null }]
+			}
+			try {
+				const [variantsResponse, productResponse] = await Promise.all([
+					productsListVariantsList({
+						path: { product_product_id: product.productPublicId },
+						query: { page_size: 200 },
+					}),
+					productsListRetrieve({
+						path: { product_id: product.productPublicId },
+					}),
+				])
+
+				const variants = (variantsResponse.data?.results || []).map((variant: any) => ({
+					variantId: String(variant.variant_id || variant.id || ''),
+					sizeDisplay: String(variant.size_display || variant.size || 'Variant'),
+					color: String(variant.color || ''),
+					finalPrice: String(variant.final_price || variant.modified_amount || product.modifiedAmount),
+					stockQuantity: Number(variant.stock_quantity || 0),
+					isActive: !!variant.is_active,
+				}))
+
+				const detail = productResponse.data
+				const mainImage = detail?.main_image?.url || detail?.images?.main?.url || null
+				
+				if (mainImage) {
+					console.log(`[Package Product] Found image for product ${product.productPublicId}: ${mainImage}`)
+				}
+				
+				return [product.id, { variants, imageUrl: mainImage }]
+			} catch (error) {
+				console.error(`[Package Product] Failed to fetch details for product ${product.productPublicId}:`, error)
+				return [product.id, { variants: [], imageUrl: null }]
+			}
+		}))
+
+		if (loadVersion !== packageProductLoadVersion) return
+
+		packageProductVariants.value = Object.fromEntries(
+			packageProductLookups.map(([productId, row]) => [productId, row.variants])
+		)
+
+		currentPackageProducts.value = products.map((product) => {
+			const lookup = packageProductLookups.find(([productId]) => productId === product.id)?.[1]
+			return {
+				...product,
+				imageUrl: lookup?.imageUrl || null,
+			}
+		})
+
+		const validProductIds = new Set(currentPackageProducts.value.map((product) => product.id))
+		const normalized = (attendee?.productSelections || []).filter((selection) => {
+			if (!validProductIds.has(selection.packageProductId)) return false
+			const variants = packageProductVariants.value[selection.packageProductId] || []
+			return variants.some((variant) => {
+				return variant.variantId === selection.variantId && variant.isActive && variant.stockQuantity > 0
+			})
+		}).map((selection) => {
+			const pkg = currentPackageProducts.value.find((row) => row.id === selection.packageProductId)
+			if (!pkg) return selection
+			return {
+				...selection,
+				quantity: Math.min(pkg.quantityPerAttendee, Math.max(1, Number(selection.quantity || 1))),
+			}
+		})
+
+		if ((attendee?.productSelections || []).length !== normalized.length) {
+			setSelectionsForCurrentAttendee(normalized)
+		}
+	} catch (error) {
+		if (loadVersion !== packageProductLoadVersion) return
+		currentPackageProducts.value = []
+		packageProductVariants.value = {}
+		packageProductsError.value = 'Unable to load package products right now.'
+		console.error('Failed to load package products', error)
+	} finally {
+		if (loadVersion === packageProductLoadVersion) {
+			packageProductsLoading.value = false
+		}
+	}
+}
+
+const attendeeReviewAmount = (attendee: AttendeeDraft, index: number) => {
+	const previewAttendees = checkoutPreview.value?.attendees || []
+	const previewAttendee = previewAttendees[index]
+	if (previewAttendee?.attendee_total) {
+		return {
+			amount: Number(previewAttendee.attendee_total || 0),
+			currency: previewAttendee.currency || checkoutPreview.value?.currency || 'GBP',
+		}
+	}
+
+	const pkg = packageById(attendee.packageId)
+	return {
+		amount: Number(pkg?.modified_amount || 0),
+		currency: pkg?.base_amount_currency || checkoutPreview.value?.currency || 'GBP',
+	}
+}
+
 const paymentMethodsQuery = usePaymentMethods(
 	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
 )
@@ -1435,6 +2148,7 @@ const effectiveStripePublishableKey = computed(() => {
 })
 
 const idempotencyKey = ref(createIdempotencyKey())
+const checkoutCompleted = ref(false)
 
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
@@ -1449,6 +2163,7 @@ const stripeElements = ref<StripeElements | null>(null)
 const stripeCardElement = ref<StripeCardElement | null>(null)
 const stripeCardReady = ref(false)
 const stripeCardError = ref('')
+const stripePaymentAttemptError = ref('')
 const stripeClientSecret = ref<string | null>(null)
 
 const isPollingPaymentStatus = ref(false)
@@ -1563,10 +2278,10 @@ const paymentBreakdownTotal = computed(() => {
 
 const showCheckoutPricingSidebar = computed(() => activeStepIndex.value === reviewStepIndex)
 
-const formatMoney = (value: number | string, currency: string = 'GBP') => {
-	const amount = typeof value === 'number' ? value : Number(value || 0)
-	return `${amount.toFixed(2)} ${currency}`
-}
+// const formatMoney = (value: number | string, currency: string = 'GBP') => {
+// 	const amount = typeof value === 'number' ? value : Number(value || 0)
+// 	return `${amount.toFixed(2)} ${currency}`
+// }
 
 const requiredConsentsMissing = computed(() => {
 	if (!consents.value.length) return 0
@@ -1757,14 +2472,14 @@ const canContinue = computed(() => {
 		return hasValidPersonalInfo
 	}
 	if (activeStepIndex.value === 3) {
-		return !!currentAttendee.value.packageId
+		return !!currentAttendee.value.packageId && isCurrentAttendeePackageAvailable.value
 	}
 	if (activeStepIndex.value === 5) {
 		return requiredConsentsMissing.value === 0
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		if (!store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
+		if (checkoutCompleted.value || !store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
 			return false
 		}
 		if (isStripeMethod.value) {
@@ -1856,12 +2571,16 @@ const toggleConsent = (consentId: number, eventTarget: Event) => {
 const redirectToEventHome = () => {
 	showIntentExpiredModal.value = false
 	store.reset()
+	stopIntentCountdown()
 	// Redirect to dashboard after intent expiration
 	router.push({ path: '/' })
 }
 
 const markIntentExpired = () => {
+	if (checkoutCompleted.value) return
+	showCheckoutSuccessModal.value = false
 	showIntentExpiredModal.value = true
+	stopIntentCountdown()
 }
 
 const pingBookingIntent = async (silent: boolean = true) => {
@@ -1881,6 +2600,16 @@ const pingBookingIntent = async (silent: boolean = true) => {
 		const data = response.data as {
 			is_active?: boolean
 			redirect_required?: boolean
+			seconds_remaining?: number
+			expires_at?: string | null
+		}
+
+		setIntentExpiryFromSeconds(data?.seconds_remaining)
+		if (!intentExpiresAtMs.value) {
+			setIntentExpiryFromIso(data?.expires_at)
+		}
+		if (store.bookingIntentId && intentExpiresAtMs.value && !showIntentExpiredModal.value) {
+			startIntentCountdown()
 		}
 
 		if (!data?.is_active || data?.redirect_required) {
@@ -1924,12 +2653,37 @@ watch(
 	(intentId) => {
 		if (!intentId) {
 			stopIntentPing()
+			stopIntentCountdown()
+			intentExpiresAtMs.value = null
 			return
 		}
 		void pingBookingIntent(true)
 		startIntentPing()
+		if (intentExpiresAtMs.value) {
+			startIntentCountdown()
+		}
 	},
 	{ immediate: true }
+)
+
+watch(
+	() => checkoutCompleted.value,
+	(completed) => {
+		if (!completed) return
+		showIntentExpiredModal.value = false
+		stopIntentPing()
+		stopIntentCountdown()
+	}
+)
+
+watch(
+	() => intentCountdownSeconds.value,
+	(seconds) => {
+		if (seconds === null) return
+		if (seconds <= 0) {
+			markIntentExpired()
+		}
+	}
 )
 
 const refreshCheckoutPreview = async () => {
@@ -2005,6 +2759,9 @@ const ensureStripeCardMounted = async () => {
 	stripeCardElement.value.on('change', (event) => {
 		stripeCardError.value = event.error?.message || ''
 		stripeCardReady.value = !!event.complete && !event.error
+		if (stripePaymentAttemptError.value) {
+			stripePaymentAttemptError.value = ''
+		}
 	})
 }
 
@@ -2030,7 +2787,7 @@ const stopPaymentStatusPolling = () => {
 	isPollingPaymentStatus.value = false
 }
 
-const startPaymentStatusPolling = (bookingId: number) => {
+const startPaymentStatusPolling = (paymentId: string, bookingId?: number) => {
 	stopPaymentStatusPolling()
 	isPollingPaymentStatus.value = true
 	paymentProcessingMessage.value = 'Processing your card payment and issuing tickets...'
@@ -2041,16 +2798,26 @@ const startPaymentStatusPolling = (bookingId: number) => {
 	paymentPollingTimer = setInterval(async () => {
 		attempts += 1
 		try {
-			const response = await bookingsListRetrieve({ path: { id: bookingId } })
-			const booking = response.data
-			const payments = booking?.payments || []
-			const hasCompletedPayment = payments.some((payment) => payment?.status === 'COMPLETED')
+			const paymentResponse = await paymentsListRetrieve({ path: { payment_id: paymentId } })
+			const paymentData = paymentResponse.data as any
+			const hasCompletedPayment = paymentData?.status === 'COMPLETED'
+			const finalizedBookingId = Number(paymentData?.metadata?.booking_id || bookingId || 0)
 
 			if (hasCompletedPayment) {
+				if (finalizedBookingId > 0) {
+					try {
+						await bookingsListRetrieve({ path: { id: finalizedBookingId } })
+					} catch {
+						// Booking finalization may still be committing. Keep polling.
+						return
+					}
+				}
 				stopPaymentStatusPolling()
 				checkoutResult.value = {
 					...checkoutResult.value,
 					status: 'confirmed',
+					booking_id: finalizedBookingId > 0 ? finalizedBookingId : checkoutResult.value?.booking_id,
+					booking_reference: paymentData?.metadata?.booking_reference || checkoutResult.value?.booking_reference,
 				}
 				showCheckoutSuccessModal.value = true
 				toast.add({
@@ -2082,6 +2849,14 @@ watch(
 		areaSearch.value = ''
 		areaOptions.value = []
 	}
+)
+
+watch(
+	[() => store.currentIndex, () => currentAttendee.value?.packageId],
+	() => {
+		void loadPackageProductsForCurrentAttendee()
+	},
+	{ immediate: true }
 )
 
 watch(
@@ -2224,11 +2999,13 @@ const jumpToAttendee = async (index: number) => {
 }
 
 const handleCheckout = async () => {
+	if (checkoutCompleted.value) return
 	if (!canContinue.value || !store.bookingIntentId || !selectedPaymentMethodId.value) return
 	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
 	stripeCardError.value = ''
+	stripePaymentAttemptError.value = ''
 
 	try {
 		const payload = buildCheckoutPayload({
@@ -2264,15 +3041,18 @@ const handleCheckout = async () => {
 			})
 
 			if (confirmation.error) {
-				stripeCardError.value = confirmation.error.message || 'Card confirmation failed.'
-				toast.add({ title: 'Payment failed', description: stripeCardError.value, color: 'red' })
+				stripePaymentAttemptError.value = confirmation.error.message || 'Card confirmation failed.'
+				idempotencyKey.value = createIdempotencyKey()
+				toast.add({ title: 'Payment failed', description: stripePaymentAttemptError.value, color: 'red' })
 				return
 			}
 
 			if (confirmation.paymentIntent?.status === 'succeeded') {
+				checkoutCompleted.value = true
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
-				if (bookingId > 0) {
-					startPaymentStatusPolling(bookingId)
+				const paymentId = checkoutResult.value?.payment_id
+				if (paymentId > 0) {
+					startPaymentStatusPolling(String(paymentId), bookingId > 0 ? bookingId : undefined)
 				}
 				showCheckoutSuccessModal.value = true
 				toast.add({
@@ -2288,18 +3068,34 @@ const handleCheckout = async () => {
 				description: 'Stripe is still processing your payment.',
 				color: 'amber',
 			})
+			checkoutCompleted.value = true
 			showCheckoutSuccessModal.value = true
 			return
 		}
 
+		checkoutCompleted.value = true
 		showCheckoutSuccessModal.value = true
 		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
 	} catch (error) {
 		console.error('Checkout failed', error)
+		idempotencyKey.value = createIdempotencyKey()
 		toast.add({ title: 'Error', description: 'Checkout failed. Please try again.', color: 'red' })
 	} finally {
 		isSaving.value = false
 	}
+}
+
+const closeSuccessModalAndRedirect = () => {
+	showCheckoutSuccessModal.value = false
+	showIntentExpiredModal.value = false
+	stopIntentPing()
+	stopIntentCountdown()
+	store.reset()
+	if (event.value?.event_id) {
+		router.push({ path: `/events/${event.value.event_id}/my-booking` })
+		return
+	}
+	router.push({ path: '/events' })
 }
 
 onBeforeUnmount(() => {
@@ -2312,6 +3108,7 @@ onBeforeUnmount(() => {
 		areaSearchDebounceTimer = null
 	}
 	stopIntentPing()
+	stopIntentCountdown()
 	stopPaymentStatusPolling()
 	teardownStripeElements()
 })
@@ -2354,5 +3151,120 @@ const goBack = () => {
 .stepper-slide-back-enter-from {
 	opacity: 0;
 	transform: translateX(-20px);
+}
+
+.success-modal {
+	position: relative;
+	overflow: hidden;
+	background: linear-gradient(180deg, #f8fafc 0%, #ffffff 62%);
+}
+
+.success-glow {
+	pointer-events: none;
+	position: absolute;
+	inset: -90px -10% auto;
+	height: 210px;
+	background: radial-gradient(circle at 50% 30%, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.06) 38%, rgba(255, 255, 255, 0) 70%);
+}
+
+.success-pop {
+	position: relative;
+	animation: successRise 0.75s ease-out;
+}
+
+.success-check {
+	animation: successPulse 1.2s ease-out;
+}
+
+.success-title {
+	animation: successFadeIn 0.9s ease-out;
+}
+
+.success-event-lead {
+	opacity: 0;
+	animation: successFadeIn 0.9s ease-out 0.5s forwards;
+}
+
+.success-event-name {
+	opacity: 0;
+	animation: successFadeIn 1s ease-out 0.8s forwards;
+}
+
+.success-stagger .success-card {
+	opacity: 0;
+	animation: successCardIn 0.65s ease both;
+	animation-delay: 1.15s;
+}
+
+.success-stagger .success-card:nth-child(2) {
+	animation-delay: 1.28s;
+}
+
+.success-stagger .success-card:nth-child(3) {
+	animation-delay: 1.4s;
+}
+
+.success-stagger .success-card:nth-child(4) {
+	animation-delay: 1.52s;
+}
+
+.success-stagger .success-card:nth-child(5) {
+	animation-delay: 1.64s;
+}
+
+.success-stagger .success-card:nth-child(6) {
+	animation-delay: 1.76s;
+}
+
+.success-cta-wrap {
+	opacity: 0;
+	animation: successFadeIn 0.9s ease-out 1.95s forwards;
+}
+
+@keyframes successRise {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes successPulse {
+	0% {
+		transform: scale(0.5) rotate(-12deg);
+		opacity: 0;
+	}
+	60% {
+		transform: scale(1.14) rotate(0deg);
+		opacity: 1;
+	}
+	100% {
+		transform: scale(1);
+	}
+}
+
+@keyframes successCardIn {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes successFadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }
 </style>

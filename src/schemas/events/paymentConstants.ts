@@ -7,6 +7,7 @@ export const paymentStatusChoices = {
   FAILED: 'FAILED',
   PENDING_REFUND: 'PENDING_REFUND',
   REFUNDED: 'REFUNDED',
+  PARTIALLY_REFUNDED: 'PARTIALLY_REFUNDED',
 } as const
 
 export type PaymentStatus = typeof paymentStatusChoices[keyof typeof paymentStatusChoices]
@@ -19,6 +20,7 @@ export const paymentStatusLabels: Record<PaymentStatus, string> = {
   FAILED: 'Failed',
   PENDING_REFUND: 'Pending Refund',
   REFUNDED: 'Refunded',
+  PARTIALLY_REFUNDED: 'Partially Refunded',
 }
 
 export const paymentStatusColors: Record<PaymentStatus, string> = {
@@ -29,6 +31,7 @@ export const paymentStatusColors: Record<PaymentStatus, string> = {
   FAILED: 'red',
   PENDING_REFUND: 'orange',
   REFUNDED: 'blue',
+  PARTIALLY_REFUNDED: 'yellow',
 }
 
 // Refund Status Constants

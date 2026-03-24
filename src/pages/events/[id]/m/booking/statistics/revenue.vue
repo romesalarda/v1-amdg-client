@@ -253,15 +253,15 @@ const revenueByPackageChartData = computed<BarChartData[]>(() => {
   if (!packageData.value?.data?.distribution) return []
   return packageData.value.data.distribution.slice(0, 10).map((item: any) => ({
     label: item.package_name || 'Unknown',
-    value: item.revenue,
+    value: item.ticket_count,
   }))
 })
 
 const revenueByTicketTypeChartData = computed<BarChartData[]>(() => {
   if (!ticketTypeData.value?.data?.distribution) return []
   return ticketTypeData.value.data.distribution.map((item: any) => ({
-    label: item.ticket_type || 'Unknown',
-    value: item.revenue,
+    label: item.scope || 'Unknown',
+    value: item.ticket_count,
   }))
 })
 
