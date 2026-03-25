@@ -108,11 +108,17 @@
 <script setup lang="ts">
 import { useEventMyBooking, type ApiErrorLike } from '~/composables/resources/events'
 
+definePageMeta({
+	layout: 'booking' as any,
+})
+
 const route = useRoute()
 
 const eventId = computed(() => String(route.params.id || ''))
 const bookingReference = computed(() => String(route.params.booking_id || ''))
-const myBooking = useEventMyBooking(eventId)
+const myBooking = useEventMyBooking(eventId, computed(() => ({
+	booking_reference: bookingReference.value,
+})))
 
 const isNotFound = computed(() => {
 	const error = myBooking.error.value as unknown as ApiErrorLike | undefined

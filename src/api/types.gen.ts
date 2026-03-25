@@ -6036,48 +6036,6 @@ export type EventList = {
     };
 };
 
-export type EventMyBookingBooking = {
-    booking: BookingDetail;
-    readonly is_booking_owner: boolean;
-    /**
-     * * `made_by` - made_by
-     * * `attendee_linked` - attendee_linked
-     */
-    selection_reason: 'made_by' | 'attendee_linked';
-    readonly can_manage_all_attendees: boolean;
-};
-
-export type EventMyBookingEvent = {
-    readonly event_id: string;
-    readonly display_identifier: string;
-    /**
-     * display title
-     */
-    readonly title: string;
-    /**
-     * * `DRAFTING` - Drafting
-     * * `PUBLISHED` - Published
-     * * `OPEN` - Open for Registration
-     * * `CLOSED` - Closed
-     * * `IN_PROGRESS` - In Progress
-     * * `COMPLETED` - Completed
-     * * `DELETED` - Deleted
-     * * `CANCELLED` - Cancelled
-     * * `POSTPONED` - Postponed
-     * * `ARCHIVED` - Archived
-     */
-    status: 'DRAFTING' | 'PUBLISHED' | 'OPEN' | 'CLOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELETED' | 'CANCELLED' | 'POSTPONED' | 'ARCHIVED';
-    readonly start_datetime: string;
-    readonly end_datetime: string;
-    timezone: string;
-};
-
-export type EventMyBookingResponse = {
-    event: EventMyBookingEvent;
-    readonly primary_booking_reference: string;
-    readonly bookings: Array<EventMyBookingBooking>;
-};
-
 export type EventOutstandingTask = {
     readonly title: string;
     readonly description: string;
@@ -19383,18 +19341,6 @@ export type EventListWritable = {
     created_by?: number | null;
 };
 
-export type EventMyBookingBookingWritable = {
-    [key: string]: unknown;
-};
-
-export type EventMyBookingEventWritable = {
-    timezone: string;
-};
-
-export type EventMyBookingResponseWritable = {
-    [key: string]: unknown;
-};
-
 export type EventPermissionWritable = {
     name: string;
     code: string;
@@ -28831,7 +28777,36 @@ export type EventListMyBookingRetrieveData = {
     path: {
         event_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Filter by attendee name (first or last, case-insensitive)
+         */
+        attendee_name?: string;
+        /**
+         * Filter bookings made after this date (ISO 8601 format)
+         */
+        booked_after?: string;
+        /**
+         * Filter bookings made before this date (ISO 8601 format)
+         */
+        booked_before?: string;
+        /**
+         * Filter bookings from last N days (e.g., 7, 30, 90)
+         */
+        booked_in_days?: number;
+        /**
+         * Filter by booking reference (contains, case-insensitive)
+         */
+        booking_reference?: string;
+        /**
+         * Filter by outstanding payment status (true/false)
+         */
+        has_outstanding_payments?: boolean;
+        /**
+         * Page number (defaults to 1, 20 results per page)
+         */
+        page?: number;
+    };
     url: '/api/event/list/{event_id}/my-booking/';
 };
 
@@ -28841,16 +28816,69 @@ export type EventListMyBookingRetrieveErrors = {
      */
     401: unknown;
     /**
-     * No booking found for the current user in this event
+     * Event not found
      */
     404: unknown;
 };
 
 export type EventListMyBookingRetrieveResponses = {
-    200: EventMyBookingResponse;
+    /**
+     * Paginated list of user bookings
+     */
+    200: unknown;
 };
 
-export type EventListMyBookingRetrieveResponse = EventListMyBookingRetrieveResponses[keyof EventListMyBookingRetrieveResponses];
+export type EventListMyOutstandingBookingPaymentsRetrieveData = {
+    body?: never;
+    path: {
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Filter by attendee name in associated booking (first or last, case-insensitive)
+         */
+        attendee_name?: string;
+        /**
+         * Filter payments for bookings made after this date (ISO 8601 format)
+         */
+        booked_after?: string;
+        /**
+         * Filter payments for bookings made before this date (ISO 8601 format)
+         */
+        booked_before?: string;
+        /**
+         * Filter payments for bookings from last N days (e.g., 7, 30, 90)
+         */
+        booked_in_days?: number;
+        /**
+         * Page number (defaults to 1, 20 results per page)
+         */
+        page?: number;
+        /**
+         * Filter by payment status (PENDING, DRAFTING, etc.)
+         */
+        payment_status?: string;
+    };
+    url: '/api/event/list/{event_id}/my-outstanding-booking-payments/';
+};
+
+export type EventListMyOutstandingBookingPaymentsRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * Event not found
+     */
+    404: unknown;
+};
+
+export type EventListMyOutstandingBookingPaymentsRetrieveResponses = {
+    /**
+     * Paginated list of outstanding payments
+     */
+    200: unknown;
+};
 
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;

@@ -145,6 +145,10 @@ import {
 	type ApiErrorLike,
 } from '~/composables/resources/events'
 
+definePageMeta({
+	layout: 'booking' as any,
+})
+
 type RelationshipType = 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other' | ''
 
 const route = useRoute()
@@ -156,7 +160,9 @@ const eventId = computed(() => String(route.params.id || ''))
 const bookingReference = computed(() => String(route.params.booking_id || ''))
 const attendeeId = computed(() => String(route.params.attendee_id || ''))
 
-const myBooking = useEventMyBooking(eventId)
+const myBooking = useEventMyBooking(eventId, computed(() => ({
+	booking_reference: bookingReference.value,
+})))
 const attendee = useAttendee(attendeeId)
 const updateAttendee = useUpdateAttendee()
 
