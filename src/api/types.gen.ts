@@ -28772,6 +28772,114 @@ export type EventListLandingImagesListResponses = {
 
 export type EventListLandingImagesListResponse = EventListLandingImagesListResponses[keyof EventListLandingImagesListResponses];
 
+export type EventListMyBookingRetrieveData = {
+    body?: never;
+    path: {
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Filter by attendee name (first or last, case-insensitive)
+         */
+        attendee_name?: string;
+        /**
+         * Filter bookings made after this date (ISO 8601 format)
+         */
+        booked_after?: string;
+        /**
+         * Filter bookings made before this date (ISO 8601 format)
+         */
+        booked_before?: string;
+        /**
+         * Filter bookings from last N days (e.g., 7, 30, 90)
+         */
+        booked_in_days?: number;
+        /**
+         * Filter by booking reference (contains, case-insensitive)
+         */
+        booking_reference?: string;
+        /**
+         * Filter by outstanding payment status (true/false)
+         */
+        has_outstanding_payments?: boolean;
+        /**
+         * Page number (defaults to 1, 20 results per page)
+         */
+        page?: number;
+    };
+    url: '/api/event/list/{event_id}/my-booking/';
+};
+
+export type EventListMyBookingRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * Event not found
+     */
+    404: unknown;
+};
+
+export type EventListMyBookingRetrieveResponses = {
+    /**
+     * Paginated list of user bookings
+     */
+    200: unknown;
+};
+
+export type EventListMyOutstandingBookingPaymentsRetrieveData = {
+    body?: never;
+    path: {
+        event_id: string;
+    };
+    query?: {
+        /**
+         * Filter by attendee name in associated booking (first or last, case-insensitive)
+         */
+        attendee_name?: string;
+        /**
+         * Filter payments for bookings made after this date (ISO 8601 format)
+         */
+        booked_after?: string;
+        /**
+         * Filter payments for bookings made before this date (ISO 8601 format)
+         */
+        booked_before?: string;
+        /**
+         * Filter payments for bookings from last N days (e.g., 7, 30, 90)
+         */
+        booked_in_days?: number;
+        /**
+         * Page number (defaults to 1, 20 results per page)
+         */
+        page?: number;
+        /**
+         * Filter by payment status (PENDING, DRAFTING, etc.)
+         */
+        payment_status?: string;
+    };
+    url: '/api/event/list/{event_id}/my-outstanding-booking-payments/';
+};
+
+export type EventListMyOutstandingBookingPaymentsRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * Event not found
+     */
+    404: unknown;
+};
+
+export type EventListMyOutstandingBookingPaymentsRetrieveResponses = {
+    /**
+     * Paginated list of outstanding payments
+     */
+    200: unknown;
+};
+
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
     path: {
