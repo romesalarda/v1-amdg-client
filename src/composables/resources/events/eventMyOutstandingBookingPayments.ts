@@ -26,6 +26,9 @@ export interface OutstandingPaymentItem {
   currency?: string
   created_at?: string
   payment_method?: string
+  payment_method_title?: string
+  payment_instructions?: string
+  payment_method_details?: Record<string, unknown> | null
   has_booking?: boolean
   checkout_intent_id?: string | null
   metadata_attendees?: string[]

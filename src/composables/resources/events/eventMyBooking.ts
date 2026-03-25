@@ -33,6 +33,7 @@ export interface EventMyBookingPagination {
 
 export interface EventMyBookingQuery {
   page?: number
+  page_size?: number
   attendee_name?: string
   booked_after?: string
   booked_before?: string

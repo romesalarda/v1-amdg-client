@@ -114,7 +114,7 @@
       <img 
         :alt="featuredEvent.title" 
         :src="featuredEvent.main_landing_image?.image ? resolveImageUrl(featuredEvent.main_landing_image.image) : ''" 
-        class="absolute inset-0 w-full h-full object-contain opacity-60"
+        class="absolute inset-0 w-full h-full object-cover opacity-60"
         @error="onImageError"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-deep-navy via-deep-navy/30 to-transparent"></div>

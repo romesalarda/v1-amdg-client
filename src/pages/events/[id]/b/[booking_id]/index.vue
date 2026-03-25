@@ -90,7 +90,7 @@
 
 						<NuxtLink
 							v-if="attendee.id && selectedBookingItem?.can_manage_all_attendees"
-							:to="`/events/${eventId}/my-booking/${bookingReference}/${attendee.id}`"
+							:to="`/events/${eventId}/b/${bookingReference}/${attendee.id}`"
 							class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
 						>
 							Manage attendee
