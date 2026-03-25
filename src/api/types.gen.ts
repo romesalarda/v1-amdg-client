@@ -6036,6 +6036,48 @@ export type EventList = {
     };
 };
 
+export type EventMyBookingBooking = {
+    booking: BookingDetail;
+    readonly is_booking_owner: boolean;
+    /**
+     * * `made_by` - made_by
+     * * `attendee_linked` - attendee_linked
+     */
+    selection_reason: 'made_by' | 'attendee_linked';
+    readonly can_manage_all_attendees: boolean;
+};
+
+export type EventMyBookingEvent = {
+    readonly event_id: string;
+    readonly display_identifier: string;
+    /**
+     * display title
+     */
+    readonly title: string;
+    /**
+     * * `DRAFTING` - Drafting
+     * * `PUBLISHED` - Published
+     * * `OPEN` - Open for Registration
+     * * `CLOSED` - Closed
+     * * `IN_PROGRESS` - In Progress
+     * * `COMPLETED` - Completed
+     * * `DELETED` - Deleted
+     * * `CANCELLED` - Cancelled
+     * * `POSTPONED` - Postponed
+     * * `ARCHIVED` - Archived
+     */
+    status: 'DRAFTING' | 'PUBLISHED' | 'OPEN' | 'CLOSED' | 'IN_PROGRESS' | 'COMPLETED' | 'DELETED' | 'CANCELLED' | 'POSTPONED' | 'ARCHIVED';
+    readonly start_datetime: string;
+    readonly end_datetime: string;
+    timezone: string;
+};
+
+export type EventMyBookingResponse = {
+    event: EventMyBookingEvent;
+    readonly primary_booking_reference: string;
+    readonly bookings: Array<EventMyBookingBooking>;
+};
+
 export type EventOutstandingTask = {
     readonly title: string;
     readonly description: string;
@@ -19341,6 +19383,18 @@ export type EventListWritable = {
     created_by?: number | null;
 };
 
+export type EventMyBookingBookingWritable = {
+    [key: string]: unknown;
+};
+
+export type EventMyBookingEventWritable = {
+    timezone: string;
+};
+
+export type EventMyBookingResponseWritable = {
+    [key: string]: unknown;
+};
+
 export type EventPermissionWritable = {
     name: string;
     code: string;
@@ -28771,6 +28825,32 @@ export type EventListLandingImagesListResponses = {
 };
 
 export type EventListLandingImagesListResponse = EventListLandingImagesListResponses[keyof EventListLandingImagesListResponses];
+
+export type EventListMyBookingRetrieveData = {
+    body?: never;
+    path: {
+        event_id: string;
+    };
+    query?: never;
+    url: '/api/event/list/{event_id}/my-booking/';
+};
+
+export type EventListMyBookingRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * No booking found for the current user in this event
+     */
+    404: unknown;
+};
+
+export type EventListMyBookingRetrieveResponses = {
+    200: EventMyBookingResponse;
+};
+
+export type EventListMyBookingRetrieveResponse = EventListMyBookingRetrieveResponses[keyof EventListMyBookingRetrieveResponses];
 
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
