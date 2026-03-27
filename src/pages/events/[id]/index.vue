@@ -489,7 +489,7 @@ const event = computed(() => data.value?.data)
 
 // Fetch event venues
 const { data: venuesData } = useEventVenues(computed(() => ({
-  event__event_id: eventId.value,
+  event_id: eventId.value,
 })))
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])

@@ -1379,7 +1379,7 @@ const event_uuid = computed(() => event.value?.event_id || '')
 const eventLoading = computed(() => eventQuery.isLoading.value)
 const { data: eventVenuesData } = useEventVenues(
 	computed(() => ({
-		event__event_id: eventId.value,
+		event_id: eventId.value,
 	}))
 )
 const primaryVenue = computed(() => eventVenuesData.value?.data?.results?.[0] || null)
@@ -1648,14 +1648,14 @@ const requiredQuestionIds = computed(() => eventQuestions.value.filter((question
 
 const bookingPackagesQuery = useBookingPackages(
 	computed(() => {
-		return { event__event_id: event_uuid.value }
+		return { event_id: event_uuid.value }
 	})
 )
 
 const bookingPackages = computed(() => bookingPackagesQuery.data.value?.data?.results || [])
 const allPackagesQuery = useBookingPackages(
 	computed(() => {
-		return { event__event_id: event_uuid.value, page_size: 200 }
+		return { event_id: event_uuid.value, page_size: 200 }
 	})
 )
 const allPackages = computed(() => allPackagesQuery.data.value?.data?.results || [])
@@ -2051,7 +2051,7 @@ const attendeeReviewAmount = (attendee: AttendeeDraft, index: number) => {
 }
 
 const paymentMethodsQuery = usePaymentMethods(
-	computed(() => ({ event__event_id: event_uuid.value, page_size: 100 }))
+	computed(() => ({ event_id: event_uuid.value, page_size: 100 }))
 )
 const paymentMethods = computed(() => paymentMethodsQuery.data.value?.data?.results || [])
 const selectedPaymentMethodId = ref<number | undefined>(undefined)

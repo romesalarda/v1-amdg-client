@@ -898,7 +898,7 @@ async function syncStateToQuery() {
 // Computed query params for API
 const paymentsQueryParams = computed(() => {
   const params: any = {
-    event__event_id: route.params.id as string,
+    event_id: route.params.id as string,
     page: paymentsCurrentPage.value,
     page_size: paymentsPageSize.value,
   }
