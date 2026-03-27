@@ -155,7 +155,7 @@ const canDeleteStaff = computed(() => can('STAFF_MANAGEMENT', 'delete').value.al
 const { data: event } = useEvent(id)
 
 // Fetch staff and roles
-const eventIdFilter = { event__event_id: route.params.id as string }
+const eventIdFilter = { event_id: route.params.id as string }
 const { data: staffData, isLoading: staffLoading, refetch: refetchStaff } = useEventStaff(eventIdFilter)
 const { data: rolesData, isLoading: rolesLoading, refetch: refetchRoles } = useEventRoles()
 

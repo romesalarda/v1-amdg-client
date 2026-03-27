@@ -685,7 +685,7 @@ const { data: eventData } = useEvent(id)
 const event = computed(() => eventData.value?.data)
 
 // Fetch authorization data
-const { data: authData } = useEventAuthorizations(computed(() => ({ event__event_id: event.value?.event_id })))
+const { data: authData } = useEventAuthorizations(computed(() => ({ event_id: event.value?.event_id })))
 const authorizationHistory = computed(() => authData.value?.data?.results || [])
 const currentAuthorization = computed(() => authorizationHistory.value?.[0])
 

@@ -185,7 +185,7 @@ const isLoading = ref(false)
 
 // Payment search params
 const paymentSearchParams = computed(() => ({
-  event__event_id: props.eventId,
+  event_id: props.eventId,
   status: ['COMPLETED' as const], // Only show completed payments
   search: paymentSearchQuery.value,
   page_size: 10,

@@ -178,7 +178,7 @@ const globalVenueSearch = ref('')
 const showVenueWizard = ref(false)
 
 const eventVenueQuery = computed(() => ({
-	event__event_id: id.value,
+	event_id: id.value,
 	search: linkedSearch.value || undefined,
 	ordering: 'venue__poi__name',
 	page_size: 100,

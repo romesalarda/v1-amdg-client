@@ -374,7 +374,7 @@ const isApproving = ref(true)
 // Query params
 const queryParams = computed(() => {
   const params: any = {
-    payment__event__event_id: props.eventId,
+    payment_id: props.eventId,
     page: currentPage.value,
     page_size: pageSize.value,
   }

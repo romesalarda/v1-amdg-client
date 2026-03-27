@@ -339,10 +339,10 @@ const event = computed(() => eventData.value?.data)
 const { data: settingsData } = useEventSettings(id)
 const settings = computed(() => settingsData.value?.data)
 
-const { data: staffData } = useEventStaff({ event__event_id: id.value })
+const { data: staffData } = useEventStaff({ event_id: id.value })
 const staffList = computed(() => staffData.value?.data)
 
-const { data: questionsData } = useEventQuestions({ event__event_id: id.value })
+const { data: questionsData } = useEventQuestions({ event_id: id.value })
 const questionsList = computed(() => questionsData.value?.data)
 
 const { data: rolesData } = useEventRoles()

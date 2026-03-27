@@ -140,7 +140,7 @@ const queryParams = computed(() => {
   if (props.targetType === 'booking') {
     return {
       ...base,
-      event__event_id: props.eventId,
+      event_id: props.eventId,
       search: searchQuery.value || undefined,
     }
   }
@@ -148,7 +148,7 @@ const queryParams = computed(() => {
   if (props.targetType === 'order') {
     return {
       ...base,
-      event__event_id: props.eventId,
+      event_id: props.eventId,
       search: searchQuery.value || undefined,
     }
   }

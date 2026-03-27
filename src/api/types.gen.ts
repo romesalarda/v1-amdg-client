@@ -24853,7 +24853,7 @@ export type BookingsAlternativeSigninsListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -25131,11 +25131,11 @@ export type BookingsIntentsListData = {
          * Filter intents created on or before this datetime
          */
         created_before?: string;
+        event?: number;
         /**
          * Filter by event UUID
          */
-        event?: string;
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter intents expiring on or after this datetime
          */
@@ -25351,7 +25351,7 @@ export type BookingsListListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by user ID who made the booking
          */
@@ -25557,7 +25557,7 @@ export type BookingsBookingTicketsListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by user ID who made the booking
          */
@@ -25733,7 +25733,7 @@ export type BookingsPackagesListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -25921,7 +25921,7 @@ export type BookingsPackageAvailabilityWindowsListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -26041,7 +26041,7 @@ export type BookingsPackageProductsListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -26292,7 +26292,7 @@ export type BookingsPackageRulesListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -27272,11 +27272,7 @@ export type BookingsTicketTypesListData = {
         /**
          * Filter by event ID
          */
-        event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter by active status
          */
@@ -27442,7 +27438,7 @@ export type BookingsTicketsListData = {
         /**
          * Filter by event UUID (through attendee's booking)
          */
-        event?: string;
+        event_id?: string;
         /**
          * Filter tickets issued after this date
          */
@@ -28015,7 +28011,8 @@ export type EventAuthorizationsListData = {
          * Filter by event ID
          */
         event?: string;
-        event__event_id?: string;
+        event_id?: string;
+        event_title?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -28029,6 +28026,7 @@ export type EventAuthorizationsListData = {
          */
         page_size?: number;
         reviewed_by?: number;
+        search?: string;
         /**
          * Filter by authorization status
          */
@@ -30303,6 +30301,7 @@ export type EventPermissionAssignmentsListData = {
          */
         event?: number;
         event__event_id?: string;
+        event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30559,7 +30558,7 @@ export type EventQuestionAnswersListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30712,7 +30711,7 @@ export type EventQuestionAnswersSubmitFormCreateData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30921,7 +30920,7 @@ export type EventQuestionsListData = {
          * Filter by event ID
          */
         event?: number;
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -30935,11 +30934,14 @@ export type EventQuestionsListData = {
          */
         page_size?: number;
         public?: boolean;
+        question_body?: string;
+        question_title?: string;
         /**
          * Filter by question type
          */
         question_type?: string;
         required?: boolean;
+        search?: string;
     };
     url: '/api/event/questions/';
 };
@@ -31054,7 +31056,7 @@ export type EventQuestionsBulkCreateCreateData = {
     path?: never;
     query?: {
         event?: number;
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -31068,6 +31070,8 @@ export type EventQuestionsBulkCreateCreateData = {
          */
         page_size?: number;
         public?: boolean;
+        question_body?: string;
+        question_title?: string;
         /**
          * * `short_answer` - Short Answer
          * * `long_answer` - Long Answer
@@ -31078,6 +31082,7 @@ export type EventQuestionsBulkCreateCreateData = {
          */
         question_type?: 'long_answer' | 'multiple_choice' | 'short_answer' | 'single_choice' | 'slider' | 'upload';
         required?: boolean;
+        search?: string;
     };
     url: '/api/event/questions/bulk-create/';
 };
@@ -31133,7 +31138,8 @@ export type EventReviewsListData = {
          * Filter by event ID
          */
         event?: number;
-        event__event_id?: string;
+        event_id?: string;
+        event_title?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -31147,6 +31153,11 @@ export type EventReviewsListData = {
          */
         page_size?: number;
         rating?: number;
+        rating_max?: number;
+        rating_min?: number;
+        search?: string;
+        user?: number;
+        user_email?: string;
     };
     url: '/api/event/reviews/';
 };
@@ -31272,6 +31283,7 @@ export type EventRoleAssignmentsListData = {
          */
         event?: number;
         event__event_id?: string;
+        event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31627,7 +31639,7 @@ export type EventStaffListData = {
          * Filter by event ID
          */
         event?: number;
-        event__event_id?: string;
+        event_id?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31636,7 +31648,10 @@ export type EventStaffListData = {
          * Number of results to return per page.
          */
         page_size?: number;
+        search?: string;
         user?: number;
+        user_email?: string;
+        user_name?: string;
     };
     url: '/api/event/staff/';
 };
@@ -32600,6 +32615,7 @@ export type EventVenuesListData = {
          */
         event?: string;
         event__event_id?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -38679,6 +38695,10 @@ export type PaymentsDiscountRulesListData = {
          */
         event__event_id?: string;
         /**
+         * Filter rules by event UUID (alias of event__event_id)
+         */
+        event_id?: string;
+        /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
@@ -38828,6 +38848,10 @@ export type PaymentsDiscountsListData = {
          * Filter discounts by event UUID
          */
         event__event_id?: string;
+        /**
+         * Filter discounts by event UUID (alias of event__event_id)
+         */
+        event_id?: string;
         /**
          * Maximum fixed amount
          */
@@ -39268,7 +39292,7 @@ export type PaymentsListListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter payments with/without donations
          */
@@ -39548,7 +39572,7 @@ export type PaymentsMethodsListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Filter active/inactive payment methods
          */
@@ -39788,7 +39812,7 @@ export type PaymentsRefundPoliciesListData = {
         /**
          * Filter by event UUID
          */
-        event__event_id?: string;
+        event_id?: string;
         /**
          * Maximum refundable days
          */
@@ -39924,6 +39948,10 @@ export type PaymentsRefundsListData = {
     path?: never;
     query?: {
         /**
+         * Filter by event UUID (filters refunds for payments associated with the event)
+         */
+        event_id?: string;
+        /**
          * Filter active/inactive refund requests
          */
         is_active?: boolean;
@@ -39960,13 +39988,13 @@ export type PaymentsRefundsListData = {
          */
         payment?: number;
         /**
-         * Filter by event UUID (filters refunds for payments associated with the event)
-         */
-        payment__event__event_id?: string;
-        /**
          * Filter by payment UUID
          */
         payment__payment_id?: string;
+        /**
+         * Filter by event UUID (filters refunds for payments associated with the event)
+         */
+        payment_id?: string;
         /**
          * Filter refunds processed after this date
          */
@@ -40760,10 +40788,6 @@ export type ProductsEventCategoriesListData = {
          */
         event?: number;
         /**
-         * Filter by event UUID
-         */
-        event__event_id?: string;
-        /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
@@ -40881,10 +40905,6 @@ export type ProductsListListData = {
          * Filter by event ID
          */
         event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event__event_id?: string;
         /**
          * Filter products that have variants
          */
@@ -41557,10 +41577,6 @@ export type ProductsListVariantsListData = {
          * Filter by event ID
          */
         event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event__event_id?: string;
         /**
          * Filter variants with stock available
          */
@@ -42437,10 +42453,6 @@ export type ProductsOrdersListData = {
          * Filter by event ID
          */
         event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event__event_id?: string;
         /**
          * Filter orders with or without payment
          */
