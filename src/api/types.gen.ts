@@ -6092,7 +6092,7 @@ export type EventPermission = {
 
 export type EventPermissionAssignment = {
     readonly id: number;
-    event: number;
+    event: string;
     readonly event_title: string;
     user: number;
     readonly user_email: string;
@@ -6136,7 +6136,7 @@ export type EventPermissionAssignment = {
 };
 
 export type EventPermissionAssignmentRequest = {
-    event: number;
+    event: string;
     user: number;
     permission: number;
     read_only?: boolean;
@@ -6231,7 +6231,7 @@ export type EventProductCategoryCreateUpdateRequest = {
  */
 export type EventQuestion = {
     readonly id: string;
-    event: number;
+    event: string;
     readonly event_title: string;
     question_title: string;
     question_body: string;
@@ -6388,7 +6388,7 @@ export type EventQuestionOptionRequest = {
  * - Existing options not in payload: deleted
  */
 export type EventQuestionRequest = {
-    event: number;
+    event: string;
     question_title: string;
     question_body: string;
     /**
@@ -6459,7 +6459,7 @@ export type EventRevenueOverview = {
 
 export type EventReview = {
     readonly id: number;
-    event: number;
+    event: string;
     readonly event_title: string;
     readonly user: number;
     readonly user_email: string;
@@ -6489,7 +6489,7 @@ export type EventReview = {
 };
 
 export type EventReviewRequest = {
-    event: number;
+    event: string;
     rating: number;
     comment?: string | null;
 };
@@ -6523,7 +6523,7 @@ export type EventRole = {
 
 export type EventRoleAssignment = {
     readonly id: number;
-    event: number;
+    event: string;
     readonly event_title: string;
     user: number;
     readonly user_email: string;
@@ -6560,7 +6560,7 @@ export type EventRoleAssignment = {
 };
 
 export type EventRoleAssignmentRequest = {
-    event: number;
+    event: string;
     user: number;
     role: number;
 };
@@ -8244,7 +8244,7 @@ export type EventSponsorPackageList = {
 
 export type EventStaff = {
     readonly staff_id: string;
-    event: number;
+    event: string;
     readonly event_title: string;
     user: number | null;
     readonly user_email: string;
@@ -8418,7 +8418,7 @@ export type EventStaffInviteRequest = {
 };
 
 export type EventStaffRequest = {
-    event: number;
+    event: string;
     user: number | null;
     notes?: string | null;
 };
@@ -8480,7 +8480,7 @@ export type EventTypeRequest = {
  */
 export type EventVenue = {
     readonly event_venue_id: string;
-    event: number;
+    event: string;
     venue: number;
     readonly event_title: string;
     readonly event_display_code: string;
@@ -8510,7 +8510,7 @@ export type EventVenue = {
  * Serializer for EventVenue model with HATEOAS support.
  */
 export type EventVenueRequest = {
-    event: number;
+    event: string;
     venue: number;
 };
 
@@ -12390,7 +12390,7 @@ export type PatchedEventDetailRequest = {
 };
 
 export type PatchedEventPermissionAssignmentRequest = {
-    event?: number;
+    event?: string;
     user?: number;
     permission?: number;
     read_only?: boolean;
@@ -12451,7 +12451,7 @@ export type PatchedEventQuestionOptionRequest = {
  * - Existing options not in payload: deleted
  */
 export type PatchedEventQuestionRequest = {
-    event?: number;
+    event?: string;
     question_title?: string;
     question_body?: string;
     /**
@@ -12472,13 +12472,13 @@ export type PatchedEventQuestionRequest = {
 };
 
 export type PatchedEventReviewRequest = {
-    event?: number;
+    event?: string;
     rating?: number;
     comment?: string | null;
 };
 
 export type PatchedEventRoleAssignmentRequest = {
-    event?: number;
+    event?: string;
     user?: number;
     role?: number;
 };
@@ -13204,7 +13204,7 @@ export type PatchedEventStaffInviteRequest = {
 };
 
 export type PatchedEventStaffRequest = {
-    event?: number;
+    event?: string;
     user?: number | null;
     notes?: string | null;
 };
@@ -13220,7 +13220,7 @@ export type PatchedEventTypeRequest = {
  * Serializer for EventVenue model with HATEOAS support.
  */
 export type PatchedEventVenueRequest = {
-    event?: number;
+    event?: string;
     venue?: number;
 };
 
@@ -19360,7 +19360,7 @@ export type EventPermissionWritable = {
 };
 
 export type EventPermissionAssignmentWritable = {
-    event: number;
+    event: string;
     user: number;
     permission: number;
     read_only?: boolean;
@@ -19393,7 +19393,7 @@ export type EventProductCategoryWritable = {
  * - Existing options not in payload: deleted
  */
 export type EventQuestionWritable = {
-    event: number;
+    event: string;
     question_title: string;
     question_body: string;
     /**
@@ -19452,7 +19452,7 @@ export type EventQuestionOptionWritable = {
 };
 
 export type EventReviewWritable = {
-    event: number;
+    event: string;
     rating: number;
     comment?: string | null;
 };
@@ -19472,7 +19472,7 @@ export type EventRoleWritable = {
 };
 
 export type EventRoleAssignmentWritable = {
-    event: number;
+    event: string;
     user: number;
     role: number;
 };
@@ -20253,7 +20253,7 @@ export type EventSponsorPackageListWritable = {
 };
 
 export type EventStaffWritable = {
-    event: number;
+    event: string;
     user: number | null;
     notes?: string | null;
 };
@@ -20296,7 +20296,7 @@ export type EventTypeWritable = {
  * Serializer for EventVenue model with HATEOAS support.
  */
 export type EventVenueWritable = {
-    event: number;
+    event: string;
     venue: number;
 };
 
@@ -28011,7 +28011,6 @@ export type EventAuthorizationsListData = {
          * Filter by event ID
          */
         event?: string;
-        event_id?: string;
         event_title?: string;
         /**
          * Which field to use when ordering the results.
@@ -28133,7 +28132,6 @@ export type EventListListData = {
     body?: never;
     path?: never;
     query?: {
-        event_id?: string;
         /**
          * Filter by event type ID
          */
@@ -28188,10 +28186,13 @@ export type EventListCreateResponse = EventListCreateResponses[keyof EventListCr
 export type EventListDestroyData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/';
+    url: '/api/event/list/{url_safe_title}/';
 };
 
 export type EventListDestroyResponses = {
@@ -28206,10 +28207,13 @@ export type EventListDestroyResponse = EventListDestroyResponses[keyof EventList
 export type EventListRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/';
+    url: '/api/event/list/{url_safe_title}/';
 };
 
 export type EventListRetrieveResponses = {
@@ -28221,10 +28225,13 @@ export type EventListRetrieveResponse = EventListRetrieveResponses[keyof EventLi
 export type EventListPartialUpdateData = {
     body?: PatchedEventCreateUpdateRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/';
+    url: '/api/event/list/{url_safe_title}/';
 };
 
 export type EventListPartialUpdateResponses = {
@@ -28236,10 +28243,13 @@ export type EventListPartialUpdateResponse = EventListPartialUpdateResponses[key
 export type EventListUpdateData = {
     body: EventCreateUpdateRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/';
+    url: '/api/event/list/{url_safe_title}/';
 };
 
 export type EventListUpdateResponses = {
@@ -28251,10 +28261,13 @@ export type EventListUpdateResponse = EventListUpdateResponses[keyof EventListUp
 export type EventListAddAvailabilityWindowCreateData = {
     body: AvailabilityWindowRequestWritable;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/add-availability-window/';
+    url: '/api/event/list/{url_safe_title}/add-availability-window/';
 };
 
 export type EventListAddAvailabilityWindowCreateErrors = {
@@ -28298,10 +28311,13 @@ export type EventListAddLandingImageCreateData = {
         public?: boolean;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/add-landing-image/';
+    url: '/api/event/list/{url_safe_title}/add-landing-image/';
 };
 
 export type EventListAddLandingImageCreateErrors = {
@@ -28354,10 +28370,13 @@ export type EventListAddResourceCreateData = {
         link?: string;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/add-resource/';
+    url: '/api/event/list/{url_safe_title}/add-resource/';
 };
 
 export type EventListAddResourceCreateErrors = {
@@ -28389,10 +28408,13 @@ export type EventListAddStaffCreateData = {
         notes?: string;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/add-staff/';
+    url: '/api/event/list/{url_safe_title}/add-staff/';
 };
 
 export type EventListAddStaffCreateErrors = {
@@ -28424,10 +28446,12 @@ export type EventListApplyAvailabilityTemplateCreateData = {
         template_id: string;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -28460,7 +28484,7 @@ export type EventListApplyAvailabilityTemplateCreateData = {
          */
         status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
     };
-    url: '/api/event/list/{event_id}/apply-availability-template/';
+    url: '/api/event/list/{url_safe_title}/apply-availability-template/';
 };
 
 export type EventListApplyAvailabilityTemplateCreateErrors = {
@@ -28511,10 +28535,13 @@ export type EventListAssignPermissionCreateData = {
         allow_delete?: boolean;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/assign-permission/';
+    url: '/api/event/list/{url_safe_title}/assign-permission/';
 };
 
 export type EventListAssignPermissionCreateErrors = {
@@ -28537,10 +28564,12 @@ export type EventListAssignPermissionCreateResponse = EventListAssignPermissionC
 export type EventListAvailabilityWindowsListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -28573,7 +28602,7 @@ export type EventListAvailabilityWindowsListData = {
          */
         status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
     };
-    url: '/api/event/list/{event_id}/availability-windows/';
+    url: '/api/event/list/{url_safe_title}/availability-windows/';
 };
 
 export type EventListAvailabilityWindowsListResponses = {
@@ -28585,7 +28614,10 @@ export type EventListAvailabilityWindowsListResponse = EventListAvailabilityWind
 export type EventListCheckPermissionsRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -28593,7 +28625,7 @@ export type EventListCheckPermissionsRetrieveData = {
          */
         user_id?: number;
     };
-    url: '/api/event/list/{event_id}/check-permissions/';
+    url: '/api/event/list/{url_safe_title}/check-permissions/';
 };
 
 export type EventListCheckPermissionsRetrieveErrors = {
@@ -28690,7 +28722,10 @@ export type EventListCheckPermissionsRetrieveResponse = EventListCheckPermission
 export type EventListDemoteLandingImageCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -28698,7 +28733,7 @@ export type EventListDemoteLandingImageCreateData = {
          */
         resource_id: number;
     };
-    url: '/api/event/list/{event_id}/demote-landing-image/';
+    url: '/api/event/list/{url_safe_title}/demote-landing-image/';
 };
 
 export type EventListDemoteLandingImageCreateErrors = {
@@ -28725,10 +28760,12 @@ export type EventListDemoteLandingImageCreateResponse = EventListDemoteLandingIm
 export type EventListLandingImagesListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -28761,7 +28798,7 @@ export type EventListLandingImagesListData = {
          */
         status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
     };
-    url: '/api/event/list/{event_id}/landing-images/';
+    url: '/api/event/list/{url_safe_title}/landing-images/';
 };
 
 export type EventListLandingImagesListResponses = {
@@ -28773,7 +28810,10 @@ export type EventListLandingImagesListResponse = EventListLandingImagesListRespo
 export type EventListMyBookingRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -28805,7 +28845,7 @@ export type EventListMyBookingRetrieveData = {
          */
         page?: number;
     };
-    url: '/api/event/list/{event_id}/my-booking/';
+    url: '/api/event/list/{url_safe_title}/my-booking/';
 };
 
 export type EventListMyBookingRetrieveErrors = {
@@ -28829,7 +28869,10 @@ export type EventListMyBookingRetrieveResponses = {
 export type EventListMyOutstandingBookingPaymentsRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -28857,7 +28900,7 @@ export type EventListMyOutstandingBookingPaymentsRetrieveData = {
          */
         payment_status?: string;
     };
-    url: '/api/event/list/{event_id}/my-outstanding-booking-payments/';
+    url: '/api/event/list/{url_safe_title}/my-outstanding-booking-payments/';
 };
 
 export type EventListMyOutstandingBookingPaymentsRetrieveErrors = {
@@ -28881,7 +28924,10 @@ export type EventListMyOutstandingBookingPaymentsRetrieveResponses = {
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -28889,7 +28935,7 @@ export type EventListPreviewTemplateApplicationRetrieveData = {
          */
         template_id: string;
     };
-    url: '/api/event/list/{event_id}/preview-template-application/';
+    url: '/api/event/list/{url_safe_title}/preview-template-application/';
 };
 
 export type EventListPreviewTemplateApplicationRetrieveErrors = {
@@ -28915,7 +28961,10 @@ export type EventListPreviewTemplateApplicationRetrieveResponse = EventListPrevi
 export type EventListPromoteLandingImageCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -28923,7 +28972,7 @@ export type EventListPromoteLandingImageCreateData = {
          */
         resource_id: number;
     };
-    url: '/api/event/list/{event_id}/promote-landing-image/';
+    url: '/api/event/list/{url_safe_title}/promote-landing-image/';
 };
 
 export type EventListPromoteLandingImageCreateErrors = {
@@ -28950,10 +28999,13 @@ export type EventListPromoteLandingImageCreateResponse = EventListPromoteLanding
 export type EventListPublicSponsorsRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/public-sponsors/';
+    url: '/api/event/list/{url_safe_title}/public-sponsors/';
 };
 
 export type EventListPublicSponsorsRetrieveResponses = {
@@ -28965,7 +29017,10 @@ export type EventListPublicSponsorsRetrieveResponse = EventListPublicSponsorsRet
 export type EventListRemoveAvailabilityWindowDestroyData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -28973,7 +29028,7 @@ export type EventListRemoveAvailabilityWindowDestroyData = {
          */
         window_id: string;
     };
-    url: '/api/event/list/{event_id}/remove-availability-window/';
+    url: '/api/event/list/{url_safe_title}/remove-availability-window/';
 };
 
 export type EventListRemoveAvailabilityWindowDestroyErrors = {
@@ -29003,7 +29058,10 @@ export type EventListRemoveAvailabilityWindowDestroyResponse = EventListRemoveAv
 export type EventListRemoveResourceDestroyData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -29011,7 +29069,7 @@ export type EventListRemoveResourceDestroyData = {
          */
         resource_id: number;
     };
-    url: '/api/event/list/{event_id}/remove-resource/';
+    url: '/api/event/list/{url_safe_title}/remove-resource/';
 };
 
 export type EventListRemoveResourceDestroyErrors = {
@@ -29041,7 +29099,10 @@ export type EventListRemoveResourceDestroyResponse = EventListRemoveResourceDest
 export type EventListRemoveStaffDestroyData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -29049,7 +29110,7 @@ export type EventListRemoveStaffDestroyData = {
          */
         staff_id: string;
     };
-    url: '/api/event/list/{event_id}/remove-staff/';
+    url: '/api/event/list/{url_safe_title}/remove-staff/';
 };
 
 export type EventListRemoveStaffDestroyErrors = {
@@ -29079,10 +29140,12 @@ export type EventListRemoveStaffDestroyResponse = EventListRemoveStaffDestroyRes
 export type EventListResourcesListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -29123,7 +29186,7 @@ export type EventListResourcesListData = {
          */
         tag?: string;
     };
-    url: '/api/event/list/{event_id}/resources/';
+    url: '/api/event/list/{url_safe_title}/resources/';
 };
 
 export type EventListResourcesListResponses = {
@@ -29135,10 +29198,13 @@ export type EventListResourcesListResponse = EventListResourcesListResponses[key
 export type EventListRestoreCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/restore/';
+    url: '/api/event/list/{url_safe_title}/restore/';
 };
 
 export type EventListRestoreCreateErrors = {
@@ -29162,7 +29228,10 @@ export type EventListRestoreCreateResponses = {
 export type EventListRevokePermissionDestroyData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -29170,7 +29239,7 @@ export type EventListRevokePermissionDestroyData = {
          */
         assignment_id: number;
     };
-    url: '/api/event/list/{event_id}/revoke-permission/';
+    url: '/api/event/list/{url_safe_title}/revoke-permission/';
 };
 
 export type EventListRevokePermissionDestroyErrors = {
@@ -29209,10 +29278,13 @@ export type EventListSaveWindowsAsTemplateCreateData = {
         description?: string;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/save-windows-as-template/';
+    url: '/api/event/list/{url_safe_title}/save-windows-as-template/';
 };
 
 export type EventListSaveWindowsAsTemplateCreateErrors = {
@@ -29235,10 +29307,13 @@ export type EventListSaveWindowsAsTemplateCreateResponse = EventListSaveWindowsA
 export type EventListSettingsRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/settings/';
+    url: '/api/event/list/{url_safe_title}/settings/';
 };
 
 export type EventListSettingsRetrieveErrors = {
@@ -29257,10 +29332,13 @@ export type EventListSettingsRetrieveResponse = EventListSettingsRetrieveRespons
 export type EventListSoftDeleteCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/soft-delete/';
+    url: '/api/event/list/{url_safe_title}/soft-delete/';
 };
 
 export type EventListSoftDeleteCreateErrors = {
@@ -29284,10 +29362,13 @@ export type EventListSoftDeleteCreateResponses = {
 export type EventListSponsorsListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/';
+    url: '/api/event/list/{url_safe_title}/sponsors/';
 };
 
 export type EventListSponsorsListResponses = {
@@ -29299,10 +29380,13 @@ export type EventListSponsorsListResponse = EventListSponsorsListResponses[keyof
 export type EventListSponsorsCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/';
+    url: '/api/event/list/{url_safe_title}/sponsors/';
 };
 
 export type EventListSponsorsCreateResponses = {
@@ -29314,11 +29398,14 @@ export type EventListSponsorsCreateResponse = EventListSponsorsCreateResponses[k
 export type EventListSponsorsDestroyData = {
     body?: never;
     path: {
-        event_id: string;
         sponsor_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/';
 };
 
 export type EventListSponsorsDestroyResponses = {
@@ -29333,11 +29420,14 @@ export type EventListSponsorsDestroyResponse = EventListSponsorsDestroyResponses
 export type EventListSponsorsRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
         sponsor_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/';
 };
 
 export type EventListSponsorsRetrieveResponses = {
@@ -29349,11 +29439,14 @@ export type EventListSponsorsRetrieveResponse = EventListSponsorsRetrieveRespons
 export type EventListSponsorsPartialUpdateData = {
     body?: PatchedEventDetailRequest;
     path: {
-        event_id: string;
         sponsor_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/';
 };
 
 export type EventListSponsorsPartialUpdateResponses = {
@@ -29365,11 +29458,14 @@ export type EventListSponsorsPartialUpdateResponse = EventListSponsorsPartialUpd
 export type EventListSponsorsApproveData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
         sponsor_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/approve/';
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/approve/';
 };
 
 export type EventListSponsorsApproveResponses = {
@@ -29381,11 +29477,14 @@ export type EventListSponsorsApproveResponse = EventListSponsorsApproveResponses
 export type EventListSponsorsRejectData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
         sponsor_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/reject/';
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/reject/';
 };
 
 export type EventListSponsorsRejectResponses = {
@@ -29397,10 +29496,13 @@ export type EventListSponsorsRejectResponse = EventListSponsorsRejectResponses[k
 export type EventListSponsorshipPackagesListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsorship-packages/';
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/';
 };
 
 export type EventListSponsorshipPackagesListResponses = {
@@ -29412,10 +29514,13 @@ export type EventListSponsorshipPackagesListResponse = EventListSponsorshipPacka
 export type EventListSponsorshipPackagesCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsorship-packages/';
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/';
 };
 
 export type EventListSponsorshipPackagesCreateResponses = {
@@ -29427,11 +29532,14 @@ export type EventListSponsorshipPackagesCreateResponse = EventListSponsorshipPac
 export type EventListSponsorshipPackagesDestroyData = {
     body?: never;
     path: {
-        event_id: string;
         package_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/';
 };
 
 export type EventListSponsorshipPackagesDestroyResponses = {
@@ -29446,11 +29554,14 @@ export type EventListSponsorshipPackagesDestroyResponse = EventListSponsorshipPa
 export type EventListSponsorshipPackagesRetrieveData = {
     body?: never;
     path: {
-        event_id: string;
         package_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/';
 };
 
 export type EventListSponsorshipPackagesRetrieveResponses = {
@@ -29462,11 +29573,14 @@ export type EventListSponsorshipPackagesRetrieveResponse = EventListSponsorshipP
 export type EventListSponsorshipPackagesPartialUpdateData = {
     body?: PatchedEventDetailRequest;
     path: {
-        event_id: string;
         package_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/';
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/';
 };
 
 export type EventListSponsorshipPackagesPartialUpdateResponses = {
@@ -29481,7 +29595,7 @@ export type EventStaffInvitesListData = {
         /**
          * UUID of the event to list invites for
          */
-        event_id: string;
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -29509,7 +29623,7 @@ export type EventStaffInvitesListData = {
          */
         target_user?: number;
     };
-    url: '/api/event/list/{event_id}/staff-invites/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/';
 };
 
 export type EventStaffInvitesListErrors = {
@@ -29542,10 +29656,10 @@ export type EventStaffInvitesCreateData = {
         /**
          * UUID of the event to create invite for
          */
-        event_id: string;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/';
 };
 
 export type EventStaffInvitesCreateErrors = {
@@ -29567,7 +29681,7 @@ export type EventStaffInvitesCreateErrors = {
      */
     403: unknown;
     /**
-     * Event not found with the specified event_id
+     * Event not found with the specified url_safe_title
      */
     404: unknown;
 };
@@ -29585,16 +29699,16 @@ export type EventStaffInviteDeleteData = {
     body?: never;
     path: {
         /**
-         * UUID of the event containing the invite
-         */
-        event_id: string;
-        /**
          * UUID of the specific staff invite to delete
          */
         invite_id: string;
+        /**
+         * UUID of the event containing the invite
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/';
 };
 
 export type EventStaffInviteDeleteErrors = {
@@ -29625,16 +29739,16 @@ export type EventStaffInviteRetrieveData = {
     body?: never;
     path: {
         /**
-         * UUID of the event containing the invite
-         */
-        event_id: string;
-        /**
          * Integer ID of the specific staff invite to retrieve
          */
         invite_id: string;
+        /**
+         * UUID of the event containing the invite
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/';
 };
 
 export type EventStaffInviteRetrieveErrors = {
@@ -29665,16 +29779,16 @@ export type EventStaffInvitePartialUpdateData = {
     body?: PatchedEventStaffInviteRequest;
     path: {
         /**
-         * UUID of the event containing the invite
-         */
-        event_id: string;
-        /**
          * UUID of the specific staff invite to update
          */
         invite_id: string;
+        /**
+         * UUID of the event containing the invite
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/';
 };
 
 export type EventStaffInvitePartialUpdateErrors = {
@@ -29712,16 +29826,16 @@ export type EventStaffInviteUpdateData = {
     body: EventStaffInviteRequest;
     path: {
         /**
-         * UUID of the event containing the invite
-         */
-        event_id: string;
-        /**
          * UUID of the specific staff invite to update
          */
         invite_id: string;
+        /**
+         * UUID of the event containing the invite
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/';
 };
 
 export type EventStaffInviteUpdateErrors = {
@@ -29761,16 +29875,16 @@ export type EventListStaffInvitesAcceptCreateData = {
     body?: never;
     path: {
         /**
-         * UUID of the event for which the invite was sent
-         */
-        event_id: string;
-        /**
          * UUID of the specific staff invite to accept
          */
         invite_id: string;
+        /**
+         * UUID of the event for which the invite was sent
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/accept/';
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/accept/';
 };
 
 export type EventListStaffInvitesAcceptCreateErrors = {
@@ -29825,10 +29939,12 @@ export type EventListStaffInvitesAcceptCreateResponse = EventListStaffInvitesAcc
 export type EventListStaffListListData = {
     body?: never;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -29861,7 +29977,7 @@ export type EventListStaffListListData = {
          */
         status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
     };
-    url: '/api/event/list/{event_id}/staff-list/';
+    url: '/api/event/list/{url_safe_title}/staff-list/';
 };
 
 export type EventListStaffListListResponses = {
@@ -29873,7 +29989,10 @@ export type EventListStaffListListResponse = EventListStaffListListResponses[key
 export type EventListUpdateAvailabilityWindowPartialUpdateData = {
     body?: PatchedAvailabilityWindowRequestWritable;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -29881,7 +30000,7 @@ export type EventListUpdateAvailabilityWindowPartialUpdateData = {
          */
         window_id?: string;
     };
-    url: '/api/event/list/{event_id}/update-availability-window/';
+    url: '/api/event/list/{url_safe_title}/update-availability-window/';
 };
 
 export type EventListUpdateAvailabilityWindowPartialUpdateErrors = {
@@ -29908,7 +30027,10 @@ export type EventListUpdateAvailabilityWindowPartialUpdateResponse = EventListUp
 export type EventListUpdateAvailabilityWindowUpdateData = {
     body: AvailabilityWindowRequestWritable;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -29916,7 +30038,7 @@ export type EventListUpdateAvailabilityWindowUpdateData = {
          */
         window_id?: string;
     };
-    url: '/api/event/list/{event_id}/update-availability-window/';
+    url: '/api/event/list/{url_safe_title}/update-availability-window/';
 };
 
 export type EventListUpdateAvailabilityWindowUpdateErrors = {
@@ -29960,7 +30082,10 @@ export type EventListUpdateResourcePartialUpdateData = {
         public?: boolean;
     };
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query: {
         /**
@@ -29968,7 +30093,7 @@ export type EventListUpdateResourcePartialUpdateData = {
          */
         resource_id: number;
     };
-    url: '/api/event/list/{event_id}/update-resource/';
+    url: '/api/event/list/{url_safe_title}/update-resource/';
 };
 
 export type EventListUpdateResourcePartialUpdateErrors = {
@@ -29995,10 +30120,13 @@ export type EventListUpdateResourcePartialUpdateResponse = EventListUpdateResour
 export type EventListWsTokenCreateData = {
     body: EventDetailRequest;
     path: {
-        event_id: string;
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/event/list/{event_id}/ws-token/';
+    url: '/api/event/list/{url_safe_title}/ws-token/';
 };
 
 export type EventListWsTokenCreateErrors = {
@@ -30038,7 +30166,6 @@ export type EventListAvailabilityTemplatesListData = {
     body?: never;
     path?: never;
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -30158,7 +30285,6 @@ export type EventListOngoingListData = {
     body?: never;
     path?: never;
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -30204,7 +30330,6 @@ export type EventListSponsorableListData = {
     body?: never;
     path?: never;
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -30250,7 +30375,6 @@ export type EventListUpcomingListData = {
     body?: never;
     path?: never;
     query?: {
-        event_id?: string;
         event_type?: number;
         /**
          * Which field to use when ordering the results.
@@ -30297,11 +30421,9 @@ export type EventPermissionAssignmentsListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        event__event_id?: string;
-        event_id?: string;
+        event?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30552,13 +30674,9 @@ export type EventQuestionAnswersListData = {
          */
         attendee_id?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event_id?: string;
+        event?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30705,13 +30823,9 @@ export type EventQuestionAnswersSubmitFormCreateData = {
          */
         attendee_id?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        /**
-         * Filter by event UUID
-         */
-        event_id?: string;
+        event?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30917,10 +31031,9 @@ export type EventQuestionsListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        event_id?: string;
+        event?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -31055,8 +31168,7 @@ export type EventQuestionsBulkCreateCreateData = {
     }>;
     path?: never;
     query?: {
-        event?: number;
-        event_id?: string;
+        event?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -31135,10 +31247,9 @@ export type EventReviewsListData = {
          */
         approved?: boolean;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        event_id?: string;
+        event?: string;
         event_title?: string;
         /**
          * Which field to use when ordering the results.
@@ -31279,11 +31390,9 @@ export type EventRoleAssignmentsListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        event__event_id?: string;
-        event_id?: string;
+        event?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31636,10 +31745,9 @@ export type EventStaffListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
-        event_id?: string;
+        event?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31798,9 +31906,9 @@ export type EventStaffInvitesGlobalListData = {
          */
         accepted?: boolean;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by validity status
          */
@@ -31969,9 +32077,9 @@ export type EventStatisticsBookingPackagesRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32125,9 +32233,9 @@ export type EventStatisticsPaymentStatusRetrieveData = {
          */
         date_to?: string;
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32167,9 +32275,9 @@ export type EventStatisticsRegistrationTrendsRetrieveData = {
          */
         date_to?: string;
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32259,9 +32367,9 @@ export type EventStatisticsRevenueOverviewRetrieveData = {
          */
         date_to?: string;
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32293,9 +32401,9 @@ export type EventStatisticsReviewsRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32327,9 +32435,9 @@ export type EventStatisticsSponsorPackagesRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Filter by specific event ID
+         * Filter by specific event URL-safe title
          */
-        event_id?: string;
+        event?: string;
         /**
          * Filter by event type ID
          */
@@ -32611,11 +32719,9 @@ export type EventVenuesListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID (UUID)
+         * Filter by event URL-safe title
          */
         event?: string;
-        event__event_id?: string;
-        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */

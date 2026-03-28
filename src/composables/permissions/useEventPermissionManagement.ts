@@ -42,7 +42,7 @@ export function useAssignEventPermission(eventId: MaybeRefOrGetter<string>) {
       const id = toValue(eventId)
       
       return eventListAssignPermissionCreate({
-        path: { event_id: id },
+        path: { url_safe_title: id },
         body: {
           user_id: request.user_id,
           permission_id: request.permission_id,
@@ -99,7 +99,7 @@ export function useRevokeEventPermission(eventId: MaybeRefOrGetter<string>) {
       const id = toValue(eventId)
       
       return eventListRevokePermissionDestroy({
-        path: { event_id: id },
+        path: { url_safe_title: id },
         query: { assignment_id: request.assignment_id },
       })
     },
@@ -195,7 +195,7 @@ export function useCheckEventPermissions(
       const user = toValue(userId)
       
       const response = await eventListCheckPermissionsRetrieve({
-        path: { event_id: id },
+        path: { url_safe_title: id },
         query: user ? { user_id: user } : undefined,
       })
       
@@ -239,7 +239,7 @@ export function useBulkAssignEventPermissions(eventId: MaybeRefOrGetter<string>)
       const results = []
       for (const perm of request.permissions) {
         const result = await eventListAssignPermissionCreate({
-          path: { event_id: id },
+          path: { url_safe_title: id },
           body: {
             user_id: request.user_id,
             permission_id: perm.permission_id,

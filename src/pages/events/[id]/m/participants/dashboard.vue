@@ -1944,7 +1944,7 @@ const { data: organisationsData } = useOrganisations({ page_size: 100 })
 const { data: areasData } = useAreas({ page_size: 100 })
 
 // Fetch event questions for question-based filtering
-const { data: eventQuestionsData } = useEventQuestions({ event: Number(event.value?.data.id) })
+const { data: eventQuestionsData } = useEventQuestions({ event: event.value?.data.event_id, page_size: 100 })
 
 // Fetch dietary requirements for filter dropdown
 const { data: dietaryRequirementsData } = useDietaryRequirements({ page_size: 100 })

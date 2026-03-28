@@ -3108,7 +3108,7 @@ export const eventListDestroy = <ThrowOnError extends boolean = false>(options: 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/',
+    url: '/api/event/list/{url_safe_title}/',
     ...options
 });
 
@@ -3123,7 +3123,7 @@ export const eventListRetrieve = <ThrowOnError extends boolean = false>(options:
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/',
+    url: '/api/event/list/{url_safe_title}/',
     ...options
 });
 
@@ -3138,7 +3138,7 @@ export const eventListPartialUpdate = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/',
+    url: '/api/event/list/{url_safe_title}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3157,7 +3157,7 @@ export const eventListUpdate = <ThrowOnError extends boolean = false>(options: O
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/',
+    url: '/api/event/list/{url_safe_title}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3176,7 +3176,7 @@ export const eventListAddAvailabilityWindowCreate = <ThrowOnError extends boolea
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/add-availability-window/',
+    url: '/api/event/list/{url_safe_title}/add-availability-window/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3196,7 +3196,7 @@ export const eventListAddLandingImageCreate = <ThrowOnError extends boolean = fa
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/add-landing-image/',
+    url: '/api/event/list/{url_safe_title}/add-landing-image/',
     ...options,
     headers: {
         'Content-Type': null,
@@ -3216,7 +3216,7 @@ export const eventListAddResourceCreate = <ThrowOnError extends boolean = false>
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/add-resource/',
+    url: '/api/event/list/{url_safe_title}/add-resource/',
     ...options,
     headers: {
         'Content-Type': null,
@@ -3235,7 +3235,7 @@ export const eventListAddStaffCreate = <ThrowOnError extends boolean = false>(op
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/add-staff/',
+    url: '/api/event/list/{url_safe_title}/add-staff/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3254,7 +3254,7 @@ export const eventListApplyAvailabilityTemplateCreate = <ThrowOnError extends bo
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/apply-availability-template/',
+    url: '/api/event/list/{url_safe_title}/apply-availability-template/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3273,7 +3273,7 @@ export const eventListAssignPermissionCreate = <ThrowOnError extends boolean = f
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/assign-permission/',
+    url: '/api/event/list/{url_safe_title}/assign-permission/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3292,7 +3292,7 @@ export const eventListAvailabilityWindowsList = <ThrowOnError extends boolean = 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/availability-windows/',
+    url: '/api/event/list/{url_safe_title}/availability-windows/',
     ...options
 });
 
@@ -3329,7 +3329,7 @@ export const eventListCheckPermissionsRetrieve = <ThrowOnError extends boolean =
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/check-permissions/',
+    url: '/api/event/list/{url_safe_title}/check-permissions/',
     ...options
 });
 
@@ -3344,7 +3344,7 @@ export const eventListDemoteLandingImageCreate = <ThrowOnError extends boolean =
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/demote-landing-image/',
+    url: '/api/event/list/{url_safe_title}/demote-landing-image/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3363,7 +3363,7 @@ export const eventListLandingImagesList = <ThrowOnError extends boolean = false>
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/landing-images/',
+    url: '/api/event/list/{url_safe_title}/landing-images/',
     ...options
 });
 
@@ -3378,7 +3378,7 @@ export const eventListMyBookingRetrieve = <ThrowOnError extends boolean = false>
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/my-booking/',
+    url: '/api/event/list/{url_safe_title}/my-booking/',
     ...options
 });
 
@@ -3393,7 +3393,7 @@ export const eventListMyOutstandingBookingPaymentsRetrieve = <ThrowOnError exten
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/my-outstanding-booking-payments/',
+    url: '/api/event/list/{url_safe_title}/my-outstanding-booking-payments/',
     ...options
 });
 
@@ -3408,7 +3408,7 @@ export const eventListPreviewTemplateApplicationRetrieve = <ThrowOnError extends
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/preview-template-application/',
+    url: '/api/event/list/{url_safe_title}/preview-template-application/',
     ...options
 });
 
@@ -3423,7 +3423,7 @@ export const eventListPromoteLandingImageCreate = <ThrowOnError extends boolean 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/promote-landing-image/',
+    url: '/api/event/list/{url_safe_title}/promote-landing-image/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3442,7 +3442,7 @@ export const eventListPublicSponsorsRetrieve = <ThrowOnError extends boolean = f
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/public-sponsors/',
+    url: '/api/event/list/{url_safe_title}/public-sponsors/',
     ...options
 });
 
@@ -3457,7 +3457,7 @@ export const eventListRemoveAvailabilityWindowDestroy = <ThrowOnError extends bo
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/remove-availability-window/',
+    url: '/api/event/list/{url_safe_title}/remove-availability-window/',
     ...options
 });
 
@@ -3472,7 +3472,7 @@ export const eventListRemoveResourceDestroy = <ThrowOnError extends boolean = fa
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/remove-resource/',
+    url: '/api/event/list/{url_safe_title}/remove-resource/',
     ...options
 });
 
@@ -3487,7 +3487,7 @@ export const eventListRemoveStaffDestroy = <ThrowOnError extends boolean = false
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/remove-staff/',
+    url: '/api/event/list/{url_safe_title}/remove-staff/',
     ...options
 });
 
@@ -3502,7 +3502,7 @@ export const eventListResourcesList = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/resources/',
+    url: '/api/event/list/{url_safe_title}/resources/',
     ...options
 });
 
@@ -3517,7 +3517,7 @@ export const eventListRestoreCreate = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/restore/',
+    url: '/api/event/list/{url_safe_title}/restore/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3536,7 +3536,7 @@ export const eventListRevokePermissionDestroy = <ThrowOnError extends boolean = 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/revoke-permission/',
+    url: '/api/event/list/{url_safe_title}/revoke-permission/',
     ...options
 });
 
@@ -3551,7 +3551,7 @@ export const eventListSaveWindowsAsTemplateCreate = <ThrowOnError extends boolea
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/save-windows-as-template/',
+    url: '/api/event/list/{url_safe_title}/save-windows-as-template/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3570,7 +3570,7 @@ export const eventListSettingsRetrieve = <ThrowOnError extends boolean = false>(
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/settings/',
+    url: '/api/event/list/{url_safe_title}/settings/',
     ...options
 });
 
@@ -3585,7 +3585,7 @@ export const eventListSoftDeleteCreate = <ThrowOnError extends boolean = false>(
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/soft-delete/',
+    url: '/api/event/list/{url_safe_title}/soft-delete/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3604,7 +3604,7 @@ export const eventListSponsorsList = <ThrowOnError extends boolean = false>(opti
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/',
+    url: '/api/event/list/{url_safe_title}/sponsors/',
     ...options
 });
 
@@ -3619,7 +3619,7 @@ export const eventListSponsorsCreate = <ThrowOnError extends boolean = false>(op
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/',
+    url: '/api/event/list/{url_safe_title}/sponsors/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3638,7 +3638,7 @@ export const eventListSponsorsDestroy = <ThrowOnError extends boolean = false>(o
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/',
     ...options
 });
 
@@ -3653,7 +3653,7 @@ export const eventListSponsorsRetrieve = <ThrowOnError extends boolean = false>(
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/',
     ...options
 });
 
@@ -3668,7 +3668,7 @@ export const eventListSponsorsPartialUpdate = <ThrowOnError extends boolean = fa
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3687,7 +3687,7 @@ export const eventListSponsorsApprove = <ThrowOnError extends boolean = false>(o
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/approve/',
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/approve/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3706,7 +3706,7 @@ export const eventListSponsorsReject = <ThrowOnError extends boolean = false>(op
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsors/{sponsor_id}/reject/',
+    url: '/api/event/list/{url_safe_title}/sponsors/{sponsor_id}/reject/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3725,7 +3725,7 @@ export const eventListSponsorshipPackagesList = <ThrowOnError extends boolean = 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsorship-packages/',
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/',
     ...options
 });
 
@@ -3740,7 +3740,7 @@ export const eventListSponsorshipPackagesCreate = <ThrowOnError extends boolean 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsorship-packages/',
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3759,7 +3759,7 @@ export const eventListSponsorshipPackagesDestroy = <ThrowOnError extends boolean
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/',
     ...options
 });
 
@@ -3774,7 +3774,7 @@ export const eventListSponsorshipPackagesRetrieve = <ThrowOnError extends boolea
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/',
     ...options
 });
 
@@ -3789,7 +3789,7 @@ export const eventListSponsorshipPackagesPartialUpdate = <ThrowOnError extends b
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/sponsorship-packages/{package_id}/',
+    url: '/api/event/list/{url_safe_title}/sponsorship-packages/{package_id}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3824,7 +3824,7 @@ export const eventStaffInvitesList = <ThrowOnError extends boolean = false>(opti
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/',
     ...options
 });
 
@@ -3863,7 +3863,7 @@ export const eventStaffInvitesCreate = <ThrowOnError extends boolean = false>(op
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3896,7 +3896,7 @@ export const eventStaffInviteDelete = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/',
     ...options
 });
 
@@ -3923,7 +3923,7 @@ export const eventStaffInviteRetrieve = <ThrowOnError extends boolean = false>(o
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/',
     ...options
 });
 
@@ -3951,7 +3951,7 @@ export const eventStaffInvitePartialUpdate = <ThrowOnError extends boolean = fal
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -3984,7 +3984,7 @@ export const eventStaffInviteUpdate = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -4040,7 +4040,7 @@ export const eventListStaffInvitesAcceptCreate = <ThrowOnError extends boolean =
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-invites/{invite_id}/accept/',
+    url: '/api/event/list/{url_safe_title}/staff-invites/{invite_id}/accept/',
     ...options
 });
 
@@ -4055,7 +4055,7 @@ export const eventListStaffListList = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/staff-list/',
+    url: '/api/event/list/{url_safe_title}/staff-list/',
     ...options
 });
 
@@ -4070,7 +4070,7 @@ export const eventListUpdateAvailabilityWindowPartialUpdate = <ThrowOnError exte
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/update-availability-window/',
+    url: '/api/event/list/{url_safe_title}/update-availability-window/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -4089,7 +4089,7 @@ export const eventListUpdateAvailabilityWindowUpdate = <ThrowOnError extends boo
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/update-availability-window/',
+    url: '/api/event/list/{url_safe_title}/update-availability-window/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -4108,7 +4108,7 @@ export const eventListUpdateResourcePartialUpdate = <ThrowOnError extends boolea
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/update-resource/',
+    url: '/api/event/list/{url_safe_title}/update-resource/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -4146,7 +4146,7 @@ export const eventListWsTokenCreate = <ThrowOnError extends boolean = false>(opt
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/event/list/{event_id}/ws-token/',
+    url: '/api/event/list/{url_safe_title}/ws-token/',
     ...options,
     headers: {
         'Content-Type': 'application/json',

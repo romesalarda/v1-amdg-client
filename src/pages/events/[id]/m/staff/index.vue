@@ -155,7 +155,7 @@ const canDeleteStaff = computed(() => can('STAFF_MANAGEMENT', 'delete').value.al
 const { data: event } = useEvent(id)
 
 // Fetch staff and roles
-const eventIdFilter = { event_id: route.params.id as string }
+const eventIdFilter = { event: route.params.id as string }
 const { data: staffData, isLoading: staffLoading, refetch: refetchStaff } = useEventStaff(eventIdFilter)
 const { data: rolesData, isLoading: rolesLoading, refetch: refetchRoles } = useEventRoles()
 
@@ -167,7 +167,7 @@ const { data: permissionsData } = useEventPermissions()
 const permissionsList = computed(() => permissionsData.value?.data?.results || [])
 
 // Fetch permission assignments
-const permissionsFilter = computed(() => ({ event: event.value?.data?.id }))
+const permissionsFilter = computed(() => ({ event: event.value?.data?.event_id }))
 const { data: permissionAssignmentsData, refetch: refetchPermissions } = useEventPermissionAssignments(permissionsFilter)
 const permissionAssignments = computed(() => permissionAssignmentsData.value?.data?.results || [])
 
@@ -257,7 +257,7 @@ const handleUpdatePermissions = async (staff: any, permissions: Record<string, C
     }
 
     const createPayloads: Array<{
-      event: number
+      event: string
       user: number
       permission: number
       read_only: boolean
@@ -269,9 +269,12 @@ const handleUpdatePermissions = async (staff: any, permissions: Record<string, C
     for (const [category, actions] of Object.entries(permissions)) {
       const permission = permissionsList.value.find(p => p.category === category)
       if (!permission) continue
-
+      if (!event.value?.data.event_id) {
+        throw new Error('Event context mismatch. Please refresh and try again.')
+      }
+      
       createPayloads.push({
-        event: eventPk,
+        event: event.value?.data.event_id,
         user: staff.user!,
         permission: permission.id,
         read_only: actions.includes('read') && actions.length === 1,

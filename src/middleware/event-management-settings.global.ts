@@ -65,7 +65,7 @@ async function getEventSettings(eventId: string) {
   }
 
   const response = await eventListSettingsRetrieve({
-    path: { event_id: eventId },
+    path: { url_safe_title: eventId },
   })
 
   if (queryClient) {

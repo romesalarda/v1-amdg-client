@@ -138,7 +138,7 @@ const formatDateTime = (dateString: string, timezone?: string) => {
 // Check if user is staff member for this event
 const { data: staffData } = useEventStaff(
   computed(() => props.showStaffControls !== false ? {
-    event: props.event.id,
+    event: props.event.event_id,
     user: authStore.user?.id,
   } : undefined)
 )

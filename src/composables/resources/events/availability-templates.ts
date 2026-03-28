@@ -31,7 +31,7 @@ export function usePreviewTemplateApplication(eventId: MaybeRefOrGetter<string>)
   return useMutation({
     mutationFn: async (templateId: string) => {
       const response = await eventListPreviewTemplateApplicationRetrieve({
-        path: { event_id: toValue(eventId) },
+        path: { url_safe_title: toValue(eventId) },
         query: { template_id: templateId },
       })
       return response.data
@@ -48,7 +48,7 @@ export function useApplyAvailabilityTemplate(eventId: MaybeRefOrGetter<string>) 
   return useMutation({
     mutationFn: async (templateId: string) => {
       const response = await eventListApplyAvailabilityTemplateCreate({
-        path: { event_id: toValue(eventId) },
+        path: { url_safe_title: toValue(eventId) },
         body: { template_id: templateId },
       })
       return response.data
@@ -109,7 +109,7 @@ export function useSaveWindowsAsTemplate(eventId: MaybeRefOrGetter<string>) {
   return useMutation({
     mutationFn: async (data: { name: string; description?: string }) => {
       const response = await eventListSaveWindowsAsTemplateCreate({
-        path: { event_id: toValue(eventId) },
+        path: { url_safe_title: toValue(eventId) },
         body: data,
       })
       return response.data

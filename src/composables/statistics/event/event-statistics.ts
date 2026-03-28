@@ -82,7 +82,7 @@ export function useRegistrationTrends(
     },
     enabled: computed(() => {
       const queryParams = toValue(params)
-      return !!queryParams?.event_id
+      return !!queryParams?.event
     }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   })

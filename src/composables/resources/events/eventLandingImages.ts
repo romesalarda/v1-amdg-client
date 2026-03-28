@@ -26,7 +26,7 @@ export function useEventLandingImages(
       const id = toValue(eventId)
       const queryParams = toValue(params)
       return eventListLandingImagesList({
-        path: { event_id: id },
+        path: { url_safe_title: id },
         query: queryParams,
       })
     },
@@ -48,7 +48,7 @@ export function useAddEventLandingImage() {
       body: EventListAddLandingImageCreateData['body']
     }) => {
       return eventListAddLandingImageCreate({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         body: data.body,
       })
     },

@@ -95,7 +95,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!eventData) {
       // Fetch from API if not in cache
       const response = await eventListRetrieve({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
       })
       eventData = response.data
 
