@@ -443,15 +443,40 @@ export type AttendeeCancellationRefundResponse = {
 };
 
 /**
- * Serializer for a single attendee's package and product selections.
+ * Attendee selection for a specific checkout transaction.
+ *
+ * Each attendee selection includes:
+ * - Either an existing attendee_id OR attendee draft data (not both)
+ * - A booking package selection
+ * - Optional product variant selections
+ *
+ * Example:
+ * {
+ * "attendee_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "package_id": 5,
+ * "product_selections": [
+ * {
+ * "package_product_id": 1,
+ * "variant_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "quantity": 2
+ * }
+ * ]
+ * }
+ *
+ * Or with attendee draft:
+ * {
+ * "attendee": {...AttendeeDraftSerializer...},
+ * "package_id": 5,
+ * "product_selections": [...]
+ * }
  */
 export type AttendeeCheckoutRequest = {
     /**
-     * UUID of the attendee this selection is for
+     * UUID of an existing attendee (use this OR attendee, not both)
      */
     attendee_id?: string;
     /**
-     * Draft attendee data to create during checkout
+     * Draft attendee data to create during checkout (use this OR attendee_id, not both)
      */
     attendee?: AttendeeDraftRequest;
     /**
@@ -490,8 +515,26 @@ export type AttendeeConsent = {
     };
 };
 
+/**
+ * Consent record indicating whether attendee consents to something.
+ *
+ * The 'consent_id' references a Consent record in the database.
+ * 'consent_given' must be True for all required consents.
+ *
+ * Example:
+ * {
+ * "consent_id": 5,
+ * "consent_given": true
+ * }
+ */
 export type AttendeeConsentDraftRequest = {
+    /**
+     * ID of the Consent record
+     */
     consent_id: number;
+    /**
+     * Whether attendee gave consent (must be True for required consents)
+     */
     consent_given?: boolean;
 };
 
@@ -667,14 +710,61 @@ export type AttendeeDietaryRequirementRequest = {
     verified_by?: number | null;
 };
 
+/**
+ * Complete attendee draft data for creation during checkout.
+ *
+ * Creates a new Attendee record with full personal information.
+ * Validates all nested personal info, consents, and event responses.
+ *
+ * Key fields:
+ * - attendee_id: UUID of existing attendee (use this OR attendee_draft, not both)
+ * - personal_info: Medical, dietary, accessibility, emergency contact
+ * - consents: Event consent records
+ * - question_answers: Event question responses
+ *
+ * Example:
+ * {
+ * "first_name": "John",
+ * "last_name": "Smith",
+ * "email": "john@example.com",
+ * "phone_number": "+44 7123 456789",
+ * "date_of_birth": "1990-05-15",
+ * "gender": "male",
+ * "relationship_to_user": "self",
+ * "area_from": 1,
+ * "personal_info": {...},
+ * "consents": [...],
+ * "question_answers": [...]
+ * }
+ */
 export type AttendeeDraftRequest = {
+    /**
+     * First name of attendee
+     */
     first_name: string;
+    /**
+     * Last name of attendee
+     */
     last_name: string;
+    /**
+     * Email address (optional, for contact purposes)
+     */
     email?: string | null;
+    /**
+     * Phone number (optional, international format supported)
+     */
     phone_number?: string | null;
+    /**
+     * Date of birth (YYYY-MM-DD) - used for age validation and pricing
+     */
     date_of_birth: string;
+    /**
+     * Gender (free-form text for inclusivity)
+     */
     gender?: string | null;
     /**
+     * Relationship to the user making the booking
+     *
      * * `self` - self
      * * `spouse` - spouse
      * * `child` - child
@@ -684,9 +774,21 @@ export type AttendeeDraftRequest = {
      * * `other` - other
      */
     relationship_to_user: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
+    /**
+     * ID of AreaLocation (active areas only)
+     */
     area_from: number;
+    /**
+     * Personal information (medical, dietary, accessibility, emergency contact)
+     */
     personal_info?: AttendeePersonalInfoDraftRequest;
+    /**
+     * Consent records (required consents must be True)
+     */
     consents?: Array<AttendeeConsentDraftRequest>;
+    /**
+     * Event question responses (required questions must have answers)
+     */
     question_answers?: Array<EventQuestionAnswerDraftRequest>;
 };
 
@@ -1021,10 +1123,48 @@ export type AttendeeOverviewStats = {
     };
 };
 
+/**
+ * Complete personal information payload for attendee.
+ *
+ * Includes dietary restrictions, medical conditions, accessibility needs,
+ * and emergency contact. Most fields are optional unless marked as required
+ * (e.g., emergency contact for minors).
+ *
+ * Example:
+ * {
+ * "dietary_requirements": [
+ * {"id": 1, "details": "Vegetarian", "notes": "No substitute needed"}
+ * ],
+ * "medical_conditions": [
+ * {"id": 3, "details": "Asthma", "severity": "mild", "notes": "Inhaler on site"}
+ * ],
+ * "accessibility_requirements": [
+ * {"id": 2, "details": "Wheelchair", "notes": "Accessible parking requested"}
+ * ],
+ * "emergency_contact": {
+ * "first_name": "Jane",
+ * "last_name": "Doe",
+ * "relationship": "parent",
+ * "phone_number": "+44 1234 567890"
+ * }
+ * }
+ */
 export type AttendeePersonalInfoDraftRequest = {
+    /**
+     * Dietary restrictions and requirements
+     */
     dietary_requirements?: Array<PersonalInfoItemRequest>;
+    /**
+     * Medical conditions and allergies
+     */
     medical_conditions?: Array<MedicalConditionItemRequest>;
+    /**
+     * Accessibility needs and accommodations
+     */
     accessibility_requirements?: Array<PersonalInfoItemRequest>;
+    /**
+     * Emergency contact (REQUIRED for attendees under 18)
+     */
     emergency_contact?: EmergencyContactDraftRequest;
 };
 
@@ -2041,9 +2181,47 @@ export type ChapterLocationList = {
 };
 
 /**
- * Read-only checkout preview serializer.
+ * Read-only checkout preview serializer (safe for calculations without persistence).
  *
- * Mirrors checkout attendee payload but does not require a payment method.
+ * Similar to CheckoutSerializer but:
+ * - Does not require payment method
+ * - Does not create any database records
+ * - Used only to calculate totals and preview what would happen
+ *
+ * Response includes calculated totals but NO booking/attendee creation.
+ *
+ * **Example request:**
+ * {
+ * "booking_intent_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "attendees": [
+ * {
+ * "attendee": {...AttendeeDraftSerializer...},
+ * "package_id": 5
+ * }
+ * ]
+ * }
+ *
+ * **Example response:**
+ * {
+ * "total_amount": "150.00",
+ * "currency": "GBP",
+ * "attendees": [
+ * {
+ * "name": "John Smith",
+ * "package_name": "Standard Package",
+ * "package_price": "150.00",
+ * "products": [
+ * {
+ * "product_name": "Merchandise",
+ * "variant_name": "Large",
+ * "quantity": 1,
+ * "price": "25.00"
+ * }
+ * ],
+ * "total": "175.00"
+ * }
+ * ]
+ * }
  */
 export type CheckoutPreviewRequest = {
     /**
@@ -2057,13 +2235,75 @@ export type CheckoutPreviewRequest = {
 };
 
 /**
- * Checkout serializer for creating bookings with payments.
+ * Main checkout serializer for creating bookings with payments.
  *
- * This serializer:
- * 1. Accepts booking intent ID, payment method, and attendee selections
- * 2. Validates all data comprehensively
- * 3. Does NOT accept prices from frontend (backend calculates all)
- * 4. Returns booking, payment, orders, and tickets (or client_secret for Stripe)
+ * **Two-phase flow:**
+ * 1. **Validation phase**: Validates intent, payment method, attendees
+ * 2. **Processing phase**: (handled by viewset) Creates payment or finalizes booking
+ *
+ * **Important notes:**
+ * - All prices are calculated server-side; frontend must not send prices
+ * - Booking & attendees created on checkout submission (not after payment)
+ * - Payment status tracked via Payment model
+ * - Stripe payments auto-create tickets; bank transfers await manual approval
+ *
+ * **Request flow:**
+ * 1. Frontend submits checkout with valid intent, payment method, attendees
+ * 2. Serializer validates all data (throws ValidationError if invalid)
+ * 3. Viewset creates Payment model with metadata
+ * 4. For Stripe: payment already confirmed, so finalize immediately
+ * 5. For bank transfer: return reference, await manual admin approval
+ *
+ * **Example request:**
+ * {
+ * "booking_intent_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "payment_method_id": 1,
+ * "stripe_payment_intent_id": "pi_1234567890abcdef" (optional),
+ * "attendees": [
+ * {
+ * "attendee_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "package_id": 5,
+ * "product_selections": []
+ * }
+ * ]
+ * }
+ *
+ * **Example response (Stripe, payment confirmed):**
+ * {
+ * "booking_id": 123,
+ * "booking_reference": "BKG-ABC-2025",
+ * "payment_id": "550e8400-e29b-41d4-a716-446655440002",
+ * "payment_reference": "PAY-XYZ-2025",
+ * "total_amount": "150.00",
+ * "currency": "GBP",
+ * "status": "confirmed",
+ * "message": "Booking confirmed and tickets created",
+ * "tickets": [
+ * {
+ * "ticket_id": "550e8400-e29b-41d4-a716-446655440003",
+ * "ticket_code": "TC-ABC-001",
+ * "attendee_name": "John Smith",
+ * "_links": {"self": "..."}
+ * }
+ * ],
+ * "_links": {"self": "...", "attendees": "...", "tickets": "..."}
+ * }
+ *
+ * **Example response (Bank transfer, awaiting payment verification):**
+ * {
+ * "booking_id": 124,
+ * "booking_reference": "BKG-DEF-2025",
+ * "payment_id": "550e8400-e29b-41d4-a716-446655440004",
+ * "payment_reference": "PAY-UVW-2025",
+ * "total_amount": "200.00",
+ * "currency": "GBP",
+ * "status": "pending_payment",
+ * "message": "Booking created. Complete bank transfer to finalize.",
+ * "bank_transfer_reference": "BT-XYZ-2025",
+ * "bank_transfer_instructions": "Transfer £200.00 to our account...",
+ * "tickets": [],
+ * "_links": {"self": "...", "attendees": "...", "tickets": "..."}
+ * }
  */
 export type CheckoutRequest = {
     /**
@@ -2071,11 +2311,11 @@ export type CheckoutRequest = {
      */
     booking_intent_id: string;
     /**
-     * ID of the PaymentMethod to use
+     * ID of the PaymentMethod to use (must be active and match event)
      */
     payment_method_id: number;
     /**
-     * Stripe PaymentIntent ID when payment is already confirmed
+     * Stripe PaymentIntent ID when payment is already confirmed (Stripe only)
      */
     stripe_payment_intent_id?: string;
     /**
@@ -4203,10 +4443,34 @@ export type EmergencyContact = {
     };
 };
 
+/**
+ * Emergency contact information for attendee.
+ *
+ * Required for minors (under 18). Validates phone number format
+ * and email format.
+ *
+ * Example:
+ * {
+ * "first_name": "Jane",
+ * "last_name": "Doe",
+ * "relationship": "parent",
+ * "phone_number": "+44 1234 567890",
+ * "email": "jane@example.com",
+ * "primary_contact": true
+ * }
+ */
 export type EmergencyContactDraftRequest = {
+    /**
+     * First name of emergency contact
+     */
     first_name: string;
+    /**
+     * Last name of emergency contact
+     */
     last_name: string;
     /**
+     * Relationship to attendee
+     *
      * * `parent` - parent
      * * `sibling` - sibling
      * * `child` - child
@@ -4215,8 +4479,17 @@ export type EmergencyContactDraftRequest = {
      * * `other` - other
      */
     relationship: 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other';
+    /**
+     * Phone number of emergency contact (international format supported)
+     */
     phone_number: string;
+    /**
+     * Email address of emergency contact (optional)
+     */
     email?: string | null;
+    /**
+     * Whether this is the primary emergency contact
+     */
     primary_contact?: boolean;
 };
 
@@ -6250,7 +6523,7 @@ export type EventQuestion = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOption>;
+    options?: Array<EventQuestionNestedOption>;
     readonly created_at: string;
     readonly updated_at: string;
     /**
@@ -6329,11 +6602,53 @@ export type EventQuestionAnswerChoiceRequest = {
     option: number;
 };
 
+/**
+ * Answer to an event question with support for multiple formats.
+ *
+ * Supports:
+ * - Text answers (free-form text)
+ * - Multiple choice (selected_option_ids)
+ * - File uploads (upload_resource_id or upload_url)
+ * - Numeric answers (answer_text with numeric value)
+ *
+ * Validation ensures at least one answer format is provided.
+ *
+ * Examples:
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "answer_text": "Yes, I am available"
+ * }
+ *
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "selected_option_ids": [1, 3]
+ * }
+ *
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440002",
+ * "upload_resource_id": 42
+ * }
+ */
 export type EventQuestionAnswerDraftRequest = {
+    /**
+     * UUID of the EventQuestion
+     */
     question_id: string;
+    /**
+     * Text answer (for text/numeric questions)
+     */
     answer_text?: string | null;
+    /**
+     * IDs of selected options (for choice questions)
+     */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource (for file questions)
+     */
     upload_resource_id?: number;
+    /**
+     * URL of uploaded file (alternative to upload_resource_id)
+     */
     upload_url?: string;
 };
 
@@ -6349,9 +6664,26 @@ export type EventQuestionAnswerRequest = {
     answer_text: string;
 };
 
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOption = {
+    readonly id: number;
+    option_text: string;
+    order?: number;
+};
+
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOptionRequest = {
+    option_text: string;
+    order?: number;
+};
+
 export type EventQuestionOption = {
     readonly id: number;
-    readonly question: string;
+    question?: string;
     option_text: string;
     order?: number;
     readonly created_at: string;
@@ -6372,6 +6704,7 @@ export type EventQuestionOption = {
 };
 
 export type EventQuestionOptionRequest = {
+    question?: string;
     option_text: string;
     order?: number;
 };
@@ -6405,7 +6738,7 @@ export type EventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionRequest>;
+    options?: Array<EventQuestionNestedOptionRequest>;
 };
 
 /**
@@ -9138,11 +9471,33 @@ export type MedicalCondition = {
     };
 };
 
+/**
+ * Medical condition item with severity level.
+ *
+ * Example:
+ * {
+ * "id": 3,
+ * "details": "Nut allergy - severe",
+ * "notes": "Keep EpiPen on hand",
+ * "severity": "severe"
+ * }
+ */
 export type MedicalConditionItemRequest = {
+    /**
+     * ID of the requirement (dietary requirement ID, etc)
+     */
     id: number;
+    /**
+     * Additional details about this requirement
+     */
     details?: string | null;
+    /**
+     * Notes or special instructions for this requirement
+     */
     notes?: string | null;
     /**
+     * Severity level of the medical condition
+     *
      * * `mild` - mild
      * * `moderate` - moderate
      * * `severe` - severe
@@ -12435,6 +12790,7 @@ export type PatchedEventQuestionAnswerRequest = {
 };
 
 export type PatchedEventQuestionOptionRequest = {
+    question?: string;
     option_text?: string;
     order?: number;
 };
@@ -12468,7 +12824,7 @@ export type PatchedEventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionRequest>;
+    options?: Array<EventQuestionNestedOptionRequest>;
 };
 
 export type PatchedEventReviewRequest = {
@@ -14247,9 +14603,28 @@ export type PersonalInfoCombined = {
     };
 };
 
+/**
+ * Generic personal requirement item (dietary, accessibility, etc).
+ *
+ * Example:
+ * {
+ * "id": 1,
+ * "details": "Gluten-free",
+ * "notes": "Also avoid cross-contamination"
+ * }
+ */
 export type PersonalInfoItemRequest = {
+    /**
+     * ID of the requirement (dietary requirement ID, etc)
+     */
     id: number;
+    /**
+     * Additional details about this requirement
+     */
     details?: string | null;
+    /**
+     * Notes or special instructions for this requirement
+     */
     notes?: string | null;
 };
 
@@ -14578,7 +14953,20 @@ export type ProductRevenueTrends = {
 };
 
 /**
- * Serializer for product variant selection within a package.
+ * Serializer for product variant selection within a booking package.
+ *
+ * Validates:
+ * - PackageProduct exists and belongs to package
+ * - ProductVariant exists and belongs to product
+ * - Variant is purchasable
+ * - Quantity does not exceed package limits
+ *
+ * Example:
+ * {
+ * "package_product_id": 1,
+ * "variant_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "quantity": 2
+ * }
  */
 export type ProductSelectionRequest = {
     /**
@@ -19410,7 +19798,7 @@ export type EventQuestionWritable = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionWritable>;
+    options?: Array<EventQuestionNestedOptionWritable>;
 };
 
 /**
@@ -19446,7 +19834,16 @@ export type EventQuestionAnswerRequestWritable = {
     selected_option_ids?: Array<number>;
 };
 
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOptionWritable = {
+    option_text: string;
+    order?: number;
+};
+
 export type EventQuestionOptionWritable = {
+    question?: string;
     option_text: string;
     order?: number;
 };
@@ -25345,9 +25742,9 @@ export type BookingsListListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25551,9 +25948,9 @@ export type BookingsBookingTicketsListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -30837,7 +31234,7 @@ export type EventQuestionAnswersSubmitFormCreateData = {
         /**
          * Filter by question ID
          */
-        question?: number;
+        question?: string;
         /**
          * Filter by event ID (through question)
          */

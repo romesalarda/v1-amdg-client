@@ -352,7 +352,7 @@ import { useField, useForm } from 'vee-validate'
 import { z } from 'zod'
 import { useDebounceFn } from '@vueuse/core'
 import { useToast } from '#ui/composables/useToast'
-import type { EventQuestion, EventQuestionOption, EventDetail } from '~/api/types.gen'
+import type { EventQuestion, EventQuestionNestedOption, EventDetail } from '~/api/types.gen'
 import type { EventQuestionAnswerDraft } from '~/stores/registration'
 
 // Composables
@@ -597,7 +597,7 @@ const getAnswer = (questionId: string) => {
   return answer
 }
 
-const getSelectedOptions = (questionId: string): EventQuestionOption[] => {
+const getSelectedOptions = (questionId: string): EventQuestionNestedOption[] => {
   const answer = getAnswer(questionId)
   if (!answer) return []
   

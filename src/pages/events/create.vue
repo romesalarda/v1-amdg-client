@@ -499,6 +499,8 @@ const eventTypeOptions = computed(() => {
   }))
 })
 
+const route = useRoute()
+
 // Common timezones
 const timezoneOptions = [
   'UTC',
@@ -656,6 +658,18 @@ const onSubmit = handleSubmit((formValues) => {
       $notyf?.error(error?.message || 'Failed to create event')
     }
   })
+})
+
+// set start date if sdt=2026-01-01 is provided in query params
+onMounted(() => {
+  const sdt = route.query.sdt as string
+  if (sdt) {
+    const parsedDate = new Date(sdt)
+    if (!isNaN(parsedDate.getTime())) {
+      start_datetime.value = parsedDate.toISOString().slice(0, 16)
+      end_datetime.value = new Date(parsedDate.getTime() + 3600000).toISOString().slice(0, 16) // default to 1 hour later
+    }
+  }
 })
 
 const saveDraft = () => {
