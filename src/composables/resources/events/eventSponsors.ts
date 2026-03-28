@@ -44,7 +44,7 @@ export function extractCollection<T>(payload: unknown): T[] {
 export function useEventSponsors(eventId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'list', eventId] as const,
-    queryFn: () => eventListSponsorsList({ path: { event_id: toValue(eventId) } }),
+    queryFn: () => eventListSponsorsList({ path: { url_safe_title: toValue(eventId) } }),
     enabled: () => !!toValue(eventId),
   })
 }
@@ -55,7 +55,7 @@ export function useCreateEventSponsor() {
   return useMutation({
     mutationFn: ({ eventId, body }: { eventId: string; body: EventSponsorCreateUpdateRequest }) => {
       return eventListSponsorsCreate({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
         body: body as any,
       })
     },
@@ -80,7 +80,7 @@ export function useUpdateEventSponsor() {
       body: Partial<EventSponsorCreateUpdateRequest>
     }) => {
       return eventListSponsorsPartialUpdate({
-        path: { event_id: eventId, sponsor_id: sponsorId },
+        path: { url_safe_title: eventId, sponsor_id: sponsorId },
         body: body as any,
       })
     },
@@ -97,7 +97,7 @@ export function useDeleteEventSponsor() {
   return useMutation({
     mutationFn: ({ eventId, sponsorId }: { eventId: string; sponsorId: string }) => {
       return eventListSponsorsDestroy({
-        path: { event_id: eventId, sponsor_id: sponsorId },
+        path: { url_safe_title: eventId, sponsor_id: sponsorId },
       })
     },
     onSuccess: (_data, variables) => {
@@ -113,7 +113,7 @@ export function useApproveEventSponsor() {
   return useMutation({
     mutationFn: ({ eventId, sponsorId }: { eventId: string; sponsorId: string }) => {
       return eventListSponsorsApprove({
-        path: { event_id: eventId, sponsor_id: sponsorId },
+        path: { url_safe_title: eventId, sponsor_id: sponsorId },
         body: {} as any,
       })
     },
@@ -130,7 +130,7 @@ export function useRejectEventSponsor() {
   return useMutation({
     mutationFn: ({ eventId, sponsorId }: { eventId: string; sponsorId: string }) => {
       return eventListSponsorsReject({
-        path: { event_id: eventId, sponsor_id: sponsorId },
+        path: { url_safe_title: eventId, sponsor_id: sponsorId },
         body: {} as any,
       })
     },
@@ -144,7 +144,7 @@ export function useRejectEventSponsor() {
 export function useEventSponsorshipPackages(eventId: MaybeRefOrGetter<string>) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'packages', eventId] as const,
-    queryFn: () => eventListSponsorshipPackagesList({ path: { event_id: toValue(eventId) } }),
+    queryFn: () => eventListSponsorshipPackagesList({ path: { url_safe_title: toValue(eventId) } }),
     enabled: () => !!toValue(eventId),
   })
 }
@@ -155,7 +155,7 @@ export function useCreateEventSponsorshipPackage() {
   return useMutation({
     mutationFn: ({ eventId, body }: { eventId: string; body: EventSponsorPackageCreateUpdateRequest }) => {
       return eventListSponsorshipPackagesCreate({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
         body: body as any,
       })
     },
@@ -181,7 +181,7 @@ export function useUpdateEventSponsorshipPackage() {
       body: Partial<EventSponsorPackageCreateUpdateRequest>
     }) => {
       return eventListSponsorshipPackagesPartialUpdate({
-        path: { event_id: eventId, package_id: packageId },
+        path: { url_safe_title: eventId, package_id: packageId },
         body: body as any,
       })
     },
@@ -199,7 +199,7 @@ export function useDeleteEventSponsorshipPackage() {
   return useMutation({
     mutationFn: ({ eventId, packageId }: { eventId: string; packageId: string }) => {
       return eventListSponsorshipPackagesDestroy({
-        path: { event_id: eventId, package_id: packageId },
+        path: { url_safe_title: eventId, package_id: packageId },
       })
     },
     onSuccess: (_data, variables) => {

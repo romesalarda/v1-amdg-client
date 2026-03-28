@@ -972,7 +972,7 @@ const removeConsentDefinition = async (consentId: number) => {
 }
 
 // Fetch questions from API
-const eventIdFilter = { event_id: route.params.id as string }
+const eventIdFilter = { event: route.params.id as string, page_size: 100 }
 const { data: questionsData, isLoading: questionsLoading } = useEventQuestions(eventIdFilter)
 
 // Initialize WebSocket connection FIRST (needed by form builder)

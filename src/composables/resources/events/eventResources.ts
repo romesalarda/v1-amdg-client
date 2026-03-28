@@ -34,7 +34,7 @@ export function useEventResources(
       const id = toValue(eventId)
       const queryParams = toValue(params)
       return eventListResourcesList({
-        path: { event_id: id },
+        path: { url_safe_title: id },
         query: queryParams,
       })
     },
@@ -55,7 +55,7 @@ export function useAddEventResource() {
       body: EventListAddResourceCreateData['body']
     }) => {
       return eventListAddResourceCreate({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         body: data.body,
       })
     },
@@ -81,7 +81,7 @@ export function useRemoveEventResource() {
       query: EventListRemoveResourceDestroyData['query']
     }) => {
       return eventListRemoveResourceDestroy({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         query: data.query,
       })
     },
@@ -112,7 +112,7 @@ export function useUpdateEventResource() {
       body: EventListUpdateResourcePartialUpdateData['body']
     }) => {
       return eventListUpdateResourcePartialUpdate({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         query: data.query,
         body: data.body,
       })
@@ -143,7 +143,7 @@ export function usePromoteLandingImage() {
       query: EventListPromoteLandingImageCreateData['query']
     }) => {
       return eventListPromoteLandingImageCreate({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         query: data.query,
         body: {} as any, // Empty body - API doesn't require body data
       })
@@ -174,7 +174,7 @@ export function useDemoteLandingImage() {
       query: EventListDemoteLandingImageCreateData['query']
     }) => {
       return eventListDemoteLandingImageCreate({
-        path: { event_id: data.eventId },
+        path: { url_safe_title: data.eventId },
         query: data.query,
         body: {} as any, // Empty body - API doesn't require body data
       })

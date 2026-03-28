@@ -41,7 +41,7 @@ export function useEventSettings(eventId: MaybeRefOrGetter<string>) {
     queryKey: [...QUERY_KEY, 'event', eventId] as const,
     queryFn: () => {
       const id = toValue(eventId)
-      return eventListSettingsRetrieve({ path: { event_id: id } })
+      return eventListSettingsRetrieve({ path: { url_safe_title: id } })
     },
     enabled: () => !!toValue(eventId),
   })

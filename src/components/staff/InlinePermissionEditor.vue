@@ -70,7 +70,7 @@ import PermissionPresetSelector from './PermissionPresetSelector.vue'
 
 interface Props {
   staffId: string
-  eventId: number
+  eventId: string
   userId: number
   currentPermissions?: EventPermissionAssignment[]
   disabled?: boolean

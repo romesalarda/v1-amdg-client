@@ -185,7 +185,7 @@
           v-for="event in paginatedEvents" 
           :key="event.event_id" 
           class="event-card shadow-drawn shadow-drawn-hover flex flex-col group overflow-hidden cursor-pointer"
-          @click="navigateTo(`/events/${event.event_id}`)"
+          @click="navigateTo(`/events/${event.url_safe_title}`)"
         >
           <!-- Event Image -->
           <div class="aspect-[16/9] w-full overflow-hidden relative border-b border-deep-navy/10">

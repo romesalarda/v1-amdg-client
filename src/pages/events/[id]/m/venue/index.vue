@@ -214,7 +214,7 @@ const createEventVenue = useCreateEventVenue()
 const deleteEventVenue = useDeleteEventVenue()
 
 const handleVenueSelection = async (venueId: number) => {
-	if (!eventInternalId.value) {
+	if (!event.value?.data?.event_id) {
 		toast.add({
 			title: 'Event not ready',
 			description: 'Event context is still loading. Please try again in a moment.',
@@ -225,7 +225,7 @@ const handleVenueSelection = async (venueId: number) => {
 
 	try {
 		await createEventVenue.mutateAsync({
-			event: eventInternalId.value,
+			event: event.value?.data?.event_id,
 			venue: venueId,
 		})
 

@@ -233,7 +233,7 @@
                   />
                   <div v-else class="w-full h-full bg-gradient-to-br from-blue-400 to-blue-600"></div>
                   <div class="absolute top-4 left-4 bg-deep-navy/90 backdrop-blur-md text-white px-3 py-1 rounded-full text-[9px] font-bold tracking-widest uppercase">
-                    {{ activeTimeFilter === 'past' ? 'Past' : (staffEventIds.has(event.id) ? 'Staff' : 'Attending') }}
+                    {{ activeTimeFilter === 'past' ? 'Past' : (staffEventIds.has(event.event_id) ? 'Staff' : 'Attending') }}
                   </div>
                 </div>
                 
@@ -273,7 +273,7 @@
               v-for="event in filteredStaffEvents" 
               :key="'staff-' + event.event_id"
               class="bg-white border border-deep-navy/10 shadow-drawn rounded-2xl overflow-hidden group hover:border-blue-500/20 transition-all cursor-pointer"
-              @click="router.push(`/events/${event.event_id}/m/dashboard`)"
+              @click="router.push(`/events/${event.url_safe_title}/m/dashboard`)"
             >
               <div class="flex flex-col md:flex-row h-auto md:h-48">
                 <div class="w-full md:w-64 h-48 md:h-full overflow-hidden relative">
@@ -607,7 +607,7 @@ const myUpcomingEvents = computed(() => {
     .filter(event => 
       event.organisation && 
       userOrganizationIds.value.includes(event.organisation) &&
-      !staffEventIds.value.has(event.id)
+      !staffEventIds.value.has(event.event_id)
     )
     .slice(0, 6)
 })
@@ -618,7 +618,7 @@ const myPastEvents = computed(() => {
     .filter(event => 
       event.organisation && 
       userOrganizationIds.value.includes(event.organisation) &&
-      !staffEventIds.value.has(event.id)
+      !staffEventIds.value.has(event.event_id)
     )
     .slice(0, 6)
 })
@@ -626,14 +626,14 @@ const myPastEvents = computed(() => {
 // Events where user is staff (upcoming)
 const upcomingStaffEvents = computed(() => {
   return upcomingEventsResults.value
-    .filter(event => staffEventIds.value.has(event.id))
+    .filter(event => staffEventIds.value.has(event.event_id))
     .slice(0, 6)
 })
 
 // Events where user is staff (past)
 const pastStaffEvents = computed(() => {
   return pastEventsResults.value
-    .filter(event => staffEventIds.value.has(event.id))
+    .filter(event => staffEventIds.value.has(event.event_id))
     .slice(0, 6)
 })
 
@@ -642,7 +642,7 @@ const recommendedEvents = computed(() => {
   return upcomingEventsResults.value
     .filter(event => 
       (!event.organisation || !userOrganizationIds.value.includes(event.organisation)) &&
-      !staffEventIds.value.has(event.id)
+      !staffEventIds.value.has(event.event_id)
     )
     .slice(0, 6)
 })

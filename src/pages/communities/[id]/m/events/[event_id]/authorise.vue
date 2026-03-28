@@ -259,7 +259,7 @@ const { data: eventData, isLoading: isLoadingEvent, error: eventError } = useEve
 const event = computed(() => eventData.value?.data)
 
 // Fetch existing authorizations for this event
-const { data: authData } = useEventAuthorizations(computed(() => ({ event_id: event.value?.event_id })))
+const { data: authData } = useEventAuthorizations(computed(() => ({ event: event.value?.url_safe_title || '' })))
 const existingAuthorizations = computed(() => authData.value?.data?.results || [])
 
 // Get the most recent authorization (if any)

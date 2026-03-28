@@ -105,7 +105,7 @@ export function useEvent(eventId: MaybeRefOrGetter<String>) {
     queryKey: [...QUERY_KEY, 'detail', eventId] as const,
     queryFn: () => {
       const id = toValue(eventId)
-      return eventListRetrieve({ path: { event_id: String(id) } , throwOnError: true})
+      return eventListRetrieve({ path: { url_safe_title: String(id) } , throwOnError: true})
     },
     enabled: () => !!toValue(eventId),
   })
@@ -133,7 +133,7 @@ export function useUpdateEvent() {
 
   return useMutation({
     mutationFn: ({ eventId, body }: { eventId: string; body: EventListUpdateData['body'] }) =>
-      eventListUpdate({ path: { event_id: eventId }, body }),
+      eventListUpdate({ path: { url_safe_title: eventId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -151,7 +151,7 @@ export function usePartialUpdateEvent() {
 
   return useMutation({
     mutationFn: ({ eventId, body }: { eventId: string; body?: EventListPartialUpdateData['body'] }) =>
-      eventListPartialUpdate({ path: { event_id: eventId }, body }),
+      eventListPartialUpdate({ path: { url_safe_title: eventId }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -168,7 +168,7 @@ export function useDeleteEvent() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (eventId: string) => eventListDestroy({ path: { event_id: eventId } }),
+    mutationFn: (eventId: string) => eventListDestroy({ path: { url_safe_title: eventId } }),
     onSuccess: (_, eventId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

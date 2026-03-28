@@ -120,7 +120,7 @@ export function useCurrentUserEventPermissions(
     queryFn: async () => {
       const id = toValue(eventId)
       const response = await eventListRetrieve({
-        path: { event_id: id },
+        path: { url_safe_title: id },
       })
       
       // CRITICAL: Validate that user_permissions exists

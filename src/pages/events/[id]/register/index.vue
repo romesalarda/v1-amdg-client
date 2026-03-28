@@ -1379,7 +1379,7 @@ const event_uuid = computed(() => event.value?.event_id || '')
 const eventLoading = computed(() => eventQuery.isLoading.value)
 const { data: eventVenuesData } = useEventVenues(
 	computed(() => ({
-		event_id: eventId.value,
+		event: eventId.value,
 	}))
 )
 const primaryVenue = computed(() => eventVenuesData.value?.data?.results?.[0] || null)
@@ -1640,8 +1640,8 @@ const consentsQuery = useConsents(
 const consents = computed(() => consentsQuery.data.value?.data?.results || [])
 
 const eventQuestionsQuery = useEventQuestions(
-	computed(() => (event.value?.id ? { event: event.value.id, page_size: 100 } : undefined)),
-	{ enabled: computed(() => !!event.value?.id) }
+	computed(() => (event.value?.event_id ? { event: event.value.event_id, page_size: 100 } : undefined)),
+	{ enabled: computed(() => !!event.value?.event_id) }
 )
 const eventQuestions = computed(() => eventQuestionsQuery.data.value?.data?.results || [])
 const requiredQuestionIds = computed(() => eventQuestions.value.filter((question) => question.required).map((question) => question.id))

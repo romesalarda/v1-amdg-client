@@ -47,7 +47,7 @@ export function useEventStaffInvites(
       const id = toValue(eventId)
       const queryParams = toValue(params)
       return eventStaffInvitesList({ 
-        path: { event_id: id }, 
+        path: { url_safe_title: id }, 
         query: queryParams 
       })
     },
@@ -72,7 +72,7 @@ export function useMyEventStaffInvitesForEvent(
       const queryParams = toValue(params)
       
       return eventStaffInvitesList({ 
-        path: { event_id }, 
+        path: { url_safe_title: event_id }, 
         query: { 
           target_user: authStore.user?.id,
           ...queryParams
@@ -96,7 +96,7 @@ export function useEventStaffInvite(
       const event_id = toValue(eventId)
       const invite_id = toValue(inviteId)
       return eventStaffInviteRetrieve({ 
-        path: { event_id, invite_id: String(invite_id) } 
+        path: { url_safe_title: event_id, invite_id: String(invite_id) } 
       })
     },
     enabled: () => !!toValue(eventId) && !!toValue(inviteId),
@@ -112,7 +112,7 @@ export function useCreateEventStaffInvite() {
   return useMutation({
     mutationFn: ({ eventId, body }: { eventId: string; body: EventStaffInvitesCreateData['body'] }) =>
       eventStaffInvitesCreate({ 
-        path: { event_id: eventId }, 
+        path: { url_safe_title: eventId }, 
         body 
       }),
     onSuccess: (_, variables) => {
@@ -141,7 +141,7 @@ export function useUpdateEventStaffInvite() {
       body: EventStaffInviteUpdateData['body'] 
     }) =>
       eventStaffInviteUpdate({ 
-        path: { event_id: eventId, invite_id: String(inviteId) }, 
+        path: { url_safe_title: eventId, invite_id: String(inviteId) }, 
         body 
       }),
     onSuccess: (_, variables) => {
@@ -170,7 +170,7 @@ export function usePartialUpdateEventStaffInvite() {
       body?: EventStaffInvitePartialUpdateData['body'] 
     }) =>
       eventStaffInvitePartialUpdate({ 
-        path: { event_id: eventId, invite_id: String(inviteId) }, 
+        path: { url_safe_title: eventId, invite_id: String(inviteId) }, 
         body 
       }),
     onSuccess: (_, variables) => {
@@ -191,7 +191,7 @@ export function useDeleteEventStaffInvite() {
   return useMutation({
     mutationFn: ({ eventId, inviteId }: { eventId: string; inviteId: string }) =>
       eventStaffInviteDelete({ 
-        path: { event_id: eventId, invite_id: String(inviteId) } 
+        path: { url_safe_title: eventId, invite_id: String(inviteId) } 
       }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -211,7 +211,7 @@ export function useAcceptEventStaffInvite() {
   return useMutation({
     mutationFn: ({ eventId, inviteId }: { eventId: string; inviteId: string }) =>
       eventListStaffInvitesAcceptCreate({ 
-        path: { event_id: eventId, invite_id: String(inviteId) },
+        path: { url_safe_title: eventId, invite_id: String(inviteId) },
         throwOnError: true
       }),
     onSuccess: (_, variables) => {

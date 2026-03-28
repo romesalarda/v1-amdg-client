@@ -26,7 +26,7 @@ export function useAvailabilityWindows(eventId: MaybeRefOrGetter<string | undefi
       const id = toValue(eventId)
       if (!id) throw new Error('Event ID is required')
       return eventListAvailabilityWindowsList({ 
-        path: { event_id: id },
+        path: { url_safe_title: id },
       })
     },
     enabled: () => !!toValue(eventId),
@@ -48,7 +48,7 @@ export function useCreateAvailabilityWindow() {
       body: EventListAddAvailabilityWindowCreateData['body']
     }) =>
       eventListAddAvailabilityWindowCreate({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
         body,
       }),
     onSuccess: (_, variables) => {
@@ -77,7 +77,7 @@ export function useUpdateAvailabilityWindow() {
       body: EventListUpdateAvailabilityWindowPartialUpdateData['body']
     }) =>
       eventListUpdateAvailabilityWindowPartialUpdate({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
         query: { window_id: windowId },
         body,
       }),
@@ -105,7 +105,7 @@ export function useDeleteAvailabilityWindow() {
       windowId: string
     }) =>
       eventListRemoveAvailabilityWindowDestroy({
-        path: { event_id: eventId },
+        path: { url_safe_title: eventId },
         query: { window_id: windowId },
       }),
     onSuccess: (_, variables) => {
