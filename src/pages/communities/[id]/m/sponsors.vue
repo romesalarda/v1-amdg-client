@@ -871,12 +871,12 @@ const sponsorshipPackages = computed<PackageItem[]>(() => {
 })
 
 const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods } = usePaymentMethods(computed(() => {
-	if (!selectedEvent.value?.id) {
+	if (!selectedEventId.value) {
 		return undefined
 	}
 
 	return {
-		event: selectedEvent.value.id,
+		event: selectedEventId.value,
 		is_active: true,
 		page_size: 100,
 	}

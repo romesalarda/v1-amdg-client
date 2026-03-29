@@ -71,7 +71,6 @@ export function useBookingShop() {
       return {
         attendee_id: selectedAttendeeId.value,
         event: eventNumericId.value,
-        status: 'draft' as const,
         ordering: '-created_at',
         page_size: 20,
       }
@@ -81,7 +80,8 @@ export function useBookingShop() {
   const latestDraftOrder = computed(() => {
     const results = draftOrdersQuery.data.value?.data?.results || []
     if (!Array.isArray(results)) return null
-    return results[0] || null
+    const openStatuses = new Set(['draft', 'pending'])
+    return results.find((order) => openStatuses.has(String(order.status || '').toLowerCase())) || null
   })
 
   watch(
@@ -120,15 +120,33 @@ export function useBookingShop() {
       throw new Error('Unable to resolve attendee details for order creation.')
     }
 
-    const createResponse = await createOrderMutation.mutateAsync({
-      attendee: attendeePrimaryId,
-      items: [
-        {
-          product_variant_id: variantId,
-          quantity,
-        },
-      ],
-    } as any)
+    let createResponse: any
+    try {
+      createResponse = await createOrderMutation.mutateAsync({
+        attendee: attendeePrimaryId,
+        items: [
+          {
+            product_variant_id: variantId,
+            quantity,
+          },
+        ],
+      } as any)
+    } catch (error: any) {
+      const payload = error?.body || error?.response?.data || error?.data || {}
+      const existingOrderId = payload?.existing_order_id
+      const existingOrderReference = payload?.existing_order_reference
+
+      if (typeof existingOrderId === 'string' && existingOrderId.length > 0) {
+        store.setActiveOrder(existingOrderId)
+        throw new Error(
+          existingOrderReference
+            ? `An open order (${existingOrderReference}) already exists for this attendee. Complete payment before creating another.`
+            : 'An open order already exists for this attendee. Complete payment before creating another.'
+        )
+      }
+
+      throw error
+    }
 
     const createdOrderId = createResponse.data?.order_id
     if (!createdOrderId) {

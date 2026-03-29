@@ -3316,7 +3316,7 @@ const exportActionsToCSV = () => {
 const handleCreateOrder = async () => {
   try {
     await createOrderMutation.mutateAsync({
-      attendee: parseInt(attendeeId.value),
+      attendee: attendeeId.value,
       items: [], // Empty items array for draft order
     })
     showCreateOrderForm.value = false

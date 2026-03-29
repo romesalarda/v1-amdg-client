@@ -4789,6 +4789,10 @@ export type EventCreateUpdate = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -4844,6 +4848,10 @@ export type EventCreateUpdateRequest = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -9554,7 +9562,7 @@ export type OrderCheckoutRequestRequest = {
  */
 export type OrderCreate = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
     readonly order_id: string;
 };
 
@@ -9563,7 +9571,7 @@ export type OrderCreate = {
  */
 export type OrderCreateRequest = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
 };
 
 /**
@@ -9681,6 +9689,19 @@ export type OrderList = {
         attendee?: string;
     };
     readonly order_items: Array<OrderItem>;
+};
+
+export type OrderPricingPreviewItemRequest = {
+    product_variant_id: string;
+    quantity: number;
+};
+
+export type OrderPricingPreviewRequestRequest = {
+    /**
+     * Attendee UUID used for pricing context
+     */
+    attendee_id: string;
+    items: Array<OrderPricingPreviewItemRequest>;
 };
 
 /**
@@ -12100,6 +12121,10 @@ export type PatchedEventCreateUpdateRequest = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime?: string;
     end_datetime?: string;
     /**
@@ -19053,6 +19078,10 @@ export type EventCreateUpdateWritable = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -20913,7 +20942,7 @@ export type MedicalConditionsStatsWritable = {
  */
 export type OrderCreateWritable = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
 };
 
 /**
@@ -20921,7 +20950,7 @@ export type OrderCreateWritable = {
  */
 export type OrderCreateRequestWritable = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
     /**
      * Items to add to the order
      */
@@ -39481,6 +39510,40 @@ export type PaymentsDiscountsUpdateResponses = {
 
 export type PaymentsDiscountsUpdateResponse = PaymentsDiscountsUpdateResponses[keyof PaymentsDiscountsUpdateResponses];
 
+export type PaymentsDiscountsEligibilityPreviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Attendee UUID to evaluate discount eligibility for
+         */
+        attendee_id: string;
+        /**
+         * Optional event UUID to limit results
+         */
+        event_id?: string;
+    };
+    url: '/api/payments/discounts/eligibility-preview/';
+};
+
+export type PaymentsDiscountsEligibilityPreviewRetrieveErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type PaymentsDiscountsEligibilityPreviewRetrieveResponses = {
+    /**
+     * Discount eligibility diagnostics
+     */
+    200: unknown;
+};
+
 export type PaymentsDonationsListData = {
     body?: never;
     path?: never;
@@ -39789,9 +39852,9 @@ export type PaymentsListListData = {
          */
         descriptor?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -40069,9 +40132,9 @@ export type PaymentsMethodsListData = {
          */
         created_before?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -43269,6 +43332,31 @@ export type ProductsOrdersSubmitCreateErrors = {
 export type ProductsOrdersSubmitCreateResponses = {
     /**
      * Order submitted successfully
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersPreviewPricingCreateData = {
+    body: OrderPricingPreviewRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/products/orders/preview-pricing/';
+};
+
+export type ProductsOrdersPreviewPricingCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type ProductsOrdersPreviewPricingCreateResponses = {
+    /**
+     * Pricing preview result
      */
     200: unknown;
 };

@@ -52,6 +52,41 @@
 								</div>
 							</label>
 						</div>
+
+						<div
+							v-if="isStripeMethod"
+							class="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-4"
+						>
+							<p class="text-xs font-black uppercase tracking-wide text-blue-900">Card payment</p>
+							<p class="mt-1 text-xs text-blue-900/85">Your card details are handled by Stripe and never stored on our servers.</p>
+							<div class="mt-3 rounded-lg border border-blue-200 bg-white px-3 py-3">
+								<div ref="stripeCardMountRef" class="min-h-[24px]" />
+							</div>
+							<p v-if="stripeCardError" class="mt-2 text-xs text-red-700">{{ stripeCardError }}</p>
+						</div>
+
+						<div
+							v-if="isBankTransferMethod"
+							class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
+						>
+							<p class="text-xs font-black uppercase tracking-wide text-amber-900">Bank transfer details</p>
+							<p class="mt-1 text-xs text-amber-900/80">Pay using the account below. Final transfer reference is generated after checkout submission.</p>
+
+							<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
+								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
+									<p class="font-black">Account name</p>
+									<p class="mt-1 break-all">{{ bankDetails.account_name || 'Not provided' }}</p>
+								</div>
+								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
+									<p class="font-black">Sort code</p>
+									<p class="mt-1 break-all">{{ bankDetails.sort_code || 'Not provided' }}</p>
+								</div>
+								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
+									<p class="font-black">Account number</p>
+									<p class="mt-1 break-all">{{ bankDetails.account_number || 'Not provided' }}</p>
+								</div>
+							</div>
+						</div>
 					</article>
 
 					<article v-if="checkoutResult" class="rounded-2xl border border-deep-navy/10 bg-white p-4">
@@ -60,7 +95,7 @@
 						<p class="mt-1 text-sm text-deep-navy/80">Status {{ checkoutResult.status || 'pending' }}</p>
 
 						<div v-if="checkoutResult.stripe_client_secret" class="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-3 text-xs text-blue-900">
-							Stripe payment intent created. Complete payment with the provided client secret in your payment flow.
+							Stripe payment intent created. Complete the inline card step to finish payment.
 						</div>
 
 						<div v-if="checkoutResult.bank_transfer_reference" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-900">
@@ -95,10 +130,10 @@
 						<button
 							type="button"
 							class="mt-4 w-full rounded-xl bg-deep-navy px-4 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-							:disabled="!canSubmitCheckout || checkoutMutation.isPending.value"
+							:disabled="!canSubmitCheckout || checkoutMutation.isPending.value || isConfirmingStripePayment"
 							@click="submitCheckout"
 						>
-							{{ checkoutMutation.isPending.value ? 'Processing...' : 'Checkout now' }}
+							{{ ctaLabel }}
 						</button>
 					</article>
 				</aside>
@@ -108,8 +143,11 @@
 </template>
 
 <script setup lang="ts">
+import { loadStripe } from '@stripe/stripe-js'
+import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
 import type { PaymentMethod } from '~/api/types.gen'
 import { useBookingShop } from '~/composables/booking/useBookingShop'
+import { useStripeConfig } from '~/composables/resources/common/stripe'
 import { useCheckoutProductOrder } from '~/composables/resources/products/productOrders'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { formatMoney } from '~/utils/money'
@@ -141,7 +179,7 @@ const paymentMethodsQuery = usePaymentMethods(
 	computed(() => {
 		if (!eventNumericId.value) return undefined
 		return {
-			event: eventNumericId.value,
+			event: eventId.value,
 			is_active: true,
 			page_size: 20,
 		}
@@ -151,6 +189,23 @@ const paymentMethodsQuery = usePaymentMethods(
 const paymentMethods = computed<PaymentMethod[]>(() => {
 	const rows = paymentMethodsQuery.data.value?.data?.results
 	return Array.isArray(rows) ? (rows as PaymentMethod[]) : []
+})
+
+const selectedPaymentMethod = computed(() => {
+	if (!selectedPaymentMethodId.value) return null
+	return paymentMethods.value.find((item) => item.id === selectedPaymentMethodId.value) || null
+})
+
+const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+const isBankTransferMethod = computed(() => selectedPaymentMethod.value?.method_type === 'BANK_TRANSFER')
+
+const bankDetails = computed(() => {
+	const details = selectedPaymentMethod.value?.provided_details as Record<string, unknown> | undefined
+	return {
+		account_name: typeof details?.account_name === 'string' ? details.account_name : '',
+		sort_code: typeof details?.sort_code === 'string' ? details.sort_code : '',
+		account_number: typeof details?.account_number === 'string' ? details.account_number : '',
+	}
 })
 
 watch(
@@ -175,15 +230,111 @@ const selectedPaymentMethodId = computed({
 
 const checkoutMutation = useCheckoutProductOrder()
 const checkoutResult = ref<Record<string, any> | null>(null)
+const stripeConfigQuery = useStripeConfig()
+
+const stripeCardMountRef = ref<HTMLElement | null>(null)
+const stripeInstance = ref<Stripe | null>(null)
+const stripeElements = ref<StripeElements | null>(null)
+const stripeCardElement = ref<StripeCardElement | null>(null)
+const stripeCardReady = ref(false)
+const stripeCardError = ref('')
+const isConfirmingStripePayment = ref(false)
 
 const canSubmitCheckout = computed(() => {
-	return !!activeOrderId.value && !!selectedPaymentMethodId.value && itemCount.value > 0
+	const baseReady = !!activeOrderId.value && !!selectedPaymentMethodId.value && itemCount.value > 0
+	if (!baseReady) return false
+	if (isStripeMethod.value) return stripeCardReady.value
+	return true
+})
+
+const ctaLabel = computed(() => {
+	if (checkoutMutation.isPending.value) return 'Initializing payment...'
+	if (isConfirmingStripePayment.value) return 'Confirming card payment...'
+	if (isStripeMethod.value) return 'Pay now'
+	return 'Checkout now'
 })
 
 const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
 
+const stripePublishableKey = computed(() => {
+	return String(stripeConfigQuery.data.value?.data?.publishable_key || '').trim()
+})
+
+const teardownStripeElements = () => {
+	if (stripeCardElement.value) {
+		stripeCardElement.value.unmount()
+		stripeCardElement.value = null
+	}
+	stripeElements.value = null
+	stripeInstance.value = null
+	stripeCardReady.value = false
+	stripeCardError.value = ''
+}
+
+const ensureStripeCardMounted = async () => {
+	if (!isStripeMethod.value) return
+	if (stripeCardElement.value) return
+
+	const key = stripePublishableKey.value
+	if (!key) {
+		stripeCardError.value = 'Stripe is not configured yet for this event.'
+		return
+	}
+
+	await nextTick()
+	if (!stripeCardMountRef.value) return
+
+	const stripe = await loadStripe(key)
+	if (!stripe) {
+		stripeCardError.value = 'Unable to initialize Stripe card form.'
+		return
+	}
+
+	stripeInstance.value = stripe
+	stripeElements.value = stripe.elements()
+	stripeCardElement.value = stripeElements.value.create('card', { hidePostalCode: true })
+	stripeCardElement.value.mount(stripeCardMountRef.value)
+	stripeCardElement.value.on('change', (event) => {
+		stripeCardError.value = event.error?.message || ''
+		stripeCardReady.value = !!event.complete && !event.error
+	})
+}
+
+watch(
+	[isStripeMethod, stripePublishableKey],
+	([stripeSelected, key], [wasStripeSelected, previousKey]) => {
+		if (!stripeSelected) {
+			teardownStripeElements()
+			return
+		}
+
+		if (!wasStripeSelected || key !== previousKey) {
+			teardownStripeElements()
+		}
+
+		void ensureStripeCardMounted()
+	},
+	{ immediate: true }
+)
+
+onBeforeUnmount(() => {
+	teardownStripeElements()
+})
+
 async function submitCheckout() {
 	if (!canSubmitCheckout.value || !activeOrderId.value || !selectedPaymentMethodId.value) return
+	if (isStripeMethod.value) {
+		await ensureStripeCardMounted()
+		if (!stripeCardElement.value || !stripeInstance.value) {
+			toast.add({
+				title: 'Stripe unavailable',
+				description: stripeCardError.value || 'Card form could not be initialized.',
+				color: 'red',
+				timeout: 4500,
+			})
+			return
+		}
+	}
 
 	try {
 		const response = await checkoutMutation.mutateAsync({
@@ -194,15 +345,74 @@ async function submitCheckout() {
 		})
 
 		checkoutResult.value = (response.data || null) as Record<string, any> | null
+
+		if (isStripeMethod.value) {
+			const clientSecret = checkoutResult.value?.stripe_client_secret
+			if (!clientSecret) {
+				const backendStatus = String(checkoutResult.value?.status || 'unknown')
+				const selectedTitle = selectedPaymentMethod.value?.title || 'Selected method'
+				toast.add({
+					title: 'Unable to start card payment',
+					description: `${selectedTitle} returned status "${backendStatus}" without Stripe client secret. Verify this method is configured as STRIPE and try again.`,
+					color: 'red',
+					timeout: 5000,
+				})
+				return
+			}
+
+			await ensureStripeCardMounted()
+			if (!stripeInstance.value || !stripeCardElement.value) {
+				toast.add({
+					title: 'Card form unavailable',
+					description: stripeCardError.value || 'Unable to initialize the Stripe card form. Please refresh and try again.',
+					color: 'red',
+					timeout: 5000,
+				})
+				return
+			}
+
+			isConfirmingStripePayment.value = true
+			const result = await stripeInstance.value.confirmCardPayment(clientSecret, {
+				payment_method: {
+					card: stripeCardElement.value,
+				},
+			})
+			isConfirmingStripePayment.value = false
+
+			if (result.error) {
+				stripeCardError.value = result.error.message || 'Card payment could not be confirmed.'
+				toast.add({
+					title: 'Card payment failed',
+					description: stripeCardError.value,
+					color: 'red',
+					timeout: 4500,
+				})
+				return
+			}
+
+			const statusValue = result.paymentIntent?.status || 'processing'
+			toast.add({
+				title: statusValue === 'succeeded' ? 'Payment confirmed' : 'Payment processing',
+				description: statusValue === 'succeeded'
+					? 'Card payment completed successfully.'
+					: 'Card payment is being processed by Stripe.',
+				color: statusValue === 'succeeded' ? 'green' : 'amber',
+				timeout: 2600,
+			})
+		}
+
 		await activeOrderQuery.refetch()
 
 		toast.add({
 			title: 'Checkout submitted',
-			description: 'Payment has been initialized for this order.',
+			description: isStripeMethod.value
+				? 'Payment has been initialized and card confirmation was attempted.'
+				: 'Payment has been initialized for this order.',
 			color: 'green',
 			timeout: 2200,
 		})
 	} catch (error: unknown) {
+		isConfirmingStripePayment.value = false
 		const description = error instanceof Error ? error.message : 'Unable to complete checkout.'
 		toast.add({
 			title: 'Checkout failed',
