@@ -88,10 +88,6 @@
                     <dd class="font-semibold">{{ formattedBookedAt }}</dd>
                   </div>
                   <div class="flex justify-between">
-                    <dt>Selection reason</dt>
-                    <dd class="font-semibold">{{ selectedBookingItem?.selection_reason || '-' }}</dd>
-                  </div>
-                  <div class="flex justify-between">
                     <dt>Attendees</dt>
                     <dd class="font-semibold">{{ attendees.length }}</dd>
                   </div>
