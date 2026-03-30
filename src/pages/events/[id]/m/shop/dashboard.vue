@@ -1567,7 +1567,7 @@ function getStockAlertLabel(product: ProductList) {
 // ============================================
 
 const bookingPackagesQuery = computed(() => {
-  const eventId = event.value?.data?.id
+  const eventId = event.value?.data?.url_safe_title
   if (!eventId) return undefined
 
   return {

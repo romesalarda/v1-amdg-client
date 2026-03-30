@@ -1870,7 +1870,7 @@ const queryParams = computed(() => {
 // Bookings query parameters
 const bookingsQueryParams = computed(() => {
   const params: any = {
-    event_id: id.value,
+    event: id.value,
     page: currentPage.value,
     page_size: pageSize.value,
   }
@@ -1907,7 +1907,7 @@ const familyGroupsQueryParams = computed(() => {
 
 // Event bookings query for create modal (fetch all bookings for the event with higher page size)
 const eventBookingsQueryParams = computed(() => ({
-  event_id: id.value,
+  event: id.value,
   page_size: 100, // Fetch more bookings for the dropdown
 }))
 

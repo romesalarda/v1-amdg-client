@@ -398,7 +398,7 @@ const { data: event } = useEvent(id)
 
 // Fetch settings and payment methods
 const { data: settingsData, isLoading: settingsLoading } = useEventSettings(id)
-const eventIdFilter = computed(() => ({ event_id: route.params.id as string }))
+const eventIdFilter = computed(() => ({ event: route.params.id as string }))
 const { data: paymentMethodsData, isLoading: paymentMethodsLoading, refetch: refetchPaymentMethods } = usePaymentMethods(eventIdFilter)
 
 const paymentMethods = computed(() => paymentMethodsData.value?.data?.results || [])

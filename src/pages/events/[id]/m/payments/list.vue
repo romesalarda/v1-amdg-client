@@ -680,7 +680,6 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
-import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -898,7 +897,7 @@ async function syncStateToQuery() {
 // Computed query params for API
 const paymentsQueryParams = computed(() => {
   const params: any = {
-    event_id: route.params.id as string,
+    event: route.params.id as string,
     page: paymentsCurrentPage.value,
     page_size: paymentsPageSize.value,
   }

@@ -882,7 +882,7 @@ const handleStatusAction = (newStatus: string) => {
   confirmModal.value = {
     ...config,
     isOpen: true,
-    expectedText: config.requireTyping ? event.value.title : '',
+    expectedText: config.requireTyping ? event.value.title.toUpperCase() : '',
     action: () => executeStatusChange(newStatus),
   }
 }
@@ -921,7 +921,7 @@ const handleDeleteAction = () => {
     message: `<strong>Warning:</strong> This will permanently delete the event "${event.value.title}". This action cannot be undone. All associated data will be lost.<br><br>Type <strong>${event.value.title}</strong> to confirm deletion.`,
     confirmText: 'Delete Forever',
     requireTyping: true,
-    expectedText: event.value.title,
+    expectedText: event.value.title.toUpperCase(),
     buttonColor: 'danger',
     isDestructive: true,
     icon: 'delete_forever',
