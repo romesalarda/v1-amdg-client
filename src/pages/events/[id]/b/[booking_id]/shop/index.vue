@@ -67,7 +67,7 @@
 
 						<div
 							v-else
-							class="grid grid-cols-1 gap-5 2xl:grid-cols-2"
+							class="grid grid-cols-1 gap-5 2xl:grid-cols-1"
 							:class="{ 'opacity-60': isOrderCreationBlocked }"
 						>
 							<BookingShopProductCard
@@ -175,12 +175,8 @@
 								class="mt-4 inline-flex w-full items-center justify-center rounded-xl bg-deep-navy px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700"
 								:class="{ 'pointer-events-none opacity-50': !canCheckout }"
 							>
-								Continue to Checkout
+								{{ cartOrder?.status === 'draft' ? 'Proceed to checkout' : 'View cart' }}
 							</NuxtLink>
-						</article>
-
-						<article class="rounded-2xl border border-blue-200 bg-blue-50 p-4 text-xs text-blue-800">
-							Pricing, discounts, and stock eligibility are revalidated on cart and checkout by backend order pricing.
 						</article>
 					</div>
 				</aside>

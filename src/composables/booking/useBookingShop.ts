@@ -92,13 +92,12 @@ export function useBookingShop() {
   })
 
   const orderCreationBlockedReason = computed(() => {
-    if (latestDraftOrder.value?.order_id) return ''
     const blocked = latestBlockingOrder.value
     if (!blocked) return ''
 
     const reference = blocked.order_reference_id || blocked.order_id
     const status = String(blocked.status || 'pending')
-    return `Order ${reference} is currently ${status}. Complete or resolve payment before creating a new draft order.`
+    return `Product selection is disabled until your current purchase has been verified.`
   })
 
   const isOrderCreationBlocked = computed(() => !!orderCreationBlockedReason.value)
@@ -123,7 +122,7 @@ export function useBookingShop() {
       throw new Error('Select an attendee before adding products.')
     }
 
-    if (!store.activeOrderId && isOrderCreationBlocked.value) {
+    if (isOrderCreationBlocked.value) {
       throw new Error(orderCreationBlockedReason.value)
     }
 

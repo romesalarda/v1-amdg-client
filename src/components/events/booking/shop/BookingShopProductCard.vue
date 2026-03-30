@@ -1,5 +1,8 @@
 <template>
-  <article class="rounded-3xl border border-deep-navy/10 bg-white p-5 shadow-sm">
+  <article
+    class="rounded-3xl border border-deep-navy/10 bg-white p-5 shadow-sm"
+    :class="{ 'opacity-70': addDisabled }"
+  >
     <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
       <div>
         <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-mist-blue">
@@ -14,8 +17,9 @@
             v-for="image in galleryImages"
             :key="image"
             type="button"
-            class="overflow-hidden rounded-lg border"
+            class="overflow-hidden rounded-lg border disabled:cursor-not-allowed disabled:opacity-60"
             :class="activeImageUrl === image ? 'border-deep-navy' : 'border-deep-navy/15'"
+            :disabled="addDisabled"
             @click="activeImageUrl = image"
           >
             <img :src="image" alt="Variant preview" class="h-14 w-full object-cover">
@@ -49,8 +53,9 @@
               v-for="option in colorOptions"
               :key="option.value"
               type="button"
-              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
               :class="selectedColor === option.value ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
+              :disabled="addDisabled"
               @click="selectColor(option.value)"
             >
               {{ option.label }}
@@ -65,8 +70,9 @@
               v-for="option in sizeOptions"
               :key="option.variant.variant_id"
               type="button"
-              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
               :class="selectedVariantId === option.variant.variant_id ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
+              :disabled="addDisabled"
               @click="selectSize(option.variant)"
             >
               {{ option.variant.size_display || 'Standard' }}

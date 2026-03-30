@@ -43,8 +43,8 @@
 										<p class="text-[11px] text-deep-navy/65">Qty {{ item.quantity }}</p>
 									</div>
 									<div class="text-right">
-										<p class="text-[11px] text-deep-navy/65">Unit {{ formatMoney(item.unitPrice, currencyCode) }}</p>
-										<p class="text-xs font-black text-deep-navy">{{ formatMoney(item.totalPrice, currencyCode) }}</p>
+										<p class="text-[11px] text-deep-navy/65">Unit {{ item.unitPrice }}</p>
+										<p class="text-xs font-black text-deep-navy">{{ item.totalPrice}}</p>
 									</div>
 								</div>
 							</article>
@@ -169,7 +169,7 @@
 							</div>
 							<div class="flex items-center justify-between border-t border-deep-navy/10 pt-2">
 								<dt class="font-black">Total</dt>
-								<dd class="font-black">{{ formatMoney(order.total_amount, currencyCode) }}</dd>
+								<dd class="font-black">{{ order.total_amount }}</dd>
 							</div>
 						</dl>
 
@@ -185,6 +185,44 @@
 				</aside>
 			</section>
 		</div>
+
+		<Transition
+			enter-active-class="transition duration-300 ease-out"
+			enter-from-class="opacity-0 scale-95"
+			enter-to-class="opacity-100 scale-100"
+			leave-active-class="transition duration-200 ease-in"
+			leave-from-class="opacity-100 scale-100"
+			leave-to-class="opacity-0 scale-95"
+		>
+			<div
+				v-if="showSuccessModal"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-deep-navy/55 px-4 backdrop-blur-sm"
+			>
+				<div class="relative w-full max-w-md overflow-hidden rounded-3xl border border-green-200 bg-white p-6 shadow-2xl">
+					<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-3">
+						<span class="h-2 w-2 rounded-full bg-green-400 animate-bounce" />
+						<span class="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+						<span class="h-2 w-2 rounded-full bg-amber-400 animate-bounce" />
+					</div>
+
+					<div class="mt-4 text-center">
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-700">Purchase complete</p>
+						<h3 class="mt-2 text-2xl font-black text-deep-navy">{{ successModalTitle }}</h3>
+						<p class="mt-2 text-sm text-deep-navy/75">{{ successModalMessage }}</p>
+					</div>
+
+					<div class="mt-5 flex justify-center">
+						<button
+							type="button"
+							class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700"
+							@click="showSuccessModal = false"
+						>
+							Awesome
+						</button>
+					</div>
+				</div>
+			</div>
+		</Transition>
 	</div>
 </template>
 
@@ -311,6 +349,9 @@ const stripeCardElement = ref<StripeCardElement | null>(null)
 const stripeCardReady = ref(false)
 const stripeCardError = ref('')
 const isConfirmingStripePayment = ref(false)
+const showSuccessModal = ref(false)
+const successModalTitle = ref('Payment successful')
+const successModalMessage = ref('Your purchase has been confirmed.')
 
 const canSubmitCheckout = computed(() => {
 	if (isCheckoutLocked.value) return false
@@ -328,6 +369,16 @@ const ctaLabel = computed(() => {
 })
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const isPurchaseSuccessfulStatus = (status: string) => {
+	return status === 'processing' || status === 'completed'
+}
+
+const openSuccessModal = (title: string, message: string) => {
+	successModalTitle.value = title
+	successModalMessage.value = message
+	showSuccessModal.value = true
+}
 
 const waitForOrderStatusAfterStripePayment = async () => {
 	const maxAttempts = 8
@@ -506,11 +557,15 @@ async function submitCheckout() {
 			})
 
 			const orderStatus = await waitForOrderStatusAfterStripePayment()
-			if (orderStatus === 'processing' || orderStatus === 'completed') {
+			if (isPurchaseSuccessfulStatus(orderStatus)) {
 				checkoutToastTitle = 'Order payment recorded'
 				checkoutToastDescription = 'Your order moved to processing after Stripe confirmation.'
 				checkoutToastColor = 'green'
 				paymentSuccessMessage.value = 'Your card payment was confirmed and your order is now being processed.'
+				openSuccessModal(
+					'Payment received',
+					'Your order is now being processed. You can safely close this page or continue browsing.'
+				)
 			} else {
 				checkoutToastTitle = 'Payment confirmed, awaiting sync'
 				checkoutToastDescription = 'Stripe confirmed your payment. Order status update may take a few seconds.'
@@ -518,6 +573,13 @@ async function submitCheckout() {
 			}
 		} else {
 			await activeOrderQuery.refetch()
+			const orderStatus = String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
+			if (isPurchaseSuccessfulStatus(orderStatus)) {
+				openSuccessModal(
+					'Order confirmed',
+					'Your checkout was successful and your order has been recorded.'
+				)
+			}
 		}
 
 		toast.add({

@@ -44,14 +44,21 @@
 					</div>
 
 					<article
-						v-for="item in order.order_items"
+						v-for="item in cartDisplayItems"
 						:key="item.id"
 						class="rounded-2xl border border-deep-navy/10 bg-white p-4"
 					>
 						<div class="flex flex-wrap items-start justify-between gap-3">
-							<div>
+							<div class="flex min-w-0 items-start gap-3">
+								<img
+									:src="item.imageUrl"
+									:alt="item.title"
+									class="h-14 w-14 rounded-lg border border-deep-navy/10 bg-white object-cover"
+								>
+								<div class="min-w-0">
 								<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Line item</p>
-								<p class="mt-1 text-sm font-semibold text-deep-navy">Variant #{{ item.product_variant || '-' }}</p>
+								<p class="mt-1 text-sm font-semibold text-deep-navy">{{ item.title }}</p>
+								<p class="mt-1 text-xs text-deep-navy/60">{{ item.subtitle }}</p>
 								<p class="mt-1 text-xs text-deep-navy/60">Quantity {{ item.quantity }}</p>
 								<div class="mt-3 flex flex-wrap items-center gap-2">
 									<button
@@ -79,10 +86,11 @@
 										Remove
 									</button>
 								</div>
+								</div>
 							</div>
 							<div class="text-right">
-								<p class="text-xs text-deep-navy/60">Unit {{ item.unit_price }}</p>
-								<p class="mt-1 text-sm font-black text-deep-navy">{{ item.total_price }}</p>
+								<p class="text-xs text-deep-navy/60">Unit {{ formatMoney(item.unitPrice, currencyCode) }}</p>
+								<p class="mt-1 text-sm font-black text-deep-navy">{{ formatMoney(item.totalPrice, currencyCode) }}</p>
 							</div>
 						</div>
 					</article>
@@ -143,6 +151,29 @@ const isDraftOrder = computed(() => String(order.value?.status || '').toLowerCas
 const itemCount = computed(() => {
 	const rows = order.value?.order_items || []
 	return rows.reduce((sum, row) => sum + Number(row.quantity || 0), 0)
+})
+
+const cartDisplayItems = computed(() => {
+	const rows = order.value?.order_items || []
+	return rows.map((item: any) => {
+		const details = item?.product_variant_details || {}
+		const color = typeof details?.color === 'string' ? details.color.trim() : ''
+		const size = typeof details?.size === 'string' ? details.size.trim() : ''
+		const subtitle = [color, size].filter(Boolean).join(' · ') || 'Variant details unavailable'
+		const imageUrl = typeof details?.image_url === 'string' && details.image_url
+			? details.image_url
+			: 'https://placehold.co/120x120?text=Variant'
+
+		return {
+			id: item.id,
+			title: details?.product_title || 'Product variant',
+			subtitle,
+			imageUrl,
+			quantity: Number(item.quantity || 0),
+			unitPrice: item.unit_price,
+			totalPrice: item.total_price,
+		}
+	})
 })
 
 const currencyCode = computed(() => 'GBP')
