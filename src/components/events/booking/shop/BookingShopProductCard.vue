@@ -82,18 +82,19 @@
             min="1"
             :max="maxQuantity(activeVariant)"
             class="w-24 rounded-xl border border-deep-navy/20 px-3 py-2 text-sm"
-            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id"
+            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id || addDisabled"
           >
           <button
             type="button"
             class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id"
+            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id || addDisabled"
             @click="handleAdd(activeVariant)"
           >
             {{ addingVariantId === activeVariant.variant_id ? 'Adding...' : 'Add to Cart' }}
           </button>
         </div>
 
+        <p v-if="addDisabled && addDisabledReason" class="mt-3 text-[11px] text-amber-700">{{ addDisabledReason }}</p>
         <p class="mt-3 text-[11px] text-deep-navy/60">Discounts are validated server-side once item is added to cart.</p>
       </div>
     </div>
@@ -110,7 +111,12 @@ import { formatMoney } from '~/utils/money'
 const props = defineProps<{
   product: ProductList
   currencyCode?: string
+  addDisabled?: boolean
+  addDisabledReason?: string
 }>()
+
+const addDisabled = computed(() => !!props.addDisabled)
+const addDisabledReason = computed(() => String(props.addDisabledReason || '').trim())
 
 const emit = defineEmits<{
   add: [payload: { variantId: string; quantity: number }]
@@ -444,6 +450,7 @@ function safeQuantity(variant: ProductVariantList) {
 }
 
 function handleAdd(variant: ProductVariantList) {
+  if (addDisabled.value) return
   if (!canAddVariant(variant)) return
 
   const quantity = safeQuantity(variant)

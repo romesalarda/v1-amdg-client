@@ -84,6 +84,25 @@ export function useBookingShop() {
     return results.find((order) => openStatuses.has(String(order.status || '').toLowerCase())) || null
   })
 
+  const latestBlockingOrder = computed(() => {
+    const results = draftOrdersQuery.data.value?.data?.results || []
+    if (!Array.isArray(results)) return null
+    const blockedStatuses = new Set(['pending', 'processing'])
+    return results.find((order) => blockedStatuses.has(String(order.status || '').toLowerCase())) || null
+  })
+
+  const orderCreationBlockedReason = computed(() => {
+    if (latestDraftOrder.value?.order_id) return ''
+    const blocked = latestBlockingOrder.value
+    if (!blocked) return ''
+
+    const reference = blocked.order_reference_id || blocked.order_id
+    const status = String(blocked.status || 'pending')
+    return `Order ${reference} is currently ${status}. Complete or resolve payment before creating a new draft order.`
+  })
+
+  const isOrderCreationBlocked = computed(() => !!orderCreationBlockedReason.value)
+
   watch(
     latestDraftOrder,
     (order) => {
@@ -102,6 +121,10 @@ export function useBookingShop() {
   async function addVariantToCart(variantId: string, quantity: number) {
     if (!selectedAttendeeId.value) {
       throw new Error('Select an attendee before adding products.')
+    }
+
+    if (!store.activeOrderId && isOrderCreationBlocked.value) {
+      throw new Error(orderCreationBlockedReason.value)
     }
 
     if (store.activeOrderId) {
@@ -169,6 +192,9 @@ export function useBookingShop() {
     attendeeQuery,
     draftOrdersQuery,
     latestDraftOrder,
+    latestBlockingOrder,
+    isOrderCreationBlocked,
+    orderCreationBlockedReason,
     activeOrderId,
     activeOrderQuery,
     createOrderMutation,

@@ -24,6 +24,52 @@
 			<section v-else class="grid grid-cols-1 gap-4 lg:grid-cols-12">
 				<div class="space-y-4 lg:col-span-8">
 					<article class="rounded-2xl border border-deep-navy/10 bg-white p-4">
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Order items</p>
+						<div class="mt-3 space-y-2">
+							<article
+								v-for="item in checkoutDisplayItems"
+								:key="item.id"
+								class="rounded-xl border border-deep-navy/10 bg-mist-blue/60 p-3"
+							>
+								<div class="flex items-start gap-3">
+									<img
+										:src="item.imageUrl"
+										:alt="item.title"
+										class="h-14 w-14 rounded-lg border border-deep-navy/10 bg-white object-cover"
+									>
+									<div class="min-w-0 flex-1">
+										<p class="text-xs font-black text-deep-navy">{{ item.title }}</p>
+										<p class="text-[11px] text-deep-navy/65">{{ item.subtitle }}</p>
+										<p class="text-[11px] text-deep-navy/65">Qty {{ item.quantity }}</p>
+									</div>
+									<div class="text-right">
+										<p class="text-[11px] text-deep-navy/65">Unit {{ formatMoney(item.unitPrice, currencyCode) }}</p>
+										<p class="text-xs font-black text-deep-navy">{{ formatMoney(item.totalPrice, currencyCode) }}</p>
+									</div>
+								</div>
+							</article>
+						</div>
+					</article>
+
+					<article
+						v-if="isCheckoutLocked"
+						class="rounded-2xl border border-amber-200 bg-amber-50 p-4"
+					>
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-900">Checkout unavailable</p>
+						<p class="mt-2 text-sm text-amber-900">
+							This order is {{ order?.status }}. Checkout is only available for draft orders.
+						</p>
+					</article>
+
+					<article
+						v-if="paymentSuccessMessage"
+						class="rounded-2xl border border-green-200 bg-green-50 p-4"
+					>
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Payment successful</p>
+						<p class="mt-2 text-sm font-semibold text-green-900">{{ paymentSuccessMessage }}</p>
+					</article>
+
+					<article v-if="!isCheckoutLocked" class="rounded-2xl border border-deep-navy/10 bg-white p-4">
 						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Payment methods</p>
 
 						<div v-if="paymentMethodsQuery.isLoading.value" class="mt-3 text-sm text-deep-navy/65">Loading payment methods...</div>
@@ -168,9 +214,34 @@ const {
 } = useBookingShop()
 
 const order = computed(() => activeOrderQuery.data.value?.data || null)
+const lockedCheckoutStatuses = new Set(['pending', 'processing', 'completed'])
+const isCheckoutLocked = computed(() => lockedCheckoutStatuses.has(String(order.value?.status || '').toLowerCase()))
 const itemCount = computed(() => {
 	const rows = order.value?.order_items || []
 	return rows.reduce((sum, row) => sum + Number(row.quantity || 0), 0)
+})
+
+const checkoutDisplayItems = computed(() => {
+	const rows = order.value?.order_items || []
+	return rows.map((item: any) => {
+		const details = item?.product_variant_details || {}
+		const color = typeof details?.color === 'string' ? details.color.trim() : ''
+		const size = typeof details?.size === 'string' ? details.size.trim() : ''
+		const subtitle = [color, size].filter(Boolean).join(' · ') || 'Variant details unavailable'
+		const imageUrl = typeof details?.image_url === 'string' && details.image_url
+			? details.image_url
+			: 'https://placehold.co/120x120?text=Variant'
+
+		return {
+			id: item.id,
+			title: details?.product_title || `Variant #${item.product_variant || '-'}`,
+			subtitle,
+			imageUrl,
+			quantity: Number(item.quantity || 0),
+			unitPrice: item.unit_price,
+			totalPrice: item.total_price,
+		}
+	})
 })
 
 const currencyCode = computed(() => 'GBP')
@@ -230,6 +301,7 @@ const selectedPaymentMethodId = computed({
 
 const checkoutMutation = useCheckoutProductOrder()
 const checkoutResult = ref<Record<string, any> | null>(null)
+const paymentSuccessMessage = ref('')
 const stripeConfigQuery = useStripeConfig()
 
 const stripeCardMountRef = ref<HTMLElement | null>(null)
@@ -241,6 +313,7 @@ const stripeCardError = ref('')
 const isConfirmingStripePayment = ref(false)
 
 const canSubmitCheckout = computed(() => {
+	if (isCheckoutLocked.value) return false
 	const baseReady = !!activeOrderId.value && !!selectedPaymentMethodId.value && itemCount.value > 0
 	if (!baseReady) return false
 	if (isStripeMethod.value) return stripeCardReady.value
@@ -254,7 +327,32 @@ const ctaLabel = computed(() => {
 	return 'Checkout now'
 })
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const waitForOrderStatusAfterStripePayment = async () => {
+	const maxAttempts = 8
+	for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+		await activeOrderQuery.refetch()
+		const latestStatus = String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
+		if (latestStatus && latestStatus !== 'pending') return latestStatus
+		if (attempt < maxAttempts - 1) {
+			await sleep(1200)
+		}
+	}
+
+	return String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
+}
+
 const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
+
+watch(
+	isCheckoutLocked,
+	(locked) => {
+		if (!locked) return
+		void navigateTo(cartHref.value)
+	},
+	{ immediate: true }
+)
 
 const stripePublishableKey = computed(() => {
 	return String(stripeConfigQuery.data.value?.data?.publishable_key || '').trim()
@@ -337,6 +435,13 @@ async function submitCheckout() {
 	}
 
 	try {
+		paymentSuccessMessage.value = ''
+		let checkoutToastTitle = 'Checkout submitted'
+		let checkoutToastDescription = isStripeMethod.value
+			? 'Payment has been initialized and card confirmation was attempted.'
+			: 'Payment has been initialized for this order.'
+		let checkoutToastColor: 'green' | 'amber' = 'green'
+
 		const response = await checkoutMutation.mutateAsync({
 			orderId: activeOrderId.value,
 			body: {
@@ -399,16 +504,26 @@ async function submitCheckout() {
 				color: statusValue === 'succeeded' ? 'green' : 'amber',
 				timeout: 2600,
 			})
+
+			const orderStatus = await waitForOrderStatusAfterStripePayment()
+			if (orderStatus === 'processing' || orderStatus === 'completed') {
+				checkoutToastTitle = 'Order payment recorded'
+				checkoutToastDescription = 'Your order moved to processing after Stripe confirmation.'
+				checkoutToastColor = 'green'
+				paymentSuccessMessage.value = 'Your card payment was confirmed and your order is now being processed.'
+			} else {
+				checkoutToastTitle = 'Payment confirmed, awaiting sync'
+				checkoutToastDescription = 'Stripe confirmed your payment. Order status update may take a few seconds.'
+				checkoutToastColor = 'amber'
+			}
+		} else {
+			await activeOrderQuery.refetch()
 		}
 
-		await activeOrderQuery.refetch()
-
 		toast.add({
-			title: 'Checkout submitted',
-			description: isStripeMethod.value
-				? 'Payment has been initialized and card confirmation was attempted.'
-				: 'Payment has been initialized for this order.',
-			color: 'green',
+			title: checkoutToastTitle,
+			description: checkoutToastDescription,
+			color: checkoutToastColor,
 			timeout: 2200,
 		})
 	} catch (error: unknown) {

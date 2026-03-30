@@ -680,7 +680,6 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
-import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,

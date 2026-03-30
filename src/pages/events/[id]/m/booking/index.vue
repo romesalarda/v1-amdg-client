@@ -1082,7 +1082,7 @@ const { data: event } = useEvent(id)
 const event_pk = computed(() => event.value?.data?.id || null)
 
 // Fetch booking data
-const eventIdFilter = computed(() => ({ event_id: route.params.id as string }))
+const eventIdFilter = computed(() => ({ event: route.params.id as string }))
 const { data: ticketTypesData, isLoading: ticketTypesLoading, refetch: refetchTicketTypes } = useBookingTicketTypes(eventIdFilter)
 const { data: packagesData, isLoading: packagesLoading, refetch: refetchPackages } = useBookingPackages(eventIdFilter)
 const { data: signInsData, isLoading: signInsLoading, refetch: refetchSignIns } = useBookingAlternativeSignins(eventIdFilter)

@@ -170,6 +170,69 @@ export function useAddProductOrderItem() {
 }
 
 /**
+ * Update quantity for an item in a draft order
+ */
+export function useUpdateProductOrderItem() {
+  const queryClient = useQueryClient()
+  const requestFetch = useRequestFetch()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      orderItemId,
+      quantity,
+    }: {
+      orderId: string | number
+      orderItemId: number
+      quantity: number
+    }) =>
+      requestFetch(`/api/products/orders/${String(orderId)}/update-item/`, {
+        method: 'POST',
+        body: {
+          order_item_id: orderItemId,
+          quantity,
+        },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
+ * Remove an item from a draft order
+ */
+export function useRemoveProductOrderItem() {
+  const queryClient = useQueryClient()
+  const requestFetch = useRequestFetch()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      orderItemId,
+    }: {
+      orderId: string | number
+      orderItemId: number
+    }) =>
+      requestFetch(`/api/products/orders/${String(orderId)}/remove-item/`, {
+        method: 'POST',
+        body: {
+          order_item_id: orderItemId,
+        },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
  * Cancel an order
  */
 export function useCancelProductOrder() {

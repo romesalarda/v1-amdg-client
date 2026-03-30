@@ -9704,6 +9704,10 @@ export type OrderPricingPreviewRequestRequest = {
     items: Array<OrderPricingPreviewItemRequest>;
 };
 
+export type OrderRemoveItemRequestRequest = {
+    order_item_id: number;
+};
+
 /**
  * Serializer for order status distribution statistics.
  */
@@ -9786,6 +9790,11 @@ export type OrderUpdate = {
      * * `refunded` - Refunded
      */
     status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+};
+
+export type OrderUpdateItemQuantityRequestRequest = {
+    order_item_id: number;
+    quantity: number;
 };
 
 /**
@@ -25273,9 +25282,9 @@ export type BookingsAlternativeSigninsListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26153,9 +26162,9 @@ export type BookingsPackagesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26341,9 +26350,9 @@ export type BookingsPackageAvailabilityWindowsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26461,9 +26470,9 @@ export type BookingsPackageProductsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26712,9 +26721,9 @@ export type BookingsPackageRulesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -27696,6 +27705,10 @@ export type BookingsTicketTypesListData = {
          */
         currently_valid?: boolean;
         /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
+        /**
          * Filter by event ID
          */
         event_id?: string;
@@ -27861,6 +27874,10 @@ export type BookingsTicketsListData = {
          * Filter by booking reference
          */
         booking__reference?: string;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
         /**
          * Filter by event UUID (through attendee's booking)
          */
@@ -39373,13 +39390,9 @@ export type PaymentsDiscountsListData = {
          */
         discount_type?: string;
         /**
-         * Filter discounts by event ID (shows discounts for objects within this event)
+         * Filter discounts by event URL-safe title (shows discounts for objects within this event)
          */
-        event?: number;
-        /**
-         * Filter discounts by event UUID
-         */
-        event__event_id?: string;
+        event?: string;
         /**
          * Filter discounts by event UUID (alias of event__event_id)
          */
@@ -43305,6 +43318,37 @@ export type ProductsOrdersCompleteCreateResponses = {
     200: unknown;
 };
 
+export type ProductsOrdersRemoveItemCreateData = {
+    body: OrderRemoveItemRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/remove-item/';
+};
+
+export type ProductsOrdersRemoveItemCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Order or order item not found
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersRemoveItemCreateResponses = {
+    /**
+     * Order item removed successfully
+     */
+    200: unknown;
+};
+
 export type ProductsOrdersSubmitCreateData = {
     body?: never;
     path: {
@@ -43332,6 +43376,37 @@ export type ProductsOrdersSubmitCreateErrors = {
 export type ProductsOrdersSubmitCreateResponses = {
     /**
      * Order submitted successfully
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersUpdateItemCreateData = {
+    body: OrderUpdateItemQuantityRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/update-item/';
+};
+
+export type ProductsOrdersUpdateItemCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Order or order item not found
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersUpdateItemCreateResponses = {
+    /**
+     * Order item updated successfully
      */
     200: unknown;
 };

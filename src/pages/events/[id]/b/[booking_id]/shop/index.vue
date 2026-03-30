@@ -49,7 +49,14 @@
 						Select an attendee to start shopping.
 					</div>
 
-					<template v-else>
+					<div
+						v-if="selectedAttendeeId && isOrderCreationBlocked"
+						class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800"
+					>
+						{{ orderCreationBlockedReason }}
+					</div>
+
+					<template v-if="selectedAttendeeId">
 						<div v-if="productsQuery.isLoading.value" class="rounded-2xl border border-deep-navy/10 bg-white p-5 text-sm text-deep-navy/70">
 							Loading products...
 						</div>
@@ -58,12 +65,18 @@
 							No products are currently available for this event.
 						</div>
 
-						<div v-else class="grid grid-cols-1 gap-5 2xl:grid-cols-2">
+						<div
+							v-else
+							class="grid grid-cols-1 gap-5 2xl:grid-cols-2"
+							:class="{ 'opacity-60': isOrderCreationBlocked }"
+						>
 							<BookingShopProductCard
 								v-for="product in products"
 								:key="product.product_id"
 								:product="product"
 								:currency-code="currencyCode"
+								:add-disabled="isOrderCreationBlocked"
+								:add-disabled-reason="orderCreationBlockedReason"
 								@add="(payload) => onAddItem(payload.variantId, payload.quantity)"
 							/>
 						</div>
@@ -81,6 +94,13 @@
 							</div>
 
 							<div v-else class="mt-3 space-y-3">
+								<div
+									v-if="!isDraftCartOrder"
+									class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] text-amber-800"
+								>
+									This cart is {{ cartOrder?.status }} and can no longer be edited.
+								</div>
+
 								<div class="max-h-56 space-y-2 overflow-auto pr-1">
 									<article
 										v-for="item in cartPreviewItems"
@@ -103,7 +123,33 @@
 										<div class="text-right">
 											<p class="text-[11px] text-deep-navy/65">Unit {{ formatMoney(item.unitPrice, currencyCode) }}</p>
 											<p class="text-xs font-black text-deep-navy">{{ formatMoney(item.totalPrice, currencyCode) }}</p>
+											<div class="mt-2 flex items-center justify-end gap-1">
+												<button
+													type="button"
+													class="rounded border border-deep-navy/20 px-2 py-0.5 text-[11px] font-bold text-deep-navy disabled:cursor-not-allowed disabled:opacity-50"
+													:disabled="!isDraftCartOrder || isUpdatingItem(item.id) || Number(item.quantity || 0) <= 1"
+													@click="updateCartItemQuantity(item.id, Number(item.quantity || 1) - 1)"
+												>
+													-
+												</button>
+												<button
+													type="button"
+													class="rounded border border-deep-navy/20 px-2 py-0.5 text-[11px] font-bold text-deep-navy disabled:cursor-not-allowed disabled:opacity-50"
+													:disabled="!isDraftCartOrder || isUpdatingItem(item.id)"
+													@click="updateCartItemQuantity(item.id, Number(item.quantity || 0) + 1)"
+												>
+													+
+												</button>
+												<button
+													type="button"
+													class="rounded border border-red-200 px-2 py-0.5 text-[11px] font-bold text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+													:disabled="!isDraftCartOrder || isRemovingItem(item.id)"
+													@click="removeCartItem(item.id)"
+												>
+													Remove
+												</button>
 											</div>
+										</div>
 									</article>
 								</div>
 
@@ -148,6 +194,7 @@ import type { ProductList, ProductVariantList } from '~/api/types.gen'
 import { productsListVariantsList } from '~/api/sdk.gen'
 import BookingShopProductCard from '~/components/events/booking/shop/BookingShopProductCard.vue'
 import { useBookingShop } from '~/composables/booking/useBookingShop'
+import { useRemoveProductOrderItem, useUpdateProductOrderItem } from '~/composables/resources/products/productOrders'
 import { useProducts } from '~/composables/resources/products/products'
 import { formatMoney } from '~/utils/money'
 
@@ -166,9 +213,17 @@ const {
 	bookingQuery,
 	attendees,
 	selectedAttendeeId,
+	activeOrderId,
 	activeOrderQuery,
 	addVariantToCart,
+	isOrderCreationBlocked,
+	orderCreationBlockedReason,
 } = useBookingShop()
+
+const updateItemMutation = useUpdateProductOrderItem()
+const removeItemMutation = useRemoveProductOrderItem()
+const pendingUpdateItemIds = ref<number[]>([])
+const pendingRemoveItemIds = ref<number[]>([])
 
 const productsQuery = useProducts(
 	computed(() => {
@@ -217,6 +272,7 @@ const variantByNumericId = computed(() => {
 })
 
 const cartOrder = computed(() => activeOrderQuery.data.value?.data)
+const isDraftCartOrder = computed(() => String(cartOrder.value?.status || '').toLowerCase() === 'draft')
 const cartItemCount = computed(() => {
 	const rows = cartOrder.value?.order_items
 	if (!Array.isArray(rows)) return 0
@@ -258,6 +314,61 @@ const attendeeModel = computed({
 
 const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
 const checkoutHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`)
+
+function isUpdatingItem(orderItemId: number) {
+	return pendingUpdateItemIds.value.includes(orderItemId)
+}
+
+function isRemovingItem(orderItemId: number) {
+	return pendingRemoveItemIds.value.includes(orderItemId)
+}
+
+async function updateCartItemQuantity(orderItemId: number, quantity: number) {
+	if (!activeOrderId.value || !isDraftCartOrder.value || quantity < 1 || isUpdatingItem(orderItemId)) return
+
+	pendingUpdateItemIds.value = [...pendingUpdateItemIds.value, orderItemId]
+	try {
+		await updateItemMutation.mutateAsync({
+			orderId: activeOrderId.value,
+			orderItemId,
+			quantity,
+		})
+		await activeOrderQuery.refetch()
+	} catch (error: unknown) {
+		const description = error instanceof Error ? error.message : 'Unable to update quantity right now.'
+		toast.add({
+			title: 'Quantity update failed',
+			description,
+			color: 'red',
+			timeout: 4500,
+		})
+	} finally {
+		pendingUpdateItemIds.value = pendingUpdateItemIds.value.filter((id) => id !== orderItemId)
+	}
+}
+
+async function removeCartItem(orderItemId: number) {
+	if (!activeOrderId.value || !isDraftCartOrder.value || isRemovingItem(orderItemId)) return
+
+	pendingRemoveItemIds.value = [...pendingRemoveItemIds.value, orderItemId]
+	try {
+		await removeItemMutation.mutateAsync({
+			orderId: activeOrderId.value,
+			orderItemId,
+		})
+		await activeOrderQuery.refetch()
+	} catch (error: unknown) {
+		const description = error instanceof Error ? error.message : 'Unable to remove item right now.'
+		toast.add({
+			title: 'Remove failed',
+			description,
+			color: 'red',
+			timeout: 4500,
+		})
+	} finally {
+		pendingRemoveItemIds.value = pendingRemoveItemIds.value.filter((id) => id !== orderItemId)
+	}
+}
 
 async function onAddItem(variantId: string, quantity: number) {
 	try {
