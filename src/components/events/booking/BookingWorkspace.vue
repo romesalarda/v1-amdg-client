@@ -401,6 +401,12 @@
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
               <div class="mt-3 space-y-2">
+                <NuxtLink
+                  :to="bookingShopHref"
+                  class="block rounded-lg bg-deep-navy px-3 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-blue-700"
+                >
+                  Open booking shop
+                </NuxtLink>
                 <NuxtLink :to="`/events/${eventId}`" class="block rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event
                 </NuxtLink>
@@ -573,6 +579,17 @@ const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
 const selectedAttendee = computed(() => {
   if (!selectedAttendeeId.value) return null
   return attendees.value.find(item => item.id === selectedAttendeeId.value) || null
+})
+
+const bookingShopHref = computed(() => {
+  const base = `/events/${eventId.value}/b/${bookingReference.value}/shop`
+  if (!selectedAttendeeId.value) return base
+  return {
+    path: base,
+    query: {
+      attendee: selectedAttendeeId.value,
+    },
+  }
 })
 
 function toAttendeeSlug(name: string | undefined, attendeeId: string | undefined) {

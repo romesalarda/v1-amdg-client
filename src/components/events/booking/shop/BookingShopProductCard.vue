@@ -28,9 +28,7 @@
       </div>
 
       <div>
-        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">{{ product.display_code }}</p>
         <h3 class="mt-2 text-2xl font-black text-deep-navy">{{ product.title }}</h3>
-        <p class="mt-1 text-sm text-deep-navy/60">{{ product.event_name }}</p>
 
         <div class="mt-4 flex items-center gap-2">
           <p class="text-xl font-black text-deep-navy">
@@ -53,11 +51,17 @@
               v-for="option in colorOptions"
               :key="option.value"
               type="button"
-              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+              class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
               :class="selectedColor === option.value ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
               :disabled="addDisabled"
               @click="selectColor(option.value)"
             >
+              <span
+                v-if="option.hex"
+                class="inline-block h-3 w-3 rounded-full border"
+                :class="selectedColor === option.value ? 'border-white/70' : 'border-deep-navy/25'"
+                :style="{ backgroundColor: option.hex }"
+              />
               {{ option.label }}
             </button>
           </div>
@@ -101,7 +105,6 @@
         </div>
 
         <p v-if="addDisabled && addDisabledReason" class="mt-3 text-[11px] text-amber-700">{{ addDisabledReason }}</p>
-        <p class="mt-3 text-[11px] text-deep-navy/60">Discounts are validated server-side once item is added to cart.</p>
       </div>
     </div>
   </article>
@@ -148,6 +151,7 @@ const addingVariantId = ref<string | null>(null)
 type ColorOption = {
   value: string
   label: string
+  hex?: string
 }
 
 type SizeOption = {
@@ -202,6 +206,7 @@ const colorOptions = computed<ColorOption[]>(() => {
     options.push({
       value,
       label: colorLabel(variant.color),
+      hex: normalizeHexColor(variant.color),
     })
   })
 
@@ -381,6 +386,21 @@ function colorKey(color: string | null | undefined) {
 
 function colorLabel(color: string | null | undefined) {
   return (color || '').trim() || 'Standard'
+}
+
+function normalizeHexColor(color: string | null | undefined) {
+  const raw = (color || '').trim()
+  if (!raw) return ''
+
+  const match = raw.match(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+  if (!match) return ''
+
+  const body = match[1]
+  if (body.length === 3) {
+    return `#${body[0]}${body[0]}${body[1]}${body[1]}${body[2]}${body[2]}`.toUpperCase()
+  }
+
+  return `#${body}`.toUpperCase()
 }
 
 function selectColor(nextColor: string) {

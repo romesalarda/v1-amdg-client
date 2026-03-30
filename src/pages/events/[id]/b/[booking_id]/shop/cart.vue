@@ -4,11 +4,18 @@
 			<section class="rounded-3xl border border-deep-navy/10 bg-white p-5 shadow-sm">
 				<div class="flex flex-wrap items-center justify-between gap-2">
 					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Booking {{ bookingReference }}</p>
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Shopping for {{ selectedAttendeeLabel }}</p>
 						<h1 class="mt-1 text-2xl font-black text-deep-navy">Cart</h1>
 						<p class="mt-1 text-sm text-deep-navy/65">Review selected products and continue to payment.</p>
+						<p class="mt-1 text-[11px] text-deep-navy/45">Booking ref {{ bookingReference }}</p>
 					</div>
 					<div class="flex items-center gap-2">
+						<NuxtLink
+							:to="bookingWorkspaceHref"
+							class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wide text-deep-navy hover:border-deep-navy"
+						>
+							Booking
+						</NuxtLink>
 						<NuxtLink
 							:to="shopHref"
 							class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wide text-deep-navy hover:border-deep-navy"
@@ -136,6 +143,8 @@ definePageMeta({
 const {
 	eventId,
 	bookingReference,
+	attendees,
+	selectedAttendeeId,
 	activeOrderId,
 	activeOrderQuery,
 } = useBookingShop()
@@ -178,6 +187,13 @@ const cartDisplayItems = computed(() => {
 
 const currencyCode = computed(() => 'GBP')
 const canCheckout = computed(() => !!order.value && itemCount.value > 0)
+const bookingWorkspaceHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}`)
+
+const selectedAttendeeLabel = computed(() => {
+	const attendee = attendees.value.find((item) => item.id === selectedAttendeeId.value)
+	if (!attendee) return 'selected attendee'
+	return attendee.name || attendee.display_id || 'selected attendee'
+})
 
 const shopHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop`)
 const checkoutHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`)

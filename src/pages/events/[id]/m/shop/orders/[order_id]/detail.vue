@@ -250,12 +250,8 @@
                     <p class="font-mono text-slate-900">{{ order.order_reference_id }}</p>
                   </div>
                   <div class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
-                    <p class="text-slate-500">UUID</p>
+                    <p class="text-slate-500">Tag</p>
                     <p class="font-mono text-slate-900 break-all">{{ order.order_id }}</p>
-                  </div>
-                  <div class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
-                    <p class="text-slate-500">Database ID</p>
-                    <p class="font-mono text-slate-900">{{ order.id }}</p>
                   </div>
                 </div>
 
