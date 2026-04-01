@@ -16,7 +16,7 @@
             <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-300">Your booking for</p>
             <h1 class="mt-3 text-4xl md:text-5xl font-black leading-tight text-white">{{ eventTitle }}</h1>
             <p class="mt-2 text-white/80 text-sm">{{ booking?.booking_reference || '-' }}</p>
-            <p class="mt-1 text-white/70 text-sm">Hello, {{ booking?.made_by_name || 'Unknown' }}</p>
+            <p class="mt-1 text-2xl text-white/70 ">Hello, {{ booking?.made_by_name || 'Unknown' }}</p>
           </div>
 
           <div class="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 text-white animate-soft-in lg:justify-self-start lg:max-w-md w-full">
@@ -193,7 +193,6 @@
                                   {{ payment.status || 'PENDING' }}
                                 </span>
                               </div>
-                              <p class="mt-1 text-lg font-black text-deep-navy">{{ payment.amount || '-' }}</p>
                               <p class="mt-1 text-[11px] text-deep-navy/75">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
 
                               <div v-if="isOutstandingBankTransfer(payment)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
@@ -350,6 +349,71 @@
             <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
               <p class="text-sm text-deep-navy/75">Attendee selection is pinned in the right panel for quicker switching while you edit.</p>
             </div>
+          </article>
+
+          <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between gap-3">
+              <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Payments</p>
+              <p class="text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
+            </div>
+
+            <div v-if="paymentSummary.isLoading.value" class="text-sm text-deep-navy/60">Loading payments...</div>
+            <div v-else-if="paymentSummary.error.value" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              Unable to load payment summary right now.
+            </div>
+            <template v-else>
+              <section class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <div class="flex items-center justify-between gap-2">
+                  <p class="text-xs font-black uppercase tracking-wider text-amber-700">Outstanding now</p>
+                  <p class="text-xs font-black text-amber-800">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
+                </div>
+                <p class="mt-2 text-sm text-amber-900">
+                  Booking: {{ paymentSummaryData?.totals?.booking_outstanding_payments || 0 }} | Shop: {{ paymentSummaryData?.totals?.shop_outstanding_payments || 0 }}
+                </p>
+                <p class="mt-1 text-xs text-amber-800">Outstanding total amount: {{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }}</p>
+              </section>
+
+              <section class="space-y-2">
+                <div class="flex items-center justify-between">
+                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Attendee payments</p>
+                  <p class="text-xs text-deep-navy/60">{{ attendeeLevelPayments.length }}</p>
+                </div>
+                <div v-if="attendeeLevelPayments.length" class="space-y-2">
+                  <div v-for="payment in attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
+                        {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
+                      </span>
+                    </div>
+                    <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                    <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                    <p v-if="payment.order_reference" class="text-[11px] text-deep-navy/70 mt-1">Order {{ payment.order_reference }}</p>
+                  </div>
+                </div>
+                <p v-else class="text-sm text-deep-navy/60">No attendee-level payments yet.</p>
+              </section>
+
+              <section class="space-y-2 pt-2 border-t border-deep-navy/10">
+                <div class="flex items-center justify-between">
+                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Booking-wide payments</p>
+                  <p class="text-xs text-deep-navy/60">{{ bookingLevelPayments.length }}</p>
+                </div>
+                <div v-if="bookingLevelPayments.length" class="space-y-2">
+                  <div v-for="payment in bookingLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
+                    <div class="flex items-center justify-between gap-2">
+                      <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
+                        {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
+                      </span>
+                    </div>
+                    <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                    <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                  </div>
+                </div>
+                <p v-else class="text-sm text-deep-navy/60">No booking-level payments found.</p>
+              </section>
+            </template>
           </article>
 
           <article v-if="selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
@@ -926,6 +990,7 @@ import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import {
   useEventMyBooking,
   invalidateEventMyBookingQuery,
+  useEventMyPaymentSummary,
   type ApiErrorLike,
 } from '~/composables/resources/events'
 import { useAttendee, useAttendees, useUpdateAttendee } from '~/composables/resources/attendee/attendees'
@@ -959,7 +1024,7 @@ import { useFamilyAttendees, useCreateFamilyAttendee, useDeleteFamilyAttendee } 
 import { useFamilyGroups, useCreateFamilyGroup } from '~/composables/resources/common/familyGroups'
 
 type RelationshipType = 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other' | ''
-type TabId = 'overview' | 'attendee' | 'health' | 'consents' | 'family' | 'orders'
+type TabId = 'overview' | 'attendee' | 'health' | 'consents' | 'family' | 'orders' | 'payments'
 
 const props = defineProps<{
   eventId: string
@@ -1066,11 +1131,30 @@ const formattedBookedAt = computed(() => {
   return date.toLocaleString()
 })
 
+const selectedAttendeeId = ref(props.initialAttendeeId || '')
+const activeTab = ref<TabId>(props.initialTab || 'overview')
+const applyingRouteState = ref(false)
+
+const paymentSummary = useEventMyPaymentSummary(eventId, computed(() => {
+  if (!bookingReference.value) return undefined
+  return {
+    booking_reference: bookingReference.value,
+    attendee_id: selectedAttendeeId.value || undefined,
+  }
+}))
+
+const paymentSummaryData = computed(() => paymentSummary.data.value)
+
 const outstandingPayments = computed(() => {
-  return (booking.value?.payments || []).filter(item => {
-    const status = String(item.status || '').toUpperCase()
-    return status !== 'COMPLETED' && status !== 'PAID'
-  })
+  return paymentSummaryData.value?.outstanding_payments || []
+})
+
+const bookingLevelPayments = computed(() => {
+  return paymentSummaryData.value?.booking_payments || []
+})
+
+const attendeeLevelPayments = computed(() => {
+  return paymentSummaryData.value?.attendee_payments || []
 })
 
 const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
@@ -1128,10 +1212,6 @@ const journeySteps = computed<Array<{
   },
 ])
 
-const selectedAttendeeId = ref(props.initialAttendeeId || '')
-const activeTab = ref<TabId>(props.initialTab || 'overview')
-const applyingRouteState = ref(false)
-
 watch(attendees, () => {
   if (!selectedAttendeeId.value) return
   const exists = attendees.value.some(item => item.id === selectedAttendeeId.value)
@@ -1147,6 +1227,7 @@ if (props.initialAttendeeId) {
 
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
   { id: 'overview', label: 'Booking Overview' },
+  { id: 'payments', label: 'Payments', needsAttendee: true },
   { id: 'attendee', label: 'Attendee Editor', needsAttendee: true },
   { id: 'health', label: 'Medical + Dietary + Accessibility', needsAttendee: true },
   { id: 'consents', label: 'Consents', needsAttendee: true },
@@ -1256,7 +1337,7 @@ watch(
     applyingRouteState.value = true
     try {
       const routeTab = String(route.query.tab || '')
-      if (routeTab === 'overview' || routeTab === 'attendee' || routeTab === 'health' || routeTab === 'consents' || routeTab === 'family' || routeTab === 'orders') {
+      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'health' || routeTab === 'consents' || routeTab === 'family' || routeTab === 'orders') {
         activeTab.value = routeTab
       }
 
@@ -1310,7 +1391,7 @@ async function fetchPaymentDetails(paymentId: string) {
 
   paymentDetailLoading.value[paymentId] = true
   try {
-    const paymentData = await requestFetch(`/api/payments/${paymentId}/`)
+    const paymentData = await requestFetch(`/api/payments/list/${paymentId}/`)
     paymentDetails.value[paymentId] = paymentData
   } catch (error) {
     console.error('Failed to fetch payment detail', error)

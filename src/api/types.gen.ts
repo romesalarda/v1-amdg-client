@@ -6323,6 +6323,50 @@ export type EventList = {
     };
 };
 
+export type EventMyPaymentSummary = {
+    readonly booking_reference: string;
+    readonly attendee_filter: string | null;
+    totals: EventMyPaymentSummaryTotals;
+    readonly booking_payments: Array<EventMyPaymentSummaryItem>;
+    readonly shop_payments: Array<EventMyPaymentSummaryItem>;
+    readonly attendee_payments: Array<EventMyPaymentSummaryItem>;
+    readonly outstanding_payments: Array<EventMyPaymentSummaryItem>;
+};
+
+export type EventMyPaymentSummaryItem = {
+    readonly payment_id: string;
+    readonly payment_reference: string;
+    readonly status: string;
+    readonly amount: string;
+    readonly currency: string | null;
+    readonly created_at: string | null;
+    readonly method_type: string | null;
+    readonly method_title: string | null;
+    readonly provided_details: unknown;
+    readonly bank_reference: string | null;
+    /**
+     * * `BOOKING` - BOOKING
+     * * `SHOP_ORDER` - SHOP_ORDER
+     */
+    source: 'BOOKING' | 'SHOP_ORDER';
+    readonly is_outstanding: boolean;
+    readonly descriptor: string | null;
+    readonly order_id: string | null;
+    readonly order_reference: string | null;
+    readonly order_status: string | null;
+    readonly attendee_id: string | null;
+    readonly attendee_display_id: string | null;
+    readonly attendee_name: string | null;
+};
+
+export type EventMyPaymentSummaryTotals = {
+    readonly total_payments: number;
+    readonly outstanding_payments: number;
+    readonly booking_outstanding_payments: number;
+    readonly shop_outstanding_payments: number;
+    readonly total_outstanding_amount: string;
+};
+
 export type EventOutstandingTask = {
     readonly title: string;
     readonly description: string;
@@ -29462,6 +29506,44 @@ export type EventListMyOutstandingBookingPaymentsRetrieveResponses = {
      */
     200: unknown;
 };
+
+export type EventListMyPaymentSummaryRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
+    };
+    query?: {
+        /**
+         * Optional attendee UUID filter for attendee-specific payment section.
+         */
+        attendee_id?: string;
+        /**
+         * Optional booking reference to target a specific booking within this event.
+         */
+        booking_reference?: string;
+    };
+    url: '/api/event/list/{url_safe_title}/my-payment-summary/';
+};
+
+export type EventListMyPaymentSummaryRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * Event or booking not found
+     */
+    404: unknown;
+};
+
+export type EventListMyPaymentSummaryRetrieveResponses = {
+    200: EventMyPaymentSummary;
+};
+
+export type EventListMyPaymentSummaryRetrieveResponse = EventListMyPaymentSummaryRetrieveResponses[keyof EventListMyPaymentSummaryRetrieveResponses];
 
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
