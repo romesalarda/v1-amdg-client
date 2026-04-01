@@ -1041,6 +1041,11 @@
       </div>
     </div>
 
+    <!-- Product Preview Modal -->
+    <ProductPreviewModal 
+      v-model="isPreviewOpen"
+      :product="selectedProduct"
+    />
   </EventManagementLayout>
 </template>
 
@@ -1060,6 +1065,7 @@ import { useProductCategories } from '~/composables/resources/products/productCa
 import { useProductEventCategories } from '~/composables/resources/products/productEventCategories'
 import { useBulkAssignCategoryToProducts, useBulkRemoveCategoryFromProducts } from '~/composables/resources/products/productCategoryAssignments'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import ProductPreviewModal from '~/components/events/shop/ProductPreviewModal.vue'
 import StatisticsIndex from './statistics/index.vue'
 import { 
   getStockStatus, 
@@ -1080,6 +1086,10 @@ const id = computed(() => route.params.id as string)
 
 // Event Data
 const { data: event } = useEvent(id)
+
+// Product Preview Modal State
+const isPreviewOpen = ref(false)
+const selectedProduct = ref<ProductList | null>(null)
 
 // Tab State
 const currentTab = ref('products')
@@ -1239,8 +1249,8 @@ function toggleSelectAll() {
 
 // Actions
 function viewProductDetails(product: ProductList) {
-  // TODO: Open product detail modal
-  console.log('View product:', product)
+  selectedProduct.value = product
+  isPreviewOpen.value = true
 }
 
 function deleteProduct(product: ProductList) {
