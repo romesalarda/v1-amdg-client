@@ -248,7 +248,15 @@
                   </svg>
                   {{ countdown.isExpired ? 'Registration Closed' : 'Register Now' }}
                 </button>
-                
+
+                <NuxtLink
+                  v-if="bookingData?.bookings && bookingData.bookings.length > 0"
+                  :href="`/events/${event.url_safe_title}/b`"
+                  class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  View my bookings
+                </NuxtLink>
+
                 <!-- Capacity Status -->
                 <div v-if="event.maximum_attendance && !countdown.isExpired" class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
                   <div class="flex justify-between items-center text-xs font-black mb-3">
@@ -472,6 +480,7 @@ import { useToast } from '#ui/composables/useToast'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useCreateBookingIntent } from '~/composables/resources/booking/bookingIntents'
+import { useEventMyBooking } from '~/composables/resources/events'
 import { useRegistrationStore } from '~/stores/registration'
 import { formatDate, useCountdown, formatTime } from '~/utils/time'
 import { resolveImageUrl, onImageError } from '~/utils/image'
@@ -493,6 +502,9 @@ const { data: venuesData } = useEventVenues(computed(() => ({
 })))
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
+
+const { data: bookingData } = useEventMyBooking(eventId)
+const userBookings = computed(() => bookingData.value?.bookings)
 
 // Registration modal state
 const showRegistrationModal = ref(false)

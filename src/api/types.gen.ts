@@ -13854,6 +13854,17 @@ export type PatchedPaymentUpdateRequest = {
 };
 
 /**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type PatchedProductCategoryCreateUpdateRequest = {
+    /**
+     * Category Name
+     */
+    name?: string;
+    description?: string;
+};
+
+/**
  * Create/Update serializer for ProductVariant with validation.
  */
 export type PatchedProductVariantCreateUpdateRequest = {
@@ -14685,6 +14696,28 @@ export type ProductCategory = {
 };
 
 /**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type ProductCategoryCreateUpdate = {
+    /**
+     * Category Name
+     */
+    name: string;
+    description?: string;
+};
+
+/**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type ProductCategoryCreateUpdateRequest = {
+    /**
+     * Category Name
+     */
+    name: string;
+    description?: string;
+};
+
+/**
  * Create serializer for Product with validation and image handling.
  */
 export type ProductCreate = {
@@ -14729,6 +14762,19 @@ export type ProductDetail = {
         id?: number;
         url?: string | null;
     } | null;
+    /**
+     * Return attendee-context eligibility for product-level purchase rules.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * Whether attendee context matches at least one product-level discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context price at product level.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly added_at: string;
     /**
      *  links
@@ -14790,6 +14836,19 @@ export type ProductList = {
         id?: number;
         url?: string | null;
     } | null;
+    /**
+     * Return attendee-context eligibility for product-level purchase rules.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * Whether attendee context matches at least one product-level discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context price at product level.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly added_at: string;
     /**
      *  links
@@ -15183,6 +15242,23 @@ export type ProductVariantDetail = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    /**
+     * Whether attendee can purchase this variant in current context.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * How many units attendee can still purchase for this variant.
+     */
+    readonly context_remaining_quantity: number;
+    /**
+     * Whether attendee context matches at least one variant discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context unit price for this variant.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly images: {
         main?: {
             id?: number;
@@ -15254,6 +15330,23 @@ export type ProductVariantList = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    /**
+     * Whether attendee can purchase this variant in current context.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * How many units attendee can still purchase for this variant.
+     */
+    readonly context_remaining_quantity: number;
+    /**
+     * Whether attendee context matches at least one variant discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context unit price for this variant.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly images: {
         main?: {
             id?: number;
@@ -41324,6 +41417,40 @@ export type ProductsCategoriesListResponses = {
 
 export type ProductsCategoriesListResponse = ProductsCategoriesListResponses[keyof ProductsCategoriesListResponses];
 
+export type ProductsCategoriesCreateData = {
+    body: ProductCategoryCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/products/categories/';
+};
+
+export type ProductsCategoriesCreateResponses = {
+    201: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesCreateResponse = ProductsCategoriesCreateResponses[keyof ProductsCategoriesCreateResponses];
+
+export type ProductsCategoriesDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type ProductsCategoriesDestroyResponse = ProductsCategoriesDestroyResponses[keyof ProductsCategoriesDestroyResponses];
+
 export type ProductsCategoriesRetrieveData = {
     body?: never;
     path: {
@@ -41341,6 +41468,42 @@ export type ProductsCategoriesRetrieveResponses = {
 };
 
 export type ProductsCategoriesRetrieveResponse = ProductsCategoriesRetrieveResponses[keyof ProductsCategoriesRetrieveResponses];
+
+export type ProductsCategoriesPartialUpdateData = {
+    body?: PatchedProductCategoryCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesPartialUpdateResponses = {
+    200: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesPartialUpdateResponse = ProductsCategoriesPartialUpdateResponses[keyof ProductsCategoriesPartialUpdateResponses];
+
+export type ProductsCategoriesUpdateData = {
+    body: ProductCategoryCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesUpdateResponses = {
+    200: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesUpdateResponse = ProductsCategoriesUpdateResponses[keyof ProductsCategoriesUpdateResponses];
 
 export type ProductsEventCategoriesListData = {
     body?: never;
@@ -41465,6 +41628,10 @@ export type ProductsListListData = {
          */
         added_date?: string;
         /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
          * Filter by category ID (can specify multiple, comma-separated)
          */
         category?: Array<number>;
@@ -41472,6 +41639,10 @@ export type ProductsListListData = {
          * Filter by category name
          */
         category__name?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
         /**
          * Filter by display code (case-insensitive)
          */
@@ -41597,7 +41768,16 @@ export type ProductsListRetrieveData = {
     path: {
         product_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
+    };
     url: '/api/products/list/{product_id}/';
 };
 
@@ -42145,6 +42325,10 @@ export type ProductsListVariantsListData = {
          */
         added_before?: string;
         /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
          * Filter by color (case-insensitive)
          */
         color?: string;
@@ -42152,6 +42336,10 @@ export type ProductsListVariantsListData = {
          * Color contains (case-insensitive)
          */
         color__contains?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
         /**
          * Filter by event ID
          */
@@ -42294,7 +42482,16 @@ export type ProductsListVariantsRetrieveData = {
         product_product_id: string;
         variant_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
+    };
     url: '/api/products/list/{product_product_id}/variants/{variant_id}/';
 };
 

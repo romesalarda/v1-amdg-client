@@ -28,14 +28,18 @@
       </div>
 
       <div>
-        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">{{ product.display_code }}</p>
         <h3 class="mt-2 text-2xl font-black text-deep-navy">{{ product.title }}</h3>
-        <p class="mt-1 text-sm text-deep-navy/60">{{ product.event_name }}</p>
 
         <div class="mt-4 flex items-center gap-2">
           <p class="text-xl font-black text-deep-navy">
             {{ activePrice}}
           </p>
+          <span
+            v-if="activeVariant.context_has_discount"
+            class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700"
+          >
+            Discount active
+          </span>
           <span class="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide" :class="stockBadgeClass(activeVariant)">
             {{ stockLabel(activeVariant) }}
           </span>
@@ -43,6 +47,19 @@
             {{ availabilityStatusLabel(activeVariant.variant_id) }}
           </span>
         </div>
+
+        <p v-if="typeof activeVariant.context_remaining_quantity === 'number'" class="mt-2 text-xs font-semibold text-deep-navy/75">
+          Remaining for attendee: {{ Math.max(0, activeVariant.context_remaining_quantity) }}
+        </p>
+
+        <ul v-if="discountNames(activeVariant).length" class="mt-2 space-y-1 text-[11px] text-emerald-800">
+          <li
+            v-for="(discountName, index) in discountNames(activeVariant)"
+            :key="`${activeVariant.variant_id}-discount-${index}`"
+          >
+            {{ discountName }}
+          </li>
+        </ul>
 
         <p class="mt-2 text-xs text-deep-navy/65">{{ availabilityDescription(activeVariant.variant_id) }}</p>
 
@@ -53,11 +70,17 @@
               v-for="option in colorOptions"
               :key="option.value"
               type="button"
-              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+              class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
               :class="selectedColor === option.value ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
               :disabled="addDisabled"
               @click="selectColor(option.value)"
             >
+              <span
+                v-if="option.hex"
+                class="inline-block h-3 w-3 rounded-full border"
+                :class="selectedColor === option.value ? 'border-white/70' : 'border-deep-navy/25'"
+                :style="{ backgroundColor: option.hex }"
+              />
               {{ option.label }}
             </button>
           </div>
@@ -101,7 +124,6 @@
         </div>
 
         <p v-if="addDisabled && addDisabledReason" class="mt-3 text-[11px] text-amber-700">{{ addDisabledReason }}</p>
-        <p class="mt-3 text-[11px] text-deep-navy/60">Discounts are validated server-side once item is added to cart.</p>
       </div>
     </div>
   </article>
@@ -116,6 +138,7 @@ import { formatMoney } from '~/utils/money'
 
 const props = defineProps<{
   product: ProductList
+  attendeeId?: string
   currencyCode?: string
   addDisabled?: boolean
   addDisabledReason?: string
@@ -128,7 +151,12 @@ const emit = defineEmits<{
   add: [payload: { variantId: string; quantity: number }]
 }>()
 
-const variantQuery = useProductVariants(computed(() => props.product.product_id))
+const variantQuery = useProductVariants(
+  computed(() => ({
+    productId: props.product.product_id,
+    attendeeId: props.attendeeId,
+  }))
+)
 const isLoading = computed(() => variantQuery.isLoading.value)
 const resolvedCurrencyCode = computed(() => props.currencyCode || 'GBP')
 const productPrice = computed(() => props.product.final_price || props.product.base_amount || '0')
@@ -148,6 +176,7 @@ const addingVariantId = ref<string | null>(null)
 type ColorOption = {
   value: string
   label: string
+  hex?: string
 }
 
 type SizeOption = {
@@ -190,7 +219,7 @@ const galleryImages = computed(() => {
   return [...new Set(images)]
 })
 
-const activePrice = computed(() => activeVariant.value?.final_price || productPrice.value || '0')
+const activePrice = computed(() => activeVariant.value?.context_final_price || activeVariant.value?.final_price || productPrice.value || '0')
 const colorOptions = computed<ColorOption[]>(() => {
   const seen = new Set<string>()
   const options: ColorOption[] = []
@@ -202,6 +231,7 @@ const colorOptions = computed<ColorOption[]>(() => {
     options.push({
       value,
       label: colorLabel(variant.color),
+      hex: normalizeHexColor(variant.color),
     })
   })
 
@@ -360,7 +390,11 @@ function isWindowBlocked(variantId: string) {
 }
 
 function maxQuantity(variant: ProductVariantList) {
-  const fromRule = variant.max_purchase_quantity_per_order || 50
+  const remaining =
+    typeof variant.context_remaining_quantity === 'number'
+      ? Math.max(0, variant.context_remaining_quantity)
+      : undefined
+  const fromRule = remaining ?? (variant.max_purchase_quantity_per_order || 50)
   const fromStock = typeof variant.stock_quantity === 'number' ? Math.max(0, variant.stock_quantity) : fromRule
   return Math.max(1, Math.min(fromRule, fromStock))
 }
@@ -383,6 +417,21 @@ function colorLabel(color: string | null | undefined) {
   return (color || '').trim() || 'Standard'
 }
 
+function normalizeHexColor(color: string | null | undefined) {
+  const raw = (color || '').trim()
+  if (!raw) return ''
+
+  const match = raw.match(/^#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/)
+  if (!match) return ''
+
+  const body = match[1]
+  if (body.length === 3) {
+    return `#${body[0]}${body[0]}${body[1]}${body[1]}${body[2]}${body[2]}`.toUpperCase()
+  }
+
+  return `#${body}`.toUpperCase()
+}
+
 function selectColor(nextColor: string) {
   selectedColor.value = nextColor
   const rowsForColor = variantRows.value.filter((row) => colorKey(row.color) === nextColor)
@@ -401,7 +450,8 @@ function selectSize(variant: ProductVariantList) {
 }
 
 function canAddVariant(variant: ProductVariantList) {
-  return !!variant.is_active && !!variant.is_in_stock && !isPreviewOnly(variant.variant_id) && !isWindowBlocked(variant.variant_id)
+  const blockedByContext = variant.context_can_purchase === false || (typeof variant.context_remaining_quantity === 'number' && variant.context_remaining_quantity <= 0)
+  return !!variant.is_active && !!variant.is_in_stock && !isPreviewOnly(variant.variant_id) && !isWindowBlocked(variant.variant_id) && !blockedByContext
 }
 
 function availabilityStatusLabel(variantId: string) {
@@ -419,6 +469,15 @@ function availabilityStatusClass(variantId: string) {
 }
 
 function availabilityDescription(variantId: string) {
+  const variant = variantRows.value.find((row) => row.variant_id === variantId)
+  if (variant?.context_can_purchase === false) {
+    return 'This attendee does not currently meet purchase requirements for this variant.'
+  }
+
+  if (typeof variant?.context_remaining_quantity === 'number' && variant.context_remaining_quantity <= 0) {
+    return 'This attendee has reached the purchase limit for this variant.'
+  }
+
   if (isPreviewOnly(variantId)) {
     return 'This variant is in preview mode and cannot be added yet.'
   }
@@ -453,6 +512,28 @@ function safeQuantity(variant: ProductVariantList) {
   const requested = Number(quantities.value[variant.variant_id] || 1)
   if (Number.isNaN(requested)) return 1
   return Math.min(Math.max(1, requested), maxQuantity(variant))
+}
+
+function discountNames(variant: ProductVariantList) {
+  if (!Array.isArray(variant.context_discounts)) {
+    return []
+  }
+
+  return variant.context_discounts
+    .map((item) => {
+      if (typeof item !== 'object' || item === null || !('name' in item)) {
+        return null
+      }
+      const record = item as { name?: unknown; value?: unknown }
+      if (typeof record.name !== 'string' || !record.name.trim()) {
+        return null
+      }
+      if (typeof record.value === 'string' && record.value.trim()) {
+        return `${record.name} (${record.value})`
+      }
+      return record.name
+    })
+    .filter((value): value is string => Boolean(value))
 }
 
 function handleAdd(variant: ProductVariantList) {
