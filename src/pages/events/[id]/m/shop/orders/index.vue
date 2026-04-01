@@ -579,7 +579,7 @@ function setSorting(field: string) {
 // Computed query parameters for API
 const queryParams = computed(() => {
   const params: NonNullable<ProductsOrdersListData['query']> = {
-    event: event.value?.data?.id,
+    event: event.value?.data?.url_safe_title || "",
     page: currentPage.value,
     page_size: pageSize.value,
   }

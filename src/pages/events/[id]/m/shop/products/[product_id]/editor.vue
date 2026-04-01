@@ -2291,10 +2291,10 @@ const { data: allCategoriesData, isLoading: allCategoriesLoading } = useProductC
 
 const { data: eventCategoriesData, isLoading: eventCategoriesLoading } = useProductEventCategories(
   computed(() => {
-    const eventNumericId = event.value?.data?.id
-    if (!eventNumericId) return undefined
+    const eventURLSafeTitle = event.value?.data?.url_safe_title
+    if (!eventURLSafeTitle) return undefined
     return {
-      event: eventNumericId,
+      event: eventURLSafeTitle,
       page_size: 100,
     }
   })

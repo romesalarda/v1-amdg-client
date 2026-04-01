@@ -41,7 +41,8 @@ export function useBookingShop() {
 
   const booking = computed(() => bookingItem.value?.booking || null)
   const attendees = computed(() => booking.value?.attendees || [])
-  const eventNumericId = computed(() => booking.value?.event || undefined)
+  const eventUUID = computed(() => booking.value?.event || undefined)
+  const eventUrlSafeTitle = computed(() => booking.value?.event_url_safe_title || undefined)
 
   watch(
     attendees,
@@ -66,11 +67,11 @@ export function useBookingShop() {
 
   const draftOrdersQuery = useProductOrders(
     computed(() => {
-      if (!selectedAttendeeId.value || !eventNumericId.value) return undefined
+      if (!selectedAttendeeId.value || !eventUrlSafeTitle.value) return undefined
 
       return {
         attendee_id: selectedAttendeeId.value,
-        event: eventNumericId.value,
+        event: eventUrlSafeTitle.value ,
         ordering: '-created_at',
         page_size: 20,
       }
@@ -183,7 +184,8 @@ export function useBookingShop() {
     store,
     eventId,
     bookingReference,
-    eventNumericId,
+    eventUUID,
+    eventUrlSafeTitle,
     bookingQuery,
     booking,
     attendees,

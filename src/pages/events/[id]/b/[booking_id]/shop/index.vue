@@ -370,7 +370,8 @@ const {
 	store,
 	eventId,
 	bookingReference,
-	eventNumericId,
+	eventUUID,
+	eventUrlSafeTitle,
 	booking,
 	bookingQuery,
 	attendees,
@@ -485,9 +486,9 @@ const pendingRemoveItemIds = ref<number[]>([])
 
 const eventCategoryQuery = useProductEventCategories(
 	computed(() => {
-		if (!eventNumericId.value) return undefined
+		if (!eventUrlSafeTitle.value) return undefined
 		return {
-			event: eventNumericId.value,
+			event: eventUrlSafeTitle.value,
 			ordering: 'category__name',
 			page_size: 100,
 		}
@@ -509,9 +510,9 @@ const categoryOptions = computed(() => {
 
 const productsQuery = useProducts(
 	computed(() => {
-		if (!eventNumericId.value) return undefined
+		if (!eventUrlSafeTitle.value) return undefined
 		return {
-			event: eventNumericId.value,
+			event: eventUrlSafeTitle.value,
 			attendee_id: selectedAttendeeId.value || undefined,
 			is_active: true,
 			in_stock: inStockOnly.value ? true : undefined,

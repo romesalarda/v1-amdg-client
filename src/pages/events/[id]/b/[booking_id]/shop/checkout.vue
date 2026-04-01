@@ -257,7 +257,8 @@ const {
 	bookingReference,
 	attendees,
 	selectedAttendeeId,
-	eventNumericId,
+	eventUUID,
+	eventUrlSafeTitle,
 	activeOrderId,
 	activeOrderQuery,
 } = useBookingShop()
@@ -297,9 +298,9 @@ const currencyCode = computed(() => 'GBP')
 
 const paymentMethodsQuery = usePaymentMethods(
 	computed(() => {
-		if (!eventNumericId.value) return undefined
+		if (!eventUrlSafeTitle.value) return undefined
 		return {
-			event: eventId.value,
+			event: eventUrlSafeTitle.value,
 			is_active: true,
 			page_size: 20,
 		}
