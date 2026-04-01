@@ -91,6 +91,7 @@
 								v-for="product in products"
 								:key="product.product_id"
 								:product="product"
+								:attendee-id="selectedAttendeeId || undefined"
 								:currency-code="currencyCode"
 								:add-disabled="isOrderCreationBlocked"
 								:add-disabled-reason="orderCreationBlockedReason"
@@ -511,6 +512,7 @@ const productsQuery = useProducts(
 		if (!eventNumericId.value) return undefined
 		return {
 			event: eventNumericId.value,
+			attendee_id: selectedAttendeeId.value || undefined,
 			is_active: true,
 			in_stock: inStockOnly.value ? true : undefined,
 			ordering: 'title',
@@ -535,6 +537,9 @@ const variantLookupQuery = useQuery({
 		const responses = await Promise.all(
 			products.value.map((product) => productsListVariantsList({
 				path: { product_product_id: product.product_id },
+				query: {
+					attendee_id: selectedAttendeeId.value || undefined,
+				},
 			}))
 		)
 

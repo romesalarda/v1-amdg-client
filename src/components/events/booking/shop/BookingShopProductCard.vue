@@ -34,6 +34,12 @@
           <p class="text-xl font-black text-deep-navy">
             {{ activePrice}}
           </p>
+          <span
+            v-if="activeVariant.context_has_discount"
+            class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700"
+          >
+            Discount active
+          </span>
           <span class="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide" :class="stockBadgeClass(activeVariant)">
             {{ stockLabel(activeVariant) }}
           </span>
@@ -41,6 +47,19 @@
             {{ availabilityStatusLabel(activeVariant.variant_id) }}
           </span>
         </div>
+
+        <p v-if="typeof activeVariant.context_remaining_quantity === 'number'" class="mt-2 text-xs font-semibold text-deep-navy/75">
+          Remaining for attendee: {{ Math.max(0, activeVariant.context_remaining_quantity) }}
+        </p>
+
+        <ul v-if="discountNames(activeVariant).length" class="mt-2 space-y-1 text-[11px] text-emerald-800">
+          <li
+            v-for="(discountName, index) in discountNames(activeVariant)"
+            :key="`${activeVariant.variant_id}-discount-${index}`"
+          >
+            {{ discountName }}
+          </li>
+        </ul>
 
         <p class="mt-2 text-xs text-deep-navy/65">{{ availabilityDescription(activeVariant.variant_id) }}</p>
 
@@ -119,6 +138,7 @@ import { formatMoney } from '~/utils/money'
 
 const props = defineProps<{
   product: ProductList
+  attendeeId?: string
   currencyCode?: string
   addDisabled?: boolean
   addDisabledReason?: string
@@ -131,7 +151,12 @@ const emit = defineEmits<{
   add: [payload: { variantId: string; quantity: number }]
 }>()
 
-const variantQuery = useProductVariants(computed(() => props.product.product_id))
+const variantQuery = useProductVariants(
+  computed(() => ({
+    productId: props.product.product_id,
+    attendeeId: props.attendeeId,
+  }))
+)
 const isLoading = computed(() => variantQuery.isLoading.value)
 const resolvedCurrencyCode = computed(() => props.currencyCode || 'GBP')
 const productPrice = computed(() => props.product.final_price || props.product.base_amount || '0')
@@ -194,7 +219,7 @@ const galleryImages = computed(() => {
   return [...new Set(images)]
 })
 
-const activePrice = computed(() => activeVariant.value?.final_price || productPrice.value || '0')
+const activePrice = computed(() => activeVariant.value?.context_final_price || activeVariant.value?.final_price || productPrice.value || '0')
 const colorOptions = computed<ColorOption[]>(() => {
   const seen = new Set<string>()
   const options: ColorOption[] = []
@@ -365,7 +390,11 @@ function isWindowBlocked(variantId: string) {
 }
 
 function maxQuantity(variant: ProductVariantList) {
-  const fromRule = variant.max_purchase_quantity_per_order || 50
+  const remaining =
+    typeof variant.context_remaining_quantity === 'number'
+      ? Math.max(0, variant.context_remaining_quantity)
+      : undefined
+  const fromRule = remaining ?? (variant.max_purchase_quantity_per_order || 50)
   const fromStock = typeof variant.stock_quantity === 'number' ? Math.max(0, variant.stock_quantity) : fromRule
   return Math.max(1, Math.min(fromRule, fromStock))
 }
@@ -421,7 +450,8 @@ function selectSize(variant: ProductVariantList) {
 }
 
 function canAddVariant(variant: ProductVariantList) {
-  return !!variant.is_active && !!variant.is_in_stock && !isPreviewOnly(variant.variant_id) && !isWindowBlocked(variant.variant_id)
+  const blockedByContext = variant.context_can_purchase === false || (typeof variant.context_remaining_quantity === 'number' && variant.context_remaining_quantity <= 0)
+  return !!variant.is_active && !!variant.is_in_stock && !isPreviewOnly(variant.variant_id) && !isWindowBlocked(variant.variant_id) && !blockedByContext
 }
 
 function availabilityStatusLabel(variantId: string) {
@@ -439,6 +469,15 @@ function availabilityStatusClass(variantId: string) {
 }
 
 function availabilityDescription(variantId: string) {
+  const variant = variantRows.value.find((row) => row.variant_id === variantId)
+  if (variant?.context_can_purchase === false) {
+    return 'This attendee does not currently meet purchase requirements for this variant.'
+  }
+
+  if (typeof variant?.context_remaining_quantity === 'number' && variant.context_remaining_quantity <= 0) {
+    return 'This attendee has reached the purchase limit for this variant.'
+  }
+
   if (isPreviewOnly(variantId)) {
     return 'This variant is in preview mode and cannot be added yet.'
   }
@@ -473,6 +512,28 @@ function safeQuantity(variant: ProductVariantList) {
   const requested = Number(quantities.value[variant.variant_id] || 1)
   if (Number.isNaN(requested)) return 1
   return Math.min(Math.max(1, requested), maxQuantity(variant))
+}
+
+function discountNames(variant: ProductVariantList) {
+  if (!Array.isArray(variant.context_discounts)) {
+    return []
+  }
+
+  return variant.context_discounts
+    .map((item) => {
+      if (typeof item !== 'object' || item === null || !('name' in item)) {
+        return null
+      }
+      const record = item as { name?: unknown; value?: unknown }
+      if (typeof record.name !== 'string' || !record.name.trim()) {
+        return null
+      }
+      if (typeof record.value === 'string' && record.value.trim()) {
+        return `${record.name} (${record.value})`
+      }
+      return record.name
+    })
+    .filter((value): value is string => Boolean(value))
 }
 
 function handleAdd(variant: ProductVariantList) {

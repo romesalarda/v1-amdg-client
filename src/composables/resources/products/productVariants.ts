@@ -19,18 +19,38 @@ import type {
 
 const QUERY_KEY = ['product-variants'] as const
 
+type ProductVariantsContext = {
+  productId?: string
+  attendeeId?: string
+}
+
+type ProductVariantsInput = string | undefined | ProductVariantsContext
+
+function normalizeProductVariantsContext(input: ProductVariantsInput): ProductVariantsContext {
+  if (typeof input === 'string' || input === undefined) {
+    return { productId: input }
+  }
+  return input
+}
+
 /**
  * List all variants for a product
  */
-export function useProductVariants(productId: MaybeRefOrGetter<string | undefined>) {
+export function useProductVariants(context: MaybeRefOrGetter<ProductVariantsInput>) {
   return useQuery({
-    queryKey: [...QUERY_KEY, 'list', productId] as const,
+    queryKey: [...QUERY_KEY, 'list', context] as const,
     queryFn: () => {
-      const id = toValue(productId)
+      const { productId, attendeeId } = normalizeProductVariantsContext(toValue(context))
+      const id = productId
       if (!id) throw new Error('Product ID is required')
-      return productsListVariantsList({ path: { product_product_id: id } })
+      return productsListVariantsList({
+        path: { product_product_id: id },
+        query: {
+          attendee_id: attendeeId || undefined,
+        },
+      })
     },
-    enabled: () => !!toValue(productId),
+    enabled: () => !!normalizeProductVariantsContext(toValue(context)).productId,
   })
 }
 
