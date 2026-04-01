@@ -386,6 +386,19 @@
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
                     </div>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
+                        {{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}
+                      </span>
+                      <button
+                        v-if="payment.order_reference"
+                        type="button"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        @click="openOrderFromPayment(payment.order_reference || '')"
+                      >
+                        View {{ payment.order_reference }}
+                      </button>
+                    </div>
                     <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
                     <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
                     <p v-if="payment.order_reference" class="text-[11px] text-deep-navy/70 mt-1">Order {{ payment.order_reference }}</p>
@@ -406,6 +419,19 @@
                       <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
+                    </div>
+                    <div class="mt-2 flex flex-wrap items-center gap-2">
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
+                        {{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}
+                      </span>
+                      <button
+                        v-if="payment.order_reference"
+                        type="button"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        @click="openOrderFromPayment(payment.order_reference || '')"
+                      >
+                        View {{ payment.order_reference }}
+                      </button>
                     </div>
                     <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
                     <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
@@ -819,7 +845,7 @@
               <p v-else class="mt-3 text-sm text-deep-navy/60">No attendees found for this booking.</p>
             </section>
 
-            <section>
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Current editing scope</p>
               <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
                 <p v-if="selectedAttendee" class="text-sm font-semibold text-blue-900">
@@ -831,6 +857,30 @@
                 <p v-else class="text-sm text-blue-900/80">
                   Editing booking overview. Select an attendee to edit attendee-specific tabs.
                 </p>
+                <p v-if="isSingleAttendeeBooking" class="mt-2 text-[11px] font-black uppercase tracking-wide text-blue-700">
+                  Single attendee is auto-selected and locked.
+                </p>
+              </div>
+            </section> -->
+
+            <section>
+              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Spent so far</p>
+              <div class="mt-3 rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-3">
+                <p class="text-lg font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
+                <dl class="mt-2 space-y-1 text-xs text-deep-navy/75">
+                  <div class="flex items-center justify-between gap-2">
+                    <dt>Booking payments</dt>
+                    <dd class="font-semibold">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <dt>Order/shop payments</dt>
+                    <dd class="font-semibold">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
+                  </div>
+                  <div class="flex items-center justify-between gap-2">
+                    <dt>Completed payments</dt>
+                    <dd class="font-semibold">{{ completedPaymentsCount }}</dd>
+                  </div>
+                </dl>
               </div>
             </section>
 
@@ -879,7 +929,7 @@
                 <button
                   type="button"
                   class="w-full rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
-                  :disabled="!selectedAttendeeId"
+                  :disabled="!selectedAttendeeId || isSingleAttendeeBooking"
                   @click="clearSelectedAttendee"
                 >
                   Clear attendee selection
@@ -970,7 +1020,7 @@
           <button
             type="button"
             class="inline-flex items-center justify-center rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] md:text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
-            :disabled="!selectedAttendeeId"
+            :disabled="!selectedAttendeeId || isSingleAttendeeBooking"
             @click="clearSelectedAttendee"
           >
             Clear attendee
@@ -1157,6 +1207,50 @@ const attendeeLevelPayments = computed(() => {
   return paymentSummaryData.value?.attendee_payments || []
 })
 
+const isSingleAttendeeBooking = computed(() => attendees.value.length === 1)
+
+const allSummaryPayments = computed(() => {
+  const bookingItems = bookingLevelPayments.value || []
+  const orderItems = paymentSummaryData.value?.shop_payments || []
+  return [...bookingItems, ...orderItems]
+})
+
+function parseAmountValue(rawAmount: unknown): number {
+  const text = String(rawAmount || '').trim()
+  if (!text) return 0
+  const numericPart = text.slice(1).trim()
+  const value = Number.parseFloat(numericPart)
+  return Number.isFinite(value) ? value : 0
+}
+
+function isCompletedPaymentStatus(status: unknown): boolean {
+  const normalized = String(status || '').toUpperCase()
+  return normalized === 'COMPLETED' || normalized === 'PAID'
+}
+
+const completedSummaryPayments = computed(() => {
+  return allSummaryPayments.value.filter(payment => isCompletedPaymentStatus(payment.status))
+})
+
+const spentSoFarBooking = computed(() => {
+  return bookingLevelPayments.value
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + parseAmountValue(payment.amount), 0)
+})
+
+const spentSoFarOrders = computed(() => {
+  return (paymentSummaryData.value?.shop_payments || [])
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + parseAmountValue(payment.amount), 0)
+})
+
+const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)
+const completedPaymentsCount = computed(() => completedSummaryPayments.value.length)
+
+function formatCurrencyAmount(value: number): string {
+  return `${value.toFixed(2)} GBP`
+}
+
 const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
 const hideAllJourneyDetails = ref(false)
 
@@ -1213,6 +1307,14 @@ const journeySteps = computed<Array<{
 ])
 
 watch(attendees, () => {
+  if (attendees.value.length === 1) {
+    const onlyAttendeeId = attendees.value[0]?.id || ''
+    if (onlyAttendeeId) {
+      selectedAttendeeId.value = onlyAttendeeId
+    }
+    return
+  }
+
   if (!selectedAttendeeId.value) return
   const exists = attendees.value.some(item => item.id === selectedAttendeeId.value)
   if (!exists) {
@@ -1277,8 +1379,15 @@ function selectAttendee(attendeeId: string) {
 }
 
 function clearSelectedAttendee() {
+  if (isSingleAttendeeBooking.value) return
   selectedAttendeeId.value = ''
   activeTab.value = 'overview'
+}
+
+function openOrderFromPayment(orderReference: string) {
+  if (!orderReference) return
+  activeTab.value = 'orders'
+  $notyf?.success(`Switched to Orders tab for ${orderReference}.`)
 }
 
 function scrollToBriefingSection(id: 'briefing-info' | 'briefing-location' | 'briefing-time') {
