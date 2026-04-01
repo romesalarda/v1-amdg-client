@@ -20,7 +20,7 @@
           </div>
 
           <div class="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 text-white animate-soft-in lg:justify-self-start lg:max-w-md w-full">
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">Event countdown</p>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">We will see you in ...</p>
             <div v-if="hasStarted" class="mt-4">
               <p class="text-2xl font-black">Event started</p>
               <p class="text-xs text-white/75 mt-1">{{ formatEventDate(eventStart) }}</p>
@@ -131,15 +131,164 @@
       <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <section class="lg:col-span-8 space-y-4">
           <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
-            <div class="rounded-xl border border-deep-navy/10 p-4">
+            <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking steps</p>
+                <button
+                  type="button"
+                  class="rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                  @click="hideAllJourneyDetails = !hideAllJourneyDetails"
+                >
+                  {{ hideAllJourneyDetails ? 'Show all details' : 'Hide all details' }}
+                </button>
+              </div>
+              <ol class="mt-3 space-y-3">
+                <li
+                  v-for="step in journeySteps"
+                  :key="step.id"
+                  class="rounded-lg border border-deep-navy/10 bg-white p-3"
+                >
+                  <div class="flex items-start gap-3">
+                    <div
+                      class="h-7 w-7 shrink-0 rounded-full border text-xs font-black flex items-center justify-center"
+                      :class="step.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+                    >
+                      {{ step.id }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-semibold text-deep-navy">{{ step.title }}</p>
+                        <span
+                          class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
+                          :class="step.done ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'"
+                        >
+                          {{ step.done ? 'Done' : 'Next' }}
+                        </span>
+                      </div>
+                      <p class="mt-1 text-xs text-deep-navy/70">{{ step.description }}</p>
+                      <button
+                        type="button"
+                        class="mt-2 rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                        @click="handleJourneyStepAction(step.action)"
+                      >
+                        {{ step.cta }}
+                      </button>
+
+                      <div v-if="!hideAllJourneyDetails" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3 text-xs text-deep-navy/80 space-y-2">
+                        <template v-if="step.action === 'shop'">
+                          <p class="font-semibold text-deep-navy">
+                            {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) still outstanding.` : 'Registration complete. No outstanding payments.' }}
+                          </p>
+                          <p v-if="outstandingPayments.length" class="text-deep-navy/70">Next payment: {{ outstandingPayments[0]?.payment_reference || 'Pending payment' }}</p>
+
+                          <div v-if="outstandingPayments.length" class="space-y-2">
+                            <div
+                              v-for="payment in outstandingPayments"
+                              :key="payment.payment_id || payment.payment_reference"
+                              class="rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse"
+                            >
+                              <div class="flex items-center justify-between gap-2">
+                                <p class="text-xs font-black text-amber-900">{{ payment.payment_reference || 'Pending payment' }}</p>
+                                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
+                                  {{ payment.status || 'PENDING' }}
+                                </span>
+                              </div>
+                              <p class="mt-1 text-lg font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                              <p class="mt-1 text-[11px] text-deep-navy/75">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+
+                              <div v-if="isOutstandingBankTransfer(payment)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
+                                <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                                <ol class="space-y-2">
+                                  <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
+                                    <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                                  </li>
+                                  <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
+                                    <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                                        <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                                      </div>
+                                    <div class="mt-1 grid sm:grid-cols-2 gap-2">
+                                      
+                                      <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                                        <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                                      </div>
+                                      <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                        <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                                        <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                                      </div>
+                                    </div>
+                                  </li>
+                                  <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                                    <div class="mt-1 flex items-center justify-between gap-2">
+                                      <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                      <button
+                                        type="button"
+                                        class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                                        @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                                      >
+                                        Copy
+                                      </button>
+                                    </div>
+                                  </li>
+                                </ol>
+                              </div>
+
+                              <p v-else class="mt-2 text-[11px] text-deep-navy/70">
+                                Payment method is {{ payment.method_title || payment.method_type || 'different from bank transfer' }}.
+                              </p>
+                            </div>
+                          </div>
+                        </template>
+
+                        <template v-else-if="step.action === 'info'">
+                          <div>
+                            <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">What to bring</p>
+                            <p class="mt-1 whitespace-pre-line">{{ eventWhatToBring }}</p>
+                          </div>
+                          <div>
+                            <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">Important info</p>
+                            <p class="mt-1 whitespace-pre-line">{{ eventCheckInInstructions }}</p>
+                          </div>
+                        </template>
+
+                        <template v-else-if="step.action === 'location'">
+                          <p class="font-semibold text-deep-navy">{{ eventLocation }}</p>
+                          <p v-if="primaryVenue?.venue_address">{{ primaryVenue.venue_address }}</p>
+                          <p v-if="primaryVenue?.venue_city">{{ primaryVenue.venue_city }}</p>
+                          <iframe
+                            v-if="venueMapEmbedUrl"
+                            :src="venueMapEmbedUrl"
+                            class="w-full h-40 border-0 rounded-md"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                          ></iframe>
+                        </template>
+
+                        <template v-else-if="step.action === 'time'">
+                          <p><span class="font-black text-deep-navy">Starts:</span> {{ formatEventDate(eventStart) }}</p>
+                          <p><span class="font-black text-deep-navy">Ends:</span> {{ formatEventDate(eventEnd) }}</p>
+                          <p><span class="font-black text-deep-navy">Timezone:</span> {{ myBookingData?.event?.timezone || 'UTC' }}</p>
+                        </template>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ol>
+            </div>
+
+            <div id="briefing-info" class="rounded-xl border border-deep-navy/10 p-4">
               <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Event briefing</p>
               <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
-                <div class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
+                <div id="briefing-location" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
                   <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Location</p>
                   <p class="mt-1 font-semibold text-deep-navy">{{ eventLocation }}</p>
                   <p v-if="primaryVenue?.venue_address" class="text-xs text-deep-navy/70 mt-1">{{ primaryVenue.venue_address }}</p>
                 </div>
-                <div class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
+                <div id="briefing-time" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
                   <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Timing</p>
                   <p class="mt-1 font-semibold text-deep-navy">Starts: {{ formatEventDate(eventStart) }}</p>
                   <p class="text-xs text-deep-navy/70">Ends: {{ formatEventDate(eventEnd) }}</p>
@@ -155,7 +304,7 @@
                 </div>
                 <div v-if="primaryVenue?.venue_address" class="rounded-lg border border-deep-navy/10 overflow-hidden md:col-span-2">
                   <iframe
-                    :src="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.venue_address + ' ' + (primaryVenue.venue_city || ''))}&output=embed`"
+                    :src="venueMapEmbedUrl"
                     class="w-full h-56 border-0"
                     loading="lazy"
                     referrerpolicy="no-referrer-when-downgrade"
@@ -223,13 +372,14 @@
                   <div
                     v-for="payment in outstandingPayments"
                     :key="payment.payment_id || payment.payment_reference"
-                    class="rounded-lg border border-amber-200 bg-white p-3"
+                    class="rounded-lg border border-amber-300 bg-white p-3 outstanding-attention-pulse"
                   >
                     <div class="flex items-center justify-between gap-3">
                       <div>
                         <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
                         <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
                         <p class="text-xs text-amber-700">{{ payment.status || 'PENDING' }}</p>
+                        <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
                       </div>
                       <button
                         type="button"
@@ -244,6 +394,49 @@
                       <p v-if="paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
                       <template v-else>
                         <p><span class="font-black text-deep-navy">Method:</span> {{ getPaymentMethodType(payment.payment_id || '') }}</p>
+                        <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-amber-200 bg-white p-3 space-y-2">
+                          <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                          <ol class="space-y-2 text-[12px] text-deep-navy/90">
+                            <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                              <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
+                              <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                            </li>
+                            <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                              <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
+                              <div class="mt-1 grid sm:grid-cols-3 gap-2">
+                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                                  <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                                </div>
+                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                                  <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                                </div>
+                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                                  <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                                </div>
+                              </div>
+                            </li>
+                            <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
+                              <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                              <div class="mt-1 flex items-center justify-between gap-2">
+                                <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                <button
+                                  type="button"
+                                  class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                                  @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                                >
+                                  Copy
+                                </button>
+                              </div>
+                            </li>
+                          </ol>
+                        </div>
+
+                        <p v-if="!isOutstandingBankTransfer(payment)" class="text-[11px] text-deep-navy/70">
+                          This payment is {{ payment.method_title || payment.method_type || 'not bank transfer' }}.
+                        </p>
                         <p v-if="getBankTransferReference(payment.payment_id || '')"><span class="font-black text-deep-navy">Bank transfer reference:</span> {{ getBankTransferReference(payment.payment_id || '') }}</p>
                         <p v-if="getBankTransferInstructions(payment.payment_id || '')" class="whitespace-pre-line"><span class="font-black text-deep-navy">Instructions:</span> {{ getBankTransferInstructions(payment.payment_id || '') }}</p>
                       </template>
@@ -633,10 +826,52 @@
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
               <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
-                <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                  <p class="text-xs font-black text-blue-800">{{ item.payment_reference || 'Payment' }}</p>
-                  <p class="text-sm font-semibold text-deep-navy">{{ item.amount || '-' }}</p>
-                  <p class="text-xs text-blue-700">{{ item.status || 'PENDING' }}</p>
+                <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" class="rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse">
+                  <p class="text-xs font-black text-amber-900">{{ item.payment_reference || 'Payment' }}</p>
+                  <p class="text-lg font-black text-deep-navy">{{ item.amount || '-' }}</p>
+                  <p class="text-xs text-amber-700">{{ item.status || 'PENDING' }}</p>
+                  <p class="text-[11px] text-deep-navy/75 mt-1">{{ item.method_title || item.method_type || 'Method unavailable' }}</p>
+                  <div v-if="isOutstandingBankTransfer(item)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
+                    <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                    <ol class="space-y-2">
+                      <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
+                        <p class="mt-1 text-xl font-black text-deep-navy">{{ item.amount || '-' }}</p>
+                      </li>
+                      <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
+                        <div class="mt-1 grid grid-cols-1 gap-2">
+                          <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                            <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                            <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(item, 'account_name') || 'Unavailable' }}</p>
+                          </div>
+                          <div class="grid grid-cols-2 gap-2">
+                            <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                              <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                              <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(item, 'sort_code') || 'Unavailable' }}</p>
+                            </div>
+                            <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                              <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                              <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(item, 'account_number') || 'Unavailable' }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </li>
+                      <li v-if="getRequiredTransferReference(item)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                          <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(item) }}</p>
+                          <button
+                            type="button"
+                            class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                            @click="copyTransferReference(getRequiredTransferReference(item) || '')"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </li>
+                    </ol>
+                  </div>
                 </div>
               </div>
               <p v-else class="mt-3 text-sm text-deep-navy/60">No outstanding payments.</p>
@@ -795,6 +1030,29 @@ const eventCheckInInstructions = computed(() => {
   return details?.check_in_instructions || details?.important_information || 'Please arrive a little early and have your booking reference ready.'
 })
 
+const hasBringInfo = computed(() => {
+  const details = event.data.value?.data as any
+  const whatToBring = String(details?.what_to_bring || '').trim()
+  const checkInInfo = String(details?.check_in_instructions || details?.important_information || '').trim()
+  return Boolean(whatToBring || checkInInfo)
+})
+
+const hasLocationInfo = computed(() => {
+  return Boolean(primaryVenue.value?.venue_name || primaryVenue.value?.venue_address || primaryVenue.value?.venue_city)
+})
+
+const hasTimingInfo = computed(() => {
+  return Boolean(eventStart.value && eventEnd.value)
+})
+
+const venueMapEmbedUrl = computed(() => {
+  const address = String(primaryVenue.value?.venue_address || '').trim()
+  const city = String(primaryVenue.value?.venue_city || '').trim()
+  const query = `${address} ${city}`.trim()
+  if (!query) return ''
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+})
+
 const heroImage = computed(() => {
   const image = event.data.value?.data?.main_landing_image?.image
   return image ? resolveImageUrl(image) : ''
@@ -814,6 +1072,61 @@ const outstandingPayments = computed(() => {
     return status !== 'COMPLETED' && status !== 'PAID'
   })
 })
+
+const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
+const hideAllJourneyDetails = ref(false)
+
+type JourneyStepAction = 'shop' | 'info' | 'location' | 'time'
+
+const journeySteps = computed<Array<{
+  id: number
+  title: string
+  description: string
+  done: boolean
+  action: JourneyStepAction
+  cta: string
+}>>(() => [
+  {
+    id: 1,
+    title: 'Finish registration',
+    description: registrationStepComplete.value
+      ? 'Registration is complete and there are no outstanding payments.'
+      : 'Complete checkout in the shop and clear any outstanding payments.',
+    done: registrationStepComplete.value,
+    action: 'shop',
+    cta: 'Open shop',
+  },
+  {
+    id: 2,
+    title: 'What to bring + important info',
+    description: hasBringInfo.value
+      ? 'Review event briefing guidance before arrival.'
+      : 'Important preparation info is limited right now; check updates closer to event day.',
+    done: hasBringInfo.value,
+    action: 'info',
+    cta: 'View info',
+  },
+  {
+    id: 3,
+    title: 'Location',
+    description: hasLocationInfo.value
+      ? 'Confirm the venue details and map before travel.'
+      : 'Venue details are still being finalized.',
+    done: hasLocationInfo.value,
+    action: 'location',
+    cta: 'View location',
+  },
+  {
+    id: 4,
+    title: 'Time',
+    description: hasTimingInfo.value
+      ? 'Double-check start and end times in your timezone.'
+      : 'Event timing has not been published yet.',
+    done: hasTimingInfo.value,
+    action: 'time',
+    cta: 'View time',
+  },
+])
 
 const selectedAttendeeId = ref(props.initialAttendeeId || '')
 const activeTab = ref<TabId>(props.initialTab || 'overview')
@@ -885,6 +1198,32 @@ function selectAttendee(attendeeId: string) {
 function clearSelectedAttendee() {
   selectedAttendeeId.value = ''
   activeTab.value = 'overview'
+}
+
+function scrollToBriefingSection(id: 'briefing-info' | 'briefing-location' | 'briefing-time') {
+  if (typeof window === 'undefined') return
+  const el = document.getElementById(id)
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function handleJourneyStepAction(action: JourneyStepAction) {
+  if (action === 'shop') {
+    navigateTo(bookingShopHref.value)
+    return
+  }
+
+  if (action === 'info') {
+    scrollToBriefingSection('briefing-info')
+    return
+  }
+
+  if (action === 'location') {
+    scrollToBriefingSection('briefing-location')
+    return
+  }
+
+  scrollToBriefingSection('briefing-time')
 }
 
 watch(
@@ -1009,6 +1348,49 @@ function getBankTransferReference(paymentId: string): string | null {
 function getBankTransferInstructions(paymentId: string): string | null {
   const metadata = paymentDetails.value[paymentId]?.metadata as Record<string, any> | undefined
   return metadata?.bank_transfer_instructions || null
+}
+
+function isOutstandingBankTransfer(payment: any): boolean {
+  const type = String(payment?.method_type || '').toUpperCase()
+  return type === 'BANK_TRANSFER'
+}
+
+function getProvidedDetail(payment: any, key: 'account_name' | 'sort_code' | 'account_number'): string | null {
+  const provided = payment?.provided_details as Record<string, any> | undefined
+  const value = provided?.[key]
+  if (value === undefined || value === null || value === '') return null
+  return String(value)
+}
+
+function getRequiredTransferReference(payment: any): string | null {
+  const provided = payment?.provided_details as Record<string, any> | undefined
+  const direct = payment?.bank_reference || provided?.bank_reference
+  if (direct !== undefined && direct !== null && String(direct).trim() !== '') {
+    return String(direct)
+  }
+
+  const paymentId = String(payment?.payment_id || '')
+  const fromDetail = paymentDetails.value[paymentId]?.bank_reference || paymentDetails.value[paymentId]?.bank_transfer_reference
+  if (fromDetail !== undefined && fromDetail !== null && String(fromDetail).trim() !== '') {
+    return String(fromDetail)
+  }
+
+  return null
+}
+
+async function copyTransferReference(reference: string) {
+  if (!reference) return
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(reference)
+      $notyf?.success('Transfer reference copied.')
+      return
+    }
+    $notyf?.error('Clipboard is not available in this browser.')
+  } catch (error) {
+    console.error('Failed to copy transfer reference', error)
+    $notyf?.error('Could not copy transfer reference.')
+  }
 }
 
 function canCancelOrder(status?: string): boolean {
@@ -1481,6 +1863,10 @@ function formatEventDate(value: string) {
   animation: attendeePulse 2.1s ease-in-out infinite;
 }
 
+.outstanding-attention-pulse {
+  animation: outstandingAttentionPulse 1.8s ease-in-out infinite;
+}
+
 @keyframes softIn {
   from {
     opacity: 0;
@@ -1520,6 +1906,17 @@ function formatEventDate(value: string) {
   }
   50% {
     box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.24);
+  }
+}
+
+@keyframes outstandingAttentionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    border-color: rgba(252, 211, 77, 0.9);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.85);
   }
 }
 </style>

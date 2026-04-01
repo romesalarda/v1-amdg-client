@@ -1465,7 +1465,13 @@ export type BookingDetail = {
         payment_reference?: string;
         status?: string;
         amount?: string;
+        method?: string;
         url?: string;
+        description?: string;
+        method_id?: string;
+        method_type?: string;
+        method_title?: string;
+        bank_reference?: string;
     }>;
 };
 
