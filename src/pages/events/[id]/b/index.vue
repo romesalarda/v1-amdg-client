@@ -1,7 +1,7 @@
 <template>
-	<div class="min-h-screen bg-white">
-		<section class="relative h-[250px] w-full overflow-hidden md:h-[350px]">
-			<div class="absolute inset-0 bg-deep-navy">
+	<div class="min-h-screen bg-[#f7f9fe] text-[#181c20]">
+		<section class="relative h-[320px] overflow-hidden md:h-[350px]">
+			<div class="absolute inset-0 bg-[#0b132b]">
 				<img
 					v-if="heroImageSrc"
 					:src="heroImageSrc"
@@ -9,257 +9,339 @@
 					class="h-full w-full object-cover"
 					@error="onImageError"
 				>
-				<div v-else class="h-full w-full bg-gradient-to-br from-blue-600 to-deep-navy"></div>
+				<div v-else class="h-full w-full bg-gradient-to-br from-[#26408b] to-[#0b132b]"></div>
 			</div>
-			<div class="absolute inset-0 bg-gradient-to-t from-deep-navy via-deep-navy/40 to-transparent"></div>
+			<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-[#0b132b]/50 to-transparent"></div>
+			<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(255,255,255,0.14),_transparent_40%)]"></div>
 
-			<div class="absolute inset-0 flex items-end">
-				<div class="max-container-fluid w-full pb-12 md:pb-16">
-					<div class="flex flex-wrap items-end justify-between gap-4">
-						<div class="max-w-3xl">
-							<p class="text-[10px] font-black uppercase tracking-[0.3em] text-blue-300">My Booking</p>
-							<h1 class="mt-3 text-5xl font-black uppercase leading-[0.9] tracking-tight text-white md:text-7xl">{{ heroTitle }}</h1>
-							<p class="mt-4 max-w-2xl text-base text-white/85 md:text-xl">Manage bookings, track pending payments, and complete transfers with confidence.</p>
-						</div>
-						<NuxtLink
-							:to="`/events/${eventId}`"
-							class="inline-flex items-center rounded-xl border border-white/30 bg-white/10 px-5 py-3 text-[11px] font-black uppercase tracking-wider text-white hover:bg-white/20"
-						>
-							Back to event
-						</NuxtLink>
+			<div class="absolute bottom-0 left-0 w-full">
+				<div class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 pb-12 md:px-8 md:pb-14 lg:flex-row lg:items-end lg:justify-between">
+					<div class="max-w-4xl">
+						<p class="text-[10px] font-black uppercase tracking-[0.35em] text-blue-200">My Booking</p>
+						<h1 class="mt-4 text-5xl font-black uppercase leading-[0.9] tracking-tight text-white md:text-7xl">{{ heroTitle }}</h1>
+						<p class="mt-5 max-w-2xl text-sm leading-6 text-blue-100/80 md:text-lg">
+							Manage bookings, track outstanding payments, and complete transfers from a single dashboard.
+						</p>
 					</div>
+
+					<NuxtLink
+						:to="`/events/${eventId}`"
+						class="inline-flex items-center justify-center rounded-full border border-white/20 bg-white/10 px-5 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-white backdrop-blur-md transition-transform hover:-translate-y-0.5 hover:bg-white/20"
+					>
+						Back to event
+					</NuxtLink>
 				</div>
 			</div>
 		</section>
 
-	
+		<div class="sticky top-14 z-40 border-b border-[#dbe4f0] bg-white/90 backdrop-blur-xl">
+			<div class="mx-auto flex max-w-8xl justify-between gap-4 px-12 py-4 md:px-16">
+				<div class="flex items-center gap-2">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
+						<UIcon name="i-heroicons-calendar-days" class="h-5 w-5" />
+					</span>
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Date</p>
+						<p class="font-black text-[#181c20]">{{ eventInfo.dateRange }}</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
+						<UIcon name="i-heroicons-clock" class="h-5 w-5" />
+					</span>
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Event Start Time</p>
+						<p class="font-black text-[#181c20]">{{ eventInfo.startTime }}</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
+						<UIcon name="i-heroicons-map-pin" class="h-5 w-5" />
+					</span>
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Location</p>
+						<p class="font-black text-[#181c20]">{{ eventInfo.location }}</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-2">
+					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
+						<UIcon name="i-heroicons-currency-dollar" class="h-5 w-5" />
+					</span>
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Cost</p>
+						<p class="font-black text-[#181c20]">{{ eventInfo.cost }}</p>
+					</div>
+				</div>
+				<!-- <div class="hidden items-center justify-between gap-3 lg:flex">
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Status</p>
+						<p class="font-black text-[#181c20]">{{ eventInfo.status }}</p>
+					</div>
+					<span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+				</div> -->
+			</div>
+		</div>
 
-		<div class="max-container-fluid py-8">
-			<div class="space-y-6">
-		<section class="grid gap-6 lg:grid-cols-12">
-			<div class="space-y-4 lg:col-span-8">
-				<article class="rounded-2xl border border-deep-navy/10 bg-white p-5">
-					<div class="rounded-xl border border-deep-navy/10 bg-mist-blue/20 p-4">
-						<div class="flex flex-wrap items-center gap-3">
-							<div class="relative min-w-[260px] flex-1">
-								<span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-deep-navy/35">
-									<UIcon name="i-heroicons-magnifying-glass" class="h-4 w-4" />
-								</span>
-								<input
-									v-model="searchQuery"
-									type="text"
-									placeholder="Search attendee name or booking reference"
-									class="w-full rounded-xl border border-deep-navy/15 bg-white py-3 pl-10 pr-4 text-sm text-deep-navy placeholder:text-deep-navy/35 focus:border-blue-500 focus:outline-none"
-								>
-							</div>
+		<div class="mx-auto max-w-7xl px-6 py-12 md:px-8">
+			<section class="grid grid-cols-1 gap-12 lg:grid-cols-12">
+				<div class="lg:col-span-8">
+					<div class="flex items-center justify-between gap-4 pb-8">
+						<h2 class="text-3xl font-black tracking-tight text-[#181c20] md:text-4xl">Active Bookings</h2>
+						<div class="hidden md:flex items-center gap-2">
+							<span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+							<span class="text-xs font-black uppercase tracking-[0.25em] text-[#0b132b]/45">Registration open</span>
+						</div>
+					</div>
+
+					<div class="mb-8 flex flex-wrap items-center gap-4">
+						<div class="relative min-w-[260px] flex-1">
+							<span class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-[#0b132b]/45">
+								<UIcon name="i-heroicons-magnifying-glass" class="h-5 w-5" />
+							</span>
+							<input
+								v-model="searchQuery"
+								type="text"
+								placeholder="Search attendee name or booking reference"
+								class="w-full rounded-2xl border-0 bg-[#f1f4f9] py-3 pl-12 pr-4 text-sm text-[#181c20] ring-1 ring-[#dbe4f0] placeholder:text-[#0b132b]/35 focus:ring-2 focus:ring-[#0b132b]/15"
+							>
+						</div>
+						<div class="flex gap-2">
 							<button
 								type="button"
-								class="rounded-xl border border-deep-navy/15 bg-white px-4 py-3 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-600"
+								class="rounded-full bg-[#0b132b] px-5 py-3 text-[11px] font-black uppercase tracking-[0.22em] text-white"
 								@click="showFilters = !showFilters"
 							>
 								{{ showFilters ? 'Hide filters' : 'More filters' }}
 							</button>
 							<button
 								type="button"
-								class="rounded-xl bg-deep-navy px-4 py-3 text-xs font-black uppercase tracking-wider text-white hover:bg-blue-600"
+								class="rounded-full border border-[#dbe4f0] bg-white px-5 py-3 text-[11px] font-black uppercase tracking-[0.22em] text-[#0b132b]"
 								@click="applyFilters"
 							>
 								Search
 							</button>
 						</div>
+					</div>
 
-						<div v-if="showFilters" class="mt-4 grid gap-3 border-t border-deep-navy/10 pt-4 md:grid-cols-3">
-							<label class="space-y-1 text-xs font-bold uppercase tracking-wide text-deep-navy/60">
-								<span>Last N days</span>
-								<input
-									v-model.number="filters.booked_in_days"
-									type="number"
-									min="1"
-									class="w-full rounded-md border border-deep-navy/15 bg-white px-3 py-2 text-sm text-deep-navy focus:border-blue-500 focus:outline-none"
-								>
-							</label>
+					<div v-if="showFilters" class="mb-8 grid gap-3 border-t border-[#dbe4f0] pt-4 md:grid-cols-3">
+						<label class="space-y-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#0b132b]/60">
+							<span>Last N days</span>
+							<input
+								v-model.number="filters.booked_in_days"
+								type="number"
+								min="1"
+								class="w-full rounded-xl border border-[#dbe4f0] bg-white px-3 py-2 text-sm text-[#181c20] focus:border-[#0b132b] focus:outline-none"
+							>
+						</label>
 
-							<label class="space-y-1 text-xs font-bold uppercase tracking-wide text-deep-navy/60">
-								<span>Outstanding payments</span>
-								<select
-									v-model="filters.has_outstanding_payments"
-									class="w-full rounded-md border border-deep-navy/15 bg-white px-3 py-2 text-sm text-deep-navy focus:border-blue-500 focus:outline-none"
-								>
-									<option value="all">All</option>
-									<option value="true">Only outstanding</option>
-									<option value="false">Only clear</option>
-								</select>
-							</label>
+						<label class="space-y-1 text-[11px] font-black uppercase tracking-[0.22em] text-[#0b132b]/60">
+							<span>Outstanding payments</span>
+							<select
+								v-model="filters.has_outstanding_payments"
+								class="w-full rounded-xl border border-[#dbe4f0] bg-white px-3 py-2 text-sm text-[#181c20] focus:border-[#0b132b] focus:outline-none"
+							>
+								<option value="all">All</option>
+								<option value="true">Only outstanding</option>
+								<option value="false">Only clear</option>
+							</select>
+						</label>
 
-							<div class="flex items-end">
-								<button
-									type="button"
-									class="w-full rounded-md border border-deep-navy/20 bg-white px-3 py-2 text-sm font-semibold text-deep-navy hover:border-blue-500 hover:text-blue-600"
-									@click="resetFilters"
-								>
-									Reset filters
-								</button>
-							</div>
+						<div class="flex items-end">
+							<button
+								type="button"
+								class="w-full rounded-xl border border-[#dbe4f0] bg-white px-3 py-2 text-sm font-semibold text-[#0b132b]"
+								@click="resetFilters"
+							>
+								Reset filters
+							</button>
 						</div>
 					</div>
 
-					<!-- <div class="mb-3 flex flex-wrap items-center justify-between gap-2">
-						<h2 class="text-sm font-black uppercase tracking-wide text-deep-navy">Your bookings</h2>
-						<p class="text-xs font-semibold uppercase tracking-wider text-deep-navy/50">Page size: 5</p>
-					</div> -->
-
-					<div v-if="myBooking.isLoading.value" class="rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-6 text-sm text-deep-navy/60">
+					<div v-if="myBooking.isLoading.value" class="rounded-xl border border-[#dbe4f0] bg-[#f1f4f9] p-6 text-sm text-[#0b132b]/60">
 						Loading your bookings...
 					</div>
 
 					<div
 						v-else-if="myBooking.error.value && !isNotFound"
-						class="rounded-lg border border-red-500/40 bg-red-950/30 p-6 text-sm text-red-200"
+						class="rounded-xl border border-red-500/30 bg-red-50 p-6 text-sm text-red-700"
 					>
 						Unable to load your bookings right now.
 					</div>
 
-					<div v-else-if="bookingItems.length" class="space-y-4 mt-5">
+					<div v-else-if="bookingItems.length" class="space-y-4">
 						<NuxtLink
 							v-for="item in bookingItems"
 							:key="item.booking.booking_reference"
 							:to="`/events/${eventId}/b/${item.booking.booking_reference}`"
-							class="group block rounded-xl border border-deep-navy/10 bg-white p-5 transition-all duration-200 hover:border-blue-300 hover:bg-blue-50/20"
+							class="group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md"
 						>
-							<div class="mb-3 flex items-start justify-between gap-4">
-								<div class="space-y-1">
-									<p class="text-[11px] font-black uppercase tracking-wide text-deep-navy/50">Booking</p>
-									<h2 class="text-xl font-black text-deep-navy">{{ getBookingDisplayTitle(item) }}</h2>
-									<p class="text-sm text-deep-navy/60">
-										{{ item.is_booking_owner ? 'You are the booking owner' : 'You are linked as an attendee' }}
-									</p>
+							<div class="flex min-w-0 items-center gap-5">
+								<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b132b] font-black text-[#bec5e5]">
+									{{ getBookingInitials(getBookingDisplayTitle(item)) }}
 								</div>
-
-								<div class="flex items-center gap-3">
-									<div class="text-right">
-										<p class="text-[11px] font-black uppercase tracking-wide text-deep-navy/50">Price</p>
-										<p class="text-base font-black text-deep-navy">{{ getBookingPaymentTotal(item.booking.payments) }}</p>
-									</div>
-									<div class="flex h-14 w-14 items-center justify-center rounded-full border border-deep-navy/15 bg-white text-deep-navy/50 transition-all duration-200 group-hover:border-blue-400 group-hover:bg-blue-600 group-hover:text-white">
-										<UIcon name="i-heroicons-arrow-right" class="h-7 w-7" />
-									</div>
+								<div class="min-w-0">
+									<h3 class="font-black text-[#181c20] text-xl md:text-2xl">{{ getBookingDisplayTitle(item) }}</h3>
+									<p class="text-sm font-medium text-[#0b132b]/55">
+										Ref: #{{ item.booking.booking_reference.slice(0,20).toUpperCase()  }} ...
+									</p>
 								</div>
 							</div>
 
-							<dl class="grid gap-2 text-sm text-deep-navy md:grid-cols-3">
+							<div class="flex items-center gap-10 text-right">
 								<div>
-									<dt class="text-deep-navy/50">Booked at</dt>
-									<dd class="font-medium">{{ formatDate(item.booking.booked_at) }}</dd>
+									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Attendees</p>
+									<div class="flex justify-end -space-x-2">
+										<div
+											v-for="(attendee, attendeeIndex) in getBookingAttendeePreview(item)"
+											:key="`${item.booking.booking_reference}-${attendeeIndex}`"
+											class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
+										>
+											{{ getAttendeeInitials(attendee?.name) }}
+										</div>
+										<div
+											v-if="!getBookingAttendeePreview(item).length"
+											class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
+										>
+											?
+										</div>
+									</div>
 								</div>
 								<div>
-									<dt class="text-deep-navy/50">Attendees</dt>
-									<dd class="font-medium">{{ item.booking.attendee_count || 0 }}</dd>
+									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Amount</p>
+									<p class="font-black text-lg text-[#181c20]">{{ getBookingPaymentTotal(item.booking.payments) }}</p>
 								</div>
-								<div>
-									<dt class="text-deep-navy/50">Names</dt>
-									<dd class="font-medium">{{ item.booking.attendees.map(attendee => attendee.name).filter(Boolean).join(', ') }}</dd>
+								<div class="text-right">
+									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Booked</p>
+									<p class="text-sm font-medium text-[#181c20]">{{ formatRelativeTime(item.booking.booked_at) }}</p>
 								</div>
-							</dl>
-
+								<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f1f4f9] text-[#0b132b] transition-all group-hover:bg-[#0b132b] group-hover:text-white">
+									<UIcon name="i-heroicons-chevron-right" class="h-5 w-5" />
+								</div>
+							</div>
 						</NuxtLink>
 
-						<div class="flex items-center justify-end gap-2">
+						<div class="mt-12 flex items-center justify-between border-t border-[#dbe4f0] pt-8 text-sm font-medium text-[#0b132b]/55">
 							<button
 								type="button"
-								class="rounded-md border border-deep-navy/20 bg-white px-3 py-2 text-sm font-semibold text-deep-navy disabled:opacity-40"
+								class="flex items-center gap-2 transition-colors hover:text-[#181c20] disabled:opacity-40"
 								:disabled="!pagination.previous"
 								@click="previousPage"
 							>
+								<UIcon name="i-heroicons-arrow-left" class="h-5 w-5" />
 								Previous
 							</button>
+							<span class="font-black text-[#181c20]">Page {{ page }}{{ pagination.count ? ` of ${Math.max(1, Math.ceil((pagination.count || 0) / 5))}` : '' }}</span>
 							<button
 								type="button"
-								class="rounded-md border border-deep-navy/20 bg-white px-3 py-2 text-sm font-semibold text-deep-navy disabled:opacity-40"
+								class="flex items-center gap-2 transition-colors hover:text-[#181c20] disabled:opacity-40"
 								:disabled="!pagination.next"
 								@click="nextPage"
 							>
 								Next
+								<UIcon name="i-heroicons-arrow-right" class="h-5 w-5" />
 							</button>
 						</div>
 					</div>
 
-					<div v-else class="rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-6 text-sm text-deep-navy/60">
+					<div v-else class="rounded-xl border border-[#dbe4f0] bg-[#f1f4f9] p-6 text-sm text-[#0b132b]/60">
 						No bookings matched your filters.
 					</div>
-				</article>
-			</div>
+				</div>
 
-			<aside class="lg:col-span-4">
-				<article class="sticky top-24 rounded-2xl border-2 border-blue-200 bg-gradient-to-b from-blue-50 to-white p-5 shadow-sm">
-					<div class="flex items-start justify-between gap-3">
-						<div>
-							<h2 class="text-sm font-black uppercase tracking-wide text-blue-700">Outstanding payment</h2>
-							<p class="mt-1 text-sm text-blue-900/80">{{ outstandingSummary }}</p>
-						</div>
-						<p v-if="outstandingItems.length" class="rounded-full border border-blue-300 bg-white px-2.5 py-1 text-xs font-black text-blue-700">
-							{{ outstandingIndex + 1 }} / {{ outstandingItems.length }}
-						</p>
-					</div>
-
-					<div v-if="outstandingPayments.isLoading.value" class="mt-4 rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">
-						Loading payment details...
-					</div>
-
-					<div v-else-if="currentOutstandingPayment" class="mt-4 space-y-3">
-						<div class="rounded-lg border border-blue-200 bg-blue-600 p-3 text-white">
-							<p class="mt-2 inline-flex rounded-full bg-white/20 px-2 py-0.5 text-[11px] font-black uppercase tracking-wide">{{ currentOutstandingPayment.status || 'PENDING' }}</p>
-							<p class="mt-2 text-lg font-black">{{ currentOutstandingPayment.amount || '-' }}</p>
-						</div>
-
-						<div class="rounded-lg border border-blue-200 bg-white p-3">
-							<p class="text-xs font-black uppercase tracking-wide text-blue-700">Payment method</p>
-							<p class="mt-1 text-sm font-semibold text-deep-navy">
-								{{ currentOutstandingPayment.payment_method_title || currentOutstandingPayment.payment_method || 'N/A' }}
-							</p>
-							<p v-if="currentOutstandingPayment.payment_instructions" class="mt-2 rounded-md bg-blue-50 px-2 py-1 text-xs text-blue-800">
-								{{ currentOutstandingPayment.payment_instructions }}
-							</p>
+				<aside class="space-y-8 lg:col-span-4">
+					<div class="rounded-2xl bg-[#0b132b] p-8 text-white shadow-sm">
+						<div class="mb-6 flex items-start justify-between gap-4">
+							<div class="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-white">
+							<UIcon name="i-heroicons-exclamation-triangle" class="h-4 w-4" />
+							<span class="text-[10px] font-black uppercase tracking-[0.22em]">
+								Urgent Action Required
+							</span>
+							</div>
+							<div v-if="outstandingItems.length > 1" class="flex gap-2">
+								<button
+									type="button"
+									class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+									@click="previousOutstanding"
+								>
+									<UIcon name="i-heroicons-chevron-left" class="h-4 w-4" />
+								</button>
+								<button
+									type="button"
+									class="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 text-white transition-colors hover:bg-white/20"
+									@click="nextOutstanding"
+								>
+									<UIcon name="i-heroicons-chevron-right" class="h-4 w-4" />
+								</button>
+							</div>
 						</div>
 
-						<div v-if="formattedPaymentDetails.length" class="rounded-lg border border-blue-200 bg-white p-3">
-							<p class="text-xs font-black uppercase tracking-wide text-blue-700">Bank transfer details</p>
-							<dl class="mt-2 space-y-2 text-sm">
-								<div v-for="detail in formattedPaymentDetails" :key="detail.label" class="rounded-md border border-blue-200 bg-blue-50 px-2 py-1.5">
-									<dt class="text-[11px] font-black uppercase tracking-wide text-blue-700">{{ detail.label }}</dt>
-									<dd class="mt-0.5 break-all font-medium text-deep-navy">{{ detail.value }}</dd>
+						<div v-if="outstandingPayments.isLoading.value" class="rounded-2xl bg-white/5 p-4 text-sm text-white/70">
+							Loading payment details...
+						</div>
+
+						<div v-else-if="currentOutstandingPayment" class="space-y-8">
+							<div>
+								<p class="text-[10px] font-black uppercase tracking-[0.22em] text-blue-200/60">Outstanding Payment</p>
+								<h3 class="mt-2 text-4xl font-black tracking-tight text-white">{{ formatMoney(currentOutstandingPayment.amount || 0, currentOutstandingPayment.currency || 'USD') }}</h3>
+								<p class="mt-1 text-xs font-medium text-blue-200/40">
+									{{ outstandingItems.length }} payment{{ outstandingItems.length === 1 ? '' : 's' }} waiting for {{ currentOutstandingPayment.metadata_attendees?.[0] || 'completion' }}
+								</p>
+							</div>
+
+							<button type="button" class="w-full rounded-full bg-white py-4 text-sm font-black uppercase tracking-[0.22em] text-[#0b132b] transition-transform hover:-translate-y-0.5">
+								Complete Payment
+							</button>
+
+							<div class="border-t border-white/10 pt-8">
+								<h4 class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-white">
+									<UIcon name="i-heroicons-banknotes" class="h-4 w-4" />
+									Bank Transfer Details
+								</h4>
+								<div class="space-y-4">
+									<div v-for="detail in formattedPaymentDetails" :key="detail.label" class="rounded-xl bg-white/5 p-4">
+										<p class="mb-1 block text-[10px] font-bold uppercase tracking-[0.22em] text-blue-200/60">{{ detail.label }}</p>
+										<p class="font-black text-white">{{ detail.value }}</p>
+									</div>
+									<div v-if="!formattedPaymentDetails.length" class="rounded-xl bg-white/5 p-4 text-sm text-white/70">
+										No bank transfer details available.
+									</div>
 								</div>
-							</dl>
+							</div>
 						</div>
 
-						<p v-if="currentOutstandingPayment.metadata_attendees?.length" class="rounded-lg border border-blue-200 bg-white px-3 py-2 text-xs text-deep-navy/80">
-							Attendees: {{ currentOutstandingPayment.metadata_attendees.join(', ') }}
-						</p>
-
-						<div v-if="outstandingItems.length > 1" class="grid grid-cols-2 gap-2 pt-1">
-							<button
-								type="button"
-								class="rounded-md border border-deep-navy/20 bg-white px-3 py-2 text-sm font-semibold text-deep-navy hover:border-blue-500 hover:text-blue-600"
-								@click="previousOutstanding"
-							>
-								Previous
-							</button>
-							<button
-								type="button"
-								class="rounded-md bg-deep-navy px-3 py-2 text-sm font-semibold text-white hover:bg-blue-600"
-								@click="nextOutstanding"
-							>
-								Next
-							</button>
+						<div v-else class="rounded-2xl bg-white/5 p-4 text-sm text-white/70">
+							No outstanding payments found.
 						</div>
 					</div>
 
-					<div v-else class="mt-4 rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">
-						No outstanding payments found.
+					<div class="rounded-2xl bg-[#131a33] p-8 text-white">
+						<h3 class="mb-6 text-xl font-black">Upcoming Deadlines</h3>
+						<div class="space-y-6">
+							<div class="flex gap-4">
+								<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+									<UIcon name="i-heroicons-document-text" class="h-5 w-5 text-[#bec5e5]" />
+								</div>
+								<div>
+									<p class="text-sm font-bold">Review booking details</p>
+									<p class="text-xs text-white/60">Check names and references before payment.</p>
+								</div>
+							</div>
+							<div class="flex gap-4">
+								<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+									<UIcon name="i-heroicons-credit-card" class="h-5 w-5 text-[#bec5e5]" />
+								</div>
+								<div>
+									<p class="text-sm font-bold">Complete outstanding payments</p>
+									<p class="text-xs text-white/60">{{ outstandingSummary }}</p>
+								</div>
+							</div>
+						</div>
+						<button type="button" class="mt-8 w-full rounded-full border border-white/15 py-3 text-xs font-black uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10">
+							View All Tasks
+						</button>
 					</div>
-				</article>
-			</aside>
-		</section>
-			</div>
+				</aside>
+			</section>
 		</div>
 	</div>
 </template>
@@ -268,10 +350,13 @@
 import {
 	type ApiErrorLike,
 	useEvent,
+	useEventVenues,
 	useEventMyBooking,
 	useEventMyOutstandingBookingPayments,
 } from '~/composables/resources/events'
 import { onImageError, resolveImageUrl } from '~/utils/image'
+import { formatDate, formatTime } from '~/utils/time'
+import { formatMoney } from '~/utils/money'
 
 definePageMeta({
 	layout: 'booking' as any,
@@ -283,6 +368,12 @@ const router = useRouter()
 const eventId = computed(() => String(route.params.id || ''))
 const { data: eventData } = useEvent(eventId)
 const event = computed(() => eventData.value?.data)
+
+const { data: venuesData } = useEventVenues(computed(() => ({
+	event: eventId.value,
+})))
+const eventVenues = computed(() => venuesData.value?.data?.results || [])
+const primaryVenue = computed(() => eventVenues.value[0])
 
 const heroTitle = computed(() => event.value?.title || myBooking.data.value?.event?.title || 'Booking dashboard')
 const heroImageSrc = computed(() => {
@@ -341,6 +432,20 @@ const bookingItems = computed(() => myBooking.data.value?.bookings || [])
 const pagination = computed(() => myBooking.data.value?.pagination || { count: 0, next: null, previous: null })
 const outstandingItems = computed(() => outstandingPayments.data.value?.items || [])
 const outstandingIndex = ref(0)
+const eventInfo = computed(() => {
+	const eventRecord = event.value as Record<string, any> | undefined
+	const startDateTime = eventRecord?.start_datetime
+	const endDateTime = eventRecord?.end_datetime
+	const timezone = eventRecord?.timezone
+
+	return {
+		location: primaryVenue.value?.venue_name || eventRecord?.organisation_name || 'TBA',
+		dateRange: formatEventDateRange(startDateTime, endDateTime),
+		startTime: startDateTime ? formatTime(startDateTime, timezone) : 'TBA',
+		cost: eventRecord?.general_price || 'TBA',
+		status: eventRecord?.status_display || eventRecord?.status || (eventRecord?.is_registration_open ? 'Registration Open' : 'Registration Closed'),
+	}
+})
 
 watch(
 	() => outstandingItems.value.length,
@@ -440,7 +545,7 @@ function syncQueryParams() {
 	})
 }
 
-function formatDate(value?: string) {
+function formatRelativeTime(value?: string) {
 	if (!value) {
 		return '-'
 	}
@@ -450,13 +555,103 @@ function formatDate(value?: string) {
 		return value
 	}
 
-	return date.toLocaleString()
+	const diffMs = Date.now() - date.getTime()
+	const diffMinutes = Math.round(diffMs / 60000)
+	if (Math.abs(diffMinutes) < 1) {
+		return 'just now'
+	}
+
+	const diffHours = Math.round(diffMinutes / 60)
+	if (Math.abs(diffHours) < 24) {
+		return `${Math.abs(diffHours)} hour${Math.abs(diffHours) === 1 ? '' : 's'} ago`
+	}
+
+	const diffDays = Math.round(diffHours / 24)
+	return `${Math.abs(diffDays)} day${Math.abs(diffDays) === 1 ? '' : 's'} ago`
 }
 
 function formatDetailLabel(value: string) {
 	return value
 		.replace(/_/g, ' ')
 		.replace(/\b\w/g, (match) => match.toUpperCase())
+}
+
+function formatEventDateRange(startDate?: string, endDate?: string) {
+
+	if (startDate && endDate) {
+		return `${formatDate(startDate, 'MMM d, yyyy')} - ${formatDate(endDate, 'MMM d, yyyy')}`
+	}
+
+	if (startDate) {
+		return formatDate(startDate, 'MMM d, yyyy')
+	}
+
+	return 'Date TBC'
+}
+
+function getBookingInitials(title: string) {
+	const initials = title
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map(part => part[0]?.toUpperCase() || '')
+		.join('')
+
+	return initials || 'BK'
+}
+
+function getAttendeeInitials(name?: string) {
+	if (!name) {
+		return '?'
+	}
+
+	return name
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map(part => part[0]?.toUpperCase() || '')
+		.join('') || name[0]?.toUpperCase() || '?'
+}
+
+function getBookingAttendeePreview(item: {
+	booking?: { attendees?: Array<{ name?: string }> }
+}) {
+	return item.booking?.attendees?.filter(attendee => attendee.name).slice(0, 3) || []
+}
+
+function hasOutstandingPayment(payments?: Array<{ status?: string }>) {
+	if (!payments?.length) {
+		return false
+	}
+
+	return payments.some((payment) => {
+		const status = String(payment?.status || '').toUpperCase()
+		return status.includes('PENDING') || status.includes('DUE') || status.includes('OUTSTANDING') || status.includes('UNPAID')
+	})
+}
+
+function getBookingPaymentStatusLabel(payments?: Array<{ status?: string }>) {
+	if (hasOutstandingPayment(payments)) {
+		return 'Action required'
+	}
+
+	if (!payments?.length) {
+		return 'No payments'
+	}
+
+	return 'Paid'
+}
+
+function getBookingPaymentStatusClass(payments?: Array<{ status?: string }>) {
+	if (hasOutstandingPayment(payments)) {
+		return 'text-amber-600'
+	}
+
+	if (!payments?.length) {
+		return 'text-[#0b132b]/45'
+	}
+
+	return 'text-emerald-600'
 }
 
 function getBookingDisplayTitle(item: {
