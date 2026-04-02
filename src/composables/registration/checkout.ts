@@ -111,7 +111,7 @@ const buildAttendeeCheckout = (attendee: AttendeeDraft): AttendeeCheckoutRequest
 
 export const buildCheckoutPayload = (params: {
   bookingIntentId: string
-  paymentMethodId: number
+  paymentMethodId: number | null | undefined
   attendees: AttendeeDraft[]
   stripePaymentIntentId?: string
 }): CheckoutRequest => ({

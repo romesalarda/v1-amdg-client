@@ -120,7 +120,7 @@
         v-for="event in filteredEvents" 
         :key="event.event_id"
         :event="event"
-        :link-to="`/communities/${organisationId}/m/events/${event.event_id}`"
+        :link-to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
       />
     </div>
 

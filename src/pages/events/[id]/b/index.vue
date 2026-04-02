@@ -690,6 +690,10 @@ function getBookingPaymentTotal(payments?: Array<{ amount?: string }>) {
 		return payments[0]?.amount || '-'
 	}
 
+	if (total.toFixed(2) === '0.00') {
+		return 'Free'
+	}
+
 	return `${currencySymbol}${total.toFixed(2)}`
 }
 </script>

@@ -1001,8 +1001,8 @@
 												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
 													{{ attendee.personalInfo.dietaryRequirements.length }} dietary
 												</span>
-												<span class="rounded-full bg-emerald-50 px-2.5 py-1 font-semibold text-emerald-700">
-													Due {{ formatMoney(attendeeReviewAmount(attendee, index).amount, attendeeReviewAmount(attendee, index).currency) }}
+												<span class="rounded-full px-2.5 py-1 font-semibold" :class="attendeeReviewAmount(attendee, index).amount === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-50 text-emerald-700'">
+													Due {{ attendeeReviewAmount(attendee, index).amount === 0 ? 'FREE' : formatMoney(attendeeReviewAmount(attendee, index).amount, attendeeReviewAmount(attendee, index).currency) }}
 												</span>
 											</div>
 										</div>
@@ -1013,7 +1013,17 @@
 								</div>
 							</div>
 
-							<div>
+<div v-if="isBookingFree" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+							<div class="flex items-center gap-3">
+								<UIcon name="i-heroicons-check-circle" class="h-5 w-5 text-emerald-600" />
+								<div>
+									<p class="font-semibold text-emerald-900">This event is FREE!</p>
+									<p class="mt-1 text-xs text-emerald-700">No payment method required. Complete your registration below.</p>
+								</div>
+							</div>
+						</div>
+
+						<div v-else>
 								<label class="mb-1 block text-sm font-medium text-gray-700">Payment method</label>
 								<div v-if="paymentMethods.length" class="grid gap-3 sm:grid-cols-1 lg:grid-cols-1">
 									<button
@@ -1043,7 +1053,7 @@
 								<p v-else class="text-sm text-gray-500">No payment methods available for this event.</p>
 							</div>
 
-							<div v-if="selectedPaymentMethod" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+							<div v-if="selectedPaymentMethod && !isBookingFree" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
 								<div class="flex items-center justify-between gap-3">
 									<p class="text-sm font-semibold text-slate-900">{{ selectedPaymentMethod.title }}</p>
 									<span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
@@ -1098,7 +1108,7 @@
 								</div>
 							</div>
 						</div>
-									<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
+					<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
 										<UButton color="gray" variant="ghost" @click="handleBack">Back</UButton>
 										<div class="flex items-center gap-3">
 											<UButton
@@ -2441,6 +2451,10 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && hasPersonalInfoValidity && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
 }
 
+const isBookingFree = computed(() => {
+	return paymentBreakdownTotal.value.amount === 0
+})
+
 const canContinue = computed(() => {
 	if (!currentAttendee.value) return false
 	if (activeStepIndex.value === 0) {
@@ -2479,7 +2493,15 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		if (checkoutCompleted.value || !store.bookingIntentId || !selectedPaymentMethodId.value || !allAttendeesReady || isPollingPaymentStatus.value) {
+		if (checkoutCompleted.value || !store.bookingIntentId || !allAttendeesReady || isPollingPaymentStatus.value) {
+			return false
+		}
+		// For free bookings, skip payment method requirement
+		if (isBookingFree.value) {
+			return true
+		}
+		// For paid bookings, require payment method selection
+		if (!selectedPaymentMethodId.value) {
 			return false
 		}
 		if (isStripeMethod.value) {
@@ -2529,7 +2551,7 @@ const getCannotContinueMessage = () => {
 	if (activeStepIndex.value === reviewStepIndex) {
 		if (isStripeMethod.value && stripeCardError.value) return stripeCardError.value
 		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
-		if (!selectedPaymentMethodId.value) return 'Please choose a payment method.'
+		if (!isBookingFree.value && !selectedPaymentMethodId.value) return 'Please choose a payment method.'
 		return 'Some attendees are missing required information.'
 	}
 
@@ -2538,7 +2560,10 @@ const getCannotContinueMessage = () => {
 
 const primaryActionLabel = computed(() => {
 	if (activeStepIndex.value === attendeeStepCount - 1) {
-		return store.currentIndex === store.attendees.length - 1 ? 'Review payment' : 'Next attendee'
+		if (store.currentIndex === store.attendees.length - 1) {
+			return isBookingFree.value ? 'Complete registration' : 'Review payment'
+		}
+		return 'Next attendee'
 	}
 	return 'Continue'
 })
@@ -3000,7 +3025,9 @@ const jumpToAttendee = async (index: number) => {
 
 const handleCheckout = async () => {
 	if (checkoutCompleted.value) return
-	if (!canContinue.value || !store.bookingIntentId || !selectedPaymentMethodId.value) return
+	if (!canContinue.value || !store.bookingIntentId) return
+	// Only require payment method for paid bookings
+	if (!isBookingFree.value && !selectedPaymentMethodId.value) return
 	if (!(await pingBookingIntent(false))) return
 	isSaving.value = true
 	checkoutResult.value = null
@@ -3010,7 +3037,7 @@ const handleCheckout = async () => {
 	try {
 		const payload = buildCheckoutPayload({
 			bookingIntentId: store.bookingIntentId,
-			paymentMethodId: selectedPaymentMethodId.value,
+			paymentMethodId: isBookingFree.value ? -1 : selectedPaymentMethodId.value,
 			attendees: store.attendees,
 		})
 		const response = await checkoutMutation.mutateAsync({
@@ -3075,7 +3102,7 @@ const handleCheckout = async () => {
 
 		checkoutCompleted.value = true
 		showCheckoutSuccessModal.value = true
-		toast.add({ title: 'Success', description: 'Checkout completed.', color: 'green' })
+		toast.add({ title: 'Success', description: 'Registration completed.', color: 'green' })
 	} catch (error) {
 		console.error('Checkout failed', error)
 		idempotencyKey.value = createIdempotencyKey()
@@ -3092,7 +3119,7 @@ const closeSuccessModalAndRedirect = () => {
 	stopIntentCountdown()
 	store.reset()
 	if (event.value?.event_id) {
-		router.push({ path: `/events/${event.value.event_id}/my-booking` })
+		router.push({ path: `/events/${event.value.url_safe_title}/b` })
 		return
 	}
 	router.push({ path: '/events' })

@@ -2319,9 +2319,9 @@ export type CheckoutRequest = {
      */
     booking_intent_id: string;
     /**
-     * ID of the PaymentMethod to use (must be active and match event)
+     * Optional payment method ID. Required for paid checkouts; omitted for free checkouts.
      */
-    payment_method_id: number;
+    payment_method_id?: number | null;
     /**
      * Stripe PaymentIntent ID when payment is already confirmed (Stripe only)
      */
@@ -9604,9 +9604,9 @@ export type MedicalConditionsStats = {
 
 export type OrderCheckoutRequestRequest = {
     /**
-     * ID of payment method to use
+     * Optional payment method ID. Required when order total is greater than 0.
      */
-    payment_method_id: number;
+    payment_method_id?: number | null;
 };
 
 /**
@@ -38392,7 +38392,7 @@ export type OrganisationsSponsorInvitesListData = {
          */
         email?: string;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38556,7 +38556,7 @@ export type OrganisationsSponsorPackagesListData = {
          */
         added_before?: string;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38698,7 +38698,7 @@ export type OrganisationsSponsorsListData = {
          */
         chapter_location_id?: number;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38847,7 +38847,7 @@ export type OrganisationsSponsorsPackagesListData = {
          */
         chapter_location_id?: number;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -43542,7 +43542,7 @@ export type ProductsOrdersCancelCreateResponses = {
 };
 
 export type ProductsOrdersCheckoutCreateData = {
-    body: OrderCheckoutRequestRequest;
+    body?: OrderCheckoutRequestRequest;
     path: {
         order_id: string;
     };
