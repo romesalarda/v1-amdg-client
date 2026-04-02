@@ -1,313 +1,426 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event">
-    <!-- Quick Actions Bar -->
-    <div class="mb-6 flex justify-end">
-      <UButton
-        :to="`/events/${id}/m/dashboard/statistics`"
-        color="primary"
-        variant="solid"
-        icon="i-heroicons-chart-bar-square"
-        size="md"
-      >
-        View Detailed Statistics
-      </UButton>
-    </div>
-
-    <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Registrations -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm flex justify-between items-start">
-        <div>
-          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Total Registrations</p>
-          <h3 class="text-4xl font-black text-deep-navy mt-2">{{ eventStats?.total_attendees || event?.number_of_attendees || 0 }}</h3>
-          <p v-if="event?.maximum_attendance" class="text-[10px] font-bold text-gray-400 mt-1 uppercase">
-            of {{ event.maximum_attendance }} capacity
-          </p>
-        </div>
-        <div class="w-12 h-12 rounded bg-blue-50 flex items-center justify-center text-deep-navy border border-blue-100">
-          <UIcon name="i-heroicons-user-group" class="w-6 h-6" />
-        </div>
-      </div>
-
-      <!-- Event Staff -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm flex justify-between items-start">
-        <div>
-          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Event Staff</p>
-          <h3 class="text-4xl font-black text-deep-navy mt-2">{{ staffList?.count || 0 }}</h3>
-          <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase">Active members</p>
-        </div>
-        <div class="w-12 h-12 rounded bg-purple-50 flex items-center justify-center text-deep-navy border border-purple-100">
-          <UIcon name="i-heroicons-identification" class="w-6 h-6" />
-        </div>
-      </div>
-
-      <!-- Live Forms -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm flex justify-between items-start">
-        <div>
-          <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Form Questions</p>
-          <h3 class="text-4xl font-black text-deep-navy mt-2">{{ questionsList?.count || 0 }}</h3>
-          <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase">Registration fields</p>
-        </div>
-        <div class="w-12 h-12 rounded bg-green-50 flex items-center justify-center text-deep-navy border border-green-100">
-          <UIcon name="i-heroicons-clipboard-document-list" class="w-6 h-6" />
-        </div>
-      </div>
-    </div>
-
-    <!-- Registrations Over Time Chart -->
-    <section class="bg-white border border-deep-navy rounded-lg shadow-sm overflow-hidden mb-8">
-      <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-        <h2 class="text-sm font-black text-deep-navy flex items-center gap-2 uppercase tracking-widest">
-          <UIcon name="i-heroicons-chart-bar" class="text-xl text-deep-navy" />
-          Registrations Over Time
-        </h2>
-        <div class="flex gap-2">
-          <span class="px-2 py-1 bg-gray-50 rounded text-[10px] font-bold text-deep-navy border border-gray-100">7 DAYS</span>
-          <span class="px-2 py-1 rounded text-[10px] font-bold text-gray-400 border border-transparent">30 DAYS</span>
-        </div>
-      </div>
-      <div class="h-[300px]">
-        <LineChart :data="registrationChartData" :labels="registrationChartLabels" color="#0a192f" />
-      </div>
-    </section>
-
-    <!-- Financial Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <!-- Total Revenue -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Revenue</p>
-        <div class="flex items-baseline gap-2">
-          <h3 class="text-3xl font-black text-deep-navy">£{{ formatRevenue(eventStats?.total_revenue) }}</h3>
-        </div>
-        <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase">
-          from {{ eventStats?.total_bookings || 0 }} bookings
-        </p>
-      </div>
-
-      <!-- Revenue Breakdown -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm">
-        <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Revenue Sources</p>
-        <div class="space-y-3">
-          <div class="flex items-center justify-between text-[10px] font-bold uppercase">
-            <span class="text-deep-navy">Bookings</span>
-            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.booking_revenue) }}</span>
-          </div>
-          <div class="flex items-center justify-between text-[10px] font-bold uppercase">
-            <span class="text-deep-navy">Products</span>
-            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.product_revenue) }}</span>
-          </div>
-          <div class="flex items-center justify-between text-[10px] font-bold uppercase">
-            <span class="text-deep-navy">Donations</span>
-            <span class="text-gray-400">£{{ formatRevenue(revenueBreakdown?.donation_revenue) }}</span>
-          </div>
-          <div class="pt-2 border-t border-gray-200">
-            <UButton
-              :to="`/events/${id}/m/dashboard/statistics`"
-              variant="ghost"
-              color="primary"
-              size="xs"
-              block
-            >
-              View Full Breakdown
-            </UButton>
-          </div>
-        </div>
-      </div>
-
-      <!-- Venue Capacity -->
-      <div class="bg-white border border-deep-navy p-6 rounded-lg shadow-sm flex items-center justify-between">
-        <div>
-          <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Venue Capacity</p>
-          <h3 class="text-3xl font-black text-deep-navy">{{ Math.round(attendancePercentage) }}%</h3>
-          <p class="text-[10px] font-bold text-gray-400 uppercase mt-1">
-            {{ event?.number_of_attendees || 0 }} / {{ event?.maximum_attendance || 0 }}
-          </p>
-        </div>
-        <div class="relative w-20 h-20">
-          <CircularProgress 
-            :percentage="attendancePercentage" 
-            :size="80" 
-            :stroke-width="6"
-            color="primary"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Bottom Grid: Attendees by Location + Recent Activity -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
-      <!-- Attendees by Location (8 cols) -->
-      <div class="lg:col-span-8">
-        <section class="bg-white border border-deep-navy rounded-lg shadow-sm overflow-hidden">
-          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="text-sm font-black text-deep-navy flex items-center gap-2 uppercase tracking-widest">
-              <UIcon name="i-heroicons-map" class="text-xl" />
-              Attendees by {{ selectedLocationScopeLabel }}
-            </h2>
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="scope in locationScopes"
-                :key="scope.value"
-                @click="selectedLocationScope = scope.value"
-                class="px-2 py-1 text-[10px] font-black uppercase tracking-wider rounded border transition-colors"
-                :class="selectedLocationScope === scope.value
-                  ? 'bg-deep-navy text-white border-deep-navy'
-                  : 'bg-white text-gray-500 border-gray-200 hover:border-deep-navy/40 hover:text-deep-navy'"
-              >
-                {{ scope.label }}
-              </button>
+    <div class="space-y-8 pb-8">
+      <section class="overflow-hidden rounded-[2rem] bg-gradient-to-br from-deep-navy via-navy-600 to-navy-800 text-white shadow-drawn">
+        <div class="relative px-6 py-8 md:px-8 md:py-10 lg:px-10">
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.16),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(236,200,19,0.12),transparent_26%)]" />
+          <div class="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            <div class="max-w-3xl space-y-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.4em] text-white/55">
+                Event management dashboard
+              </p>
+              <div class="space-y-3">
+                <h1 class="text-4xl font-black tracking-tight md:text-5xl" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  {{ event?.title || 'Event dashboard' }}
+                </h1>
+                <p class="max-w-2xl text-sm leading-6 text-white/75 md:text-base">
+                  A curated view of registrations, revenue, staffing, and attendee distribution.
+                </p>
+              </div>
+              <div class="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/70">
+                <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">
+                  {{ event?.status_display || 'Status pending' }}
+                </span>
+                <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">
+                  {{ Math.round(attendancePercentage) }}% capacity
+                </span>
+                <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">
+                  £{{ formatCurrency(overview?.total_revenue) }} revenue
+                </span>
+              </div>
             </div>
-          </div>
-          <div class="p-6">
-            <div v-if="isLocationBreakdownPending" class="py-8 flex items-center justify-center">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-deep-navy"></div>
-            </div>
-            <div v-else-if="attendeesByLocation.length" class="space-y-4">
-              <ProgressBar
-                v-for="location in attendeesByLocation"
-                :key="location.label"
-                :label="location.label"
-                :value="location.value"
-                :percentage="location.percentage"
-                color="primary"
-              />
-            </div>
-            <div v-else class="py-8 text-center text-gray-500 text-sm font-semibold uppercase tracking-wider">
-              No {{ selectedLocationScopeLabel.toLowerCase() }} location data available
-            </div>
-          </div>
-        </section>
 
-        <!-- Recent Activity -->
-        <section class="bg-white border border-deep-navy rounded-lg shadow-sm overflow-hidden mt-8">
-          <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-            <h2 class="text-sm font-black text-deep-navy flex items-center gap-2 uppercase tracking-widest">
-              <UIcon name="i-heroicons-bell" class="text-xl" />
-              Recent Activity
-            </h2>
-            <NuxtLink
-              :to="`/events/${id}/m/participants/dashboard`"
-              class="text-[10px] font-black text-blue-600 hover:text-blue-700 flex items-center gap-1 uppercase tracking-widest"
-            >
-              Full Log <UIcon name="i-heroicons-arrow-right" class="text-sm" />
-            </NuxtLink>
-          </div>
-          <div class="divide-y divide-gray-50">
-            <div
-              v-for="(activity, idx) in recentActivities"
-              :key="idx"
-              class="p-6 flex items-center justify-between hover:bg-gray-50/50 transition-colors"
-            >
-              <div class="flex items-center gap-4">
-                <div :class="['w-8 h-8 rounded-full flex items-center justify-center', activity.colorClass]">
-                  <UIcon :name="activity.icon" class="text-sm" />
+            <div class="grid gap-3 sm:grid-cols-3 lg:min-w-[30rem]">
+              <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Event revenue</p>
+                <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  £{{ formatCurrency(overview?.total_revenue) }}
                 </div>
-                <div>
-                  <h4 class="text-sm font-bold text-deep-navy">{{ activity.title }}</h4>
-                  <p class="text-[10px] text-gray-400 uppercase font-bold">{{ activity.subtitle }}</p>
+              </div>
+              <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Registrations</p>
+                <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  {{ overview?.total_attendees ?? event?.number_of_attendees ?? 0 }}
+                </div>
+              </div>
+              <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Staff</p>
+                <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  {{ staffList?.count || 0 }}
                 </div>
               </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
+
+      <div class="flex flex-col gap-3 rounded-3xl bg-white/75 p-3 shadow-drawn backdrop-blur md:flex-row md:items-center md:justify-between">
+        <div class="flex flex-wrap gap-2">
+          <UButton
+            :to="`/events/${id}/m/dashboard#statistics`"
+            color="primary"
+            variant="solid"
+            icon="i-heroicons-chart-bar-square"
+            size="md"
+          >
+            View detailed statistics
+          </UButton>
+          <UButton
+            :to="`/events/${id}/m/participants/dashboard`"
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-users"
+            size="md"
+          >
+            Open participants
+          </UButton>
+          <UButton
+            :to="`/events/${id}`"
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-arrow-top-right-on-square"
+            size="md"
+          >
+            View event
+          </UButton>
+        </div>
+
+        <UButton
+          color="primary"
+          variant="soft"
+          icon="i-heroicons-arrow-path"
+          size="md"
+          :loading="isRefreshing"
+          @click="refreshAll"
+        >
+          Refresh dashboard
+        </UButton>
       </div>
 
-      <!-- Sidebar (4 cols) -->
-      <div class="lg:col-span-4 space-y-6">
-        <!-- Event Status -->
-        <div class="bg-white border border-deep-navy rounded-lg shadow-sm p-6">
-          <h3 class="text-sm font-black text-deep-navy uppercase tracking-widest mb-4">Event Status</h3>
-          <div class="space-y-4">
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div class="rounded-3xl bg-white p-5 shadow-drawn">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Total registrations</p>
+          <div class="mt-3 flex items-end justify-between gap-4">
             <div>
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Current Status</p>
-              <UBadge
-                v-if="event?.status"
-                :color="getStatusColor(event.status)"
-                variant="subtle"
-                size="md"
+              <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                {{ overview?.total_attendees ?? event?.number_of_attendees ?? 0 }}
+              </div>
+              <p v-if="event?.maximum_attendance" class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
+                of {{ event.maximum_attendance }} capacity
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-deep-navy">
+              <UIcon name="i-heroicons-user-group" class="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white p-5 shadow-drawn">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Event revenue</p>
+          <div class="mt-3 flex items-end justify-between gap-4">
+            <div>
+              <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                £{{ formatCurrency(overview?.total_revenue) }}
+              </div>
+              <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
+                from {{ overview?.total_bookings || 0 }} bookings
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+              <UIcon name="i-heroicons-currency-pound" class="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white p-5 shadow-drawn">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Event staff</p>
+          <div class="mt-3 flex items-end justify-between gap-4">
+            <div>
+              <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                {{ staffList?.count || 0 }}
+              </div>
+              <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
+                active members
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+              <UIcon name="i-heroicons-identification" class="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-3xl bg-white p-5 shadow-drawn">
+          <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Form questions</p>
+          <div class="mt-3 flex items-end justify-between gap-4">
+            <div>
+              <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                {{ questionsList?.count || 0 }}
+              </div>
+              <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
+                registration fields
+              </p>
+            </div>
+            <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <UIcon name="i-heroicons-clipboard-document-list" class="h-6 w-6" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div class="xl:col-span-8 rounded-3xl bg-white shadow-drawn overflow-hidden">
+          <div class="flex flex-col gap-4 border-b border-black/5 px-6 py-5 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Analytics</p>
+              <h2 class="mt-1 text-xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                Registrations over time
+              </h2>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <button
+                v-for="period in registrationPeriods"
+                :key="period.value"
+                type="button"
+                class="rounded-full px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] transition-colors"
+                :class="registrationPeriod === period.value
+                  ? 'bg-deep-navy text-white'
+                  : 'bg-mist-blue text-deep-navy/70 hover:bg-deep-navy/5'"
+                @click="registrationPeriod = period.value"
               >
-                {{ event.status_display }}
-              </UBadge>
+                {{ period.label }}
+              </button>
             </div>
-            <div v-if="event?.start_datetime">
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Start Date</p>
-              <p class="text-sm font-bold text-deep-navy">{{ formatDate(event.start_datetime) }}</p>
+          </div>
+
+          <div class="p-6">
+            <div v-if="isLoadingRegistrationTrends" class="flex h-80 items-center justify-center">
+              <div class="text-center">
+                <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-deep-navy" />
+                <p class="text-sm text-gray-500">Loading registration trends...</p>
+              </div>
             </div>
-            <div v-if="event?.end_datetime">
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">End Date</p>
-              <p class="text-sm font-bold text-deep-navy">{{ formatDate(event.end_datetime) }}</p>
+            <div v-else-if="registrationTrendsError" class="flex h-80 items-center justify-center">
+              <div class="text-center">
+                <UIcon name="i-heroicons-exclamation-circle" class="mx-auto mb-4 h-12 w-12 text-red-400" />
+                <p class="text-sm text-gray-600">Unable to load registration trends</p>
+                <p class="mt-2 text-xs text-gray-500">The event trend query needs a valid event slug.</p>
+              </div>
             </div>
-            <div v-if="event?.created_at">
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Created</p>
-              <p class="text-sm font-bold text-deep-navy">{{ formatCompactDateTime(event.created_at) }}</p>
+            <v-chart
+              v-else-if="registrationTrendsOption"
+              :option="registrationTrendsOption"
+              :autoresize="true"
+              class="h-80"
+            />
+            <div v-else class="flex h-80 items-center justify-center">
+              <div class="text-center">
+                <UIcon name="i-heroicons-chart-bar-square" class="mx-auto mb-4 h-12 w-12 text-gray-300" />
+                <p class="text-sm text-gray-500">No registration data available</p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Features Enabled -->
-        <div class="bg-white border border-deep-navy rounded-lg shadow-sm p-6">
-          <h3 class="text-sm font-black text-deep-navy uppercase tracking-widest mb-4">Features Enabled</h3>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Payments</span>
-              <UIcon
-                :name="settings?.payment_enabled ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                :class="settings?.payment_enabled ? 'text-green-600' : 'text-gray-400'"
-                class="w-5 h-5"
+        <div class="xl:col-span-4 space-y-6">
+          <div class="rounded-3xl bg-gradient-to-br from-deep-navy to-navy-700 p-6 text-white shadow-drawn">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">Event state</p>
+            <div class="mt-3 flex items-center justify-between gap-4">
+              <div>
+                <div class="text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  {{ event?.status_display || 'Unknown' }}
+                </div>
+                <p class="mt-2 text-sm text-white/70">
+                  {{ event?.organisation_name || 'No organisation linked' }}
+                </p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
+                <UIcon name="i-heroicons-signal" class="h-6 w-6" />
+              </div>
+            </div>
+          </div>
+
+          <div class="rounded-3xl bg-white p-6 shadow-drawn">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Revenue sources</p>
+            <div class="mt-4 space-y-4">
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm font-medium text-deep-navy">
+                  <span>Bookings</span>
+                  <span>£{{ formatCurrency(revenueBreakdown?.booking_revenue) }}</span>
+                </div>
+                <div class="h-2 rounded-full bg-mist-blue">
+                  <div class="h-full rounded-full bg-deep-navy" :style="{ width: `${revenueShare(revenueBreakdown?.booking_revenue)}%` }" />
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm font-medium text-deep-navy">
+                  <span>Products</span>
+                  <span>£{{ formatCurrency(revenueBreakdown?.product_revenue) }}</span>
+                </div>
+                <div class="h-2 rounded-full bg-mist-blue">
+                  <div class="h-full rounded-full bg-amber-500" :style="{ width: `${revenueShare(revenueBreakdown?.product_revenue)}%` }" />
+                </div>
+              </div>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between text-sm font-medium text-deep-navy">
+                  <span>Donations</span>
+                  <span>£{{ formatCurrency(revenueBreakdown?.donation_revenue) }}</span>
+                </div>
+                <div class="h-2 rounded-full bg-mist-blue">
+                  <div class="h-full rounded-full bg-emerald-500" :style="{ width: `${revenueShare(revenueBreakdown?.donation_revenue)}%` }" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </section>
+        <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <div class="xl:col-span-9 rounded-3xl bg-white shadow-drawn overflow-hidden">
+            <div class="flex items-center justify-between border-b border-black/5 px-6 py-5">
+              <div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Location map</p>
+                <h3 class="mt-1 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                  Area distribution map
+                </h3>
+              </div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
+                Deterministic name-based placement
+              </div>
+            </div>
+            <div class="p-6">
+              <MapLibre
+                :map-style="mapStyle"
+                :center="mapCenter"
+                :zoom="mapZoom"
+                :sources="areaMapSources"
+                :layers="areaMapLayers"
               />
             </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Product Shop</span>
-              <UIcon
-                :name="settings?.product_selling_enabled ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                :class="settings?.product_selling_enabled ? 'text-green-600' : 'text-gray-400'"
-                class="w-5 h-5"
-              />
+          </div>
+
+          <div class="xl:col-span-3 rounded-3xl bg-white shadow-drawn overflow-hidden">
+            <div class="border-b border-black/5 px-6 py-5">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Distribution</p>
+              <h3 class="mt-1 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                {{ selectedLocationScopeLabel }} breakdown
+              </h3>
             </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Donations</span>
-              <UIcon
-                :name="settings?.donation_enabled ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                :class="settings?.donation_enabled ? 'text-green-600' : 'text-gray-400'"
-                class="w-5 h-5"
-              />
+            <div class="p-6">
+              <div v-if="isLocationBreakdownPending" class="flex items-center justify-center py-8">
+                <div class="h-10 w-10 animate-spin rounded-full border-b-2 border-deep-navy" />
+              </div>
+              <div v-else-if="attendeesByLocation.length" class="space-y-4">
+                <div
+                  v-for="location in attendeesByLocation"
+                  :key="location.label"
+                  class="space-y-2"
+                >
+                  <div class="flex items-center justify-between gap-3 text-sm font-medium text-deep-navy">
+                    <span class="truncate">{{ location.label }}</span>
+                    <span>{{ location.value }}</span>
+                  </div>
+                  <div class="h-2 rounded-full bg-mist-blue">
+                    <div
+                      class="h-full rounded-full bg-deep-navy"
+                      :style="{ width: `${location.percentage}%` }"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div v-else class="py-8 text-center text-sm font-medium text-gray-500">
+                No {{ selectedLocationScopeLabel.toLowerCase() }} location data available.
+              </div>
             </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Sponsors</span>
-              <UIcon
-                :name="settings?.accepting_sponsorships_enabled ? 'i-heroicons-check-circle' : 'i-heroicons-x-circle'"
-                :class="settings?.accepting_sponsorships_enabled ? 'text-green-600' : 'text-gray-400'"
-                class="w-5 h-5"
-              />
+          </div>
+        </section>
+
+      <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div class="xl:col-span-8 rounded-3xl bg-white shadow-drawn overflow-hidden">
+          <div class="flex items-center justify-between border-b border-black/5 px-6 py-5">
+            <div>
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Activity</p>
+              <h3 class="mt-1 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                Recent activity
+              </h3>
+            </div>
+            <NuxtLink
+              :to="`/events/${id}/m/participants/dashboard`"
+              class="text-[11px] font-semibold uppercase tracking-[0.22em] text-deep-navy hover:text-deep-navy/70"
+            >
+              Full log
+            </NuxtLink>
+          </div>
+
+          <div class="divide-y divide-black/5">
+            <div
+              v-for="(activity, index) in recentActivities"
+              :key="index"
+              class="flex items-center gap-4 p-6"
+            >
+              <div :class="['flex h-10 w-10 items-center justify-center rounded-2xl', activity.colorClass]">
+                <UIcon :name="activity.icon" class="h-5 w-5" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <h4 class="truncate text-sm font-bold text-deep-navy">{{ activity.title }}</h4>
+                <p class="truncate text-xs font-medium uppercase tracking-[0.18em] text-gray-400">
+                  {{ activity.subtitle }}
+                </p>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Overview Stats -->
-        <div class="bg-white border border-deep-navy rounded-lg shadow-sm p-6">
-          <h3 class="text-sm font-black text-deep-navy uppercase tracking-widest mb-4">Overview</h3>
-          <div class="space-y-3">
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Resources</span>
-              <span class="font-black text-deep-navy">{{ resourcesList?.count || 0 }}</span>
+        <div class="xl:col-span-4 space-y-6">
+          <div class="rounded-3xl bg-white p-6 shadow-drawn">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Event timing</p>
+            <div class="mt-4 space-y-4">
+              <div v-if="event?.start_datetime">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.25em] text-gray-400">Start date</p>
+                <p class="mt-1 text-sm font-black text-deep-navy">{{ formatDate(event.start_datetime) }}</p>
+              </div>
+              <div v-if="event?.end_datetime">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.25em] text-gray-400">End date</p>
+                <p class="mt-1 text-sm font-black text-deep-navy">{{ formatDate(event.end_datetime) }}</p>
+              </div>
+              <div v-if="event?.created_at">
+                <p class="text-[10px] font-semibold uppercase tracking-[0.25em] text-gray-400">Created</p>
+                <p class="mt-1 text-sm font-black text-deep-navy">{{ formatCompactDateTime(event.created_at) }}</p>
+              </div>
             </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Landing Images</span>
-              <span class="font-black text-deep-navy">{{ landingImages?.count || 0 }}</span>
-            </div>
-            <div class="flex items-center justify-between text-sm">
-              <span class="text-gray-600 font-medium">Staff Roles</span>
-              <span class="font-black text-deep-navy">{{ rolesList?.count || 0 }}</span>
+          </div>
+
+          <div class="rounded-3xl bg-white p-6 shadow-drawn">
+            <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Overview counts</p>
+            <div class="mt-4 space-y-3 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-medium text-gray-600">Resources</span>
+                <span class="font-black text-deep-navy">{{ resourcesList?.count || 0 }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-medium text-gray-600">Landing images</span>
+                <span class="font-black text-deep-navy">{{ landingImages?.count || 0 }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="font-medium text-gray-600">Staff roles</span>
+                <span class="font-black text-deep-navy">{{ rolesList?.count || 0 }}</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
+import { computed, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
+import VChart from 'vue-echarts'
+import { use } from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { LineChart, PieChart, BarChart, GaugeChart } from 'echarts/charts'
+import { TitleComponent, TooltipComponent, LegendComponent, GridComponent } from 'echarts/components'
 import { attendeesList } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
@@ -316,56 +429,62 @@ import { useEventQuestions } from '~/composables/resources/events/eventQuestions
 import { useEventRoles } from '~/composables/resources/events/eventRoles'
 import { useEventResources } from '~/composables/resources/events/eventResources'
 import { useEventLandingImages } from '~/composables/resources/events/eventLandingImages'
-import { useEventOverview, useRevenueOverview } from '~/composables/statistics/event/event-statistics'
+import { useEventOverview, useRegistrationTrends, useRevenueOverview, usePaymentStatus } from '~/composables/statistics/event/event-statistics'
 import { useLocationBreakdown } from '~/composables/statistics/attendee/attendee-statistics'
 import { formatDate, formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
-import LineChart from '~/components/charts/LineChart.vue'
-import ProgressBar from '~/components/charts/ProgressBar.vue'
-import CircularProgress from '~/components/charts/CircularProgress.vue'
+import MapLibre from '~/components/common/MapLibre.vue'
+
+use([
+  CanvasRenderer,
+  LineChart,
+  PieChart,
+  BarChart,
+  GaugeChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent,
+])
 
 definePageMeta({
   layout: false,
   middleware: 'auth',
 })
 
+useHead({
+  title: 'Event Dashboard',
+  link: [
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.googleapis.com',
+    },
+    {
+      rel: 'preconnect',
+      href: 'https://fonts.gstatic.com',
+      crossorigin: 'anonymous',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700;800&display=swap',
+    },
+  ],
+})
+
 const route = useRoute()
 const id = computed(() => route.params.id as string)
+const registrationPeriod = ref<'hour' | 'day' | 'week' | 'month'>('week')
+const isRefreshing = ref(false)
+const mapStyle = 'https://demotiles.maplibre.org/style.json'
+const mapCenter: [number, number] = [0, 20]
+const mapZoom = 1.7
 
-// Fetch event data
-const { data: eventData, isPending: isEventPending } = useEvent(id)
-const event = computed(() => eventData.value?.data)
-
-const { data: settingsData } = useEventSettings(id)
-const settings = computed(() => settingsData.value?.data)
-
-const { data: staffData } = useEventStaff({ event: id.value })
-const staffList = computed(() => staffData.value?.data)
-
-const { data: questionsData } = useEventQuestions({ event: id.value })
-const questionsList = computed(() => questionsData.value?.data)
-
-const { data: rolesData } = useEventRoles()
-const rolesList = computed(() => rolesData.value?.data)
-
-const { data: resourcesData } = useEventResources(id, { page_size: 1 })
-const resourcesList = computed(() => resourcesData.value?.data)
-
-const { data: landingImagesData } = useEventLandingImages(id, { page_size: 1 })
-const landingImages = computed(() => landingImagesData.value?.data)
-
-// Fetch event statistics
-const { data: eventStatsData } = useEventOverview(computed(() => ({
-  // @ts-ignore - Backend accepts UUID string despite OpenAPI spec saying number
-  event_id: id.value,
-} as any)))
-const eventStats = computed(() => eventStatsData.value?.data)
-
-const { data: revenueData } = useRevenueOverview(computed(() => ({
-  // @ts-ignore
-  event_id: id.value,
-} as any)))
-const revenueBreakdown = computed(() => revenueData.value?.data)
+const registrationPeriods = [
+  { value: 'hour' as const, label: 'Hour' },
+  { value: 'day' as const, label: 'Day' },
+  { value: 'week' as const, label: 'Week' },
+  { value: 'month' as const, label: 'Month' },
+]
 
 const locationScopes = [
   { value: 'area' as const, label: 'Area' },
@@ -375,77 +494,199 @@ const locationScopes = [
 ]
 const selectedLocationScope = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
 
-const { data: locationBreakdownData, isPending: isLocationBreakdownPending } = useLocationBreakdown(computed(() => ({
-  // @ts-ignore - Backend accepts UUID string despite OpenAPI spec saying number
+const { data: eventData, refetch: refetchEvent } = useEvent(id)
+const event = computed(() => eventData.value?.data)
+
+const { data: settingsData, refetch: refetchSettings } = useEventSettings(id)
+const settings = computed(() => settingsData.value?.data)
+
+const { data: staffData, refetch: refetchStaff } = useEventStaff({ event: id.value })
+const staffList = computed(() => staffData.value?.data)
+
+const { data: questionsData, refetch: refetchQuestions } = useEventQuestions({ event: id.value })
+const questionsList = computed(() => questionsData.value?.data)
+
+const { data: rolesData, refetch: refetchRoles } = useEventRoles()
+const rolesList = computed(() => rolesData.value?.data)
+
+const { data: resourcesData, refetch: refetchResources } = useEventResources(id, { page_size: 1 })
+const resourcesList = computed(() => resourcesData.value?.data)
+
+const { data: landingImagesData, refetch: refetchLandingImages } = useEventLandingImages(id, { page_size: 1 })
+const landingImages = computed(() => landingImagesData.value?.data)
+
+const { data: overviewData, refetch: refetchOverview } = useEventOverview(computed(() => ({
+  event_id: id.value,
+} as any)))
+const overview = computed(() => overviewData.value?.data)
+
+const eventSlug = computed(() => event.value?.url_safe_title || '')
+
+const { data: revenueData, refetch: refetchRevenue, isLoading: isLoadingRevenue } = useRevenueOverview(computed(() => ({
+  event_id: id.value,
+} as any)))
+const revenueBreakdown = computed(() => revenueData.value?.data)
+
+const registrationTrendQuery = computed(() => ({
+  event_id: eventSlug.value || undefined,
+  period: registrationPeriod.value,
+  cumulative: true,
+} as any))
+
+const registrationTrendsReady = computed(() => !!eventSlug.value)
+
+const { data: registrationTrendsData, isLoading: isLoadingRegistrationTrends, error: registrationTrendsError, refetch: refetchRegistrationTrends } = useRegistrationTrends(registrationTrendQuery)
+
+const { data: paymentStatusData, isLoading: isLoadingPaymentStatus, refetch: refetchPaymentStatus } = usePaymentStatus(computed(() => ({
   event_id: id.value,
 } as any)))
 
-// Fetch attendees list for chart data and recent activity
-const { data: attendeesData, isPending: isAttendeesPending } = useQuery({
+const { data: locationBreakdownData, isPending: isLocationBreakdownPending, refetch: refetchLocationBreakdown } = useLocationBreakdown(computed(() => ({
+  event_id: id.value,
+} as any)))
+
+const { data: attendeesData, refetch: refetchAttendees } = useQuery({
   queryKey: ['attendees', 'list', id],
-  queryFn: () => {
-    return attendeesList({
-      query: {
-        event: id.value,
-        page_size: 100, // Fetch more for chart data
-        ordering: '-created_at',
-      },
-    })
-  },
+  queryFn: () => attendeesList({
+    query: {
+      event: id.value,
+      page_size: 100,
+      ordering: '-created_at',
+    },
+  }),
   enabled: () => !!id.value,
 })
 
 const attendeesResults = computed(() => attendeesData.value?.data?.results || [])
 
-const attendancePercentage = computed(() => {
-  if (!event.value?.maximum_attendance) return 0
-  const current = event.value.number_of_attendees || 0
-  return Math.min((current / event.value.maximum_attendance) * 100, 100)
-})
+const normalizeNumber = (value: unknown) => {
+  const numberValue = Number(value)
+  return Number.isFinite(numberValue) ? numberValue : 0
+}
 
-// Chart Data: Registrations Over Time (Last 7 days)
-const registrationChartData = computed(() => {
-  // Get last 7 days
-  const days = 7
-  const data = new Array(days).fill(0)
-  const today = new Date()
-  
-  attendeesResults.value.forEach(attendee => {
-    const createdDate = new Date(attendee.created_at)
-    const daysDiff = Math.floor((today.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24))
-    
-    if (daysDiff >= 0 && daysDiff < days) {
-      data[days - 1 - daysDiff]++
-    }
+type LocationRow = {
+  label: string
+  value: number
+  percentage: number
+}
+
+type AreaMapPoint = {
+  label: string
+  count: number
+  percentage: number
+  longitude: number
+  latitude: number
+  color: string
+}
+
+const colorPalette = ['#0a192f', '#d97706', '#10b981', '#2563eb', '#7c3aed', '#059669', '#ca8a04', '#7f1d1d']
+
+const hashString = (value: string) => {
+  let hash = 0
+  for (let index = 0; index < value.length; index += 1) {
+    hash = ((hash << 5) - hash) + value.charCodeAt(index)
+    hash |= 0
+  }
+  return Math.abs(hash)
+}
+
+const coordinateFromName = (value: string): [number, number] => {
+  const hash = hashString(value)
+  const longitude = ((hash % 36000) / 100) - 180
+  const latitude = (((Math.floor(hash / 36000) % 18000) / 100) - 90)
+  return [longitude, latitude]
+}
+
+const areaMapPoints = computed(() => {
+  const entries: LocationRow[] = locationBreakdownEntry.value?.area || []
+  return entries.map((entry: LocationRow, index: number) => {
+    const [longitude, latitude] = coordinateFromName(entry.label)
+    return {
+      label: entry.label,
+      count: entry.value,
+      percentage: entry.percentage,
+      longitude,
+      latitude,
+      color: colorPalette[index % colorPalette.length],
+    } as AreaMapPoint
   })
-  
-  // If no real data, use mock data for demonstration
-  if (data.every(val => val === 0)) {
-    return [15, 28, 42, 38, 55, 68, 82]
-  }
-  
-  return data
 })
 
-const registrationChartLabels = computed(() => {
-  const labels = []
-  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-  const today = new Date()
-  
-  for (let i = 6; i >= 0; i--) {
-    const date = new Date(today)
-    date.setDate(date.getDate() - i)
-    labels.push(days[date.getDay()])
-  }
-  
-  return labels
-})
+const areaMapGeoJson = computed(() => ({
+  type: 'FeatureCollection',
+  features: areaMapPoints.value.map((point: AreaMapPoint) => ({
+    type: 'Feature',
+    geometry: {
+      type: 'Point',
+      coordinates: [point.longitude, point.latitude],
+    },
+    properties: {
+      label: point.label,
+      count: point.count,
+      percentage: point.percentage,
+      color: point.color,
+    },
+  })),
+}))
 
-// Format revenue helper
-const formatRevenue = (value: string | number | null | undefined) => {
-  if (!value) return '0.00'
-  const numValue = typeof value === 'string' ? parseFloat(value) : value
-  return numValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+const areaMapSources = computed(() => ([
+  {
+    name: 'areas',
+    data: areaMapGeoJson.value as any,
+  },
+]))
+
+const areaMapLayers = computed(() => ([
+  {
+    id: 'areas-circle',
+    type: 'circle',
+    source: 'areas',
+    paint: {
+      'circle-color': ['get', 'color'],
+      'circle-radius': [
+        'interpolate',
+        ['linear'],
+        ['get', 'count'],
+        0, 6,
+        25, 10,
+        100, 16,
+        250, 22,
+      ],
+      'circle-stroke-color': '#ffffff',
+      'circle-stroke-width': 2,
+      'circle-opacity': 0.92,
+    },
+  },
+  {
+    id: 'areas-label',
+    type: 'symbol',
+    source: 'areas',
+    layout: {
+      'text-field': ['get', 'label'],
+      'text-size': 11,
+      'text-offset': [0, 1.4],
+      'text-anchor': 'top',
+      'text-allow-overlap': false,
+    },
+    paint: {
+      'text-color': '#0a192f',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 1.5,
+    },
+  },
+]))
+
+const formatCurrency = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined || value === '') return '0.00'
+  const numericValue = typeof value === 'string' ? Number.parseFloat(value) : value
+  if (!Number.isFinite(numericValue)) return '0.00'
+  return numericValue.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
+const revenueShare = (value: string | number | null | undefined) => {
+  const total = normalizeNumber(overview.value?.total_revenue)
+  if (!total) return 0
+  return Math.max(0, Math.min(100, (normalizeNumber(value) / total) * 100))
 }
 
 const selectedLocationScopeLabel = computed(() => {
@@ -453,63 +694,343 @@ const selectedLocationScopeLabel = computed(() => {
   return selected?.label ?? 'Area'
 })
 
-const attendeesByLocation = computed(() => {
-  const breakdown = locationBreakdownData.value?.data
-  if (!breakdown) return []
+const extractDistributionRows = (section: unknown) => {
+  if (!section) return []
 
-  const sectionMap = {
-    area: breakdown.by_area,
-    chapter: breakdown.by_chapter,
-    cluster: breakdown.by_cluster,
-    country: breakdown.by_country,
+  type DistributionRow = {
+    label: string
+    value: number
+    percentage: number
   }
 
-  const section = sectionMap[selectedLocationScope.value] as any
-  if (!section?.distribution) return []
+  const source = Array.isArray(section)
+    ? section
+    : Array.isArray((section as any).distribution)
+      ? (section as any).distribution
+      : Array.isArray((section as any).results)
+        ? (section as any).results
+        : Array.isArray((section as any).items)
+          ? (section as any).items
+          : Object.entries(section as Record<string, unknown>)
+              .filter(([key]) => !['distribution', 'results', 'items', 'generated_at', 'filters_applied', 'total'].includes(key))
+              .map(([label, value]) => ({ label, value }))
 
-  return section.distribution
-    .slice(0, 8)
-    .map((item: any) => ({
-      label: item.label,
-      value: item.value,
-      percentage: item.percentage,
-    }))
+  const total = normalizeNumber((section as any).total)
+  return source
+    .map((item: unknown) => {
+      const entry = item as Record<string, unknown>
+      const label = String(entry.label ?? entry.name ?? entry.title ?? entry.key ?? 'Unknown')
+      const value = normalizeNumber(entry.value ?? entry.count ?? entry.total ?? entry.amount)
+      const percentage = normalizeNumber(entry.percentage ?? (total ? (value / total) * 100 : 0))
+      return {
+        label,
+        value,
+        percentage: Math.min(100, Math.max(0, percentage)),
+      } satisfies DistributionRow
+    })
+    .filter((item: DistributionRow) => item.value > 0 || item.percentage > 0)
+    .sort((a: DistributionRow, b: DistributionRow) => b.value - a.value)
+}
+
+const locationBreakdownEntry = computed(() => {
+  const breakdown = locationBreakdownData.value?.data
+  if (!breakdown) return null
+
+  return {
+    area: extractDistributionRows((breakdown as any).by_area),
+    chapter: extractDistributionRows((breakdown as any).by_chapter),
+    cluster: extractDistributionRows((breakdown as any).by_cluster),
+    country: extractDistributionRows((breakdown as any).by_country),
+  }
 })
 
-// Recent Activities (converted from latest registrations)
+const attendeesByLocation = computed(() => {
+  const entries = locationBreakdownEntry.value?.[selectedLocationScope.value] || []
+  return entries.slice(0, 8)
+})
+
+const locationTotal = computed(() => {
+  const breakdown = locationBreakdownData.value?.data as any
+  return normalizeNumber(breakdown?.total)
+})
+
+const registrationTrendsOption = computed(() => {
+  const trends = registrationTrendsData.value?.data?.trends
+  if (!trends || trends.length === 0) return null
+
+  const formatTrendLabel = (value: string) => {
+    const date = new Date(value)
+
+    if (registrationPeriod.value === 'hour') {
+      return date.toLocaleString('en-GB', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    }
+
+    if (registrationPeriod.value === 'month') {
+      return date.toLocaleDateString('en-GB', {
+        month: 'short',
+        year: 'numeric',
+      })
+    }
+
+    return date.toLocaleDateString('en-GB', {
+      month: 'short',
+      day: 'numeric',
+    })
+  }
+
+  return {
+    color: ['#0a192f', '#2563eb'],
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross',
+        label: {
+          backgroundColor: '#0a192f',
+        },
+      },
+    },
+    legend: {
+      data: ['New Registrations', 'Cumulative Total'],
+      bottom: 0,
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '12%',
+      containLabel: true,
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: trends.map((trend: any) => formatTrendLabel(trend.date)),
+    },
+    yAxis: {
+      type: 'value',
+    },
+    series: [
+      {
+        name: 'New Registrations',
+        type: 'line',
+        data: trends.map((trend: any) => trend.count),
+        smooth: true,
+        itemStyle: {
+          color: '#0a192f',
+        },
+        lineStyle: {
+          width: 3,
+        },
+        areaStyle: {
+          color: {
+            type: 'linear',
+            x: 0,
+            y: 0,
+            x2: 0,
+            y2: 1,
+            colorStops: [
+              {
+                offset: 0,
+                color: 'rgba(10, 25, 47, 0.28)',
+              },
+              {
+                offset: 1,
+                color: 'rgba(10, 25, 47, 0.03)',
+              },
+            ],
+          },
+        },
+      },
+      {
+        name: 'Cumulative Total',
+        type: 'line',
+        data: trends.map((trend: any) => trend.cumulative ?? 0),
+        smooth: true,
+        itemStyle: {
+          color: '#ecc813',
+        },
+        lineStyle: {
+          width: 2,
+          type: 'dashed',
+        },
+      },
+    ],
+  }
+})
+
+const revenueOption = computed(() => {
+  const breakdown = revenueData.value?.data?.breakdown
+  if (!breakdown || breakdown.length === 0) return null
+
+  const sourceColors: Record<string, string> = {
+    Bookings: '#0a192f',
+    Products: '#d97706',
+    Donations: '#10b981',
+    Sponsors: '#2563eb',
+  }
+
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: £{c} ({d}%)',
+    },
+    legend: {
+      orient: 'vertical',
+      left: 'left',
+    },
+    series: [
+      {
+        name: 'Revenue',
+        type: 'pie',
+        radius: ['38%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2,
+        },
+        label: {
+          show: false,
+          position: 'center',
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 20,
+            fontWeight: 'bold',
+          },
+        },
+        labelLine: {
+          show: false,
+        },
+        data: breakdown.map((item: any) => ({
+          value: item.value,
+          name: item.source,
+          itemStyle: {
+            color: sourceColors[item.source] || colorPalette[breakdown.indexOf(item) % colorPalette.length],
+          },
+        })),
+      },
+    ],
+  }
+})
+
+const paymentStatusOption = computed(() => {
+  const distribution = paymentStatusData.value?.data?.distribution
+  if (!distribution || distribution.length === 0) return null
+
+  return {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: {c} ({d}%)',
+    },
+    legend: {
+      bottom: 0,
+      left: 'center',
+    },
+    series: [
+      {
+        name: 'Payment Status',
+        type: 'pie',
+        radius: '66%',
+        center: ['50%', '45%'],
+        data: distribution.map((item: any) => ({
+          value: item.count,
+          name: item.label,
+          itemStyle: {
+            color: item.label === 'Completed'
+              ? '#10b981'
+              : item.label === 'Pending'
+                ? '#f59e0b'
+                : item.label === 'Refunded'
+                  ? '#ef4444'
+                  : '#64748b',
+          },
+        })),
+        emphasis: {
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.24)',
+          },
+        },
+      },
+    ],
+  }
+})
+
 const recentActivities = computed(() => {
-  const activities = []
-  
-  // Add recent registrations
-  attendeesResults.value.slice(0, 3).forEach(attendee => {
+  const activities: Array<{ icon: string; colorClass: string; title: string; subtitle: string }> = []
+
+  attendeesResults.value.slice(0, 3).forEach((attendee) => {
     activities.push({
       icon: 'i-heroicons-user-plus',
-      colorClass: 'bg-blue-100 text-blue-600',
+      colorClass: 'bg-blue-100 text-blue-700',
       title: `New registration by ${attendee.full_name}`,
-      subtitle: `${formatCompactDateTime(attendee.created_at)}`,
+      subtitle: formatCompactDateTime(attendee.created_at),
     })
   })
-  
-  // Add mock activities for variety (until we have real activity tracking)
+
   if (activities.length < 3) {
     activities.push(
       {
         icon: 'i-heroicons-identification',
-        colorClass: 'bg-purple-100 text-purple-600',
+        colorClass: 'bg-violet-100 text-violet-700',
         title: 'Staff member added',
-        subtitle: 'Team Update • 2 hours ago',
+        subtitle: 'Team update',
       },
       {
         icon: 'i-heroicons-shopping-cart',
-        colorClass: 'bg-green-100 text-green-600',
+        colorClass: 'bg-emerald-100 text-emerald-700',
         title: 'Product purchase completed',
-        subtitle: 'Order #8821 • 4 hours ago',
+        subtitle: 'Order activity',
       }
     )
   }
-  
+
   return activities.slice(0, 3)
 })
+
+const attendancePercentage = computed(() => {
+  if (!event.value?.maximum_attendance) return 0
+  const current = overview.value?.total_attendees ?? event.value.number_of_attendees ?? 0
+  return Math.min((current / event.value.maximum_attendance) * 100, 100)
+})
+
+const refreshAll = async () => {
+  isRefreshing.value = true
+  try {
+    if (registrationTrendsReady.value) {
+      await refetchRegistrationTrends()
+    }
+    await Promise.allSettled([
+      refetchEvent(),
+      refetchSettings(),
+      refetchStaff(),
+      refetchQuestions(),
+      refetchRoles(),
+      refetchResources(),
+      refetchLandingImages(),
+      refetchOverview(),
+      refetchRevenue(),
+      refetchPaymentStatus(),
+      refetchLocationBreakdown(),
+      refetchAttendees(),
+    ])
+  } finally {
+    isRefreshing.value = false
+  }
+}
+
+watch([eventSlug, registrationPeriod], async ([slug]) => {
+  if (slug) {
+    await refetchRegistrationTrends()
+  }
+}, { immediate: true })
 
 const getStatusColor = (status: string): 'gray' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange' => {
   const colors: Record<string, 'gray' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'> = {
