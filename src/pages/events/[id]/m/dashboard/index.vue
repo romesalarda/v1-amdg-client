@@ -281,15 +281,16 @@
               <div>
                 <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Location map</p>
                 <h3 class="mt-1 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                  Area distribution map
+                  {{ selectedLocationScopeLabel }} distribution map
                 </h3>
               </div>
               <div class="text-[11px] font-semibold uppercase tracking-[0.25em] text-gray-400">
-                Deterministic name-based placement
+                Live backend coordinates
               </div>
             </div>
             <div class="p-6">
               <MapLibre
+                :key="selectedLocationScope"
                 :map-style="mapStyle"
                 :center="mapCenter"
                 :zoom="mapZoom"
@@ -302,7 +303,19 @@
           <div class="xl:col-span-3 rounded-3xl bg-white shadow-drawn overflow-hidden">
             <div class="border-b border-black/5 px-6 py-5">
               <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Distribution</p>
-              <h3 class="mt-1 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+              <div class="mt-2 flex flex-wrap items-center gap-2">
+                <button
+                  v-for="scope in locationScopes"
+                  :key="scope.value"
+                  type="button"
+                  class="rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] transition"
+                  :class="selectedLocationScope === scope.value ? 'bg-deep-navy text-white shadow-sm' : 'bg-mist-blue text-deep-navy hover:bg-sand-beige'"
+                  @click="selectedLocationScope = scope.value"
+                >
+                  {{ scope.label }}
+                </button>
+              </div>
+              <h3 class="mt-3 text-lg font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                 {{ selectedLocationScopeLabel }} breakdown
               </h3>
             </div>
@@ -421,7 +434,7 @@ import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { LineChart, PieChart, BarChart, GaugeChart } from 'echarts/charts'
 import { TitleComponent, TooltipComponent, LegendComponent, GridComponent } from 'echarts/components'
-import { attendeesList } from '~/api/sdk.gen'
+import { attendeesList, locationsAreasList, locationsChaptersList, locationsClustersList, locationsCountriesList } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import { useEventStaff } from '~/composables/resources/events/eventStaff'
@@ -476,8 +489,8 @@ const id = computed(() => route.params.id as string)
 const registrationPeriod = ref<'hour' | 'day' | 'week' | 'month'>('week')
 const isRefreshing = ref(false)
 const mapStyle = 'https://demotiles.maplibre.org/style.json'
-const mapCenter: [number, number] = [0, 20]
-const mapZoom = 1.7
+const defaultMapCenter: [number, number] = [0, 20]
+const defaultMapZoom = 1.7
 
 const registrationPeriods = [
   { value: 'hour' as const, label: 'Hour' },
@@ -493,6 +506,13 @@ const locationScopes = [
   { value: 'country' as const, label: 'Country' },
 ]
 const selectedLocationScope = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
+
+const selectedLocationListItems = computed(() => {
+  if (selectedLocationScope.value === 'area') return extractLocationResults(areaLocationsQuery.data.value)
+  if (selectedLocationScope.value === 'chapter') return extractLocationResults(chapterLocationsQuery.data.value)
+  if (selectedLocationScope.value === 'cluster') return extractLocationResults(clusterLocationsQuery.data.value)
+  return extractLocationResults(countryLocationsQuery.data.value)
+})
 
 const { data: eventData, refetch: refetchEvent } = useEvent(id)
 const event = computed(() => eventData.value?.data)
@@ -579,36 +599,78 @@ type AreaMapPoint = {
   color: string
 }
 
+type LocationListItem = {
+  area_name?: string
+  chapter_name?: string
+  cluster_name?: string
+  country_name?: string
+  latitude?: string | number | null
+  longitude?: string | number | null
+}
+
 const colorPalette = ['#0a192f', '#d97706', '#10b981', '#2563eb', '#7c3aed', '#059669', '#ca8a04', '#7f1d1d']
 
-const hashString = (value: string) => {
-  let hash = 0
-  for (let index = 0; index < value.length; index += 1) {
-    hash = ((hash << 5) - hash) + value.charCodeAt(index)
-    hash |= 0
-  }
-  return Math.abs(hash)
+const normalizeLabel = (value: string) => value.trim().toLowerCase()
+
+const toCoordinate = (value: string | number | null | undefined) => {
+  if (value === null || value === undefined || value === '') return null
+  const coordinate = typeof value === 'number' ? value : Number.parseFloat(value)
+  return Number.isFinite(coordinate) ? coordinate : null
 }
 
-const coordinateFromName = (value: string): [number, number] => {
-  const hash = hashString(value)
-  const longitude = ((hash % 36000) / 100) - 180
-  const latitude = (((Math.floor(hash / 36000) % 18000) / 100) - 90)
-  return [longitude, latitude]
+const extractLocationResults = (response: unknown) => {
+  const payload = (response as any)?.data
+  if (Array.isArray(payload?.results)) return payload.results as LocationListItem[]
+  if (Array.isArray(payload)) return payload as LocationListItem[]
+  return []
 }
+
+const areaLocationsQuery = useQuery({
+  queryKey: ['locations', 'areas'],
+  queryFn: () => locationsAreasList({ query: { page_size: 500 } }),
+})
+
+const chapterLocationsQuery = useQuery({
+  queryKey: ['locations', 'chapters'],
+  queryFn: () => locationsChaptersList({ query: { page_size: 500 } }),
+})
+
+const clusterLocationsQuery = useQuery({
+  queryKey: ['locations', 'clusters'],
+  queryFn: () => locationsClustersList({ query: { page_size: 500 } }),
+})
+
+const countryLocationsQuery = useQuery({
+  queryKey: ['locations', 'countries'],
+  queryFn: () => locationsCountriesList({ query: { page_size: 500 } }),
+})
 
 const areaMapPoints = computed(() => {
-  const entries: LocationRow[] = locationBreakdownEntry.value?.area || []
-  return entries.map((entry: LocationRow, index: number) => {
-    const [longitude, latitude] = coordinateFromName(entry.label)
-    return {
+  const entries: LocationRow[] = locationBreakdownEntry.value?.[selectedLocationScope.value] || []
+  const locationsByLabel = new Map(
+    selectedLocationListItems.value.map((location: LocationListItem) => {
+      const label = String(location.area_name ?? location.chapter_name ?? location.cluster_name ?? location.country_name ?? '').trim()
+      return [normalizeLabel(label), location]
+    }),
+  )
+
+  return entries.flatMap((entry: LocationRow, index: number) => {
+    const location = locationsByLabel.get(normalizeLabel(entry.label))
+    const longitude = toCoordinate(location?.longitude)
+    const latitude = toCoordinate(location?.latitude)
+
+    if (longitude === null || latitude === null) {
+      return []
+    }
+
+    return [{
       label: entry.label,
       count: entry.value,
       percentage: entry.percentage,
       longitude,
       latitude,
       color: colorPalette[index % colorPalette.length],
-    } as AreaMapPoint
+    } as AreaMapPoint]
   })
 })
 
@@ -635,6 +697,20 @@ const areaMapSources = computed(() => ([
     data: areaMapGeoJson.value as any,
   },
 ]))
+
+const mapCenter = computed<[number, number]>(() => {
+  if (!areaMapPoints.value.length) return defaultMapCenter
+
+  const totalLongitude = areaMapPoints.value.reduce((sum, point) => sum + point.longitude, 0)
+  const totalLatitude = areaMapPoints.value.reduce((sum, point) => sum + point.latitude, 0)
+  return [totalLongitude / areaMapPoints.value.length, totalLatitude / areaMapPoints.value.length]
+})
+
+const mapZoom = computed(() => {
+  if (areaMapPoints.value.length <= 1) return 3.4
+  if (areaMapPoints.value.length <= 4) return 2.6
+  return defaultMapZoom
+})
 
 const areaMapLayers = computed(() => ([
   {

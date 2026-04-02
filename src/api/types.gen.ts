@@ -158,6 +158,8 @@ export type AreaLocationDetail = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -200,6 +202,8 @@ export type AreaLocationList = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -2130,6 +2134,8 @@ export type ChapterLocationDetail = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -2171,6 +2177,8 @@ export type ChapterLocationList = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -3472,6 +3480,8 @@ export type CountryLocationDetail = {
     readonly country_name: string;
     readonly general_sector_display: string;
     readonly specific_sector_display: string;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -3801,6 +3811,8 @@ export type CountryLocationList = {
     readonly country_name: string;
     readonly general_sector_display: string;
     readonly specific_sector_display: string;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -17526,6 +17538,8 @@ export type AreaLocationDetailWritable = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -17547,6 +17561,8 @@ export type AreaLocationListWritable = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -18130,6 +18146,8 @@ export type ChapterLocationDetailWritable = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -18151,6 +18169,8 @@ export type ChapterLocationListWritable = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -18539,6 +18559,8 @@ export type CountryLocationDetailWritable = {
      * * `PERSIAN` - Persian Region
      */
     specific_sector: 'NORTH_EUROPE' | 'SOUTH_EUROPE' | 'WEST_EUROPE' | 'EAST_EUROPE' | 'CENTRAL_EUROPE' | 'EAST_ASIA' | 'SOUTH_ASIA' | 'SOUTHEAST_ASIA' | 'CENTRAL_ASIA' | 'WEST_ASIA' | 'NORTH_AMERICA' | 'CENTRAL_AMERICA' | 'CARIBBEAN' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'ANDES' | 'CONO_SUR' | 'NORTH_AFRICA' | 'WEST_AFRICA' | 'EAST_AFRICA' | 'CENTRAL_AFRICA' | 'SOUTH_AFRICA' | 'AUSTRALIA_NEWZEALAND' | 'MELANESIA' | 'MICRONESIA' | 'POLYNESIA' | 'GULF' | 'LEVANT' | 'PERSIAN';
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -18848,6 +18870,8 @@ export type CountryLocationListWritable = {
      * * `PERSIAN` - Persian Region
      */
     specific_sector: 'NORTH_EUROPE' | 'SOUTH_EUROPE' | 'WEST_EUROPE' | 'EAST_EUROPE' | 'CENTRAL_EUROPE' | 'EAST_ASIA' | 'SOUTH_ASIA' | 'SOUTHEAST_ASIA' | 'CENTRAL_ASIA' | 'WEST_ASIA' | 'NORTH_AMERICA' | 'CENTRAL_AMERICA' | 'CARIBBEAN' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'ANDES' | 'CONO_SUR' | 'NORTH_AFRICA' | 'WEST_AFRICA' | 'EAST_AFRICA' | 'CENTRAL_AFRICA' | 'SOUTH_AFRICA' | 'AUSTRALIA_NEWZEALAND' | 'MELANESIA' | 'MICRONESIA' | 'POLYNESIA' | 'GULF' | 'LEVANT' | 'PERSIAN';
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
