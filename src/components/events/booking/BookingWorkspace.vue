@@ -533,12 +533,12 @@
                     </div>
                   </div>
                 </div>
-                <p v-else class="mt-2 text-sm text-green-700">No outstanding payments linked to this booking.</p>
+                <p v-else class="mt-2 text-sm">No outstanding payments linked to this booking.</p>
               </section>
 
               <div v-if="attendeeOrderList.length" class="space-y-3">
-                <article v-for="order in attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden">
-                  <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3">
+                <article v-for="order in attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden"> 
+                  <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
                     <div>
                       <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
                       <p class="text-xs text-deep-navy/60">{{ formatEventDate(order.created_at) }}</p>
@@ -561,7 +561,7 @@
                     </div>
                   </div>
 
-                  <div class="p-4 space-y-3">
+                  <div class="p-4 space-y-3" v-if="order.status !== 'draft'">
                     <div
                       v-for="item in order.order_items || []"
                       :key="item.id"
@@ -1108,6 +1108,7 @@ watchEffect(() => {
 })
 
 const myBookingData = computed(() => myBooking.data.value)
+const currencySymbol = computed(() => myBookingData.value?.bookings?.[0]?.booking?.payments?.[0]?.amount?.slice(0, 1) || '£')
 const selectedBookingItem = computed(() => {
   return myBookingData.value?.bookings?.find(item => item.booking?.booking_reference === bookingReference.value)
 })
@@ -1248,7 +1249,7 @@ const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrder
 const completedPaymentsCount = computed(() => completedSummaryPayments.value.length)
 
 function formatCurrencyAmount(value: number): string {
-  return `${value.toFixed(2)} GBP`
+  return `${currencySymbol.value}${value.toFixed(2)}`
 }
 
 const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)

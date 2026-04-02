@@ -1,7 +1,7 @@
 <template>
 	<EventManagementLayout :event-id="id" :event="event?.data">
 		<div class="pb-20 space-y-6">
-			<section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+			<section class="bg-[#f7f9fe] border border-[#c6c6ce]/30 rounded-2xl shadow-drawn overflow-hidden">
 				<div class="px-6 py-5 border-b border-navy-50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
 						<h2 class="text-sm font-black text-primary uppercase tracking-widest">Event Sponsorship Management</h2>
@@ -29,107 +29,209 @@
 					</div>
 				</div>
 
-				<div v-if="activeTab === 'overview'" class="p-6">
+				<div v-if="activeTab === 'overview'" class="p-6 md:p-8 bg-[#f7f9fe]">
 					<div v-if="overviewStatsLoading" class="space-y-4">
-						<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-							<div v-for="i in 8" :key="i" class="h-24 rounded-xl bg-mist-blue/60 animate-pulse" />
+						<div class="h-56 rounded-[2rem] bg-[#131a33]/20 animate-pulse" />
+						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+							<div v-for="i in 6" :key="i" class="h-36 rounded-2xl bg-white animate-pulse" />
 						</div>
-						<div class="h-56 rounded-xl bg-mist-blue/40 animate-pulse" />
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+							<div class="h-56 rounded-3xl bg-[#f1f4f9] animate-pulse" />
+							<div class="h-56 rounded-3xl bg-[#f1f4f9] animate-pulse" />
+						</div>
+						<div class="h-80 rounded-[2rem] bg-white animate-pulse" />
 					</div>
 
-					<div v-else class="space-y-4">
-						<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-							<div class="p-4 rounded-xl border border-navy-100 bg-mist-blue/40">
-								<p class="text-[10px] uppercase tracking-wide text-navy-400 font-bold">Total Sponsors</p>
-								<p class="text-2xl font-black text-navy-900 mt-1">{{ sponsorOverviewStats.total_sponsors ?? 0 }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-indigo-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-indigo-700 font-bold">Unique Organisations</p>
-								<p class="text-2xl font-black text-indigo-700 mt-1">{{ sponsorOverviewStats.unique_organisations_sponsoring ?? 0 }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-emerald-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-emerald-700 font-bold">Commitments</p>
-								<p class="text-2xl font-black text-emerald-700 mt-1">{{ formatMoney(sponsorOverviewStats.commitment_amount) }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-teal-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-teal-700 font-bold">Completed Revenue</p>
-								<p class="text-2xl font-black text-teal-700 mt-1">{{ formatMoney(sponsorPaymentSummary.completed_revenue) }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-violet-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-violet-700 font-bold">Package Revenue</p>
-								<p class="text-2xl font-black text-violet-700 mt-1">{{ formatMoney(sponsorPackageTotals.total_completed_revenue) }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-amber-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-amber-700 font-bold">Acceptance Rate</p>
-								<p class="text-2xl font-black text-amber-700 mt-1">{{ formatPercent(sponsorInviteSummary.acceptance_rate) }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-cyan-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-cyan-700 font-bold">Response Rate</p>
-								<p class="text-2xl font-black text-cyan-700 mt-1">{{ formatPercent(sponsorInviteSummary.response_rate) }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-fuchsia-50/70">
-								<p class="text-[10px] uppercase tracking-wide text-fuchsia-700 font-bold">Converted Invites</p>
-								<p class="text-2xl font-black text-fuchsia-700 mt-1">{{ sponsorInviteConversionSummary.accepted_with_resulting_sponsor ?? 0 }}</p>
-							</div>
-							<div class="p-4 rounded-xl border border-navy-100 bg-slate-50/80">
-								<p class="text-[10px] uppercase tracking-wide text-slate-700 font-bold">Realization Rate</p>
-								<p class="text-2xl font-black text-slate-700 mt-1">{{ formatPercent(sponsorOverviewStats.realization_rate) }}</p>
-							</div>
-						</div>
+					<div v-else class="space-y-2">
 
-						<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
-							<div class="p-4 rounded-xl border border-navy-100 bg-white">
-								<p class="text-[10px] uppercase tracking-wide text-navy-500 font-bold mb-2">Verification Status</p>
-								<div class="flex flex-wrap gap-2">
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">Pending: {{ sponsorVerificationSummary.pending ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-green-100 text-green-700">Verified: {{ sponsorVerificationSummary.verified ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">Rejected: {{ sponsorVerificationSummary.rejected ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-indigo-100 text-indigo-700">Processed: {{ sponsorVerificationSummary.processed ?? 0 }}</span>
+						<section>
+							<div class="bg-[#0B132B] rounded-[2rem] p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-8 shadow-[0_24px_48px_rgba(24,28,32,0.12)]">
+								<div class="absolute top-0 right-0 w-64 h-64 bg-[#131a33] rounded-full blur-[100px] opacity-40 -mr-20 -mt-20" />
+								<div class="relative z-10 flex items-center gap-6 md:gap-8">
+									<div class="w-16 h-16 md:w-20 md:h-20 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md">
+										<span class="material-symbols-outlined text-white text-3xl md:text-4xl">token</span>
+									</div>
+									<div>
+										<p class="text-[#bec5e5] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-2">Total Commitments</p>
+										<div class="flex items-baseline gap-2">
+											<span class="text-white text-3xl md:text-6xl font-black tracking-tight">{{ formatMoney(sponsorOverviewStats.commitment_amount) }}</span>
+										</div>
+									</div>
+								</div>
+								<div class="relative z-10 w-full md:w-auto flex flex-col md:items-end">
+									<p class="text-[#bec5e5] text-xs md:text-sm font-semibold uppercase tracking-[0.2em] mb-2">Realization Rate</p>
+									<div class="flex items-center gap-4">
+										<div class="w-44 md:w-48 h-3 bg-white/10 rounded-full overflow-hidden">
+											<div class="h-full bg-white rounded-full transition-all duration-500" :style="realizationRateBarStyle" />
+										</div>
+										<span class="text-white text-2xl md:text-3xl font-black">{{ formatPercent(sponsorOverviewStats.realization_rate) }}</span>
+									</div>
+								</div>
+							</div>
+						</section>
+
+						<section>
+							<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">group</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 01</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Total Sponsors</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ sponsorOverviewStats.total_sponsors ?? 0 }}</h3>
+								</div>
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">corporate_fare</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 02</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Unique Organisations</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ sponsorOverviewStats.unique_organisations_sponsoring ?? 0 }}</h3>
+								</div>
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">check_circle</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 03</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Acceptance Rate</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ formatPercent(sponsorInviteSummary.acceptance_rate) }}</h3>
+								</div>
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">reply_all</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 04</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Response Rate</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ formatPercent(sponsorInviteSummary.response_rate) }}</h3>
+								</div>
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">payments</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 05</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Package Revenue</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ formatMoney(sponsorPackageTotals.total_completed_revenue) }}</h3>
+								</div>
+								<div class="bg-[#ffffff] p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow group">
+									<div class="flex justify-between items-start mb-4">
+										<div class="p-3 bg-[#f1f4f9] rounded-xl group-hover:bg-[#000000] group-hover:text-white transition-colors">
+											<span class="material-symbols-outlined">person_add</span>
+										</div>
+										<span class="text-xs font-bold text-[#76767e] uppercase tracking-tighter">Metric 06</span>
+									</div>
+									<p class="text-[#45464d] text-sm font-medium mb-1">Converted Invites</p>
+									<h3 class="text-3xl font-black text-[#181c20]">{{ sponsorInviteConversionSummary.accepted_with_resulting_sponsor ?? 0 }}</h3>
+								</div>
+							</div>
+						</section>
+
+						<section class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+							<div class="bg-[#f1f4f9] p-8 rounded-3xl">
+								<div class="flex items-center gap-3 mb-8">
+									<span class="material-symbols-outlined text-[#000000]">verified_user</span>
+									<h2 class="text-xl font-bold text-[#181c20]">Verification Status</h2>
+								</div>
+								<div class="grid grid-cols-2 gap-4">
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+										<span class="text-[#45464d] font-medium">Pending</span>
+										<span class="px-3 py-1 bg-[#e5e8ed] text-[#45464d] rounded-full text-xs font-bold">{{ sponsorVerificationSummary.pending ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-blue-500">
+										<span class="text-[#45464d] font-medium">Verified</span>
+										<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{{ sponsorVerificationSummary.verified ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+										<span class="text-[#45464d] font-medium">Rejected</span>
+										<span class="px-3 py-1 bg-[#e5e8ed] text-[#45464d] rounded-full text-xs font-bold">{{ sponsorVerificationSummary.rejected ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-green-500">
+										<span class="text-[#45464d] font-medium">Processed</span>
+										<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">{{ sponsorVerificationSummary.processed ?? 0 }}</span>
+									</div>
 								</div>
 							</div>
 
-							<div class="p-4 rounded-xl border border-navy-100 bg-white">
-								<p class="text-[10px] uppercase tracking-wide text-navy-500 font-bold mb-2">Payment Status</p>
-								<div class="flex flex-wrap gap-2">
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-700">Completed: {{ sponsorPaymentSummary.completed ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">Pending: {{ sponsorPaymentSummary.pending ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700">Failed: {{ sponsorPaymentSummary.failed ?? 0 }}</span>
-									<span class="px-2 py-1 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700">Cancelled: {{ sponsorPaymentSummary.cancelled ?? 0 }}</span>
+							<div class="bg-[#f1f4f9] p-8 rounded-3xl">
+								<div class="flex items-center gap-3 mb-8">
+									<span class="material-symbols-outlined text-[#000000]">receipt_long</span>
+									<h2 class="text-xl font-bold text-[#181c20]">Payment Status</h2>
+								</div>
+								<div class="grid grid-cols-2 gap-4">
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl border-l-4 border-emerald-500">
+										<span class="text-[#45464d] font-medium">Completed</span>
+										<span class="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold">{{ sponsorPaymentSummary.completed ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+										<span class="text-[#45464d] font-medium">Pending</span>
+										<span class="px-3 py-1 bg-[#e5e8ed] text-[#45464d] rounded-full text-xs font-bold">{{ sponsorPaymentSummary.pending ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+										<span class="text-[#45464d] font-medium">Failed</span>
+										<span class="px-3 py-1 bg-[#e5e8ed] text-[#45464d] rounded-full text-xs font-bold">{{ sponsorPaymentSummary.failed ?? 0 }}</span>
+									</div>
+									<div class="flex items-center justify-between p-4 bg-white rounded-xl">
+										<span class="text-[#45464d] font-medium">Cancelled</span>
+										<span class="px-3 py-1 bg-[#e5e8ed] text-[#45464d] rounded-full text-xs font-bold">{{ sponsorPaymentSummary.cancelled ?? 0 }}</span>
+									</div>
 								</div>
 							</div>
-						</div>
+						</section>
 
-						<div class="rounded-xl border border-navy-100 overflow-hidden">
-							<div class="px-4 py-3 border-b border-navy-100 bg-mist-blue/30 flex items-center justify-between">
-								<p class="text-xs font-black text-primary uppercase tracking-wider">Event Sponsorship Breakdown</p>
-								<p class="text-[11px] text-navy-500">Top events by sponsors and realized revenue</p>
-							</div>
+						<section>
+							<div class="bg-[#ffffff] rounded-[2rem] overflow-hidden shadow-sm border border-[#c6c6ce]/20">
+								<div class="px-8 py-6 border-b border-[#ebeef3]">
+									<h2 class="text-2xl font-bold text-[#181c20]">Event Sponsorship Breakdown</h2>
+								</div>
+								<div v-if="sponsorEventBreakdownRows.length" class="overflow-x-auto">
+									<table class="w-full min-w-[820px] text-left">
+										<thead>
+											<tr class="bg-[#f1f4f9]">
+												<th class="px-8 py-4 text-xs font-extrabold uppercase tracking-widest text-[#45464d]">Event Name</th>
+												<th class="px-8 py-4 text-xs font-extrabold uppercase tracking-widest text-[#45464d]">Sponsors</th>
+												<th class="px-8 py-4 text-xs font-extrabold uppercase tracking-widest text-[#45464d] text-center">Organisations</th>
+												<th class="px-8 py-4 text-xs font-extrabold uppercase tracking-widest text-[#45464d] text-right">Completed Revenue</th>
+											</tr>
+										</thead>
+										<tbody class="divide-y divide-[#ebeef3]">
+											<tr v-for="row in sponsorEventBreakdownRows" :key="row.event_id" class="hover:bg-[#f7f9fe] transition-colors group">
+												<td class="px-8 py-6">
+													<div class="flex items-center gap-4">
+														<div class="w-12 h-12 rounded-xl bg-[#dfe3e8] flex items-center justify-center text-[#37485b] text-xs font-black">
+															{{ eventInitials(row.event_title) }}
+														</div>
+														<span class="font-bold text-[#181c20] group-hover:text-[#000000] transition-colors">{{ row.event_title }}</span>
+													</div>
+												</td>
+												<td class="px-8 py-6">
+													<div class="inline-flex items-center px-3 py-1.5 rounded-full bg-[#f1f4f9] text-xs font-bold text-[#37485b]">
+														{{ row.sponsors }} sponsor{{ row.sponsors === 1 ? '' : 's' }}
+													</div>
+												</td>
+												<td class="px-8 py-6 text-center font-medium text-[#181c20]">{{ row.organisations }}</td>
+												<td class="px-8 py-6 text-right">
+													<span class="text-lg font-black text-[#181c20]">{{ formatMoney(row.completed_revenue) }}</span>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
 
-							<div v-if="sponsorEventBreakdownRows.length" class="overflow-x-auto">
-								<table class="w-full min-w-[760px]">
-									<thead class="bg-white border-b border-navy-100">
-										<tr class="text-left text-[10px] uppercase tracking-wide text-navy-500">
-											<th class="px-4 py-3 font-bold">Event</th>
-											<th class="px-4 py-3 font-bold">Sponsors</th>
-											<th class="px-4 py-3 font-bold">Organisations</th>
-											<th class="px-4 py-3 font-bold">Completed Revenue</th>
-										</tr>
-									</thead>
-									<tbody class="divide-y divide-navy-50 bg-white">
-										<tr v-for="row in sponsorEventBreakdownRows" :key="row.event_id" class="hover:bg-mist-blue/20 transition-colors">
-											<td class="px-4 py-3 text-sm font-semibold text-navy-900">{{ row.event_title }}</td>
-											<td class="px-4 py-3 text-sm text-navy-700">{{ row.sponsors }}</td>
-											<td class="px-4 py-3 text-sm text-navy-700">{{ row.organisations }}</td>
-											<td class="px-4 py-3 text-sm text-emerald-700 font-semibold">{{ formatMoney(row.completed_revenue) }}</td>
-										</tr>
-									</tbody>
-								</table>
+								<div v-else class="p-10 text-center text-[#45464d] bg-white">
+									<span class="material-symbols-outlined text-4xl text-[#76767e] mb-2 block">analytics</span>
+									<p class="text-sm font-medium">No sponsor event statistics available for this event yet.</p>
+								</div>
 							</div>
-
-							<div v-else class="p-6 text-center text-sm text-navy-500 bg-white">
-								No sponsor event statistics available for this event yet.
-							</div>
-						</div>
+						</section>
 					</div>
 				</div>
 
@@ -270,79 +372,111 @@
 				</div>
 
 				<div v-else-if="activeTab === 'packages'">
-					<div class="px-6 py-5 border-b border-navy-50 flex items-center justify-between gap-3">
-						<div>
-							<h3 class="text-sm font-black text-primary uppercase tracking-widest">Sponsorship Packages</h3>
-							<p class="text-xs text-navy-400 mt-1">Define tiered packages for sponsors to select.</p>
+					<div class="px-6 md:px-8 py-8 md:py-10 bg-[#f7f9fe]">
+						<header class="mb-10">
+							<div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+								<div>
+									<h3 class="text-3xl md:text-4xl font-black tracking-tight text-[#181c20]">Sponsorship Packages</h3>
+									<p class="text-[#45464d] max-w-2xl mt-2">Curate and manage your event sponsorship tiers with precision. Design custom packages that offer unique value to your partners.</p>
+								</div>
+								<button
+									class="bg-[#000000] text-white px-6 py-3 rounded-full font-semibold inline-flex items-center gap-2 hover:bg-[#565d79] transition-all active:scale-95 shadow-lg disabled:opacity-60"
+									:disabled="!canManage || packageMutating"
+									@click="openCreatePackageModal"
+								>
+									<span class="material-symbols-outlined">add</span>
+									Add New Package
+								</button>
+							</div>
+						</header>
+
+						<div v-if="packagesLoading" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+							<div v-for="i in 6" :key="i" class="h-[360px] rounded-xl bg-white animate-pulse" />
 						</div>
-						<button
-							class="px-4 py-2 rounded-xl text-xs font-bold bg-primary text-white hover:bg-primary/90 transition-colors"
-							:disabled="!canManage || packageMutating"
-							@click="openCreatePackageModal"
-						>
-							Add Package
-						</button>
-					</div>
 
-					<div v-if="packagesLoading" class="p-6 space-y-3">
-						<div v-for="i in 3" :key="i" class="h-20 rounded-xl bg-mist-blue/60 animate-pulse" />
-					</div>
+						<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+							<div
+								v-for="pkg in styledPackages"
+								:key="pkg.package_id"
+								class="bg-[#ffffff] rounded-xl p-8 relative group hover:-translate-y-1 transition-transform duration-300"
+								:class="pkg.cardClass"
+							>
+								<div
+									v-if="pkg.showPremiumBadge"
+									class="absolute top-4 right-4 text-[10px] uppercase tracking-widest font-bold px-3 py-1 rounded-full"
+									:class="pkg.premiumBadgeClass"
+								>
+									Premium
+								</div>
 
-					<div v-else-if="sponsorshipPackages.length" class="overflow-x-auto">
-						<table class="w-full min-w-[760px]">
-							<thead class="bg-mist-blue/30 border-b border-navy-100">
-								<tr class="text-left text-[10px] uppercase tracking-wide text-navy-500">
-									<th class="px-6 py-3 font-bold">Package</th>
-									<th class="px-6 py-3 font-bold">Tier</th>
-									<th class="px-6 py-3 font-bold">Base Amount</th>
-									<th class="px-6 py-3 font-bold">Status</th>
-									<th class="px-6 py-3 font-bold">Sponsors</th>
-									<th class="px-6 py-3 font-bold text-right">Actions</th>
-								</tr>
-							</thead>
-							<tbody class="divide-y divide-navy-50">
-								<tr v-for="pkg in sponsorshipPackages" :key="pkg.package_id" class="hover:bg-mist-blue/20 transition-colors align-top">
-									<td class="px-6 py-4">
-										<p class="text-sm font-bold text-navy-900">{{ pkg.package_name }}</p>
-										<p class="text-xs text-navy-500 mt-1">{{ pkg.package_description || 'No package description provided.' }}</p>
-									</td>
-									<td class="px-6 py-4 text-sm text-navy-700">{{ pkg.tier ?? 1 }}</td>
-									<td class="px-6 py-4 text-sm text-navy-700">{{ formatMoney(pkg.base_amount, pkg.base_amount_currency) }}</td>
-									<td class="px-6 py-4">
-										<span class="text-[10px] px-2 py-1 rounded-full font-semibold" :class="pkg.active ? 'bg-green-100 text-green-700' : 'bg-navy-100 text-navy-600'">
-											{{ pkg.active ? 'Active' : 'Inactive' }}
-										</span>
-									</td>
-									<td class="px-6 py-4 text-sm text-navy-700">{{ pkg.sponsors_count ?? 0 }}</td>
-									<td class="px-6 py-4">
-										<div class="flex items-center justify-end gap-2">
-											<button
-												class="p-2 rounded-lg text-navy-500 hover:text-navy-900 hover:bg-mist-blue transition-colors"
-												:disabled="!canManage || packageMutating"
-												@click="openEditPackageModal(pkg)"
-												title="Edit package"
-											>
-												<span class="material-symbols-outlined text-base">edit</span>
-											</button>
-											<button
-												class="p-2 rounded-lg text-navy-500 hover:text-red-600 hover:bg-red-50 transition-colors"
-												:disabled="!canManage || packageMutating"
-												@click="deletePackage(pkg)"
-												title="Delete package"
-											>
-												<span class="material-symbols-outlined text-base">delete</span>
-											</button>
-										</div>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
+								<div class="flex items-center gap-3 mb-6">
+									<div class="w-12 h-12 rounded-full flex items-center justify-center border" :class="pkg.iconWrapClass">
+										<span class="material-symbols-outlined" :class="pkg.iconClass">{{ pkg.icon }}</span>
+									</div>
+									<div>
+										<span class="text-xs font-bold uppercase tracking-tighter" :class="pkg.tierTextClass">Tier {{ pkg.tier ?? 1 }}</span>
+										<h4 class="text-2xl font-black leading-none text-[#181c20] mt-0.5">{{ pkg.package_name }}</h4>
+									</div>
+								</div>
 
-					<div v-else class="p-10 text-center text-navy-500">
-						<span class="material-symbols-outlined text-4xl text-navy-300 mb-2 block">sell</span>
-						<p class="text-sm">No sponsorship packages configured.</p>
-						<p class="text-xs text-navy-400 mt-1">Create packages first, then assign them to sponsors.</p>
+								<div class="mb-8">
+									<div class="text-sm text-[#45464d] mb-1 font-medium">Investment</div>
+									<div class="text-4xl font-black tracking-tighter text-[#181c20]">{{ formatMoney(pkg.base_amount, pkg.base_amount_currency) }}</div>
+								</div>
+
+								<div class="flex items-center justify-between mb-8 pb-8 border-b border-[#f1f4f9]">
+									<div class="flex flex-col">
+										<span class="text-xs uppercase tracking-widest text-[#45464d]">Sponsors</span>
+										<span class="text-xl font-bold">{{ String(pkg.sponsors_count ?? 0).padStart(2, '0') }}</span>
+									</div>
+									<span class="px-3 py-1 rounded-md text-xs font-bold flex items-center gap-1" :class="pkg.active ? 'bg-emerald-100 text-emerald-700' : 'bg-[#e5e8ed] text-[#45464d]'">
+										<span class="w-1.5 h-1.5 rounded-full" :class="pkg.active ? 'bg-emerald-500' : 'bg-[#76767e]'" />
+										{{ pkg.active ? 'Active' : 'Inactive' }}
+									</span>
+								</div>
+
+								<p class="text-sm text-[#45464d] mb-6 min-h-[2.75rem]">{{ pkg.package_description || 'No package description provided.' }}</p>
+
+								<div class="flex items-center gap-2">
+									<button
+										class="flex-1 bg-[#f1f4f9] text-[#181c20] py-2 rounded-lg font-semibold text-sm hover:bg-[#e5e8ed] transition-colors disabled:opacity-60"
+										:disabled="!canManage || packageMutating"
+										@click="openEditPackageModal(pkg)"
+									>
+										Edit
+									</button>
+									<button
+										class="p-2 text-[#45464d] hover:text-[#181c20] bg-[#f1f4f9] rounded-lg transition-colors"
+										@click="copyPackageSummary(pkg)"
+										title="Copy package summary"
+									>
+										<span class="material-symbols-outlined text-[20px]">content_copy</span>
+									</button>
+									<button
+										class="p-2 text-[#ba1a1a] hover:bg-[#ffdad6] rounded-lg transition-colors disabled:opacity-60"
+										:disabled="!canManage || packageMutating"
+										@click="deletePackage(pkg)"
+										title="Delete package"
+									>
+										<span class="material-symbols-outlined text-[20px]">delete</span>
+									</button>
+								</div>
+							</div>
+
+							<button
+								class="border-2 border-dashed border-[#c6c6ce]/60 rounded-xl p-8 flex flex-col items-center justify-center gap-4 hover:border-[#000000]/40 hover:bg-[#f1f4f9]/50 transition-all group min-h-[360px]"
+								:disabled="!canManage || packageMutating"
+								@click="openCreatePackageModal"
+							>
+								<div class="w-16 h-16 rounded-full bg-[#e5e8ed] flex items-center justify-center group-hover:scale-110 transition-transform">
+									<span class="material-symbols-outlined text-4xl text-[#45464d]">add_circle</span>
+								</div>
+								<div class="text-center">
+									<h4 class="font-bold text-lg text-[#181c20]">New Package</h4>
+									<p class="text-sm text-[#45464d]">Create a custom sponsorship tier</p>
+								</div>
+							</button>
+						</div>
 					</div>
 				</div>
 
@@ -505,7 +639,7 @@
 								>
 									<option disabled :value="null">Select an organisation</option>
 									<option v-for="org in organisationOptions" :key="org.id" :value="org.id">
-										{{ org.title }} (ID {{ org.id }})
+										{{ org.title }}
 									</option>
 								</select>
 								<p class="text-[11px] text-navy-500 mt-1" v-if="selectedOrganisationLabel">
@@ -605,6 +739,7 @@
 									min="0"
 									class="w-full px-3 py-2 rounded-xl border border-navy-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
 									required
+									placeholder="20.00"
 								/>
 							</div>
 							<div>
@@ -714,6 +849,16 @@ interface EventSponsorshipPackageItem {
 	sponsors_count?: number
 }
 
+interface StyledPackageItem extends EventSponsorshipPackageItem {
+	cardClass: string
+	iconWrapClass: string
+	iconClass: string
+	tierTextClass: string
+	icon: string
+	showPremiumBadge: boolean
+	premiumBadgeClass: string
+}
+
 interface EventSponsorInviteItem {
 	invite_id: string
 	email: string
@@ -770,6 +915,10 @@ const canManage = computed(() => can('REGISTRATION', 'update').value.allowed)
 
 const { data: event } = useEvent(id)
 const eventInternalId = computed(() => event.value?.data?.id)
+const sponsorDashboardEventTitle = computed(() => {
+	const eventData = event.value?.data as { title?: string; name?: string } | undefined
+	return eventData?.title || eventData?.name || `Event ${id.value}`
+})
 
 const sponsorsQuery = useEventSponsors(id)
 const packagesQuery = useEventSponsorshipPackages(id)
@@ -802,6 +951,77 @@ const sponsorPaymentSummary = computed(() => sponsorOverviewStats.value.payment_
 const sponsorInviteSummary = computed(() => sponsorOverviewStats.value.invite_summary || {})
 const sponsorInviteConversionSummary = computed(() => sponsorInviteConversionStats.value.summary || {})
 const sponsorPackageTotals = computed(() => sponsorPackagePerformanceStats.value.totals || {})
+const styledPackages = computed<StyledPackageItem[]>(() => {
+	return [...sponsorshipPackages.value]
+		.sort((a, b) => {
+			const tierA = a.tier ?? Number.MAX_SAFE_INTEGER
+			const tierB = b.tier ?? Number.MAX_SAFE_INTEGER
+			if (tierA === tierB) {
+				return a.package_name.localeCompare(b.package_name)
+			}
+			return tierA - tierB
+		})
+		.map((pkg) => {
+			const tier = pkg.tier ?? 1
+			if (tier === 1) {
+				return {
+					...pkg,
+					cardClass: 'shadow-[0_0_20px_rgba(212,175,55,0.15)] border border-[rgba(212,175,55,0.3)]',
+					iconWrapClass: 'bg-yellow-50 border-yellow-100',
+					iconClass: 'text-yellow-600',
+					tierTextClass: 'text-yellow-600',
+					icon: 'workspace_premium',
+					showPremiumBadge: true,
+					premiumBadgeClass: 'bg-yellow-100 text-yellow-800 border border-yellow-200',
+				}
+			}
+
+			if (tier === 2) {
+				return {
+					...pkg,
+					cardClass: 'shadow-[0_0_20px_rgba(192,192,192,0.15)] border border-[rgba(192,192,192,0.3)]',
+					iconWrapClass: 'bg-slate-50 border-slate-100',
+					iconClass: 'text-slate-500',
+					tierTextClass: 'text-slate-500',
+					icon: 'stars',
+					showPremiumBadge: false,
+					premiumBadgeClass: '',
+				}
+			}
+
+			if (tier === 3) {
+				return {
+					...pkg,
+					cardClass: 'shadow-[0_0_20px_rgba(205,127,50,0.1)] border border-[rgba(205,127,50,0.2)]',
+					iconWrapClass: 'bg-orange-50 border-orange-100',
+					iconClass: 'text-orange-700',
+					tierTextClass: 'text-orange-700',
+					icon: 'military_tech',
+					showPremiumBadge: false,
+					premiumBadgeClass: '',
+				}
+			}
+
+			return {
+				...pkg,
+				cardClass: 'border border-transparent hover:border-[#c6c6ce]/40',
+				iconWrapClass: 'bg-[#f1f4f9] border-[#ebeef3]',
+				iconClass: 'text-[#45464d]',
+				tierTextClass: 'text-[#45464d]',
+				icon: 'group',
+				showPremiumBadge: false,
+				premiumBadgeClass: '',
+			}
+		})
+})
+const realizationRate = computed(() => {
+	const value = Number(sponsorOverviewStats.value.realization_rate || 0)
+	if (Number.isNaN(value)) {
+		return 0
+	}
+	return Math.max(0, Math.min(100, value))
+})
+const realizationRateBarStyle = computed(() => ({ width: `${realizationRate.value}%` }))
 
 const sponsorEventBreakdownRows = computed(() => {
 	const rows = sponsorOverviewStats.value.event_breakdown
@@ -1248,6 +1468,16 @@ async function copyInviteToken(token: string) {
 	}
 }
 
+async function copyPackageSummary(pkg: EventSponsorshipPackageItem) {
+	try {
+		await navigator.clipboard.writeText(`${pkg.package_name} (${formatMoney(pkg.base_amount, pkg.base_amount_currency)})`)
+		toast.add({ title: 'Package summary copied', color: 'green' })
+	}
+	catch {
+		toast.add({ title: 'Could not copy package summary', color: 'red' })
+	}
+}
+
 async function approveSponsor(sponsor: EventSponsorItem) {
 	try {
 		await approveSponsorMutation.mutateAsync({ eventId: id.value, sponsorId: sponsor.sponsor_id })
@@ -1342,6 +1572,23 @@ function formatPercent(value: number | string | undefined | null) {
 		return '0.00%'
 	}
 	return `${amount.toFixed(2)}%`
+}
+
+function eventInitials(title: string | undefined | null) {
+	if (!title) {
+		return 'EV'
+	}
+
+	const words = title.split(' ').map(part => part.trim()).filter(Boolean)
+	if (!words.length) {
+		return 'EV'
+	}
+
+	if (words.length === 1) {
+		return words[0].slice(0, 2).toUpperCase()
+	}
+
+	return `${words[0][0] || ''}${words[1][0] || ''}`.toUpperCase()
 }
 
 function getErrorMessage(error: unknown, fallback: string) {

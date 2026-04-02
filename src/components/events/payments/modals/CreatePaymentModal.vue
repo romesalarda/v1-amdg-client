@@ -276,7 +276,7 @@ const targetChoices: Array<{ value: TargetType; label: string }> = [
 ]
 
 const paymentMethodParams = computed(() => ({
-  event_id: props.eventId,
+  event: props.eventId,
   is_active: true,
   page_size: 100,
 }))

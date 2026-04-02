@@ -45,7 +45,6 @@
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
 										<h3 class="text-sm font-black text-navy-900">{{ entry.venue_name }}</h3>
-										<UBadge color="blue" variant="soft" size="xs">Venue ID: {{ entry.venue }}</UBadge>
 									</div>
 									<p class="text-sm text-navy-600 mt-1">{{ entry.venue_address || 'No address available' }}</p>
 									<p class="text-xs text-navy-400 mt-1">{{ entry.venue_city || 'No city' }}</p>
