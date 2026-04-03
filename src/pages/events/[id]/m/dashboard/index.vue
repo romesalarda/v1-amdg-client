@@ -13,9 +13,9 @@
                 <h1 class="text-4xl font-black tracking-tight md:text-5xl" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                   {{ event?.title || 'Event dashboard' }}
                 </h1>
-                <p class="max-w-2xl text-sm leading-6 text-white/75 md:text-base">
+                <!-- <p class="max-w-2xl text-sm leading-6 text-white/75 md:text-base">
                   A curated view of registrations, revenue, staffing, and attendee distribution.
-                </p>
+                </p> -->
               </div>
               <div class="flex flex-wrap gap-3 text-[11px] font-semibold uppercase tracking-[0.25em] text-white/70">
                 <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">

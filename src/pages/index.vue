@@ -111,9 +111,9 @@
           <h1 class="mx-auto mb-8 max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white md:text-7xl">
             Elevating the <span class="italic text-[#dbe1ff]">Sacred Mission</span>
           </h1>
-          <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-blue-100/90 md:text-xl">
-            We believe administrative excellence is a profound form of stewardship. Empower your parish with tools built for the sanctity of the mission.
-          </p>
+          <!-- <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-blue-100/90 md:text-xl">
+            For His greater glory
+          </p> -->
 
           <div class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
             <NuxtLink
@@ -245,7 +245,6 @@
               @mouseleave="hoveredSnapshot = null"
             >
               <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Check-in Rate</p>
-              <p class="mt-4 text-4xl font-black tracking-tight text-[#0B132B]">{{ animatedCheckinRate }}%</p>
               <div class="mt-5">
                 <GaugeChart
                   :value="checkinRateTarget"
@@ -378,32 +377,7 @@
         </div>
       </section>
 
-      <section class="bg-white py-32">
-        <div class="mx-auto max-w-4xl px-6 text-center lg:px-12">
-          <h2 class="mb-8 text-4xl font-bold tracking-tight text-[#0B132B]" data-reveal data-reveal-delay="0ms">Fellowship &amp; Mission</h2>
-          <p class="mb-12 text-lg italic text-[#4f6073]" data-reveal data-reveal-delay="80ms">"Joining the AMDG network transformed how our diocese connects. The administrative burden vanished, allowing us to focus entirely on spiritual accompaniment."</p>
-          <div class="flex flex-col items-center">
-            <div class="mb-6 flex -space-x-4" data-reveal data-reveal-delay="120ms">
-              <img class="h-16 w-16 rounded-full border-4 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALD2yJmG4EuTDRVmreYOFDrYuxbnjaRl30weerxxFs-tUXpGhC1l0oQPIAQGr-KRPzPWtU3iQZwcS7bBZV8l-UAx3w3XIYlhbBnpNmMxYQMdORc1nBB_e--XqLwIOXERY7ckhJdCKO_tN4X1V14jWOLatZS_5kQ4b7IlXAYrATMLKHHGM4C-H0YA30ZbHvgari2XUn6JMtNmFwugltj1pCykJMEdXxB4KvN0Qkyi6PZMEw2tSlt0AR1QDpc4jDQ62r7A0UG0UBawY" alt="Portrait of a smiling middle-aged man in business casual attire" />
-              <img class="h-16 w-16 rounded-full border-4 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXqn9kYwKbicEKKuwzzNZggOCAV6k1wWkXyz_Owcr2QKSePFqqU3vIgWnMSSaUnl9TvllGVgGpHow0sHT20OOaHG3LyrqDIrhKLZMcu2SZxWofNzLW0SiaMenqvFbyFayker_2Eig5ihOLLZm-rEgqX6GklwMzD2hHiuMYyZlZdl1Po6zOdRUJIK3c6UEZi2b1pKzC66vtmwg9YSglvj2J3vip_IJY0xZxsdqTTeJkFAa0o_I2L3zdfBshLTR5noQ5IRWnGMui-yY" alt="Portrait of a young woman with a warm and friendly smile" />
-              <img class="h-16 w-16 rounded-full border-4 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4o2D5xQMiec4ryHls5TCPrRScXvw72NPqzMAPP6LbaKRdNqt0F0zL9VdKGYGxwIQ0Ibf98MdHhwfDtowHUoeeLa4kcF5kicO9X6R4xnFSFQPZwMDmt1gHk6ubxRo-cz76hgQnPWnN8jM55WFOW9SxmyqSNEGEq1vO42o_wmpDxKjvICogAdamxMlrvKn88tWekbir6JQ_dY15h-pHFoEzL3Bs_F7H7eUaZ0dnCooqbzXul_Mj2bUmAyIGxPzEVjafChwgiz_4BXY" alt="Portrait of a man with spectacles and a kind professional look" />
-              <img class="h-16 w-16 rounded-full border-4 border-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoeFMW-lZVGLwjxvYZBgXembEzPKe4CEwLiXGDkCu84dVCdCiWn72VIqH9ZwLqZ99O0zAT30SWdw9z_r46fSF6IeLgikbqPpUxZiLpIXIMrxRH8MLtzMhr_BLVK0QtisYaX8flHAH7EstIGyRAg9FdJZ129N9t1nES_Otu9viGbawTZtOEjGgsvbbLEdS8I2RYv-VX3SPc8NCEvuR657aM7_YyF4ZRqIrD2OQXBrd6v8ZCSTb_ZF0N9q09GA6M0rFn-mqibSw5q3g" alt="Portrait of a confident woman leader with soft lighting" />
-            </div>
-            <div class="text-sm font-bold uppercase tracking-widest text-[#131a33]" data-reveal data-reveal-delay="160ms">Rev. Thomas Miller</div>
-            <div class="mt-1 text-xs text-[#4f6073]" data-reveal data-reveal-delay="200ms">Diocesan Coordinator</div>
-          </div>
-
-          <div class="hero-gradient mt-20 flex flex-col items-center justify-between gap-8 rounded-[3rem] p-10 text-white md:flex-row" data-reveal data-reveal-delay="240ms">
-            <div class="text-left">
-              <h3 class="text-2xl font-bold">Ready to streamline your mission?</h3>
-              <p class="text-slate-400">Join over 500 parishes and 20 dioceses today.</p>
-            </div>
-            <NuxtLink class="rounded-full bg-white px-10 py-4 font-bold text-[#0B132B] transition-all hover:bg-slate-200" to="/register">
-              Schedule a Demo
-            </NuxtLink>
-          </div>
-        </div>
-      </section>
+      <Footer/>
     </main>
   </div>
 </template>
@@ -422,6 +396,7 @@ import { useLogout } from '~/composables/resources/user/auth'
 import GaugeChart from '~/components/charts/GaugeChart.vue'
 import MapLibre from '~/components/common/MapLibre.vue'
 import { resolveImageUrl } from '~/utils/image'
+import Footer from '~/components/common/Footer.vue'
 
 use([
   CanvasRenderer,
