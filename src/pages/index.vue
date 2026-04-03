@@ -1,31 +1,26 @@
 <template>
   <div class="bg-white text-[#181c20] selection:bg-[#bec5e5] selection:text-[#181c20]">
-    <main class="pt-6">
-      <section class="relative flex min-h-[870px] items-center justify-center overflow-hidden bg-[#f1f4f9] px-6 lg:px-12">
-        <div class="absolute inset-0 z-0 opacity-10">
-          <img
-            class="h-full w-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIDITTU8RL_yT49HgQi5Y3C6dd9FHmLRflE6rlVI1jFt3zUA-EuVdjUjW88jeXjAFQzcfaGZYs0c7c8EmlKbS2Qg3iwIWAMEkZhDwpuNJqrY2Z4Ul5XqMvxvGHxTisMkT1qK_ntQCUR2YMLK7Iy-NzizIS5ZJrZSu1BA7ZAYZ-4wzYTgLKlW-O24o9vbpC2FjrHr-wNK2wxGtJo5a-WItCIXlRWUq43lJzHwUAyYWWrEVzWyKWZk3WSOihX-Ne0yCojPOxQDybRaI"
-            alt="Atmospheric interior of a gothic cathedral with dramatic light rays"
-          />
+    <main>
+      <section class="relative flex min-h-[870px] items-center justify-center overflow-hidden bg-[#0B132B] px-6 lg:px-12">
+        <div class="absolute inset-0 z-0 overflow-hidden">
+          <UiFlowingBackground position="absolute" :speed="3" :soft="8" :palette="4" />
+          <div class="hero-vignette absolute inset-0"></div>
+          <div class="hero-grid absolute inset-0 opacity-25"></div>
         </div>
 
         <div class="relative z-10 mx-auto max-w-5xl text-center" data-reveal data-reveal-delay="0ms">
-          <span class="mb-8 inline-block rounded-full bg-[#131a33] px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
-            Sacred Management Platform
-          </span>
-          <h1 class="mx-auto mb-8 max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-[#0B132B] md:text-7xl">
-            Elevating the <span class="italic text-[#131a33]">Sacred Mission</span>
+          <h1 class="mx-auto mb-8 max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white md:text-7xl">
+            Elevating the <span class="italic text-[#dbe1ff]">Sacred Mission</span>
           </h1>
-          <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-[#4f6073] md:text-xl">
+          <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-blue-100/90 md:text-xl">
             We believe administrative excellence is a profound form of stewardship. Empower your parish with tools built for the sanctity of the mission.
           </p>
 
           <div class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-            <NuxtLink class="rounded-full bg-[#0B132B] px-10 py-5 text-sm font-bold tracking-wide text-white shadow-xl shadow-[#0B132B]/10 transition-all hover:bg-[#565d79]" to="/register">
+            <NuxtLink class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]" to="/register">
               Get Started
             </NuxtLink>
-            <NuxtLink class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-[0_8px_24px_rgba(24,28,32,0.06)] transition-all hover:bg-[#e5e8ed]" to="/my-dashboard">
+            <NuxtLink class="rounded-full border border-white/25 bg-white/10 px-10 py-5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(24,28,32,0.06)] backdrop-blur-xl transition-all hover:bg-white/20" to="/my-dashboard">
               My Bookings
             </NuxtLink>
           </div>
@@ -198,6 +193,17 @@ onBeforeUnmount(() => {
 
 .hero-gradient {
   background: linear-gradient(135deg, #131a33 0%, #0B132B 100%);
+}
+
+.hero-vignette {
+  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.14) 0%, rgba(11, 19, 43, 0.15) 38%, rgba(11, 19, 43, 0.82) 100%);
+}
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
 [data-reveal] {
