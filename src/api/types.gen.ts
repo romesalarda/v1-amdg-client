@@ -9392,6 +9392,26 @@ export type LocationBreakdown = {
     };
 };
 
+export type LocationDistributionFeature = {
+    type: string;
+    geometry: {
+        [key: string]: unknown;
+    };
+    properties: {
+        [key: string]: unknown;
+    };
+};
+
+export type LocationDistributionMap = {
+    level: string;
+    event_id?: string | null;
+    total_attendees: number;
+    total_with_location: number;
+    total_without_location: number;
+    type: string;
+    features: Array<LocationDistributionFeature>;
+};
+
 /**
  * Create/update serializer for location leader invites.
  */
@@ -36088,6 +36108,32 @@ export type LocationsRoomsUpdateResponses = {
 };
 
 export type LocationsRoomsUpdateResponse = LocationsRoomsUpdateResponses[keyof LocationsRoomsUpdateResponses];
+
+export type LocationsStatisticsDistributionMapRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Optional event UUID or url-safe title to scope attendee counts.
+         */
+        event_id?: string;
+        /**
+         * Include inactive locations if true.
+         */
+        include_inactive?: boolean;
+        /**
+         * Location granularity for distribution points.
+         */
+        level?: 'area' | 'chapter' | 'cluster' | 'country';
+    };
+    url: '/api/locations/statistics/distribution-map/';
+};
+
+export type LocationsStatisticsDistributionMapRetrieveResponses = {
+    200: LocationDistributionMap;
+};
+
+export type LocationsStatisticsDistributionMapRetrieveResponse = LocationsStatisticsDistributionMapRetrieveResponses[keyof LocationsStatisticsDistributionMapRetrieveResponses];
 
 export type LocationsVenueContactsListData = {
     body?: never;
