@@ -36,11 +36,16 @@
           </div>
         </div>
 
-        <div class="inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl">
-          <NuxtLink
-            to="/profile"
+        <div
+          v-if="isLoggedIn"
+          class="relative inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl"
+          ref="profileMenuRoot"
+        >
+          <button
+            type="button"
             class="group relative block rounded-full border border-white/30 p-[2px] transition-colors hover:border-white"
-            aria-label="Go to profile"
+            aria-label="Open profile menu"
+            @click="isProfileMenuOpen = !isProfileMenuOpen"
           >
             <div class="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-[#dbe1ff] to-[#7b83a0]">
               <img
@@ -53,6 +58,42 @@
                 {{ profileInitials }}
               </div>
             </div>
+          </button>
+
+          <div
+            v-if="isProfileMenuOpen"
+            class="absolute right-0 top-[calc(100%+0.65rem)] min-w-[220px] overflow-hidden rounded-2xl border border-white/20 bg-[#0B132B]/95 shadow-xl backdrop-blur-xl"
+          >
+            <div class="border-b border-white/10 px-4 py-3">
+              <p class="text-sm font-semibold text-white">{{ profileDisplayName }}</p>
+              <p class="truncate text-xs text-blue-100/70">{{ profileEmail }}</p>
+            </div>
+
+            <NuxtLink to="/my-dashboard" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
+              My Dashboard
+            </NuxtLink>
+            <NuxtLink to="/events" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
+              Events
+            </NuxtLink>
+            <NuxtLink to="/communities" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
+              Communities
+            </NuxtLink>
+            <NuxtLink to="/profile" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
+              Profile
+            </NuxtLink>
+            <button
+              type="button"
+              class="w-full border-0 border-t border-white/10 bg-transparent px-4 py-2.5 text-left text-sm font-semibold text-[#f7b7b7] transition-colors hover:bg-white/10"
+              @click="handleLogout"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
+
+        <div v-else class="inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+          <NuxtLink to="/login" class="rounded-full border border-white/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-blue-100 no-underline transition-colors hover:border-white hover:text-white">
+            Login
           </NuxtLink>
         </div>
       </div>
@@ -75,12 +116,22 @@
           </p>
 
           <div class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-            <NuxtLink class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]" to="/register">
+            <NuxtLink
+              v-if="!isLoggedIn"
+              class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]"
+              to="/register"
+            >
               Get Started
             </NuxtLink>
-            <NuxtLink class="rounded-full border border-white/25 bg-white/10 px-10 py-5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(24,28,32,0.06)] backdrop-blur-xl transition-all hover:bg-white/20" to="/my-dashboard">
-              My Bookings
-            </NuxtLink>
+
+            <template v-else>
+              <NuxtLink class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]" to="/my-dashboard">
+                My Dashboard
+              </NuxtLink>
+              <NuxtLink class="rounded-full border border-white/45 bg-white/18 px-10 py-5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(24,28,32,0.18)] backdrop-blur-xl transition-all hover:bg-white/28" to="/events">
+                View Events
+              </NuxtLink>
+            </template>
           </div>
         </div>
       </section>
@@ -96,8 +147,16 @@
               />
             </div>
             <div class="absolute -bottom-6 -right-6 max-w-[240px] rounded-[1.5rem] bg-[#0B132B] p-8 text-white shadow-[0_8px_24px_rgba(24,28,32,0.06)]" data-reveal data-reveal-delay="120ms">
-              <p class="mb-2 text-3xl font-bold leading-none">500+</p>
-              <p class="text-[10px] uppercase tracking-widest text-slate-400">Parishes trusted us</p>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <p class="text-3xl font-bold leading-none">{{ parishTrustedDisplay }}</p>
+                  <p class="mt-1 text-[10px] uppercase tracking-widest text-slate-400">Parishes</p>
+                </div>
+                <div>
+                  <p class="text-3xl font-bold leading-none">{{ usersTrustedDisplay }}</p>
+                  <p class="mt-1 text-[10px] uppercase tracking-widest text-slate-400">Users</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -129,6 +188,9 @@
           <div class="mb-20 text-center" data-reveal data-reveal-delay="0ms">
             <h2 class="mb-4 text-5xl font-extrabold tracking-tight text-[#0B132B]">Operational Snapshot</h2>
             <div class="mx-auto h-1.5 w-24 rounded-full bg-[#131a33]"></div>
+            <p class="text-lg text-[#4f6073] pt-4">
+              An example view of your operational metrics at a glance.
+            </p>
           </div>
 
           <div class="grid h-auto grid-cols-1 gap-8 md:grid-cols-12">
@@ -142,7 +204,7 @@
               <div class="mb-4 flex items-end justify-between gap-4">
                 <div>
                   <p class="text-[12px] text-blue-100/75">Gross revenue</p>
-                  <p class="text-4xl font-black tracking-tight">£{{ formatMockCurrency(mockRevenueStat) }}</p>
+                  <p class="text-4xl font-black tracking-tight">£{{ formatMockCurrency(animatedRevenueStat) }}</p>
                 </div>
                 <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                   <svg viewBox="0 0 24 24" class="h-6 w-6 text-blue-100" fill="none" stroke="currentColor" stroke-width="2">
@@ -167,7 +229,7 @@
                 <span class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0B132B]">+18.2% this month</span>
               </div>
               <div class="mb-3 flex items-end justify-between">
-                <p class="text-4xl font-black tracking-tight text-[#0B132B]">{{ mockRegistrationTotal }}</p>
+                <p class="text-4xl font-black tracking-tight text-[#0B132B]">{{ animatedRegistrationTotal }}</p>
                 <p class="text-sm font-semibold text-[#4f6073]">Monthly trend</p>
               </div>
               <div class="rounded-2xl border border-[#dfe6f1] bg-[#f8fafc] p-3">
@@ -183,9 +245,10 @@
               @mouseleave="hoveredSnapshot = null"
             >
               <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Check-in Rate</p>
+              <p class="mt-4 text-4xl font-black tracking-tight text-[#0B132B]">{{ animatedCheckinRate }}%</p>
               <div class="mt-5">
                 <GaugeChart
-                  :value="hoveredSnapshot === 'checkin' ? 94 : mockCheckinRate"
+                  :value="checkinRateTarget"
                   :max="100"
                   unit="%"
                   height="220px"
@@ -248,7 +311,7 @@
               <p class="mb-3 text-xs font-black uppercase tracking-[0.22em] text-[#4f6073]">Global Presence</p>
               <h2 class="text-4xl font-black tracking-tight text-[#0B132B] md:text-5xl">Community Distribution Map</h2>
               <p class="mt-4 max-w-2xl text-sm leading-relaxed text-[#4f6073] md:text-base">
-                Live attendee distribution by location level. Explore area, chapter, cluster, and country concentration at a glance.
+                Live attendee distribution by parish, chapter, cluster, and country. Explore where communities gather at a glance.
               </p>
             </div>
 
@@ -265,6 +328,32 @@
               >
                 {{ scope.label }}
               </button>
+            </div>
+          </div>
+
+          <div class="mt-8 mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal data-reveal-delay="60ms">
+            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
+              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">{{ distributionLevelMetricLabel }}</p>
+              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionLevelCount }}</p>
+              <p class="mt-2 text-sm text-[#4f6073]">Locations currently shown on the map.</p>
+            </div>
+
+            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
+              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Mapped attendees</p>
+              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionWithLocation }}</p>
+              <p class="mt-2 text-sm text-[#4f6073]">People linked to a parish, chapter, cluster, or country.</p>
+            </div>
+
+            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
+              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Total attendees</p>
+              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionTotal }}</p>
+              <p class="mt-2 text-sm text-[#4f6073]">All attendees in the current dataset.</p>
+            </div>
+
+            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
+              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Without location</p>
+              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionWithoutLocation }}</p>
+              <p class="mt-2 text-sm text-[#4f6073]">Attendees not yet tied to a map point.</p>
             </div>
           </div>
 
@@ -320,7 +409,7 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
@@ -329,6 +418,7 @@ import { GridComponent, TooltipComponent, TitleComponent, LegendComponent } from
 import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
 import { useMe } from '~/composables/resources/user/users'
 import { useMyProfile } from '~/composables/resources/user/profiles'
+import { useLogout } from '~/composables/resources/user/auth'
 import GaugeChart from '~/components/charts/GaugeChart.vue'
 import MapLibre from '~/components/common/MapLibre.vue'
 import { resolveImageUrl } from '~/utils/image'
@@ -354,7 +444,9 @@ useHead({
 
 const revealObserver = ref<IntersectionObserver | null>(null)
 const locationRoot = ref<HTMLElement | null>(null)
+const profileMenuRoot = ref<HTMLElement | null>(null)
 const isLocationOpen = ref(false)
+const isProfileMenuOpen = ref(false)
 const hoveredSnapshot = ref<'registrations' | 'checkin' | 'performance' | 'products' | 'attendees' | null>(null)
 const mapStyle = 'https://demotiles.maplibre.org/style.json'
 const distributionLevel = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
@@ -387,10 +479,6 @@ const mockRegistrationHoverCumulativeSeries = mockRegistrationHoverSeries.reduce
   return acc
 }, [])
 
-const mockCheckinsSeries = [61, 68, 72, 74, 79, 83, 87, 91]
-const mockCapacitySeries = [96, 96, 96, 96, 96, 96, 96, 96]
-const mockCheckinsHoverSeries = [64, 70, 75, 77, 82, 85, 89, 94]
-const mockCapacityHoverSeries = [96, 98, 98, 98, 98, 98, 98, 100]
 const mockPerformanceLabels = ['Bookings', 'Products', 'Donations', 'Sponsors']
 const mockPerformanceValues = [71, 48, 29, 36]
 const mockPerformanceHoverValues = [75, 56, 41, 44]
@@ -428,6 +516,82 @@ const mockRegistrationTotal = mockRegistrationCumulativeSeries[mockRegistrationC
 const mockCheckinRate = 91
 
 const formatMockCurrency = (value: number) => value.toLocaleString('en-GB')
+
+const useAnimatedNumber = (source: () => number, duration = 900, delay = 0) => {
+  const animatedValue = ref(0)
+  let stepTimerId: ReturnType<typeof setTimeout> | null = null
+  let startTimerId: ReturnType<typeof setTimeout> | null = null
+
+  const animate = (from: number, to: number) => {
+    if (stepTimerId !== null) {
+      clearTimeout(stepTimerId)
+      stepTimerId = null
+    }
+    if (startTimerId !== null) {
+      clearTimeout(startTimerId)
+      startTimerId = null
+    }
+
+    const run = () => {
+      const startedAt = Date.now()
+      const delta = to - from
+
+      const step = () => {
+        const progress = Math.min((Date.now() - startedAt) / duration, 1)
+        const easedProgress = 1 - Math.pow(1 - progress, 3)
+        animatedValue.value = Math.round(from + delta * easedProgress)
+
+        if (progress < 1) {
+          stepTimerId = setTimeout(step, 16)
+        }
+      }
+
+      step()
+    }
+
+    if (delay > 0) {
+      startTimerId = setTimeout(run, delay)
+      return
+    }
+
+    run()
+  }
+
+  watch(source, (nextValue, previousValue) => {
+    animate(previousValue ?? 0, nextValue)
+  }, {
+    immediate: true,
+  })
+
+  onBeforeUnmount(() => {
+    if (stepTimerId !== null) {
+      clearTimeout(stepTimerId)
+    }
+    if (startTimerId !== null) {
+      clearTimeout(startTimerId)
+    }
+  })
+
+  return animatedValue
+}
+
+const revenueStatTarget = computed(() => (
+  hoveredSnapshot.value === 'registrations'
+    ? mockRevenueHoverGrossSeries[mockRevenueHoverGrossSeries.length - 1]
+    : mockRevenueGrossSeries[mockRevenueGrossSeries.length - 1]
+))
+
+const registrationTotalTarget = computed(() => (
+  hoveredSnapshot.value === 'registrations'
+    ? mockRegistrationHoverCumulativeSeries[mockRegistrationHoverCumulativeSeries.length - 1]
+    : mockRegistrationCumulativeSeries[mockRegistrationCumulativeSeries.length - 1]
+))
+
+const checkinRateTarget = computed(() => (hoveredSnapshot.value === 'checkin' ? 94 : mockCheckinRate))
+
+const animatedRevenueStat = useAnimatedNumber(() => revenueStatTarget.value)
+const animatedRegistrationTotal = useAnimatedNumber(() => registrationTotalTarget.value)
+const animatedCheckinRate = useAnimatedNumber(() => checkinRateTarget.value)
 
 const revenueMiniOption = computed(() => {
   const grossSeries = hoveredSnapshot.value === 'registrations' ? mockRevenueHoverGrossSeries : mockRevenueGrossSeries
@@ -678,6 +842,25 @@ type DistributionResponse = {
   features: DistributionFeature[]
 }
 
+const { data: parishDistributionData } = useAsyncData(
+  'home-parish-distribution',
+  async () => await $fetch<DistributionResponse>('/api/locations/statistics/distribution-map/', {
+    query: {
+      level: 'area',
+    },
+  }),
+  {
+    default: () => ({
+      level: 'area',
+      total_attendees: 0,
+      total_with_location: 0,
+      total_without_location: 0,
+      type: 'FeatureCollection',
+      features: [],
+    }),
+  },
+)
+
 const { data: distributionData, pending: distributionPending } = useAsyncData(
   'home-location-distribution',
   async () => await $fetch<DistributionResponse>('/api/locations/statistics/distribution-map/', {
@@ -700,6 +883,18 @@ const { data: distributionData, pending: distributionPending } = useAsyncData(
 
 const { data: userData } = useMe()
 const { data: profileData } = useMyProfile()
+const { mutate: logout } = useLogout()
+
+const isLoggedIn = computed(() => Boolean(userData.value?.data))
+const profileDisplayName = computed(() => userData.value?.data?.display_name || 'AMDG User')
+const profileEmail = computed(() => userData.value?.data?.email || '')
+
+const parishTrustedTarget = computed(() => parishDistributionData.value?.features?.length ?? 0)
+const animatedParishTrustedCount = useAnimatedNumber(() => parishTrustedTarget.value, 900, 120)
+const parishTrustedDisplay = computed(() => `${animatedParishTrustedCount.value}+`)
+const usersTrustedTarget = computed(() => parishDistributionData.value?.total_attendees ?? 0)
+const animatedUsersTrustedCount = useAnimatedNumber(() => usersTrustedTarget.value, 900, 240)
+const usersTrustedDisplay = computed(() => `${animatedUsersTrustedCount.value}+`)
 
 const profileImageUrl = computed(() => {
   const profilePicture = profileData.value?.data?.profile_picture_url
@@ -722,6 +917,23 @@ const distributionFeatures = computed(() => {
   const features = distributionData.value?.features || []
   return [...features].sort((a, b) => b.properties.attendee_count - a.properties.attendee_count)
 })
+
+const distributionLevelMetricLabel = computed(() => {
+  if (distributionLevel.value === 'area') return 'Parishes'
+  if (distributionLevel.value === 'chapter') return 'Chapters'
+  if (distributionLevel.value === 'cluster') return 'Clusters'
+  return 'Countries'
+})
+
+const distributionLevelCountTarget = computed(() => distributionFeatures.value.length)
+const distributionWithLocationTarget = computed(() => distributionData.value?.total_with_location ?? 0)
+const distributionTotalTarget = computed(() => distributionData.value?.total_attendees ?? 0)
+const distributionWithoutLocationTarget = computed(() => distributionData.value?.total_without_location ?? 0)
+
+const animatedDistributionLevelCount = useAnimatedNumber(() => distributionLevelCountTarget.value, 900, 0)
+const animatedDistributionWithLocation = useAnimatedNumber(() => distributionWithLocationTarget.value, 900, 140)
+const animatedDistributionTotal = useAnimatedNumber(() => distributionTotalTarget.value, 900, 280)
+const animatedDistributionWithoutLocation = useAnimatedNumber(() => distributionWithoutLocationTarget.value, 900, 420)
 
 const distributionMapSources = computed(() => ([
   {
@@ -771,6 +983,18 @@ const handleDocumentClick = (event: MouseEvent) => {
   if (!locationRoot.value?.contains(target)) {
     isLocationOpen.value = false
   }
+  if (!profileMenuRoot.value?.contains(target)) {
+    isProfileMenuOpen.value = false
+  }
+}
+
+const handleLogout = () => {
+  isProfileMenuOpen.value = false
+  logout(undefined, {
+    onSuccess: () => {
+      navigateTo('/')
+    },
+  })
 }
 
 onMounted(() => {
