@@ -1,11 +1,69 @@
 <template>
   <div class="bg-white text-[#181c20] selection:bg-[#bec5e5] selection:text-[#181c20]">
+    <header class="fixed inset-x-0 top-0 z-50 px-4 py-4 sm:px-6 lg:px-10">
+      <div class="flex items-start justify-between">
+        <div class="inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-[#0B132B]/55 px-4 py-3 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:gap-4 sm:px-5">
+          <NuxtLink to="/" class="text-sm font-black tracking-[0.16em] no-underline sm:text-base">
+            AMDG
+          </NuxtLink>
+
+          <div class="relative" ref="locationRoot">
+            <button
+              type="button"
+              class="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-100 transition-colors hover:bg-white/20"
+              @click="isLocationOpen = !isLocationOpen"
+            >
+              <img src="/assets/images/uk.png" alt="UK" class="h-4 w-4 rounded-full object-cover" />
+              <span>UK</span>
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <div
+              v-if="isLocationOpen"
+              class="absolute left-0 top-[calc(100%+0.5rem)] min-w-[150px] overflow-hidden rounded-xl border border-white/20 bg-[#0B132B]/90 p-1 shadow-xl backdrop-blur-xl"
+            >
+              <button
+                type="button"
+                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100 transition-colors hover:bg-white/10"
+                @click="isLocationOpen = false"
+              >
+                <img src="/assets/images/uk.png" alt="UK" class="h-4 w-4 rounded-full object-cover" />
+                United Kingdom
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl">
+          <NuxtLink
+            to="/profile"
+            class="group relative block rounded-full border border-white/30 p-[2px] transition-colors hover:border-white"
+            aria-label="Go to profile"
+          >
+            <div class="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-[#dbe1ff] to-[#7b83a0]">
+              <img
+                v-if="profileImageUrl"
+                :src="profileImageUrl"
+                alt="Profile"
+                class="h-full w-full object-cover"
+              />
+              <div v-else class="flex h-full w-full items-center justify-center text-xs font-black text-[#0B132B]">
+                {{ profileInitials }}
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+    </header>
+
     <main>
-      <section class="relative flex min-h-[870px] items-center justify-center overflow-hidden bg-[#0B132B] px-6 lg:px-12">
+      <section class="relative flex min-h-[820px] items-center justify-center overflow-hidden bg-[#0B132B] px-6 lg:px-12">
         <div class="absolute inset-0 z-0 overflow-hidden">
           <UiFlowingBackground position="absolute" :speed="3" :soft="8" :palette="4" />
-          <div class="hero-vignette absolute inset-0"></div>
-          <div class="hero-grid absolute inset-0 opacity-25"></div>
+          <div class="absolute inset-0"></div>
+          <div class="absolute inset-0 opacity-25"></div>
         </div>
 
         <div class="relative z-10 mx-auto max-w-5xl text-center" data-reveal data-reveal-delay="0ms">
@@ -147,17 +205,49 @@
 </template>
 
 <script lang="ts" setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { useMe } from '~/composables/resources/user/users'
+import { useMyProfile } from '~/composables/resources/user/profiles'
+import { resolveImageUrl } from '~/utils/image'
 
 definePageMeta({
-  layout: 'default',
+  layout: false,
 })
 
 useHead({
-  title: 'St. Peter\'s Events | AMDG Catholic Event Management',
+  title: 'AMDG - Elevating the Sacred Mission of Parish Management',
 })
 
 const revealObserver = ref<IntersectionObserver | null>(null)
+const locationRoot = ref<HTMLElement | null>(null)
+const isLocationOpen = ref(false)
+
+const { data: userData } = useMe()
+const { data: profileData } = useMyProfile()
+
+const profileImageUrl = computed(() => {
+  const profilePicture = profileData.value?.data?.profile_picture_url
+  return profilePicture ? resolveImageUrl(profilePicture) : ''
+})
+
+const profileInitials = computed(() => {
+  const displayName = userData.value?.data?.display_name
+  if (!displayName) return 'AM'
+
+  return displayName
+    .split(' ')
+    .map((chunk) => chunk[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+})
+
+const handleDocumentClick = (event: MouseEvent) => {
+  const target = event.target as Node
+  if (!locationRoot.value?.contains(target)) {
+    isLocationOpen.value = false
+  }
+}
 
 onMounted(() => {
   const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'))
@@ -181,30 +271,18 @@ onMounted(() => {
   targets.forEach((target) => {
     revealObserver.value?.observe(target)
   })
+
+  document.addEventListener('click', handleDocumentClick)
 })
 
 onBeforeUnmount(() => {
   revealObserver.value?.disconnect()
+  document.removeEventListener('click', handleDocumentClick)
 })
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-.hero-gradient {
-  background: linear-gradient(135deg, #131a33 0%, #0B132B 100%);
-}
-
-.hero-vignette {
-  background: radial-gradient(circle at 50% 35%, rgba(255, 255, 255, 0.14) 0%, rgba(11, 19, 43, 0.15) 38%, rgba(11, 19, 43, 0.82) 100%);
-}
-
-.hero-grid {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 56px 56px;
-}
 
 [data-reveal] {
   opacity: 0;

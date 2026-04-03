@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-background-dark font-display text-white">
     <!-- Blueprint Grid Background -->
-    <div class="fixed inset-0 blueprint-grid pointer-events-none z-0"></div>
+    <div class="fixed inset-0 pointer-events-none z-0"></div>
 
     <!-- Main Content -->
     <div class="relative z-10 flex flex-col min-h-screen">
