@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-mist-blue">
     <!-- Hero Section with Featured Event -->
-    <section v-if="featuredEvent" class="relative w-full h-[360px] overflow-hidden bg-deep-navy cursor-pointer group" @click="router.push(`/events/${featuredEvent.event_id}/`)">
+    <section v-if="featuredEvent" class="relative w-full h-[360px] overflow-hidden bg-deep-navy cursor-pointer group" @click="router.push(`/events/${featuredEvent.url_safe_title}/`)">
       <img 
         v-if="featuredEvent.main_landing_image" 
         :src="resolveImageUrl(featuredEvent.main_landing_image.image)" 

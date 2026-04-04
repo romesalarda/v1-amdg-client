@@ -6307,6 +6307,32 @@ export type EventList = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    readonly attendee_overview: {
+        /**
+         * Total number of attendees
+         */
+        total_attendees: number;
+        /**
+         * Number of confirmed attendees
+         */
+        confirmed_attendees: number;
+        /**
+         * Number of pending attendees
+         */
+        pending_attendees: number;
+        /**
+         * Number of cancelled attendees
+         */
+        cancelled_attendees: number;
+        /**
+         * Maximum attendance for the event
+         */
+        max_attendance: number;
+        /**
+         * Percentage of confirmed attendees relative to maximum attendance
+         */
+        percentage_full?: number;
+    };
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -16382,6 +16408,32 @@ export type SponsorableEventList = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    readonly attendee_overview: {
+        /**
+         * Total number of attendees
+         */
+        total_attendees: number;
+        /**
+         * Number of confirmed attendees
+         */
+        confirmed_attendees: number;
+        /**
+         * Number of pending attendees
+         */
+        pending_attendees: number;
+        /**
+         * Number of cancelled attendees
+         */
+        cancelled_attendees: number;
+        /**
+         * Maximum attendance for the event
+         */
+        max_attendance: number;
+        /**
+         * Percentage of confirmed attendees relative to maximum attendance
+         */
+        percentage_full?: number;
+    };
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;

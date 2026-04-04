@@ -13,6 +13,26 @@
               <div class="px-8 py-6 border-b-2 border-deep-navy/10">
                 <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Members</h2>
                 <p class="text-sm text-deep-navy/60 mt-2 font-medium">View active members and manage verification.</p>
+
+                <div class="mt-5">
+                  <label for="member-search" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+                    Search Members
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      id="member-search"
+                      v-model="membersSearchInput"
+                      type="text"
+                      placeholder="Search by username, name, or email..."
+                      class="w-full pl-12 pr-4 py-4 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div v-if="isLoadingMembers" class="p-8 space-y-3">
@@ -94,8 +114,12 @@
               </div>
 
               <div v-else class="px-8 py-16 text-center">
-                <p class="text-sm font-bold text-deep-navy/60">No members found</p>
-                <p class="text-xs text-deep-navy/40 mt-2 font-medium">Invite users to start building your community.</p>
+                <p class="text-sm font-bold text-deep-navy/60">
+                  {{ membersSearchQuery ? 'No members matched your search' : 'No members found' }}
+                </p>
+                <p class="text-xs text-deep-navy/40 mt-2 font-medium">
+                  {{ membersSearchQuery ? 'Try a different name or email.' : 'Invite users to start building your community.' }}
+                </p>
               </div>
 
               <div v-if="!isLoadingMembers && memberships.length > 0" class="px-6 py-4 border-t border-deep-navy/10 flex items-center justify-between">
@@ -483,6 +507,8 @@ const { $notyf } = useNuxtApp()
 const organisationId = computed(() => route.params.id as string)
 // Search functionality
 const searchQuery = ref('')
+const membersSearchInput = ref('')
+const membersSearchQuery = ref('')
 const tabItems = [
   { key: 'members', label: 'Members' },
   { key: 'invites', label: 'Invitations' },
@@ -509,6 +535,7 @@ const membersPageSize = ref(10)
 
 const { data: membershipsData, isLoading: isLoadingMembers } = useOrganisationMemberships(computed(() => ({
   organisation: organisationId.value,
+  search: membersSearchQuery.value || undefined,
   page: membersPage.value,
   page_size: membersPageSize.value,
 })))
@@ -562,6 +589,10 @@ const filteredUsers = computed(() => {
 
 const debouncedSearch = useDebounceFn(() => {
   // Search is reactive via the query parameter
+}, 300)
+
+const debouncedMembersSearch = useDebounceFn(() => {
+  membersSearchQuery.value = membersSearchInput.value.trim()
 }, 300)
 
 // Check if user already has an invite
@@ -760,6 +791,11 @@ const openMembershipModal = (membershipId: number) => {
 
 watch(membersPageSize, () => {
   membersPage.value = 1
+})
+
+watch(membersSearchInput, () => {
+  membersPage.value = 1
+  debouncedMembersSearch()
 })
 
 watch(invitesPageSize, () => {

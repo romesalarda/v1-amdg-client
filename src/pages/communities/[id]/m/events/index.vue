@@ -1,52 +1,46 @@
 <template>
   <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
-    <!-- Page Header -->
-    <div class="mb-8">
-      <div class="flex items-center justify-between">
-        <div>
-          <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Events</h1>
-          <p class="mt-2 text-sm text-deep-navy/60 font-medium">
-            Manage and view all events in this community
-          </p>
-        </div>
+    <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+      <div>
+        <h1 class="text-4xl font-black text-deep-navy tracking-tight">Community Events</h1>
+        <p class="mt-2 text-sm font-medium text-deep-navy/60">
+          Dashboard view for quick status, registration progress, and event access.
+        </p>
+      </div>
+      <div class="inline-flex items-center rounded-md bg-deep-navy px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">
+        {{ totalCount }} total
       </div>
     </div>
 
-    <!-- Compact Search Bar -->
-    <div class="mb-8 bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-2">
-      <div class="flex items-center gap-0">
-        <div class="relative flex-grow min-w-0">
-          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="mb-8 rounded-lg bg-white p-3 shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
+      <div class="flex flex-col gap-3 md:flex-row md:items-center">
+        <div class="relative flex-1">
+          <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
-          <input 
+          <input
             v-model="searchQuery"
-            class="w-full h-12 pl-12 pr-4 bg-transparent border-none text-sm font-medium text-deep-navy placeholder:text-deep-navy/40 focus:ring-0 outline-none" 
-            placeholder="Search events..." 
+            class="h-11 w-full rounded-md bg-slate-100 pl-12 pr-10 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-slate-300"
+            placeholder="Search events by title, type, or description"
             type="text"
           />
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="absolute right-4 top-1/2 -translate-y-1/2 text-deep-navy/40 hover:text-deep-navy transition-colors"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
           >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        
-        <div class="h-8 w-px bg-deep-navy/10"></div>
-        
-        <div class="relative w-56">
-          <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-deep-navy/40" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M3 4h18v2H3V4zm0 7h12v2H3v-2zm0 7h18v2H3v-2z"/>
-          </svg>
-          <select 
+
+        <div class="relative md:w-64">
+          <select
             v-model="statusFilter"
-            class="w-full h-12 pl-12 pr-10 bg-transparent border-none text-[11px] font-black uppercase tracking-wider text-deep-navy focus:ring-0 appearance-none cursor-pointer"
+            class="h-11 w-full appearance-none rounded-md bg-slate-100 px-4 pr-10 text-xs font-black uppercase tracking-[0.18em] text-slate-700 focus:border-transparent focus:ring-2 focus:ring-slate-300"
           >
-            <option :value="undefined">All Statuses</option>
+            <option :value="undefined">All statuses</option>
             <option value="DRAFTING">Drafting</option>
             <option value="PUBLISHED">Published</option>
             <option value="OPEN">Open</option>
@@ -57,89 +51,181 @@
             <option value="POSTPONED">Postponed</option>
             <option value="ARCHIVED">Archived</option>
           </select>
-          <svg class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-deep-navy/40 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
           </svg>
         </div>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="isLoading" class="space-y-4">
-      <div v-for="i in 3" :key="i" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-6">
-        <USkeleton class="h-6 w-3/4 mb-3 rounded-lg" />
-        <USkeleton class="h-4 w-1/2 rounded-lg" />
+    <div v-if="isLoading" class="space-y-3">
+      <div v-for="i in 5" :key="i" class="rounded-lg bg-white p-6 ring-1 ring-slate-200">
+        <USkeleton class="mb-3 h-6 w-2/5 rounded-lg" />
+        <USkeleton class="h-4 w-1/3 rounded-lg" />
       </div>
     </div>
 
-    <!-- Error State -->
-    <div v-else-if="error" class="bg-red-500/10 border-2 border-red-500/20 rounded-xl p-6">
+    <div v-else-if="error" class="rounded-lg border border-red-200 bg-red-50 p-6">
       <div class="flex gap-4">
         <div class="flex-shrink-0">
-          <div class="w-10 h-10 bg-red-500 rounded-xl flex items-center justify-center">
-            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <div class="flex h-10 w-10 items-center justify-center rounded-md bg-red-500">
+            <svg class="h-6 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
             </svg>
           </div>
         </div>
         <div class="flex-1">
-          <h3 class="text-sm font-black text-deep-navy uppercase tracking-tight mb-1">Error loading events</h3>
-          <p class="text-xs text-deep-navy/70 font-medium">{{ error.message }}</p>
+          <h3 class="mb-1 text-sm font-black uppercase tracking-tight text-deep-navy">Error loading events</h3>
+          <p class="text-xs font-medium text-deep-navy/70">{{ error.message }}</p>
         </div>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div 
-      v-else-if="!filteredEvents?.length" 
-      class="text-center py-16 bg-white border-2 border-deep-navy rounded-xl shadow-drawn"
+    <div
+      v-else-if="!events.length"
+      class="rounded-lg bg-white py-16 text-center shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200"
     >
-      <div class="w-20 h-20 mx-auto bg-deep-navy/5 rounded-xl flex items-center justify-center mb-5 border-2 border-deep-navy/10">
-        <svg class="w-10 h-10 text-deep-navy/30" fill="currentColor" viewBox="0 0 24 24">
+      <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-md border border-slate-200 bg-slate-100">
+        <svg class="h-10 w-10 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
           <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
         </svg>
       </div>
-      <h3 class="text-lg font-black text-deep-navy uppercase tracking-tight mb-2">No events found</h3>
-      <p class="text-sm text-deep-navy/60 font-medium mb-6">
+      <h3 class="mb-2 text-lg font-black uppercase tracking-tight text-deep-navy">No events found</h3>
+      <p class="text-sm font-medium text-deep-navy/60">
         {{ searchQuery || statusFilter ? 'Try adjusting your filters' : 'Get started by creating your first event' }}
       </p>
-      <button 
-        v-if="!searchQuery && !statusFilter"
-        class="inline-flex items-center gap-2 px-6 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
-      >
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-        </svg>
-        Create Event
-      </button>
     </div>
 
-    <!-- Events List -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <EventListItem 
-        v-for="event in filteredEvents" 
-        :key="event.event_id"
-        :event="event"
-        :link-to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
-      />
-    </div>
+    <div v-else class="overflow-hidden rounded-lg bg-slate-100 shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
+      <div class="hidden grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] gap-4 border-b border-slate-200 bg-white px-8 py-4 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 lg:grid">
+        <div>Event</div>
+        <div>Date</div>
+        <div>Status</div>
+        <div>Registrations</div>
+        <div class="text-right">Actions</div>
+      </div>
 
-    <!-- Pagination -->
-    <div v-if="totalPages > 1" class="mt-8 flex justify-center">
-      <UPagination 
-        v-model="currentPage"
-        :total="totalPages"
-        :page-count="pageSize"
-      />
+      <div class="space-y-2 p-2">
+        <div
+          v-for="event in events"
+          :key="event.event_id"
+          class="grid gap-4 rounded-md bg-white px-4 py-3 transition hover:-translate-y-[1px] hover:bg-slate-50 lg:grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] lg:items-center lg:px-8"
+        >
+          <div class="flex items-center gap-4">
+            <div class="h-12 w-12 overflow-hidden rounded-md bg-slate-200">
+              <img
+                v-if="event.main_landing_image?.image"
+                :src="resolveImageUrl(event.main_landing_image.image)"
+                :alt="event.title"
+                class="h-full w-full object-cover"
+                @error="onImageError"
+              />
+              <div v-else class="h-full w-full bg-gradient-to-br from-slate-300 to-slate-500" />
+            </div>
+            <div class="min-w-0">
+              <NuxtLink
+                :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
+                class="line-clamp-1 text-base font-black text-deep-navy hover:text-deep-navy/80"
+              >
+                {{ event.title }}
+              </NuxtLink>
+              <p class="line-clamp-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                {{ event.event_type_name || 'General event' }}
+              </p>
+            </div>
+          </div>
+
+          <div>
+            <p class="text-sm font-bold text-deep-navy">{{ formatEventDate(event.start_datetime) }}</p>
+            <p class="text-xs font-medium text-slate-500">{{ formatEventTime(event.start_datetime) }}</p>
+          </div>
+
+          <div>
+            <span
+              class="inline-flex rounded-md px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em]"
+              :class="getStatusBadgeClass(event.status)"
+            >
+              {{ event.status }}
+            </span>
+          </div>
+
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs font-semibold text-deep-navy">
+              <span>{{ getRegistrationLabel(event) }}</span>
+              <span class="text-slate-500">{{ event.attendee_overview.percentage_full?.toFixed(1) }}%</span>
+            </div>
+            <div class="h-1.5 overflow-hidden rounded-md bg-slate-200">
+              <div
+                class="h-full rounded-md bg-blue-600 transition-all duration-300"
+                :style="{ width: `${event.attendee_overview.percentage_full || 0}%` }"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2">
+            <NuxtLink
+              :to="`/events/${event.url_safe_title}`"
+              class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+            >
+              View
+            </NuxtLink>
+            <NuxtLink
+              :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
+              class="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700"
+            >
+              Manage
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-4 border-t border-slate-200 bg-white px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p class="text-sm font-medium text-slate-600">
+          Showing {{ showingStart }}-{{ showingEnd }} of {{ totalCount }} events
+        </p>
+
+        <div class="flex items-center gap-2">
+          <button
+            class="flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            :disabled="currentPage <= 1"
+            @click="setPage(currentPage - 1)"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <button
+            v-for="page in visiblePages"
+            :key="page"
+            class="flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm font-black transition"
+            :class="page === currentPage ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'"
+            @click="setPage(page)"
+          >
+            {{ page }}
+          </button>
+
+          <button
+            class="flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            :disabled="currentPage >= totalPages"
+            @click="setPage(currentPage + 1)"
+          >
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
     </div>
   </ManagementLayout>
 </template>
 
 <script setup lang="ts">
+import type { EventList } from '~/api/types.gen'
 import { useEvents } from '~/composables/resources/events/events'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
-import EventListItem from '~/components/events/display/EventListItem.vue'
 import ManagementLayout from '~/components/communities/ManagementLayout.vue'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 
 const route = useRoute()
 const organisationId = computed(() => route.params.id as string)
@@ -149,13 +235,11 @@ const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
 const organisationNumericId = computed(() => organisation.value?.id)
 
-// State
 const searchQuery = ref('')
 const statusFilter = ref<string | undefined>(undefined)
 const currentPage = ref(1)
 const pageSize = ref(10)
 
-// Query params for API
 const queryParams = computed(() => ({
   organisation: organisationNumericId.value,
   page: currentPage.value,
@@ -164,36 +248,144 @@ const queryParams = computed(() => ({
   ...(searchQuery.value && { search: searchQuery.value }),
 }))
 
-// Fetch events
 const { data, isLoading, error } = useEvents(queryParams)
 
-const events = computed(() => data.value?.data?.results || [])
+const events = computed<EventList[]>(() => data.value?.data?.results || [])
+const totalCount = computed(() => data.value?.data?.count || 0)
+
 const totalPages = computed(() => {
-  if (!data.value?.data) return 1
-  const total = data.value.data.count || 0
-  return Math.ceil(total / pageSize.value)
+  const pages = Math.ceil(totalCount.value / pageSize.value)
+  return pages > 0 ? pages : 1
 })
 
-// Client-side filtering (in addition to API filtering)
-const filteredEvents = computed(() => {
-  let result = events.value
+const showingStart = computed(() => {
+  if (!totalCount.value) return 0
+  return (currentPage.value - 1) * pageSize.value + 1
+})
 
-  if (searchQuery.value) {
-    const query = searchQuery.value.toLowerCase()
-    result = result.filter(event => 
-      event.title?.toLowerCase().includes(query) ||
-      event.short_description?.toLowerCase().includes(query) ||
-      event.event_type_name?.toLowerCase().includes(query)
-    )
+const showingEnd = computed(() => {
+  if (!totalCount.value) return 0
+  return Math.min(currentPage.value * pageSize.value, totalCount.value)
+})
+
+const visiblePages = computed(() => {
+  const maxVisible = 5
+  if (totalPages.value <= maxVisible) {
+    return Array.from({ length: totalPages.value }, (_, index) => index + 1)
   }
 
-  return result
+  let start = Math.max(currentPage.value - 2, 1)
+  let end = Math.min(start + maxVisible - 1, totalPages.value)
+
+  if (end - start + 1 < maxVisible) {
+    start = Math.max(end - maxVisible + 1, 1)
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
 })
 
-// Reset page when filters change
 watch([searchQuery, statusFilter], () => {
   currentPage.value = 1
 })
+
+watch(totalPages, (pageCount) => {
+  if (currentPage.value > pageCount) {
+    currentPage.value = pageCount
+  }
+})
+
+const setPage = (page: number) => {
+  if (page < 1 || page > totalPages.value || page === currentPage.value) return
+  currentPage.value = page
+}
+
+const formatEventDate = (dateString?: string) => {
+  if (!dateString) return 'No date'
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(dateString))
+}
+
+const formatEventTime = (dateString?: string) => {
+  if (!dateString) return ''
+  return new Intl.DateTimeFormat('en-US', {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(dateString))
+}
+
+const getStatusLabel = (status?: string) => {
+  switch (status?.toUpperCase()) {
+    case 'DRAFTING':
+      return 'Draft'
+    case 'IN_PROGRESS':
+      return 'In Progress'
+    default:
+      return status || 'Unknown'
+  }
+}
+
+const getStatusBadgeClass = (status?: string) => {
+  switch (status?.toUpperCase()) {
+    case 'OPEN':
+    case 'PUBLISHED':
+      return 'bg-emerald-100 text-emerald-700'
+    case 'DRAFTING':
+      return 'bg-slate-200 text-slate-700'
+    case 'IN_PROGRESS':
+      return 'bg-blue-100 text-blue-700'
+    case 'CLOSED':
+    case 'COMPLETED':
+      return 'bg-orange-100 text-orange-700'
+    case 'CANCELLED':
+    case 'DELETED':
+      return 'bg-red-100 text-red-700'
+    case 'POSTPONED':
+      return 'bg-amber-100 text-amber-700'
+    case 'ARCHIVED':
+      return 'bg-zinc-200 text-zinc-700'
+    default:
+      return 'bg-slate-200 text-slate-700'
+  }
+}
+
+const getAttendeeCount = (event: EventList) => {
+  const eventWithTotals = event as EventList & {
+    number_of_attendees?: number
+    attendees_count?: number
+    current_attendance?: number
+  }
+
+  return eventWithTotals.number_of_attendees
+    ?? eventWithTotals.attendees_count
+    ?? eventWithTotals.current_attendance
+    ?? 0
+}
+
+const getCapacity = (event: EventList) => {
+  const eventWithCapacity = event as EventList & {
+    maximum_attendance?: number | null
+    max_attendance?: number | null
+  }
+
+  return eventWithCapacity.maximum_attendance ?? eventWithCapacity.max_attendance ?? null
+}
+
+const getRegistrationPercent = (event: EventList) => {
+  const attendees = getAttendeeCount(event)
+  const capacity = getCapacity(event)
+  if (!capacity || capacity <= 0) return attendees > 0 ? 100 : 0
+  return Math.max(0, Math.min(100, Math.round((attendees / capacity) * 100)))
+}
+
+const getRegistrationLabel = (event: EventList) => {
+  const attendees = event.attendee_overview?.total_attendees
+  const capacity = event.attendee_overview?.max_attendance
+  if (!capacity || capacity <= 0) return `${attendees} attendees`
+  return `${attendees} / ${capacity} Attendees`
+}
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
