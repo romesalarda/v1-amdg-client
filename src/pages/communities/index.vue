@@ -128,7 +128,7 @@
             v-for="org in displayedOrganisations" 
             :key="org.id" 
             class="shadow-drawn shadow-drawn-hover flex flex-col group overflow-hidden cursor-pointer"
-            @click="navigateTo(`/communities/${org.id}`)"
+            @click="navigateTo(`/communities/${org.url_safe_title || org.id}`)"
           >
             <!-- Community Image -->
             <div class="aspect-[16/9] w-full overflow-hidden relative border-b border-deep-navy/10">

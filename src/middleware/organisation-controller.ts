@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   try {
     const response = await organisationsControlsList({
       query: {
-        organisation: Number(orgId),
+        organisation: String(orgId),
         user: authStore.user?.id,
       }
     })

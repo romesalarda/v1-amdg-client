@@ -88,7 +88,7 @@ export function useLeaderInvitation(organisationId: ComputedRef<number>, leaders
         }
 
         return {
-            organisation: organisationId.value,
+            organisation: String(organisationId.value),
             search: debouncedCandidateSearch.value,
             location_type: selectedLocationType.value,
             location_id: selectedLocationId.value,

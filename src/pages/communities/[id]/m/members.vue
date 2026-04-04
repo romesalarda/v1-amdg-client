@@ -493,8 +493,9 @@ useHead({
 })
 
 // Fetch organization data
-const { data: orgData } = useOrganisation(computed(() => Number(organisationId.value)))
+const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 // Fetch all users for search
 const { data: usersData, isLoading: isLoadingUsers } = useUsers(computed(() => ({
@@ -507,7 +508,7 @@ const membersPage = ref(1)
 const membersPageSize = ref(10)
 
 const { data: membershipsData, isLoading: isLoadingMembers } = useOrganisationMemberships(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: membersPage.value,
   page_size: membersPageSize.value,
 })))
@@ -518,7 +519,7 @@ const membersFrom = computed(() => membersTotalCount.value === 0 ? 0 : (membersP
 const membersTo = computed(() => Math.min(membersPage.value * membersPageSize.value, membersTotalCount.value))
 
 const { data: membershipLookupData } = useOrganisationMemberships(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: 1,
   page_size: 200,
 })))
@@ -529,7 +530,7 @@ const invitesPage = ref(1)
 const invitesPageSize = ref(10)
 
 const { data: invitesData, isLoading: isLoadingInvites } = useOrganisationInvites(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: invitesPage.value,
   page_size: invitesPageSize.value,
   is_valid: true,
@@ -543,7 +544,7 @@ const invitesFrom = computed(() => invitesTotalCount.value === 0 ? 0 : (invitesP
 const invitesTo = computed(() => Math.min(invitesPage.value * invitesPageSize.value, invitesTotalCount.value))
 
 const { data: invitesLookupData } = useOrganisationInvites(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: 1,
   page_size: 200,
   is_valid: true,
@@ -574,10 +575,15 @@ const { mutate: createInvite } = useCreateOrganisationInvite()
 const sendingInviteToUserId = ref<number | null>(null)
 
 const sendInvite = (userId: number) => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
   sendingInviteToUserId.value = userId
   
   createInvite({
-    organisation: Number(organisationId.value),
+    organisation: organisationNumericId.value,
     target_user: userId,
   }, {
     onSuccess: () => {
@@ -617,7 +623,7 @@ const removeInvite = (inviteId: string) => {
 
 // Access Codes Management
 const { data: codesData, isLoading: isLoadingCodes } = useOrganisationAcceptanceCodes(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
 })))
 
 const accessCodes = computed(() => codesData.value?.data?.results || [])
@@ -632,8 +638,13 @@ const newAccessCode = ref({
 const { mutate: createCode, isPending: isCreatingCode } = useCreateOrganisationAcceptanceCode()
 
 const createAccessCode = () => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
   const body: any = {
-    organisation: Number(organisationId.value),
+    organisation: organisationNumericId.value,
   }
 
   if (newAccessCode.value.max_uses) {
