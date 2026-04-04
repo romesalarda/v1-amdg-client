@@ -145,8 +145,9 @@ const route = useRoute()
 const organisationId = computed(() => route.params.id as string)
 
 // Fetch organisation for the layout
-const { data: orgData } = useOrganisation(Number(organisationId.value))
+const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 // State
 const searchQuery = ref('')
@@ -156,7 +157,7 @@ const pageSize = ref(10)
 
 // Query params for API
 const queryParams = computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationNumericId.value,
   page: currentPage.value,
   page_size: pageSize.value,
   ...(statusFilter.value && { status: statusFilter.value }),

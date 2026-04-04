@@ -251,7 +251,7 @@ const organisationId = computed(() => route.params.id as string)
 const eventId = computed(() => route.params.event_id as string)
 
 // Fetch organisation for the layout
-const { data: orgData } = useOrganisation(Number(organisationId.value))
+const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
 
 // Fetch event details

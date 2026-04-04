@@ -10124,6 +10124,7 @@ export type OrganisationCreateUpdateRequest = {
 export type OrganisationDetail = {
     readonly id: number;
     title: string;
+    readonly url_safe_title: string;
     description?: string;
     external_website?: string | null;
     required_acceptance_code?: boolean;
@@ -10300,6 +10301,7 @@ export type OrganisationLeaderDistributionStatistics = {
 export type OrganisationList = {
     readonly id: number;
     title: string;
+    readonly url_safe_title: string;
     description?: string;
     external_website?: string | null;
     required_acceptance_code?: boolean;
@@ -36992,9 +36994,9 @@ export type OrganisationsAcceptanceCodesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37114,9 +37116,9 @@ export type OrganisationsContactsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37248,9 +37250,9 @@ export type OrganisationsControlsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37358,9 +37360,9 @@ export type OrganisationsInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37514,9 +37516,9 @@ export type OrganisationsInvolvedEventsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37668,9 +37670,9 @@ export type OrganisationsLeaderInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37845,9 +37847,9 @@ export type OrganisationsLeadersListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37975,9 +37977,9 @@ export type OrganisationsLeadersCandidateUsersRetrieveData = {
          */
         location_type?: string;
         /**
-         * Organisation ID
+         * Organisation id or url_safe_title
          */
-        organisation: number;
+        organisation: string;
         /**
          * Search by name, username, or email
          */
@@ -38077,12 +38079,12 @@ export type OrganisationsListDestroyData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListDestroyResponses = {
@@ -38098,12 +38100,12 @@ export type OrganisationsListRetrieveData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListRetrieveResponses = {
@@ -38116,12 +38118,12 @@ export type OrganisationsListPartialUpdateData = {
     body?: PatchedOrganisationCreateUpdateRequest;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListPartialUpdateResponses = {
@@ -38134,12 +38136,12 @@ export type OrganisationsListUpdateData = {
     body: OrganisationCreateUpdateRequest;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListUpdateResponses = {
@@ -38152,9 +38154,9 @@ export type OrganisationsListContactsListData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -38211,7 +38213,7 @@ export type OrganisationsListContactsListData = {
          */
         updated_before?: string;
     };
-    url: '/api/organisations/list/{id}/contacts/';
+    url: '/api/organisations/list/{url_safe_title}/contacts/';
 };
 
 export type OrganisationsListContactsListResponses = {
@@ -38224,9 +38226,9 @@ export type OrganisationsListMembershipsListData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -38283,7 +38285,7 @@ export type OrganisationsListMembershipsListData = {
          */
         updated_before?: string;
     };
-    url: '/api/organisations/list/{id}/memberships/';
+    url: '/api/organisations/list/{url_safe_title}/memberships/';
 };
 
 export type OrganisationsListMembershipsListResponses = {
@@ -38314,9 +38316,9 @@ export type OrganisationsMembershipsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -38470,7 +38472,7 @@ export type OrganisationsSponsorInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -38776,7 +38778,7 @@ export type OrganisationsSponsorsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -38925,7 +38927,7 @@ export type OrganisationsSponsorsPackagesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -39009,9 +39011,9 @@ export type OrganisationsSponsorsInboundListData = {
          */
         ordering?: string;
         /**
-         * Organisation ID.
+         * Organisation id or url_safe_title.
          */
-        organisation_id: number;
+        organisation_id: string;
         /**
          * Filter by selected package UUID
          */
@@ -39033,9 +39035,9 @@ export type OrganisationsSponsorsInboundListData = {
          */
         search?: string;
         /**
-         * Sponsor organisation ID.
+         * Sponsor organisation id or url_safe_title.
          */
-        sponsor_organisation_id?: number;
+        sponsor_organisation_id?: string;
         /**
          * Filter by verification status
          *
@@ -39080,17 +39082,17 @@ export type OrganisationsSponsorsOutboundListData = {
          */
         event_id?: string;
         /**
-         * Event organisation ID.
+         * Event organisation id or url_safe_title.
          */
-        event_organisation_id?: number;
+        event_organisation_id?: string;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         /**
-         * Organisation ID.
+         * Organisation id or url_safe_title.
          */
-        organisation_id: number;
+        organisation_id: string;
         /**
          * Filter by selected package UUID
          */
@@ -39199,9 +39201,9 @@ export type OrganisationsStatisticsEventPerformanceRetrieveData = {
          */
         limit?: number;
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/event-performance/';
 };
@@ -39217,9 +39219,9 @@ export type OrganisationsStatisticsEventsOnMapRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/events-on-map/';
 };
@@ -39239,9 +39241,9 @@ export type OrganisationsStatisticsLeadersDistributionRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/leaders-distribution/';
 };
@@ -39257,9 +39259,9 @@ export type OrganisationsStatisticsLeadersOnMapRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/leaders-on-map/';
 };
@@ -39287,9 +39289,9 @@ export type OrganisationsStatisticsOverviewRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/overview/';
 };
@@ -39317,9 +39319,9 @@ export type OrganisationsStatisticsPaymentsBySourceRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/payments-by-source/';
 };
@@ -39351,9 +39353,9 @@ export type OrganisationsStatisticsSponsorInviteConversionRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsor-invite-conversion/';
 };
@@ -39389,9 +39391,9 @@ export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData = {
          */
         limit?: number;
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsor-packages-performance/';
 };
@@ -39423,9 +39425,9 @@ export type OrganisationsStatisticsSponsorsFlowRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsors-flow/';
 };
@@ -39457,9 +39459,9 @@ export type OrganisationsStatisticsSponsorsOverviewRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsors-overview/';
 };

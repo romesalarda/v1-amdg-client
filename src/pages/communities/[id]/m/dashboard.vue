@@ -209,17 +209,17 @@ const toLabel = (value: unknown, fallback = 'Unknown'): string => {
 }
 
 const statisticsQuery = computed(() => ({
-  organisation_id: Number(organisationId.value),
+  organisation_id: organisationId.value,
   format: 'raw' as const,
 }))
 
 const performanceQuery = computed(() => ({
-  organisation_id: Number(organisationId.value),
+  organisation_id: organisationId.value,
   format: 'raw' as const,
   limit: 10,
 }))
 
-const { data: orgData, isLoading: isLoadingOrganisation } = useOrganisation(computed(() => Number(organisationId.value)))
+const { data: orgData, isLoading: isLoadingOrganisation } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
 
 const {

@@ -402,7 +402,7 @@
             v-for="org in userOrganisations" 
             :key="org.id"
             class="w-72 shrink-0 group cursor-pointer"
-            @click="router.push(`/communities/${org.id}`)"
+            @click="router.push(`/communities/${org.url_safe_title || org.id}`)"
           >
             <div class="aspect-[16/9] rounded-xl overflow-hidden bg-mist-blue mb-3 relative border border-deep-navy/5 shadow-drawn transition-transform hover:-translate-y-1">
               <img 

@@ -8623,7 +8623,7 @@ export const organisationsListDestroy = <ThrowOnError extends boolean = false>(o
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/',
+    url: '/api/organisations/list/{url_safe_title}/',
     ...options
 });
 
@@ -8638,7 +8638,7 @@ export const organisationsListRetrieve = <ThrowOnError extends boolean = false>(
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/',
+    url: '/api/organisations/list/{url_safe_title}/',
     ...options
 });
 
@@ -8653,7 +8653,7 @@ export const organisationsListPartialUpdate = <ThrowOnError extends boolean = fa
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/',
+    url: '/api/organisations/list/{url_safe_title}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -8672,7 +8672,7 @@ export const organisationsListUpdate = <ThrowOnError extends boolean = false>(op
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/',
+    url: '/api/organisations/list/{url_safe_title}/',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -8691,7 +8691,7 @@ export const organisationsListContactsList = <ThrowOnError extends boolean = fal
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/contacts/',
+    url: '/api/organisations/list/{url_safe_title}/contacts/',
     ...options
 });
 
@@ -8706,7 +8706,7 @@ export const organisationsListMembershipsList = <ThrowOnError extends boolean = 
             name: 'sessionid',
             type: 'apiKey'
         }],
-    url: '/api/organisations/list/{id}/memberships/',
+    url: '/api/organisations/list/{url_safe_title}/memberships/',
     ...options
 });
 
