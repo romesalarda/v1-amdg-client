@@ -22,10 +22,10 @@
                   {{ event?.status_display || 'Status pending' }}
                 </span>
                 <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">
-                  {{ Math.round(attendancePercentage) }}% capacity
+                  {{ animatedAttendancePercentage }}% capacity
                 </span>
                 <span class="rounded-full bg-white/10 px-3 py-1 backdrop-blur">
-                  £{{ formatCurrency(overview?.total_revenue) }} revenue
+                  £{{ formatCurrency(animatedTotalRevenue) }} revenue
                 </span>
               </div>
             </div>
@@ -34,19 +34,19 @@
               <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Event revenue</p>
                 <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                  £{{ formatCurrency(overview?.total_revenue) }}
+                  £{{ formatCurrency(animatedTotalRevenue) }}
                 </div>
               </div>
               <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Registrations</p>
                 <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                  {{ overview?.total_attendees ?? event?.number_of_attendees ?? 0 }}
+                  {{ animatedTotalAttendees }}
                 </div>
               </div>
               <div class="rounded-2xl bg-white/10 p-4 backdrop-blur-md">
                 <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/60">Staff</p>
                 <div class="mt-2 text-2xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                  {{ staffList?.count || 0 }}
+                  {{ animatedTotalStaff }}
                 </div>
               </div>
             </div>
@@ -103,7 +103,7 @@
           <div class="mt-3 flex items-end justify-between gap-4">
             <div>
               <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                {{ overview?.total_attendees ?? event?.number_of_attendees ?? 0 }}
+                {{ animatedTotalAttendees }}
               </div>
               <p v-if="event?.maximum_attendance" class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
                 of {{ event.maximum_attendance }} capacity
@@ -120,10 +120,10 @@
           <div class="mt-3 flex items-end justify-between gap-4">
             <div>
               <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                £{{ formatCurrency(overview?.total_revenue) }}
+                £{{ formatCurrency(animatedTotalRevenue) }}
               </div>
               <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
-                from {{ overview?.total_bookings || 0 }} bookings
+                from {{ animatedTotalBookings }} bookings
               </p>
             </div>
             <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
@@ -137,7 +137,7 @@
           <div class="mt-3 flex items-end justify-between gap-4">
             <div>
               <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                {{ staffList?.count || 0 }}
+                {{ animatedTotalStaff }}
               </div>
               <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
                 active members
@@ -154,7 +154,7 @@
           <div class="mt-3 flex items-end justify-between gap-4">
             <div>
               <div class="text-4xl font-black text-deep-navy" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                {{ questionsList?.count || 0 }}
+                {{ animatedTotalQuestions }}
               </div>
               <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-gray-400">
                 registration fields
@@ -408,15 +408,15 @@
             <div class="mt-4 space-y-3 text-sm">
               <div class="flex items-center justify-between gap-3">
                 <span class="font-medium text-gray-600">Resources</span>
-                <span class="font-black text-deep-navy">{{ resourcesList?.count || 0 }}</span>
+                <span class="font-black text-deep-navy">{{ animatedTotalResources }}</span>
               </div>
               <div class="flex items-center justify-between gap-3">
                 <span class="font-medium text-gray-600">Landing images</span>
-                <span class="font-black text-deep-navy">{{ landingImages?.count || 0 }}</span>
+                <span class="font-black text-deep-navy">{{ animatedTotalLandingImages }}</span>
               </div>
               <div class="flex items-center justify-between gap-3">
                 <span class="font-medium text-gray-600">Staff roles</span>
-                <span class="font-black text-deep-navy">{{ rolesList?.count || 0 }}</span>
+                <span class="font-black text-deep-navy">{{ animatedTotalRoles }}</span>
               </div>
             </div>
           </div>
@@ -427,7 +427,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useQuery } from '@tanstack/vue-query'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
@@ -582,6 +582,64 @@ const attendeesResults = computed(() => attendeesData.value?.data?.results || []
 const normalizeNumber = (value: unknown) => {
   const numberValue = Number(value)
   return Number.isFinite(numberValue) ? numberValue : 0
+}
+
+const useAnimatedNumber = (source: () => number, duration = 900, delay = 0) => {
+  const animatedValue = ref(0)
+  let stepTimerId: ReturnType<typeof setTimeout> | null = null
+  let startTimerId: ReturnType<typeof setTimeout> | null = null
+
+  const animate = (from: number, to: number) => {
+    if (stepTimerId !== null) {
+      clearTimeout(stepTimerId)
+      stepTimerId = null
+    }
+    if (startTimerId !== null) {
+      clearTimeout(startTimerId)
+      startTimerId = null
+    }
+
+    const run = () => {
+      const startedAt = Date.now()
+      const delta = to - from
+
+      const step = () => {
+        const progress = Math.min((Date.now() - startedAt) / duration, 1)
+        const easedProgress = 1 - Math.pow(1 - progress, 3)
+        animatedValue.value = Math.round(from + delta * easedProgress)
+
+        if (progress < 1) {
+          stepTimerId = setTimeout(step, 16)
+        }
+      }
+
+      step()
+    }
+
+    if (delay > 0) {
+      startTimerId = setTimeout(run, delay)
+      return
+    }
+
+    run()
+  }
+
+  watch(source, (nextValue, previousValue) => {
+    animate(previousValue ?? 0, nextValue)
+  }, {
+    immediate: true,
+  })
+
+  onBeforeUnmount(() => {
+    if (stepTimerId !== null) {
+      clearTimeout(stepTimerId)
+    }
+    if (startTimerId !== null) {
+      clearTimeout(startTimerId)
+    }
+  })
+
+  return animatedValue
 }
 
 type LocationRow = {
@@ -764,6 +822,29 @@ const revenueShare = (value: string | number | null | undefined) => {
   if (!total) return 0
   return Math.max(0, Math.min(100, (normalizeNumber(value) / total) * 100))
 }
+
+const totalRevenueTarget = computed(() => normalizeNumber(overview.value?.total_revenue))
+const totalAttendeesTarget = computed(() => normalizeNumber(overview.value?.total_attendees ?? event.value?.number_of_attendees ?? 0))
+const totalBookingsTarget = computed(() => normalizeNumber(overview.value?.total_bookings))
+const totalStaffTarget = computed(() => normalizeNumber(staffList.value?.count))
+const totalQuestionsTarget = computed(() => normalizeNumber(questionsList.value?.count))
+const totalResourcesTarget = computed(() => normalizeNumber(resourcesList.value?.count))
+const totalLandingImagesTarget = computed(() => normalizeNumber(landingImages.value?.count))
+const totalRolesTarget = computed(() => normalizeNumber(rolesList.value?.count))
+const attendancePercentageTarget = computed(() => {
+  if (!event.value?.maximum_attendance) return 0
+  return Math.min((totalAttendeesTarget.value / event.value.maximum_attendance) * 100, 100)
+})
+
+const animatedTotalRevenue = useAnimatedNumber(() => totalRevenueTarget.value, 1000)
+const animatedTotalAttendees = useAnimatedNumber(() => totalAttendeesTarget.value, 900, 90)
+const animatedTotalBookings = useAnimatedNumber(() => totalBookingsTarget.value, 900, 130)
+const animatedTotalStaff = useAnimatedNumber(() => totalStaffTarget.value, 900, 170)
+const animatedTotalQuestions = useAnimatedNumber(() => totalQuestionsTarget.value, 900, 210)
+const animatedTotalResources = useAnimatedNumber(() => totalResourcesTarget.value, 850, 250)
+const animatedTotalLandingImages = useAnimatedNumber(() => totalLandingImagesTarget.value, 850, 290)
+const animatedTotalRoles = useAnimatedNumber(() => totalRolesTarget.value, 850, 330)
+const animatedAttendancePercentage = useAnimatedNumber(() => attendancePercentageTarget.value, 900, 120)
 
 const selectedLocationScopeLabel = computed(() => {
   const selected = locationScopes.find((scope) => scope.value === selectedLocationScope.value)

@@ -1,6 +1,5 @@
 <template>
   <div class="space-y-6">
-    <!-- Summary Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <StatCard
         :value="bookingOverviewData?.data?.total_bookings ?? 0"
@@ -32,10 +31,31 @@
       />
     </div>
 
-    <!-- Charts Grid Row 1 -->
+    <StatSection
+      title="Booking Trends"
+      description="Bookings created over time"
+    >
+      <div v-if="trendsLoading" class="flex items-center justify-center h-64">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+      </div>
+      <div v-else-if="trendsError" class="text-center text-red-600 py-8">
+        Error loading booking trends
+      </div>
+      <LineChart
+        v-else-if="bookingTrendsChartData.labels.length"
+        :labels="bookingTrendsChartData.labels"
+        :data="bookingTrendsChartData.data"
+        height="320px"
+        color="#8b5cf6"
+        label="Bookings"
+      />
+      <div v-else class="text-center text-gray-500 py-8">
+        No trend data available
+      </div>
+    </StatSection>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Booking Status Distribution -->
-      <StatSection 
+      <StatSection
         title="Booking Status"
         description="Distribution by payment status"
       >
@@ -56,34 +76,8 @@
           No booking status data available
         </div>
       </StatSection>
-      <!-- Booking Trends --><StatSection 
-        title="Booking Trends"
-        description="Bookings created over time"
-      >
-        <div v-if="trendsLoading" class="flex items-center justify-center h-64">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-        </div>
-        <div v-else-if="trendsError" class="text-center text-red-600 py-8">
-          Error loading booking trends
-        </div>
-        <LineChart
-          v-else-if="bookingTrendsChartData.labels.length"
-          :labels="bookingTrendsChartData.labels"
-          :data="bookingTrendsChartData.data"
-          height="300px"
-          color="#8b5cf6"
-          :label="'Bookings'"
-        />
-        <div v-else class="text-center text-gray-500 py-8">
-          No trend data available
-        </div>
-      </StatSection>
-    </div>
 
-    <!-- Charts Grid Row 2 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Bookings by Package -->
-      <StatSection 
+      <StatSection
         title="Bookings by Package"
         description="Most popular booking packages"
       >
@@ -98,15 +92,15 @@
           :data="bookingsByPackageChartData"
           height="300px"
           color="#6366f1"
-          :horizontal="true"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No package data available
         </div>
       </StatSection>
+    </div>
 
-      <!-- Attendees per Booking Distribution -->
-      <StatSection 
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <StatSection
         title="Party Size Distribution"
         description="Number of attendees per booking"
       >
@@ -126,12 +120,8 @@
           No party size data available
         </div>
       </StatSection>
-    </div>
 
-    <!-- Charts Grid Row 3 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Completion Rate Breakdown -->
-      <StatSection 
+      <StatSection
         title="Completion Funnel"
         description="Intent to booking conversion"
       >
@@ -155,7 +145,7 @@
             <span class="text-2xl font-bold text-blue-600">{{ completionRateData.data.completion_rate }}%</span>
           </div>
           <div class="mt-4 bg-gray-100 rounded-full h-4 overflow-hidden">
-            <div 
+            <div
               class="bg-emerald-500 h-full transition-all duration-500"
               :style="`width: ${completionRateData.data.completion_rate}%`"
             ></div>
@@ -165,32 +155,9 @@
           No completion data available
         </div>
       </StatSection>
-
-      <!-- Booking Timeline -->
-      <StatSection 
-        title="Booking Timeline"
-        description="When bookings were created"
-      >
-        <div v-if="timelineLoading" class="flex items-center justify-center h-64">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-amber-600"></div>
-        </div>
-        <div v-else-if="timelineError" class="text-center text-red-600 py-8">
-          Error loading timeline data
-        </div>
-        <BarChart
-          v-else-if="bookingTimelineChartData.length"
-          :data="bookingTimelineChartData"
-          height="300px"
-          color="#f59e0b"
-        />
-        <div v-else class="text-center text-gray-500 py-8">
-          No timeline data available
-        </div>
-      </StatSection>
     </div>
 
-    <!-- Status Breakdown Table -->
-    <StatSection 
+    <StatSection
       title="Status Breakdown Details"
       description="Detailed breakdown of booking statuses"
     >
@@ -231,7 +198,6 @@ import {
   useBookingsByPackage,
   useAttendeesPerBooking,
   useCompletionRate,
-  useBookingTimeline,
 } from '~/composables/statistics/bookings/booking-statistics'
 import StatCard from '~/components/statistics/StatCard.vue'
 import StatSection from '~/components/statistics/StatSection.vue'
@@ -248,16 +214,13 @@ interface Props {
 
 const props = defineProps<Props>()
 
-// Fetch all booking statistics
 const { data: bookingOverviewData, isLoading: overviewLoading } = useBookingOverview(() => props.queryParams)
 const { data: statusData, isLoading: statusLoading, error: statusError } = useBookingStatus(() => props.queryParams)
 const { data: trendsData, isLoading: trendsLoading, error: trendsError } = useBookingTrends(() => props.queryParams)
 const { data: packageData, isLoading: packageLoading, error: packageError } = useBookingsByPackage(() => props.queryParams)
 const { data: attendeesData, isLoading: attendeesLoading, error: attendeesError } = useAttendeesPerBooking(() => props.queryParams)
 const { data: completionRateData, isLoading: completionLoading, error: completionError } = useCompletionRate(() => props.queryParams)
-const { data: timelineData, isLoading: timelineLoading, error: timelineError } = useBookingTimeline(() => props.queryParams)
 
-// Transform data for charts
 const bookingStatusChartData = computed<PieChartData[]>(() => {
   if (!statusData.value?.data?.distribution) return []
   return statusData.value.data.distribution.map((item: any) => ({
@@ -267,10 +230,12 @@ const bookingStatusChartData = computed<PieChartData[]>(() => {
 })
 
 const bookingTrendsChartData = computed(() => {
-  if (!trendsData.value?.data?.trends) return { labels: [], data: [] }
+  const trends = trendsData.value?.data?.trends || (trendsData.value as any)?.trends || []
+  if (!trends.length) return { labels: [], data: [] }
+
   return {
-    labels: trendsData.value.data.trends.map((item: any) => item.date),
-    data: trendsData.value.data.trends.map((item: any) => item.count),
+    labels: trends.map((item: any) => item.date),
+    data: trends.map((item: any) => item.count),
   }
 })
 
@@ -290,16 +255,5 @@ const attendeesPerBookingChartData = computed<BarChartData[]>(() => {
   }))
 })
 
-const bookingTimelineChartData = computed<BarChartData[]>(() => {
-  if (!timelineData.value?.data?.timeline) return []
-  return timelineData.value.data.timeline.map((item: any) => ({
-    label: item.date,
-    value: item.count,
-  }))
-})
-
-// Helper function to format status
-const formatStatus = (status: string) => {
-  return status.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())
-}
+const formatStatus = (status: string) => status.replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())
 </script>

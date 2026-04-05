@@ -50,7 +50,6 @@
           :data="packagePopularityChartData"
           height="300px"
           color="#3b82f6"
-          :horizontal="true"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No popularity data available
