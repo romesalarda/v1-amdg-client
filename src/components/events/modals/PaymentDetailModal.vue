@@ -151,10 +151,155 @@
             </div>
           </section>
 
-          <section>
-            <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-              <pre class="text-xs text-gray-700 whitespace-pre-wrap font-mono">{{ JSON.stringify(paymentData.metadata, null, 2) }}</pre>
+          <section v-if="hasMetadata">
+            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">inventory_2</span>
+              Payment Content
+            </h4>
+
+            <div v-if="metadataType === 'ORDER'" class="space-y-3">
+              <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div class="text-xs text-indigo-700 mb-1">Order Reference</div>
+                    <div class="font-mono font-semibold text-indigo-900">{{ orderMetadata?.order_reference_id || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-indigo-700 mb-1">Status</div>
+                    <div class="font-semibold text-indigo-900">{{ formatMetadataLabel(orderMetadata?.status) }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-indigo-700 mb-1">Customer ID</div>
+                    <div class="font-mono font-semibold text-indigo-900">{{ orderMetadata?.customer_id ?? 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-indigo-700 mb-1">Attendee ID</div>
+                    <div class="font-mono font-semibold text-indigo-900">{{ orderMetadata?.attendee_id ?? 'N/A' }}</div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-indigo-200 flex items-center justify-between">
+                  <span class="text-sm text-indigo-700">Total Amount</span>
+                  <span class="text-lg font-black text-indigo-900">{{ formatDisplayAmount(orderMetadata?.total_amount) }}</span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Order Items ({{ orderItems.length }})</div>
+                <div class="space-y-2">
+                  <div
+                    v-for="item in orderItems"
+                    :key="item.order_item_id || `${item.product_variant_id || 'variant'}-${item.product_title || 'item'}`"
+                    class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-semibold text-gray-900">{{ item.product_title || 'Product' }}</div>
+                        <div class="text-xs text-gray-600 mt-1">
+                          Qty {{ item.quantity || 1 }} x {{ formatDisplayAmount(item.unit_price, item.currency) }}
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-xs text-gray-500">Line Total</div>
+                        <div class="text-sm font-bold text-gray-900">{{ item.final_price_for_attendee || formatDisplayAmount(item.total_price || item.total_amount, item.currency) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <div v-else-if="metadataType === 'BOOKING'" class="space-y-3">
+              <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div class="text-xs text-emerald-700 mb-1">Booking Reference</div>
+                    <div class="font-mono font-semibold text-emerald-900">{{ bookingMetadata?.booking_reference || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-emerald-700 mb-1">Booking ID</div>
+                    <div class="font-mono font-semibold text-emerald-900">{{ bookingMetadata?.booking_id || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-emerald-700 mb-1">Payment Type</div>
+                    <div class="font-semibold text-emerald-900">{{ formatMetadataLabel(bookingMetadata?.payment_type) }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-emerald-700 mb-1">Booking Finalized</div>
+                    <div class="font-semibold text-emerald-900">{{ bookingMetadata?.booking_finalized ? 'Yes' : 'No' }}</div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-emerald-200 flex items-center justify-between">
+                  <span class="text-sm text-emerald-700">Total Attendees</span>
+                  <span class="text-lg font-black text-emerald-900">{{ bookingMetadata?.total_attendees ?? bookingAttendees.length }}</span>
+                </div>
+              </div>
+
+              <div v-if="bookingAttendees.length > 0" class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Attendees ({{ bookingAttendees.length }})</div>
+                <div class="space-y-2">
+                  <div
+                    v-for="(attendee, index) in bookingAttendees"
+                    :key="attendee.attendee_id || attendee.attendee_draft?.email || `${attendee.package_id || 'pkg'}-${index}`"
+                    class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-semibold text-gray-900">{{ attendee.attendee_name || getDraftAttendeeName(attendee.attendee_draft) || 'Attendee draft' }}</div>
+                        <div class="text-xs text-gray-600 mt-1">Package: {{ attendee.package_name || attendee.package_id || 'N/A' }}</div>
+                        <div v-if="attendee.attendee_draft?.email" class="text-xs text-gray-500 mt-0.5">{{ attendee.attendee_draft.email }}</div>
+                      </div>
+                      <div v-if="attendee.frozen_price" class="text-right">
+                        <div class="text-xs text-gray-500">Price</div>
+                        <div class="text-sm font-bold text-gray-900">{{ formatDisplayAmount(attendee.frozen_price, attendee.currency) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="metadataType === 'DONATION'" class="space-y-3">
+              <div class="bg-rose-50 rounded-lg p-4 border border-rose-200">
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div class="text-xs text-rose-700 mb-1">Event</div>
+                    <div class="font-semibold text-rose-900">{{ donationMetadata?.event || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-rose-700 mb-1">Tracking Reference</div>
+                    <div class="font-mono font-semibold text-rose-900">{{ donationMetadata?.tracking_reference || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-rose-700 mb-1">Donated By</div>
+                    <div class="font-semibold text-rose-900">{{ donationMetadata?.donated_by || 'N/A' }}</div>
+                  </div>
+                  <div>
+                    <div class="text-xs text-rose-700 mb-1">Created By</div>
+                    <div class="font-semibold text-rose-900">{{ donationMetadata?.created_by || 'N/A' }}</div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-3 border-t border-rose-200 flex items-center justify-between">
+                  <span class="text-sm text-rose-700">Donation Amount</span>
+                  <span class="text-lg font-black text-rose-900">{{ formatDisplayAmount(donationMetadata?.amount, donationMetadata?.currency) }}</span>
+                </div>
+                <div v-if="donationMetadata?.message" class="mt-3 pt-3 border-t border-rose-200 text-sm text-rose-900">
+                  {{ donationMetadata.message }}
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div class="text-sm text-gray-700">No specialized metadata renderer found for this payment. Raw metadata is available below.</div>
+            </div>
+
+            <details class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+              <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-700 select-none">
+                View Raw Metadata JSON
+              </summary>
+              <div class="px-4 pb-4 border-t border-gray-200">
+                <pre class="text-xs text-gray-700 whitespace-pre-wrap font-mono mt-3">{{ formattedMetadataJson }}</pre>
+              </div>
+            </details>
           </section>
 
           <!-- Tickets -->
@@ -317,8 +462,75 @@ const hasDiscounts = computed(() => {
   return false // TODO: implement discount checking from metadata
 })
 
+const metadata = computed<any>(() => paymentData.value?.metadata || null)
+
+const hasMetadata = computed(() => !!metadata.value && typeof metadata.value === 'object')
+
+const metadataType = computed<'ORDER' | 'BOOKING' | 'DONATION' | 'UNKNOWN'>(() => {
+  const value = metadata.value
+  if (!value || typeof value !== 'object') return 'UNKNOWN'
+  if (value?.order?.order_items && Array.isArray(value.order.order_items)) return 'ORDER'
+  if (value?.donation && typeof value.donation === 'object') return 'DONATION'
+  if (value?.booking_id || value?.payment_type || value?.attendee_selections || value?.checkout_attendees) return 'BOOKING'
+  return 'UNKNOWN'
+})
+
+const orderMetadata = computed<any>(() => (metadataType.value === 'ORDER' ? metadata.value : null))
+
+const orderItems = computed<any[]>(() => {
+  const items = orderMetadata.value?.order?.order_items
+  return Array.isArray(items) ? items : []
+})
+
+const bookingMetadata = computed<any>(() => (metadataType.value === 'BOOKING' ? metadata.value : null))
+
+const bookingAttendees = computed<any[]>(() => {
+  const selected = bookingMetadata.value?.attendee_selections
+  if (Array.isArray(selected) && selected.length > 0) return selected
+  const checkout = bookingMetadata.value?.checkout_attendees
+  return Array.isArray(checkout) ? checkout : []
+})
+
+const donationMetadata = computed<any>(() => {
+  if (metadataType.value !== 'DONATION') return null
+  return metadata.value?.donation || null
+})
+
+const formattedMetadataJson = computed(() => {
+  if (!metadata.value) return '{}'
+  return JSON.stringify(metadata.value, null, 2)
+})
+
 function formatAmount(amount: string | number): string {
   return `£${parseAmount(amount).toFixed(2)}`
+}
+
+function formatDisplayAmount(amount: any, currency?: string): string {
+  if (amount === null || amount === undefined || amount === '') return 'N/A'
+  if (typeof amount === 'string' && amount.includes('£')) return amount
+  if (typeof amount === 'string' && /^\s*[A-Z]{3}\s+/.test(amount)) return amount
+
+  const parsed = Number.parseFloat(String(amount).replace(/[^0-9.-]/g, ''))
+  if (!Number.isFinite(parsed)) return String(amount)
+
+  const currencyCode = (currency || 'GBP').toUpperCase()
+  try {
+    return new Intl.NumberFormat('en-GB', { style: 'currency', currency: currencyCode }).format(parsed)
+  } catch {
+    return `${currencyCode} ${parsed.toFixed(2)}`
+  }
+}
+
+function formatMetadataLabel(value: any): string {
+  if (value === null || value === undefined || value === '') return 'N/A'
+  return String(value).replace(/_/g, ' ')
+}
+
+function getDraftAttendeeName(attendeeDraft: any): string {
+  if (!attendeeDraft || typeof attendeeDraft !== 'object') return ''
+  const firstName = attendeeDraft.first_name || ''
+  const lastName = attendeeDraft.last_name || ''
+  return `${firstName} ${lastName}`.trim()
 }
 
 function calculateModifier(baseAmount: string | number, percentage: string | number): number {

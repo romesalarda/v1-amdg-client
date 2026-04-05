@@ -249,8 +249,8 @@
 				</div>
 
 				<aside class="space-y-8 lg:col-span-4">
-					<div class="rounded-2xl bg-[#0b132b] p-8 text-white shadow-sm">
-						<div class="mb-6 flex items-start justify-between gap-4">
+					<div class="rounded-2xl bg-[#0b132b] p-8 text-white shadow-sm" v-if="outstandingItems.length >= 1">
+						<div class="mb-6 flex items-start justify-between gap-4" >
 							<div class="flex items-center gap-2 rounded-lg bg-red-600 px-3 py-1.5 text-white">
 							<UIcon name="i-heroicons-exclamation-triangle" class="h-4 w-4" />
 							<span class="text-[10px] font-black uppercase tracking-[0.22em]">
