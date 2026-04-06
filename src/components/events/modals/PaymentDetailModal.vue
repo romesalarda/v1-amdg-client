@@ -629,6 +629,8 @@ const evidenceForm = reactive({
   amount_on_evidence: '',
 })
 
+const asTrimmedString = (value: unknown) => String(value ?? '').trim()
+
 function generateBankTransferTransferId(): string {
   const paymentReference = String(paymentData.value?.payment_reference || paymentData.value?.payment_id || 'PAY')
     .replace(/[^A-Za-z0-9]+/g, '')
@@ -703,7 +705,7 @@ async function uploadBankTransferEvidence() {
     return
   }
 
-  if (!evidenceForm.transfer_id.trim()) {
+  if (!asTrimmedString(evidenceForm.transfer_id)) {
     evidenceUploadError.value = 'Transfer ID is required.'
     return
   }
@@ -719,18 +721,18 @@ async function uploadBankTransferEvidence() {
   }
 
   const formData = new FormData()
-  formData.append('transfer_id', evidenceForm.transfer_id.trim())
+  formData.append('transfer_id', asTrimmedString(evidenceForm.transfer_id))
   formData.append('evidence_file', evidenceForm.evidence_file)
   formData.append('payment', String(paymentData.value.id))
 
-  if (evidenceForm.payer_name.trim()) {
-    formData.append('payer_name', evidenceForm.payer_name.trim())
+  if (asTrimmedString(evidenceForm.payer_name)) {
+    formData.append('payer_name', asTrimmedString(evidenceForm.payer_name))
   }
-  if (evidenceForm.payer_account_last4.trim()) {
-    formData.append('payer_account_last4', evidenceForm.payer_account_last4.trim())
+  if (asTrimmedString(evidenceForm.payer_account_last4)) {
+    formData.append('payer_account_last4', asTrimmedString(evidenceForm.payer_account_last4))
   }
-  if (evidenceForm.amount_on_evidence.trim()) {
-    formData.append('amount_on_evidence', evidenceForm.amount_on_evidence.trim())
+  if (asTrimmedString(evidenceForm.amount_on_evidence)) {
+    formData.append('amount_on_evidence', asTrimmedString(evidenceForm.amount_on_evidence))
   }
 
   evidenceUploadPending.value = true

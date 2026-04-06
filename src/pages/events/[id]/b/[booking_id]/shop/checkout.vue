@@ -153,16 +153,8 @@
 
 							<div v-if="isBankTransferEvidenceRequiredImmediately" class="mt-3 rounded-lg border border-amber-200 bg-white p-3">
 								<p class="text-xs font-black uppercase tracking-[0.14em] text-amber-900">Upload transfer evidence</p>
+								<p class="mt-1 text-[11px] text-amber-800">Transfer reference is generated automatically after checkout submission.</p>
 								<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-									<div class="sm:col-span-2">
-										<div class="mb-1 flex items-center justify-between gap-2">
-											<label class="block text-[11px] font-semibold text-amber-900">Transfer reference <span class="text-red-600">*</span></label>
-											<button type="button" class="text-[11px] font-semibold text-amber-700 hover:text-amber-800" @click="regenerateBankTransferEvidenceReference">Regenerate</button>
-										</div>
-										<input v-model="bankTransferEvidence.transfer_id" type="text" readonly class="w-full rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm" placeholder="Auto-generated">
-										<p class="mt-1 text-[11px] text-amber-700">Generated automatically for cross-reference.</p>
-										<p v-if="bankTransferEvidenceErrors.transfer_id" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.transfer_id }}</p>
-									</div>
 									<div class="sm:col-span-2">
 										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Evidence file <span class="text-red-600">*</span></label>
 										<input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" @change="onBankTransferEvidenceFileChange">
@@ -181,7 +173,7 @@
 									</div>
 									<div class="sm:col-span-2">
 										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Amount on evidence <span class="text-red-600">*</span></label>
-										<input v-model="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="0.00">
+										<input v-model.number="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="0.00">
 										<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
 									</div>
 								</div>
@@ -369,37 +361,24 @@ const isBankTransferEvidenceRequiredImmediately = computed(
 	() => isBankTransferMethod.value && !!selectedPaymentMethod.value?.bank_transfer_required_immediately
 )
 
-const generateBankTransferEvidenceReference = () => {
-	const baseReference = String(activeOrderId.value || bookingReference.value || eventId.value || 'ORDER')
-		.replace(/[^A-Za-z0-9]+/g, '')
-		.toUpperCase()
-	const timestamp = Date.now().toString(36).toUpperCase()
-	const randomSegment = Math.random().toString(36).slice(2, 8).toUpperCase()
-	return `BT-${baseReference}-${timestamp}-${randomSegment}`
-}
+const asTrimmedString = (value: unknown) => String(value ?? '').trim()
 
 const bankTransferEvidence = reactive({
-	transfer_id: generateBankTransferEvidenceReference(),
+	transfer_id: '',
 	evidence_file: null as File | null,
 	payer_name: '',
 	payer_account_last4: '',
-	amount_on_evidence: '',
+	amount_on_evidence: null as number | null,
 })
 
 const bankTransferEvidenceErrors = reactive({
-	transfer_id: '',
 	evidence_file: '',
 	payer_name: '',
 	payer_account_last4: '',
 	amount_on_evidence: '',
 })
 
-const regenerateBankTransferEvidenceReference = () => {
-	bankTransferEvidence.transfer_id = generateBankTransferEvidenceReference()
-}
-
 const clearBankTransferEvidenceErrors = () => {
-	bankTransferEvidenceErrors.transfer_id = ''
 	bankTransferEvidenceErrors.evidence_file = ''
 	bankTransferEvidenceErrors.payer_name = ''
 	bankTransferEvidenceErrors.payer_account_last4 = ''
@@ -407,11 +386,11 @@ const clearBankTransferEvidenceErrors = () => {
 }
 
 const clearBankTransferEvidenceForm = () => {
-	regenerateBankTransferEvidenceReference()
+	bankTransferEvidence.transfer_id = ''
 	bankTransferEvidence.evidence_file = null
 	bankTransferEvidence.payer_name = ''
 	bankTransferEvidence.payer_account_last4 = ''
-	bankTransferEvidence.amount_on_evidence = ''
+	bankTransferEvidence.amount_on_evidence = null
 	clearBankTransferEvidenceErrors()
 }
 
@@ -423,11 +402,10 @@ const onBankTransferEvidenceFileChange = (event: Event) => {
 
 const isBankTransferEvidenceFormReady = computed(() => {
 	if (!isBankTransferEvidenceRequiredImmediately.value) return true
-	if (!bankTransferEvidence.transfer_id.trim()) return false
 	if (!bankTransferEvidence.evidence_file) return false
-	if (!bankTransferEvidence.payer_name.trim()) return false
+	if (!asTrimmedString(bankTransferEvidence.payer_name)) return false
 	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) return false
-	if (!bankTransferEvidence.amount_on_evidence.trim()) return false
+	if (bankTransferEvidence.amount_on_evidence === null || Number(bankTransferEvidence.amount_on_evidence) <= 0) return false
 	return true
 })
 
@@ -436,20 +414,16 @@ const validateBankTransferEvidenceForm = () => {
 	if (!isBankTransferEvidenceRequiredImmediately.value) return true
 
 	let valid = true
-	if (!bankTransferEvidence.transfer_id.trim()) {
-		bankTransferEvidenceErrors.transfer_id = 'Transfer ID is required.'
-		valid = false
-	}
 	if (!bankTransferEvidence.evidence_file) {
 		bankTransferEvidenceErrors.evidence_file = 'Evidence file is required.'
 		valid = false
 	}
-	if (!bankTransferEvidence.payer_name.trim()) {
+	if (!asTrimmedString(bankTransferEvidence.payer_name)) {
 		bankTransferEvidenceErrors.payer_name = 'Payer name is required.'
 		valid = false
 	}
-	if (!bankTransferEvidence.amount_on_evidence.trim()) {
-		bankTransferEvidenceErrors.amount_on_evidence = 'Amount on evidence is required.'
+	if (bankTransferEvidence.amount_on_evidence === null || Number(bankTransferEvidence.amount_on_evidence) <= 0) {
+		bankTransferEvidenceErrors.amount_on_evidence = 'Amount on evidence must be greater than zero.'
 		valid = false
 	}
 	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) {
@@ -680,11 +654,10 @@ async function submitCheckout() {
 				? toMultipartFormData({
 					payment_method_id: selectedPaymentMethodId.value,
 					bank_transfer_evidence: {
-						transfer_id: bankTransferEvidence.transfer_id.trim(),
 						evidence_file: bankTransferEvidence.evidence_file as File,
-						payer_name: bankTransferEvidence.payer_name.trim() || undefined,
-						payer_account_last4: bankTransferEvidence.payer_account_last4.trim() || undefined,
-						amount_on_evidence: bankTransferEvidence.amount_on_evidence.trim() || undefined,
+						payer_name: asTrimmedString(bankTransferEvidence.payer_name),
+						payer_account_last4: asTrimmedString(bankTransferEvidence.payer_account_last4),
+						amount_on_evidence: Number(bankTransferEvidence.amount_on_evidence),
 					},
 				})
 				: {

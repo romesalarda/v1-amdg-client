@@ -1085,16 +1085,8 @@
 
 									<div v-if="isBankTransferEvidenceRequiredImmediately" class="rounded-lg border border-amber-200 bg-white p-3 sm:col-span-2 space-y-3">
 										<p class="text-xs font-semibold text-slate-800">Upload transfer evidence</p>
+										<p class="text-[11px] text-slate-500">Transfer reference is generated automatically after checkout submission.</p>
 										<div class="grid gap-3 sm:grid-cols-2">
-											<div class="sm:col-span-2">
-												<div class="mb-1 flex items-center justify-between gap-2">
-													<label class="block text-[11px] font-semibold text-slate-700">Transfer reference <span class="text-red-600">*</span></label>
-													<UButton size="xs" color="gray" variant="ghost" @click="regenerateBankTransferEvidenceReference">Regenerate</UButton>
-												</div>
-												<UInput v-model="bankTransferEvidence.transfer_id" readonly />
-												<p class="mt-1 text-[11px] text-slate-500">Generated automatically for cross-reference.</p>
-												<p v-if="bankTransferEvidenceErrors.transfer_id" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.transfer_id }}</p>
-											</div>
 											<div class="sm:col-span-2">
 												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Evidence file <span class="text-red-600">*</span></label>
 												<input
@@ -1118,7 +1110,21 @@
 											</div>
 											<div class="sm:col-span-2">
 												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Amount on evidence <span class="text-red-600">*</span></label>
-												<UInput v-model="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" placeholder="0.00" />
+												<UInput
+													:model-value="bankTransferEvidence.amount_on_evidence ?? undefined"
+													type="number"
+													min="0"
+													step="0.01"
+													placeholder="0.00"
+													@update:model-value="(val) => {
+														if (val === '' || val === null || val === undefined) {
+															bankTransferEvidence.amount_on_evidence = null
+															return
+														}
+														const amount = Number(val)
+														bankTransferEvidence.amount_on_evidence = Number.isFinite(amount) ? amount : null
+													}"
+												/>
 												<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
 											</div>
 										</div>
@@ -1286,6 +1292,12 @@
 				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
 					{{ event?.title || 'this event' }}
 				</p>
+				<div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
+					<p class="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Bank transfer reference</p>
+					<p class="mt-1 text-2xl font-black tracking-[0.12em] text-amber-900">{{ checkoutBankTransferReference }}</p>
+					<p class="mt-2 text-xs text-amber-800">Use this exact reference when making the transfer so your payment can be matched quickly.</p>
+					<p v-if="checkoutBankTransferInstructions" class="mt-2 text-xs text-amber-800">{{ checkoutBankTransferInstructions }}</p>
+				</div>
 			</div>
 
 			<div class="flex justify-center success-cta-wrap">
@@ -1324,11 +1336,11 @@ import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPrev
 import { useStripeConfig } from '~/composables/resources/common/stripe'
 import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import {
-	buildCheckoutMultipartPayload,
 	buildCheckoutPayload,
 	buildCheckoutPreviewPayload,
 	createIdempotencyKey,
 } from '~/composables/registration/checkout'
+import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, MedicalConditionItemDraft, PersonalInfoItemDraft, ProductSelectionDraft } from '~/stores/registration'
@@ -2142,37 +2154,25 @@ const isBankTransferEvidenceRequiredImmediately = computed(
 	() => isBankTransferMethod.value && !!selectedPaymentMethod.value?.bank_transfer_required_immediately
 )
 
-const generateBankTransferEvidenceReference = () => {
-	const baseReference = String(store.bookingIntentId || event_uuid.value || 'BOOKING')
-		.replace(/[^A-Za-z0-9]+/g, '')
-		.toUpperCase()
-	const timestamp = Date.now().toString(36).toUpperCase()
-	const randomSegment = Math.random().toString(36).slice(2, 8).toUpperCase()
-	return `BT-${baseReference}-${timestamp}-${randomSegment}`
-}
+const asTrimmedString = (value: unknown) => String(value ?? '').trim()
 
 const bankTransferEvidence = reactive({
-	transfer_id: generateBankTransferEvidenceReference(),
+	transfer_id: '',
+	bank_transfer_evidence_id: '' as string,
 	evidence_file: null as File | null,
 	payer_name: '',
 	payer_account_last4: '',
-	amount_on_evidence: '',
+	amount_on_evidence: null as number | null,
 })
 
 const bankTransferEvidenceErrors = reactive({
-	transfer_id: '',
 	evidence_file: '',
 	payer_name: '',
 	payer_account_last4: '',
 	amount_on_evidence: '',
 })
 
-const regenerateBankTransferEvidenceReference = () => {
-	bankTransferEvidence.transfer_id = generateBankTransferEvidenceReference()
-}
-
 const clearBankTransferEvidenceErrors = () => {
-	bankTransferEvidenceErrors.transfer_id = ''
 	bankTransferEvidenceErrors.evidence_file = ''
 	bankTransferEvidenceErrors.payer_name = ''
 	bankTransferEvidenceErrors.payer_account_last4 = ''
@@ -2180,27 +2180,28 @@ const clearBankTransferEvidenceErrors = () => {
 }
 
 const clearBankTransferEvidenceForm = () => {
-	regenerateBankTransferEvidenceReference()
+	bankTransferEvidence.transfer_id = ''
+	bankTransferEvidence.bank_transfer_evidence_id = ''
 	bankTransferEvidence.evidence_file = null
 	bankTransferEvidence.payer_name = ''
 	bankTransferEvidence.payer_account_last4 = ''
-	bankTransferEvidence.amount_on_evidence = ''
+	bankTransferEvidence.amount_on_evidence = null
 	clearBankTransferEvidenceErrors()
 }
 
 const onBankTransferEvidenceFileChange = (event: Event) => {
 	const input = event.target as HTMLInputElement
 	bankTransferEvidence.evidence_file = input.files?.[0] || null
+	bankTransferEvidence.bank_transfer_evidence_id = ''
 	bankTransferEvidenceErrors.evidence_file = ''
 }
 
 const isBankTransferEvidenceFormReady = computed(() => {
 	if (!isBankTransferEvidenceRequiredImmediately.value) return true
-	if (!bankTransferEvidence.transfer_id.trim()) return false
 	if (!bankTransferEvidence.evidence_file) return false
-	if (!bankTransferEvidence.payer_name.trim()) return false
+	if (!asTrimmedString(bankTransferEvidence.payer_name)) return false
 	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) return false
-	if (!bankTransferEvidence.amount_on_evidence.trim()) return false
+	if (bankTransferEvidence.amount_on_evidence === null || Number(bankTransferEvidence.amount_on_evidence) <= 0) return false
 	return true
 })
 
@@ -2209,20 +2210,16 @@ const validateBankTransferEvidenceForm = () => {
 	if (!isBankTransferEvidenceRequiredImmediately.value) return true
 
 	let valid = true
-	if (!bankTransferEvidence.transfer_id.trim()) {
-		bankTransferEvidenceErrors.transfer_id = 'Transfer ID is required.'
-		valid = false
-	}
 	if (!bankTransferEvidence.evidence_file) {
 		bankTransferEvidenceErrors.evidence_file = 'Evidence file is required.'
 		valid = false
 	}
-	if (!bankTransferEvidence.payer_name.trim()) {
+	if (!asTrimmedString(bankTransferEvidence.payer_name)) {
 		bankTransferEvidenceErrors.payer_name = 'Payer name is required.'
 		valid = false
 	}
-	if (!bankTransferEvidence.amount_on_evidence.trim()) {
-		bankTransferEvidenceErrors.amount_on_evidence = 'Amount on evidence is required.'
+	if (bankTransferEvidence.amount_on_evidence === null || Number(bankTransferEvidence.amount_on_evidence) <= 0) {
+		bankTransferEvidenceErrors.amount_on_evidence = 'Amount on evidence must be greater than zero.'
 		valid = false
 	}
 	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) {
@@ -2231,6 +2228,35 @@ const validateBankTransferEvidenceForm = () => {
 	}
 
 	return valid
+}
+
+const uploadBankTransferEvidenceForCheckout = async (): Promise<string> => {
+	if (bankTransferEvidence.bank_transfer_evidence_id) {
+		return bankTransferEvidence.bank_transfer_evidence_id
+	}
+
+	if (!store.bookingIntentId) {
+		throw new Error('Booking intent is missing. Refresh and try again.')
+	}
+
+	const formData = new FormData()
+	formData.append('booking_intent_id', store.bookingIntentId)
+	formData.append('evidence_file', bankTransferEvidence.evidence_file as File)
+	formData.append('payer_name', asTrimmedString(bankTransferEvidence.payer_name))
+	formData.append('payer_account_last4', asTrimmedString(bankTransferEvidence.payer_account_last4))
+	formData.append('amount_on_evidence', String(Number(bankTransferEvidence.amount_on_evidence)))
+
+	const uploadResponse = await uploadMultipart('/api/bookings/list/upload-bank-transfer-evidence/', formData, { method: 'POST' }) as Record<string, unknown>
+	const evidenceId = typeof uploadResponse.bank_transfer_evidence_id === 'string'
+		? uploadResponse.bank_transfer_evidence_id
+		: ''
+
+	if (!evidenceId) {
+		throw new Error('Evidence uploaded but no evidence ID was returned.')
+	}
+
+	bankTransferEvidence.bank_transfer_evidence_id = evidenceId
+	return evidenceId
 }
 
 watch(
@@ -2341,6 +2367,16 @@ const paymentProcessingMessage = ref('')
 
 let previewDebounceTimer: ReturnType<typeof setTimeout> | null = null
 let paymentPollingTimer: ReturnType<typeof setInterval> | null = null
+
+const checkoutBankTransferReference = computed(() => {
+	const value = checkoutResult.value?.bank_transfer_reference
+	return typeof value === 'string' && value.trim().length ? value.trim() : null
+})
+
+const checkoutBankTransferInstructions = computed(() => {
+	const value = checkoutResult.value?.bank_transfer_instructions
+	return typeof value === 'string' && value.trim().length ? value.trim() : null
+})
 
 const parseDiscountAmount = (value: string | undefined) => Math.abs(Number(value || 0))
 
@@ -2715,7 +2751,7 @@ const getCannotContinueMessage = () => {
 		if (isStripeMethod.value && stripeCardError.value) return stripeCardError.value
 		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
 		if (isBankTransferEvidenceRequiredImmediately.value && !isBankTransferEvidenceFormReady.value) {
-			return 'Transfer ID and evidence file are required for this bank transfer method.'
+			return 'Evidence file, payer details, and amount are required for this bank transfer method.'
 		}
 		if (!isBookingFree.value && !selectedPaymentMethodId.value) return 'Please choose a payment method.'
 		return 'Some attendees are missing required information.'
@@ -3201,6 +3237,16 @@ const handleCheckout = async () => {
 	stripePaymentAttemptError.value = ''
 
 	try {
+		const missingPackageAttendeeIndex = store.attendees.findIndex((attendee) => !attendee.packageId)
+		if (missingPackageAttendeeIndex >= 0) {
+			toast.add({
+				title: 'Missing ticket package',
+				description: `Please select a package for attendee ${missingPackageAttendeeIndex + 1}.`,
+				color: 'red',
+			})
+			return
+		}
+
 		if (!validateBankTransferEvidenceForm()) {
 			toast.add({
 				title: 'Missing transfer evidence',
@@ -3212,33 +3258,45 @@ const handleCheckout = async () => {
 
 		const paymentMethodId = isBookingFree.value ? -1 : (selectedPaymentMethodId.value as number)
 
-		const response = await checkoutMutation.mutateAsync(
-			isBankTransferEvidenceRequiredImmediately.value
-				? {
-					body: buildCheckoutMultipartPayload({
-						bookingIntentId: store.bookingIntentId,
-						paymentMethodId,
-						attendees: store.attendees,
-						bankTransferEvidence: {
-							transfer_id: bankTransferEvidence.transfer_id.trim() || generateBankTransferEvidenceReference(),
-							evidence_file: bankTransferEvidence.evidence_file as File,
-							payer_name: bankTransferEvidence.payer_name.trim(),
-							payer_account_last4: bankTransferEvidence.payer_account_last4.trim(),
-							amount_on_evidence: bankTransferEvidence.amount_on_evidence.trim(),
-						},
-					}),
-					idempotencyKey: idempotencyKey.value,
-				}
-				: {
-					body: buildCheckoutPayload({
-						bookingIntentId: store.bookingIntentId,
-						paymentMethodId,
-						attendees: store.attendees,
-					}),
-					idempotencyKey: idempotencyKey.value,
-				}
-		)
+		let bankTransferEvidenceId: string | undefined
+		if (isBankTransferEvidenceRequiredImmediately.value) {
+			bankTransferEvidenceId = await uploadBankTransferEvidenceForCheckout()
+		}
+
+		const response = await checkoutMutation.mutateAsync({
+			body: buildCheckoutPayload({
+				bookingIntentId: store.bookingIntentId,
+				paymentMethodId,
+				attendees: store.attendees,
+				bankTransferEvidenceId,
+			}),
+			idempotencyKey: idempotencyKey.value,
+		})
 		checkoutResult.value = ((response as { data?: Record<string, any> }).data || null) as any
+
+		if (isBankTransferMethod.value && !checkoutResult.value?.bank_transfer_reference) {
+			const paymentId = Number(checkoutResult.value?.payment_id || 0)
+			if (paymentId > 0) {
+				try {
+					const paymentResponse = await paymentsListRetrieve({ path: { payment_id: String(paymentId) } })
+					const paymentData = paymentResponse.data as Record<string, unknown> | undefined
+					const fetchedReference = typeof paymentData?.bank_transfer_reference === 'string'
+						? paymentData.bank_transfer_reference
+						: null
+					const fetchedInstructions = typeof paymentData?.bank_transfer_instructions === 'string'
+						? paymentData.bank_transfer_instructions
+						: null
+
+					checkoutResult.value = {
+						...checkoutResult.value,
+						bank_transfer_reference: fetchedReference || checkoutResult.value?.bank_transfer_reference || null,
+						bank_transfer_instructions: fetchedInstructions || checkoutResult.value?.bank_transfer_instructions || null,
+					}
+				} catch (paymentLookupError) {
+					console.warn('Unable to hydrate bank transfer reference from payment details', paymentLookupError)
+				}
+			}
+		}
 
 		if (isStripeMethod.value) {
 			stripeClientSecret.value = checkoutResult.value?.stripe_client_secret || null
@@ -3296,11 +3354,21 @@ const handleCheckout = async () => {
 
 		checkoutCompleted.value = true
 		showCheckoutSuccessModal.value = true
-		toast.add({ title: 'Success', description: 'Registration completed.', color: 'green' })
+		if (isBankTransferMethod.value) {
+			const description = checkoutBankTransferReference.value
+				? `Registration completed. Use reference ${checkoutBankTransferReference.value} for your transfer.`
+				: 'Registration completed. Your transfer reference will appear in payment details shortly.'
+			toast.add({ title: 'Registration submitted', description, color: 'green' })
+		} else {
+			toast.add({ title: 'Success', description: 'Registration completed.', color: 'green' })
+		}
 	} catch (error) {
 		console.error('Checkout failed', error)
 		idempotencyKey.value = createIdempotencyKey()
 		let description = 'Checkout failed. Please try again.'
+		if (error instanceof Error && error.message) {
+			description = error.message
+		}
 		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
 		if (typeof payload === 'string' && payload) {
 			description = payload
