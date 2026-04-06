@@ -134,11 +134,13 @@ export const buildCheckoutPayload = (params: {
   bookingIntentId: string
   paymentMethodId: number
   attendees: AttendeeDraft[]
+  paymentId?: string
   stripePaymentIntentId?: string
   bankTransferEvidenceId?: string
-}): CheckoutRequest & { bank_transfer_evidence_id?: string } => ({
+}): CheckoutRequest => ({
   booking_intent_id: params.bookingIntentId,
   payment_method_id: params.paymentMethodId,
+  payment_id: params.paymentId,
   stripe_payment_intent_id: params.stripePaymentIntentId,
   bank_transfer_evidence_id: params.bankTransferEvidenceId,
   attendees: params.attendees.map(buildAttendeeCheckout),

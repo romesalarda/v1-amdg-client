@@ -1083,9 +1083,18 @@
 										</p>
 									</div>
 
+									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
+										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Reserved transfer reference</p>
+										<p v-if="reservedBankTransferLoading" class="mt-1 text-sm font-semibold text-blue-900">Reserving your reference...</p>
+										<p v-else-if="reservedBankTransferReference" class="mt-1 text-lg font-black tracking-[0.16em] text-blue-900">{{ reservedBankTransferReference }}</p>
+										<p v-else class="mt-1 text-sm text-blue-900">Select bank transfer to reserve your reference before checkout.</p>
+										<p v-if="reservedBankTransferError" class="mt-2 text-xs font-semibold text-red-600">{{ reservedBankTransferError }}</p>
+										<p v-else-if="reservedBankTransferPaymentReference" class="mt-2 text-[11px] text-blue-700">Draft payment {{ reservedBankTransferPaymentReference }} is reserved for this checkout.</p>
+									</div>
+
 									<div v-if="isBankTransferEvidenceRequiredImmediately" class="rounded-lg border border-amber-200 bg-white p-3 sm:col-span-2 space-y-3">
 										<p class="text-xs font-semibold text-slate-800">Upload transfer evidence</p>
-										<p class="text-[11px] text-slate-500">Transfer reference is generated automatically after checkout submission.</p>
+										<p class="text-[11px] text-slate-500">Your transfer reference is already reserved above so you can include it before checkout.</p>
 										<div class="grid gap-3 sm:grid-cols-2">
 											<div class="sm:col-span-2">
 												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Evidence file <span class="text-red-600">*</span></label>
@@ -1478,6 +1487,7 @@ const reminderLocation = computed(() => {
 
 const bookingIntentMutation = useCreateBookingIntent()
 const pingBookingIntentMutation = usePingBookingIntent()
+const requestFetch = useRequestFetch()
 const isCreatingIntent = ref(false)
 const showIntentExpiredModal = ref(false)
 const intentExpiresAtMs = ref<number | null>(null)
@@ -2154,6 +2164,87 @@ const isBankTransferEvidenceRequiredImmediately = computed(
 	() => isBankTransferMethod.value && !!selectedPaymentMethod.value?.bank_transfer_required_immediately
 )
 
+const reservedBankTransferPaymentId = ref('')
+const reservedBankTransferPaymentReference = ref('')
+const reservedBankTransferReference = ref('')
+const reservedBankTransferIntentId = ref('')
+const reservedBankTransferMethodId = ref<number | null>(null)
+const reservedBankTransferLoading = ref(false)
+const reservedBankTransferError = ref('')
+
+const clearReservedBankTransferPayment = () => {
+	reservedBankTransferPaymentId.value = ''
+	reservedBankTransferPaymentReference.value = ''
+	reservedBankTransferReference.value = ''
+	reservedBankTransferIntentId.value = ''
+	reservedBankTransferMethodId.value = null
+	reservedBankTransferError.value = ''
+}
+
+const reserveBankTransferPayment = async () => {
+	if (!isBankTransferMethod.value || !store.bookingIntentId || !selectedPaymentMethodId.value) {
+		return
+	}
+
+	if (
+		reservedBankTransferIntentId.value === store.bookingIntentId &&
+		reservedBankTransferMethodId.value === selectedPaymentMethodId.value &&
+		reservedBankTransferReference.value
+	) {
+		return
+	}
+
+	reservedBankTransferLoading.value = true
+	reservedBankTransferError.value = ''
+
+	try {
+		const response = await requestFetch('/api/bookings/list/reserve-bank-transfer-payment/', {
+			method: 'POST',
+			body: {
+				booking_intent_id: store.bookingIntentId,
+				payment_method_id: selectedPaymentMethodId.value,
+			},
+		}) as Record<string, unknown>
+
+		const paymentId = typeof response.payment_id === 'string' ? response.payment_id : ''
+		const paymentReference = typeof response.payment_reference === 'string' ? response.payment_reference : ''
+		const bankTransferReference = typeof response.bank_transfer_reference === 'string' ? response.bank_transfer_reference : ''
+
+		if (!paymentId || !paymentReference || !bankTransferReference) {
+			throw new Error('Reservation response was incomplete.')
+		}
+
+		reservedBankTransferPaymentId.value = paymentId
+		reservedBankTransferPaymentReference.value = paymentReference
+		reservedBankTransferReference.value = bankTransferReference
+		reservedBankTransferIntentId.value = store.bookingIntentId
+		reservedBankTransferMethodId.value = selectedPaymentMethodId.value
+	} catch (error) {
+		reservedBankTransferError.value = 'Unable to reserve your bank transfer reference right now.'
+		console.error('Failed to reserve bank transfer payment', error)
+	} finally {
+		reservedBankTransferLoading.value = false
+	}
+}
+
+watch(
+	[() => store.bookingIntentId, () => selectedPaymentMethodId.value],
+	() => {
+		if (!isBankTransferMethod.value) {
+			clearReservedBankTransferPayment()
+			return
+		}
+
+		if (!store.bookingIntentId || !selectedPaymentMethodId.value) {
+			clearReservedBankTransferPayment()
+			return
+		}
+
+		void reserveBankTransferPayment()
+	},
+	{ immediate: true }
+)
+
 const asTrimmedString = (value: unknown) => String(value ?? '').trim()
 
 const bankTransferEvidence = reactive({
@@ -2704,7 +2795,10 @@ const canContinue = computed(() => {
 			return stripeCardReady.value && !stripeCardError.value
 		}
 		if (isBankTransferEvidenceRequiredImmediately.value) {
-			return isBankTransferEvidenceFormReady.value
+			return isBankTransferEvidenceFormReady.value && !!reservedBankTransferReference.value && !reservedBankTransferLoading.value
+		}
+		if (isBankTransferMethod.value) {
+			return !!reservedBankTransferReference.value && !reservedBankTransferLoading.value
 		}
 		return true
 	}
@@ -2752,6 +2846,9 @@ const getCannotContinueMessage = () => {
 		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
 		if (isBankTransferEvidenceRequiredImmediately.value && !isBankTransferEvidenceFormReady.value) {
 			return 'Evidence file, payer details, and amount are required for this bank transfer method.'
+		}
+		if (isBankTransferMethod.value && !reservedBankTransferReference.value) {
+			return reservedBankTransferError.value || 'Please wait for your bank transfer reference to be reserved.'
 		}
 		if (!isBookingFree.value && !selectedPaymentMethodId.value) return 'Please choose a payment method.'
 		return 'Some attendees are missing required information.'
@@ -3256,6 +3353,19 @@ const handleCheckout = async () => {
 			return
 		}
 
+		if (isBankTransferMethod.value && !reservedBankTransferReference.value) {
+			await reserveBankTransferPayment()
+		}
+
+		if (isBankTransferMethod.value && !reservedBankTransferReference.value) {
+			toast.add({
+				title: 'Missing transfer reference',
+				description: reservedBankTransferError.value || 'Please reserve the bank transfer reference before checkout.',
+				color: 'red',
+			})
+			return
+		}
+
 		const paymentMethodId = isBookingFree.value ? -1 : (selectedPaymentMethodId.value as number)
 
 		let bankTransferEvidenceId: string | undefined
@@ -3263,11 +3373,14 @@ const handleCheckout = async () => {
 			bankTransferEvidenceId = await uploadBankTransferEvidenceForCheckout()
 		}
 
+		const bankTransferPaymentId = reservedBankTransferPaymentId.value || undefined
+
 		const response = await checkoutMutation.mutateAsync({
 			body: buildCheckoutPayload({
 				bookingIntentId: store.bookingIntentId,
 				paymentMethodId,
 				attendees: store.attendees,
+				paymentId: bankTransferPaymentId,
 				bankTransferEvidenceId,
 			}),
 			idempotencyKey: idempotencyKey.value,
@@ -3359,6 +3472,7 @@ const handleCheckout = async () => {
 				? `Registration completed. Use reference ${checkoutBankTransferReference.value} for your transfer.`
 				: 'Registration completed. Your transfer reference will appear in payment details shortly.'
 			toast.add({ title: 'Registration submitted', description, color: 'green' })
+			clearReservedBankTransferPayment()
 		} else {
 			toast.add({ title: 'Success', description: 'Registration completed.', color: 'green' })
 		}

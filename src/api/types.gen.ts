@@ -2482,9 +2482,17 @@ export type CheckoutRequest = {
      */
     payment_method_id: number;
     /**
+     * Optional draft payment ID reserved before checkout for bank transfer flows
+     */
+    payment_id?: string | null;
+    /**
      * Stripe PaymentIntent ID when payment is already confirmed (Stripe only)
      */
     stripe_payment_intent_id?: string;
+    /**
+     * Pre-uploaded bank transfer evidence ID bound to this booking intent
+     */
+    bank_transfer_evidence_id?: string | null;
     /**
      * List of attendee selections with packages and products
      */
@@ -26961,6 +26969,57 @@ export type BookingsListPingIntentRetrieveResponses = {
 };
 
 export type BookingsListPingIntentRetrieveResponse = BookingsListPingIntentRetrieveResponses[keyof BookingsListPingIntentRetrieveResponses];
+
+export type BookingsReserveBankTransferPaymentData = {
+    body?: {
+        booking_intent_id: string;
+        payment_method_id: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/reserve-bank-transfer-payment/';
+};
+
+export type BookingsReserveBankTransferPaymentErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+};
+
+export type BookingsReserveBankTransferPaymentResponses = {
+    /**
+     * Draft bank transfer payment reserved.
+     */
+    201: unknown;
+};
+
+export type BookingsUploadBankTransferEvidenceData = {
+    body?: {
+        booking_intent_id: string;
+        evidence_file: Blob | File;
+        payer_name: string;
+        payer_account_last4: string;
+        amount_on_evidence: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/upload-bank-transfer-evidence/';
+};
+
+export type BookingsUploadBankTransferEvidenceErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+};
+
+export type BookingsUploadBankTransferEvidenceResponses = {
+    /**
+     * Evidence uploaded and bound to intent.
+     */
+    201: unknown;
+};
 
 export type BookingsPackagesListData = {
     body?: never;
