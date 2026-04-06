@@ -405,7 +405,6 @@
 														@click="
 															store.setAreaFrom(store.currentIndex, option.value, option.label);
 															areaSearch = option.label;
-															toast.add({ title: 'Area locked', description: `${option.label} has been set for this attendee.`, color: 'green' })
 														"
 													>
 														{{ option.label }}
@@ -1301,12 +1300,12 @@
 				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
 					{{ event?.title || 'this event' }}
 				</p>
-				<div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
+				<!-- <div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
 					<p class="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Bank transfer reference</p>
 					<p class="mt-1 text-2xl font-black tracking-[0.12em] text-amber-900">{{ checkoutBankTransferReference }}</p>
 					<p class="mt-2 text-xs text-amber-800">Use this exact reference when making the transfer so your payment can be matched quickly.</p>
 					<p v-if="checkoutBankTransferInstructions" class="mt-2 text-xs text-amber-800">{{ checkoutBankTransferInstructions }}</p>
-				</div>
+				</div> -->
 			</div>
 
 			<div class="flex justify-center success-cta-wrap">

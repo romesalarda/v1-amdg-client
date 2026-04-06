@@ -185,15 +185,86 @@
                             <div
                               v-for="payment in outstandingPayments"
                               :key="payment.payment_id || payment.payment_reference"
-                              class="rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse"
+                              :class="paymentAttentionCardClass(payment)"
                             >
                               <div class="flex items-center justify-between gap-2">
                                 <p class="text-xs font-black text-amber-900">{{ payment.payment_reference || 'Pending payment' }}</p>
-                                <span class="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700">
-                                  {{ payment.status || 'PENDING' }}
+                                <span :class="paymentAttentionLabelClass(payment)">
+                                  {{ paymentAttentionLabel(payment) }}
                                 </span>
                               </div>
                               <p class="mt-1 text-[11px] text-deep-navy/75">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+
+                              <p
+                                v-if="isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || ''))"
+                                class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800"
+                              >
+                                Evidence has been uploaded and is pending admin verification.
+                              </p>
+
+                              <div
+                                v-if="isOutstandingBankTransfer(payment) && needsEvidenceUpload(payment)"
+                                class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2"
+                              >
+                                <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
+                                <div>
+                                  <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
+                                  <input
+                                    type="file"
+                                    accept=".pdf,.jpg,.jpeg,.png"
+                                    class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                                    @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)"
+                                  >
+                                </div>
+                                <div class="grid sm:grid-cols-2 gap-2">
+                                  <div>
+                                    <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
+                                    <input
+                                      v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_name"
+                                      type="text"
+                                      class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                                      placeholder="Full name"
+                                    >
+                                  </div>
+                                  <div>
+                                    <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
+                                    <input
+                                      v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4"
+                                      type="text"
+                                      maxlength="4"
+                                      class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                                      placeholder="1234"
+                                    >
+                                  </div>
+                                </div>
+                                <div>
+                                  <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
+                                  <input
+                                    v-model="evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
+                                    class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                                    placeholder="0.00"
+                                  >
+                                </div>
+                                <p v-if="evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">
+                                  {{ evidenceUploadError[String(payment.payment_id || '')] }}
+                                </p>
+                                <p v-if="evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">
+                                  {{ evidenceUploadSuccess[String(payment.payment_id || '')] }}
+                                </p>
+                                <div class="flex justify-end">
+                                  <button
+                                    type="button"
+                                    class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60"
+                                    :disabled="!!evidenceUploadPending[String(payment.payment_id || '')]"
+                                    @click="uploadOutstandingEvidence(payment)"
+                                  >
+                                    {{ evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                                  </button>
+                                </div>
+                              </div>
 
                               <div v-if="isOutstandingBankTransfer(payment)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
                                 <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
@@ -462,13 +533,15 @@
                   <div
                     v-for="payment in outstandingPayments"
                     :key="payment.payment_id || payment.payment_reference"
-                    class="rounded-lg border border-amber-300 bg-white p-3 outstanding-attention-pulse"
+                    :class="paymentAttentionCardClass(payment)"
                   >
                     <div class="flex items-center justify-between gap-3">
                       <div>
                         <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
                         <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
-                        <p class="text-xs text-amber-700">{{ payment.status || 'PENDING' }}</p>
+                        <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : (isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || '')) ? 'text-blue-700' : 'text-amber-700')">
+                          {{ paymentAttentionLabel(payment) }}
+                        </p>
                         <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
                       </div>
                       <button
@@ -478,6 +551,77 @@
                       >
                         {{ isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
                       </button>
+                    </div>
+
+                    <p
+                      v-if="isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || ''))"
+                      class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800"
+                    >
+                      Evidence uploaded. Waiting for verification.
+                    </p>
+
+                    <div
+                      v-if="isOutstandingBankTransfer(payment) && needsEvidenceUpload(payment)"
+                      class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2"
+                    >
+                      <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
+                      <div>
+                        <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
+                        <input
+                          type="file"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                          @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)"
+                        >
+                      </div>
+                      <div class="grid sm:grid-cols-2 gap-2">
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
+                          <input
+                            v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_name"
+                            type="text"
+                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                            placeholder="Full name"
+                          >
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
+                          <input
+                            v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4"
+                            type="text"
+                            maxlength="4"
+                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                            placeholder="1234"
+                          >
+                        </div>
+                      </div>
+                      <div>
+                        <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
+                        <input
+                          v-model="evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                          placeholder="0.00"
+                        >
+                      </div>
+                      <p v-if="evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">
+                        {{ evidenceUploadError[String(payment.payment_id || '')] }}
+                      </p>
+                      <p v-if="evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">
+                        {{ evidenceUploadSuccess[String(payment.payment_id || '')] }}
+                      </p>
+                      <div class="flex justify-end">
+                        <button
+                          type="button"
+                          class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60"
+                          :disabled="!!evidenceUploadPending[String(payment.payment_id || '')]"
+                          @click="uploadOutstandingEvidence(payment)"
+                        >
+                          {{ evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                        </button>
+                      </div>
                     </div>
 
                     <div v-if="isPaymentExpanded(payment.payment_id || '')" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3 text-xs text-deep-navy/80 space-y-2">
@@ -940,11 +1084,78 @@
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
               <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
-                <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" class="rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse">
+                <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" :class="paymentAttentionCardClass(item)">
                   <p class="text-xs font-black text-amber-900">{{ item.payment_reference || 'Payment' }}</p>
                   <p class="text-lg font-black text-deep-navy">{{ item.amount || '-' }}</p>
-                  <p class="text-xs text-amber-700">{{ item.status || 'PENDING' }}</p>
+                  <p class="text-xs" :class="needsEvidenceUpload(item) ? 'text-red-700' : (isOutstandingBankTransfer(item) && hasUploadedEvidence(String(item.payment_id || '')) ? 'text-blue-700' : 'text-amber-700')">
+                    {{ paymentAttentionLabel(item) }}
+                  </p>
                   <p class="text-[11px] text-deep-navy/75 mt-1">{{ item.method_title || item.method_type || 'Method unavailable' }}</p>
+
+                  <p
+                    v-if="isOutstandingBankTransfer(item) && hasUploadedEvidence(String(item.payment_id || ''))"
+                    class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800"
+                  >
+                    Evidence uploaded. Pending verification.
+                  </p>
+
+                  <div
+                    v-if="isOutstandingBankTransfer(item) && needsEvidenceUpload(item)"
+                    class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2"
+                  >
+                    <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
+                    <div>
+                      <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                        @change="onEvidenceUploadFileChange(String(item.payment_id || ''), $event)"
+                      >
+                    </div>
+                    <div class="grid grid-cols-1 gap-2">
+                      <input
+                        v-model="evidenceUploadForm[String(item.payment_id || '')].payer_name"
+                        type="text"
+                        class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                        placeholder="Payer name"
+                      >
+                      <div class="grid grid-cols-2 gap-2">
+                        <input
+                          v-model="evidenceUploadForm[String(item.payment_id || '')].payer_account_last4"
+                          type="text"
+                          maxlength="4"
+                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                          placeholder="Last 4"
+                        >
+                        <input
+                          v-model="evidenceUploadForm[String(item.payment_id || '')].amount_on_evidence"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
+                          placeholder="Amount"
+                        >
+                      </div>
+                    </div>
+                    <p v-if="evidenceUploadError[String(item.payment_id || '')]" class="text-xs font-semibold text-red-700">
+                      {{ evidenceUploadError[String(item.payment_id || '')] }}
+                    </p>
+                    <p v-if="evidenceUploadSuccess[String(item.payment_id || '')]" class="text-xs font-semibold text-blue-700">
+                      {{ evidenceUploadSuccess[String(item.payment_id || '')] }}
+                    </p>
+                    <div class="flex justify-end">
+                      <button
+                        type="button"
+                        class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60"
+                        :disabled="!!evidenceUploadPending[String(item.payment_id || '')]"
+                        @click="uploadOutstandingEvidence(item)"
+                      >
+                        {{ evidenceUploadPending[String(item.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                      </button>
+                    </div>
+                  </div>
+
                   <div v-if="isOutstandingBankTransfer(item)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
                     <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
                     <ol class="space-y-2">
@@ -1035,6 +1246,7 @@
 import { onMounted, onUnmounted, ref, watch, watchEffect, computed } from 'vue'
 import { useQueryClient } from '@tanstack/vue-query'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { uploadMultipart } from '~/utils/upload'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import {
@@ -1490,6 +1702,157 @@ const attendeeOrderList = computed(() => {
 const expandedPaymentIds = ref<string[]>([])
 const paymentDetailLoading = ref<Record<string, boolean>>({})
 const paymentDetails = ref<Record<string, any>>({})
+const evidenceUploadPending = ref<Record<string, boolean>>({})
+const evidenceUploadError = ref<Record<string, string>>({})
+const evidenceUploadSuccess = ref<Record<string, string>>({})
+const evidenceUploadFormVisible = ref<Record<string, boolean>>({})
+const evidenceUploadForm = ref<Record<string, {
+  evidence_file: File | null
+  payer_name: string
+  payer_account_last4: string
+  amount_on_evidence: string
+}>>({})
+
+function ensureEvidenceForm(paymentId: string) {
+  if (!paymentId) return
+  if (!evidenceUploadForm.value[paymentId]) {
+    evidenceUploadForm.value[paymentId] = {
+      evidence_file: null,
+      payer_name: '',
+      payer_account_last4: '',
+      amount_on_evidence: '',
+    }
+  }
+}
+
+function hasUploadedEvidence(paymentId: string): boolean {
+  return !!paymentDetails.value[paymentId]?.bank_transfer_evidence?.bank_transfer_id
+}
+
+function needsEvidenceUpload(payment: any): boolean {
+  const paymentId = String(payment?.payment_id || '')
+  if (!paymentId || !isOutstandingBankTransfer(payment)) return false
+  return !hasUploadedEvidence(paymentId)
+}
+
+function paymentAttentionCardClass(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'rounded-lg border border-red-300 bg-red-50 p-3 outstanding-attention-pulse'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-lg border border-blue-300 bg-blue-50 p-3'
+  return 'rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse'
+}
+
+function paymentAttentionLabel(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'Evidence required'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'Pending review'
+  return String(payment?.status || 'PENDING')
+}
+
+function paymentAttentionLabelClass(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-red-700'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700'
+  return 'rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700'
+}
+
+function toggleEvidenceUploadForm(paymentId: string) {
+  if (!paymentId) return
+  ensureEvidenceForm(paymentId)
+  evidenceUploadFormVisible.value[paymentId] = !evidenceUploadFormVisible.value[paymentId]
+}
+
+function onEvidenceUploadFileChange(paymentId: string, event: Event) {
+  ensureEvidenceForm(paymentId)
+  const input = event.target as HTMLInputElement
+  evidenceUploadForm.value[paymentId].evidence_file = input.files?.[0] || null
+  evidenceUploadError.value[paymentId] = ''
+}
+
+async function uploadOutstandingEvidence(payment: any) {
+  const paymentId = String(payment?.payment_id || '')
+  if (!paymentId) return
+
+  ensureEvidenceForm(paymentId)
+  evidenceUploadError.value[paymentId] = ''
+  evidenceUploadSuccess.value[paymentId] = ''
+
+  const form = evidenceUploadForm.value[paymentId]
+  if (!form.evidence_file) {
+    evidenceUploadError.value[paymentId] = 'Evidence file is required.'
+    return
+  }
+
+  const payerName = String(form.payer_name || '').trim()
+  const payerLast4 = String(form.payer_account_last4 || '').trim()
+  const amountOnEvidence = String(form.amount_on_evidence || '').trim()
+
+  if (!payerName) {
+    evidenceUploadError.value[paymentId] = 'Payer name is required.'
+    return
+  }
+  if (!/^\d{4}$/.test(payerLast4)) {
+    evidenceUploadError.value[paymentId] = 'Payer account last 4 must be exactly 4 digits.'
+    return
+  }
+  if (!amountOnEvidence || Number(amountOnEvidence) <= 0) {
+    evidenceUploadError.value[paymentId] = 'Amount on evidence must be greater than zero.'
+    return
+  }
+
+  if (!paymentDetails.value[paymentId]?.id) {
+    await fetchPaymentDetails(paymentId)
+  }
+
+  const paymentDbId = paymentDetails.value[paymentId]?.id
+  if (!paymentDbId) {
+    evidenceUploadError.value[paymentId] = 'Unable to resolve payment details for evidence upload.'
+    return
+  }
+
+  const transferRef = getRequiredTransferReference(payment) || `BT-${paymentId.slice(0, 8)}-${Date.now()}`
+  const formData = new FormData()
+  formData.append('transfer_id', transferRef)
+  formData.append('evidence_file', form.evidence_file)
+  formData.append('payment', String(paymentDbId))
+  formData.append('payer_name', payerName)
+  formData.append('payer_account_last4', payerLast4)
+  formData.append('amount_on_evidence', amountOnEvidence)
+
+  evidenceUploadPending.value[paymentId] = true
+  try {
+    await uploadMultipart('/api/payments/bank-transfer-evidence/', formData, { method: 'POST' })
+    evidenceUploadSuccess.value[paymentId] = 'Evidence uploaded. Awaiting verification.'
+    evidenceUploadFormVisible.value[paymentId] = false
+    evidenceUploadForm.value[paymentId] = {
+      evidence_file: null,
+      payer_name: '',
+      payer_account_last4: '',
+      amount_on_evidence: '',
+    }
+    await fetchPaymentDetails(paymentId)
+    await paymentSummary.refetch()
+    $notyf?.success('Evidence uploaded. Payment is now pending review.')
+  } catch (error) {
+    const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
+    if (typeof payload === 'string' && payload) {
+      evidenceUploadError.value[paymentId] = payload
+    } else if (payload && typeof payload === 'object') {
+      const firstValue = Object.values(payload)[0] as any
+      if (Array.isArray(firstValue) && firstValue[0]) {
+        evidenceUploadError.value[paymentId] = String(firstValue[0])
+      } else if (typeof firstValue === 'string') {
+        evidenceUploadError.value[paymentId] = firstValue
+      } else {
+        evidenceUploadError.value[paymentId] = 'Could not upload evidence.'
+      }
+    } else {
+      evidenceUploadError.value[paymentId] = 'Could not upload evidence.'
+    }
+  } finally {
+    evidenceUploadPending.value[paymentId] = false
+  }
+}
 
 function isPaymentExpanded(paymentId: string): boolean {
   if (!paymentId) return false
@@ -1510,6 +1873,21 @@ async function fetchPaymentDetails(paymentId: string) {
     paymentDetailLoading.value[paymentId] = false
   }
 }
+
+watch(
+  outstandingPayments,
+  (payments) => {
+    payments.forEach((payment: any) => {
+      const paymentId = String(payment?.payment_id || '')
+      if (!paymentId || !isOutstandingBankTransfer(payment)) return
+      ensureEvidenceForm(paymentId)
+      if (!paymentDetails.value[paymentId] && !paymentDetailLoading.value[paymentId]) {
+        void fetchPaymentDetails(paymentId)
+      }
+    })
+  },
+  { immediate: true }
+)
 
 async function togglePaymentExpand(payment: any) {
   const paymentId = String(payment?.payment_id || '')

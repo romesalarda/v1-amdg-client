@@ -166,6 +166,35 @@
                     View uploaded file
                   </a>
                 </div>
+
+                <div v-if="bankTransferEvidence?.evidence_file" class="mt-3 rounded-lg border border-gray-200 bg-white">
+                  <button
+                    type="button"
+                    class="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                    @click="showEvidencePreview = !showEvidencePreview"
+                  >
+                    <span>{{ showEvidencePreview ? 'Hide evidence preview' : 'Show evidence preview' }}</span>
+                    <span class="material-symbols-outlined text-base">{{ showEvidencePreview ? 'expand_less' : 'expand_more' }}</span>
+                  </button>
+
+                  <div v-if="showEvidencePreview" class="border-t border-gray-200 p-3">
+                    <img
+                      v-if="isEvidenceImage"
+                      :src="bankTransferEvidence.evidence_file"
+                      alt="Bank transfer evidence"
+                      class="max-h-96 w-full rounded-md border border-gray-200 object-contain bg-gray-50"
+                    >
+                    <iframe
+                      v-else-if="isEvidencePdf"
+                      :src="bankTransferEvidence.evidence_file"
+                      class="h-96 w-full rounded-md border border-gray-200"
+                      title="Bank transfer evidence preview"
+                    />
+                    <div v-else class="text-xs text-gray-600">
+                      Preview is not available for this file type. Use the link above to open it.
+                    </div>
+                  </div>
+                </div>
               </div>
               <div v-if="paymentData.status === 'PENDING'" class="mt-3 pt-3 border-t border-amber-200">
                 <p class="text-xs text-amber-800 mb-2">
@@ -192,26 +221,6 @@
               </div>
 
               <div v-if="showEvidenceUploadForm" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div class="sm:col-span-2">
-                  <div class="mb-1 flex items-center justify-between gap-2">
-                    <label class="block text-xs font-semibold text-gray-700">Transfer ID <span class="text-red-600">*</span></label>
-                    <button
-                      type="button"
-                      class="text-[11px] font-semibold text-amber-700 hover:text-amber-800"
-                      @click="resetEvidenceForm"
-                    >
-                      Regenerate
-                    </button>
-                  </div>
-                  <input
-                    v-model="evidenceForm.transfer_id"
-                    type="text"
-                    readonly
-                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-amber-500 focus:outline-none"
-                    placeholder="Auto-generated"
-                  >
-                  <p class="mt-1 text-[11px] text-gray-500">This is generated automatically for the evidence record and can be regenerated if needed.</p>
-                </div>
                 <div class="sm:col-span-2">
                   <label class="mb-1 block text-xs font-semibold text-gray-700">Evidence file <span class="text-red-600">*</span></label>
                   <input
@@ -609,12 +618,18 @@ const paymentData = computed(() => {
 const isBankTransferPayment = computed(() => paymentData.value?.method?.method_type === 'BANK_TRANSFER')
 const bankTransferEvidence = computed<any>(() => paymentData.value?.bank_transfer_evidence || null)
 const bankTransferEvidenceIsVerified = computed(() => String(bankTransferEvidence.value?.verification_status || '').toLowerCase() === 'verified')
+const bankTransferEvidenceHasOutstandingVerification = computed(() => !!bankTransferEvidence.value && !bankTransferEvidenceIsVerified.value)
 const bankTransferEvidenceStatusLabel = computed(() => {
   const evidence = bankTransferEvidence.value
   if (!evidence) return 'No evidence uploaded'
   const status = String(evidence.verification_status || 'pending').toUpperCase()
   return `Evidence uploaded (${status})`
 })
+
+const evidenceFileUrl = computed(() => String(bankTransferEvidence.value?.evidence_file || '').toLowerCase())
+const isEvidenceImage = computed(() => /\.(png|jpe?g|gif|webp)(\?|$)/.test(evidenceFileUrl.value))
+const isEvidencePdf = computed(() => /\.pdf(\?|$)/.test(evidenceFileUrl.value))
+const showEvidencePreview = ref(false)
 
 const evidenceUploadPending = ref(false)
 const evidenceVerifyPending = ref(false)
@@ -654,10 +669,12 @@ watch(
   (bankTransferId) => {
     if (bankTransferId) {
       showEvidenceUploadForm.value = false
+      showEvidencePreview.value = bankTransferEvidenceHasOutstandingVerification.value
       return
     }
 
     showEvidenceUploadForm.value = true
+    showEvidencePreview.value = false
     if (!evidenceForm.transfer_id) {
       evidenceForm.transfer_id = generateBankTransferTransferId()
     }
