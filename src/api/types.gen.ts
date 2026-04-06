@@ -779,9 +779,9 @@ export type AttendeeDraftRequest = {
      */
     relationship_to_user: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
     /**
-     * ID of AreaLocation (active areas only)
+     * Optional ID of AreaLocation (active areas only)
      */
-    area_from: number;
+    area_from?: number | null;
     /**
      * Personal information (medical, dietary, accessibility, emergency contact)
      */
@@ -1383,6 +1383,157 @@ export type AvailabilityWindowTemplate = {
     readonly windows_count: number;
     readonly created_at: string;
     readonly updated_at: string;
+};
+
+/**
+ * Create serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceCreate = {
+    transfer_id: string;
+    evidence_file: string;
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    amount_on_evidence?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+};
+
+/**
+ * Create serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceCreateRequest = {
+    transfer_id: string;
+    evidence_file: Blob | File;
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    amount_on_evidence?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+};
+
+/**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetail = {
+    readonly bank_transfer_id: string;
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    readonly payment_reference: string | null;
+    readonly payer_name: string | null;
+    readonly payer_account_last4: string | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly uploaded_at: string;
+    readonly auto_expiry_date: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        payment?: string;
+    };
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetailRequest = {
+    transfer_id: string;
+    evidence_file: Blob | File;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceList = {
+    readonly bank_transfer_id: string;
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    readonly payment_reference: string | null;
+    readonly payer_name: string | null;
+    readonly payer_account_last4: string | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly uploaded_at: string;
+    readonly auto_expiry_date: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        payment?: string;
+    };
+};
+
+/**
+ * Update serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceUpdate = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceUpdateRequest = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -2327,9 +2478,9 @@ export type CheckoutRequest = {
      */
     booking_intent_id: string;
     /**
-     * Optional payment method ID. Required for paid checkouts; omitted for free checkouts.
+     * Payment method ID for checkout.
      */
-    payment_method_id?: number | null;
+    payment_method_id: number;
     /**
      * Stripe PaymentIntent ID when payment is already confirmed (Stripe only)
      */
@@ -3848,6 +3999,195 @@ export type CreatePaymentIntentRequest = {
      * Optional: Specific PaymentMethod to use (must be Stripe type)
      */
     payment_method_id?: number | null;
+};
+
+/**
+ * Create serializer for CreditExpense.
+ */
+export type CreditExpenseCreate = {
+    event?: number | null;
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Create serializer for CreditExpense.
+ */
+export type CreditExpenseCreateRequest = {
+    event?: number | null;
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Detailed serializer for CreditExpense.
+ */
+export type CreditExpenseDetail = {
+    readonly credit_id: string;
+    amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly target: string;
+    readonly target_type: string | null;
+    readonly target_type_name: string | null;
+    readonly target_id: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for CreditExpense with read-only generic target details.
+ */
+export type CreditExpenseList = {
+    readonly credit_id: string;
+    amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly target: string;
+    readonly target_type: string | null;
+    readonly target_type_name: string | null;
+    readonly target_id: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+};
+
+/**
+ * Update serializer for CreditExpense.
+ */
+export type CreditExpenseUpdate = {
+    description: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for CreditExpense.
+ */
+export type CreditExpenseUpdateRequest = {
+    description: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -10892,6 +11232,13 @@ export type PaginatedAvailabilityWindowTemplateList = {
     results: Array<AvailabilityWindowTemplate>;
 };
 
+export type PaginatedBankTransferEvidenceListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BankTransferEvidenceList>;
+};
+
 export type PaginatedBookingIntentListList = {
     count: number;
     next?: string | null;
@@ -10953,6 +11300,13 @@ export type PaginatedCountryLocationListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<CountryLocationList>;
+};
+
+export type PaginatedCreditExpenseListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<CreditExpenseList>;
 };
 
 export type PaginatedDietaryRequirementList = {
@@ -11674,6 +12028,23 @@ export type PatchedAvailabilityWindowTemplateRequest = {
 };
 
 /**
+ * Update serializer for bank transfer evidence.
+ */
+export type PatchedBankTransferEvidenceUpdateRequest = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Update serializer for BookingIntent (limited fields).
  */
 export type PatchedBookingIntentUpdateRequest = {
@@ -12057,6 +12428,22 @@ export type PatchedCountryLocationCreateUpdateRequest = {
      * Is-active-country
      */
     active?: boolean;
+};
+
+/**
+ * Update serializer for CreditExpense.
+ */
+export type PatchedCreditExpenseUpdateRequest = {
+    description?: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -13941,6 +14328,10 @@ export type PatchedPaymentMethodCreateUpdateRequest = {
     method_type?: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14327,6 +14718,10 @@ export type PaymentDetail = {
      * Base amount as float for easier frontend handling
      */
     readonly amount_value: number;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
     description?: string | null;
     readonly base_amount_currency: string | null;
     /**
@@ -14351,7 +14746,6 @@ export type PaymentDetail = {
      */
     readonly history_actions: Array<unknown>;
     readonly updated_at: string;
-    target_type?: number | null;
 };
 
 /**
@@ -14456,6 +14850,10 @@ export type PaymentList = {
      * Base amount as float for easier frontend handling
      */
     readonly amount_value: number;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14473,6 +14871,10 @@ export type PaymentMethod = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     readonly event_name: string;
     created_by?: number | null;
@@ -14505,6 +14907,10 @@ export type PaymentMethodCreateUpdate = {
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14522,6 +14928,10 @@ export type PaymentMethodCreateUpdateRequest = {
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14539,6 +14949,10 @@ export type PaymentMethodDetail = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     readonly event_name: string;
     created_by?: number | null;
@@ -14601,6 +15015,12 @@ export type PaymentOverviewStats = {
         [key: string]: unknown;
     };
     revenue: {
+        [key: string]: unknown;
+    };
+    credits?: {
+        [key: string]: unknown;
+    };
+    net_flow?: {
         [key: string]: unknown;
     };
     discounts: {
@@ -18060,6 +18480,46 @@ export type AvailabilityWindowTemplateWritable = {
 };
 
 /**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetailWritable = {
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceListWritable = {
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Create serializer for Booking with validation.
  */
 export type BookingCreateWritable = {
@@ -18950,6 +19410,77 @@ export type CountryLocationListWritable = {
      * Is-active-country
      */
     active?: boolean;
+};
+
+/**
+ * Detailed serializer for CreditExpense.
+ */
+export type CreditExpenseDetailWritable = {
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for CreditExpense with read-only generic target details.
+ */
+export type CreditExpenseListWritable = {
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -21578,6 +22109,13 @@ export type PaginatedAvailabilityWindowTemplateListWritable = {
     results: Array<AvailabilityWindowTemplateWritable>;
 };
 
+export type PaginatedBankTransferEvidenceListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BankTransferEvidenceListWritable>;
+};
+
 export type PaginatedBookingIntentListListWritable = {
     count: number;
     next?: string | null;
@@ -21632,6 +22170,13 @@ export type PaginatedCountryLocationListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<CountryLocationListWritable>;
+};
+
+export type PaginatedCreditExpenseListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<CreditExpenseListWritable>;
 };
 
 export type PaginatedDietaryRequirementListWritable = {
@@ -22281,16 +22826,15 @@ export type PaymentCreateRequestWritable = {
     base_amount_currency?: string;
     description?: string | null;
     /**
-     * Payment target type: booking, order, ticket, donation, sponsorship, or none.
+     * Payment target type: booking, order, ticket, sponsorship, or none.
      *
      * * `booking` - Booking
      * * `order` - Order
      * * `ticket` - Ticket
-     * * `donation` - Donation
      * * `sponsorship` - Sponsorship
      * * `none` - None
      */
-    target?: 'booking' | 'order' | 'ticket' | 'donation' | 'sponsorship' | 'none' | null;
+    target?: 'booking' | 'order' | 'ticket' | 'sponsorship' | 'none' | null;
     /**
      * Target identifier (UUID or numeric ID).
      */
@@ -22325,6 +22869,10 @@ export type PaymentDetailWritable = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
     description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -22334,7 +22882,6 @@ export type PaymentDetailWritable = {
     stripe_charge_id?: string | null;
     bank_transfer_reference?: string | null;
     metadata?: unknown;
-    target_type?: number | null;
 };
 
 /**
@@ -22370,6 +22917,10 @@ export type PaymentListWritable = {
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     base_amount?: string | null;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -22384,6 +22935,10 @@ export type PaymentMethodWritable = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
     provided_details?: unknown;
@@ -22401,6 +22956,10 @@ export type PaymentMethodDetailWritable = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
     provided_details?: unknown;
@@ -22439,6 +22998,12 @@ export type PaymentOverviewStatsWritable = {
         [key: string]: unknown;
     };
     revenue: {
+        [key: string]: unknown;
+    };
+    credits?: {
+        [key: string]: unknown;
+    };
+    net_flow?: {
         [key: string]: unknown;
     };
     discounts: {
@@ -25807,7 +26372,10 @@ export type BookingsIntentsListData = {
          * Filter intents created on or before this datetime
          */
         created_before?: string;
-        event?: number;
+        /**
+         * Filter by event PK, UUID, or URL-safe title
+         */
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26021,7 +26589,7 @@ export type BookingsListListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -26227,7 +26795,7 @@ export type BookingsBookingTicketsListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -26403,7 +26971,7 @@ export type BookingsPackagesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -26591,7 +27159,7 @@ export type BookingsPackageAvailabilityWindowsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -26711,7 +27279,7 @@ export type BookingsPackageProductsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -26962,7 +27530,7 @@ export type BookingsPackageRulesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -27946,7 +28514,7 @@ export type BookingsTicketTypesListData = {
          */
         currently_valid?: boolean;
         /**
-         * Filter by event URL-safe title
+         * Filter by event PK, UUID, or URL-safe title
          */
         event?: string;
         /**
@@ -38384,6 +38952,10 @@ export type OrganisationsMembershipsListData = {
          */
         requires_verification?: boolean;
         /**
+         * A search term.
+         */
+        search?: string;
+        /**
          * Filter by user ID
          */
         user?: number;
@@ -39524,6 +40096,362 @@ export type OrganisationsStatisticsSponsorsOverviewRetrieveResponses = {
 
 export type OrganisationsStatisticsSponsorsOverviewRetrieveResponse = OrganisationsStatisticsSponsorsOverviewRetrieveResponses[keyof OrganisationsStatisticsSponsorsOverviewRetrieveResponses];
 
+export type PaymentsBankTransferEvidenceListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter evidence expiring on or after this date
+         */
+        expiry_after?: string;
+        /**
+         * Filter evidence expiring on or before this date
+         */
+        expiry_before?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by linked payment ID
+         */
+        payment?: number;
+        /**
+         * Filter by linked payment UUID
+         */
+        payment__payment_id?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter evidence uploaded after this timestamp
+         */
+        uploaded_after?: string;
+        /**
+         * Filter evidence uploaded before this timestamp
+         */
+        uploaded_before?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/bank-transfer-evidence/';
+};
+
+export type PaymentsBankTransferEvidenceListResponses = {
+    200: PaginatedBankTransferEvidenceListList;
+};
+
+export type PaymentsBankTransferEvidenceListResponse = PaymentsBankTransferEvidenceListResponses[keyof PaymentsBankTransferEvidenceListResponses];
+
+export type PaymentsBankTransferEvidenceCreateData = {
+    body: BankTransferEvidenceCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/';
+};
+
+export type PaymentsBankTransferEvidenceCreateResponses = {
+    201: BankTransferEvidenceCreate;
+};
+
+export type PaymentsBankTransferEvidenceCreateResponse = PaymentsBankTransferEvidenceCreateResponses[keyof PaymentsBankTransferEvidenceCreateResponses];
+
+export type PaymentsBankTransferEvidenceDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsBankTransferEvidenceDestroyResponse = PaymentsBankTransferEvidenceDestroyResponses[keyof PaymentsBankTransferEvidenceDestroyResponses];
+
+export type PaymentsBankTransferEvidenceRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceRetrieveResponses = {
+    200: BankTransferEvidenceDetail;
+};
+
+export type PaymentsBankTransferEvidenceRetrieveResponse = PaymentsBankTransferEvidenceRetrieveResponses[keyof PaymentsBankTransferEvidenceRetrieveResponses];
+
+export type PaymentsBankTransferEvidencePartialUpdateData = {
+    body?: PatchedBankTransferEvidenceUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidencePartialUpdateResponses = {
+    200: BankTransferEvidenceUpdate;
+};
+
+export type PaymentsBankTransferEvidencePartialUpdateResponse = PaymentsBankTransferEvidencePartialUpdateResponses[keyof PaymentsBankTransferEvidencePartialUpdateResponses];
+
+export type PaymentsBankTransferEvidenceUpdateData = {
+    body?: BankTransferEvidenceUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceUpdateResponses = {
+    200: BankTransferEvidenceUpdate;
+};
+
+export type PaymentsBankTransferEvidenceUpdateResponse = PaymentsBankTransferEvidenceUpdateResponses[keyof PaymentsBankTransferEvidenceUpdateResponses];
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateData = {
+    body: BankTransferEvidenceDetailRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/confirm_payment_match/';
+};
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses = {
+    200: BankTransferEvidenceDetail;
+};
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponse = PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses[keyof PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses];
+
+export type PaymentsCreditsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter credits created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter credits created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by creator user ID
+         */
+        created_by?: number;
+        /**
+         * Filter by creator username
+         */
+        created_by__username?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
+        /**
+         * Filter by expense type
+         *
+         * * `VENUE_COST` - Venue Cost
+         * * `FOOD_COST` - Food Cost
+         * * `CLERGY_COST` - Clergy Cost
+         * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+         * * `LOGISTICS_COST` - Logistics Cost
+         * * `TRANSPORT_COST` - Transport Cost
+         * * `STAFF_COST` - Staff Cost
+         * * `CREATIVES_COST` - Creatives Cost
+         * * `TECHNICAL_COST` - Technical Cost
+         * * `STIPEND` - Stipend
+         * * `OTHER` - Other
+         */
+        expense_type?: Array<'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'CREATIVES_COST' | 'FOOD_COST' | 'LOGISTICS_COST' | 'OTHER' | 'STAFF_COST' | 'STIPEND' | 'TECHNICAL_COST' | 'TRANSPORT_COST' | 'VENUE_COST'>;
+        /**
+         * Filter by settlement state
+         */
+        is_settled?: boolean;
+        /**
+         * Maximum credit amount
+         */
+        max_amount?: number;
+        /**
+         * Minimum credit amount
+         */
+        min_amount?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by paid date on or after this value
+         */
+        paid_after?: string;
+        /**
+         * Filter by paid date on or before this value
+         */
+        paid_before?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/credits/';
+};
+
+export type PaymentsCreditsListResponses = {
+    200: PaginatedCreditExpenseListList;
+};
+
+export type PaymentsCreditsListResponse = PaymentsCreditsListResponses[keyof PaymentsCreditsListResponses];
+
+export type PaymentsCreditsCreateData = {
+    body: CreditExpenseCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/credits/';
+};
+
+export type PaymentsCreditsCreateResponses = {
+    201: CreditExpenseCreate;
+};
+
+export type PaymentsCreditsCreateResponse = PaymentsCreditsCreateResponses[keyof PaymentsCreditsCreateResponses];
+
+export type PaymentsCreditsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsCreditsDestroyResponse = PaymentsCreditsDestroyResponses[keyof PaymentsCreditsDestroyResponses];
+
+export type PaymentsCreditsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsRetrieveResponses = {
+    200: CreditExpenseDetail;
+};
+
+export type PaymentsCreditsRetrieveResponse = PaymentsCreditsRetrieveResponses[keyof PaymentsCreditsRetrieveResponses];
+
+export type PaymentsCreditsPartialUpdateData = {
+    body?: PatchedCreditExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsPartialUpdateResponses = {
+    200: CreditExpenseUpdate;
+};
+
+export type PaymentsCreditsPartialUpdateResponse = PaymentsCreditsPartialUpdateResponses[keyof PaymentsCreditsPartialUpdateResponses];
+
+export type PaymentsCreditsUpdateData = {
+    body: CreditExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsUpdateResponses = {
+    200: CreditExpenseUpdate;
+};
+
+export type PaymentsCreditsUpdateResponse = PaymentsCreditsUpdateResponses[keyof PaymentsCreditsUpdateResponses];
+
 export type PaymentsDiscountRulesListData = {
     body?: never;
     path?: never;
@@ -40178,6 +41106,10 @@ export type PaymentsListListData = {
          */
         event_id?: string;
         /**
+         * Filter bank transfer payments with/without any evidence records
+         */
+        has_bank_transfer_evidence?: boolean;
+        /**
          * Filter payments with/without donations
          */
         has_donation?: boolean;
@@ -40185,6 +41117,14 @@ export type PaymentsListListData = {
          * Filter payments with/without refund requests
          */
         has_refund?: boolean;
+        /**
+         * Filter bank transfer payments with/without verified evidence
+         */
+        has_verified_bank_transfer_evidence?: boolean;
+        /**
+         * Filter bank transfer payments pending evidence beyond overdue_hours (default 72)
+         */
+        is_overdue_bank_transfer_evidence?: boolean;
         /**
          * Filter payments created in the last 7 days
          */
@@ -40441,6 +41381,10 @@ export type PaymentsMethodsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter payment methods that require evidence immediately at checkout
+         */
+        bank_transfer_required_immediately?: boolean;
         /**
          * Filter methods created after this date
          */

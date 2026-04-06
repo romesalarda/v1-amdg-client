@@ -20,6 +20,14 @@ import type {
   ProductSelectionDraft,
 } from '~/stores/registration'
 
+export type BankTransferEvidenceInput = {
+  transfer_id: string
+  evidence_file: File | Blob
+  payer_name?: string
+  payer_account_last4?: string
+  amount_on_evidence?: string | number
+}
+
 const buildPersonalInfoItem = (item: PersonalInfoItemDraft): PersonalInfoItemRequest => ({
   id: item.id,
   details: item.details ?? null,
@@ -111,7 +119,7 @@ const buildAttendeeCheckout = (attendee: AttendeeDraft): AttendeeCheckoutRequest
 
 export const buildCheckoutPayload = (params: {
   bookingIntentId: string
-  paymentMethodId: number | null | undefined
+  paymentMethodId: number
   attendees: AttendeeDraft[]
   stripePaymentIntentId?: string
 }): CheckoutRequest => ({
@@ -120,6 +128,66 @@ export const buildCheckoutPayload = (params: {
   stripe_payment_intent_id: params.stripePaymentIntentId,
   attendees: params.attendees.map(buildAttendeeCheckout),
 })
+
+const appendFormDataValue = (formData: FormData, key: string, value: unknown): void => {
+  if (value === undefined || value === null) return
+
+  if (value instanceof Blob) {
+    formData.append(key, value)
+    return
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      appendFormDataValue(formData, `${key}[${index}]`, item)
+    })
+    return
+  }
+
+  if (typeof value === 'object') {
+    Object.entries(value as Record<string, unknown>).forEach(([childKey, childValue]) => {
+      appendFormDataValue(formData, `${key}[${childKey}]`, childValue)
+    })
+    return
+  }
+
+  formData.append(key, String(value))
+}
+
+export const toMultipartFormData = (payload: Record<string, unknown>): FormData => {
+  const formData = new FormData()
+  Object.entries(payload).forEach(([key, value]) => {
+    appendFormDataValue(formData, key, value)
+  })
+  return formData
+}
+
+export const buildCheckoutMultipartPayload = (params: {
+  bookingIntentId: string
+  paymentMethodId: number
+  attendees: AttendeeDraft[]
+  stripePaymentIntentId?: string
+  bankTransferEvidence?: BankTransferEvidenceInput
+}): FormData => {
+  const payload: Record<string, unknown> = buildCheckoutPayload({
+    bookingIntentId: params.bookingIntentId,
+    paymentMethodId: params.paymentMethodId,
+    attendees: params.attendees,
+    stripePaymentIntentId: params.stripePaymentIntentId,
+  }) as unknown as Record<string, unknown>
+
+  if (params.bankTransferEvidence) {
+    payload.bank_transfer_evidence = {
+      transfer_id: params.bankTransferEvidence.transfer_id,
+      evidence_file: params.bankTransferEvidence.evidence_file,
+      payer_name: params.bankTransferEvidence.payer_name,
+      payer_account_last4: params.bankTransferEvidence.payer_account_last4,
+      amount_on_evidence: params.bankTransferEvidence.amount_on_evidence,
+    }
+  }
+
+  return toMultipartFormData(payload)
+}
 
 export const buildCheckoutPreviewPayload = (params: {
   bookingIntentId: string

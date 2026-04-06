@@ -11,6 +11,7 @@ export const paymentMethodSchema = z.object({
   description: z.string().optional(),
   method_type: paymentMethodTypeEnum,
   is_active: z.boolean().default(true),
+  bank_transfer_required_immediately: z.boolean().default(false),
   
   // Bank transfer fields - optional with optional inner fields
   provided_details: z.object({

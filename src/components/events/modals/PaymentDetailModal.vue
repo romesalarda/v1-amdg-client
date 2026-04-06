@@ -135,18 +135,163 @@
           </section>
 
           <!-- Bank Transfer Information -->
-          <section v-if="paymentData.method?.method_type === 'BANK_TRANSFER' && paymentData.bank_transfer_reference">
+          <section v-if="isBankTransferPayment">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">account_balance</span>
               Bank Transfer Information
             </h4>
-            <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
-              <div class="text-xs text-amber-700 mb-1">Bank Reference</div>
-              <div class="font-mono text-lg font-bold text-amber-900">{{ paymentData.bank_transfer_reference }}</div>
+            <div :class="bankTransferEvidenceIsVerified ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'" class="rounded-lg p-4 border">
+              <div :class="bankTransferEvidenceIsVerified ? 'text-emerald-700' : 'text-amber-700'" class="text-xs mb-1">Bank Reference</div>
+              <div :class="bankTransferEvidenceIsVerified ? 'text-emerald-900' : 'text-amber-900'" class="font-mono text-lg font-bold">{{ paymentData.bank_transfer_reference || 'Not assigned yet' }}</div>
+              <div :class="bankTransferEvidenceIsVerified ? 'border-emerald-200' : 'border-amber-200'" class="mt-3 pt-3 border-t">
+                <div :class="bankTransferEvidenceIsVerified ? 'text-emerald-700' : 'text-amber-700'" class="text-xs mb-1">Evidence Status</div>
+                <div :class="bankTransferEvidenceIsVerified ? 'text-emerald-900' : 'text-amber-900'" class="text-sm font-semibold">
+                  {{ bankTransferEvidenceStatusLabel }}
+                </div>
+                <div v-if="bankTransferEvidence?.transfer_id" :class="bankTransferEvidenceIsVerified ? 'text-emerald-800' : 'text-amber-800'" class="mt-1 text-xs">
+                  Transfer ID: <span class="font-mono">{{ bankTransferEvidence.transfer_id }}</span>
+                </div>
+                <div v-if="bankTransferEvidence?.uploaded_at" :class="bankTransferEvidenceIsVerified ? 'text-emerald-800' : 'text-amber-800'" class="mt-1 text-xs">
+                  Uploaded: {{ formatDateTime(bankTransferEvidence.uploaded_at) }}
+                </div>
+                <div v-if="bankTransferEvidence?.evidence_file" class="mt-2 text-xs">
+                  <a
+                    :href="bankTransferEvidence.evidence_file"
+                    target="_blank"
+                    rel="noreferrer"
+                    :class="bankTransferEvidenceIsVerified ? 'text-emerald-700 hover:text-emerald-800' : 'text-amber-700 hover:text-amber-800'"
+                    class="inline-flex items-center gap-1 font-semibold underline decoration-dotted underline-offset-2"
+                  >
+                    <span class="material-symbols-outlined text-sm">attach_file</span>
+                    View uploaded file
+                  </a>
+                </div>
+              </div>
               <div v-if="paymentData.status === 'PENDING'" class="mt-3 pt-3 border-t border-amber-200">
                 <p class="text-xs text-amber-800 mb-2">
                   This payment is awaiting verification. Please verify the bank transfer before proceeding.
                 </p>
+              </div>
+            </div>
+
+            <div class="mt-4 rounded-lg border border-gray-200 bg-white p-4">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <p class="text-sm font-semibold text-gray-900">Upload Bank Transfer Evidence</p>
+                  <p class="mt-1 text-xs text-gray-500">
+                    Upload evidence when attendee proof is missing or needs correction.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                  @click="showEvidenceUploadForm = !showEvidenceUploadForm"
+                >
+                  {{ showEvidenceUploadForm ? 'Hide form' : 'Upload evidence' }}
+                </button>
+              </div>
+
+              <div v-if="showEvidenceUploadForm" class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div class="sm:col-span-2">
+                  <div class="mb-1 flex items-center justify-between gap-2">
+                    <label class="block text-xs font-semibold text-gray-700">Transfer ID <span class="text-red-600">*</span></label>
+                    <button
+                      type="button"
+                      class="text-[11px] font-semibold text-amber-700 hover:text-amber-800"
+                      @click="resetEvidenceForm"
+                    >
+                      Regenerate
+                    </button>
+                  </div>
+                  <input
+                    v-model="evidenceForm.transfer_id"
+                    type="text"
+                    readonly
+                    class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-700 focus:border-amber-500 focus:outline-none"
+                    placeholder="Auto-generated"
+                  >
+                  <p class="mt-1 text-[11px] text-gray-500">This is generated automatically for the evidence record and can be regenerated if needed.</p>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="mb-1 block text-xs font-semibold text-gray-700">Evidence file <span class="text-red-600">*</span></label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                    @change="onEvidenceFileChange"
+                  >
+                  <p class="mt-1 text-[11px] text-gray-500">Accepted: PDF/JPG/JPEG/PNG, up to 10MB.</p>
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700">Payer name</label>
+                  <input
+                    v-model="evidenceForm.payer_name"
+                    type="text"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                    placeholder="Optional"
+                  >
+                </div>
+                <div>
+                  <label class="mb-1 block text-xs font-semibold text-gray-700">Payer account last 4</label>
+                  <input
+                    v-model="evidenceForm.payer_account_last4"
+                    type="text"
+                    maxlength="4"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                    placeholder="1234"
+                  >
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="mb-1 block text-xs font-semibold text-gray-700">Amount on evidence</label>
+                  <input
+                    v-model="evidenceForm.amount_on_evidence"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-amber-500 focus:outline-none"
+                    placeholder="Optional"
+                  >
+                </div>
+              </div>
+
+              <p v-if="evidenceUploadError" class="mt-3 text-xs font-semibold text-red-600">{{ evidenceUploadError }}</p>
+              <p v-if="evidenceUploadSuccess" class="mt-3 text-xs font-semibold text-green-700">{{ evidenceUploadSuccess }}</p>
+
+              <div v-if="bankTransferEvidence && !bankTransferEvidenceIsVerified" class="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-semibold text-amber-900">Verification pending</p>
+                    <p class="mt-1 text-xs text-amber-800">Evidence is uploaded but still needs manual verification.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-700 text-white hover:bg-amber-800 transition-colors disabled:opacity-60"
+                    :disabled="evidenceVerifyPending"
+                    @click="verifyBankTransferEvidence"
+                  >
+                    {{ evidenceVerifyPending ? 'Verifying...' : 'Verify Evidence' }}
+                  </button>
+                </div>
+              </div>
+
+              <div v-else-if="bankTransferEvidenceIsVerified" class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <p class="text-sm font-semibold text-emerald-900">Evidence verified</p>
+                    <p class="mt-1 text-xs text-emerald-800">This bank transfer evidence is verified and ready for review.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="mt-4 flex justify-end">
+                <button v-if="evidenceForm.evidence_file"
+                  type="button"
+                  class="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors disabled:opacity-60"
+                  :disabled="evidenceUploadPending"
+                  @click="uploadBankTransferEvidence"
+                >
+                  {{ evidenceUploadPending ? 'Uploading...' : 'Upload Evidence' }}
+                </button>
               </div>
             </div>
           </section>
@@ -413,6 +558,7 @@
 </template>
 
 <script setup lang="ts">
+import { reactive } from 'vue'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -423,6 +569,7 @@ import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import { usePayment } from '~/composables/resources/payments/payments'
 import { usePaymentMethod } from '~/composables/resources/payments/paymentMethods'
 import { parseAmount } from '~/utils/money'
+import { uploadMultipart } from '~/utils/upload'
 
 interface Props {
   payment: any
@@ -431,9 +578,11 @@ interface Props {
 
 const props = defineProps<Props>()
 defineEmits(['close', 'refund', 'verify'])
+const { $notyf } = useNuxtApp()
+const requestFetch = useRequestFetch()
 
 // Fetch full payment details
-const { data: fullPaymentData, isLoading: isLoadingPayment, error: paymentError } = usePayment(computed(() => props.payment?.payment_id))
+const { data: fullPaymentData, isLoading: isLoadingPayment, error: paymentError, refetch: refetchPaymentDetail } = usePayment(computed(() => props.payment?.payment_id))
 
 // Fetch payment method details
 const methodId = computed(() => {
@@ -456,6 +605,171 @@ const paymentData = computed(() => {
     method: method || payment.method
   }
 })
+
+const isBankTransferPayment = computed(() => paymentData.value?.method?.method_type === 'BANK_TRANSFER')
+const bankTransferEvidence = computed<any>(() => paymentData.value?.bank_transfer_evidence || null)
+const bankTransferEvidenceIsVerified = computed(() => String(bankTransferEvidence.value?.verification_status || '').toLowerCase() === 'verified')
+const bankTransferEvidenceStatusLabel = computed(() => {
+  const evidence = bankTransferEvidence.value
+  if (!evidence) return 'No evidence uploaded'
+  const status = String(evidence.verification_status || 'pending').toUpperCase()
+  return `Evidence uploaded (${status})`
+})
+
+const evidenceUploadPending = ref(false)
+const evidenceVerifyPending = ref(false)
+const evidenceUploadError = ref('')
+const evidenceUploadSuccess = ref('')
+const showEvidenceUploadForm = ref(true)
+const evidenceForm = reactive({
+  transfer_id: '',
+  evidence_file: null as File | null,
+  payer_name: '',
+  payer_account_last4: '',
+  amount_on_evidence: '',
+})
+
+function generateBankTransferTransferId(): string {
+  const paymentReference = String(paymentData.value?.payment_reference || paymentData.value?.payment_id || 'PAY')
+    .replace(/[^A-Za-z0-9]+/g, '')
+    .toUpperCase()
+  const timestamp = Date.now().toString(36).toUpperCase()
+  const randomSegment = Math.random().toString(36).slice(2, 8).toUpperCase()
+
+  return `BT-${paymentReference}-${timestamp}-${randomSegment}`
+}
+
+function resetEvidenceForm() {
+  evidenceForm.transfer_id = generateBankTransferTransferId()
+  evidenceForm.evidence_file = null
+  evidenceForm.payer_name = ''
+  evidenceForm.payer_account_last4 = ''
+  evidenceForm.amount_on_evidence = ''
+}
+
+watch(
+  () => bankTransferEvidence.value?.bank_transfer_id,
+  (bankTransferId) => {
+    if (bankTransferId) {
+      showEvidenceUploadForm.value = false
+      return
+    }
+
+    showEvidenceUploadForm.value = true
+    if (!evidenceForm.transfer_id) {
+      evidenceForm.transfer_id = generateBankTransferTransferId()
+    }
+  },
+  { immediate: true }
+)
+
+watch(
+  () => paymentData.value?.payment_id,
+  (paymentId) => {
+    if (!paymentId) return
+    if (!evidenceForm.transfer_id) {
+      evidenceForm.transfer_id = generateBankTransferTransferId()
+    }
+  },
+  { immediate: true }
+)
+
+function onEvidenceFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  evidenceForm.evidence_file = input.files?.[0] || null
+}
+
+function extractErrorMessage(error: any): string {
+  const data = error?.data || error?.response?._data || error?.response?.data
+  if (!data) return error?.message || 'Evidence upload failed.'
+
+  if (typeof data === 'string') return data
+  if (Array.isArray(data)) return data.join(' ')
+  if (typeof data === 'object') {
+    const firstValue = Object.values(data)[0] as any
+    if (Array.isArray(firstValue)) return firstValue.join(' ')
+    if (typeof firstValue === 'string') return firstValue
+  }
+
+  return error?.message || 'Evidence upload failed.'
+}
+
+async function uploadBankTransferEvidence() {
+  evidenceUploadError.value = ''
+  evidenceUploadSuccess.value = ''
+
+  if (!paymentData.value?.id) {
+    evidenceUploadError.value = 'Unable to resolve payment record for evidence upload.'
+    return
+  }
+
+  if (!evidenceForm.transfer_id.trim()) {
+    evidenceUploadError.value = 'Transfer ID is required.'
+    return
+  }
+
+  if (!evidenceForm.evidence_file) {
+    evidenceUploadError.value = 'Evidence file is required.'
+    return
+  }
+
+  if (evidenceForm.payer_account_last4 && !/^\d{4}$/.test(evidenceForm.payer_account_last4)) {
+    evidenceUploadError.value = 'Payer account last 4 must be exactly 4 digits.'
+    return
+  }
+
+  const formData = new FormData()
+  formData.append('transfer_id', evidenceForm.transfer_id.trim())
+  formData.append('evidence_file', evidenceForm.evidence_file)
+  formData.append('payment', String(paymentData.value.id))
+
+  if (evidenceForm.payer_name.trim()) {
+    formData.append('payer_name', evidenceForm.payer_name.trim())
+  }
+  if (evidenceForm.payer_account_last4.trim()) {
+    formData.append('payer_account_last4', evidenceForm.payer_account_last4.trim())
+  }
+  if (evidenceForm.amount_on_evidence.trim()) {
+    formData.append('amount_on_evidence', evidenceForm.amount_on_evidence.trim())
+  }
+
+  evidenceUploadPending.value = true
+  try {
+    await uploadMultipart('/api/payments/bank-transfer-evidence/', formData, { method: 'POST' })
+    evidenceUploadSuccess.value = 'Evidence uploaded successfully.'
+    $notyf?.success('Evidence uploaded successfully.')
+    resetEvidenceForm()
+    showEvidenceUploadForm.value = false
+    await refetchPaymentDetail()
+  } catch (error) {
+    evidenceUploadError.value = extractErrorMessage(error)
+  } finally {
+    evidenceUploadPending.value = false
+  }
+}
+
+async function verifyBankTransferEvidence() {
+  evidenceUploadError.value = ''
+  const evidence = bankTransferEvidence.value
+
+  if (!evidence?.bank_transfer_id) {
+    evidenceUploadError.value = 'Unable to resolve the uploaded evidence record.'
+    return
+  }
+
+  evidenceVerifyPending.value = true
+  try {
+    await requestFetch(`/api/payments/bank-transfer-evidence/${String(evidence.bank_transfer_id)}/confirm_payment_match/`, {
+      method: 'POST',
+    })
+    $notyf?.success('Bank transfer evidence verified.')
+    await refetchPaymentDetail()
+  } catch (error) {
+    evidenceUploadError.value = extractErrorMessage(error)
+  } finally {
+    evidenceVerifyPending.value = false
+  }
+}
 
 const hasDiscounts = computed(() => {
   // Check if there are discounts in metadata

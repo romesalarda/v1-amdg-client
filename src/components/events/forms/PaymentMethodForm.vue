@@ -61,6 +61,19 @@
     <template v-if="method_type === 'BANK_TRANSFER'">
       <div class="space-y-4 p-4 bg-mist-blue/40 rounded-lg">
         <h4 class="font-semibold text-sm text-background-dark-600">Bank Account Details</h4>
+
+        <label class="flex items-start gap-3 p-3 rounded-lg border border-primary-500/20 bg-white">
+          <input
+            v-model="bankTransferRequiredImmediately"
+            v-bind="bankTransferRequiredImmediatelyAttrs"
+            type="checkbox"
+            class="mt-0.5 h-4 w-4 rounded border-navy-300 text-primary focus:ring-primary focus:ring-offset-0"
+          />
+          <div>
+            <p class="text-sm font-semibold text-background-dark-600">Require evidence immediately</p>
+            <p class="text-xs text-background-dark-500">Attendees must upload transfer proof during checkout for this method.</p>
+          </div>
+        </label>
         
         <div class="space-y-2">
           <label class="block text-sm font-medium text-background-dark-600" for="account-name">
@@ -228,6 +241,7 @@ const { errors, handleSubmit, defineField, resetForm } = useForm({
     description: props.modelValue?.description || '',
     method_type: props.modelValue?.method_type || 'STRIPE',
     is_active: props.modelValue?.is_active ?? true,
+    bank_transfer_required_immediately: props.modelValue?.bank_transfer_required_immediately ?? ((props.modelValue?.method_type || 'STRIPE') === 'BANK_TRANSFER'),
     provided_details: props.modelValue?.provided_details || {
       account_name: '',
       sort_code: '',
@@ -241,6 +255,7 @@ const [title, titleAttrs] = defineField('title')
 const [description, descriptionAttrs] = defineField('description')
 const [method_type, method_typeAttrs] = defineField('method_type')
 const [isActive, isActiveAttrs] = defineField('is_active')
+const [bankTransferRequiredImmediately, bankTransferRequiredImmediatelyAttrs] = defineField('bank_transfer_required_immediately')
 
 // Bank transfer fields
 const [accountName, accountNameAttrs] = defineField('provided_details.account_name')
@@ -255,6 +270,9 @@ const onSubmit = handleSubmit((values) => {
     description: values.description || undefined,
     method_type: values.method_type,
     is_active: values.is_active,
+    bank_transfer_required_immediately: values.method_type === 'BANK_TRANSFER'
+      ? !!values.bank_transfer_required_immediately
+      : false,
     event: props.eventId,
   }
 
@@ -289,6 +307,7 @@ watch(() => props.modelValue, (newValue) => {
         description: newValue.description || '',
         method_type: newValue.method_type || 'STRIPE',
         is_active: newValue.is_active ?? true,
+        bank_transfer_required_immediately: newValue.bank_transfer_required_immediately ?? (newValue.method_type === 'BANK_TRANSFER'),
         provided_details: newValue.provided_details || {
           account_name: '',
           sort_code: '',
@@ -298,4 +317,15 @@ watch(() => props.modelValue, (newValue) => {
     })
   }
 }, { immediate: true })
+
+watch(
+  () => method_type.value,
+  (next) => {
+    if (props.modelValue) return
+    if (next !== 'BANK_TRANSFER') return
+    if (!bankTransferRequiredImmediately.value) {
+      bankTransferRequiredImmediately.value = true
+    }
+  }
+)
 </script>

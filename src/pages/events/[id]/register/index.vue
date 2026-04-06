@@ -1073,6 +1073,56 @@
 										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account number</p>
 										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_number || 'TBA' }}</p>
 									</div>
+
+									<div class="rounded-lg border border-amber-200 bg-amber-50 p-3 sm:col-span-2">
+										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Evidence policy</p>
+										<p class="mt-1 text-sm text-amber-900">
+											{{ isBankTransferEvidenceRequiredImmediately
+												? 'This method requires evidence upload during checkout.'
+												: 'Evidence can be uploaded later before payment completion.' }}
+										</p>
+									</div>
+
+									<div v-if="isBankTransferEvidenceRequiredImmediately" class="rounded-lg border border-amber-200 bg-white p-3 sm:col-span-2 space-y-3">
+										<p class="text-xs font-semibold text-slate-800">Upload transfer evidence</p>
+										<div class="grid gap-3 sm:grid-cols-2">
+											<div class="sm:col-span-2">
+												<div class="mb-1 flex items-center justify-between gap-2">
+													<label class="block text-[11px] font-semibold text-slate-700">Transfer reference <span class="text-red-600">*</span></label>
+													<UButton size="xs" color="gray" variant="ghost" @click="regenerateBankTransferEvidenceReference">Regenerate</UButton>
+												</div>
+												<UInput v-model="bankTransferEvidence.transfer_id" readonly />
+												<p class="mt-1 text-[11px] text-slate-500">Generated automatically for cross-reference.</p>
+												<p v-if="bankTransferEvidenceErrors.transfer_id" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.transfer_id }}</p>
+											</div>
+											<div class="sm:col-span-2">
+												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Evidence file <span class="text-red-600">*</span></label>
+												<input
+													type="file"
+													accept=".pdf,.jpg,.jpeg,.png"
+													class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
+													@change="onBankTransferEvidenceFileChange"
+												>
+												<p class="mt-1 text-[11px] text-slate-500">Accepted: PDF/JPG/JPEG/PNG up to 10MB.</p>
+												<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
+											</div>
+											<div>
+												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer name <span class="text-red-600">*</span></label>
+												<UInput v-model="bankTransferEvidence.payer_name" placeholder="Full name on the transfer" />
+												<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
+											</div>
+											<div>
+												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer account last 4 <span class="text-red-600">*</span></label>
+												<UInput v-model="bankTransferEvidence.payer_account_last4" placeholder="1234" maxlength="4" />
+												<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
+											</div>
+											<div class="sm:col-span-2">
+												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Amount on evidence <span class="text-red-600">*</span></label>
+												<UInput v-model="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" placeholder="0.00" />
+												<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
+											</div>
+										</div>
+									</div>
 								</div>
 
 								<div v-else-if="isStripeMethod" class="mt-4 space-y-3">
@@ -1273,7 +1323,12 @@ import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
 import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
-import { buildCheckoutPayload, buildCheckoutPreviewPayload, createIdempotencyKey } from '~/composables/registration/checkout'
+import {
+	buildCheckoutMultipartPayload,
+	buildCheckoutPayload,
+	buildCheckoutPreviewPayload,
+	createIdempotencyKey,
+} from '~/composables/registration/checkout'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft, MedicalConditionItemDraft, PersonalInfoItemDraft, ProductSelectionDraft } from '~/stores/registration'
@@ -2083,6 +2138,111 @@ const paymentMethodTypeLabel = computed(() => {
 
 const isBankTransferMethod = computed(() => selectedPaymentMethod.value?.method_type === 'BANK_TRANSFER')
 const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+const isBankTransferEvidenceRequiredImmediately = computed(
+	() => isBankTransferMethod.value && !!selectedPaymentMethod.value?.bank_transfer_required_immediately
+)
+
+const generateBankTransferEvidenceReference = () => {
+	const baseReference = String(store.bookingIntentId || event_uuid.value || 'BOOKING')
+		.replace(/[^A-Za-z0-9]+/g, '')
+		.toUpperCase()
+	const timestamp = Date.now().toString(36).toUpperCase()
+	const randomSegment = Math.random().toString(36).slice(2, 8).toUpperCase()
+	return `BT-${baseReference}-${timestamp}-${randomSegment}`
+}
+
+const bankTransferEvidence = reactive({
+	transfer_id: generateBankTransferEvidenceReference(),
+	evidence_file: null as File | null,
+	payer_name: '',
+	payer_account_last4: '',
+	amount_on_evidence: '',
+})
+
+const bankTransferEvidenceErrors = reactive({
+	transfer_id: '',
+	evidence_file: '',
+	payer_name: '',
+	payer_account_last4: '',
+	amount_on_evidence: '',
+})
+
+const regenerateBankTransferEvidenceReference = () => {
+	bankTransferEvidence.transfer_id = generateBankTransferEvidenceReference()
+}
+
+const clearBankTransferEvidenceErrors = () => {
+	bankTransferEvidenceErrors.transfer_id = ''
+	bankTransferEvidenceErrors.evidence_file = ''
+	bankTransferEvidenceErrors.payer_name = ''
+	bankTransferEvidenceErrors.payer_account_last4 = ''
+	bankTransferEvidenceErrors.amount_on_evidence = ''
+}
+
+const clearBankTransferEvidenceForm = () => {
+	regenerateBankTransferEvidenceReference()
+	bankTransferEvidence.evidence_file = null
+	bankTransferEvidence.payer_name = ''
+	bankTransferEvidence.payer_account_last4 = ''
+	bankTransferEvidence.amount_on_evidence = ''
+	clearBankTransferEvidenceErrors()
+}
+
+const onBankTransferEvidenceFileChange = (event: Event) => {
+	const input = event.target as HTMLInputElement
+	bankTransferEvidence.evidence_file = input.files?.[0] || null
+	bankTransferEvidenceErrors.evidence_file = ''
+}
+
+const isBankTransferEvidenceFormReady = computed(() => {
+	if (!isBankTransferEvidenceRequiredImmediately.value) return true
+	if (!bankTransferEvidence.transfer_id.trim()) return false
+	if (!bankTransferEvidence.evidence_file) return false
+	if (!bankTransferEvidence.payer_name.trim()) return false
+	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) return false
+	if (!bankTransferEvidence.amount_on_evidence.trim()) return false
+	return true
+})
+
+const validateBankTransferEvidenceForm = () => {
+	clearBankTransferEvidenceErrors()
+	if (!isBankTransferEvidenceRequiredImmediately.value) return true
+
+	let valid = true
+	if (!bankTransferEvidence.transfer_id.trim()) {
+		bankTransferEvidenceErrors.transfer_id = 'Transfer ID is required.'
+		valid = false
+	}
+	if (!bankTransferEvidence.evidence_file) {
+		bankTransferEvidenceErrors.evidence_file = 'Evidence file is required.'
+		valid = false
+	}
+	if (!bankTransferEvidence.payer_name.trim()) {
+		bankTransferEvidenceErrors.payer_name = 'Payer name is required.'
+		valid = false
+	}
+	if (!bankTransferEvidence.amount_on_evidence.trim()) {
+		bankTransferEvidenceErrors.amount_on_evidence = 'Amount on evidence is required.'
+		valid = false
+	}
+	if (bankTransferEvidence.payer_account_last4 && !/^\d{4}$/.test(bankTransferEvidence.payer_account_last4)) {
+		bankTransferEvidenceErrors.payer_account_last4 = 'Use exactly 4 digits.'
+		valid = false
+	}
+
+	return valid
+}
+
+watch(
+	() => selectedPaymentMethodId.value,
+	() => {
+		if (!isBankTransferEvidenceRequiredImmediately.value) {
+			clearBankTransferEvidenceForm()
+		} else {
+			clearBankTransferEvidenceErrors()
+		}
+	}
+)
 
 type PreviewDiscountLine = {
 	name?: string
@@ -2507,6 +2667,9 @@ const canContinue = computed(() => {
 		if (isStripeMethod.value) {
 			return stripeCardReady.value && !stripeCardError.value
 		}
+		if (isBankTransferEvidenceRequiredImmediately.value) {
+			return isBankTransferEvidenceFormReady.value
+		}
 		return true
 	}
 	return true
@@ -2551,6 +2714,9 @@ const getCannotContinueMessage = () => {
 	if (activeStepIndex.value === reviewStepIndex) {
 		if (isStripeMethod.value && stripeCardError.value) return stripeCardError.value
 		if (isStripeMethod.value && !stripeCardReady.value) return 'Please complete your card details before continuing.'
+		if (isBankTransferEvidenceRequiredImmediately.value && !isBankTransferEvidenceFormReady.value) {
+			return 'Transfer ID and evidence file are required for this bank transfer method.'
+		}
 		if (!isBookingFree.value && !selectedPaymentMethodId.value) return 'Please choose a payment method.'
 		return 'Some attendees are missing required information.'
 	}
@@ -3035,16 +3201,44 @@ const handleCheckout = async () => {
 	stripePaymentAttemptError.value = ''
 
 	try {
-		const payload = buildCheckoutPayload({
-			bookingIntentId: store.bookingIntentId,
-			paymentMethodId: isBookingFree.value ? -1 : selectedPaymentMethodId.value,
-			attendees: store.attendees,
-		})
-		const response = await checkoutMutation.mutateAsync({
-			body: payload,
-			idempotencyKey: idempotencyKey.value,
-		})
-		checkoutResult.value = response.data
+		if (!validateBankTransferEvidenceForm()) {
+			toast.add({
+				title: 'Missing transfer evidence',
+				description: 'Add required bank transfer evidence before completing checkout.',
+				color: 'red',
+			})
+			return
+		}
+
+		const paymentMethodId = isBookingFree.value ? -1 : (selectedPaymentMethodId.value as number)
+
+		const response = await checkoutMutation.mutateAsync(
+			isBankTransferEvidenceRequiredImmediately.value
+				? {
+					body: buildCheckoutMultipartPayload({
+						bookingIntentId: store.bookingIntentId,
+						paymentMethodId,
+						attendees: store.attendees,
+						bankTransferEvidence: {
+							transfer_id: bankTransferEvidence.transfer_id.trim() || generateBankTransferEvidenceReference(),
+							evidence_file: bankTransferEvidence.evidence_file as File,
+							payer_name: bankTransferEvidence.payer_name.trim(),
+							payer_account_last4: bankTransferEvidence.payer_account_last4.trim(),
+							amount_on_evidence: bankTransferEvidence.amount_on_evidence.trim(),
+						},
+					}),
+					idempotencyKey: idempotencyKey.value,
+				}
+				: {
+					body: buildCheckoutPayload({
+						bookingIntentId: store.bookingIntentId,
+						paymentMethodId,
+						attendees: store.attendees,
+					}),
+					idempotencyKey: idempotencyKey.value,
+				}
+		)
+		checkoutResult.value = ((response as { data?: Record<string, any> }).data || null) as any
 
 		if (isStripeMethod.value) {
 			stripeClientSecret.value = checkoutResult.value?.stripe_client_secret || null
@@ -3106,7 +3300,19 @@ const handleCheckout = async () => {
 	} catch (error) {
 		console.error('Checkout failed', error)
 		idempotencyKey.value = createIdempotencyKey()
-		toast.add({ title: 'Error', description: 'Checkout failed. Please try again.', color: 'red' })
+		let description = 'Checkout failed. Please try again.'
+		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
+		if (typeof payload === 'string' && payload) {
+			description = payload
+		} else if (payload && typeof payload === 'object') {
+			const firstValue = Object.values(payload)[0] as any
+			if (Array.isArray(firstValue) && firstValue[0]) {
+				description = String(firstValue[0])
+			} else if (typeof firstValue === 'string') {
+				description = firstValue
+			}
+		}
+		toast.add({ title: 'Error', description, color: 'red' })
 	} finally {
 		isSaving.value = false
 	}

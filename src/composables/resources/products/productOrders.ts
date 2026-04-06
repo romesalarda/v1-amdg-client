@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import { isFormData, uploadMultipart } from '~/utils/upload'
 import {
   productsOrdersList,
   productsOrdersRetrieve,
@@ -256,8 +257,19 @@ export function useCheckoutProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ orderId, body }: { orderId: string | number; body: ProductsOrdersCheckoutCreateData['body'] }) =>
-      productsOrdersCheckoutCreate({ path: { order_id: String(orderId) }, body }),
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string | number
+      body: ProductsOrdersCheckoutCreateData['body'] | FormData
+    }) => {
+      if (isFormData(body)) {
+        return uploadMultipart(`/api/products/orders/${String(orderId)}/checkout/`, body, { method: 'POST' })
+      }
+
+      return productsOrdersCheckoutCreate({ path: { order_id: String(orderId) }, body })
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

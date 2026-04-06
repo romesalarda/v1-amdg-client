@@ -136,6 +136,13 @@
                   <p v-if="(method as any).description" class="text-xs text-navy-500 mb-2">
                     {{ (method as any).description }}
                   </p>
+                  <div
+                    v-if="method.method_type === 'BANK_TRANSFER'"
+                    class="mb-2 inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold"
+                    :class="(method as any).bank_transfer_required_immediately ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600'"
+                  >
+                    {{ (method as any).bank_transfer_required_immediately ? 'Immediate evidence required' : 'Evidence can be submitted later' }}
+                  </div>
                   <div v-if="method.method_type === 'BANK_TRANSFER' && (method as any).provided_details" class="text-xs text-navy-400 space-y-0.5">
                     <div>Account: {{ (method as any).provided_details.account_name }}</div>
                     <div>Sort Code: {{ (method as any).provided_details.sort_code }}</div>
