@@ -2135,8 +2135,8 @@ const attendeeReviewAmount = (attendee: AttendeeDraft, index: number) => {
 		currency: pkg?.base_amount_currency || checkoutPreview.value?.currency || 'GBP',
 	}
 }
-
-const paymentMethodsQuery = usePaymentMethods(
+// todo fix
+const paymentMethodsQuery = usePaymentMethods( 
 	computed(() => ({ event_id: event_uuid.value, page_size: 100 }))
 )
 const paymentMethods = computed(() => paymentMethodsQuery.data.value?.data?.results || [])

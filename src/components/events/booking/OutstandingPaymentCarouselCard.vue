@@ -220,14 +220,10 @@
             </div>
 
             <div v-else-if="metadataType === 'BOOKING'" class="rounded-md border border-emerald-200 bg-emerald-50 p-3">
-              <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="grid grid-cols-1 gap-2 text-xs">
                 <div>
                   <p class="text-emerald-700">Booking reference</p>
                   <p class="font-semibold text-emerald-900">{{ bookingReference }}</p>
-                </div>
-                <div>
-                  <p class="text-emerald-700">Payment type</p>
-                  <p class="font-semibold text-emerald-900">{{ bookingPaymentType }}</p>
                 </div>
               </div>
               <div v-if="bookingAttendees.length" class="mt-2">
@@ -239,6 +235,7 @@
                 </div>
               </div>
             </div>
+
 
             <div v-else-if="metadataType === 'DONATION'" class="rounded-md border border-rose-200 bg-rose-50 p-3">
               <div class="grid grid-cols-2 gap-2 text-xs">
@@ -255,10 +252,6 @@
               <p v-if="donationMessage" class="mt-1 text-xs text-rose-900">{{ donationMessage }}</p>
             </div>
 
-            <details class="rounded border border-deep-navy/10 bg-mist-blue/20 px-2 py-2">
-              <summary class="cursor-pointer text-xs font-semibold text-deep-navy">View raw metadata JSON</summary>
-              <pre class="mt-2 whitespace-pre-wrap text-[11px] text-deep-navy/80">{{ formattedMetadata }}</pre>
-            </details>
           </div>
         </template>
       </div>
