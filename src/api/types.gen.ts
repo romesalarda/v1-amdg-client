@@ -6726,6 +6726,7 @@ export type EventMyPaymentSummaryItem = {
     readonly payment_reference: string;
     readonly status: string;
     readonly amount: string;
+    readonly amount_value: string | null;
     readonly currency: string | null;
     readonly created_at: string | null;
     readonly method_type: string | null;
@@ -6739,12 +6740,18 @@ export type EventMyPaymentSummaryItem = {
     source: 'BOOKING' | 'SHOP_ORDER';
     readonly is_outstanding: boolean;
     readonly descriptor: string | null;
+    readonly target_type: string | null;
+    readonly target_id: string | null;
+    readonly booking_id: string | null;
+    readonly booking_reference: string | null;
     readonly order_id: string | null;
     readonly order_reference: string | null;
     readonly order_status: string | null;
     readonly attendee_id: string | null;
     readonly attendee_display_id: string | null;
     readonly attendee_name: string | null;
+    readonly related_orders: unknown;
+    readonly summary_context: unknown;
 };
 
 export type EventMyPaymentSummaryTotals = {
@@ -6752,6 +6759,9 @@ export type EventMyPaymentSummaryTotals = {
     readonly outstanding_payments: number;
     readonly booking_outstanding_payments: number;
     readonly shop_outstanding_payments: number;
+    readonly booking_payments_count: number;
+    readonly shop_payments_count: number;
+    readonly attendee_payments_count: number;
     readonly total_outstanding_amount: string;
 };
 

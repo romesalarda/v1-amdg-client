@@ -3439,7 +3439,7 @@ export const eventListMyOutstandingBookingPaymentsRetrieve = <ThrowOnError exten
 /**
  * Get Unified Payment Summary For Current User Booking
  *
- * Retrieve a unified booking payment summary for the current authenticated user, including booking-level payments and shop/order payments for attendees in the booking. Supports optional attendee filtering to focus attendee-specific payments while still returning booking-wide payment context.
+ * Retrieve a booking payment summary for the current authenticated user. The response keeps separate sections for booking, shop, attendee, and outstanding payments, but each payment_id is canonical and appears in only one section. Use the returned relationship metadata to understand whether a payment is tied to a booking, one or more orders, and the related attendee identities. Outstanding payments are unpaid only and are deduplicated before serialization.
  */
 export const eventListMyPaymentSummaryRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListMyPaymentSummaryRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListMyPaymentSummaryRetrieveResponses, EventListMyPaymentSummaryRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {

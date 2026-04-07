@@ -15,7 +15,6 @@
           <div class="lg:justify-self-end lg:max-w-xl w-full">
             <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-300">Your booking for</p>
             <h1 class="mt-3 text-4xl md:text-5xl font-black leading-tight text-white">{{ eventTitle }}</h1>
-            <p class="mt-2 text-white/80 text-sm">{{ booking?.booking_reference || '-' }}</p>
             <p class="mt-1 text-2xl text-white/70 ">Hello, {{ booking?.made_by_name || 'Unknown' }}</p>
           </div>
 
@@ -89,7 +88,7 @@
             </svg>
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Booking status</p>
-              <p class="text-sm font-black" :class="outstandingPayments.length ? 'text-amber-700' : 'text-green-700'">
+              <p class="text-sm font-black" :class="outstandingPayments.length ? 'text-blue-700' : 'text-green-700'">
                 {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) outstanding` : 'No outstanding payments' }}
               </p>
             </div>
@@ -142,25 +141,26 @@
                   {{ hideAllJourneyDetails ? 'Show all details' : 'Hide all details' }}
                 </button>
               </div>
-              <ol class="mt-3 space-y-3">
-                <li
-                  v-for="step in journeySteps"
-                  :key="step.id"
-                  class="rounded-lg border border-deep-navy/10 bg-white p-3"
-                >
-                  <div class="flex items-start gap-3">
-                    <div
-                      class="h-7 w-7 shrink-0 rounded-full border text-xs font-black flex items-center justify-center"
-                      :class="step.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
-                    >
-                      {{ step.id }}
-                    </div>
-                    <div class="min-w-0 flex-1">
+              <div class="mt-4 relative">
+                <div class="pointer-events-none absolute left-3 top-6 bottom-6 w-px bg-blue-200"></div>
+                <ol class="space-y-4 relative">
+                  <li
+                    v-for="step in journeySteps"
+                    :key="step.id"
+                    class="relative pl-10"
+                  >
+                  <div
+                    class="absolute left-0 top-1 h-6 w-6 rounded-full border text-[11px] font-black flex items-center justify-center"
+                    :class="step.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+                  >
+                    {{ step.id }}
+                  </div>
+                  <div class="min-w-0 rounded-lg border border-deep-navy/10 bg-white p-3">
                       <div class="flex items-center justify-between gap-2">
                         <p class="text-sm font-semibold text-deep-navy">{{ step.title }}</p>
                         <span
                           class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
-                          :class="step.done ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'"
+                          :class="step.done ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'"
                         >
                           {{ step.done ? 'Done' : 'Next' }}
                         </span>
@@ -179,8 +179,6 @@
                           <p class="font-semibold text-deep-navy">
                             {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) still outstanding.` : 'Registration complete. No outstanding payments.' }}
                           </p>
-                          <p v-if="outstandingPayments.length" class="text-deep-navy/70">Next payment: {{ outstandingPayments[0]?.payment_reference || 'Pending payment' }}</p>
-
                           <div v-if="outstandingPayments.length" class="space-y-2">
                             <div
                               v-for="payment in outstandingPayments"
@@ -188,7 +186,7 @@
                               :class="paymentAttentionCardClass(payment)"
                             >
                               <div class="flex items-center justify-between gap-2">
-                                <p class="text-xs font-black text-amber-900">{{ payment.payment_reference || 'Pending payment' }}</p>
+                                <p class="text-xs font-black text-blue-900">{{ payment.payment_reference || 'Pending payment' }}</p>
                                 <span :class="paymentAttentionLabelClass(payment)">
                                   {{ paymentAttentionLabel(payment) }}
                                 </span>
@@ -266,8 +264,8 @@
                                 </div>
                               </div>
 
-                              <div v-if="isOutstandingBankTransfer(payment)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
-                                <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                              <div v-if="isOutstandingBankTransfer(payment)" class="mt-2 rounded-md border border-blue-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
+                                <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
                                 <ol class="space-y-2">
                                   <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
                                     <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
@@ -291,13 +289,13 @@
                                       </div>
                                     </div>
                                   </li>
-                                  <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
-                                    <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                                  <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
+                                    <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
                                     <div class="mt-1 flex items-center justify-between gap-2">
-                                      <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                      <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
                                       <button
                                         type="button"
-                                        class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                                        class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                                         @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
                                       >
                                         Copy
@@ -310,6 +308,15 @@
                               <p v-else class="mt-2 text-[11px] text-deep-navy/70">
                                 Payment method is {{ payment.method_title || payment.method_type || 'different from bank transfer' }}.
                               </p>
+
+                              <div v-if="getRelatedOrderLabels(payment).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
+                                <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
+                                <div class="mt-1 space-y-1">
+                                  <p v-for="label in getRelatedOrderLabels(payment)" :key="label" class="font-semibold">
+                                    {{ label }}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </template>
@@ -345,20 +352,20 @@
                         </template>
                       </div>
                     </div>
-                  </div>
-                </li>
-              </ol>
+                  </li>
+                </ol>
+              </div>
             </div>
 
-            <div id="briefing-info" class="rounded-xl border border-deep-navy/10 p-4">
+            <div ref="briefingInfoRef" class="rounded-xl border border-deep-navy/10 p-4">
               <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Event briefing</p>
               <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
-                <div id="briefing-location" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
+                <div ref="briefingLocationRef" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
                   <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Location</p>
                   <p class="mt-1 font-semibold text-deep-navy">{{ eventLocation }}</p>
                   <p v-if="primaryVenue?.venue_address" class="text-xs text-deep-navy/70 mt-1">{{ primaryVenue.venue_address }}</p>
                 </div>
-                <div id="briefing-time" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
+                <div ref="briefingTimeRef" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
                   <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Timing</p>
                   <p class="mt-1 font-semibold text-deep-navy">Starts: {{ formatEventDate(eventStart) }}</p>
                   <p class="text-xs text-deep-navy/70">Ends: {{ formatEventDate(eventEnd) }}</p>
@@ -368,9 +375,9 @@
                   <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">What to bring</p>
                   <p class="mt-1 text-deep-navy/80 whitespace-pre-line">{{ eventWhatToBring }}</p>
                 </div>
-                <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 md:col-span-2">
-                  <p class="text-[10px] uppercase tracking-widest text-amber-700 font-black">Check-in instructions</p>
-                  <p class="mt-1 text-amber-900/85 whitespace-pre-line">{{ eventCheckInInstructions }}</p>
+                <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 md:col-span-2">
+                  <p class="text-[10px] uppercase tracking-widest text-blue-700 font-black">Check-in instructions</p>
+                  <p class="mt-1 text-blue-900/85 whitespace-pre-line">{{ eventCheckInInstructions }}</p>
                 </div>
                 <div v-if="primaryVenue?.venue_address" class="rounded-lg border border-deep-navy/10 overflow-hidden md:col-span-2">
                   <iframe
@@ -397,11 +404,11 @@
                   </div>
                   <div class="flex justify-between">
                     <dt>Payments</dt>
-                    <dd class="font-semibold">{{ booking.payments?.length || 0 }}</dd>
+                    <dd class="font-semibold">{{ booking?.payments?.length || 0 }}</dd>
                   </div>
                   <div class="flex justify-between">
                     <dt>Outstanding</dt>
-                    <dd class="font-semibold" :class="outstandingPayments.length ? 'text-amber-700' : 'text-green-700'">
+                    <dd class="font-semibold" :class="outstandingPayments.length ? 'text-blue-700' : 'text-green-700'">
                       {{ outstandingPayments.length }}
                     </dd>
                   </div>
@@ -410,7 +417,7 @@
 
               <div class="rounded-xl border border-deep-navy/10 p-4">
                 <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Access status</p>
-                <p class="mt-3 text-sm" :class="canManageAllAttendees ? 'text-green-700' : 'text-amber-700'">
+                <p class="mt-3 text-sm" :class="canManageAllAttendees ? 'text-green-700' : 'text-blue-700'">
                   {{ canManageAllAttendees ? 'You can fully manage attendees for this booking.' : 'You have limited attendee management access.' }}
                 </p>
                 <p class="mt-2 text-xs text-deep-navy/65">{{ selectedAttendeeId ? 'Tabs are unlocked for the selected attendee below.' : 'Select an attendee to unlock attendee tabs and orders.' }}</p>
@@ -433,15 +440,15 @@
               Unable to load payment summary right now.
             </div>
             <template v-else>
-              <section class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
                 <div class="flex items-center justify-between gap-2">
-                  <p class="text-xs font-black uppercase tracking-wider text-amber-700">Outstanding now</p>
-                  <p class="text-xs font-black text-amber-800">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
+                  <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding now</p>
+                  <p class="text-xs font-black text-blue-800">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
                 </div>
-                <p class="mt-2 text-sm text-amber-900">
+                <p class="mt-2 text-sm text-blue-900">
                   Booking: {{ paymentSummaryData?.totals?.booking_outstanding_payments || 0 }} | Shop: {{ paymentSummaryData?.totals?.shop_outstanding_payments || 0 }}
                 </p>
-                <p class="mt-1 text-xs text-amber-800">Outstanding total amount: {{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }}</p>
+                <p class="mt-1 text-xs text-blue-800">Outstanding total amount: {{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }}</p>
               </section>
 
               <section class="space-y-2">
@@ -453,13 +460,13 @@
                   <div v-for="payment in attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
                     <div class="flex items-center justify-between gap-2">
                       <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
                     </div>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                       <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
-                        {{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}
+                        {{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}
                       </span>
                       <button
                         v-if="payment.order_reference"
@@ -472,7 +479,47 @@
                     </div>
                     <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
                     <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                    <p v-if="payment.order_reference" class="text-[11px] text-deep-navy/70 mt-1">Order {{ payment.order_reference }}</p>
+                    <p class="text-[11px] text-deep-navy/70 mt-1">{{ paymentContextSummary(payment) }}</p>
+
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-[12px] text-deep-navy/90 space-y-2">
+                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer details</p>
+                      <div class="grid sm:grid-cols-3 gap-2">
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                          <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                      </div>
+                      <div v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-white p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">Transfer reference</p>
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                          <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                          <button
+                            type="button"
+                            class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                            @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
+                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
+                      <div class="mt-1 space-y-1">
+                        <p v-for="label in getRelatedOrderLabels(payment)" :key="label" class="font-semibold">
+                          {{ label }}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <p v-else class="text-sm text-deep-navy/60">No attendee-level payments yet.</p>
@@ -487,13 +534,13 @@
                   <div v-for="payment in bookingLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
                     <div class="flex items-center justify-between gap-2">
                       <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'">
+                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
                     </div>
                     <div class="mt-2 flex flex-wrap items-center gap-2">
                       <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
-                        {{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}
+                        {{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}
                       </span>
                       <button
                         v-if="payment.order_reference"
@@ -506,6 +553,47 @@
                     </div>
                     <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
                     <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                    <p class="text-[11px] text-deep-navy/70 mt-1">{{ paymentContextSummary(payment) }}</p>
+
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-[12px] text-deep-navy/90 space-y-2">
+                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer details</p>
+                      <div class="grid sm:grid-cols-3 gap-2">
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                          <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                      </div>
+                      <div v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-white p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">Transfer reference</p>
+                        <div class="mt-1 flex items-center justify-between gap-2">
+                          <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                          <button
+                            type="button"
+                            class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                            @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                          >
+                            Copy
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
+                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
+                      <div class="mt-1 space-y-1">
+                        <p v-for="label in getRelatedOrderLabels(payment)" :key="label" class="font-semibold">
+                          {{ label }}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <p v-else class="text-sm text-deep-navy/60">No booking-level payments found.</p>
@@ -524,10 +612,10 @@
               Unable to load orders right now.
             </div>
             <template v-else>
-              <section class="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
                 <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-amber-700">Outstanding payments</p>
-                  <p class="text-xs text-amber-800">{{ outstandingPayments.length }}</p>
+                  <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding payments</p>
+                  <p class="text-xs text-blue-800">{{ outstandingPayments.length }}</p>
                 </div>
                 <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
                   <div
@@ -539,14 +627,14 @@
                       <div>
                         <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
                         <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
-                        <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : (isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || '')) ? 'text-blue-700' : 'text-amber-700')">
+                        <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : 'text-blue-700'">
                           {{ paymentAttentionLabel(payment) }}
                         </p>
                         <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
                       </div>
                       <button
                         type="button"
-                        class="rounded-lg border border-amber-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                        class="rounded-lg border border-blue-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                         @click="togglePaymentExpand(payment)"
                       >
                         {{ isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
@@ -628,8 +716,8 @@
                       <p v-if="paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
                       <template v-else>
                         <p><span class="font-black text-deep-navy">Method:</span> {{ getPaymentMethodType(payment.payment_id || '') }}</p>
-                        <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-amber-200 bg-white p-3 space-y-2">
-                          <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                        <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-blue-200 bg-white p-3 space-y-2">
+                          <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
                           <ol class="space-y-2 text-[12px] text-deep-navy/90">
                             <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
                               <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
@@ -652,13 +740,13 @@
                                 </div>
                               </div>
                             </li>
-                            <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
-                              <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                            <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
+                              <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
                               <div class="mt-1 flex items-center justify-between gap-2">
-                                <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
                                 <button
                                   type="button"
-                                  class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                                  class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                                   @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
                                 >
                                   Copy
@@ -899,7 +987,7 @@
                     <p class="text-sm font-semibold text-deep-navy">{{ item.consent_details.title }}</p>
                     <p class="text-xs text-deep-navy/60">{{ item.consent_details.required ? 'Required' : 'Optional' }}</p>
                   </div>
-                  <button type="button" class="text-xs font-semibold" :class="item.consent_given ? 'text-green-700' : 'text-amber-700'" @click="toggleConsent(item)">
+                  <button type="button" class="text-xs font-semibold" :class="item.consent_given ? 'text-green-700' : 'text-blue-700'" @click="toggleConsent(item)">
                     {{ item.consent_given ? 'Given' : 'Not given' }}
                   </button>
                 </div>
@@ -983,7 +1071,6 @@
                   ]"
                 >
                   <p class="text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
-                  <p class="text-xs text-deep-navy/55">{{ item.display_id || item.id || 'No identifier' }}</p>
                 </button>
               </div>
               <p v-else class="mt-3 text-sm text-deep-navy/60">No attendees found for this booking.</p>
@@ -1031,7 +1118,7 @@
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Important alerts</p>
               <div class="mt-3 space-y-2 text-sm">
-                <p v-if="!canManageAllAttendees" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800">Limited attendee permissions for this booking.</p>
+                <p v-if="!canManageAllAttendees" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">Limited attendee permissions for this booking.</p>
                 <p v-if="attendees.length > 1" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">This is a group booking with multiple attendees.</p>
                 <p v-if="!outstandingPayments.length" class="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-800">No outstanding payments detected.</p>
               </div>
@@ -1085,9 +1172,9 @@
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
               <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
                 <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" :class="paymentAttentionCardClass(item)">
-                  <p class="text-xs font-black text-amber-900">{{ item.payment_reference || 'Payment' }}</p>
+                  <p class="text-xs font-black text-blue-900">{{ item.payment_reference || 'Payment' }}</p>
                   <p class="text-lg font-black text-deep-navy">{{ item.amount || '-' }}</p>
-                  <p class="text-xs" :class="needsEvidenceUpload(item) ? 'text-red-700' : (isOutstandingBankTransfer(item) && hasUploadedEvidence(String(item.payment_id || '')) ? 'text-blue-700' : 'text-amber-700')">
+                  <p class="text-xs" :class="needsEvidenceUpload(item) ? 'text-red-700' : 'text-blue-700'">
                     {{ paymentAttentionLabel(item) }}
                   </p>
                   <p class="text-[11px] text-deep-navy/75 mt-1">{{ item.method_title || item.method_type || 'Method unavailable' }}</p>
@@ -1156,8 +1243,8 @@
                     </div>
                   </div>
 
-                  <div v-if="isOutstandingBankTransfer(item)" class="mt-2 rounded-md border border-amber-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
-                    <p class="font-black uppercase tracking-wide text-[10px] text-amber-700">Bank transfer instructions</p>
+                  <div v-if="isOutstandingBankTransfer(item)" class="mt-2 rounded-md border border-blue-200 bg-white p-3 text-[12px] text-deep-navy/90 space-y-2">
+                    <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
                     <ol class="space-y-2">
                       <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
                         <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
@@ -1182,13 +1269,13 @@
                           </div>
                         </div>
                       </li>
-                      <li v-if="getRequiredTransferReference(item)" class="rounded-md border border-amber-300 bg-amber-50 p-2">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-amber-800">3. Add this exact transfer reference</p>
+                      <li v-if="getRequiredTransferReference(item)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
                         <div class="mt-1 flex items-center justify-between gap-2">
-                          <p class="text-sm font-black text-amber-900 break-all">{{ getRequiredTransferReference(item) }}</p>
+                          <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(item) }}</p>
                           <button
                             type="button"
-                            class="shrink-0 rounded-md border border-amber-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700 hover:bg-amber-100"
+                            class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                             @click="copyTransferReference(getRequiredTransferReference(item) || '')"
                           >
                             Copy
@@ -1196,6 +1283,15 @@
                         </div>
                       </li>
                     </ol>
+                  </div>
+
+                  <div v-if="getRelatedOrderLabels(item).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
+                    <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
+                    <div class="mt-1 space-y-1">
+                      <p v-for="label in getRelatedOrderLabels(item)" :key="label" class="font-semibold">
+                        {{ label }}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1428,12 +1524,20 @@ const allSummaryPayments = computed(() => {
   return [...bookingItems, ...orderItems]
 })
 
-function parseAmountValue(rawAmount: unknown): number {
+function parseAmountValue(rawAmount: unknown, rawAmountValue?: unknown): number {
+  const direct = Number.parseFloat(String(rawAmountValue || '').trim())
+  if (Number.isFinite(direct)) return direct
+
   const text = String(rawAmount || '').trim()
   if (!text) return 0
-  const numericPart = text.slice(1).trim()
+  const numericPart = text.replace(/[^\d.-]/g, '')
   const value = Number.parseFloat(numericPart)
   return Number.isFinite(value) ? value : 0
+}
+
+function paymentAmountValue(payment: unknown): unknown {
+  if (!payment || typeof payment !== 'object') return undefined
+  return (payment as Record<string, unknown>).amount_value
 }
 
 function isCompletedPaymentStatus(status: unknown): boolean {
@@ -1448,20 +1552,94 @@ const completedSummaryPayments = computed(() => {
 const spentSoFarBooking = computed(() => {
   return bookingLevelPayments.value
     .filter(payment => isCompletedPaymentStatus(payment.status))
-    .reduce((sum, payment) => sum + parseAmountValue(payment.amount), 0)
+    .reduce((sum, payment) => sum + parseAmountValue(payment.amount, paymentAmountValue(payment)), 0)
 })
 
 const spentSoFarOrders = computed(() => {
   return (paymentSummaryData.value?.shop_payments || [])
     .filter(payment => isCompletedPaymentStatus(payment.status))
-    .reduce((sum, payment) => sum + parseAmountValue(payment.amount), 0)
+    .reduce((sum, payment) => sum + parseAmountValue(payment.amount, paymentAmountValue(payment)), 0)
 })
 
 const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)
 const completedPaymentsCount = computed(() => completedSummaryPayments.value.length)
+const briefingInfoRef = ref<HTMLElement | null>(null)
+const briefingLocationRef = ref<HTMLElement | null>(null)
+const briefingTimeRef = ref<HTMLElement | null>(null)
 
 function formatCurrencyAmount(value: number): string {
   return `${currencySymbol.value}${value.toFixed(2)}`
+}
+
+function paymentContextSummary(payment: any): string {
+  const relatedLabels = getRelatedOrderLabels(payment)
+
+  if (payment?.source === 'BOOKING') {
+    const count = relatedLabels.length
+    return count > 0
+      ? `Covers ${count} linked order${count > 1 ? 's' : ''}`
+      : 'Booking-level payment'
+  }
+
+  if (payment?.source === 'SHOP_ORDER') {
+    if (payment?.order_reference) return `Order ${payment.order_reference}`
+    if (relatedLabels.length) return `Order ${relatedLabels[0]}`
+    return 'Order payment'
+  }
+
+  return 'Payment'
+}
+
+function getRelatedOrders(payment: unknown): Array<Record<string, any>> {
+  if (!payment || typeof payment !== 'object') return []
+  const source = payment as Record<string, any>
+  const direct = source.related_orders
+  if (Array.isArray(direct)) return direct as Array<Record<string, any>>
+
+  const metadata = source.metadata as Record<string, unknown> | undefined
+  const fromMetadata = metadata?.related_orders
+  if (Array.isArray(fromMetadata)) return fromMetadata as Array<Record<string, any>>
+
+  return []
+}
+
+function orderLabel(order: Record<string, any>): string {
+  return String(order?.order_reference || order?.order_id || 'Order')
+}
+
+function getRelatedOrderLabels(payment: unknown): string[] {
+  if (!payment || typeof payment !== 'object') return []
+
+  const source = payment as Record<string, any>
+  const labels = new Set<string>()
+
+  getRelatedOrders(source).forEach((order) => {
+    const label = orderLabel(order).trim()
+    if (label && label !== 'Order') labels.add(label)
+  })
+
+  const summaryRefs = Array.isArray(source.summary_context?.related_order_references)
+    ? source.summary_context.related_order_references
+    : []
+  summaryRefs.forEach((ref: unknown) => {
+    const label = String(ref || '').trim()
+    if (label) labels.add(label)
+  })
+
+  const topLevelRefs = Array.isArray(source.related_order_references)
+    ? source.related_order_references
+    : []
+  topLevelRefs.forEach((ref: unknown) => {
+    const label = String(ref || '').trim()
+    if (label) labels.add(label)
+  })
+
+  const singleOrderRef = String(source.order_reference || '').trim()
+  if (singleOrderRef && source.source === 'BOOKING') {
+    labels.add(singleOrderRef)
+  }
+
+  return Array.from(labels)
 }
 
 const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
@@ -1603,9 +1781,13 @@ function openOrderFromPayment(orderReference: string) {
   $notyf?.success(`Switched to Orders tab for ${orderReference}.`)
 }
 
-function scrollToBriefingSection(id: 'briefing-info' | 'briefing-location' | 'briefing-time') {
+function scrollToBriefingSection(target: 'info' | 'location' | 'time') {
   if (typeof window === 'undefined') return
-  const el = document.getElementById(id)
+  const el = target === 'info'
+    ? briefingInfoRef.value
+    : target === 'location'
+      ? briefingLocationRef.value
+      : briefingTimeRef.value
   if (!el) return
   el.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
@@ -1617,16 +1799,16 @@ function handleJourneyStepAction(action: JourneyStepAction) {
   }
 
   if (action === 'info') {
-    scrollToBriefingSection('briefing-info')
+    scrollToBriefingSection('info')
     return
   }
 
   if (action === 'location') {
-    scrollToBriefingSection('briefing-location')
+    scrollToBriefingSection('location')
     return
   }
 
-  scrollToBriefingSection('briefing-time')
+  scrollToBriefingSection('time')
 }
 
 watch(
@@ -1739,7 +1921,7 @@ function paymentAttentionCardClass(payment: any): string {
   const paymentId = String(payment?.payment_id || '')
   if (needsEvidenceUpload(payment)) return 'rounded-lg border border-red-300 bg-red-50 p-3 outstanding-attention-pulse'
   if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-lg border border-blue-300 bg-blue-50 p-3'
-  return 'rounded-lg border border-amber-300 bg-amber-50 p-3 outstanding-attention-pulse'
+  return 'rounded-lg border border-blue-300 bg-blue-50/70 p-3 outstanding-attention-pulse'
 }
 
 function paymentAttentionLabel(payment: any): string {
@@ -1753,7 +1935,7 @@ function paymentAttentionLabelClass(payment: any): string {
   const paymentId = String(payment?.payment_id || '')
   if (needsEvidenceUpload(payment)) return 'rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-red-700'
   if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700'
-  return 'rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-amber-700'
+  return 'rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700'
 }
 
 function toggleEvidenceUploadForm(paymentId: string) {
@@ -1920,20 +2102,31 @@ function getBankTransferInstructions(paymentId: string): string | null {
 }
 
 function isOutstandingBankTransfer(payment: any): boolean {
-  const type = String(payment?.method_type || '').toUpperCase()
-  return type === 'BANK_TRANSFER'
+  const type = String(payment?.method_type || payment?.metadata?.method_type || '').toUpperCase().replace(/-/g, '_')
+  const title = String(payment?.method_title || payment?.metadata?.method_title || '').toUpperCase()
+  return type === 'BANK_TRANSFER' || title.includes('BANK TRANSFER')
 }
 
 function getProvidedDetail(payment: any, key: 'account_name' | 'sort_code' | 'account_number'): string | null {
-  const provided = payment?.provided_details as Record<string, any> | undefined
+  const provided = (
+    payment?.provided_details ||
+    payment?.metadata?.provided_details ||
+    payment?.metadata ||
+    {}
+  ) as Record<string, any>
   const value = provided?.[key]
   if (value === undefined || value === null || value === '') return null
   return String(value)
 }
 
 function getRequiredTransferReference(payment: any): string | null {
-  const provided = payment?.provided_details as Record<string, any> | undefined
-  const direct = payment?.bank_reference || provided?.bank_reference
+  const provided = (
+    payment?.provided_details ||
+    payment?.metadata?.provided_details ||
+    payment?.metadata ||
+    {}
+  ) as Record<string, any>
+  const direct = payment?.bank_reference || payment?.metadata?.bank_reference || provided?.bank_reference
   if (direct !== undefined && direct !== null && String(direct).trim() !== '') {
     return String(direct)
   }
@@ -1945,6 +2138,15 @@ function getRequiredTransferReference(payment: any): string | null {
   }
 
   return null
+}
+
+function hasSummaryBankMetadata(payment: any): boolean {
+  return Boolean(
+    getProvidedDetail(payment, 'account_name') ||
+    getProvidedDetail(payment, 'sort_code') ||
+    getProvidedDetail(payment, 'account_number') ||
+    getRequiredTransferReference(payment)
+  )
 }
 
 async function copyTransferReference(reference: string) {
@@ -2022,7 +2224,7 @@ function getOrderStatusBadgeClass(status?: string): string {
   const normalized = String(status || '').toLowerCase()
   const classes: Record<string, string> = {
     draft: 'bg-gray-100 text-gray-700',
-    pending: 'bg-yellow-100 text-yellow-700',
+    pending: 'bg-blue-100 text-blue-700',
     processing: 'bg-blue-100 text-blue-700',
     completed: 'bg-green-100 text-green-700',
     cancelled: 'bg-red-100 text-red-700',
