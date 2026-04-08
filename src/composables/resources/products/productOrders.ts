@@ -13,6 +13,7 @@ import {
   productsOrdersCancelCreate,
   productsOrdersCheckoutCreate,
   productsOrdersCompleteCreate,
+  productsOrdersReserveBankTransferPayment,
   productsOrdersSubmitCreate,
 } from '~/api/sdk.gen'
 import type {
@@ -26,6 +27,7 @@ import type {
   ProductsOrdersCancelCreateData,
   ProductsOrdersCheckoutCreateData,
   ProductsOrdersCompleteCreateData,
+  ProductsOrdersReserveBankTransferPaymentData,
   ProductsOrdersSubmitCreateData,
 } from '~/api/types.gen'
 
@@ -270,6 +272,29 @@ export function useCheckoutProductOrder() {
 
       return productsOrdersCheckoutCreate({ path: { order_id: String(orderId) }, body })
     },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
+ * Reserve a bank transfer reference for a draft order before checkout
+ */
+export function useReserveProductOrderBankTransferPayment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string | number
+      body: ProductsOrdersReserveBankTransferPaymentData['body']
+    }) => productsOrdersReserveBankTransferPayment({ path: { order_id: String(orderId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

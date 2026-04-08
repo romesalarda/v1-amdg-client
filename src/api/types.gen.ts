@@ -10023,6 +10023,10 @@ export type OrderCheckoutRequestRequest = {
      * Optional payment method ID. Required when order total is greater than 0.
      */
     payment_method_id?: number | null;
+    /**
+     * Optional reserved bank transfer payment UUID to reuse during checkout.
+     */
+    payment_id?: string | null;
 };
 
 /**
@@ -10174,6 +10178,13 @@ export type OrderPricingPreviewRequestRequest = {
 
 export type OrderRemoveItemRequestRequest = {
     order_item_id: number;
+};
+
+export type OrderReserveBankTransferRequestRequest = {
+    /**
+     * Bank transfer payment method ID for this order event.
+     */
+    payment_method_id: number;
 };
 
 /**
@@ -44769,6 +44780,37 @@ export type ProductsOrdersRemoveItemCreateResponses = {
      * Order item removed successfully
      */
     200: unknown;
+};
+
+export type ProductsOrdersReserveBankTransferPaymentData = {
+    body: OrderReserveBankTransferRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/reserve-bank-transfer-payment/';
+};
+
+export type ProductsOrdersReserveBankTransferPaymentErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+    /**
+     * Order not found.
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersReserveBankTransferPaymentResponses = {
+    /**
+     * Existing bank transfer reference reused.
+     */
+    200: unknown;
+    /**
+     * Bank transfer reference reserved.
+     */
+    201: unknown;
 };
 
 export type ProductsOrdersSubmitCreateData = {

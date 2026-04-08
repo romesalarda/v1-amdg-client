@@ -166,16 +166,27 @@
 									<li class="relative pl-10">
 										<div
 											class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-black"
-											:class="checkoutResult?.bank_transfer_reference ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+											:class="effectiveBankTransferReference ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
 										>
 											3
 										</div>
 										<div class="rounded-lg border border-deep-navy/10 bg-white p-3">
-											<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Submit checkout to get transfer reference</p>
-											<p v-if="checkoutResult?.bank_transfer_reference" class="mt-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-900">
-												<span class="font-black">Reference:</span> {{ checkoutResult.bank_transfer_reference }}
+											<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Review reserved transfer reference</p>
+											<p v-if="reservedBankTransferLoading" class="mt-2 text-xs text-blue-800">Reserving bank transfer reference...</p>
+											<div v-else-if="reservedBankTransferError" class="mt-2 rounded-md border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
+												<p>{{ reservedBankTransferError }}</p>
+												<button
+													type="button"
+													class="mt-2 rounded border border-red-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-100"
+													@click="reserveBankTransferPayment(true)"
+												>
+													Retry reserve
+												</button>
+											</div>
+											<p v-else-if="effectiveBankTransferReference" class="mt-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-900">
+												<span class="font-black">Reference:</span> {{ effectiveBankTransferReference }}
 											</p>
-											<p v-else class="mt-2 text-xs text-deep-navy/70">A unique reference is generated immediately after you submit this checkout.</p>
+											<p v-else class="mt-2 text-xs text-deep-navy/70">Reference will be reserved before checkout so you can transfer with confidence.</p>
 											<p v-if="checkoutResult?.bank_transfer_instructions" class="mt-2 text-xs text-deep-navy/75">{{ checkoutResult.bank_transfer_instructions }}</p>
 										</div>
 									</li>
@@ -338,10 +349,9 @@ import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-j
 import type { PaymentMethod } from '~/api/types.gen'
 import { useBookingShop } from '~/composables/booking/useBookingShop'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { useCheckoutProductOrder } from '~/composables/resources/products/productOrders'
+import { useCheckoutProductOrder, useReserveProductOrderBankTransferPayment } from '~/composables/resources/products/productOrders'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { toMultipartFormData } from '~/composables/registration/checkout'
-import { formatMoney } from '~/utils/money'
 
 definePageMeta({
 	layout: 'booking',
@@ -499,16 +509,9 @@ const validateBankTransferEvidenceForm = () => {
 	return valid
 }
 
-watch(
-	() => selectedPaymentMethodId.value,
-	() => {
-		if (!isBankTransferEvidenceRequiredImmediately.value) {
-			clearBankTransferEvidenceForm()
-		} else {
-			clearBankTransferEvidenceErrors()
-		}
-	}
-)
+
+
+
 
 const bankDetails = computed(() => {
 	const details = selectedPaymentMethod.value?.provided_details as Record<string, unknown> | undefined
@@ -537,8 +540,13 @@ watch(
 
 
 const checkoutMutation = useCheckoutProductOrder()
+const reserveBankTransferMutation = useReserveProductOrderBankTransferPayment()
 const checkoutResult = ref<Record<string, any> | null>(null)
 const stripeConfigQuery = useStripeConfig()
+const reservedBankTransferPaymentId = ref('')
+const reservedBankTransferReference = ref('')
+const reservedBankTransferLoading = ref(false)
+const reservedBankTransferError = ref('')
 
 const stripeCardMountRef = ref<HTMLElement | null>(null)
 const stripeInstance = ref<Stripe | null>(null)
@@ -555,12 +563,50 @@ const successModalMessage = ref('Your purchase has been confirmed.')
 let successRedirectTimer: ReturnType<typeof setTimeout> | null = null
 let successCountdownTimer: ReturnType<typeof setInterval> | null = null
 
+const clearReservedBankTransferPayment = () => {
+	reservedBankTransferPaymentId.value = ''
+	reservedBankTransferReference.value = ''
+	reservedBankTransferError.value = ''
+	reservedBankTransferLoading.value = false
+}
+
+watch(
+	() => selectedPaymentMethodId.value,
+	() => {
+		if (!isBankTransferMethod.value) {
+			clearReservedBankTransferPayment()
+		}
+		if (!isBankTransferEvidenceRequiredImmediately.value) {
+			clearBankTransferEvidenceForm()
+		} else {
+			clearBankTransferEvidenceErrors()
+		}
+	}
+)
+
+watch(
+	[() => isBankTransferMethod.value, () => activeOrderId.value, () => selectedPaymentMethodId.value],
+	([bankSelected, orderId, methodId]) => {
+		if (!bankSelected || !orderId || !methodId) {
+			clearReservedBankTransferPayment()
+			return
+		}
+		void reserveBankTransferPayment(false)
+	},
+	{ immediate: true }
+)
+
 const canSubmitCheckout = computed(() => {
 	if (isCheckoutLocked.value) return false
 	const baseReady = !!activeOrderId.value && !!selectedPaymentMethodId.value && itemCount.value > 0
 	if (!baseReady) return false
 	if (isStripeMethod.value) return stripeCardReady.value
-	if (isBankTransferEvidenceRequiredImmediately.value) return isBankTransferEvidenceFormReady.value
+	if (isBankTransferMethod.value) {
+		if (reservedBankTransferLoading.value || !reservedBankTransferPaymentId.value || !effectiveBankTransferReference.value) {
+			return false
+		}
+		if (isBankTransferEvidenceRequiredImmediately.value) return isBankTransferEvidenceFormReady.value
+	}
 	return true
 })
 
@@ -575,6 +621,58 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const isPurchaseSuccessfulStatus = (status: string) => {
 	return status === 'processing' || status === 'completed'
+}
+
+const effectiveBankTransferReference = computed(() => {
+	const checkoutRef = asTrimmedString(checkoutResult.value?.bank_transfer_reference)
+	if (checkoutRef) return checkoutRef
+	return asTrimmedString(reservedBankTransferReference.value)
+})
+
+
+
+const reserveBankTransferPayment = async (force: boolean = false) => {
+	if (!isBankTransferMethod.value || !activeOrderId.value || !selectedPaymentMethodId.value) {
+		clearReservedBankTransferPayment()
+		return
+	}
+
+	if (!force && reservedBankTransferPaymentId.value && reservedBankTransferReference.value) {
+		return
+	}
+
+	reservedBankTransferLoading.value = true
+	reservedBankTransferError.value = ''
+	try {
+		const response = await reserveBankTransferMutation.mutateAsync({
+			orderId: activeOrderId.value,
+			body: {
+				payment_method_id: selectedPaymentMethodId.value,
+			},
+		})
+		const payload = (response as { data?: Record<string, unknown> }).data || {}
+		reservedBankTransferPaymentId.value = asTrimmedString(payload.payment_id)
+		reservedBankTransferReference.value = asTrimmedString(payload.bank_transfer_reference)
+
+		if (!reservedBankTransferPaymentId.value || !reservedBankTransferReference.value) {
+			reservedBankTransferError.value = 'Could not reserve a bank transfer reference for this order.'
+		}
+	} catch (error: unknown) {
+		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
+		let message = error instanceof Error ? error.message : 'Could not reserve bank transfer reference.'
+		if (typeof payload === 'string' && payload) {
+			message = payload
+		} else if (payload && typeof payload === 'object') {
+			const first = Object.values(payload)[0] as any
+			if (Array.isArray(first) && first[0]) message = String(first[0])
+			else if (typeof first === 'string') message = first
+		}
+		reservedBankTransferError.value = message
+		reservedBankTransferPaymentId.value = ''
+		reservedBankTransferReference.value = ''
+	} finally {
+		reservedBankTransferLoading.value = false
+	}
 }
 
 const openSuccessModal = (title: string, message: string) => {
@@ -772,6 +870,7 @@ async function submitCheckout() {
 			body: isBankTransferEvidenceRequiredImmediately.value
 				? toMultipartFormData({
 					payment_method_id: selectedPaymentMethodId.value,
+					payment_id: isBankTransferMethod.value ? reservedBankTransferPaymentId.value : undefined,
 					bank_transfer_evidence: {
 						evidence_file: bankTransferEvidence.evidence_file as File,
 						payer_name: asTrimmedString(bankTransferEvidence.payer_name),
@@ -781,6 +880,7 @@ async function submitCheckout() {
 				})
 				: {
 					payment_method_id: selectedPaymentMethodId.value,
+					payment_id: isBankTransferMethod.value ? reservedBankTransferPaymentId.value : undefined,
 				},
 		})
 
