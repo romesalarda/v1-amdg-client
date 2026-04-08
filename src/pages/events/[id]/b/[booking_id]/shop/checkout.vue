@@ -70,14 +70,6 @@
 						</p>
 					</article>
 
-					<article
-						v-if="paymentSuccessMessage"
-						class="rounded-2xl border border-green-200 bg-green-50 p-4"
-					>
-						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-800">Payment successful</p>
-						<p class="mt-2 text-sm font-semibold text-green-900">{{ paymentSuccessMessage }}</p>
-					</article>
-
 					<article v-if="!isCheckoutLocked" class="rounded-2xl border border-deep-navy/10 bg-white p-4">
 						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Payment methods</p>
 
@@ -124,22 +116,105 @@
 							v-if="isBankTransferMethod"
 							class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4"
 						>
-							<p class="text-xs font-black uppercase tracking-wide text-amber-900">Bank transfer details</p>
-							<p class="mt-1 text-xs text-amber-900/80">Pay using the account below. Final transfer reference is generated after checkout submission.</p>
+							<div class="flex items-start justify-between gap-3">
+								<div>
+									<p class="text-xs font-black uppercase tracking-wide text-amber-900">Bank transfer checkout</p>
+									<p class="mt-1 text-xs text-amber-900/80">Follow these steps to complete payment clearly and correctly.</p>
+								</div>
+								<span class="rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-wide"
+									:class="hasCompleteBankDetails ? 'border-blue-300 bg-blue-50 text-blue-700' : 'border-amber-300 bg-amber-100 text-amber-800'"
+								>
+									{{ hasCompleteBankDetails ? 'Ready' : 'Missing details' }}
+								</span>
+							</div>
 
-							<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
-									<p class="font-black">Account name</p>
-									<p class="mt-1 break-all">{{ bankDetails.account_name || 'Not provided' }}</p>
-								</div>
-								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
-									<p class="font-black">Sort code</p>
-									<p class="mt-1 break-all">{{ bankDetails.sort_code || 'Not provided' }}</p>
-								</div>
-								<div class="rounded-lg border border-amber-200 bg-white px-3 py-2 text-xs text-amber-900">
-									<p class="font-black">Account number</p>
-									<p class="mt-1 break-all">{{ bankDetails.account_number || 'Not provided' }}</p>
-								</div>
+							<div class="relative mt-4">
+								<div class="pointer-events-none absolute left-3 top-8 bottom-8 w-px bg-blue-200" />
+								<ol class="space-y-3">
+									<li class="relative pl-10">
+										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-blue-300 bg-blue-50 text-[11px] font-black text-blue-700">1</div>
+										<div class="rounded-lg border border-deep-navy/10 bg-white p-3">
+											<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Use these account details</p>
+											<div v-if="!hasCompleteBankDetails" class="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2 py-2 text-xs text-amber-800">
+												Bank details are not fully available yet. Please choose another method or check back shortly.
+											</div>
+											<div class="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
+												<div class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+													<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Account name</p>
+													<p class="mt-1 break-words text-sm font-semibold text-deep-navy">{{ bankDetails.account_name || 'Unavailable' }}</p>
+												</div>
+												<div class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+													<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Sort code</p>
+													<p class="mt-1 text-sm font-semibold text-deep-navy">{{ bankDetails.sort_code || 'Unavailable' }}</p>
+												</div>
+												<div class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+													<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Account number</p>
+													<p class="mt-1 text-sm font-semibold text-deep-navy">{{ bankDetails.account_number || 'Unavailable' }}</p>
+												</div>
+											</div>
+										</div>
+									</li>
+
+									<li class="relative pl-10">
+										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-blue-300 bg-blue-50 text-[11px] font-black text-blue-700">2</div>
+										<div class="rounded-lg border border-deep-navy/10 bg-white p-3">
+											<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Pay this amount</p>
+											<p class="mt-1 text-xl font-black text-deep-navy">{{ order?.total_amount || 'N/A' }}</p>
+										</div>
+									</li>
+
+									<li class="relative pl-10">
+										<div
+											class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-black"
+											:class="checkoutResult?.bank_transfer_reference ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+										>
+											3
+										</div>
+										<div class="rounded-lg border border-deep-navy/10 bg-white p-3">
+											<p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Submit checkout to get transfer reference</p>
+											<p v-if="checkoutResult?.bank_transfer_reference" class="mt-2 rounded-md border border-green-200 bg-green-50 px-3 py-2 text-xs text-green-900">
+												<span class="font-black">Reference:</span> {{ checkoutResult.bank_transfer_reference }}
+											</p>
+											<p v-else class="mt-2 text-xs text-deep-navy/70">A unique reference is generated immediately after you submit this checkout.</p>
+											<p v-if="checkoutResult?.bank_transfer_instructions" class="mt-2 text-xs text-deep-navy/75">{{ checkoutResult.bank_transfer_instructions }}</p>
+										</div>
+									</li>
+
+									<li v-if="isBankTransferEvidenceRequiredImmediately" class="relative pl-10">
+										<div
+											class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-black"
+											:class="isBankTransferEvidenceFormReady ? 'border-green-300 bg-green-50 text-green-700' : 'border-red-300 bg-red-50 text-red-700'"
+										>
+											4
+										</div>
+										<div class="rounded-lg border border-red-200 bg-white p-3">
+											<p class="text-[10px] font-black uppercase tracking-wide text-red-700">Upload transfer evidence (required)</p>
+											<p class="mt-1 text-[11px] text-red-800/90">Accepted: PDF/JPG/JPEG/PNG up to 10MB.</p>
+											<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+												<div class="sm:col-span-2">
+													<label class="mb-1 block text-[11px] font-semibold text-red-800">Evidence file <span class="text-red-600">*</span></label>
+													<input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" @change="onBankTransferEvidenceFileChange">
+													<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
+												</div>
+												<div>
+													<label class="mb-1 block text-[11px] font-semibold text-red-800">Payer name <span class="text-red-600">*</span></label>
+													<input v-model="bankTransferEvidence.payer_name" type="text" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="Full name on transfer">
+													<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
+												</div>
+												<div>
+													<label class="mb-1 block text-[11px] font-semibold text-red-800">Payer account last 4 <span class="text-red-600">*</span></label>
+													<input v-model="bankTransferEvidence.payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="1234">
+													<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
+												</div>
+												<div class="sm:col-span-2">
+													<label class="mb-1 block text-[11px] font-semibold text-red-800">Amount on evidence <span class="text-red-600">*</span></label>
+													<input v-model.number="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="0.00">
+													<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
+												</div>
+											</div>
+										</div>
+									</li>
+								</ol>
 							</div>
 
 							<div class="mt-3 rounded-lg border border-amber-200 bg-white px-3 py-3 text-xs text-amber-900">
@@ -149,34 +224,6 @@
 										? 'This method requires evidence upload during checkout.'
 										: 'Evidence can be uploaded later before payment completion.' }}
 								</p>
-							</div>
-
-							<div v-if="isBankTransferEvidenceRequiredImmediately" class="mt-3 rounded-lg border border-amber-200 bg-white p-3">
-								<p class="text-xs font-black uppercase tracking-[0.14em] text-amber-900">Upload transfer evidence</p>
-								<p class="mt-1 text-[11px] text-amber-800">Transfer reference is generated automatically after checkout submission.</p>
-								<div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-									<div class="sm:col-span-2">
-										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Evidence file <span class="text-red-600">*</span></label>
-										<input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" @change="onBankTransferEvidenceFileChange">
-										<p class="mt-1 text-[11px] text-amber-700">Accepted: PDF/JPG/JPEG/PNG up to 10MB.</p>
-										<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
-									</div>
-									<div>
-										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Payer name <span class="text-red-600">*</span></label>
-										<input v-model="bankTransferEvidence.payer_name" type="text" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="Full name on the transfer">
-										<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
-									</div>
-									<div>
-										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Payer account last 4 <span class="text-red-600">*</span></label>
-										<input v-model="bankTransferEvidence.payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="1234">
-										<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
-									</div>
-									<div class="sm:col-span-2">
-										<label class="mb-1 block text-[11px] font-semibold text-amber-900">Amount on evidence <span class="text-red-600">*</span></label>
-										<input v-model.number="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-amber-200 px-3 py-2 text-sm" placeholder="0.00">
-										<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
-									</div>
-								</div>
 							</div>
 						</div>
 					</article>
@@ -233,10 +280,10 @@
 		</div>
 
 		<Transition
-			enter-active-class="transition duration-300 ease-out"
+			enter-active-class="transition duration-500 ease-out"
 			enter-from-class="opacity-0 scale-95"
 			enter-to-class="opacity-100 scale-100"
-			leave-active-class="transition duration-200 ease-in"
+			leave-active-class="transition duration-250 ease-in"
 			leave-from-class="opacity-100 scale-100"
 			leave-to-class="opacity-0 scale-95"
 		>
@@ -244,26 +291,39 @@
 				v-if="showSuccessModal"
 				class="fixed inset-0 z-50 flex items-center justify-center bg-deep-navy/55 px-4 backdrop-blur-sm"
 			>
-				<div class="relative w-full max-w-md overflow-hidden rounded-3xl border border-green-200 bg-white p-6 shadow-2xl">
-					<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-3">
+				<div class="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-green-200 bg-white p-6 shadow-2xl">
+					<div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-green-100/70 to-transparent" />
+					<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-4">
 						<span class="h-2 w-2 rounded-full bg-green-400 animate-bounce" />
 						<span class="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
 						<span class="h-2 w-2 rounded-full bg-amber-400 animate-bounce" />
 					</div>
 
-					<div class="mt-4 text-center">
-						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-green-700">Purchase complete</p>
-						<h3 class="mt-2 text-2xl font-black text-deep-navy">{{ successModalTitle }}</h3>
-						<p class="mt-2 text-sm text-deep-navy/75">{{ successModalMessage }}</p>
+					<div class="mt-6 text-center success-pop">
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-green-700">Thank you for your order</p>
+						<h3 class="mt-2 text-3xl font-black text-deep-navy">{{ successModalTitle }}</h3>
+						<p class="mx-auto mt-2 max-w-xl text-sm text-deep-navy/75">{{ successModalMessage }}</p>
 					</div>
 
-					<div class="mt-5 flex justify-center">
+					<div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 text-center success-fade-in">
+						<p class="text-[11px] font-black uppercase tracking-[0.14em] text-green-800">Redirecting automatically</p>
+						<p class="mt-1 text-sm font-semibold text-green-900">Back to shop in {{ successModalCountdown }}s</p>
+					</div>
+
+					<div class="mt-5 flex flex-wrap justify-center gap-2">
+						<button
+							type="button"
+							class="rounded-xl border border-deep-navy/20 bg-white px-5 py-2 text-xs font-black uppercase tracking-wide text-deep-navy hover:border-deep-navy"
+							@click="closeSuccessModal"
+						>
+							Stay here
+						</button>
 						<button
 							type="button"
 							class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700"
-							@click="showSuccessModal = false"
+							@click="redirectToShopNow"
 						>
-							Awesome
+							Go to Shop now
 						</button>
 					</div>
 				</div>
@@ -348,6 +408,11 @@ const paymentMethodsQuery = usePaymentMethods(
 const paymentMethods = computed<PaymentMethod[]>(() => {
 	const rows = paymentMethodsQuery.data.value?.data?.results
 	return Array.isArray(rows) ? (rows as PaymentMethod[]) : []
+})
+
+const selectedPaymentMethodId = computed({
+	get: () => store.selectedPaymentMethodId,
+	set: (next: number | null) => store.setSelectedPaymentMethod(next),
 })
 
 const selectedPaymentMethod = computed(() => {
@@ -469,14 +534,10 @@ watch(
 	{ immediate: true }
 )
 
-const selectedPaymentMethodId = computed({
-	get: () => store.selectedPaymentMethodId,
-	set: (next: number | null) => store.setSelectedPaymentMethod(next),
-})
+
 
 const checkoutMutation = useCheckoutProductOrder()
 const checkoutResult = ref<Record<string, any> | null>(null)
-const paymentSuccessMessage = ref('')
 const stripeConfigQuery = useStripeConfig()
 
 const stripeCardMountRef = ref<HTMLElement | null>(null)
@@ -487,8 +548,12 @@ const stripeCardReady = ref(false)
 const stripeCardError = ref('')
 const isConfirmingStripePayment = ref(false)
 const showSuccessModal = ref(false)
+const successRedirectSeconds = 10
+const successModalCountdown = ref(successRedirectSeconds)
 const successModalTitle = ref('Payment successful')
 const successModalMessage = ref('Your purchase has been confirmed.')
+let successRedirectTimer: ReturnType<typeof setTimeout> | null = null
+let successCountdownTimer: ReturnType<typeof setInterval> | null = null
 
 const canSubmitCheckout = computed(() => {
 	if (isCheckoutLocked.value) return false
@@ -518,6 +583,40 @@ const openSuccessModal = (title: string, message: string) => {
 	showSuccessModal.value = true
 }
 
+const clearSuccessModalTimers = () => {
+	if (successRedirectTimer) {
+		clearTimeout(successRedirectTimer)
+		successRedirectTimer = null
+	}
+	if (successCountdownTimer) {
+		clearInterval(successCountdownTimer)
+		successCountdownTimer = null
+	}
+}
+
+const startSuccessModalRedirect = () => {
+	clearSuccessModalTimers()
+	successModalCountdown.value = successRedirectSeconds
+	successCountdownTimer = setInterval(() => {
+		successModalCountdown.value = Math.max(0, successModalCountdown.value - 1)
+	}, 1000)
+	successRedirectTimer = setTimeout(() => {
+		showSuccessModal.value = false
+		void navigateTo(shopHref.value)
+	}, successRedirectSeconds * 1000)
+}
+
+const closeSuccessModal = () => {
+	showSuccessModal.value = false
+	clearSuccessModalTimers()
+}
+
+const redirectToShopNow = () => {
+	clearSuccessModalTimers()
+	showSuccessModal.value = false
+	void navigateTo(shopHref.value)
+}
+
 const waitForOrderStatusAfterStripePayment = async () => {
 	const maxAttempts = 8
 	for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
@@ -532,6 +631,7 @@ const waitForOrderStatusAfterStripePayment = async () => {
 	return String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
 }
 
+const shopHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop`)
 const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
 const bookingWorkspaceHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}`)
 
@@ -549,6 +649,25 @@ watch(
 	},
 	{ immediate: true }
 )
+
+watch(
+	showSuccessModal,
+	(visible) => {
+		if (visible) {
+			startSuccessModalRedirect()
+			return
+		}
+		clearSuccessModalTimers()
+	}
+)
+
+const hasCompleteBankDetails = computed(() => {
+	return Boolean(
+		asTrimmedString(bankDetails.value.account_name) &&
+		asTrimmedString(bankDetails.value.sort_code) &&
+		asTrimmedString(bankDetails.value.account_number)
+	)
+})
 
 const stripePublishableKey = computed(() => {
 	return String(stripeConfigQuery.data.value?.data?.publishable_key || '').trim()
@@ -612,6 +731,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
+	clearSuccessModalTimers()
 	teardownStripeElements()
 })
 
@@ -641,7 +761,6 @@ async function submitCheckout() {
 			return
 		}
 
-		paymentSuccessMessage.value = ''
 		let checkoutToastTitle = 'Checkout submitted'
 		let checkoutToastDescription = isStripeMethod.value
 			? 'Payment has been initialized and card confirmation was attempted.'
@@ -712,24 +831,15 @@ async function submitCheckout() {
 			}
 
 			const statusValue = result.paymentIntent?.status || 'processing'
-			toast.add({
-				title: statusValue === 'succeeded' ? 'Payment confirmed' : 'Payment processing',
-				description: statusValue === 'succeeded'
-					? 'Card payment completed successfully.'
-					: 'Card payment is being processed by Stripe.',
-				color: statusValue === 'succeeded' ? 'green' : 'amber',
-				timeout: 2600,
-			})
 
 			const orderStatus = await waitForOrderStatusAfterStripePayment()
 			if (isPurchaseSuccessfulStatus(orderStatus)) {
 				checkoutToastTitle = 'Order payment recorded'
 				checkoutToastDescription = 'Your order moved to processing after Stripe confirmation.'
 				checkoutToastColor = 'green'
-				paymentSuccessMessage.value = 'Your card payment was confirmed and your order is now being processed.'
 				openSuccessModal(
 					'Payment received',
-					'Your order is now being processed. You can safely close this page or continue browsing.'
+					'Thank you. Your card payment has been confirmed and your order is now being processed.'
 				)
 			} else {
 				checkoutToastTitle = 'Payment confirmed, awaiting sync'
@@ -742,17 +852,19 @@ async function submitCheckout() {
 			if (isPurchaseSuccessfulStatus(orderStatus)) {
 				openSuccessModal(
 					'Order confirmed',
-					'Your checkout was successful and your order has been recorded.'
+					'Thank you. Your checkout was successful and your order has been recorded.'
 				)
 			}
 		}
 
-		toast.add({
-			title: checkoutToastTitle,
-			description: checkoutToastDescription,
-			color: checkoutToastColor,
-			timeout: 2200,
-		})
+		if (checkoutToastColor !== 'green') {
+			toast.add({
+				title: checkoutToastTitle,
+				description: checkoutToastDescription,
+				color: checkoutToastColor,
+				timeout: 2800,
+			})
+		}
 	} catch (error: unknown) {
 		isConfirmingStripePayment.value = false
 		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
@@ -776,3 +888,35 @@ async function submitCheckout() {
 	}
 }
 </script>
+
+<style scoped>
+.success-pop {
+	animation: successPop 420ms ease-out;
+}
+
+.success-fade-in {
+	animation: successFadeIn 520ms ease-out;
+}
+
+@keyframes successPop {
+	0% {
+		opacity: 0;
+		transform: translateY(10px) scale(0.98);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+@keyframes successFadeIn {
+	0% {
+		opacity: 0;
+		transform: translateY(8px);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+</style>
