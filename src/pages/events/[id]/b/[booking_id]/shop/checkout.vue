@@ -102,12 +102,39 @@
 
 						<div
 							v-if="isStripeMethod"
-							class="mt-4 rounded-xl border border-blue-200 bg-blue-50/60 p-4"
+							class="mt-4 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 to-sky-50 p-4"
 						>
-							<p class="text-xs font-black uppercase tracking-wide text-blue-900">Card payment</p>
-							<p class="mt-1 text-xs text-blue-900/85">Your card details are handled by Stripe and never stored on our servers.</p>
-							<div class="mt-3 rounded-lg border border-blue-200 bg-white px-3 py-3">
-								<div ref="stripeCardMountRef" class="min-h-[24px]" />
+							<div class="flex items-start justify-between gap-3">
+								<div class="flex items-center gap-2">
+									<span class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-blue-200 bg-white text-blue-700">
+										<svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+											<path d="M12 2a5 5 0 0 0-5 5v2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1V7a5 5 0 0 0-5-5Zm-3 7V7a3 3 0 1 1 6 0v2H9Z" fill="currentColor"/>
+										</svg>
+									</span>
+									<div>
+										<p class="text-xs font-black uppercase tracking-wide text-blue-900">Secure card payment</p>
+										<p class="mt-1 text-xs text-blue-900/80">Enter your card details in the secure Stripe form below.</p>
+									</div>
+								</div>
+								<div class="flex items-center gap-1 text-[10px] font-black uppercase tracking-wide text-blue-700/80">
+									<span class="rounded border border-blue-200 bg-white px-2 py-1">Visa</span>
+									<span class="rounded border border-blue-200 bg-white px-2 py-1">MC</span>
+									<span class="rounded border border-blue-200 bg-white px-2 py-1">Amex</span>
+								</div>
+							</div>
+
+							<div class="mt-3 rounded-lg border border-blue-200 bg-white p-3 shadow-sm">
+								<div ref="stripeCardMountRef" class="min-h-[32px]" />
+							</div>
+
+							<div class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-blue-200/70 bg-white px-3 py-2">
+								<p class="text-[11px] text-blue-900/80">Transactions are encrypted and processed by Stripe.</p>
+								<div class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white">
+									<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+										<path d="M13.5 2 6 13h5l-1 9 8-12h-5l.5-8Z" fill="currentColor"/>
+									</svg>
+									<span>Powered by Stripe</span>
+								</div>
 							</div>
 							<p v-if="stripeCardError" class="mt-2 text-xs text-red-700">{{ stripeCardError }}</p>
 						</div>
@@ -272,19 +299,50 @@
 					</article>
 				</div>
 
-				<aside class="space-y-3 lg:col-span-4">
+				<aside class="space-y-3 md:sticky md:top-14 md:self-start lg:col-span-4">
 					<article class="rounded-2xl border border-deep-navy/10 bg-white p-4">
 						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Order summary</p>
-						<dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
-							<div class="flex items-center justify-between">
-								<dt>Items</dt>
-								<dd class="font-semibold">{{ itemCount }}</dd>
+						
+						<div v-if="checkoutDisplayItems.length > 0" class="mt-4 space-y-3 max-h-56 overflow-y-auto pr-1">
+							<div
+								v-for="item in checkoutDisplayItems"
+								:key="item.id"
+								class="flex gap-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3"
+							>
+								<img
+									:src="item.imageUrl"
+									:alt="item.title"
+									class="h-16 w-16 rounded-md border border-deep-navy/10 bg-white object-cover flex-shrink-0"
+								>
+								<div class="min-w-0 flex-1">
+									<p class="text-xs font-black text-deep-navy line-clamp-2">{{ item.title }}</p>
+									<p class="text-[10px] text-deep-navy/65 line-clamp-1">{{ item.subtitle }}</p>
+									<div class="mt-2 flex items-end justify-between gap-2">
+										<p class="text-[10px] text-deep-navy/65">Qty <span class="font-bold">{{ item.quantity }}</span></p>
+										<p class="text-xs font-bold text-deep-navy">{{ item.totalPrice }}</p>
+									</div>
+								</div>
 							</div>
-							<div class="flex items-center justify-between border-t border-deep-navy/10 pt-2">
-								<dt class="font-black">Total</dt>
-								<dd class="font-black">{{ order.total_amount }}</dd>
+						</div>
+
+						<div class="mt-4 space-y-3 border-t border-deep-navy/10 pt-4">
+							<div class="flex items-center justify-between text-sm">
+								<dt class="text-[11px] font-semibold text-deep-navy/70">Subtotal</dt>
+								<dd class="font-semibold text-deep-navy">{{ order.total_amount }}</dd>
 							</div>
-						</dl>
+							<div class="flex items-center justify-between text-sm">
+								<dt class="text-[11px] font-semibold text-deep-navy/70">Discounts</dt>
+								<dd class="font-semibold text-deep-navy/70">£0.00</dd>
+							</div>
+							<div class="flex items-center justify-between text-sm">
+								<dt class="text-[11px] font-semibold text-deep-navy/70">Tax</dt>
+								<dd class="font-semibold text-deep-navy/70">£0.00</dd>
+							</div>
+							<div class="border-t border-deep-navy/10 pt-3 flex items-center justify-between">
+								<dt class="text-[11px] font-black uppercase tracking-wide text-deep-navy">Total</dt>
+								<dd class="text-lg font-black text-deep-navy">{{ order.total_amount }}</dd>
+							</div>
+						</div>
 
 						<button
 							type="button"
@@ -294,6 +352,21 @@
 						>
 							{{ ctaLabel }}
 						</button>
+
+						<label class="mt-3 flex items-start gap-2 rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-3">
+							<input
+								v-model="hasAcceptedTerms"
+								type="checkbox"
+								class="mt-0.5 h-4 w-4 rounded border-deep-navy/30 text-deep-navy focus:ring-deep-navy"
+							>
+							<span class="text-[11px] text-deep-navy/85">
+								I agree to the
+								<NuxtLink to="/terms" class="font-semibold text-deep-navy underline underline-offset-2">terms and conditions</NuxtLink>
+								and
+								<NuxtLink to="/privacy" class="font-semibold text-deep-navy underline underline-offset-2">privacy policy</NuxtLink>.
+							</span>
+						</label>
+						<p v-if="termsValidationError" class="mt-2 text-xs font-semibold text-red-600">{{ termsValidationError }}</p>
 					</article>
 				</aside>
 			</section>
@@ -564,6 +637,8 @@ const stripeCardElement = ref<StripeCardElement | null>(null)
 const stripeCardReady = ref(false)
 const stripeCardError = ref('')
 const isConfirmingStripePayment = ref(false)
+const hasAcceptedTerms = ref(false)
+const termsValidationError = ref('')
 const showSuccessModal = ref(false)
 const successRedirectSeconds = 10
 const successModalCountdown = ref(successRedirectSeconds)
@@ -607,6 +682,7 @@ watch(
 
 const canSubmitCheckout = computed(() => {
 	if (isCheckoutLocked.value) return false
+	if (!hasAcceptedTerms.value) return false
 	const baseReady = !!activeOrderId.value && !!selectedPaymentMethodId.value && itemCount.value > 0
 	if (!baseReady) return false
 	if (isStripeMethod.value) return stripeCardReady.value
@@ -768,6 +844,15 @@ watch(
 	}
 )
 
+watch(
+	hasAcceptedTerms,
+	(accepted) => {
+		if (accepted) {
+			termsValidationError.value = ''
+		}
+	}
+)
+
 const hasCompleteBankDetails = computed(() => {
 	return Boolean(
 		asTrimmedString(bankDetails.value.account_name) &&
@@ -858,6 +943,17 @@ async function submitCheckout() {
 	}
 
 	try {
+		if (!hasAcceptedTerms.value) {
+			termsValidationError.value = 'You must accept the terms and conditions before checkout.'
+			toast.add({
+				title: 'Terms required',
+				description: 'Please accept the terms and conditions to continue.',
+				color: 'amber',
+				timeout: 3500,
+			})
+			return
+		}
+
 		if (!validateBankTransferEvidenceForm()) {
 			toast.add({
 				title: 'Missing transfer evidence',
