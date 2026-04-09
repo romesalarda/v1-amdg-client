@@ -538,7 +538,9 @@
             <button
               v-if="!isLoading && paymentData.status === 'PENDING' && paymentData.method?.method_type === 'BANK_TRANSFER'"
               @click="$emit('verify', paymentData)"
+              :disabled="bankTransferEvidenceHasOutstandingVerification || evidenceVerifyPending"
               class="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition-colors flex items-center gap-2"
+              :class="(bankTransferEvidenceHasOutstandingVerification || evidenceVerifyPending) ? 'cursor-not-allowed opacity-60 hover:bg-amber-600' : ''"
             >
               <span class="material-symbols-outlined text-lg">verified</span>
               Verify Bank Transfer

@@ -637,6 +637,7 @@ const stripeCardElement = ref<StripeCardElement | null>(null)
 const stripeCardReady = ref(false)
 const stripeCardError = ref('')
 const isConfirmingStripePayment = ref(false)
+const shouldPreventLockedRedirect = ref(false)
 const hasAcceptedTerms = ref(false)
 const termsValidationError = ref('')
 const showSuccessModal = ref(false)
@@ -827,7 +828,7 @@ const selectedAttendeeLabel = computed(() => {
 watch(
 	isCheckoutLocked,
 	(locked) => {
-		if (!locked) return
+		if (!locked || shouldPreventLockedRedirect.value) return
 		void navigateTo(cartHref.value)
 	},
 	{ immediate: true }
@@ -969,6 +970,7 @@ async function submitCheckout() {
 			? 'Payment has been initialized and card confirmation was attempted.'
 			: 'Payment has been initialized for this order.'
 		let checkoutToastColor: 'green' | 'amber' = 'green'
+		shouldPreventLockedRedirect.value = true
 
 		const response = await checkoutMutation.mutateAsync({
 			orderId: activeOrderId.value,
@@ -1080,6 +1082,7 @@ async function submitCheckout() {
 		}
 	} catch (error: unknown) {
 		isConfirmingStripePayment.value = false
+		shouldPreventLockedRedirect.value = false
 		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
 		let description = error instanceof Error ? error.message : 'Unable to complete checkout.'
 		if (typeof payload === 'string' && payload) {
