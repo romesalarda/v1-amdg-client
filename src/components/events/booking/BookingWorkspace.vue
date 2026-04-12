@@ -492,163 +492,128 @@
               Unable to load orders right now.
             </div>
             <template v-else>
-              <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding payments</p>
-                  <p class="text-xs text-blue-800">{{ outstandingPayments.length }}</p>
-                </div>
-                <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
-                  <div
-                    v-for="payment in outstandingPayments"
-                    :key="payment.payment_id || payment.payment_reference"
-                    :class="paymentAttentionCardClass(payment)"
-                  >
-                    <div class="flex items-center justify-between gap-3">
-                      <div>
-                        <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                        <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
-                        <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : 'text-blue-700'">
-                          {{ paymentAttentionLabel(payment) }}
-                        </p>
-                        <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                      </div>
-                      <button
-                        type="button"
-                        class="rounded-lg border border-blue-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
-                        @click="togglePaymentExpand(payment)"
-                      >
-                        {{ isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
-                      </button>
+              <div v-if="attendeeOrderList.length" class="space-y-3">
+                <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                  <div class="flex items-center justify-between gap-3">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding payments</p>
+                      <p class="mt-1 text-sm text-blue-900/80">{{ attendeeOrderList.length }} order{{ attendeeOrderList.length === 1 ? '' : 's' }} linked to this attendee</p>
                     </div>
-
-                    <p
-                      v-if="isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || ''))"
-                      class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800"
-                    >
-                      Evidence uploaded. Waiting for verification.
-                    </p>
-
+                    <p class="text-xs text-blue-800 font-black">{{ outstandingPayments.length }}</p>
+                  </div>
+                  <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
                     <div
-                      v-if="isOutstandingBankTransfer(payment) && needsEvidenceUpload(payment)"
-                      class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2"
+                      v-for="payment in outstandingPayments"
+                      :key="payment.payment_id || payment.payment_reference"
+                      :class="paymentAttentionCardClass(payment)"
                     >
-                      <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
-                      <div>
-                        <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                          @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)"
-                        >
-                      </div>
-                      <div class="space-y-2">
+                      <div class="flex items-center justify-between gap-3">
                         <div>
-                          <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
-                          <input
-                            v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_name"
-                            type="text"
-                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                            placeholder="Full name"
-                          >
+                          <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                          <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
+                          <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : 'text-blue-700'">
+                            {{ paymentAttentionLabel(payment) }}
+                          </p>
+                          <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
                         </div>
-                        <div>
-                          <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
-                          <input
-                            v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4"
-                            type="text"
-                            maxlength="4"
-                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                            placeholder="1234"
-                          >
-                        </div>
-                      </div>
-                      <div>
-                        <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
-                        <input
-                          v-model="evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                          placeholder="0.00"
-                        >
-                      </div>
-                      <p v-if="evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">
-                        {{ evidenceUploadError[String(payment.payment_id || '')] }}
-                      </p>
-                      <p v-if="evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">
-                        {{ evidenceUploadSuccess[String(payment.payment_id || '')] }}
-                      </p>
-                      <div class="flex justify-end">
                         <button
                           type="button"
-                          class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60"
-                          :disabled="!!evidenceUploadPending[String(payment.payment_id || '')]"
-                          @click="uploadOutstandingEvidence(payment)"
+                          class="rounded-lg border border-blue-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                          @click="togglePaymentExpand(payment)"
                         >
-                          {{ evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                          {{ isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
                         </button>
                       </div>
-                    </div>
 
-                    <div v-if="isPaymentExpanded(payment.payment_id || '')" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3 text-xs text-deep-navy/80 space-y-2">
-                      <p v-if="paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
-                      <template v-else>
-                        <p><span class="font-black text-deep-navy">Method:</span> {{ getPaymentMethodType(payment.payment_id || '') }}</p>
-                        <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-blue-200 bg-white p-3 space-y-2">
-                          <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
-                          <ol class="space-y-2 text-[12px] text-deep-navy/90">
-                            <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
-                              <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
-                              <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
-                            </li>
-                            <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
-                              <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
-                              <div class="mt-1 space-y-2">
-                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
-                                  <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
-                                </div>
-                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
-                                  <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
-                                </div>
-                                <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                                  <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
-                                  <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
-                                </div>
-                              </div>
-                            </li>
-                            <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
-                              <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
-                              <div class="mt-1 flex items-center justify-between gap-2">
-                                <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
-                                <button
-                                  type="button"
-                                  class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
-                                  @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
-                                >
-                                  Copy
-                                </button>
-                              </div>
-                            </li>
-                          </ol>
+                      <p v-if="isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || ''))" class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800">
+                        Evidence uploaded. Waiting for verification.
+                      </p>
+
+                      <div v-if="isOutstandingBankTransfer(payment) && needsEvidenceUpload(payment)" class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2">
+                        <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
+                          <input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)">
                         </div>
+                        <div class="space-y-2">
+                          <div>
+                            <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
+                            <input v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_name" type="text" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="Full name">
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
+                            <input v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="1234">
+                          </div>
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
+                          <input v-model="evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="0.00">
+                        </div>
+                        <p v-if="evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">{{ evidenceUploadError[String(payment.payment_id || '')] }}</p>
+                        <p v-if="evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">{{ evidenceUploadSuccess[String(payment.payment_id || '')] }}</p>
+                        <div class="flex justify-end">
+                          <button type="button" class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60" :disabled="!!evidenceUploadPending[String(payment.payment_id || '')]" @click="uploadOutstandingEvidence(payment)">
+                            {{ evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                          </button>
+                        </div>
+                      </div>
 
-                        <p v-if="!isOutstandingBankTransfer(payment)" class="text-[11px] text-deep-navy/70">
-                          This payment is {{ payment.method_title || payment.method_type || 'not bank transfer' }}.
-                        </p>
-                        <p v-if="getBankTransferReference(payment.payment_id || '')"><span class="font-black text-deep-navy">Bank transfer reference:</span> {{ getBankTransferReference(payment.payment_id || '') }}</p>
-                        <p v-if="getBankTransferInstructions(payment.payment_id || '')" class="whitespace-pre-line"><span class="font-black text-deep-navy">Instructions:</span> {{ getBankTransferInstructions(payment.payment_id || '') }}</p>
-                      </template>
+                      <div v-if="isPaymentExpanded(payment.payment_id || '')" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3 text-xs text-deep-navy/80 space-y-2">
+                        <p v-if="paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
+                        <template v-else>
+                          <p><span class="font-black text-deep-navy">Method:</span> {{ getPaymentMethodType(payment.payment_id || '') }}</p>
+                          <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-blue-200 bg-white p-3 space-y-2">
+                            <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
+                            <ol class="space-y-2 text-[12px] text-deep-navy/90">
+                              <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
+                                <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                              </li>
+                              <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
+                                <div class="mt-1 space-y-2">
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                                    <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                                  </div>
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                                    <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                                  </div>
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                                    <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                                  </div>
+                                </div>
+                              </li>
+                              <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
+                                <div class="mt-1 flex items-center justify-between gap-2">
+                                  <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                  <button type="button" class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100" @click="copyTransferReference(getRequiredTransferReference(payment) || '')">
+                                    Copy
+                                  </button>
+                                </div>
+                              </li>
+                            </ol>
+                          </div>
+                          <p v-if="!isOutstandingBankTransfer(payment)" class="text-[11px] text-deep-navy/70">This payment is {{ payment.method_title || payment.method_type || 'not bank transfer' }}.</p>
+                          <p v-if="getBankTransferReference(payment.payment_id || '')"><span class="font-black text-deep-navy">Bank transfer reference:</span> {{ getBankTransferReference(payment.payment_id || '') }}</p>
+                          <p v-if="getBankTransferInstructions(payment.payment_id || '')" class="whitespace-pre-line"><span class="font-black text-deep-navy">Instructions:</span> {{ getBankTransferInstructions(payment.payment_id || '') }}</p>
+                        </template>
+                      </div>
+
+                      <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <p v-else class="mt-2 text-sm">No outstanding payments linked to this booking.</p>
-              </section>
+                </section>
 
-              <div v-if="attendeeOrderList.length" class="space-y-3">
+                <div class="rounded-2xl border border-deep-navy/10 bg-white p-5 shadow-sm">
                 <article v-for="order in attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden"> 
                   <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
                     <div>
@@ -706,7 +671,14 @@
                   </div>
                 </article>
               </div>
-              <p v-else class="text-sm text-deep-navy/60">No orders found for this attendee yet.</p>
+              </div>
+              <div v-else class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                  <UIcon name="i-heroicons-inbox" class="h-7 w-7" />
+                </div>
+                <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No orders yet</p>
+                <p class="mt-2 text-sm text-slate-500">This attendee does not have any linked orders, so there are no outstanding payment actions to show here.</p>
+              </div>
             </template>
           </article>
 
