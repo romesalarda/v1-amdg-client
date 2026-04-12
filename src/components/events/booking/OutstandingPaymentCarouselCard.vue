@@ -199,11 +199,11 @@
               <div class="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <p class="text-blue-700">Order reference</p>
-                  <p class="font-semibold text-blue-900">{{ orderReference }}</p>
+                  <p class="font-semibold text-blue-900">{{ metadata.order_reference }}</p>
                 </div>
                 <div>
                   <p class="text-blue-700">Status</p>
-                  <p class="font-semibold text-blue-900">{{ orderStatus }}</p>
+                  <p class="font-semibold text-blue-900">{{ metadata.status }}</p>
                 </div>
               </div>
               <div v-if="orderItems.length" class="mt-2 space-y-1">
@@ -578,8 +578,8 @@ const orderItems = computed<Array<Record<string, unknown>>>(() => {
   const items = orderMetadata.value.order_items
   return Array.isArray(items) ? (items as Array<Record<string, unknown>>) : []
 })
-const orderReference = computed(() => readString(orderMetadata.value.order_reference_id) || 'N/A')
-const orderStatus = computed(() => readString(orderMetadata.value.status) || 'N/A')
+const orderReference = computed(() => readString(orderMetadata.value.order_reference) || 'N/A')
+const orderStatus = computed(() => readString(orderMetadata.value.order_status) || 'N/A')
 
 const bookingMetadata = computed(() => metadata.value)
 const bookingReference = computed(() => readString(bookingMetadata.value.booking_reference) || 'N/A')

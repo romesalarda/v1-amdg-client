@@ -1256,7 +1256,7 @@ const bookingLevelPayments = computed(() => {
 })
 
 const attendeeLevelPayments = computed(() => {
-  return paymentSummaryData.value?.attendee_payments || []
+  return paymentSummaryData.value?.shop_payments || []
 })
 
 const isSingleAttendeeBooking = computed(() => attendees.value.length === 1)
@@ -1851,7 +1851,7 @@ function getBankTransferInstructions(paymentId: string): string | null {
 function isOutstandingBankTransfer(payment: any): boolean {
   const type = String(payment?.method_type || payment?.metadata?.method_type || '').toUpperCase().replace(/-/g, '_')
   const title = String(payment?.method_title || payment?.metadata?.method_title || '').toUpperCase()
-  return type === 'BANK_TRANSFER' || title.includes('BANK TRANSFER')
+  return (type === 'BANK_TRANSFER' || title.includes('BANK TRANSFER')) && String(payment?.status || '').toUpperCase() === 'PENDING'
 }
 
 function getProvidedDetail(payment: any, key: 'account_name' | 'sort_code' | 'account_number'): string | null {
