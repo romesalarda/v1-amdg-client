@@ -3529,7 +3529,7 @@ onBeforeUnmount(() => {
 
 const goBack = () => {
 	if (event.value?.event_id) {
-		router.push({ path: `/events/${event.value.event_id}` })
+		router.push({ path: `/events/${event.value.url_safe_title}` })
 		return
 	}
 	router.back()

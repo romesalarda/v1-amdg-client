@@ -294,174 +294,189 @@
             </div>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+          <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <div class="flex items-center justify-between gap-3">
-              <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Payments</p>
-              <p class="text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
+              <div>
+                <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Payments</p>
+                <p class="mt-1 text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
+              </div>
             </div>
 
-            <div v-if="paymentSummary.isLoading.value" class="text-sm text-deep-navy/60">Loading payments...</div>
-            <div v-else-if="paymentSummary.error.value" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <div v-if="paymentSummary.isLoading.value" class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/70">
+              Loading payments...
+            </div>
+            <div v-else-if="paymentSummary.error.value" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
               Unable to load payment summary right now.
             </div>
             <template v-else>
-              <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding now</p>
-                  <p class="text-xs font-black text-blue-800">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
-                </div>
-                <p class="mt-2 text-sm text-blue-900">
-                  Booking: {{ paymentSummaryData?.totals?.booking_outstanding_payments || 0 }} | Shop: {{ paymentSummaryData?.totals?.shop_outstanding_payments || 0 }}
-                </p>
-                <p class="mt-1 text-xs text-blue-800">Outstanding total amount: {{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }}</p>
+              <section class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
+                <p class="text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">Outstanding now</p>
+                <p class="mt-3 text-4xl font-black text-blue-900">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
+                <p class="mt-1 text-sm text-blue-900/80">{{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }} outstanding</p>
               </section>
 
-              <section class="space-y-2">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Attendee payments</p>
-                  <p class="text-xs text-deep-navy/60">{{ attendeeLevelPayments.length }}</p>
-                </div>
-                <div v-if="attendeeLevelPayments.length" class="space-y-2">
-                  <div v-for="payment in attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
+              <section class="space-y-4">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Attendee payments</p>
+                <div v-if="attendeeLevelPayments.length" class="space-y-4">
+                  <article v-for="payment in attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/45">Payment</p>
+                        <p class="mt-1 truncate text-sm font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/65">{{ paymentContextSummary(payment) }}</p>
+                      </div>
+                      <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'">
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
                     </div>
-                    <div class="mt-2 flex flex-wrap items-center gap-2">
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
-                        {{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}
-                      </span>
+
+                    <div class="mt-4 space-y-3">
+                      <div class="rounded-xl border border-deep-navy/10 bg-mist-blue/35 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Amount</p>
+                        <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                      </div>
+                      <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                        <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                        <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">{{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}</span>
                       <button
                         v-if="payment.order_reference"
                         type="button"
-                        class="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                         @click="openOrderFromPayment(payment.order_reference || '')"
                       >
                         View {{ payment.order_reference }}
                       </button>
                     </div>
-                    <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
-                    <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                    <p class="text-[11px] text-deep-navy/70 mt-1">{{ paymentContextSummary(payment) }}</p>
 
-                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-[12px] text-deep-navy/90 space-y-2">
-                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer details</p>
-                      <div class="grid sm:grid-cols-3 gap-2">
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
-                          <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
-                        </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
-                        </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
-                        </div>
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 space-y-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
+                        <button
+                          v-if="getRequiredTransferReference(payment)"
+                          type="button"
+                          class="rounded-full border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-white"
+                          @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                        >
+                          Copy ref
+                        </button>
                       </div>
-                      <div v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-white p-2">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">Transfer reference</p>
-                        <div class="mt-1 flex items-center justify-between gap-2">
-                          <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
-                          <button
-                            type="button"
-                            class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
-                            @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
-                          >
-                            Copy
-                          </button>
+                      <div class="space-y-2">
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account name</p>
+                          <p class="mt-1 break-words text-sm font-black text-blue-900">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account number</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                        <div v-if="getRequiredTransferReference(payment)" class="rounded-xl border border-blue-300 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Transfer reference</p>
+                          <p class="mt-1 break-all text-sm font-black text-blue-900">{{ getRequiredTransferReference(payment) }}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
-                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
-                      <div class="mt-1 space-y-1">
-                        <p v-for="label in getRelatedOrderLabels(payment)" :key="label" class="font-semibold">
-                          {{ label }}
-                        </p>
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 </div>
-                <p v-else class="text-sm text-deep-navy/60">No attendee-level payments yet.</p>
+                <p v-else class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/65">No attendee-level payments yet.</p>
               </section>
 
-              <section class="space-y-2 pt-2 border-t border-deep-navy/10">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Booking-wide payments</p>
-                  <p class="text-xs text-deep-navy/60">{{ bookingLevelPayments.length }}</p>
-                </div>
-                <div v-if="bookingLevelPayments.length" class="space-y-2">
-                  <div v-for="payment in bookingLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-lg border border-deep-navy/10 p-3">
-                    <div class="flex items-center justify-between gap-2">
-                      <p class="text-sm font-semibold text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'">
+              <section class="space-y-4 pt-2 border-t border-deep-navy/10">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Booking-wide payments</p>
+                <div v-if="bookingLevelPayments.length" class="space-y-4">
+                  <article v-for="payment in bookingLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/45">Payment</p>
+                        <p class="mt-1 truncate text-sm font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/65">{{ paymentContextSummary(payment) }}</p>
+                      </div>
+                      <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'">
                         {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
                       </span>
                     </div>
-                    <div class="mt-2 flex flex-wrap items-center gap-2">
-                      <span class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide" :class="payment.source === 'SHOP_ORDER' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-700'">
-                        {{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}
-                      </span>
+
+                    <div class="mt-4 space-y-3">
+                      <div class="rounded-xl border border-deep-navy/10 bg-mist-blue/35 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Amount</p>
+                        <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                      </div>
+                      <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                        <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                        <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">{{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}</span>
                       <button
                         v-if="payment.order_reference"
                         type="button"
-                        class="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
                         @click="openOrderFromPayment(payment.order_reference || '')"
                       >
                         View {{ payment.order_reference }}
                       </button>
                     </div>
-                    <p class="mt-1 text-sm font-black text-deep-navy">{{ payment.amount || '-' }}</p>
-                    <p class="text-[11px] text-deep-navy/70">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                    <p class="text-[11px] text-deep-navy/70 mt-1">{{ paymentContextSummary(payment) }}</p>
 
-                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-3 text-[12px] text-deep-navy/90 space-y-2">
-                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer details</p>
-                      <div class="grid sm:grid-cols-3 gap-2">
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
-                          <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
-                        </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
-                        </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
-                        </div>
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 space-y-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
+                        <button
+                          v-if="getRequiredTransferReference(payment)"
+                          type="button"
+                          class="rounded-full border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-white"
+                          @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                        >
+                          Copy ref
+                        </button>
                       </div>
-                      <div v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-white p-2">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">Transfer reference</p>
-                        <div class="mt-1 flex items-center justify-between gap-2">
-                          <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
-                          <button
-                            type="button"
-                            class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
-                            @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
-                          >
-                            Copy
-                          </button>
+                      <div class="space-y-2">
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account name</p>
+                          <p class="mt-1 break-words text-sm font-black text-blue-900">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account number</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                        <div v-if="getRequiredTransferReference(payment)" class="rounded-xl border border-blue-300 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Transfer reference</p>
+                          <p class="mt-1 break-all text-sm font-black text-blue-900">{{ getRequiredTransferReference(payment) }}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-2 rounded-md border border-blue-200 bg-blue-50 p-2 text-[11px] text-blue-900">
-                      <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Related orders</p>
-                      <div class="mt-1 space-y-1">
-                        <p v-for="label in getRelatedOrderLabels(payment)" :key="label" class="font-semibold">
-                          {{ label }}
-                        </p>
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 </div>
-                <p v-else class="text-sm text-deep-navy/60">No booking-level payments found.</p>
+                <p v-else class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/65">No booking-level payments found.</p>
               </section>
             </template>
           </article>
@@ -527,7 +542,7 @@
                           @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)"
                         >
                       </div>
-                      <div class="grid sm:grid-cols-2 gap-2">
+                      <div class="space-y-2">
                         <div>
                           <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
                           <input
@@ -590,7 +605,7 @@
                             </li>
                             <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
                               <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
-                              <div class="mt-1 grid sm:grid-cols-3 gap-2">
+                              <div class="mt-1 space-y-2">
                                 <div class="rounded-md border border-deep-navy/10 bg-white p-2">
                                   <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
                                   <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
@@ -695,51 +710,63 @@
             </template>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+          <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
             <div v-else-if="attendee.isLoading.value" class="text-sm text-deep-navy/60">Loading attendee...</div>
             <div v-else class="space-y-4">
-              <div class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Editing attendee</p>
+              <!-- <div class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">Editing attendee</p>
                 <p class="mt-1 text-sm font-semibold text-blue-900">{{ attendee.data.value?.data?.full_name || selectedAttendee?.name || 'Attendee' }}</p>
-                <p class="text-xs text-blue-800/80">{{ attendee.data.value?.data?.attendee_display_id || selectedAttendee?.display_id || selectedAttendeeId }}</p>
-              </div>
-              <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Attendee editor</p>
-              <form class="space-y-4" @submit.prevent="saveAttendee">
-                <div class="grid md:grid-cols-2 gap-4">
+                <div v-if="attendeeForm.area_from_name || areaSearch" class="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-800">
+                  <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                  <span>{{ attendeeForm.area_from_name || areaSearch }}</span>
+                </div>
+              </div> -->
+
+              <form class="space-y-5" @submit.prevent="saveAttendee">
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>First name</span>
-                    <input v-model="attendeeForm.first_name" type="text" required class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">First name <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.first_name" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.first_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.first_name }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
-                    <span>Last name</span>
-                    <input v-model="attendeeForm.last_name" type="text" required class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Last name <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.last_name" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.last_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.last_name }}</p>
                   </label>
                 </div>
-                <div class="grid md:grid-cols-2 gap-4">
+
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>Email</span>
-                    <input v-model="attendeeForm.email" type="email" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Email <span class="text-deep-navy/45">optional</span></span>
+                    <input v-model="attendeeForm.email" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.email" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.email }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
-                    <span>Phone</span>
-                    <input v-model="attendeeForm.phone_number" type="text" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <label class="space-y-1 text-sm">
-                    <span>Date of birth</span>
-                    <input v-model="attendeeForm.date_of_birth" type="date" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
-                  <label class="space-y-1 text-sm">
-                    <span>Gender</span>
-                    <input v-model="attendeeForm.gender" type="text" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Phone <span class="text-deep-navy/45">optional</span></span>
+                    <input v-model="attendeeForm.phone_number" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.phone_number" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.phone_number }}</p>
                   </label>
                 </div>
-                <div class="grid md:grid-cols-2 gap-4">
+
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>Relationship</span>
-                    <select v-model="attendeeForm.relationship_to_user" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Date of birth <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.date_of_birth" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.date_of_birth" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.date_of_birth }}</p>
+                  </label>
+                  <label class="space-y-1 text-sm">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Gender <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.gender" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <p v-if="attendeeValidationErrors.gender" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.gender }}</p>
+                  </label>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <label class="space-y-1 text-sm">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Relationship <span class="text-red-500">*</span></span>
+                    <select v-model="attendeeForm.relationship_to_user" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
                       <option value="">Not set</option>
                       <option value="self">Self</option>
                       <option value="spouse">Spouse</option>
@@ -749,14 +776,51 @@
                       <option value="sibling">Sibling</option>
                       <option value="other">Other</option>
                     </select>
+                    <p v-if="attendeeValidationErrors.relationship_to_user" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.relationship_to_user }}</p>
                   </label>
-                  <label class="space-y-1 text-sm">
-                    <span>Area id</span>
-                    <input v-model.number="attendeeForm.area_from" type="number" min="1" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
+
+                  <div class="space-y-2 rounded-2xl border border-deep-navy/10 bg-mist-blue/35 p-4">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy/60">Area from <span class="text-red-500">*</span></p>
+                      <p class="mt-1 text-xs text-deep-navy/65">Search for an area and select the matching result.</p>
+                    </div>
+                    <div class="relative">
+                      <input
+                        v-model="areaSearch"
+                        type="text"
+                        placeholder="Search area name"
+                        class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400"
+                      >
+                      <div v-if="areaOptions.length && areaSearch.trim().length >= 2" class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-deep-navy/10 bg-white shadow-xl">
+                        <button
+                          v-for="option in areaOptions"
+                          :key="option.value"
+                          type="button"
+                          class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition hover:bg-blue-50"
+                          :class="option.value === attendeeForm.area_from ? 'bg-blue-50 text-blue-700' : 'text-deep-navy'"
+                          @click="applyAreaOption(option)"
+                        >
+                          <span class="min-w-0 truncate font-medium">{{ option.label }}</span>
+                          <span v-if="option.value === attendeeForm.area_from" class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
+                        </button>
+                      </div>
+                    </div>
+                    <p v-if="areaLookupLoading" class="text-xs font-semibold text-blue-700">Searching areas...</p>
+                    <div v-if="attendeeForm.area_from" class="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-white px-3 py-2.5">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Selected area</p>
+                        <p class="truncate text-sm font-semibold text-blue-900">{{ attendeeForm.area_from_name || areaSearch || 'Area selected' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-blue-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-50" @click="clearAreaFrom">
+                        Clear
+                      </button>
+                    </div>
+                    <p v-if="attendeeValidationErrors.area_from" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.area_from }}</p>
+                  </div>
                 </div>
+
                 <div class="flex justify-end">
-                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-blue-600 disabled:opacity-55">
+                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600 disabled:opacity-55">
                     {{ updateAttendee.isPending.value ? 'Saving...' : 'Save attendee' }}
                   </button>
                 </div>
@@ -764,157 +828,237 @@
             </div>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-6">
+          <article v-if="selectedAttendeeId && activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
             <template v-else>
-              <section class="space-y-3">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Medical conditions</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addMedicalCondition">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newMedical.medical_condition" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select condition</option>
-                    <option v-for="item in medicalConditions.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newMedical.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeMedicalConditions.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.condition_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
-                    </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeMedicalCondition(item.id)">Remove</button>
-                  </div>
-                </div>
-              </section>
-
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Dietary requirements</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addDietaryRequirement">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newDietary.dietary_requirement" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select requirement</option>
-                    <option v-for="item in dietaryRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newDietary.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeDietaryRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
-                    </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeDietaryRequirement(item.id)">Remove</button>
-                  </div>
-                </div>
-              </section>
-
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Accessibility requirements</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addAccessibilityRequirement">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newAccessibility.accessibility_requirement" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select requirement</option>
-                    <option v-for="item in accessibilityRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newAccessibility.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
-                    </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeAccessibilityRequirement(item.id)">Remove</button>
-                  </div>
-                </div>
-              </section>
-            </template>
-          </article>
-
-          <article v-if="selectedAttendeeId && activeTab === 'consents'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Consents</p>
-              <div class="space-y-2">
-                <div
-                  v-for="item in attendeeConsents.data.value?.data?.results || []"
-                  :key="item.id"
-                  class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between"
-                >
+              <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                <div class="flex items-center justify-between gap-3">
                   <div>
-                    <p class="text-sm font-semibold text-deep-navy">{{ item.consent_details.title }}</p>
-                    <p class="text-xs text-deep-navy/60">{{ item.consent_details.required ? 'Required' : 'Optional' }}</p>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Medical conditions</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked conditions are shown below. Open the form only when needed.</p>
                   </div>
-                  <button type="button" class="text-xs font-semibold" :class="item.consent_given ? 'text-green-700' : 'text-blue-700'" @click="toggleConsent(item)">
-                    {{ item.consent_given ? 'Given' : 'Not given' }}
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showMedicalForm = !showMedicalForm">
+                    {{ showMedicalForm ? 'Hide form' : 'Add condition' }}
                   </button>
                 </div>
-              </div>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeMedicalConditions.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.condition_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeMedicalCondition(item.id)">
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                  <p v-if="!attendeeMedicalConditions.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No medical conditions linked to this attendee yet.</p>
+                </div>
+                <div v-if="showMedicalForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-white p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newMedical.medical_condition" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select condition</option>
+                      <option v-for="item in medicalConditions.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newMedical.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addMedicalCondition">
+                        Add condition
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
 
-              <div class="pt-3 border-t border-deep-navy/10 grid md:grid-cols-2 gap-2">
-                <select v-model.number="newConsent.consent" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                  <option :value="null">Add consent</option>
-                  <option v-for="item in eventConsents.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.title }}</option>
-                </select>
-                <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addConsent">Add consent</button>
-              </div>
+              <section class="rounded-2xl border border-deep-navy/10 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Dietary requirements</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked requirements are shown below. Add new ones only when needed.</p>
+                  </div>
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showDietaryForm = !showDietaryForm">
+                    {{ showDietaryForm ? 'Hide form' : 'Add requirement' }}
+                  </button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeDietaryRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-mist-blue/20 p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.requirement_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeDietaryRequirement(item.id)">
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                  <p v-if="!attendeeDietaryRequirements.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-mist-blue/20 p-4 text-sm text-deep-navy/60">No dietary requirements linked to this attendee yet.</p>
+                </div>
+                <div v-if="showDietaryForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newDietary.dietary_requirement" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select requirement</option>
+                      <option v-for="item in dietaryRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newDietary.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addDietaryRequirement">
+                        Add requirement
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Accessibility requirements</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked requirements are shown below. Add new ones only when needed.</p>
+                  </div>
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showAccessibilityForm = !showAccessibilityForm">
+                    {{ showAccessibilityForm ? 'Hide form' : 'Add requirement' }}
+                  </button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.requirement_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeAccessibilityRequirement(item.id)">
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                  <p v-if="!attendeeAccessibilityRequirements.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No accessibility requirements linked to this attendee yet.</p>
+                </div>
+                <div v-if="showAccessibilityForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-white p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newAccessibility.accessibility_requirement" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select requirement</option>
+                      <option v-for="item in accessibilityRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newAccessibility.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addAccessibilityRequirement">
+                        Add requirement
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="rounded-2xl border border-deep-navy/10 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Emergency contacts</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Required for minors and useful for all attendees.</p>
+                  </div>
+                  <p class="text-xs font-black uppercase tracking-wide text-deep-navy/45">{{ attendeeEmergencyContactList.length }} linked</p>
+                </div>
+                <div class="mt-4 space-y-4">
+                  <div class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                    <div class="grid gap-3 md:grid-cols-2">
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">First name</span>
+                        <input v-model="emergencyContactForm.first_name" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Last name</span>
+                        <input v-model="emergencyContactForm.last_name" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Phone number</span>
+                        <input v-model="emergencyContactForm.phone_number" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Relationship</span>
+                        <select v-model="emergencyContactForm.relationship" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                          <option v-for="option in emergencyRelationshipOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                        </select>
+                      </label>
+                      <label class="space-y-1 text-sm md:col-span-2">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Email</span>
+                        <input v-model="emergencyContactForm.email" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <label class="inline-flex items-center gap-2 text-xs font-semibold text-deep-navy/70">
+                        <input v-model="emergencyContactForm.primary_contact" type="checkbox" class="h-4 w-4 rounded border-deep-navy/30 text-blue-600">
+                        Primary contact
+                      </label>
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addEmergencyContact">
+                        Add contact
+                      </button>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <article v-for="contact in attendeeEmergencyContactList" :key="contact.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="text-sm font-black text-deep-navy">{{ contact.full_name }}</p>
+                          <p class="mt-1 text-xs text-deep-navy/60">{{ contact.relationship_display }} • {{ contact.phone_number }}</p>
+                          <p v-if="contact.email" class="mt-1 truncate text-xs text-deep-navy/60">{{ contact.email }}</p>
+                        </div>
+                        <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeEmergencyContact(contact.id)">
+                          Remove
+                        </button>
+                      </div>
+                    </article>
+                    <p v-if="!attendeeEmergencyContactList.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No emergency contacts linked yet.</p>
+                  </div>
+                </div>
+              </section>
             </template>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'family'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-6">
+          <article v-if="selectedAttendeeId && activeTab === 'consents'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
             <template v-else>
-              <section class="space-y-3">
-                <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Guardians</p>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <select v-model="guardianCandidateId" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                    <option value="">Select attendee as guardian</option>
-                    <option v-for="item in guardianCandidates" :key="item.attendee_id" :value="item.attendee_id">{{ item.full_name }} ({{ item.attendee_display_id }})</option>
-                  </select>
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addGuardian">Add</button>
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Consents</p>
+                  <p class="mt-1 text-xs text-deep-navy/60">Tick a consent to link it. Untick it to remove the link.</p>
                 </div>
-                <div class="space-y-2">
-                  <div v-for="item in guardians.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.user_name || item.user_email || 'Guardian' }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.relationship_display }}</p>
-                    </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeGuardian(item.id)">Remove</button>
-                  </div>
-                </div>
-              </section>
+              </div>
 
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Family groups</p>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <input v-model="newFamilyGroupName" type="text" placeholder="New family group" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="createFamilyGroup">Create</button>
-                </div>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <select v-model.number="newFamilyMembership.family_group" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                    <option :value="null">Select family group</option>
-                    <option v-for="item in familyGroups.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.family_name }}</option>
-                  </select>
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addFamilyMembership">Add membership</button>
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in familyMemberships.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.family_name }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.relationship_display }}</p>
+              <div v-if="eventConsents.data.value?.data?.results?.length" class="space-y-3">
+                <article v-for="consent in eventConsents.data.value?.data?.results || []" :key="consent.id" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                  <label class="flex items-start gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      class="mt-1 h-4 w-4 rounded border-deep-navy/30 text-blue-600 focus:ring-blue-500"
+                      :checked="isConsentLinked(consent.id)"
+                      @change="toggleConsentLink(consent.id, ($event.target as HTMLInputElement).checked)"
+                    >
+                    <div class="min-w-0 flex-1">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <p class="text-sm font-black text-deep-navy">{{ consent.title }}</p>
+                        <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="consent.required ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'">
+                          {{ consent.required ? 'Required' : 'Optional' }}
+                        </span>
+                        <span class="rounded-full bg-mist-blue px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy/70">
+                          {{ consentToggleLabel(consent.id) }}
+                        </span>
+                      </div>
+                      <p class="mt-2 text-xs text-deep-navy/60">{{ consent.description }}</p>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeFamilyMembership(item.id)">Remove</button>
-                  </div>
-                </div>
-              </section>
+                  </label>
+                </article>
+              </div>
+              <p v-else class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">No consents are configured for this event yet.</p>
             </template>
+          </article>
+
+          <article v-if="selectedAttendeeId && activeTab === 'family'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+            <div class="rounded-2xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-6 text-center">
+              <p class="text-[10px] font-black uppercase tracking-[0.28em] text-deep-navy/45">In progress</p>
+              <h3 class="mt-3 text-lg font-black text-deep-navy">Family + guardians is being reworked</h3>
+              <p class="mt-2 text-sm text-deep-navy/70">This tab is intentionally reduced for future work while the new flow is designed.</p>
+            </div>
           </article>
         </section>
 
@@ -1082,10 +1226,14 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch, watchEffect, computed } from 'vue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useQueryClient } from '@tanstack/vue-query'
+import { bookingAttendeeFormSchema, type BookingAttendeeFormData } from '~/schemas/events/booking'
 import OutstandingPaymentCarouselCard from '~/components/events/booking/OutstandingPaymentCarouselCard.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { uploadMultipart } from '~/utils/upload'
+import { locationsAreasList } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import {
@@ -1094,10 +1242,11 @@ import {
   useEventMyPaymentSummary,
   type ApiErrorLike,
 } from '~/composables/resources/events'
-import { useAttendee, useAttendees, useUpdateAttendee } from '~/composables/resources/attendee/attendees'
+import { useAttendee, useUpdateAttendee } from '~/composables/resources/attendee/attendees'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { useAttendeeEmergencyContacts, useCreateAttendeeEmergencyContact, useDeleteAttendeeEmergencyContact } from '~/composables/resources/attendee/attendeeEmergencyContacts'
 import {
   useAttendeeMedicalConditions,
   useCreateAttendeeMedicalCondition,
@@ -1117,15 +1266,13 @@ import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
 import {
   useAttendeeConsents,
   useCreateAttendeeConsent,
-  usePartialUpdateAttendeeConsent,
+  useDeleteAttendeeConsent,
 } from '~/composables/resources/attendee/attendeeConsentsRelationship'
 import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
-import { useGuardians, useCreateGuardian, useDeleteGuardian } from '~/composables/resources/common/guardians'
-import { useFamilyAttendees, useCreateFamilyAttendee, useDeleteFamilyAttendee } from '~/composables/resources/common/familyAttendees'
-import { useFamilyGroups, useCreateFamilyGroup } from '~/composables/resources/common/familyGroups'
 
-type RelationshipType = 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other' | ''
 type TabId = 'overview' | 'attendee' | 'health' | 'consents' | 'family' | 'orders' | 'payments'
+type AreaOption = { label: string; value: number }
+type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 
 const props = defineProps<{
   eventId: string
@@ -1463,11 +1610,11 @@ if (props.initialAttendeeId) {
 
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
   { id: 'overview', label: 'Booking Overview' },
-  { id: 'payments', label: 'Payments', needsAttendee: true },
+  { id: 'payments', label: 'Payments', needsAttendee: false },
   { id: 'attendee', label: 'Attendee Editor', needsAttendee: true },
-  { id: 'health', label: 'Medical + Dietary + Accessibility', needsAttendee: true },
+  { id: 'health', label: 'Safeguarding', needsAttendee: true },
   { id: 'consents', label: 'Consents', needsAttendee: true },
-  { id: 'family', label: 'Family + Guardians', needsAttendee: true },
+  { id: 'family', label: 'Groups', needsAttendee: true },
   { id: 'orders', label: 'Orders', needsAttendee: true },
 ]
 
@@ -1626,6 +1773,139 @@ const cancelOrderMutation = useCancelProductOrder()
 const attendeeOrderList = computed(() => {
   const payload = attendeeOrders.data.value?.data as any
   return payload?.results || []
+})
+
+const areaSearch = ref('')
+const areaOptions = ref<AreaOption[]>([])
+const areaLookupLoading = ref(false)
+let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+const attendeeEmergencyContacts = useAttendeeEmergencyContacts(computed(() => selectedAttendeeId.value || ''))
+const createEmergencyContact = useCreateAttendeeEmergencyContact()
+const deleteEmergencyContact = useDeleteAttendeeEmergencyContact()
+
+const attendeeEmergencyContactList = computed(() => attendeeEmergencyContacts.data.value?.data?.results || [])
+
+const emergencyContactForm = ref({
+  first_name: '',
+  last_name: '',
+  phone_number: '',
+  email: '',
+  relationship: 'parent' as EmergencyContactRelationship,
+  primary_contact: true,
+})
+
+const emergencyRelationshipOptions = [
+  { label: 'Parent', value: 'parent' },
+  { label: 'Sibling', value: 'sibling' },
+  { label: 'Child', value: 'child' },
+  { label: 'Spouse', value: 'spouse' },
+  { label: 'Friend', value: 'friend' },
+  { label: 'Other', value: 'other' },
+]
+
+function normalizeEmergencyContactForm() {
+  emergencyContactForm.value = {
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    email: '',
+    relationship: 'parent',
+    primary_contact: true,
+  }
+}
+
+function applyAreaOption(option: AreaOption) {
+  attendeeForm.value.area_from = option.value
+  attendeeForm.value.area_from_name = option.label
+  areaSearch.value = option.label
+  areaOptions.value = []
+}
+
+function clearAreaFrom() {
+  attendeeForm.value.area_from = undefined
+  attendeeForm.value.area_from_name = ''
+  areaSearch.value = ''
+  areaOptions.value = []
+}
+
+async function addEmergencyContact() {
+  if (!selectedAttendeeId.value) return
+
+  const firstName = String(emergencyContactForm.value.first_name || '').trim()
+  const lastName = String(emergencyContactForm.value.last_name || '').trim()
+  const phoneNumber = String(emergencyContactForm.value.phone_number || '').trim()
+  const email = String(emergencyContactForm.value.email || '').trim()
+
+  if (!firstName || !lastName || !phoneNumber) {
+    $notyf?.error('Emergency contact first name, last name, and phone number are required.')
+    return
+  }
+
+  try {
+    await createEmergencyContact.mutateAsync({
+      attendeeId: selectedAttendeeId.value,
+      body: {
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        relationship: emergencyContactForm.value.relationship,
+        email: email || undefined,
+        primary_contact: emergencyContactForm.value.primary_contact,
+      },
+    })
+    normalizeEmergencyContactForm()
+    $notyf?.success('Emergency contact added.')
+  } catch (error) {
+    console.error('Failed to add emergency contact', error)
+    $notyf?.error('Could not add emergency contact.')
+  }
+}
+
+async function removeEmergencyContact(contactId: number) {
+  if (!selectedAttendeeId.value) return
+  try {
+    await deleteEmergencyContact.mutateAsync({ attendeeId: selectedAttendeeId.value, contactId })
+    $notyf?.success('Emergency contact removed.')
+  } catch (error) {
+    console.error('Failed to remove emergency contact', error)
+    $notyf?.error('Could not remove emergency contact.')
+  }
+}
+
+watch(areaSearch, (term) => {
+  if (areaSearchDebounceTimer) {
+    clearTimeout(areaSearchDebounceTimer)
+    areaSearchDebounceTimer = null
+  }
+
+  const query = term.trim()
+  if (query.length < 2) {
+    areaOptions.value = []
+    areaLookupLoading.value = false
+    return
+  }
+
+  areaLookupLoading.value = true
+  areaSearchDebounceTimer = setTimeout(async () => {
+    try {
+      const response = await locationsAreasList({
+        query: {
+          search: query,
+          page_size: 5,
+        },
+      })
+      areaOptions.value = (response.data?.results || []).map((area: any) => ({
+        label: area.area_name,
+        value: area.id,
+      }))
+    } catch (error) {
+      console.error('Failed to search areas', error)
+      areaOptions.value = []
+    } finally {
+      areaLookupLoading.value = false
+    }
+  }, 300)
 })
 
 const expandedPaymentIds = ref<string[]>([])
@@ -1981,16 +2261,49 @@ function getOrderStatusBadgeClass(status?: string): string {
   return classes[normalized] || 'bg-gray-100 text-gray-700'
 }
 
-const attendeeForm = ref({
+const attendeeForm = ref<BookingAttendeeFormData>({
   first_name: '',
   last_name: '',
   email: '',
   phone_number: '',
   date_of_birth: '',
   gender: '',
-  relationship_to_user: '' as RelationshipType,
-  area_from: null as number | null,
+  relationship_to_user: 'self',
+  area_from: undefined,
+  area_from_name: '',
 })
+
+const {
+  errors: attendeeValidationErrors,
+  validate: validateAttendeeForm,
+  resetForm: resetAttendeeForm,
+  setValues: setAttendeeFormValues,
+} = useForm({
+  validationSchema: toTypedSchema(bookingAttendeeFormSchema),
+  initialValues: {
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: '',
+    date_of_birth: '',
+    gender: '',
+    relationship_to_user: '',
+    area_from: undefined,
+    area_from_name: '',
+  },
+})
+
+watch(
+  attendeeForm,
+  (value) => {
+    setAttendeeFormValues({ ...value })
+  },
+  { deep: true },
+)
+
+const showMedicalForm = ref(false)
+const showDietaryForm = ref(false)
+const showAccessibilityForm = ref(false)
 
 watch(
   () => attendee.data.value?.data,
@@ -2003,15 +2316,37 @@ watch(
       phone_number: value.phone_number || '',
       date_of_birth: value.date_of_birth || '',
       gender: value.gender || '',
-      relationship_to_user: (value.relationship_to_user as RelationshipType) || '',
-      area_from: value.area_from || null,
+      relationship_to_user: (value.relationship_to_user as BookingAttendeeFormData['relationship_to_user']) || '',
+      area_from: value.area_from || undefined,
+      area_from_name: value.area_from_name || '',
     }
+    areaSearch.value = value.area_from_name || ''
+    areaOptions.value = []
+    normalizeEmergencyContactForm()
+    resetAttendeeForm({
+      values: {
+        first_name: attendeeForm.value.first_name,
+        last_name: attendeeForm.value.last_name,
+        email: attendeeForm.value.email,
+        phone_number: attendeeForm.value.phone_number,
+        date_of_birth: attendeeForm.value.date_of_birth,
+        gender: attendeeForm.value.gender,
+        relationship_to_user: attendeeForm.value.relationship_to_user || undefined,
+        area_from: attendeeForm.value.area_from || undefined,
+        area_from_name: attendeeForm.value.area_from_name,
+      },
+    })
   },
   { immediate: true },
 )
 
 async function saveAttendee() {
   if (!selectedAttendeeId.value) return
+  const validation = await validateAttendeeForm()
+  if (!validation.valid) {
+    $notyf?.error('Please complete the required attendee fields.')
+    return
+  }
   try {
     await updateAttendee.mutateAsync({
       attendeeId: selectedAttendeeId.value,
@@ -2020,8 +2355,8 @@ async function saveAttendee() {
         last_name: attendeeForm.value.last_name,
         email: attendeeForm.value.email || null,
         phone_number: attendeeForm.value.phone_number || null,
-        date_of_birth: attendeeForm.value.date_of_birth || null,
-        gender: attendeeForm.value.gender || null,
+        date_of_birth: attendeeForm.value.date_of_birth,
+        gender: attendeeForm.value.gender,
         relationship_to_user: attendeeForm.value.relationship_to_user || undefined,
         area_from: attendeeForm.value.area_from,
       },
@@ -2144,163 +2479,49 @@ async function removeAccessibilityRequirement(requirementId: number) {
 const eventConsents = useConsents(computed(() => ({ event: eventId.value })))
 const attendeeConsents = useAttendeeConsents(computed(() => selectedAttendeeId.value || ''))
 const createConsent = useCreateAttendeeConsent()
-const partialUpdateConsent = usePartialUpdateAttendeeConsent()
-const newConsent = ref({ consent: null as number | null })
+const deleteConsent = useDeleteAttendeeConsent()
 
-async function addConsent() {
-  if (!selectedAttendeeId.value || !newConsent.value.consent) return
-  try {
-    await createConsent.mutateAsync({
-      attendeeId: selectedAttendeeId.value,
-      body: {
-        consent: newConsent.value.consent,
-        consent_given: false,
-      } as any,
-    })
-    newConsent.value = { consent: null }
-    $notyf?.success('Consent record added.')
-  } catch (error) {
-    console.error('Failed to add consent', error)
-    $notyf?.error('Could not add consent.')
-  }
+const attendeeConsentRecords = computed(() => attendeeConsents.data.value?.data?.results || [])
+
+function getAttendeeConsentRecord(consentId: number) {
+  return attendeeConsentRecords.value.find((item: any) => item.consent_details?.id === consentId) || null
 }
 
-async function toggleConsent(item: any) {
+function isConsentLinked(consentId: number): boolean {
+  return !!getAttendeeConsentRecord(consentId)
+}
+
+function consentToggleLabel(consentId: number): string {
+  const record = getAttendeeConsentRecord(consentId)
+  if (!record) return 'Not linked'
+  return record.consent_given ? 'Linked' : 'Linked, not confirmed'
+}
+
+async function toggleConsentLink(consentId: number, checked: boolean) {
   if (!selectedAttendeeId.value) return
-  try {
-    await partialUpdateConsent.mutateAsync({
-      attendeeId: selectedAttendeeId.value,
-      consentId: item.id,
-      body: {
-        consent_given: !item.consent_given,
-        given_at: !item.consent_given ? new Date().toISOString() : null,
-      } as any,
-    })
-  } catch (error) {
-    console.error('Failed to toggle consent', error)
-    $notyf?.error('Could not update consent.')
-  }
-}
 
-const guardians = useGuardians(computed(() => {
-  if (!selectedAttendeeId.value) return undefined
-  return { attendee: selectedAttendeeId.value, page_size: 100 }
-}))
-const createGuardian = useCreateGuardian()
-const deleteGuardian = useDeleteGuardian()
-const guardianSourceAttendees = useAttendees(computed(() => ({ event: eventId.value, page_size: 200 })))
-const guardianCandidateId = ref('')
-
-const guardianCandidates = computed(() => {
-  return (guardianSourceAttendees.data.value?.data?.results || []).filter((item: any) => {
-    if (!selectedAttendeeId.value) return false
-    return item.attendee_id !== selectedAttendeeId.value && !!item?._links?.user
-  })
-})
-
-async function addGuardian() {
-  if (!selectedAttendeeId.value || !guardianCandidateId.value) return
-  const candidate = guardianCandidates.value.find((item: any) => item.attendee_id === guardianCandidateId.value) as any
-  const userMatch = String(candidate?._links?.user || '').match(/\/users\/(\d+)\//)
-  const userId = userMatch ? parseInt(userMatch[1], 10) : null
-  if (!userId) {
-    $notyf?.error('Selected attendee has no linked user.')
-    return
-  }
+  const existing = getAttendeeConsentRecord(consentId)
 
   try {
-    await createGuardian.mutateAsync({
-      attendee: selectedAttendeeId.value,
-      user: userId,
-      relationship: 'parent',
-    } as any)
-    guardianCandidateId.value = ''
-    $notyf?.success('Guardian linked.')
-  } catch (error) {
-    console.error('Failed to add guardian', error)
-    $notyf?.error('Could not link guardian.')
-  }
-}
-
-async function removeGuardian(guardianId: number) {
-  try {
-    await deleteGuardian.mutateAsync(guardianId)
-    $notyf?.success('Guardian removed.')
-  } catch (error) {
-    console.error('Failed to remove guardian', error)
-    $notyf?.error('Could not remove guardian.')
-  }
-}
-
-const familyMemberships = useFamilyAttendees(computed(() => {
-  if (!selectedAttendeeId.value) return undefined
-  return { attendee: selectedAttendeeId.value, page_size: 100 }
-}))
-const createFamilyMembership = useCreateFamilyAttendee()
-const deleteFamilyMembership = useDeleteFamilyAttendee()
-const familyGroups = useFamilyGroups(computed(() => ({ page_size: 100, event: eventId.value } as any)))
-const createFamilyGroupMutation = useCreateFamilyGroup()
-
-const newFamilyGroupName = ref('')
-const newFamilyMembership = ref({
-  family_group: null as number | null,
-  relationship: 'sibling' as 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other',
-  is_primary_guardian: false,
-})
-
-async function createFamilyGroup() {
-  const familyName = newFamilyGroupName.value.trim()
-  if (!familyName) return
-
-  const eventNumericId = event.data.value?.data?.id
-  const organisationId = (event.data.value?.data as any)?.organisation
-  if (!eventNumericId || !organisationId) {
-    $notyf?.error('Event context is not ready for group creation.')
-    return
-  }
-
-  try {
-    await createFamilyGroupMutation.mutateAsync({
-      family_name: familyName,
-      event: eventNumericId,
-      organisation: organisationId,
-    } as any)
-    newFamilyGroupName.value = ''
-    $notyf?.success('Family group created.')
-  } catch (error) {
-    console.error('Failed to create family group', error)
-    $notyf?.error('Could not create family group.')
-  }
-}
-
-async function addFamilyMembership() {
-  if (!selectedAttendeeId.value || !newFamilyMembership.value.family_group) return
-  try {
-    await createFamilyMembership.mutateAsync({
-      family_group: newFamilyMembership.value.family_group,
-      attendee: selectedAttendeeId.value,
-      relationship: newFamilyMembership.value.relationship,
-      is_primary_guardian: newFamilyMembership.value.is_primary_guardian,
-    } as any)
-    newFamilyMembership.value = {
-      family_group: null,
-      relationship: 'sibling',
-      is_primary_guardian: false,
+    if (checked && !existing) {
+      await createConsent.mutateAsync({
+        attendeeId: selectedAttendeeId.value,
+        body: {
+          consent: consentId,
+          consent_given: true,
+        },
+      })
+      $notyf?.success('Consent linked.')
+      return
     }
-    $notyf?.success('Family membership added.')
-  } catch (error) {
-    console.error('Failed to add family membership', error)
-    $notyf?.error('Could not add family membership.')
-  }
-}
 
-async function removeFamilyMembership(membershipId: number) {
-  try {
-    await deleteFamilyMembership.mutateAsync(membershipId)
-    $notyf?.success('Family membership removed.')
+    if (!checked && existing) {
+      await deleteConsent.mutateAsync({ attendeeId: selectedAttendeeId.value, consentId: existing.id })
+      $notyf?.success('Consent removed.')
+    }
   } catch (error) {
-    console.error('Failed to remove family membership', error)
-    $notyf?.error('Could not remove family membership.')
+    console.error('Failed to update consent link', error)
+    $notyf?.error('Could not update consent.')
   }
 }
 
@@ -2342,6 +2563,10 @@ onMounted(() => {
 onUnmounted(() => {
   if (countdownInterval) {
     clearInterval(countdownInterval)
+  }
+  if (areaSearchDebounceTimer) {
+    clearTimeout(areaSearchDebounceTimer)
+    areaSearchDebounceTimer = null
   }
 })
 
