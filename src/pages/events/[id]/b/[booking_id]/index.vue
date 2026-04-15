@@ -21,9 +21,11 @@ const bookingReference = computed(() => String(route.params.booking_id || ''))
 const initialAttendeeId = computed(() => String(route.query.attendee || ''))
 const initialTab = computed(() => {
 	const tab = String(route.query.tab || '')
-	if (tab === 'attendee' || tab === 'health' || tab === 'consents' || tab === 'family' || tab === 'overview') {
-		return tab
-	}
+	if (tab === 'overview' || tab === 'attendee' || tab === 'payments' || tab === 'orders') return tab
+
+	// Preserve compatibility with old deep links after tab consolidation.
+	if (tab === 'health' || tab === 'consents' || tab === 'family') return 'attendee'
+
 	return undefined
 })
 </script>

@@ -17,14 +17,14 @@
               <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Live Event Portal</span>
             </div>
             <h1 class="font-headline text-5xl font-extrabold tracking-tighter text-white md:text-6xl">{{ eventTitle }}</h1>
-            <p class="max-w-lg text-xl text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>. Your journey to the extraordinary is ready.</p>
+            <p class="max-w-lg text-xl text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>.</p>
           </div>
 
           <div class="md:ml-auto md:max-w-xl md:pl-8">
             <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">Countdown to Launch</p>
             <div v-if="hasStarted" class="mt-4">
               <p class="text-2xl font-black text-white">Event started</p>
-              <p class="mt-1 text-xs text-white/75">{{ formatEventDate(eventStart) }}</p>
+              <p class="mt-1 text-xs text-white/75">{{ formatDate(eventStart) }}</p>
             </div>
             <div v-else class="mt-4 flex items-end gap-3 font-headline text-4xl font-bold tracking-tighter text-white">
               <div class="flex flex-col items-center">
@@ -61,7 +61,7 @@
             </svg>
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Date</p>
-              <p class="text-sm font-black text-deep-navy truncate">{{ formatEventDate(eventStart) }}</p>
+              <p class="text-sm font-black text-deep-navy truncate">{{ formatDate(eventStart) }}</p>
             </div>
           </div>
 
@@ -71,8 +71,8 @@
             </svg>
             <div class="min-w-0">
               <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Timing</p>
-              <p class="text-sm font-black text-deep-navy truncate">{{ formatEventDate(eventStart) }}</p>
-              <p class="text-[11px] text-deep-navy/70 truncate">Ends {{ formatEventDate(eventEnd) }}</p>
+              <p class="text-sm font-black text-deep-navy truncate">{{ formatDateTime(eventStart) }}</p>
+              <p class="text-[11px] text-deep-navy/70 truncate">{{ myBookingData?.event?.timezone }}</p>
             </div>
           </div>
 
@@ -116,26 +116,26 @@
       <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <section class="lg:col-span-8 space-y-4">
-           <div v-if="booking && selectedAttendeeId" class="border-b border-deep-navy/10 bg-white/95 backdrop-blur-sm">
-      <div class="max-w-screen-xl mx-auto px-6 overflow-x-auto">
-        <div class="min-w-max flex items-center gap-2 py-3">
-          <button
-            v-for="tab in tabs"
-            :key="tab.id"
-            type="button"
-            @click="setActiveTab(tab.id)"
-            :class="[
-              'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border',
-              activeTab === tab.id
-                ? 'bg-deep-navy text-white border-deep-navy'
-                : 'bg-white text-deep-navy border-deep-navy/15 hover:border-blue-400 hover:text-blue-700'
-            ]"
-          >
-            {{ tab.label }}
-          </button>
-        </div>
-      </div>
-    </div>
+            <div v-if="booking && selectedAttendeeId" class="rounded-2xl border border-deep-navy/10 bg-white/95 p-3 shadow-sm">
+              <div class="overflow-x-auto">
+                <div class="min-w-max flex items-center gap-2">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  type="button"
+                  @click="setActiveTab(tab.id)"
+                  :class="[
+                    'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70',
+                    activeTab === tab.id
+                      ? 'bg-deep-navy text-white border-deep-navy shadow-sm'
+                      : 'bg-white text-deep-navy border-deep-navy/15 hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-700'
+                  ]"
+                >
+                  {{ tab.label }}
+                </button>
+                </div>
+              </div>
+            </div>
           <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
               <div class="flex items-center justify-between gap-3">
@@ -218,8 +218,8 @@
                         </template>
 
                         <template v-else-if="step.action === 'time'">
-                          <p><span class="font-black text-deep-navy">Starts:</span> {{ formatEventDate(eventStart) }}</p>
-                          <p><span class="font-black text-deep-navy">Ends:</span> {{ formatEventDate(eventEnd) }}</p>
+                          <p><span class="font-black text-deep-navy">Starts:</span> {{ formatDateTime(eventStart) }}</p>
+                          <p><span class="font-black text-deep-navy">Ends:</span> {{ formatDateTime(eventEnd) }}</p>
                           <p><span class="font-black text-deep-navy">Timezone:</span> {{ myBookingData?.event?.timezone || 'UTC' }}</p>
                         </template>
                       </div>
@@ -554,7 +554,7 @@
                   <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
                     <div>
                       <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ formatEventDate(order.created_at) }}</p>
+                      <p class="text-xs text-deep-navy/60">{{ formatDateTime(order.created_at) }}</p>
                     </div>
                     <div class="flex items-center gap-2">
                       <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide"
@@ -632,15 +632,62 @@
               </div> -->
 
               <form class="space-y-5" @submit.prevent="saveAttendee">
+                <section class="rounded-2xl border border-deep-navy/10 bg-white">
+                  <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Personal info</p>
+                      <p class="mt-1 text-xs text-deep-navy/60">{{ isPersonalInfoEditing ? 'Edit attendee profile details.' : 'Review attendee profile details.' }}</p>
+                    </div>
+                    <button
+                      type="button"
+                      class="rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wide"
+                      :class="isPersonalInfoEditing ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-blue-400 hover:text-blue-700'"
+                      @click="togglePersonalInfoEdit"
+                    >
+                      {{ isPersonalInfoEditing ? 'Stop editing' : 'Edit details' }}
+                    </button>
+                  </div>
+
+                  <div class="p-4">
+                    <div v-if="!isPersonalInfoEditing" class="space-y-3">
+                      <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-3">
+                        <p class="text-sm font-black text-deep-navy">{{ attendeeForm.first_name }} {{ attendeeForm.last_name }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ attendeeForm.relationship_to_user && attendeeForm.relationship_to_user !== 'self' ? attendeeForm.relationship_to_user.charAt(0).toUpperCase() + attendeeForm.relationship_to_user.slice(1) : 'Self' }}</p>
+                      </div>
+                      <div class="grid gap-3 md:grid-cols-2">
+                        <div v-if="attendeeForm.email" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Email</p>
+                          <p class="mt-1 truncate text-sm text-deep-navy">{{ attendeeForm.email }}</p>
+                        </div>
+                        <div v-if="attendeeForm.phone_number" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Phone</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.phone_number }}</p>
+                        </div>
+                        <div v-if="attendeeForm.date_of_birth" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Date of birth</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.date_of_birth }}</p>
+                        </div>
+                        <div v-if="attendeeForm.gender" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Gender</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.gender }}</p>
+                        </div>
+                        <div v-if="attendeeForm.area_from_name" class="rounded-lg border border-deep-navy/10 bg-white p-3 md:col-span-2">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Area from</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.area_from_name }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-else class="space-y-4">
                 <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">First name <span class="text-red-500">*</span></span>
-                    <input v-model="attendeeForm.first_name" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.first_name" :disabled="!isPersonalInfoEditing" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.first_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.first_name }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Last name <span class="text-red-500">*</span></span>
-                    <input v-model="attendeeForm.last_name" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.last_name" :disabled="!isPersonalInfoEditing" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.last_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.last_name }}</p>
                   </label>
                 </div>
@@ -648,12 +695,12 @@
                 <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Email <span class="text-deep-navy/45">optional</span></span>
-                    <input v-model="attendeeForm.email" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.email" :disabled="!isPersonalInfoEditing" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.email" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.email }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Phone <span class="text-deep-navy/45">optional</span></span>
-                    <input v-model="attendeeForm.phone_number" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.phone_number" :disabled="!isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.phone_number" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.phone_number }}</p>
                   </label>
                 </div>
@@ -661,12 +708,12 @@
                 <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Date of birth <span class="text-red-500">*</span></span>
-                    <input v-model="attendeeForm.date_of_birth" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.date_of_birth" :disabled="!isPersonalInfoEditing" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.date_of_birth" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.date_of_birth }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Gender <span class="text-red-500">*</span></span>
-                    <input v-model="attendeeForm.gender" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
+                    <input v-model="attendeeForm.gender" :disabled="!isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                     <p v-if="attendeeValidationErrors.gender" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.gender }}</p>
                   </label>
                 </div>
@@ -675,7 +722,7 @@
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Relationship <span class="text-red-500">*</span></span>
                     <select 
-                    :disabled="attendeeForm.relationship_to_user == 'self'"
+                    :disabled="!isPersonalInfoEditing || attendeeForm.relationship_to_user == 'self'"
                     v-model="attendeeForm.relationship_to_user" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
                       <option value="self">Self</option>
                       <option value="spouse">Spouse</option>
@@ -696,11 +743,12 @@
                     <div class="relative">
                       <input
                         v-model="areaSearch"
+                        :disabled="!isPersonalInfoEditing"
                         type="text"
                         placeholder="Search area name"
-                        class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400"
+                        class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65"
                       >
-                      <div v-if="areaOptions.length && areaSearch.trim().length >= 2" class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-deep-navy/10 bg-white shadow-xl">
+                      <div v-if="isPersonalInfoEditing && areaOptions.length && areaSearch.trim().length >= 2" class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-deep-navy/10 bg-white shadow-xl">
                         <button
                           v-for="option in areaOptions"
                           :key="option.value"
@@ -720,19 +768,80 @@
                         <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Selected area</p>
                         <p class="truncate text-sm font-semibold text-blue-900">{{ attendeeForm.area_from_name || areaSearch || 'Area selected' }}</p>
                       </div>
-                      <button type="button" class="rounded-full border border-blue-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-50" @click="clearAreaFrom">
+                      <button v-if="isPersonalInfoEditing" type="button" class="rounded-full border border-blue-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-50" @click="clearAreaFrom">
                         Clear
                       </button>
                     </div>
                     <p v-if="attendeeValidationErrors.area_from" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.area_from }}</p>
                   </div>
                 </div>
+                    </div>
+                  </div>
+                </section>
 
+                <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/20">
+                  <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Safeguarding</p>
+                      <p class="mt-1 text-xs text-deep-navy/60">Medical, dietary, accessibility, and emergency records.</p>
+                    </div>
+                    <button
+                      type="button"
+                      class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700"
+                      @click="toggleAttendeeSection('safeguarding')"
+                    >
+                      {{ attendeeSectionsOpen.safeguarding ? 'Collapse' : 'Expand' }}
+                    </button>
+                  </div>
+
+                  <div class="p-4">
+                    <div v-if="!attendeeSectionsOpen.safeguarding" class="space-y-3">
+                      <div v-if="attendeeMedicalConditions.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Medical conditions</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeMedicalConditions.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.condition_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeDietaryRequirements.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Dietary requirements</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeDietaryRequirements.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeAccessibilityRequirements.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Accessibility requirements</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeEmergencyContactList.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Emergency contacts</p>
+                        <div class="space-y-2">
+                          <div v-for="contact in attendeeEmergencyContactList" :key="contact.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ contact.full_name }}</p>
+                            <p class="mt-1 text-xs text-deep-navy/60">{{ contact.relationship_display }} • {{ contact.phone_number }}</p>
+                            <p v-if="contact.email" class="mt-1 truncate text-xs text-deep-navy/60">{{ contact.email }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <p v-if="!attendeeMedicalConditions.data.value?.data?.results?.length && !attendeeDietaryRequirements.data.value?.data?.results?.length && !attendeeAccessibilityRequirements.data.value?.data?.results?.length && !attendeeEmergencyContactList.length" class="rounded-lg border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No safeguarding information added yet.</p>
+                    </div>
+                      
+                    <div v-else class="space-y-5">
                 <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
                 <div class="flex items-center justify-between gap-3">
                   <div>
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Medical conditions</p>
-                    <p class="mt-1 text-xs text-deep-navy/60">Linked conditions are shown below. Open the form only when needed.</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked conditions are shown below.</p>
                   </div>
                   <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showMedicalForm = !showMedicalForm">
                     {{ showMedicalForm ? 'Hide form' : 'Add condition' }}
@@ -766,6 +875,7 @@
                     </div>
                   </div>
                 </div>
+              
               </section>
 
               <section class="rounded-2xl border border-deep-navy/10 bg-white p-4">
@@ -854,7 +964,6 @@
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Emergency contacts</p>
                     <p class="mt-1 text-xs text-deep-navy/60">Required for minors and useful for all attendees.</p>
                   </div>
-                  <p class="text-xs font-black uppercase tracking-wide text-deep-navy/45">{{ attendeeEmergencyContactList.length }} linked</p>
                 </div>
                 <div class="mt-4 space-y-4">
                   <div class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
@@ -909,66 +1018,54 @@
                   </div>
                 </div>
               </section>
-       
+                    </div>
+                  </div>
+                </section>
+              </form>
 
-                <div class="flex justify-end">
-                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600 disabled:opacity-55">
-                    {{ updateAttendee.isPending.value ? 'Saving...' : 'Save attendee' }}
+              <section class="rounded-2xl border border-deep-navy/10 bg-white">
+                <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Consents</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Link or unlink attendee consents here to keep profile setup complete.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700"
+                    @click="toggleAttendeeSection('consents')"
+                  >
+                    {{ attendeeSectionsOpen.consents ? 'Collapse' : 'Expand' }}
                   </button>
                 </div>
-              </form>
-            </div>
-          </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-                   </template>
-          </article>
-
-          <article v-if="selectedAttendeeId && activeTab === 'consents'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <div class="flex items-center justify-between gap-3">
-                <div>
-                  <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Consents</p>
-                  <p class="mt-1 text-xs text-deep-navy/60">Tick a consent to link it. Untick it to remove the link.</p>
+                <div v-if="attendeeSectionsOpen.consents" class="space-y-4 p-4">
+                  <div v-if="eventConsents.data.value?.data?.results?.length" class="space-y-3">
+                    <article v-for="consent in eventConsents.data.value?.data?.results || []" :key="consent.id" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                      <label class="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          class="mt-1 h-4 w-4 rounded border-deep-navy/30 text-blue-600 focus:ring-blue-500"
+                          :checked="isConsentLinked(consent.id)"
+                          @change="toggleConsentLink(consent.id, ($event.target as HTMLInputElement).checked)"
+                        >
+                        <div class="min-w-0 flex-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-sm font-black text-deep-navy">{{ consent.title }}</p>
+                            <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="consent.required ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'">
+                              {{ consent.required ? 'Required' : 'Optional' }}
+                            </span>
+                            <span class="rounded-full bg-mist-blue px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy/70">
+                              {{ consentToggleLabel(consent.id) }}
+                            </span>
+                          </div>
+                          <p class="mt-2 text-xs text-deep-navy/60">{{ consent.description }}</p>
+                        </div>
+                      </label>
+                    </article>
+                  </div>
+                  <p v-else class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">No consents are configured for this event yet.</p>
                 </div>
-              </div>
-
-              <div v-if="eventConsents.data.value?.data?.results?.length" class="space-y-3">
-                <article v-for="consent in eventConsents.data.value?.data?.results || []" :key="consent.id" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
-                  <label class="flex items-start gap-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      class="mt-1 h-4 w-4 rounded border-deep-navy/30 text-blue-600 focus:ring-blue-500"
-                      :checked="isConsentLinked(consent.id)"
-                      @change="toggleConsentLink(consent.id, ($event.target as HTMLInputElement).checked)"
-                    >
-                    <div class="min-w-0 flex-1">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <p class="text-sm font-black text-deep-navy">{{ consent.title }}</p>
-                        <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="consent.required ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'">
-                          {{ consent.required ? 'Required' : 'Optional' }}
-                        </span>
-                        <span class="rounded-full bg-mist-blue px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy/70">
-                          {{ consentToggleLabel(consent.id) }}
-                        </span>
-                      </div>
-                      <p class="mt-2 text-xs text-deep-navy/60">{{ consent.description }}</p>
-                    </div>
-                  </label>
-                </article>
-              </div>
-              <p v-else class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">No consents are configured for this event yet.</p>
-            </template>
-          </article>
-
-          <article v-if="selectedAttendeeId && activeTab === 'family'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
-            <div class="rounded-2xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-6 text-center">
-              <p class="text-[10px] font-black uppercase tracking-[0.28em] text-deep-navy/45">In progress</p>
-              <h3 class="mt-3 text-lg font-black text-deep-navy">Family + guardians is being reworked</h3>
-              <p class="mt-2 text-sm text-deep-navy/70">This tab is intentionally reduced for future work while the new flow is designed.</p>
+              </section>
             </div>
           </article>
         </section>
@@ -984,13 +1081,24 @@
                   :key="item.id || item.display_id"
                   type="button"
                   @click="selectAttendee(item.id || '')"
-                  class="w-full text-left rounded-lg border px-3 py-3 transition-all"
+                  class="w-full rounded-xl border px-3 py-3 text-left transition-all"
                   :class="[
-                    selectedAttendeeId === item.id ? 'border-blue-500 bg-blue-50' : 'border-deep-navy/10 bg-white hover:border-blue-300',
+                    selectedAttendeeId === item.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-deep-navy/10 bg-white hover:border-blue-300 hover:bg-blue-50/40',
                     !selectedAttendeeId ? 'attendee-pulse' : ''
                   ]"
                 >
-                  <p class="text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-black"
+                      :class="selectedAttendeeId === item.id ? 'border-blue-300 bg-white text-blue-700' : 'border-deep-navy/15 bg-mist-blue text-deep-navy'"
+                    >
+                      {{ attendeeInitial(item.name) }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
+                      <p class="mt-0.5 truncate text-[11px] font-medium text-deep-navy/60">{{ item.display_id || item.id || 'Attendee profile' }}</p>
+                    </div>
+                    <span v-if="selectedAttendeeId === item.id" class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
+                  </div>
                 </button>
               </div>
               <p v-else class="mt-3 text-sm text-deep-navy/60">No attendees found for this booking.</p>
@@ -1016,35 +1124,36 @@
 
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Spent so far</p>
-              <div class="mt-3 rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-3">
-                <p class="text-lg font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
-                <dl class="mt-2 space-y-1 text-xs text-deep-navy/75">
-                  <div class="flex items-center justify-between gap-2">
-                    <dt>Booking payments</dt>
-                    <dd class="font-semibold">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
+              <div class="mt-3 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-mist-blue/40 p-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Total completed spend</p>
+                <p class="mt-2 text-3xl font-black text-emerald-900">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
+                <dl class="mt-3 space-y-2 text-xs">
+                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
+                    <dt class="font-semibold text-deep-navy/70">Booking payments</dt>
+                    <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
                   </div>
-                  <div class="flex items-center justify-between gap-2">
-                    <dt>Order/shop payments</dt>
-                    <dd class="font-semibold">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
+                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
+                    <dt class="font-semibold text-deep-navy/70">Order and shop</dt>
+                    <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
                   </div>
-                  <div class="flex items-center justify-between gap-2">
-                    <dt>Completed payments</dt>
-                    <dd class="font-semibold">{{ completedPaymentsCount }}</dd>
+                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
+                    <dt class="font-semibold text-deep-navy/70">Completed payments</dt>
+                    <dd class="font-black text-deep-navy">{{ completedPaymentsCount }}</dd>
                   </div>
                 </dl>
               </div>
             </section>
 
-            <section>
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Important alerts</p>
               <div class="mt-3 space-y-2 text-sm">
                 <p v-if="!canManageAllAttendees" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">Limited attendee permissions for this booking.</p>
                 <p v-if="attendees.length > 1" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">This is a group booking with multiple attendees.</p>
                 <p v-if="!outstandingPayments.length" class="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-800">No outstanding payments detected.</p>
               </div>
-            </section>
+            </section> -->
 
-            <section>
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Event info</p>
               <dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
                 <div class="flex justify-between gap-3">
@@ -1053,37 +1162,48 @@
                 </div>
                 <div class="flex justify-between gap-3">
                   <dt>Starts</dt>
-                  <dd class="font-semibold text-right">{{ formatEventDate(eventStart) }}</dd>
+                  <dd class="font-semibold text-right">{{ formatDateTime(eventStart) }}</dd>
                 </div>
                 <div class="flex justify-between gap-3">
                   <dt>Timezone</dt>
                   <dd class="font-semibold">{{ myBookingData?.event?.timezone || '-' }}</dd>
                 </div>
               </dl>
-            </section>
+            </section> -->
 
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
               <div class="mt-3 space-y-2">
                 <NuxtLink
                   :to="bookingShopHref"
-                  class="block rounded-lg bg-deep-navy px-3 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-blue-700"
+                  class="flex w-full items-center justify-between rounded-xl border border-emerald-300 bg-emerald-600 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-700"
                 >
-                  Open booking shop
+                  <span class="inline-flex items-center gap-2">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l1 12h11l2-8H7" />
+                      <circle cx="10" cy="20" r="1" />
+                      <circle cx="18" cy="20" r="1" />
+                    </svg>
+                    Open shop
+                  </span>
+                  <span class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-100">Primary</span>
                 </NuxtLink>
-                <NuxtLink :to="`/events/${eventId}`" class="block rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
+                <NuxtLink :to="`/events/${eventId}`" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event
+                  <span aria-hidden="true">-></span>
                 </NuxtLink>
-                <button type="button" class="w-full rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700" @click="setActiveTab('overview')">
+                <button type="button" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700" @click="setActiveTab('overview')">
                   Go to overview
+                  <span aria-hidden="true">-></span>
                 </button>
                 <button
                   type="button"
-                  class="w-full rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
+                  class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
                   :disabled="!selectedAttendeeId || isSingleAttendeeBooking"
                   @click="clearSelectedAttendee"
                 >
                   Clear attendee selection
+                  <span aria-hidden="true">-></span>
                 </button>
               </div>
             </section>
@@ -1099,39 +1219,32 @@
       </div>
     </div>
 
-    <div v-if="booking" class="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-1.5rem)] max-w-4xl animate-soft-up">
-      <div class="rounded-2xl border border-deep-navy/15 bg-white/95 backdrop-blur-xl shadow-2xl p-2 md:p-3">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <NuxtLink
-            :to="bookingShopHref"
-            class="inline-flex items-center justify-center rounded-xl bg-deep-navy px-3 py-2 text-[11px] md:text-xs font-black uppercase tracking-wider text-white hover:bg-blue-700"
-          >
-            Open shop
-          </NuxtLink>
-          <NuxtLink
-            :to="`/events/${eventId}`"
-            class="inline-flex items-center justify-center rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] md:text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700"
-          >
-            Back to event
-          </NuxtLink>
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] md:text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700"
-            @click="setActiveTab('overview')"
-          >
-            Overview
-          </button>
-          <button
-            type="button"
-            class="inline-flex items-center justify-center rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] md:text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
-            :disabled="!selectedAttendeeId || isSingleAttendeeBooking"
-            @click="clearSelectedAttendee"
-          >
-            Clear attendee
-          </button>
+    <div v-if="booking && activeTab === 'attendee' && isPersonalInfoEditing && hasPersonalInfoChanges" class="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 animate-soft-up">
+      <div class="rounded-2xl border border-deep-navy/15 bg-white/95 p-3 shadow-2xl backdrop-blur-xl">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Unsaved personal info changes</p>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+              :disabled="updateAttendee.isPending.value"
+              @click="discardPersonalInfoChanges"
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-blue-700 disabled:opacity-55"
+              :disabled="updateAttendee.isPending.value"
+              @click="saveAttendee"
+            >
+              {{ updateAttendee.isPending.value ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
 </template>
 
@@ -1180,8 +1293,9 @@ import {
   useDeleteAttendeeConsent,
 } from '~/composables/resources/attendee/attendeeConsentsRelationship'
 import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
+import { formatDate, formatDateTime } from '~/utils/time'
 
-type TabId = 'overview' | 'attendee' | 'health' | 'consents' | 'family' | 'orders' | 'payments'
+type TabId = 'overview' | 'attendee' | 'orders' | 'payments'
 type AreaOption = { label: string; value: number }
 type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 
@@ -1520,12 +1634,9 @@ if (props.initialAttendeeId) {
 }
 
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
-  { id: 'overview', label: 'Booking Overview' },
+  { id: 'overview', label: 'Booking' },
+  { id: 'attendee', label: 'Attendee Info', needsAttendee: true },
   { id: 'payments', label: 'Payments', needsAttendee: false },
-  { id: 'attendee', label: 'Attendee Editor', needsAttendee: true },
-  { id: 'health', label: 'Safeguarding', needsAttendee: true },
-  { id: 'consents', label: 'Consents', needsAttendee: true },
-  { id: 'family', label: 'Groups', needsAttendee: true },
   { id: 'orders', label: 'Orders', needsAttendee: true },
 ]
 
@@ -1544,6 +1655,12 @@ const bookingShopHref = computed(() => {
     },
   }
 })
+
+function attendeeInitial(name: string | undefined): string {
+  const cleaned = String(name || '').trim()
+  if (!cleaned) return '?'
+  return cleaned.charAt(0).toUpperCase()
+}
 
 function toAttendeeSlug(name: string | undefined, attendeeId: string | undefined) {
   const base = String(name || '').trim().toLowerCase()
@@ -1646,7 +1763,7 @@ watch(
     applyingRouteState.value = true
     try {
       const routeTab = String(route.query.tab || '')
-      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'health' || routeTab === 'consents' || routeTab === 'family' || routeTab === 'orders') {
+      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'orders') {
         activeTab.value = routeTab
       }
 
@@ -1788,6 +1905,12 @@ watch(areaSearch, (term) => {
   if (areaSearchDebounceTimer) {
     clearTimeout(areaSearchDebounceTimer)
     areaSearchDebounceTimer = null
+  }
+
+  if (!isPersonalInfoEditing.value) {
+    areaOptions.value = []
+    areaLookupLoading.value = false
+    return
   }
 
   const query = term.trim()
@@ -2184,6 +2307,77 @@ const attendeeForm = ref<BookingAttendeeFormData>({
   area_from_name: '',
 })
 
+const attendeeSectionsOpen = ref({
+  personal: false,
+  safeguarding: false,
+  consents: false,
+})
+
+const isPersonalInfoEditing = ref(false)
+
+const personalInfoBaseline = ref<BookingAttendeeFormData>({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone_number: '',
+  date_of_birth: '',
+  gender: '',
+  relationship_to_user: 'self',
+  area_from: undefined,
+  area_from_name: '',
+})
+
+function attendeeFormSnapshot(): BookingAttendeeFormData {
+  return {
+    first_name: attendeeForm.value.first_name || '',
+    last_name: attendeeForm.value.last_name || '',
+    email: attendeeForm.value.email || '',
+    phone_number: attendeeForm.value.phone_number || '',
+    date_of_birth: attendeeForm.value.date_of_birth || '',
+    gender: attendeeForm.value.gender || '',
+    relationship_to_user: attendeeForm.value.relationship_to_user || 'self',
+    area_from: attendeeForm.value.area_from,
+    area_from_name: attendeeForm.value.area_from_name || '',
+  }
+}
+
+const hasPersonalInfoChanges = computed(() => {
+  const current = attendeeFormSnapshot()
+  const baseline = personalInfoBaseline.value
+  return (
+    current.first_name !== baseline.first_name ||
+    current.last_name !== baseline.last_name ||
+    current.email !== baseline.email ||
+    current.phone_number !== baseline.phone_number ||
+    current.date_of_birth !== baseline.date_of_birth ||
+    current.gender !== baseline.gender ||
+    current.relationship_to_user !== baseline.relationship_to_user ||
+    current.area_from !== baseline.area_from ||
+    current.area_from_name !== baseline.area_from_name
+  )
+})
+
+function toggleAttendeeSection(section: 'personal' | 'safeguarding' | 'consents') {
+  attendeeSectionsOpen.value[section] = !attendeeSectionsOpen.value[section]
+}
+
+function discardPersonalInfoChanges() {
+  attendeeForm.value = {
+    ...personalInfoBaseline.value,
+  }
+  areaSearch.value = personalInfoBaseline.value.area_from_name || ''
+  areaOptions.value = []
+  isPersonalInfoEditing.value = false
+}
+
+function togglePersonalInfoEdit() {
+  if (isPersonalInfoEditing.value && hasPersonalInfoChanges.value) {
+    discardPersonalInfoChanges()
+    return
+  }
+  isPersonalInfoEditing.value = !isPersonalInfoEditing.value
+}
+
 const {
   errors: attendeeValidationErrors,
   validate: validateAttendeeForm,
@@ -2216,6 +2410,10 @@ const showMedicalForm = ref(false)
 const showDietaryForm = ref(false)
 const showAccessibilityForm = ref(false)
 
+watch(selectedAttendeeId, () => {
+  isPersonalInfoEditing.value = false
+})
+
 watch(
   () => attendee.data.value?.data,
   value => {
@@ -2231,6 +2429,10 @@ watch(
       area_from: value.area_from || undefined,
       area_from_name: value.area_from_name || '',
     }
+    personalInfoBaseline.value = {
+      ...attendeeForm.value,
+    }
+    isPersonalInfoEditing.value = false
     areaSearch.value = value.area_from_name || ''
     areaOptions.value = []
     normalizeEmergencyContactForm()
@@ -2273,6 +2475,10 @@ async function saveAttendee() {
       },
     })
     await invalidateEventMyBookingQuery(queryClient, eventId.value)
+    personalInfoBaseline.value = {
+      ...attendeeFormSnapshot(),
+    }
+    isPersonalInfoEditing.value = false
     $notyf?.success('Changes were saved successfully.')
   } catch (error) {
     console.error('Failed to update attendee', error)
@@ -2481,12 +2687,6 @@ onUnmounted(() => {
   }
 })
 
-function formatEventDate(value: string) {
-  if (!value) return '-'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString()
-}
 </script>
 
 <style scoped>
