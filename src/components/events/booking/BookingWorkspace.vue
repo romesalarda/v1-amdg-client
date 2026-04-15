@@ -11,35 +11,40 @@
       <div class="absolute inset-0 bg-gradient-to-r from-deep-navy/95 via-deep-navy/85 to-deep-navy/70"></div>
 
       <div class="absolute inset-0 flex items-center">
-        <div class="max-w-screen-xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div class="lg:justify-self-end lg:max-w-xl w-full">
-            <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-300">Your booking for</p>
-            <h1 class="mt-3 text-4xl md:text-5xl font-black leading-tight text-white">{{ eventTitle }}</h1>
-            <p class="mt-1 text-2xl text-white/70 ">Hello, {{ booking?.made_by_name || 'Unknown' }}</p>
+        <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-8 md:flex-row md:items-end md:justify-between">
+          <div class="space-y-4 md:max-w-xl md:justify-self-start">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Live Event Portal</span>
+            </div>
+            <h1 class="font-headline text-5xl font-extrabold tracking-tighter text-white md:text-6xl">{{ eventTitle }}</h1>
+            <p class="max-w-lg text-xl text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>. Your journey to the extraordinary is ready.</p>
           </div>
 
-          <div class="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 text-white animate-soft-in lg:justify-self-start lg:max-w-md w-full">
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">We will see you in ...</p>
+          <div class="md:ml-auto md:max-w-xl md:pl-8">
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">Countdown to Launch</p>
             <div v-if="hasStarted" class="mt-4">
-              <p class="text-2xl font-black">Event started</p>
-              <p class="text-xs text-white/75 mt-1">{{ formatEventDate(eventStart) }}</p>
+              <p class="text-2xl font-black text-white">Event started</p>
+              <p class="mt-1 text-xs text-white/75">{{ formatEventDate(eventStart) }}</p>
             </div>
-            <div v-else class="mt-4 flex items-stretch gap-2 text-center">
-              <div class="countdown-tile flex-1">
-                <p class="text-2xl font-black leading-none">{{ countdown.days }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/65 mt-1">Days</p>
+            <div v-else class="mt-4 flex items-end gap-3 font-headline text-4xl font-bold tracking-tighter text-white">
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.days }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">DAYS</span>
               </div>
-              <div class="countdown-tile flex-1">
-                <p class="text-2xl font-black leading-none">{{ countdown.hours }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/65 mt-1">Hours</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.hours }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">HRS</span>
               </div>
-              <div class="countdown-tile flex-1">
-                <p class="text-2xl font-black leading-none">{{ countdown.minutes }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/65 mt-1">Mins</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.minutes }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">MIN</span>
               </div>
-              <div class="countdown-tile countdown-tile-live flex-1">
-                <p class="text-2xl font-black leading-none">{{ countdown.seconds }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/65 mt-1">Secs</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.seconds }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">SEC</span>
               </div>
             </div>
           </div>
@@ -48,8 +53,8 @@
     </section>
 
     <div v-if="booking" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
-      <div class="max-w-screen-xl mx-auto px-6">
-        <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-deep-navy/10">
+      <div class="max-w-6xl mx-auto px-3 py-2">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div class="flex items-center gap-3 p-4 min-w-0">
             <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -97,7 +102,21 @@
       </div>
     </div>
 
-    <div v-if="booking && selectedAttendeeId" class="border-b border-deep-navy/10 bg-white/95 backdrop-blur-sm">
+   
+
+    <div class="max-w-screen-xl mx-auto px-6 py-8 pb-28">
+      <div v-if="myBooking.isLoading.value" class="rounded-2xl bg-white border border-deep-navy/10 p-6 text-sm text-deep-navy/70">
+        Loading booking details...
+      </div>
+
+      <div v-else-if="myBooking.error.value && !isNotFound" class="rounded-2xl bg-red-50 border border-red-200 p-6 text-sm text-red-700">
+        Unable to load booking details right now.
+      </div>
+
+      <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <section class="lg:col-span-8 space-y-4">
+           <div v-if="booking && selectedAttendeeId" class="border-b border-deep-navy/10 bg-white/95 backdrop-blur-sm">
       <div class="max-w-screen-xl mx-auto px-6 overflow-x-auto">
         <div class="min-w-max flex items-center gap-2 py-3">
           <button
@@ -117,18 +136,6 @@
         </div>
       </div>
     </div>
-
-    <div class="max-w-screen-xl mx-auto px-6 py-8 pb-28">
-      <div v-if="myBooking.isLoading.value" class="rounded-2xl bg-white border border-deep-navy/10 p-6 text-sm text-deep-navy/70">
-        Loading booking details...
-      </div>
-
-      <div v-else-if="myBooking.error.value && !isNotFound" class="rounded-2xl bg-red-50 border border-red-200 p-6 text-sm text-red-700">
-        Unable to load booking details right now.
-      </div>
-
-      <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <section class="lg:col-span-8 space-y-4">
           <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
               <div class="flex items-center justify-between gap-3">
@@ -220,77 +227,6 @@
                   </li>
                 </ol>
               </div>
-            </div>
-
-            <div ref="briefingInfoRef" class="rounded-xl border border-deep-navy/10 p-4">
-              <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Event briefing</p>
-              <div class="mt-3 grid md:grid-cols-2 gap-3 text-sm">
-                <div ref="briefingLocationRef" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
-                  <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Location</p>
-                  <p class="mt-1 font-semibold text-deep-navy">{{ eventLocation }}</p>
-                  <p v-if="primaryVenue?.venue_address" class="text-xs text-deep-navy/70 mt-1">{{ primaryVenue.venue_address }}</p>
-                </div>
-                <div ref="briefingTimeRef" class="rounded-lg border border-deep-navy/10 p-3 bg-mist-blue/40">
-                  <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">Timing</p>
-                  <p class="mt-1 font-semibold text-deep-navy">Starts: {{ formatEventDate(eventStart) }}</p>
-                  <p class="text-xs text-deep-navy/70">Ends: {{ formatEventDate(eventEnd) }}</p>
-                  <p class="text-xs text-deep-navy/70">Timezone: {{ myBookingData?.event?.timezone || 'UTC' }}</p>
-                </div>
-                <div class="rounded-lg border border-deep-navy/10 p-3 md:col-span-2">
-                  <p class="text-[10px] uppercase tracking-widest text-deep-navy/60 font-black">What to bring</p>
-                  <p class="mt-1 text-deep-navy/80 whitespace-pre-line">{{ eventWhatToBring }}</p>
-                </div>
-                <div class="rounded-lg border border-blue-200 bg-blue-50 p-3 md:col-span-2">
-                  <p class="text-[10px] uppercase tracking-widest text-blue-700 font-black">Check-in instructions</p>
-                  <p class="mt-1 text-blue-900/85 whitespace-pre-line">{{ eventCheckInInstructions }}</p>
-                </div>
-                <div v-if="primaryVenue?.venue_address" class="rounded-lg border border-deep-navy/10 overflow-hidden md:col-span-2">
-                  <iframe
-                    :src="venueMapEmbedUrl"
-                    class="w-full h-56 border-0"
-                    loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
-                  ></iframe>
-                </div>
-              </div>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-4">
-              <div class="rounded-xl border border-deep-navy/10 p-4">
-                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking summary</p>
-                <dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
-                  <div class="flex justify-between">
-                    <dt>Booked at</dt>
-                    <dd class="font-semibold">{{ formattedBookedAt }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Attendees</dt>
-                    <dd class="font-semibold">{{ attendees.length }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Payments</dt>
-                    <dd class="font-semibold">{{ booking?.payments?.length || 0 }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Outstanding</dt>
-                    <dd class="font-semibold" :class="outstandingPayments.length ? 'text-blue-700' : 'text-green-700'">
-                      {{ outstandingPayments.length }}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div class="rounded-xl border border-deep-navy/10 p-4">
-                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Access status</p>
-                <p class="mt-3 text-sm" :class="canManageAllAttendees ? 'text-green-700' : 'text-blue-700'">
-                  {{ canManageAllAttendees ? 'You can fully manage attendees for this booking.' : 'You have limited attendee management access.' }}
-                </p>
-                <p class="mt-2 text-xs text-deep-navy/65">{{ selectedAttendeeId ? 'Tabs are unlocked for the selected attendee below.' : 'Select an attendee to unlock attendee tabs and orders.' }}</p>
-              </div>
-            </div>
-
-            <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
-              <p class="text-sm text-deep-navy/75">Attendee selection is pinned in the right panel for quicker switching while you edit.</p>
             </div>
           </article>
 
@@ -738,8 +674,9 @@
                 <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
                     <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Relationship <span class="text-red-500">*</span></span>
-                    <select v-model="attendeeForm.relationship_to_user" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
-                      <option value="">Not set</option>
+                    <select 
+                    :disabled="attendeeForm.relationship_to_user == 'self'"
+                    v-model="attendeeForm.relationship_to_user" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
                       <option value="self">Self</option>
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
@@ -791,19 +728,7 @@
                   </div>
                 </div>
 
-                <div class="flex justify-end">
-                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600 disabled:opacity-55">
-                    {{ updateAttendee.isPending.value ? 'Saving...' : 'Save attendee' }}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </article>
-
-          <article v-if="selectedAttendeeId && activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
                 <div class="flex items-center justify-between gap-3">
                   <div>
                     <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Medical conditions</p>
@@ -984,7 +909,21 @@
                   </div>
                 </div>
               </section>
-            </template>
+       
+
+                <div class="flex justify-end">
+                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600 disabled:opacity-55">
+                    {{ updateAttendee.isPending.value ? 'Saving...' : 'Save attendee' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </article>
+
+          <article v-if="selectedAttendeeId && activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
+            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
+            <template v-else>
+                   </template>
           </article>
 
           <article v-if="selectedAttendeeId && activeTab === 'consents'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">

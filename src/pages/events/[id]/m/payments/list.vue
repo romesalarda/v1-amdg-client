@@ -506,7 +506,7 @@
                         <span class="material-symbols-outlined text-lg">vertical_align_bottom</span>
                       </button>
                       <button
-                        v-if="payment.status === 'PENDING'"
+                        v-if="payment.status === 'PENDING' && !payment.outstanding_bank_transfer_evidence"
                         @click="handlePendingVerification(payment)"
                         class="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
                         :title="isBankTransferPayment(payment) ? 'Verify Bank Transfer' : 'Mark as Verified'"

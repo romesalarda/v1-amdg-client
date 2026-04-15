@@ -14751,6 +14751,7 @@ export type PaymentDetail = {
      * Snapshot of payment method policy at payment creation time.
      */
     bank_transfer_required_immediately?: boolean;
+    readonly outstanding_bank_transfer_evidence: boolean;
     description?: string | null;
     readonly base_amount_currency: string | null;
     /**
@@ -14883,6 +14884,7 @@ export type PaymentList = {
      * Snapshot of payment method policy at payment creation time.
      */
     bank_transfer_required_immediately?: boolean;
+    readonly outstanding_bank_transfer_evidence: boolean;
 };
 
 /**

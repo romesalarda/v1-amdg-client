@@ -212,6 +212,7 @@
                   </p>
                 </div>
                 <button
+                  v-if=" paymentData.status === 'PENDING'""
                   type="button"
                   class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                   @click="showEvidenceUploadForm = !showEvidenceUploadForm"
