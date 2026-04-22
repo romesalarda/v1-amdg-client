@@ -466,7 +466,7 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="text-sm font-semibold text-gray-900">
-                      {{ payment.amount }}
+                      {{ payment.final_amount }}
                     </div>
                   </td>
                   <td class="px-4 py-3">

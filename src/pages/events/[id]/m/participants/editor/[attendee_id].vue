@@ -994,7 +994,7 @@
                     <div v-for="payment in booking.data.value.data.payments" :key="payment.payment_id" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <div>
                         <p class="text-xs font-semibold text-gray-900">{{ payment.payment_reference }}</p>
-                        <p class="text-xs text-gray-600">{{ payment.amount }}</p>
+                        <p class="text-xs text-gray-600">{{ payment.original_amount }} -> {{ payment.final_amount }}</p>
                       </div>
                       <div class="flex">
                           <UBadge

@@ -1734,6 +1734,8 @@ export type BookingDetail = {
         payment_reference?: string;
         status?: string;
         amount?: string;
+        original_amount?: string;
+        final_amount?: string;
         method?: string;
         url?: string;
         description?: string;
@@ -14868,6 +14870,18 @@ export type PaymentDetail = {
      * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
      */
     readonly outstanding_bank_transfer_evidence: boolean;
+    /**
+     * Calculate the total refunded amount for this payment by summing all related refunds.
+     */
+    readonly total_refunded_amount: number;
+    /**
+     * Original base amount before modifications
+     */
+    readonly original_amount: string;
+    /**
+     * Final amount after percentage modifier
+     */
+    readonly final_amount: string;
     description?: string | null;
     readonly base_amount_currency: string | null;
     /**
@@ -15004,6 +15018,18 @@ export type PaymentList = {
      * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
      */
     readonly outstanding_bank_transfer_evidence: boolean;
+    /**
+     * Calculate the total refunded amount for this payment by summing all related refunds.
+     */
+    readonly total_refunded_amount: number;
+    /**
+     * Original base amount before modifications
+     */
+    readonly original_amount: string;
+    /**
+     * Final amount after percentage modifier
+     */
+    readonly final_amount: string;
 };
 
 /**

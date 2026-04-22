@@ -12,7 +12,7 @@
           </div>
           <div class="text-right mr-2">
             <div class="text-xs text-gray-500">Amount</div>
-            <div class="text-lg font-bold text-gray-900">{{ formatAmount(paymentData.modified_amount || paymentData.amount) }}</div>
+            <div class="text-lg font-bold text-gray-900">{{ formatAmount(paymentData.final_amount || paymentData.modified_amount || paymentData.amount) }}</div>
           </div>
           <UBadge :color="getPaymentStatusColor(paymentData.status || 'PENDING') as any" variant="soft" size="lg">
             {{ getPaymentStatusLabel(paymentData.status || 'PENDING') }}
@@ -89,13 +89,21 @@
             <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
               <div class="space-y-2">
                 <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Base Amount:</span>
-                  <span class="font-semibold">{{ formatAmount(paymentData.base_amount) }}</span>
+                  <span class="text-sm text-gray-600">Original Amount:</span>
+                  <span class="font-semibold">{{ formatAmount(paymentData.original_amount) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Modified Amount:</span>
+                  <span class="font-semibold">{{ formatAmount(paymentData.modified_amount) }}</span>
+                </div>
+                <div class="flex justify-between items-center">
+                  <span class="text-sm text-gray-600">Refunded Amount:</span>
+                  <span class="font-semibold text-red-600">- {{ formatAmount(paymentData.total_refunded_amount) }}</span>
                 </div>
                 <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex justify-between items-center text-amber-700">
                   <span class="text-sm">Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%):</span>
                   <span class="font-semibold">
-                    {{ parseAmount(paymentData.percentage_modifier) > 0 ? '+' : '' }}{{ formatAmount(calculateModifier(paymentData.base_amount, paymentData.percentage_modifier)) }}
+                    {{ parseAmount(paymentData.percentage_modifier) > 0 ? '+' : '' }}{{ formatAmount(calculateModifier(paymentData.modified_amount, paymentData.percentage_modifier)) }}
                   </span>
                 </div>
                 <div v-if="hasDiscounts" class="flex justify-between items-center text-blue-700">
@@ -105,7 +113,7 @@
                 <div class="border-t border-green-300 pt-2 mt-2">
                   <div class="flex justify-between items-center">
                     <span class="text-base font-bold text-gray-900">Final Amount:</span>
-                    <span class="text-xl font-black text-green-700">{{ formatAmount(paymentData.modified_amount || paymentData.amount) }}</span>
+                    <span class="text-xl font-black text-green-700">{{ formatAmount(paymentData.final_amount || paymentData.modified_amount || paymentData.amount) }}</span>
                   </div>
                 </div>
               </div>

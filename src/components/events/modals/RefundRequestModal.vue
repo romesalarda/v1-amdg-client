@@ -76,8 +76,48 @@
               </div>
             </div>
 
-            <!-- Partial Refund Amount -->
-            <div v-if="refundType === 'partial'" class="mb-4">
+            <!-- Item Selection for Partial Refunds -->
+            <div v-if="refundType === 'partial' && selectableItems.length > 0" class="mb-4">
+              <label class="block text-sm font-semibold text-gray-700 mb-2">
+                Select Items to Refund
+                <span class="text-red-500">*</span>
+              </label>
+              <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-60 overflow-y-auto">
+                <div v-for="item in selectableItems" :key="item.id" class="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
+                  <div class="flex items-center">
+                    <input
+                      :id="`item-${item.id}`"
+                      type="checkbox"
+                      :checked="!!selectedItems[item.id]"
+                      @change="toggleItemSelection(item)"
+                      class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                    />
+                    <label :for="`item-${item.id}`" class="ml-3 text-sm text-gray-800 cursor-pointer">
+                      <span class="font-semibold">{{ item.name }}</span>
+                      <span class="text-gray-600 ml-2">({{ formatCurrency(item.price) }})</span>
+                    </label>
+                  </div>
+                  <div v-if="item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500">Qty:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      :max="item.quantity"
+                      :value="selectedItems[item.id]?.quantity"
+                      @input="updateItemQuantity(item, parseInt(($event.target as HTMLInputElement).value))"
+                      class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-right">
+                <span class="text-sm text-gray-600">Total Refund Amount: </span>
+                <span class="text-lg font-bold text-primary">{{ formatCurrency(partialRefundAmount) }}</span>
+              </div>
+            </div>
+
+            <!-- Partial Refund Amount (Fallback) -->
+            <div v-if="refundType === 'partial' && selectableItems.length === 0" class="mb-4">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Refund Amount (£)
                 <span class="text-red-500">*</span>
@@ -97,8 +137,8 @@
               </p>
             </div>
 
-            <!-- Attendee Selection for Partial Booking Refunds -->
-            <div v-if="refundType === 'partial' && props.isBookingPayment && props.mode === 'attendee' && props.bookingAttendees && props.bookingAttendees.length > 0" class="mb-4">
+            <!-- Attendee Selection for Partial Booking Refunds (Legacy - can be removed if new UI is sufficient) -->
+            <div v-if="refundType === 'partial' && props.isBookingPayment && props.mode === 'attendee' && props.bookingAttendees && props.bookingAttendees.length > 0 && selectableItems.length === 0" class="mb-4">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Select Attendees to Refund
                 <span class="text-red-500">*</span>
@@ -227,6 +267,40 @@ const reason = ref('')
 const isLoading = ref(false)
 const selectedAttendeeIds = ref<string[]>([])
 
+// New state for item selection
+const selectedItems = ref<Record<string, { quantity: number; price: number }>>({})
+
+const selectableItems = computed(() => {
+  const descriptor = payment.value?.descriptor
+  const metadata = payment.value?.metadata as any
+
+  if (descriptor === 'booking' && metadata?.attendee_selections) {
+    return metadata.attendee_selections.map((item: any) => ({
+      id: item.attendee_id,
+      name: `${item.attendee_name} - ${item.package_name}`,
+      price: parseFloat(item.frozen_price),
+      quantity: 1, // Bookings have a quantity of 1 per attendee
+      type: 'attendee',
+    }))
+  }
+  if (descriptor === 'order' && metadata?.order?.order_items) {
+    return metadata.order.order_items.map((item: any) => ({
+      id: item.order_item_id,
+      name: item.product_title,
+      price: parseFloat(item.unit_price),
+      quantity: item.quantity,
+      type: 'order_item',
+    }))
+  }
+  return []
+})
+
+const partialRefundAmount = computed(() => {
+  return Object.values(selectedItems.value).reduce((total, item) => {
+    return total + item.price * item.quantity
+  }, 0)
+})
+
 const createRefundMutation = useCreatePaymentRefund()
 const createAttendeeRefundMutation = useRequestAttendeeCancellationRefund()
 
@@ -239,14 +313,16 @@ const isFormValid = computed(() => {
   
   if (refundType.value === 'partial') {
     const maxAmount = parseFloat(String(payment.value?.amount || props.payment?.amount || '0').replace("£", ""))
+    
+    // For bookings and orders, check if at least one item is selected
+    if (selectableItems.value.length > 0) {
+      return hasValidReason && Object.keys(selectedItems.value).length > 0
+    }
+
+    // Fallback for other payment types
     const hasValidAmount = refundAmount.value !== null && 
            refundAmount.value > 0 && 
            refundAmount.value <= maxAmount
-    
-    // For partial booking refunds, require attendee selection
-    if (props.isBookingPayment && props.mode === 'attendee') {
-      return hasValidReason && hasValidAmount && selectedAttendeeIds.value.length > 0
-    }
     
     return hasValidReason && hasValidAmount
   }
@@ -267,9 +343,14 @@ async function handleSubmit() {
   isLoading.value = true
 
   try {
-    const amount = refundType.value === 'full' 
-      ? (payment.value?.amount || props.payment?.amount)
-      : refundAmount.value?.toString()
+    let amount: string | undefined;
+    if (refundType.value === 'full') {
+      amount = payment.value?.amount || props.payment?.amount
+    } else if (selectableItems.value.length > 0) {
+      amount = partialRefundAmount.value.toString()
+    } else {
+      amount = refundAmount.value?.toString()
+    }
 
     if (!amount) {
       throw new Error('Refund amount is required')
@@ -281,8 +362,8 @@ async function handleSubmit() {
       }
 
       // For partial booking refunds, use selected attendees; otherwise use current attendee
-      const attendeeIds = refundType.value === 'partial' && props.isBookingPayment && selectedAttendeeIds.value.length > 0
-        ? selectedAttendeeIds.value
+      const attendeeIds = (refundType.value === 'partial' && props.isBookingPayment && selectableItems.value.length > 0)
+        ? Object.keys(selectedItems.value)
         : [String(props.attendee.attendee_id)]
 
       await createAttendeeRefundMutation.mutateAsync({
@@ -292,6 +373,12 @@ async function handleSubmit() {
           amount: parseAmount(amount).toFixed(2),
           reason: reason.value.trim(),
           attendee_ids: attendeeIds,
+          ...(payment.value?.descriptor === 'order' && {
+            refund_items: Object.entries(selectedItems.value).map(([id, item]) => ({
+              order_item_id: id,
+              quantity: item.quantity,
+            })),
+          }),
         },
       })
     } else {
@@ -299,6 +386,12 @@ async function handleSubmit() {
         payment: props.payment?.payment_id,
         amount: parseAmount(amount) as any,
         reason: reason.value.trim(),
+        ...(payment.value?.descriptor === 'order' && {
+          refund_items: Object.entries(selectedItems.value).map(([id, item]) => ({
+            order_item_id: id,
+            quantity: item.quantity,
+          })),
+        }),
       })
     }
 
@@ -331,6 +424,13 @@ function formatDate(dateString: string | undefined): string {
   }).format(date)
 }
 
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+  }).format(amount)
+}
+
 // Reset form when modal opens
 watch(() => props.open, (isOpen) => {
   if (isOpen) {
@@ -338,6 +438,23 @@ watch(() => props.open, (isOpen) => {
     refundAmount.value = null
     reason.value = ''
     selectedAttendeeIds.value = []
+    selectedItems.value = {}
   }
 })
+
+function toggleItemSelection(item: any) {
+  if (selectedItems.value[item.id]) {
+    delete selectedItems.value[item.id]
+  } else {
+    selectedItems.value[item.id] = { quantity: item.quantity, price: item.price }
+  }
+}
+
+function updateItemQuantity(item: any, quantity: number) {
+  if (quantity > 0) {
+    selectedItems.value[item.id] = { ...selectedItems.value[item.id], quantity, price: item.price }
+  } else {
+    delete selectedItems.value[item.id]
+  }
+}
 </script>
