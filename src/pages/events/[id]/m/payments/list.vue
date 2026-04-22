@@ -42,9 +42,12 @@
               </div>
               <div>
                 <div class="text-2xl font-black text-deep-navy">
-                  {{ formatCurrency(stats.totalRevenue) }}
+                  {{ revenueOverviewLoading ? '...' : formatCurrency(eventTotalRevenue) }}
                 </div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Revenue</div>
+                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Event Total Revenue</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  Current list: <span class="font-semibold text-deep-navy">{{ formatCurrency(stats.listRevenue) }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -680,6 +683,7 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
+import { useRevenueOverview } from '~/composables/statistics/payments/payment-statistics'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -959,12 +963,20 @@ const paymentsQueryParams = computed(() => {
   return params
 })
 
+const revenueOverviewQueryParams = computed(() => ({
+  event_id: id.value,
+  format: 'raw' as const,
+  include_deleted: false,
+}))
+
 // Fetch payments
 const { data: paymentsData, isLoading: paymentsLoading, refetch: refetchPayments } = usePayments(paymentsQueryParams)
+const { data: revenueOverviewData, isLoading: revenueOverviewLoading } = useRevenueOverview(revenueOverviewQueryParams)
 
 const payments = computed(() => paymentsData.value?.data?.results || [])
 const paymentsTotalCount = computed(() => paymentsData.value?.data?.count || 0)
 const totalPages = computed(() => Math.ceil(paymentsTotalCount.value / paymentsPageSize.value))
+const eventTotalRevenue = computed(() => revenueOverviewData.value?.data?.total_revenue ?? 0)
 
 // Mutations
 const cancelPaymentMutation = useCancelPayment()
@@ -1014,7 +1026,7 @@ const stats = computed(() => {
   }
 
   return {
-    totalRevenue,
+    listRevenue: totalRevenue,
     pendingCount: pending.length,
     pendingAmount,
     refundedCount: refunded.length,

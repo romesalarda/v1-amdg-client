@@ -20,18 +20,72 @@ import type {
 
 const QUERY_KEY = ['attendees'] as const
 
+export interface AttendeePreRemovalRefundSummary {
+  refund_id: string
+  tracking_reference: string
+  verification_status: string
+  is_active: boolean
+  amount: string
+  requested_at?: string | null
+  requested_by_name?: string | null
+  reason?: string
+}
+
 export interface AttendeePreRemovalBlockerItem {
-  payment_id?: string
-  payment_reference?: string
-  status?: string
-  ticket_id?: string
-  ticket_code?: string
+  payment_id?: string | null
+  payment_reference?: string | null
+  payment_type?: string | null
+  payment_descriptor?: string | null
+  payment_status?: string | null
+  payment_status_bucket?: string | null
+  amount?: string | null
+  currency?: string | null
+  method_type?: string | null
+  method_title?: string | null
+  can_request_refund?: boolean
+  refund_block_reason?: string | null
+
+  booking_id?: string | null
+  booking_reference?: string | null
+  booking_attendee_count?: number
+
+  ticket_id?: string | null
+  ticket_code?: string | null
   ticket_type?: string | null
-  order_id?: string
+  ticket_scope?: string | null
+
+  order_id?: string | null
   order_reference?: string | null
-  event_id?: string
-  event_title?: string
+  order_status?: string | null
+  order_amount?: string | null
+  order_attendee_id?: string | null
+  order_attendee_name?: string | null
+
+  event_id?: string | null
+  event_title?: string | null
   check_in_time?: string | null
+  check_out_time?: string | null
+  attendance_id?: string | null
+
+  active_refunds?: AttendeePreRemovalRefundSummary[]
+  active_refund_count?: number
+
+  _links?: {
+    self?: string | null
+    refund_requests?: string | null
+    method?: string | null
+  }
+}
+
+export interface AttendeePreRemovalBlockerPagination {
+  count: number
+  page: number
+  page_size: number
+  total_pages: number
+  has_next: boolean
+  has_previous: boolean
+  next_page?: number | null
+  previous_page?: number | null
 }
 
 export interface AttendeePreRemovalBlocker {
@@ -40,6 +94,7 @@ export interface AttendeePreRemovalBlocker {
   count: number
   message: string
   items: AttendeePreRemovalBlockerItem[]
+  pagination?: AttendeePreRemovalBlockerPagination
   action_hint: string
 }
 

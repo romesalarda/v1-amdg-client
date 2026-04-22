@@ -1470,15 +1470,18 @@
             <span v-else>Deletion is blocked until the listed blockers are resolved.</span>
           </div>
 
-          <div v-if="preRemovalSummary.blockers.length > 0" class="space-y-2">
+          <div v-if="preRemovalSummary.blockers.length > 0" class="space-y-3">
             <h4 class="text-xs font-semibold uppercase text-gray-500">Blockers</h4>
             <div
               v-for="blocker in preRemovalSummary.blockers"
               :key="blocker.code"
-              class="p-3 border border-gray-200 rounded-lg"
+              class="p-3 border border-gray-200 rounded-lg space-y-3"
             >
-              <div class="flex items-center justify-between gap-3 mb-1">
-                <div class="text-sm font-semibold text-gray-900">{{ blocker.message }}</div>
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="text-sm font-semibold text-gray-900">{{ blocker.message }}</div>
+                  <p class="text-xs text-gray-600 mt-1">{{ blocker.count }} item(s). {{ blocker.action_hint }}</p>
+                </div>
                 <UBadge
                   :color="blocker.severity === 'critical' ? 'red' : blocker.severity === 'high' ? 'orange' : 'gray'"
                   variant="soft"
@@ -1487,31 +1490,78 @@
                   {{ blocker.severity }}
                 </UBadge>
               </div>
-              <p class="text-xs text-gray-600">{{ blocker.count }} item(s). {{ blocker.action_hint }}</p>
+
+              <div v-if="blocker.items.length > 0" class="space-y-2">
+                <div
+                  v-for="(item, idx) in blocker.items"
+                  :key="`${blocker.code}-${item.payment_id || item.ticket_id || item.order_id || item.attendance_id || idx}`"
+                  class="border border-gray-200 rounded-lg p-3 bg-gray-50/60"
+                >
+                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                    <div class="space-y-1 min-w-0">
+                      <div class="flex flex-wrap items-center gap-2">
+                        <span class="text-sm font-semibold text-gray-900 truncate">{{ item.payment_reference || item.ticket_code || item.order_reference || item.event_title || 'Related item' }}</span>
+                        <UBadge v-if="item.payment_descriptor" color="blue" variant="soft" size="xs">{{ item.payment_descriptor }}</UBadge>
+                        <UBadge v-if="item.payment_status" color="gray" variant="soft" size="xs">{{ item.payment_status }}</UBadge>
+                        <UBadge v-else-if="item.payment_status_bucket" color="gray" variant="soft" size="xs">{{ item.payment_status_bucket }}</UBadge>
+                      </div>
+
+                      <p class="text-xs text-gray-600">
+                        <template v-if="item.amount">
+                          {{ item.amount }}
+                          <span v-if="item.currency">({{ item.currency }})</span>
+                        </template>
+                        <template v-else-if="item.order_amount">
+                          {{ item.order_amount }}
+                        </template>
+                        <template v-else>
+                          No amount context
+                        </template>
+                        <span v-if="item.method_title"> • {{ item.method_title }}</span>
+                        <span v-else-if="item.method_type"> • {{ item.method_type }}</span>
+                        <span v-if="item.payment_status_bucket"> • {{ item.payment_status_bucket }}</span>
+                      </p>
+
+                      <p v-if="item.order_attendee_name" class="text-xs text-gray-600">Attendee: {{ item.order_attendee_name }}</p>
+                      <p v-if="item.check_in_time" class="text-xs text-gray-600">Checked in: {{ new Date(item.check_in_time).toLocaleString() }}</p>
+
+                      <div v-if="item.active_refunds && item.active_refunds.length > 0" class="pt-1 space-y-1">
+                        <p class="text-xs font-semibold text-gray-700 uppercase">Active Refund Requests</p>
+                        <div
+                          v-for="refund in item.active_refunds"
+                          :key="refund.refund_id"
+                          class="text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 bg-white"
+                        >
+                          {{ refund.tracking_reference }} • {{ refund.verification_status }} • {{ refund.amount }}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="item.payment_id" class="flex flex-col md:items-end gap-2 shrink-0">
+                      <UButton
+                        color="blue"
+                        variant="solid"
+                        size="sm"
+                        :disabled="item.can_request_refund === false"
+                        @click="openAttendeeRefundModalFromBlockerItem(item)"
+                      >
+                        Request refund for this payment
+                      </UButton>
+                      <p
+                        v-if="item.can_request_refund === false && item.refund_block_reason"
+                        class="text-xs text-amber-700 max-w-xs text-left md:text-right"
+                      >
+                        {{ item.refund_block_reason }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p v-if="blocker.pagination" class="text-xs text-gray-500">
+                Showing {{ blocker.items.length }} of {{ blocker.pagination.count }} items (page {{ blocker.pagination.page }} of {{ blocker.pagination.total_pages }}).
+              </p>
             </div>
-          </div>
-
-          <div v-if="!preRemovalSummary.can_delete && linkedPaymentOptions.length > 0" class="p-4 border border-blue-200 bg-blue-50 rounded-lg space-y-2">
-            <h4 class="text-xs font-semibold uppercase text-blue-700">Request attendee refund</h4>
-            <p class="text-xs text-blue-700">Select a linked payment before submitting a refund request.</p>
-            <select
-              v-model="selectedRefundPaymentId"
-              class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-            >
-              <option :value="null">Select payment</option>
-              <option v-for="payment in linkedPaymentOptions" :key="payment.payment_id" :value="payment.payment_id">
-                {{ payment.payment_reference }} ({{ payment.status }})
-              </option>
-            </select>
-
-            <UButton
-              color="blue"
-              variant="solid"
-              :disabled="!canRequestRefundFromPreRemoval"
-              @click="openAttendeeRefundModalFromPreRemoval"
-            >
-              Request Refund
-            </UButton>
           </div>
 
           <div class="pt-2 flex gap-2">
@@ -1558,6 +1608,7 @@ import {
   useDeleteAttendee,
   useAttendeePreRemovalSummary,
   type AttendeePreRemovalSummary,
+  type AttendeePreRemovalBlockerItem,
 } from '~/composables/resources/attendee/attendees'
 import { useBooking, useBookings } from '~/composables/resources/booking/bookings'
 import { useBookingTickets } from '~/composables/resources/booking/bookingTickets'
@@ -1996,30 +2047,6 @@ const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.
 const medicalConditions = computed(() => medicalConditionsData.value?.data?.results || [])
 const accessibilityRequirements = computed(() => accessibilityRequirementsData.value?.data?.results || [])
 const preRemovalSummary = computed(() => preRemovalSummaryData.value?.data as AttendeePreRemovalSummary | undefined)
-const linkedPaymentOptions = computed(() => {
-  const summary = preRemovalSummary.value
-  if (!summary) {
-    return [] as Array<{ payment_id: string; payment_reference: string; status: string }>
-  }
-
-  const paymentMap = new Map<string, { payment_id: string; payment_reference: string; status: string }>()
-  for (const blocker of summary.blockers || []) {
-    for (const item of blocker.items || []) {
-      if (item.payment_id) {
-        paymentMap.set(item.payment_id, {
-          payment_id: item.payment_id,
-          payment_reference: item.payment_reference || item.payment_id,
-          status: item.status || 'unknown',
-        })
-      }
-    }
-  }
-
-  return Array.from(paymentMap.values())
-})
-const canRequestRefundFromPreRemoval = computed(() => {
-  return Boolean(selectedDeleteAttendee.value?.attendee_id && selectedRefundPaymentId.value)
-})
 
 // Create chips for active filters
 const activeFilterChips = computed(() => {
@@ -2624,6 +2651,8 @@ function goToPaymentListFromBooking(paymentReference?: string) {
 function openPreRemovalModal(attendee: ExtendedAttendeeList) {
   selectedDeleteAttendee.value = attendee
   selectedRefundPaymentId.value = null
+  isSelectedRefundBookingPayment.value = false
+  selectedRefundBookingAttendees.value = null
   showPreRemovalModal.value = true
 }
 
@@ -2661,39 +2690,32 @@ async function confirmDeleteAttendee() {
   }
 }
 
-function openAttendeeRefundModalFromPreRemoval() {
-  if (!selectedRefundPaymentId.value || !selectedDeleteAttendee.value) {
+function openAttendeeRefundModalFromBlockerItem(item: AttendeePreRemovalBlockerItem) {
+  if (!selectedDeleteAttendee.value) {
+    return
+  }
+
+  if (!item.payment_id) {
     toast.add({
-      title: 'Payment required',
-      description: 'Select a linked payment before requesting refund.',
+      title: 'Payment unavailable',
+      description: 'This blocker item does not include a payment reference.',
       color: 'orange',
     })
     return
   }
 
-  // Check if there's a BOOKING blocker in the pre-removal summary
-  const hasBookingBlocker = preRemovalSummary.value?.blockers.some(b => 
-    b.code === 'booking' || b.message?.toLowerCase().includes('booking')
-  )
-  
-  if (!hasBookingBlocker) {
-    // No booking associated, so this is a simple payment refund
-    isSelectedRefundBookingPayment.value = false
-    selectedRefundBookingAttendees.value = null
-    showRefundModal.value = true
+  if (item.can_request_refund === false) {
+    toast.add({
+      title: 'Refund unavailable',
+      description: item.refund_block_reason || 'Refund cannot be requested for this payment.',
+      color: 'orange',
+    })
     return
   }
 
-  // This attendee is part of a booking
-  // Try to find the booking from the attendee's booking association
-  // For now, we'll check if the attendee has a booking_id field or look in eventBookings
-  isSelectedRefundBookingPayment.value = true
-  
-  // Try to get attendees from the booking if available
-  // If selectedDeleteAttendee has booking info, we could fetch those attendees
-  // For now, we'll pass null and let the modal handle it gracefully
+  selectedRefundPaymentId.value = item.payment_id
+  isSelectedRefundBookingPayment.value = item.payment_type === 'booking'
   selectedRefundBookingAttendees.value = null
-
   showRefundModal.value = true
 }
 
@@ -2753,6 +2775,8 @@ watch(currentPage, () => {
 watch(showPreRemovalModal, (isOpen) => {
   if (!isOpen) {
     selectedRefundPaymentId.value = null
+    isSelectedRefundBookingPayment.value = false
+    selectedRefundBookingAttendees.value = null
     showRefundModal.value = false
   }
 })

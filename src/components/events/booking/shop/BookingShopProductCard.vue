@@ -63,6 +63,20 @@
 
         <p class="mt-2 text-xs text-deep-navy/65">{{ availabilityDescription(activeVariant.variant_id) }}</p>
 
+        <div
+          v-if="availabilityBanner(activeVariant.variant_id)"
+          class="mt-3 rounded-xl border p-3"
+          :class="availabilityBanner(activeVariant.variant_id)?.classes"
+        >
+          <div class="flex items-start gap-2">
+            <span class="material-symbols-outlined text-base leading-none">{{ availabilityBanner(activeVariant.variant_id)?.icon }}</span>
+            <div>
+              <p class="text-xs font-black uppercase tracking-wide">{{ availabilityBanner(activeVariant.variant_id)?.title }}</p>
+              <p class="mt-1 text-xs">{{ availabilityBanner(activeVariant.variant_id)?.message }}</p>
+            </div>
+          </div>
+        </div>
+
         <div class="mt-5">
           <p class="text-[11px] font-black uppercase tracking-[0.18em] text-deep-navy/55">Choose colour</p>
           <div class="mt-2 flex flex-wrap gap-2">
@@ -131,7 +145,7 @@
 
 <script setup lang="ts">
 import type { AvailabilityWindow, ProductList, ProductVariantList } from '~/api/types.gen'
-import { productVariantsAvailabilityWindowsList } from '~/api/sdk.gen'
+import { productVariantsAvailabilityWindowsList, productsAvailabilityWindowsList } from '~/api/sdk.gen'
 import { useProductVariants } from '~/composables/resources/products/productVariants'
 import { formatDateTime } from '~/utils/time'
 import { formatMoney } from '~/utils/money'
@@ -165,6 +179,7 @@ const variantRows = computed<ProductVariantList[]>(() => {
   return Array.isArray(results) ? (results as ProductVariantList[]) : []
 })
 
+const productWindows = ref<AvailabilityWindow[]>([])
 const windowsByVariant = ref<Record<string, AvailabilityWindow[]>>({})
 const quantities = ref<Record<string, number>>({})
 const selectedVariantId = ref<string>('')
@@ -289,6 +304,7 @@ watch(
       selectedVariantId.value = ''
       selectedColor.value = ''
       selectedSize.value = ''
+      productWindows.value = []
       windowsByVariant.value = {}
       quantities.value = {}
       return
@@ -311,23 +327,40 @@ watch(
     selectedSize.value = nextVariant?.size_display || ''
 
     const nextWindows: Record<string, AvailabilityWindow[]> = {}
+    let nextProductWindows: AvailabilityWindow[] = []
     await Promise.all(
-      rows.map(async (row) => {
-        try {
-          const response = await productVariantsAvailabilityWindowsList({
-            path: {
-              product_product_id: props.product.product_id,
-              variant_id: row.variant_id,
-            },
-          })
-          const resultRows = (response.data as { results?: AvailabilityWindow[] } | undefined)?.results
-          nextWindows[row.variant_id] = Array.isArray(resultRows) ? (resultRows as AvailabilityWindow[]) : []
-        } catch {
-          nextWindows[row.variant_id] = []
-        }
-      })
+      [
+        (async () => {
+          try {
+            const response = await productsAvailabilityWindowsList({
+              path: {
+                product_id: props.product.product_id,
+              },
+            })
+            const resultRows = (response.data as { results?: AvailabilityWindow[] } | undefined)?.results
+            nextProductWindows = Array.isArray(resultRows) ? (resultRows as AvailabilityWindow[]) : []
+          } catch {
+            nextProductWindows = []
+          }
+        })(),
+        ...rows.map(async (row) => {
+          try {
+            const response = await productVariantsAvailabilityWindowsList({
+              path: {
+                product_product_id: props.product.product_id,
+                variant_id: row.variant_id,
+              },
+            })
+            const resultRows = (response.data as { results?: AvailabilityWindow[] } | undefined)?.results
+            nextWindows[row.variant_id] = Array.isArray(resultRows) ? (resultRows as AvailabilityWindow[]) : []
+          } catch {
+            nextWindows[row.variant_id] = []
+          }
+        }),
+      ]
     )
 
+    productWindows.value = nextProductWindows
     windowsByVariant.value = nextWindows
   },
   { immediate: true }
@@ -367,26 +400,135 @@ watch(
   { immediate: true }
 )
 
-function activeWindowsFor(variantId: string, type: 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW') {
-  const rows = windowsByVariant.value[variantId] || []
-  return rows.filter((window) => window.availability_type === type && window.is_active)
+function evaluateWindowState(rows: AvailabilityWindow[]) {
+  const activePurchase = rows.some((window) => window.availability_type === 'PRODUCT_WINDOW' && window.is_active)
+  const activePreview = rows.some((window) => window.availability_type === 'PRODUCT_PREVIEW_WINDOW' && window.is_active)
+  const hasConfiguredPurchase = rows.some((window) => window.availability_type === 'PRODUCT_WINDOW')
+
+  if (activePurchase) return 'purchase'
+  if (activePreview) return 'preview'
+  if (hasConfiguredPurchase) return 'blocked'
+  return 'always'
+}
+
+function productWindowState() {
+  return evaluateWindowState(productWindows.value || [])
+}
+
+function variantWindowState(variantId: string) {
+  return evaluateWindowState(windowsByVariant.value[variantId] || [])
+}
+
+function effectiveAvailabilityState(variantId: string) {
+  const productState = productWindowState()
+  if (productState === 'blocked' || productState === 'preview') {
+    return productState
+  }
+
+  const variantState = variantWindowState(variantId)
+  if (variantState === 'blocked' || variantState === 'preview') {
+    return variantState
+  }
+
+  return 'purchase'
+}
+
+function activePurchaseWindow(rows: AvailabilityWindow[]) {
+  return rows.find((window) => window.availability_type === 'PRODUCT_WINDOW' && window.is_active)
+}
+
+function activePreviewWindow(rows: AvailabilityWindow[]) {
+  return rows.find((window) => window.availability_type === 'PRODUCT_PREVIEW_WINDOW' && window.is_active)
+}
+
+function nextPurchaseWindow(rows: AvailabilityWindow[]) {
+  const now = new Date()
+  const candidates = rows
+    .filter((window) => window.availability_type === 'PRODUCT_WINDOW' && !!window.available_from)
+    .map((window) => ({
+      window,
+      from: new Date(window.available_from || ''),
+    }))
+    .filter((item) => Number.isFinite(item.from.getTime()) && item.from > now)
+    .sort((a, b) => a.from.getTime() - b.from.getTime())
+
+  return candidates[0]?.window
+}
+
+function daysRemaining(endDate?: string) {
+  if (!endDate) return null
+  const now = new Date()
+  const end = new Date(endDate)
+  if (!Number.isFinite(end.getTime())) return null
+  const diff = end.getTime() - now.getTime()
+  if (diff <= 0) return 0
+  return Math.ceil(diff / (1000 * 60 * 60 * 24))
+}
+
+function availabilityBanner(variantId: string): {
+  title: string
+  message: string
+  icon: string
+  classes: string
+} | null {
+  const state = effectiveAvailabilityState(variantId)
+  const productState = productWindowState()
+  const variantRows = windowsByVariant.value[variantId] || []
+  const governingRows = productState === 'always' ? variantRows : productWindows.value
+
+  if (state === 'blocked') {
+    const nextWindow = nextPurchaseWindow(governingRows)
+    return {
+      title: 'No longer available',
+      message: nextWindow?.available_from
+        ? `Sales reopen on ${formatDateTime(nextWindow.available_from)}.`
+        : 'This item is no longer available for purchase.',
+      icon: 'event_busy',
+      classes: 'border-red-200 bg-red-50 text-red-900',
+    }
+  }
+
+  if (state === 'preview') {
+    const previewWindow = activePreviewWindow(governingRows)
+    return {
+      title: 'Preview only',
+      message: previewWindow?.available_to
+        ? `Preview ends on ${formatDateTime(previewWindow.available_to)}.`
+        : 'This item is visible but not purchasable yet.',
+      icon: 'visibility',
+      classes: 'border-blue-200 bg-blue-50 text-blue-900',
+    }
+  }
+
+  const purchaseWindow = productState !== 'always'
+    ? activePurchaseWindow(productWindows.value)
+    : activePurchaseWindow(variantRows)
+
+  const remaining = daysRemaining(purchaseWindow?.available_to)
+  if (remaining !== null && remaining <= 7) {
+    return {
+      title: remaining <= 1 ? 'Last day to purchase' : `${remaining} days left to purchase`,
+      message: purchaseWindow?.available_to
+        ? `This window closes on ${formatDateTime(purchaseWindow.available_to)}.`
+        : 'Availability is time-limited.',
+      icon: 'warning',
+      classes: 'border-amber-200 bg-amber-50 text-amber-900',
+    }
+  }
+
+  return null
 }
 
 function isPurchaseOpen(variantId: string) {
-  return activeWindowsFor(variantId, 'PRODUCT_WINDOW').length > 0
+  return effectiveAvailabilityState(variantId) === 'purchase'
 }
 
 function isPreviewOnly(variantId: string) {
-  return !isPurchaseOpen(variantId) && activeWindowsFor(variantId, 'PRODUCT_PREVIEW_WINDOW').length > 0
-}
-
-function hasConfiguredPurchaseWindow(variantId: string) {
-  const rows = windowsByVariant.value[variantId] || []
-  return rows.some((window) => window.availability_type === 'PRODUCT_WINDOW')
+  return effectiveAvailabilityState(variantId) === 'preview'
 }
 
 function isWindowBlocked(variantId: string) {
-  return hasConfiguredPurchaseWindow(variantId) && !isPurchaseOpen(variantId)
+  return effectiveAvailabilityState(variantId) === 'blocked'
 }
 
 function maxQuantity(variant: ProductVariantList) {
@@ -479,16 +621,26 @@ function availabilityDescription(variantId: string) {
   }
 
   if (isPreviewOnly(variantId)) {
+    if (productWindowState() === 'preview') {
+      return 'This product is currently in preview mode and cannot be purchased yet.'
+    }
     return 'This variant is in preview mode and cannot be added yet.'
   }
 
   if (isWindowBlocked(variantId)) {
-    const purchaseRows = (windowsByVariant.value[variantId] || []).filter((window) => window.availability_type === 'PRODUCT_WINDOW')
+    const purchaseRows = (
+      productWindowState() === 'blocked'
+        ? productWindows.value
+        : windowsByVariant.value[variantId] || []
+    ).filter((window) => window.availability_type === 'PRODUCT_WINDOW')
     const nextWindow = purchaseRows[0]
     if (nextWindow?.available_from) {
       return `Purchases reopen at ${formatDateTime(nextWindow.available_from)}.`
     }
-    return 'This variant is outside its purchase window.'
+    if (productWindowState() === 'blocked') {
+      return 'This product is no longer available for purchase.'
+    }
+    return 'This variant is no longer available for purchase.'
   }
 
   return 'Stock and eligibility are validated again in cart and checkout.'

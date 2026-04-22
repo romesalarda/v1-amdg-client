@@ -1172,6 +1172,119 @@ export type AttendeePersonalInfoDraftRequest = {
     emergency_contact?: EmergencyContactDraftRequest;
 };
 
+export type AttendeePreRemovalBlocker = {
+    code: string;
+    /**
+     * * `critical` - critical
+     * * `high` - high
+     * * `medium` - medium
+     * * `low` - low
+     */
+    severity: 'critical' | 'high' | 'medium' | 'low';
+    count: number;
+    message: string;
+    items: Array<AttendeePreRemovalBlockerItem>;
+    pagination?: AttendeePreRemovalBlockerPagination;
+    action_hint: string;
+};
+
+export type AttendeePreRemovalBlockerItem = {
+    payment_id?: string | null;
+    payment_reference?: string | null;
+    payment_type?: string | null;
+    payment_descriptor?: string | null;
+    payment_status?: string | null;
+    payment_status_bucket?: string | null;
+    amount?: string | null;
+    currency?: string | null;
+    method_type?: string | null;
+    method_title?: string | null;
+    can_request_refund?: boolean;
+    refund_block_reason?: string | null;
+    booking_id?: string | null;
+    booking_reference?: string | null;
+    booking_attendee_count?: number;
+    order_id?: string | null;
+    order_reference?: string | null;
+    order_status?: string | null;
+    order_amount?: string | null;
+    order_attendee_id?: string | null;
+    order_attendee_name?: string | null;
+    ticket_id?: string | null;
+    ticket_code?: string | null;
+    ticket_type?: string | null;
+    ticket_scope?: string | null;
+    status?: string | null;
+    event_id?: string | null;
+    event_title?: string | null;
+    check_in_time?: string | null;
+    check_out_time?: string | null;
+    attendance_id?: string | null;
+    active_refunds?: Array<AttendeePreRemovalRefundSummary>;
+    active_refund_count?: number;
+    /**
+     *  links
+     */
+    _links?: AttendeePreRemovalLinks;
+};
+
+export type AttendeePreRemovalBlockerPagination = {
+    count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page?: number | null;
+    previous_page?: number | null;
+};
+
+export type AttendeePreRemovalLinks = {
+    self?: string | null;
+    refund_requests?: string | null;
+    method?: string | null;
+};
+
+export type AttendeePreRemovalRefundSummary = {
+    refund_id: string;
+    tracking_reference: string;
+    verification_status: string;
+    is_active: boolean;
+    amount: string;
+    requested_at?: string | null;
+    requested_by_name?: string | null;
+    reason?: string;
+};
+
+export type AttendeePreRemovalSuggestedAction = {
+    code: string;
+    message: string;
+};
+
+export type AttendeePreRemovalSummary = {
+    attendee: AttendeePreRemovalSummaryAttendee;
+    can_delete: boolean;
+    blockers: Array<AttendeePreRemovalBlocker>;
+    summary_counts: AttendeePreRemovalSummaryCounts;
+    suggested_actions: Array<AttendeePreRemovalSuggestedAction>;
+};
+
+export type AttendeePreRemovalSummaryAttendee = {
+    attendee_id: string;
+    attendee_display_id: string;
+    full_name: string;
+};
+
+export type AttendeePreRemovalSummaryCounts = {
+    linked_payments: number;
+    outstanding_payments: number;
+    active_refund_requests: number;
+    active_tickets: number;
+    unresolved_orders: number;
+    open_attendance: number;
+    family_memberships: number;
+};
+
 /**
  * Serializer for registration trends statistics.
  */
@@ -14751,6 +14864,9 @@ export type PaymentDetail = {
      * Snapshot of payment method policy at payment creation time.
      */
     bank_transfer_required_immediately?: boolean;
+    /**
+     * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
+     */
     readonly outstanding_bank_transfer_evidence: boolean;
     description?: string | null;
     readonly base_amount_currency: string | null;
@@ -14884,6 +15000,9 @@ export type PaymentList = {
      * Snapshot of payment method policy at payment creation time.
      */
     bank_transfer_required_immediately?: boolean;
+    /**
+     * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
+     */
     readonly outstanding_bank_transfer_evidence: boolean;
 };
 
@@ -25536,11 +25655,10 @@ export type AttendeesPreRemovalSummaryRetrieveData = {
 };
 
 export type AttendeesPreRemovalSummaryRetrieveResponses = {
-    /**
-     * Comprehensive pre-removal summary payload
-     */
-    200: unknown;
+    200: AttendeePreRemovalSummary;
 };
+
+export type AttendeesPreRemovalSummaryRetrieveResponse = AttendeesPreRemovalSummaryRetrieveResponses[keyof AttendeesPreRemovalSummaryRetrieveResponses];
 
 export type AttendeesRequestCancellationRefundCreateData = {
     body: AttendeeCancellationRefundRequestRequest;

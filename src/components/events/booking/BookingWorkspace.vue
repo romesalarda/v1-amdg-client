@@ -429,15 +429,7 @@
             </div>
             <template v-else>
               <div v-if="attendeeOrderList.length" class="space-y-3">
-                <section class="rounded-xl border border-blue-200 bg-blue-50 p-4">
-                  <div class="flex items-center justify-between gap-3">
-                    <div>
-                      <p class="text-xs font-black uppercase tracking-wider text-blue-700">Outstanding payments</p>
-                      <p class="mt-1 text-sm text-blue-900/80">{{ attendeeOrderList.length }} order{{ attendeeOrderList.length === 1 ? '' : 's' }} linked to this attendee</p>
-                    </div>
-                    <p class="text-xs text-blue-800 font-black">{{ outstandingPayments.length }}</p>
-                  </div>
-                  <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
+                <section class="rounded-xl border border-blue-200 bg-blue-50 p-4 mt-3 space-y-2"  v-if="outstandingPayments.length">
                     <div
                       v-for="payment in outstandingPayments"
                       :key="payment.payment_id || payment.payment_reference"
@@ -546,7 +538,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
                 </section>
 
                 <div class="rounded-2xl border border-deep-navy/10 bg-white p-5 shadow-sm">
@@ -1190,11 +1181,9 @@
                 </NuxtLink>
                 <NuxtLink :to="`/events/${eventId}`" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event
-                  <span aria-hidden="true">-></span>
                 </NuxtLink>
                 <button type="button" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700" @click="setActiveTab('overview')">
                   Go to overview
-                  <span aria-hidden="true">-></span>
                 </button>
                 <button
                   type="button"
@@ -1203,7 +1192,6 @@
                   @click="clearSelectedAttendee"
                 >
                   Clear attendee selection
-                  <span aria-hidden="true">-></span>
                 </button>
               </div>
             </section>
