@@ -1124,7 +1124,7 @@
                     <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
                   </div>
                   <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
-                    <dt class="font-semibold text-deep-navy/70">Order and shop</dt>
+                    <dt class="font-semibold text-deep-navy/70">Extra Products</dt>
                     <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
                   </div>
                   <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">

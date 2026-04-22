@@ -97,7 +97,7 @@
             </div>
           </div>
 
-          <div class="rounded-xl bg-white p-5">
+          <!-- <div class="rounded-xl bg-white p-5">
             <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Form questions</p>
             <div class="mt-3 flex items-end justify-between gap-4">
               <div>
@@ -112,7 +112,23 @@
                 <UIcon name="i-heroicons-clipboard-document-list" class="h-6 w-6" />
               </div>
             </div>
-          </div>
+          </div> -->
+          <div class="rounded-xl bg-gradient-to-br p-6 text-white" :class="eventStateAppearance.gradient">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">Event state</p>
+              <div class="mt-3 flex items-center justify-between gap-4">
+                <div>
+                  <div class="text-2xl font-black" :class="eventStateAppearance.textColor">
+                    {{ event?.status_display || 'N/A' }}
+                  </div>
+                  <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-white/40">
+                    Current status
+                  </p>
+                </div>
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                  <UIcon :name="eventStateAppearance.icon" class="h-7 w-7 text-white/80" />
+                </div>
+              </div>
+            </div>
         </section>
 
         <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
@@ -169,46 +185,57 @@
           </div>
 
           <div class="xl:col-span-4 space-y-6">
-            <div class="rounded-xl bg-gradient-to-br p-6 text-white" :class="eventStateAppearance.gradient">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">Event state</p>
-              <div class="mt-3 flex items-center justify-between gap-4">
-                <div>
-                  <div class="text-2xl font-black" :class="eventStateAppearance.textColor">
-                    {{ event?.status_display || 'N/A' }}
+            <section class="rounded-xl bg-white overflow-hidden border border-black/5 shadow-sm">
+              <div class="border-b border-black/5 bg-gradient-to-r from-deep-navy to-[#153457] px-6 py-5 text-white">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">Readiness</p>
+                    <h2 class="mt-1 text-xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                      Outstanding tasks
+                    </h2>
                   </div>
-                  <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-white/40">
-                    Current status
-                  </p>
-                </div>
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                  <UIcon :name="eventStateAppearance.icon" class="h-7 w-7 text-white/80" />
+                  <span
+                    class="rounded-full px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em]"
+                    :class="outstandingTasks.length
+                      ? 'bg-amber-300/25 text-amber-100'
+                      : 'bg-emerald-300/25 text-emerald-100'"
+                  >
+                    {{ outstandingTasks.length }} open
+                  </span>
                 </div>
               </div>
-            </div>
-
-            <div class="rounded-xl bg-white p-6">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-gray-500">Revenue sources</p>
-              <div class="mt-4 space-y-4">
-                <div v-if="isLoadingRevenue" class="text-center text-xs text-gray-400">Loading...</div>
-                <div v-else-if="!revenueBreakdown || normalizeNumber(revenueBreakdown.total_revenue) === 0" class="text-center text-xs text-gray-400">No revenue data.</div>
-                <template v-else>
-                  <div v-for="(item, key) in revenueBreakdown.breakdown" :key="key" class="space-y-2">
-                    <div class="flex items-center justify-between text-xs">
-                      <span class="font-semibold text-gray-600">{{ (item as any).source }}</span>
-                      <span class="font-bold text-deep-navy">£{{ formatCurrency((item as any).value as number) }}</span>
+              <div class="p-4">
+                <ul v-if="outstandingTasksView.length" class="space-y-3">
+                  <li
+                    v-for="(task, index) in outstandingTasksView"
+                    :key="`${task.code}-${index}`"
+                    class="rounded-xl border p-4 transition-colors"
+                    :class="task.cardClass"
+                  >
+                    <div class="flex items-start gap-3">
+                      <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" :class="task.iconContainerClass">
+                        <UIcon :name="task.icon" class="h-4 w-4" :class="task.iconClass" />
+                      </div>
+                      <div class="min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                          <p class="text-sm font-bold text-deep-navy">{{ task.title }}</p>
+                          <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]" :class="task.badgeClass">
+                            {{ task.levelLabel }}
+                          </span>
+                        </div>
+                        <p class="mt-1 text-xs leading-relaxed text-gray-600">{{ task.description }}</p>
+                        <p v-if="task.hint" class="mt-2 text-[11px] font-medium text-gray-500">{{ task.hint }}</p>
+                        <p class="mt-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-gray-400">{{ task.code }}</p>
+                      </div>
                     </div>
-                    <div class="h-2 rounded-full bg-gray-200">
-                      <div
-                        class="h-2 rounded-full bg-blue-500"
-                        :style="{ width: `${revenueShare((item as any).value as number)}%` }"
-                      />
-                    </div>
-                  </div>
-                </template>
+                  </li>
+                </ul>
+                <div v-else class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700">
+                  <UIcon name="i-heroicons-check-circle" class="h-5 w-5" />
+                  <p class="text-sm font-semibold">No outstanding tasks. This event is ready.</p>
+                </div>
               </div>
-            </div>
-
-
+            </section>
           </div>
         </section>
           <section class="grid grid-cols-1 gap-6 xl:grid-cols-12">
@@ -578,6 +605,22 @@ type LocationListItem = {
   country_name?: string
   latitude?: string | number | null
   longitude?: string | number | null
+}
+
+type OutstandingTask = {
+  title: string
+  description: string
+  hint: string
+  code: string
+}
+
+type OutstandingTaskView = OutstandingTask & {
+  icon: string
+  badgeClass: string
+  cardClass: string
+  iconClass: string
+  iconContainerClass: string
+  levelLabel: 'Required' | 'Recommended' | 'Attention'
 }
 
 const colorPalette = ['#0a192f', '#d97706', '#10b981', '#2563eb', '#7c3aed', '#059669', '#ca8a04', '#7f1d1d']
@@ -1057,6 +1100,98 @@ const paymentStatusOption = computed(() => {
       },
     ],
   }
+})
+
+const outstandingTasks = computed<OutstandingTask[]>(() => {
+  const rawTasks = event.value?.outstanding_tasks
+  if (!Array.isArray(rawTasks)) return []
+
+  return rawTasks
+    .map((task: any) => ({
+      title: String(task?.title ?? 'Untitled task'),
+      description: String(task?.description ?? ''),
+      hint: String(task?.hint ?? ''),
+      code: String(task?.code ?? 'task').toUpperCase(),
+    }))
+    .filter((task: OutstandingTask) => task.title.length > 0)
+})
+
+const outstandingTaskAppearanceByCode: Record<string, Omit<OutstandingTaskView, keyof OutstandingTask>> = {
+  AUTHORIZATION_PENDING: {
+    icon: 'i-heroicons-shield-exclamation',
+    badgeClass: 'bg-amber-100 text-amber-800',
+    cardClass: 'border-amber-200 bg-amber-50/60',
+    iconClass: 'text-amber-700',
+    iconContainerClass: 'bg-amber-100',
+    levelLabel: 'Required',
+  },
+  REGISTRATION_WINDOW_REQUIRED: {
+    icon: 'i-heroicons-calendar-days',
+    badgeClass: 'bg-rose-100 text-rose-800',
+    cardClass: 'border-rose-200 bg-rose-50/60',
+    iconClass: 'text-rose-700',
+    iconContainerClass: 'bg-rose-100',
+    levelLabel: 'Required',
+  },
+  LANDING_IMAGE_RECOMMENDED: {
+    icon: 'i-heroicons-photo',
+    badgeClass: 'bg-sky-100 text-sky-800',
+    cardClass: 'border-sky-200 bg-sky-50/60',
+    iconClass: 'text-sky-700',
+    iconContainerClass: 'bg-sky-100',
+    levelLabel: 'Recommended',
+  },
+  MAX_CAPACITY_REACHED: {
+    icon: 'i-heroicons-user-group',
+    badgeClass: 'bg-red-100 text-red-800',
+    cardClass: 'border-red-200 bg-red-50/60',
+    iconClass: 'text-red-700',
+    iconContainerClass: 'bg-red-100',
+    levelLabel: 'Attention',
+  },
+  REGISTRATION_NOT_OPEN: {
+    icon: 'i-heroicons-clock',
+    badgeClass: 'bg-yellow-100 text-yellow-800',
+    cardClass: 'border-yellow-200 bg-yellow-50/60',
+    iconClass: 'text-yellow-700',
+    iconContainerClass: 'bg-yellow-100',
+    levelLabel: 'Attention',
+  },
+  NO_ACTIVE_BOOKING_PACKAGES: {
+    icon: 'i-heroicons-ticket',
+    badgeClass: 'bg-orange-100 text-orange-800',
+    cardClass: 'border-orange-200 bg-orange-50/60',
+    iconClass: 'text-orange-700',
+    iconContainerClass: 'bg-orange-100',
+    levelLabel: 'Required',
+  },
+  NO_ACTIVE_PAYMENT_METHODS: {
+    icon: 'i-heroicons-credit-card',
+    badgeClass: 'bg-fuchsia-100 text-fuchsia-800',
+    cardClass: 'border-fuchsia-200 bg-fuchsia-50/60',
+    iconClass: 'text-fuchsia-700',
+    iconContainerClass: 'bg-fuchsia-100',
+    levelLabel: 'Required',
+  },
+}
+
+const defaultOutstandingTaskAppearance: Omit<OutstandingTaskView, keyof OutstandingTask> = {
+  icon: 'i-heroicons-exclamation-circle',
+  badgeClass: 'bg-slate-100 text-slate-700',
+  cardClass: 'border-slate-200 bg-slate-50/60',
+  iconClass: 'text-slate-600',
+  iconContainerClass: 'bg-slate-100',
+  levelLabel: 'Attention',
+}
+
+const outstandingTasksView = computed<OutstandingTaskView[]>(() => {
+  return outstandingTasks.value.map((task) => {
+    const appearance = outstandingTaskAppearanceByCode[task.code] ?? defaultOutstandingTaskAppearance
+    return {
+      ...task,
+      ...appearance,
+    }
+  })
 })
 
 const recentActivities = computed(() => {

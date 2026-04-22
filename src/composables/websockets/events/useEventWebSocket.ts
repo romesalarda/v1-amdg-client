@@ -93,7 +93,7 @@ function generateUUID(): string {
   })
 }
 
-export function useEventWebSocket(eventId: MaybeRef<string>) {
+export function useEventWebSocket(eventIdentifier: MaybeRef<string>) {
   // Token management for event questions
   const token = ref<string | null>(null)
   const tokenExpiresAt = ref<number | null>(null)
@@ -109,7 +109,7 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
    */
   async function fetchToken(): Promise<string> {
     try {
-      const data = await getWebSocketToken(unref(eventId))
+      const data = await getWebSocketToken(unref(eventIdentifier))
       
       // Store token and expiration
       token.value = data.token
@@ -135,7 +135,7 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
   
   // Create base WebSocket connection using reusable composable
   const connection = useRealtimeConnection({
-    url: computed(() => `/ws/events/${unref(eventId)}/questions/`),
+    url: computed(() => `/ws/events/${unref(eventIdentifier)}/questions/`),
     token: computed(() => token.value),
     heartbeatInterval: 30000, // 30 seconds
     pongTimeout: 10000, // 10 seconds
@@ -146,7 +146,7 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
     
     // Lifecycle callbacks
     onConnected: () => {
-      console.log('[EventWebSocket] Connected to event questions:', unref(eventId))
+      console.log('[EventWebSocket] Connected to event questions:', unref(eventIdentifier))
     },
     onDisconnected: () => {
       console.log('[EventWebSocket] Disconnected from event questions')
@@ -258,8 +258,8 @@ export function useEventWebSocket(eventId: MaybeRef<string>) {
     connection.on('error', handleErrorResponse)
   }
   
-  // Watch eventId changes and refresh token
-  watch(() => unref(eventId), async (newId, oldId) => {
+  // Watch eventIdentifier changes and refresh token
+  watch(() => unref(eventIdentifier), async (newId, oldId) => {
     if (newId !== oldId && newId) {
       console.log('[EventWebSocket] Event ID changed, fetching new token')
       clearPendingRequests('Event ID changed')

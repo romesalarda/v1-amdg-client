@@ -1726,7 +1726,7 @@ const consentsQuery = useConsents(
 const consents = computed(() => consentsQuery.data.value?.data?.results || [])
 
 const eventQuestionsQuery = useEventQuestions(
-	computed(() => (event.value?.event_id ? { event: event.value.event_id, page_size: 100 } : undefined)),
+	computed(() => (event.value?.event_id ? { event: event.value.url_safe_title || event.value.event_id, page_size: 100 } : undefined)),
 	{ enabled: computed(() => !!event.value?.event_id) }
 )
 const eventQuestions = computed(() => eventQuestionsQuery.data.value?.data?.results || [])
