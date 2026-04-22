@@ -129,7 +129,10 @@
   <!-- Main Content -->
   <div class="min-h-screen bg-mist-blue lg:ml-64 transition-all duration-300">
     <!-- Top Header Bar -->
-    <header class="h-16 bg-white border-b border-gray-200 sticky top-12 z-30 px-8 flex items-center justify-between">
+    <header :class="[
+      'h-16 bg-white border-b border-gray-200 sticky z-30 px-8 flex items-center justify-between',
+      hasHero ? 'top-0' : 'top-12'
+    ]">
       <div class="flex items-center gap-4">
         <button
           @click="sidebarOpen = !sidebarOpen"
@@ -150,7 +153,7 @@
     </header>
 
     <!-- Content Area -->
-    <div class="p-8">
+    <div :class="!hasHero && 'p-8'">
       <slot />
     </div>
   </div>
@@ -168,7 +171,8 @@ import type { EventDetail } from '~/api/types.gen'
 
 const props = defineProps<{
   eventId: string
-  event?: EventDetail
+  event?: EventDetail,
+  hasHero?: boolean
 }>()
 const { data: settingsData } = useEventSettings(props.eventId)
 const eventSettings = computed(() => settingsData.value?.data)
