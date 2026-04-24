@@ -220,7 +220,7 @@
               v-for="event in filteredEvents" 
               :key="event.event_id"
               class="bg-white border border-deep-navy/10 shadow-drawn rounded-2xl overflow-hidden group hover:border-blue-500/20 transition-all cursor-pointer"
-              @click="router.push(`/events/${event.event_id}/`)"
+              @click="router.push(`/events/${event.url_safe_title}/`)"
             >
               <div class="flex flex-col md:flex-row h-auto md:h-48">
                 <div class="w-full md:w-64 h-48 md:h-full overflow-hidden relative">
@@ -470,12 +470,12 @@
           v-for="event in recommendedEvents" 
           :key="event.event_id"
           class="bg-white border border-deep-navy/10 shadow-drawn rounded-2xl overflow-hidden group cursor-pointer border-transparent hover:border-blue-500/20 transition-all hover:-translate-y-1"
-          @click="router.push(`/events/${event.event_id}`)"
+          @click="router.push(`/events/${event.url_safe_title}`)"
         >
           <div class="aspect-video relative overflow-hidden">
             <img 
               v-if="event.main_landing_image"
-              :src="resolveImageUrl(event.main_landing_image.resource_url)" 
+              :src="resolveImageUrl(event.main_landing_image.image)" 
               alt="Event" 
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               @error="(e) => onImageError(e)"

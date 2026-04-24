@@ -476,7 +476,7 @@
 											>
 												<div>
 													<label class="mb-1 block text-xs font-semibold text-gray-700">
-														Details (public-facing)
+														Details
 														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
 													</label>
 													<textarea
@@ -830,9 +830,9 @@
 																		]"
 																	/>
 																	<!-- Stock Label -->
-																	<span class="text-xs font-semibold" :class="colorOption.stockQuantity > 0 ? 'text-emerald-700' : 'text-slate-500'">
+																	<!-- <span class="text-xs font-semibold" :class="colorOption.stockQuantity > 0 ? 'text-emerald-700' : 'text-slate-500'">
 																		{{ colorOption.stockQuantity > 0 ? `${colorOption.stockQuantity}` : 'Out' }}
-																	</span>
+																	</span> -->
 																</button>
 															</div>
 														</div>
