@@ -114,7 +114,7 @@ export function useBookingShop() {
   )
 
   const activeOrderId = computed(() => store.activeOrderId)
-  const activeOrderQuery = useProductOrder(computed(() => activeOrderId.value || ''))
+  const activeOrderQuery = useProductOrder({"event": eventUrlSafeTitle.value}, computed(() => activeOrderId.value || ''))
   const createOrderMutation = useCreateProductOrder()
   const addOrderItemMutation = useAddProductOrderItem()
 

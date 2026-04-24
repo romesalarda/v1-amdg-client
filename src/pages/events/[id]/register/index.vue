@@ -359,7 +359,8 @@
 										"
 									/>
 								</div>
-								<div v-if="showRelationshipField" class="sm:col-span-2">
+								<div v-if="showRelationshipField && !isRegistrarSelf" class="sm:col-span-2">
+									
 									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
 									<USelectMenu
 										:model-value="values.relationship_to_user"
@@ -376,9 +377,7 @@
 										:disabled="isRegistrarSelf"
 									/>
 								</div>
-								<!-- <div v-else class="sm:col-span-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
-									Relationship is set to <span class="font-bold">Self</span> for this registration mode.
-								</div> -->
+
 								<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
 									<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
 									<p class="mt-1 text-xs text-slate-600">
@@ -1073,14 +1072,14 @@
 										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_number || 'TBA' }}</p>
 									</div>
 
-									<div class="rounded-lg border border-amber-200 bg-amber-50 p-3 sm:col-span-2">
+									<!-- <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 sm:col-span-2">
 										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Evidence policy</p>
 										<p class="mt-1 text-sm text-amber-900">
 											{{ isBankTransferEvidenceRequiredImmediately
 												? 'This method requires evidence upload during checkout.'
 												: 'Evidence can be uploaded later before payment completion.' }}
 										</p>
-									</div>
+									</div> -->
 
 									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
 										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Reserved transfer reference</p>
@@ -1726,7 +1725,7 @@ const consentsQuery = useConsents(
 const consents = computed(() => consentsQuery.data.value?.data?.results || [])
 
 const eventQuestionsQuery = useEventQuestions(
-	computed(() => (event.value?.event_id ? { event: event.value.url_safe_title || event.value.event_id, page_size: 100 } : undefined)),
+	computed(() => (event.value?.url_safe_title ? { event: event.value.url_safe_title, page_size: 100 } : undefined)),
 	{ enabled: computed(() => !!event.value?.event_id) }
 )
 const eventQuestions = computed(() => eventQuestionsQuery.data.value?.data?.results || [])

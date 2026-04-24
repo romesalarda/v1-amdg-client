@@ -1595,6 +1595,7 @@
       :payment-id="selectedRefundPaymentId"
       :is-booking-payment="isSelectedRefundBookingPayment"
       :booking-attendees="selectedRefundBookingAttendees"
+      :event-detail="event?.data"
       @close="showRefundModal = false"
       @created="handleAttendeeRefundCreated"
     />

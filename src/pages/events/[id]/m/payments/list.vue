@@ -517,7 +517,7 @@
                         <span class="material-symbols-outlined text-lg">verified</span>
                       </button>
                       <button
-                        v-if="payment.status === 'COMPLETED'"
+                        v-if="payment.status === 'COMPLETED' || payment.status == 'PARTIALLY_REFUNDED'"
                         @click="initiateRefund(payment)"
                         class="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Initiate Refund"
@@ -658,6 +658,7 @@
     <RefundRequestModal
       v-if="paymentToRefund"
       :payment="paymentToRefund"
+      :event-detail="event?.data"
       :open="showRefundModal"
       @close="closeRefundModal"
       @created="handleRefundCreated"

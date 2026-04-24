@@ -113,7 +113,7 @@
         View Event
       </UButton>
       <UButton
-        :to="`/events/${eventId}/preview`"
+        :to="`/events/${eventId}/?view=preview`"
         variant="ghost"
         color="white"
         block

@@ -323,7 +323,7 @@ type PaymentDetails = {
 const { data: event } = useEvent(eventId)
 
 // Order Data
-const { data: orderData, isLoading, refetch } = useProductOrder(computed(() => orderId.value))
+const { data: orderData, isLoading, refetch } = useProductOrder({"event": event.value?.data.url_safe_title || event.value?.data.event_id}, computed(() => orderId.value))
 const order = computed(() => orderData.value?.data)
 
 // Mutations

@@ -389,14 +389,14 @@ const isDraftMode = computed(() => props.modelValue !== undefined)
 
 // Data Queries
 const eventQuestions = useEventQuestions(computed(() => ({
-  event: props.event.event_id,
+  event: props.event.url_safe_title || props.event.event_id,
   page_size: 100
 })))
 
 const attendeeAnswers = useEventQuestionAnswers(
   computed(() => (props.attendeeId ? {
     attendee_id: props.attendeeId,
-    page_size: 100
+    page_size: 50
   } : undefined)),
   { enabled: computed(() => !!props.attendeeId && !isDraftMode.value) }
 )

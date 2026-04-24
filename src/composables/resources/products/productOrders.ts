@@ -29,6 +29,7 @@ import type {
   ProductsOrdersCompleteCreateData,
   ProductsOrdersReserveBankTransferPaymentData,
   ProductsOrdersSubmitCreateData,
+  ProductsOrdersRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['productOrders'] as const
@@ -49,14 +50,15 @@ export function useProductOrders(params?: MaybeRefOrGetter<ProductsOrdersListDat
 /**
  * Get a single order by ID
  */
-export function useProductOrder(orderId: MaybeRefOrGetter<string>) {
+export function useProductOrder(params: MaybeRefOrGetter<ProductsOrdersRetrieveData['query'] | undefined>, orderId: MaybeRefOrGetter<string>, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', orderId] as const,
     queryFn: () => {
       const id = toValue(orderId)
-      return productsOrdersRetrieve({ path: { order_id: String(id) } })
+      const retrieveParams = toValue(params)
+      return productsOrdersRetrieve({ path: { order_id: String(id) }, query: retrieveParams ?? undefined })
     },
-    enabled: () => !!toValue(orderId),
+    enabled: () => !!toValue(orderId) && (options?.enabled ?? true),
   })
 }
 

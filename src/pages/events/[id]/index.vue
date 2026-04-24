@@ -203,8 +203,14 @@
             <!-- Countdown Timer Card -->
             <div class="space-y-6">
               <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-center text-white/50">
-                  {{ countdown.isExpired ? 'Event Started' : 'Event Starts In' }}
+                <p v-if="countdownDisplay.windowName" class="text-sm font-bold text-center text-white/80 mb-4">
+                  <div v-if="!countdown.isExpired"> 
+                    {{ countdownDisplay.windowName }}
+                    <span class="text-sm font-bold mb-6 text-center text-white/50">ends in</span>
+                  </div>
+                  <div v-else>
+                    {{ countdownDisplay.expiredLabel }}
+                  </div>
                 </p>
                 
                 <!-- Countdown Display -->
@@ -231,7 +237,7 @@
                 </div>
                 
                 <h2 v-if="countdown.isExpired" class="text-3xl font-black text-center">
-                  Happening Now!
+                  {{ countdownDisplay.expiredHeadline }}
                 </h2>
               </div>
 
@@ -239,7 +245,7 @@
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || !event.can_participants_register"
+                  :disabled="countdown.isExpired || !event.can_participants_register || isPreview"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
@@ -250,7 +256,7 @@
                 </button>
 
                 <NuxtLink
-                  v-if="bookingData?.bookings && bookingData.bookings.length > 0"
+                  v-if="bookingData?.bookings && bookingData.bookings.length > 0 && !isPreview"
                   :href="`/events/${event.url_safe_title}/b`"
                   class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
@@ -512,6 +518,14 @@ const registrarAttending = ref(true)
 const registeringOthers = ref(false)
 const otherAttendeeCount = ref(1)
 
+const isPreview = ref(false)
+
+onMounted(() => {
+  if (route.query.view === 'preview') {
+    isPreview.value = true
+  }
+})
+
 // Booking intent creation state
 const showWaitScreen = ref(false)
 const isCreatingIntent = ref(false)
@@ -559,10 +573,72 @@ const selectRegisteringOthers = (value: boolean) => {
   registeringOthers.value = value
 }
 
+const getCountdownDisplay = (eventData?: any) => {
+  const fallback = {
+    date: eventData?.start_datetime,
+    timezone: eventData?.timezone,
+    windowName: null,
+    label: 'Event Starts In',
+    expiredLabel: 'Event Started',
+    expiredHeadline: 'Happening Now!',
+  }
+
+  const windows = Array.isArray(eventData?.availability_windows)
+    ? eventData.availability_windows
+    : []
+
+  const registrationWindows = windows.filter((window: any) => {
+    return window?.availability_type === 'REGISTRATION_WINDOW' && !!window?.available_to
+  })
+
+  if (!registrationWindows.length) {
+    return fallback
+  }
+
+  const now = Date.now()
+  const toMillis = (value?: string) => {
+    const parsed = value ? Date.parse(value) : NaN
+    return Number.isNaN(parsed) ? null : parsed
+  }
+
+  const sortedWindows = [...registrationWindows].sort((a: any, b: any) => {
+    const aTime = toMillis(a?.available_to) ?? Number.POSITIVE_INFINITY
+    const bTime = toMillis(b?.available_to) ?? Number.POSITIVE_INFINITY
+    return aTime - bTime
+  })
+
+  const activeWindow = sortedWindows.find((window: any) => {
+    const endAt = toMillis(window?.available_to)
+    return window?.is_active && endAt !== null && endAt > now
+  })
+
+  const nextWindow = sortedWindows.find((window: any) => {
+    const endAt = toMillis(window?.available_to)
+    return endAt !== null && endAt > now
+  })
+
+  const selectedWindow = activeWindow || nextWindow
+
+  if (!selectedWindow) {
+    return fallback
+  }
+
+  return {
+    date: selectedWindow.available_to,
+    timezone: selectedWindow.timezone || eventData?.timezone,
+    windowName: selectedWindow.name || null,
+    label: `${selectedWindow.name || 'Registration'} Ends In`,
+    expiredLabel: 'Registration Closed',
+    expiredHeadline: 'Registration Closed',
+  }
+}
+
+const countdownDisplay = computed(() => getCountdownDisplay(event.value))
+
 // Setup countdown timer
 const { countdown } = useCountdown(
-  computed(() => event.value?.start_datetime),
-  computed(() => event.value?.timezone)
+  computed(() => countdownDisplay.value.date),
+  computed(() => countdownDisplay.value.timezone)
 )
 
 // Helper function for status class

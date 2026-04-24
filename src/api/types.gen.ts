@@ -10195,6 +10195,10 @@ export type OrderDetail = {
         attendee?: string;
     };
     readonly order_items: Array<OrderItem>;
+    /**
+     * Whether this order has been refunded
+     */
+    readonly is_refunded: boolean;
     payment?: number | null;
     created_by?: number | null;
     readonly created_by_name: string | null;
@@ -10276,6 +10280,10 @@ export type OrderList = {
         attendee?: string;
     };
     readonly order_items: Array<OrderItem>;
+    /**
+     * Whether this order has been refunded
+     */
+    readonly is_refunded: boolean;
 };
 
 export type OrderPricingPreviewItemRequest = {
@@ -23713,6 +23721,12 @@ export type RefundRequestCreateRequestWritable = {
      */
     attendee_ids?: Array<string>;
     /**
+     * Optional granular refund targets. For booking-linked partial refunds, use items with: attendee_id (required), quantity (required), and one of order_item_id or unique variant/package selector.
+     */
+    refund_items?: Array<{
+        [key: string]: unknown;
+    }>;
+    /**
      * Short reason code for immutable audit metadata.
      */
     reason_code?: string;
@@ -34238,6 +34252,7 @@ export type EventVenuesListData = {
          * Filter by event URL-safe title
          */
         event?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -44608,7 +44623,7 @@ export type ProductsOrdersListData = {
          */
         customer__username?: string;
         /**
-         * Filter by event URL-safe title (slug)
+         * Optional event url_safe_title. If provided, event staff can view all orders for that event in addition to their own orders.
          */
         event?: string;
         /**
@@ -44733,7 +44748,12 @@ export type ProductsOrdersRetrieveData = {
     path: {
         order_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional event url_safe_title used for queryset scoping and event staff access checks.
+         */
+        event?: string;
+    };
     url: '/api/products/orders/{order_id}/';
 };
 
