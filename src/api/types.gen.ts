@@ -435,6 +435,9 @@ export type AttendeeCancellationRefundRequestRequest = {
     override_used_ticket_block?: boolean;
     override_reason?: string;
     attendee_ids?: Array<string>;
+    refund_items?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type AttendeeCancellationRefundResponse = {

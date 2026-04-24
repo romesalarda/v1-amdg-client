@@ -715,7 +715,7 @@ function canTransitionStatus(status: OrderStatus | undefined): boolean {
 
 function canCancelOrder(status: OrderStatus | undefined): boolean {
   if (!status) return false
-  return ['draft', 'pending', 'processing'].includes(status)
+  return ['draft', 'pending', 'processing', 'completed'].includes(status)
 }
 
 const transitioningOrderId = ref<string | null>(null)

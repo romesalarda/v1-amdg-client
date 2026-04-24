@@ -445,6 +445,15 @@ const selectedBookingProductRefundItems = computed(() => {
     }))
 })
 
+const selectedOrderRefundItems = computed(() => {
+  return Object.values(selectedItems.value)
+    .filter(item => item.type === 'order_item' && !!item.orderItemId)
+    .map(item => ({
+      order_item_id: item.orderItemId,
+      quantity: item.quantity,
+    }))
+})
+
 watch(selectedItemsAmount, (total) => {
   if (refundType.value === 'partial' && selectableItems.value.length > 0) {
     refundAmount.value = Number(total.toFixed(2))
@@ -466,9 +475,14 @@ const isFormValid = computed(() => {
     const hasValidAmount = refundAmount.value !== null && 
            refundAmount.value > 0 && 
            refundAmount.value <= maxAmount
+    const descriptor = payment.value?.descriptor
 
-    if (props.mode === 'payment' && payment.value?.descriptor === 'booking') {
+    if (descriptor === 'booking') {
       return hasValidReason && hasValidAmount && selectedAttendeeIdsFromItems.value.length > 0
+    }
+
+    if (descriptor === 'order') {
+      return hasValidReason && hasValidAmount && selectedOrderRefundItems.value.length > 0
     }
     
     return hasValidReason && hasValidAmount
@@ -516,25 +530,25 @@ async function handleSubmit() {
             : [String(props.attendee.attendee_id)]))
         : [String(props.attendee.attendee_id)]
 
+      const isPartialOrderPayment = refundType.value === 'partial' && payment.value?.descriptor === 'order'
+
       await createAttendeeRefundMutation.mutateAsync({
         attendeeId: String(props.attendee.attendee_id),
         body: {
           payment_id: selectedPaymentId.value,
           amount: parseAmount(amount).toFixed(2),
           reason: reason.value.trim(),
-          attendee_ids: attendeeIds,
-          ...(payment.value?.descriptor === 'order' && {
-            refund_items: Object.values(selectedItems.value)
-              .filter(item => item.type === 'order_item' && !!item.orderItemId)
-              .map(item => ({
-              order_item_id: item.orderItemId,
-              quantity: item.quantity,
-            })),
+          ...(props.isBookingPayment && {
+            attendee_ids: attendeeIds,
+          }),
+          ...(isPartialOrderPayment && selectedOrderRefundItems.value.length > 0 && {
+            refund_items: selectedOrderRefundItems.value,
           }),
         },
       })
     } else {
       const isPartialBookingPayment = refundType.value === 'partial' && payment.value?.descriptor === 'booking'
+      const isPartialOrderPayment = refundType.value === 'partial' && payment.value?.descriptor === 'order'
       const hasTargetedBookingProductItems = isPartialBookingPayment && selectedBookingProductRefundItems.value.length > 0
 
       if (isPartialBookingPayment && selectedAttendeeIdsFromItems.value.length === 0) {
@@ -551,13 +565,8 @@ async function handleSubmit() {
         ...(hasTargetedBookingProductItems && {
           refund_items: selectedBookingProductRefundItems.value,
         }),
-        ...(payment.value?.descriptor === 'order' && {
-          refund_items: Object.values(selectedItems.value)
-            .filter(item => item.type === 'order_item' && !!item.orderItemId)
-            .map(item => ({
-            order_item_id: item.orderItemId,
-            quantity: item.quantity,
-          })),
+        ...(isPartialOrderPayment && selectedOrderRefundItems.value.length > 0 && {
+          refund_items: selectedOrderRefundItems.value,
         }),
       })
     }
