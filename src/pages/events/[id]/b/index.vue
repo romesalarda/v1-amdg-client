@@ -288,11 +288,13 @@
 								</p>
 							</div>
 
-							<button type="button" class="w-full rounded-full bg-white py-4 text-sm font-black uppercase tracking-[0.22em] text-[#0b132b] transition-transform hover:-translate-y-0.5">
+							<button type="button" class="w-full rounded-full bg-white py-4 text-sm font-black uppercase tracking-[0.22em] text-[#0b132b] transition-transform hover:-translate-y-0.5"
+								@click="() => router.push(`/events/${eventId}/b/${currentOutstandingPayment?.booking?.booking?.booking_reference}`)"
+							>
 								Complete Payment
 							</button>
 
-							<div class="border-t border-white/10 pt-8">
+							<!-- <div class="border-t border-white/10 pt-8">
 								<h4 class="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-[0.22em] text-white">
 									<UIcon name="i-heroicons-banknotes" class="h-4 w-4" />
 									Bank Transfer Details
@@ -306,7 +308,7 @@
 										No bank transfer details available.
 									</div>
 								</div>
-							</div>
+							</div> -->
 						</div>
 
 						<div v-else class="rounded-2xl bg-white/5 p-4 text-sm text-white/70">
