@@ -128,23 +128,24 @@
 
             <div v-else-if="question.question_type === 'upload'" class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
               <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
-              <p class="text-xs text-gray-500">Upload a file or provide a link</p>
+              <p class="text-xs text-gray-500">Upload a file</p>
               <input
+                :id="`draft-upload-${question.id}`"
                 type="file"
-                class="mt-3 w-full text-xs"
+                class="hidden"
                 @change="handleUploadFile(question.id, $event)"
                 :disabled="uploadAnswerMutation.isPending.value"
               />
+              <label
+                :for="`draft-upload-${question.id}`"
+                class="mt-3 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-primary border border-primary/40 rounded-lg hover:bg-primary/5 cursor-pointer"
+              >
+                <UIcon name="i-heroicons-cloud-arrow-up" class="w-4 h-4" />
+                <span>{{ uploadAnswerMutation.isPending.value ? 'Uploading...' : 'Upload File' }}</span>
+              </label>
               <p v-if="Boolean(getDraftAnswer(question.id)?.uploadResourceId)" class="mt-2 text-xs text-emerald-600">
                 File uploaded and ready to submit.
               </p>
-              <input
-                :value="getDraftAnswer(question.id)?.uploadUrl || ''"
-                type="text"
-                placeholder="Or paste a file URL"
-                class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                @input="setDraftUploadUrl(question.id, ($event.target as HTMLInputElement).value)"
-              />
             </div>
 
             <p v-if="question.required && !hasAnswer(question.id)" class="text-xs text-red-600">
@@ -189,6 +190,29 @@
                   {{ option.option_text }}
                 </UBadge>
               </div>
+            </div>
+
+            <div v-else-if="question.question_type === 'upload'" class="bg-gray-50 rounded-lg p-3 space-y-2">
+              <template v-if="getAnswerResourceUrl(question.id)">
+                <img
+                  v-if="isImageResource(question.id)"
+                  :src="getAnswerResourceUrl(question.id) || ''"
+                  @error="onImageError"
+                  alt="Uploaded answer"
+                  class="max-h-56 rounded-lg border border-gray-200 object-contain bg-white"
+                />
+                <a
+                  :href="getAnswerResourceUrl(question.id) || '#'"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="text-sm text-primary font-medium hover:underline break-all"
+                >
+                  Open uploaded file
+                </a>
+              </template>
+              <p v-else class="text-sm text-gray-700 break-all">
+                {{ getAnswer(question.id)?.answer_text }}
+              </p>
             </div>
 
             <div class="flex gap-2 mt-2">
@@ -303,22 +327,33 @@
             <div v-else-if="question.question_type === 'upload'">
               <div class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
                 <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <p class="text-xs text-gray-500">Upload a file or provide a link</p>
+                <p class="text-xs text-gray-500">Replace uploaded file</p>
                 <input
+                  :id="`edit-upload-${question.id}`"
                   type="file"
-                  class="mt-3 w-full text-xs"
-                  @change="handleUploadFile(undefined, $event)"
-                  :disabled="!isDraftMode || uploadAnswerMutation.isPending.value"
+                  class="hidden"
+                  @change="handleUploadFile(question.id, $event)"
+                  :disabled="uploadAnswerMutation.isPending.value"
                 />
+                <label
+                  :for="`edit-upload-${question.id}`"
+                  class="mt-3 inline-flex items-center justify-center gap-2 px-3 py-2 text-xs font-semibold text-primary border border-primary/40 rounded-lg hover:bg-primary/5 cursor-pointer"
+                >
+                  <UIcon name="i-heroicons-cloud-arrow-up" class="w-4 h-4" />
+                  <span>{{ uploadAnswerMutation.isPending.value ? 'Uploading...' : 'Choose Replacement File' }}</span>
+                </label>
                 <p v-if="uploadResourceId" class="mt-2 text-xs text-emerald-600">
                   File uploaded and ready to submit.
                 </p>
-                <input
-                  v-model="uploadUrl"
-                  type="text"
-                  placeholder="Or paste a file URL"
-                  class="mt-3 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
-                />
+                <a
+                  v-if="!isDraftMode && getAnswerResourceUrl(question.id)"
+                  :href="getAnswerResourceUrl(question.id) || '#'"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-2 inline-block text-xs text-primary font-medium hover:underline break-all"
+                >
+                  Current uploaded file
+                </a>
                 <p v-if="uploadError" class="mt-1 text-xs text-red-600">{{ uploadError }}</p>
               </div>
             </div>
@@ -352,6 +387,7 @@ import { useField, useForm } from 'vee-validate'
 import { z } from 'zod'
 import { useDebounceFn } from '@vueuse/core'
 import { useToast } from '#ui/composables/useToast'
+import { onImageError } from '~/utils/image'
 import type { EventQuestion, EventQuestionNestedOption, EventDetail } from '~/api/types.gen'
 import type { EventQuestionAnswerDraft } from '~/stores/registration'
 
@@ -383,6 +419,7 @@ const emit = defineEmits<{
 
 // Composables
 const toast = useToast()
+const config = useRuntimeConfig()
 const uploadAnswerMutation = useUploadEventQuestionAnswer()
 
 const isDraftMode = computed(() => props.modelValue !== undefined)
@@ -616,6 +653,29 @@ const getSelectedOptions = (questionId: string): EventQuestionNestedOption[] => 
   )
 }
 
+const getAnswerResourceUrl = (questionId: string): string | null => {
+  const answer = getAnswer(questionId)
+  if (!answer) return null
+  const raw = answer.resource_info?.resource_url || answer.upload_url || answer.answer_text || null
+  if (!raw) return null
+  if (raw.startsWith('http://') || raw.startsWith('https://') || raw.startsWith('blob:') || raw.startsWith('data:')) {
+    return raw
+  }
+
+  const apiUrl = String(config.public.apiUrl || '').replace(/\/$/, '')
+  const path = raw.startsWith('/') ? raw : `/${raw}`
+  return apiUrl ? `${apiUrl}${path}` : path
+}
+
+const isImageResource = (questionId: string): boolean => {
+  const answer = getAnswer(questionId)
+  const type = String(answer?.resource_info?.resource_type || '').toUpperCase()
+  if (type === 'IMAGE') return true
+
+  const url = String(getAnswerResourceUrl(questionId) || '').toLowerCase()
+  return ['.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg'].some(ext => url.includes(ext))
+}
+
 const isEditing = (questionId: string): boolean => {
   return editingQuestionId.value === questionId
 }
@@ -677,8 +737,8 @@ const startEditing = async (question: EventQuestion) => {
         values: {
           answer_text: existingAnswer.answer_text || '',
           selected_options: [],
-          upload_url: existingAnswer.upload_url || '',
-          upload_resource_id: existingAnswer.upload_resource_id,
+          upload_url: existingAnswer.upload_url || existingAnswer.resource_info?.resource_url || '',
+          upload_resource_id: existingAnswer.upload_resource_id || existingAnswer.resource_info?.resource_id,
         },
       })
     } else if (question.question_type === 'slider') {
@@ -877,21 +937,37 @@ const saveCurrentAnswer = async () => {
     let answerId: number
 
     if (existingAnswer) {
+      const uploadPayload = question.question_type === 'upload'
+        ? {
+            upload_resource_id: uploadResourceId.value,
+            upload_url: uploadUrl.value || undefined,
+          }
+        : {}
+
       await partialUpdateAnswerMutation.mutateAsync({
         answerId: existingAnswer.id,
         body: {
           question: question.id,
           attendee: props.attendeeId,
           answer_text: answerTextString,
-        }
+          ...(uploadPayload as any),
+        } as any
       })
       answerId = existingAnswer.id
     } else {
+      const uploadPayload = question.question_type === 'upload'
+        ? {
+            upload_resource_id: uploadResourceId.value,
+            upload_url: uploadUrl.value || undefined,
+          }
+        : {}
+
       const response = await createAnswerMutation.mutateAsync({
         question: question.id,
         attendee: props.attendeeId as string,
         answer_text: answerTextString,
-      })
+        ...(uploadPayload as any),
+      } as any)
       answerId = response.data?.id || 0
       if (!answerId) {
         throw new Error('Failed to get answer ID from response')
@@ -950,20 +1026,37 @@ const handleDeleteAnswer = async (questionId: string) => {
 }
 
 const handleUploadFile = async (questionId: string | undefined, event: Event) => {
-  if (!isDraftMode.value || !questionId) return
+  if (!questionId) return
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
 
   const formData = new FormData()
-  formData.append('file', file)
   formData.append('event_id', props.event.event_id)
+
+  const isImage = file.type.startsWith('image/')
+  if (isImage) {
+    formData.append('resource_type', 'IMAGE')
+    formData.append('image', file)
+  } else {
+    formData.append('resource_type', 'DOCUMENT')
+    formData.append('file', file)
+  }
 
   try {
     const response = await uploadAnswerMutation.mutateAsync(formData)
-    upsertDraftAnswer(questionId, {
-      uploadResourceId: response.id,
-    })
+
+    if (isDraftMode.value) {
+      upsertDraftAnswer(questionId, {
+        uploadResourceId: response.id,
+      })
+    } else if (editingQuestionId.value === questionId) {
+      setFieldValue('upload_resource_id', response.id)
+      setFieldValue('upload_url', response.resource_url || '')
+      setFieldValue('answer_text', response.resource_url || answerText.value || '')
+    }
+
+    input.value = ''
     toast.add({ title: 'Uploaded', description: 'File uploaded successfully.', color: 'green' })
   } catch (error) {
     console.error('Failed to upload file:', error)
