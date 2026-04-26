@@ -160,7 +160,7 @@ const option = computed(() => {
         overflow: isHorizontal ? 'truncate' : undefined,
         interval: 0,
         hideOverlap: true,
-        align: isHorizontal ? 'left' : 'right',
+        align: isHorizontal ? 'right' : 'right',
       },
       splitLine: {
         show: !isHorizontal && props.showGrid,

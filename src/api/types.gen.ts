@@ -7129,6 +7129,20 @@ export type EventQuestionAnswer = {
     readonly attendee_name: string;
     answer_text: string;
     readonly selected_options: Array<EventQuestionAnswerChoice>;
+    readonly resource_info: {
+        /**
+         * URL of the resource
+         */
+        resource_url?: string;
+        /**
+         * Type of the resource (file, link, image)
+         */
+        resource_type?: string;
+        /**
+         * ID of the resource
+         */
+        resource_id?: number;
+    };
     readonly submitted_at: string;
     readonly updated_at: string;
     /**
@@ -42019,6 +42033,10 @@ export type PaymentsRefundsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter by event URL-safe title (filters refunds for payments associated with the event)
+         */
+        event?: string;
         /**
          * Filter by event UUID (filters refunds for payments associated with the event)
          */
