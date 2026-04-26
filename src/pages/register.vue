@@ -263,8 +263,7 @@ const handleRegister = handleSubmit(async (values) => {
       })
       
       if (auth.isAuthenticated) {
-        // Navigate to dashboard or onboarding
-        navigateTo('/admin/dashboard')
+        navigateTo('/dashboard')
       }
     } catch (loginError) {
       // If auto-login fails, redirect to login page

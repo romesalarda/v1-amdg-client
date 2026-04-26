@@ -957,6 +957,7 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
 
   const formData = new FormData()
   formData.append('file', file)
+  formData.append('event_id', props.event.event_id)
 
   try {
     const response = await uploadAnswerMutation.mutateAsync(formData)

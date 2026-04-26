@@ -203,14 +203,9 @@
             <!-- Countdown Timer Card -->
             <div class="space-y-6">
               <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
-                <p v-if="countdownDisplay.windowName" class="text-sm font-bold text-center text-white/80 mb-4">
-                  <div v-if="!countdown.isExpired"> 
-                    {{ countdownDisplay.windowName }}
-                    <span class="text-sm font-bold mb-6 text-center text-white/50">ends in</span>
-                  </div>
-                  <div v-else>
-                    {{ countdownDisplay.expiredLabel }}
-                  </div>
+                <p class="text-sm font-bold text-center text-white/80 mb-4">
+                  <span v-if="!countdown.isExpired">{{ countdownDisplay.statusText }}</span>
+                  <span v-else>{{ countdownDisplay.expiredLabel }}</span>
                 </p>
                 
                 <!-- Countdown Display -->
@@ -245,7 +240,7 @@
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || !event.can_participants_register || isPreview"
+                  :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
@@ -509,6 +504,22 @@ const { data: venuesData } = useEventVenues(computed(() => ({
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
 
+const countdownTicker = ref(Date.now())
+let countdownTickerId: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  countdownTickerId = setInterval(() => {
+    countdownTicker.value = Date.now()
+  }, 1000)
+})
+
+onBeforeUnmount(() => {
+  if (countdownTickerId) {
+    clearInterval(countdownTickerId)
+    countdownTickerId = null
+  }
+})
+
 const { data: bookingData } = useEventMyBooking(eventId)
 const userBookings = computed(() => bookingData.value?.bookings)
 
@@ -578,9 +589,10 @@ const getCountdownDisplay = (eventData?: any) => {
     date: eventData?.start_datetime,
     timezone: eventData?.timezone,
     windowName: null,
-    label: 'Event Starts In',
+    statusText: 'Event Starts In',
     expiredLabel: 'Event Started',
     expiredHeadline: 'Happening Now!',
+    isOpen: false,
   }
 
   const windows = Array.isArray(eventData?.availability_windows)
@@ -588,7 +600,7 @@ const getCountdownDisplay = (eventData?: any) => {
     : []
 
   const registrationWindows = windows.filter((window: any) => {
-    return window?.availability_type === 'REGISTRATION_WINDOW' && !!window?.available_to
+    return window?.availability_type === 'REGISTRATION_WINDOW' && !!window?.available_from && !!window?.available_to
   })
 
   if (!registrationWindows.length) {
@@ -602,19 +614,20 @@ const getCountdownDisplay = (eventData?: any) => {
   }
 
   const sortedWindows = [...registrationWindows].sort((a: any, b: any) => {
-    const aTime = toMillis(a?.available_to) ?? Number.POSITIVE_INFINITY
-    const bTime = toMillis(b?.available_to) ?? Number.POSITIVE_INFINITY
+    const aTime = toMillis(a?.available_from) ?? Number.POSITIVE_INFINITY
+    const bTime = toMillis(b?.available_from) ?? Number.POSITIVE_INFINITY
     return aTime - bTime
   })
 
   const activeWindow = sortedWindows.find((window: any) => {
+    const startAt = toMillis(window?.available_from)
     const endAt = toMillis(window?.available_to)
-    return window?.is_active && endAt !== null && endAt > now
+    return startAt !== null && endAt !== null && startAt <= now && endAt > now
   })
 
   const nextWindow = sortedWindows.find((window: any) => {
-    const endAt = toMillis(window?.available_to)
-    return endAt !== null && endAt > now
+    const startAt = toMillis(window?.available_from)
+    return startAt !== null && startAt > now
   })
 
   const selectedWindow = activeWindow || nextWindow
@@ -623,17 +636,23 @@ const getCountdownDisplay = (eventData?: any) => {
     return fallback
   }
 
+  const isOpen = !!activeWindow
+
   return {
-    date: selectedWindow.available_to,
+    date: isOpen ? selectedWindow.available_to : selectedWindow.available_from,
     timezone: selectedWindow.timezone || eventData?.timezone,
     windowName: selectedWindow.name || null,
-    label: `${selectedWindow.name || 'Registration'} Ends In`,
-    expiredLabel: 'Registration Closed',
-    expiredHeadline: 'Registration Closed',
+    statusText: `${selectedWindow.name || 'Registration'} ${isOpen ? 'ends in' : 'opens in'}`,
+    expiredLabel: isOpen ? 'Registration Closed' : 'Registration Opens Soon',
+    expiredHeadline: isOpen ? 'Registration Closed' : 'Registration Opens Soon',
+    isOpen,
   }
 }
 
-const countdownDisplay = computed(() => getCountdownDisplay(event.value))
+const countdownDisplay = computed(() => {
+  countdownTicker.value
+  return getCountdownDisplay(event.value)
+})
 
 // Setup countdown timer
 const { countdown } = useCountdown(
@@ -664,7 +683,7 @@ const getStatusClass = (status?: string) => {
 }
 
 const openRegistrationModal = () => {
-  if (countdown.value.isExpired || event.value?.status !== 'OPEN') {
+  if (countdown.value.isExpired || !countdownDisplay.value.isOpen || event.value?.status !== 'OPEN') {
     return
   }
 

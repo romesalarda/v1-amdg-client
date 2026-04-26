@@ -1720,7 +1720,7 @@ const medicalConditions = computed(() => medicalConditionsQuery.data.value?.data
 const accessibilityRequirements = computed(() => accessibilityRequirementsQuery.data.value?.data?.results || [])
 
 const consentsQuery = useConsents(
-	computed(() => (event.value?.event_id ? { event: String(event.value.event_id), page_size: 100 } : undefined))
+	computed(() => (event.value?.event_id ? { event: String(event.value.url_safe_title), page_size: 100 } : undefined))
 )
 const consents = computed(() => consentsQuery.data.value?.data?.results || [])
 

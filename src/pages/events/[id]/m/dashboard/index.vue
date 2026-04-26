@@ -230,9 +230,13 @@
                     </div>
                   </li>
                 </ul>
-                <div v-else class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700">
-                  <UIcon name="i-heroicons-check-circle" class="h-5 w-5" />
-                  <p class="text-sm font-semibold">No outstanding tasks. This event is ready.</p>
+                <!-- class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 -->
+                <div v-else class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+                    <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                      <UIcon name="i-heroicons-inbox" class="h-7 w-7" />
+                    </div>
+                    <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No outstanding tasks</p>
+                    <p class="mt-2 text-sm text-slate-500">Your event is ready to go!</p>
                 </div>
               </div>
             </section>

@@ -21,7 +21,7 @@
           </div>
 
           <div class="md:ml-auto md:max-w-xl md:pl-8">
-            <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">Countdown to Launch</p>
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">We will see you in...</p>
             <div v-if="hasStarted" class="mt-4">
               <p class="text-2xl font-black text-white">Event started</p>
               <p class="mt-1 text-xs text-white/75">{{ formatDate(eventStart) }}</p>
@@ -245,7 +245,7 @@
               Unable to load payment summary right now.
             </div>
             <template v-else>
-              <section class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm">
+              <section class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm" v-if="paymentSummaryData?.totals?.outstanding_payments">
                 <p class="text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">Outstanding now</p>
                 <p class="mt-3 text-4xl font-black text-blue-900">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
                 <p class="mt-1 text-sm text-blue-900/80">{{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }} outstanding</p>
@@ -1177,7 +1177,6 @@
                     </svg>
                     Open shop
                   </span>
-                  <span class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-100">Primary</span>
                 </NuxtLink>
                 <NuxtLink :to="`/events/${eventId}`" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event

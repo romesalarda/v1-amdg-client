@@ -744,38 +744,131 @@
       </div>
     </div>
 
-    <UModal v-model="showConsentForm" :ui="{ width: 'sm:max-w-2xl' }">
-      <UCard>
+    <UModal v-model="showConsentForm" :ui="{ width: 'sm:max-w-3xl' }">
+      <UCard class="overflow-hidden">
         <template #header>
-          <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-gray-900">
-              {{ editingConsentId ? 'Edit Consent Definition' : 'Create Consent Definition' }}
-            </h3>
-            <UButton
-              icon="i-heroicons-x-mark"
-              variant="ghost"
-              size="xs"
-              @click="resetConsentForm"
-            />
+          <div class="-mx-6 -mt-6 mb-4 p-5 bg-gradient-to-r from-emerald-50 via-cyan-50 to-sky-100 border-b border-sky-200">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <h3 class="font-semibold text-gray-900 text-lg">
+                  {{ editingConsentId ? 'Edit Consent Definition' : 'Create Consent Definition' }}
+                </h3>
+                <p class="text-xs text-gray-600 mt-1">
+                  Define what attendees agree to during registration.
+                </p>
+              </div>
+              <UButton
+                icon="i-heroicons-x-mark"
+                variant="ghost"
+                size="xs"
+                @click="resetConsentForm"
+              />
+            </div>
           </div>
         </template>
 
-        <div class="space-y-3">
-          <UInput v-model="consentForm.code" placeholder="Code" size="sm" :disabled="readOnly" />
-          <UInput v-model="consentForm.title" placeholder="Title" size="sm" :disabled="readOnly" />
-          <UTextarea v-model="consentForm.description" placeholder="Description" :rows="4" size="sm" :disabled="readOnly" />
-          <UInput v-model="consentForm.external_link" placeholder="External link (optional)" size="sm" :disabled="readOnly" />
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <UInput v-model="consentForm.version" placeholder="Version" size="sm" :disabled="readOnly" />
-            <div class="flex items-center gap-4 text-xs">
-              <label class="flex items-center gap-1">
-                <input v-model="consentForm.required" type="checkbox" :disabled="readOnly" />
-                Required
-              </label>
-              <label class="flex items-center gap-1">
-                <input v-model="consentForm.active" type="checkbox" :disabled="readOnly" />
-                Active
-              </label>
+        <div class="space-y-5">
+          <div class="space-y-2">
+            <div class="flex items-center gap-2">
+              <UIcon name="i-heroicons-sparkles" class="w-4 h-4 text-cyan-600" />
+              <p class="text-xs font-medium text-gray-700">Quick templates</p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <UButton
+                v-for="template in consentDefinitionTemplates"
+                :key="template.title"
+                size="xs"
+                variant="soft"
+                color="cyan"
+                :disabled="readOnly"
+                @click="applyConsentTemplate(template)"
+              >
+                {{ template.title }}
+              </UButton>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="md:col-span-2">
+              <label class="text-xs font-medium text-gray-700 mb-1 block">Title</label>
+              <UInput
+                v-model="consentForm.title"
+                placeholder="e.g. Photo and Video Consent"
+                size="sm"
+                :disabled="readOnly"
+                @update:model-value="onConsentTitleInput"
+              />
+            </div>
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-medium text-gray-700 block">Code</label>
+                <UButton
+                  size="2xs"
+                  variant="ghost"
+                  color="gray"
+                  :disabled="readOnly || !consentForm.title.trim()"
+                  @click="generateCodeFromTitle"
+                >
+                  Regenerate
+                </UButton>
+              </div>
+              <UInput
+                v-model="consentForm.code"
+                placeholder="3-digit code"
+                size="sm"
+                :disabled="readOnly"
+                maxlength="3"
+                @update:model-value="onConsentCodeInput"
+              />
+              <p class="text-[11px] text-gray-500 mt-1">Auto-generated from title, editable.</p>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-xs font-medium text-gray-700 mb-1 block">Description</label>
+            <UTextarea
+              v-model="consentForm.description"
+              placeholder="Describe what the attendee is consenting to."
+              :rows="5"
+              size="sm"
+              :disabled="readOnly"
+            />
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <label class="text-xs font-medium text-gray-700 mb-1 block">External Link (optional)</label>
+              <UInput
+                v-model="consentForm.external_link"
+                placeholder="https://example.com/policy"
+                size="sm"
+                :disabled="readOnly"
+              />
+            </div>
+            <div>
+              <label class="text-xs font-medium text-gray-700 mb-1 block">Version</label>
+              <UInput v-model="consentForm.version" placeholder="1.0" size="sm" :disabled="readOnly" />
+            </div>
+          </div>
+
+          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
+            <div class="flex flex-wrap items-center gap-5">
+              <UCheckbox
+                v-model="consentForm.required"
+                label="Required"
+                :disabled="readOnly"
+              />
+              <UCheckbox
+                v-model="consentForm.active"
+                label="Active"
+                :disabled="readOnly"
+              />
+              <UBadge
+                :label="consentForm.required ? 'Mandatory for registration' : 'Optional for attendees'"
+                :color="consentForm.required ? 'red' : 'gray'"
+                variant="soft"
+                size="xs"
+              />
             </div>
           </div>
         </div>
@@ -862,7 +955,7 @@ const eventIntId = computed(() => event.value?.data?.id)
 const consentFilters = computed(() => {
   if (!eventIntId.value) return undefined
   return {
-    event: event.value?.data?.event_id,
+    event: event.value?.data?.url_safe_title || event?.value?.data?.event_id,
     page_size: 100,
   }
 })
@@ -874,6 +967,95 @@ const deleteConsentMutation = useDeleteConsent()
 
 const showConsentForm = ref(false)
 const editingConsentId = ref<number | null>(null)
+const consentCodeManuallyEdited = ref(false)
+
+const consentDefinitionTemplates = [
+  {
+    title: 'Data Protection Consent',
+    description:
+      'I consent to the collection and processing of my personal data for event registration, communication, safety, and compliance purposes in line with applicable data protection laws.',
+    external_link: '',
+    required: true,
+    active: true,
+    version: '1.0',
+  },
+  {
+    title: 'Photo and Video Consent',
+    description:
+      'I consent to being photographed and recorded during the event and allow these materials to be used for event promotion, social media, and future communication.',
+    external_link: '',
+    required: false,
+    active: true,
+    version: '1.0',
+  },
+  {
+    title: 'Medical Treatment Consent',
+    description:
+      'In case of emergency, I authorize event staff to seek appropriate medical treatment on my behalf when immediate action is required.',
+    external_link: '',
+    required: true,
+    active: true,
+    version: '1.0',
+  },
+  {
+    title: 'Code of Conduct Acknowledgement',
+    description:
+      'I confirm that I have read and agree to follow the event code of conduct. I understand violations may result in removal from the event.',
+    external_link: '',
+    required: true,
+    active: true,
+    version: '1.0',
+  },
+]
+
+const inferThreeDigitConsentCode = (title: string) => {
+  const trimmed = title.trim()
+  if (!trimmed) return ''
+
+  // Stable 3-digit numeric code derived from title characters.
+  const checksum = Array.from(trimmed).reduce((acc, char, index) => {
+    return acc + char.charCodeAt(0) * (index + 1)
+  }, 0)
+
+  return String((checksum % 900) + 100)
+}
+
+const onConsentTitleInput = (value: string | number) => {
+  const title = typeof value === 'string' ? value : String(value ?? '')
+  if (!consentCodeManuallyEdited.value) {
+    consentForm.code = inferThreeDigitConsentCode(title)
+  }
+}
+
+const onConsentCodeInput = (value: string | number) => {
+  const parsed = typeof value === 'string' ? value : String(value ?? '')
+  consentCodeManuallyEdited.value = true
+  consentForm.code = parsed.replace(/\D/g, '').slice(0, 3)
+}
+
+const generateCodeFromTitle = () => {
+  consentCodeManuallyEdited.value = false
+  consentForm.code = inferThreeDigitConsentCode(consentForm.title)
+}
+
+const applyConsentTemplate = (template: {
+  title: string
+  description: string
+  external_link: string
+  required: boolean
+  active: boolean
+  version: string
+}) => {
+  consentForm.title = template.title
+  consentForm.description = template.description
+  consentForm.external_link = template.external_link
+  consentForm.required = template.required
+  consentForm.active = template.active
+  consentForm.version = template.version
+  consentCodeManuallyEdited.value = false
+  consentForm.code = inferThreeDigitConsentCode(template.title)
+}
+
 const consentForm = reactive({
   code: '',
   title: '',
@@ -887,6 +1069,7 @@ const consentForm = reactive({
 const resetConsentForm = () => {
   showConsentForm.value = false
   editingConsentId.value = null
+  consentCodeManuallyEdited.value = false
   consentForm.code = ''
   consentForm.title = ''
   consentForm.description = ''
@@ -905,6 +1088,7 @@ const startEditConsent = (consent: any) => {
   editingConsentId.value = consent.id
   showConsentForm.value = true
   consentForm.code = consent.code || ''
+  consentCodeManuallyEdited.value = true
   consentForm.title = consent.title || ''
   consentForm.description = consent.description || ''
   consentForm.external_link = consent.external_link || ''
