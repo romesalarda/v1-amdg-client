@@ -220,7 +220,7 @@
                   </p>
                 </div>
                 <button
-                  v-if=" paymentData.status === 'PENDING'""
+                  v-if="paymentData.status === 'PENDING'"
                   type="button"
                   class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
                   @click="showEvidenceUploadForm = !showEvidenceUploadForm"
@@ -376,11 +376,7 @@
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div class="text-xs text-emerald-700 mb-1">Booking Reference</div>
-                    <div class="font-mono font-semibold text-emerald-900">{{ bookingMetadata?.booking_reference || 'N/A' }}</div>
-                  </div>
-                  <div>
-                    <div class="text-xs text-emerald-700 mb-1">Booking ID</div>
-                    <div class="font-mono font-semibold text-emerald-900">{{ bookingMetadata?.booking_id || 'N/A' }}</div>
+                    <div class="font-mono font-semibold text-emerald-900">{{ bookingMetadata?.booking_reference}}</div>
                   </div>
                   <div>
                     <div class="text-xs text-emerald-700 mb-1">Payment Type</div>
@@ -413,7 +409,93 @@
                       </div>
                       <div v-if="attendee.frozen_price" class="text-right">
                         <div class="text-xs text-gray-500">Price</div>
-                        <div class="text-sm font-bold text-gray-900">{{ formatDisplayAmount(attendee.frozen_price, attendee.currency) }}</div>
+                        <div class="text-sm font-bold text-gray-900">{{ formatDisplayAmount((Number(attendee.frozen_price) + Number(attendee.order_total)).toFixed(2), attendee.currency) }}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="checkoutAttendees.length > 0" class="bg-white rounded-lg p-4 border border-gray-200">
+                <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+                  Checkout Attendee Metadata ({{ checkoutAttendees.length }})
+                </div>
+                <div class="space-y-3">
+                  <div
+                    v-for="(checkoutAttendee, index) in checkoutAttendees"
+                    :key="`${checkoutAttendee.package_id || 'pkg'}-${checkoutAttendee.attendee_draft?.email || index}`"
+                    class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div>
+                        <div class="text-sm font-semibold text-gray-900">
+                          {{ getDraftAttendeeName(checkoutAttendee.attendee_draft) || 'Attendee draft' }}
+                        </div>
+                        <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                          <span class="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700">Package: {{ checkoutAttendee.package_id || 'N/A' }}</span>
+                          <span v-if="getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) !== null" class="rounded-full bg-blue-100 px-2 py-0.5 text-blue-800">
+                            Age {{ getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) }}
+                          </span>
+                          <span
+                            v-if="isMinor(checkoutAttendee.attendee_draft?.date_of_birth)"
+                            class="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800 font-semibold"
+                          >
+                            Minor
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-700 sm:grid-cols-2">
+                      <div><span class="font-semibold text-gray-800">Gender:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.gender) }}</div>
+                      <div><span class="font-semibold text-gray-800">Date of birth:</span> {{ checkoutAttendee.attendee_draft?.date_of_birth || 'N/A' }}</div>
+                      <div><span class="font-semibold text-gray-800">Email:</span> {{ checkoutAttendee.attendee_draft?.email || 'N/A' }}</div>
+                      <div><span class="font-semibold text-gray-800">Phone:</span> {{ checkoutAttendee.attendee_draft?.phone_number || 'N/A' }}</div>
+                      <div><span class="font-semibold text-gray-800">Relationship:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.relationship_to_user) }}</div>
+                    </div>
+
+                    <div
+                      v-if="Array.isArray(checkoutAttendee.product_selections) && checkoutAttendee.product_selections.length > 0"
+                      class="mt-3 border-t border-gray-200 pt-3"
+                    >
+                      <div class="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">Product Selections</div>
+                      <div class="space-y-2">
+                        <div
+                          v-for="(selection, selectionIndex) in checkoutAttendee.product_selections"
+                          :key="`${selection.package_product_id || 'pp'}-${selection.variant_id || 'variant'}-${selectionIndex}`"
+                          class="rounded-md border border-gray-200 bg-white p-2.5"
+                        >
+                          <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-start gap-3 min-w-0">
+                              <img
+                                :src="getResolvedProductSelectionImageUrl(selection)"
+                                alt="Product variant"
+                                class="h-14 w-14 rounded-md border border-gray-200 bg-gray-50 object-cover flex-shrink-0"
+                              >
+                              <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-900 truncate">
+                                  {{ getResolvedProductSelectionLabel(checkoutAttendee.package_id, selection) }}
+                                </div>
+                                <div class="mt-0.5 text-xs text-gray-600">
+                                  {{ getResolvedProductSelectionSubtitle(checkoutAttendee.package_id, selection) }}
+                                </div>
+                                <div class="mt-2 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+                                  <div class="rounded bg-gray-50 px-2 py-1 border border-gray-200">
+                                    <span class="text-gray-500">Base price:</span>
+                                    <span class="ml-1 font-semibold text-gray-800">{{ getResolvedBasePriceLabel(checkoutAttendee.package_id, selection) }}</span>
+                                  </div>
+                                  <div class="rounded bg-emerald-50 px-2 py-1 border border-emerald-200">
+                                    <span class="text-emerald-700">Checkout price:</span>
+                                    <span class="ml-1 font-semibold text-emerald-900">{{ getResolvedCheckoutPriceLabel(checkoutAttendee.package_id, selection) }}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="text-right text-xs text-gray-600">
+                              Qty {{ selection.quantity || 1 }}
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -579,6 +661,8 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
+import { bookingsPackageProductsList, productsListVariantsRetrieve } from '~/api/sdk.gen'
+import type { PackageProduct, ProductVariantDetail } from '~/api/types.gen'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -590,6 +674,7 @@ import { usePayment } from '~/composables/resources/payments/payments'
 import { usePaymentMethod } from '~/composables/resources/payments/paymentMethods'
 import { parseAmount } from '~/utils/money'
 import { uploadMultipart } from '~/utils/upload'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 
 interface Props {
   payment: any
@@ -835,6 +920,118 @@ const bookingAttendees = computed<any[]>(() => {
   return Array.isArray(checkout) ? checkout : []
 })
 
+const checkoutAttendees = computed<any[]>(() => {
+  const checkout = bookingMetadata.value?.checkout_attendees
+  return Array.isArray(checkout) ? checkout : []
+})
+
+const packageProductsByPackageId = ref<Record<number, PackageProduct[]>>({})
+const variantsByVariantId = ref<Record<string, ProductVariantDetail>>({})
+
+function getResponseData<T>(response: unknown): T | null {
+  if (response && typeof response === 'object' && 'data' in (response as Record<string, unknown>)) {
+    return ((response as Record<string, unknown>).data as T) ?? null
+  }
+  return (response as T) ?? null
+}
+
+function normalizeListPayload<T>(payload: unknown): T[] {
+  if (Array.isArray(payload)) return payload as T[]
+  if (payload && typeof payload === 'object' && Array.isArray((payload as { results?: unknown[] }).results)) {
+    return (payload as { results: T[] }).results
+  }
+  return []
+}
+
+const checkoutPackageIds = computed<number[]>(() => {
+  const ids = new Set<number>()
+
+  for (const attendee of checkoutAttendees.value) {
+    const parsed = Number(attendee?.package_id)
+    if (Number.isFinite(parsed) && parsed > 0) {
+      ids.add(parsed)
+    }
+  }
+
+  return [...ids]
+})
+
+watch(
+  checkoutPackageIds,
+  async (packageIds) => {
+    if (!packageIds.length) {
+      packageProductsByPackageId.value = {}
+      variantsByVariantId.value = {}
+      return
+    }
+
+    const packageProductsEntries = await Promise.all(
+      packageIds.map(async (packageId) => {
+        try {
+          const response = await bookingsPackageProductsList({ path: { id: packageId } })
+          const payload = getResponseData<unknown>(response)
+          const products = normalizeListPayload<PackageProduct>(payload)
+          return [packageId, products] as const
+        } catch {
+          return [packageId, [] as PackageProduct[]] as const
+        }
+      })
+    )
+
+    const packageProductsMap: Record<number, PackageProduct[]> = {}
+    for (const [packageId, products] of packageProductsEntries) {
+      packageProductsMap[packageId] = products
+    }
+    packageProductsByPackageId.value = packageProductsMap
+
+    const variantLookups = new Map<string, { productId: number | string; variantId: string }>()
+
+    for (const attendee of checkoutAttendees.value) {
+      const packageId = Number(attendee?.package_id)
+      if (!Number.isFinite(packageId) || packageId <= 0) continue
+
+      const packageProducts = packageProductsMap[packageId] || []
+      const selections = Array.isArray(attendee?.product_selections) ? attendee.product_selections : []
+
+      for (const selection of selections) {
+        const variantId = String(selection?.variant_id || '').trim()
+        if (!variantId) continue
+
+        const packageProductId = Number(selection?.package_product_id)
+        const packageProduct = packageProducts.find((item) => Number(item.id) === packageProductId)
+        if (!packageProduct) continue
+
+        variantLookups.set(variantId, { productId: packageProduct.product_public_id, variantId })
+      }
+    }
+
+    const variantEntries = await Promise.all(
+      [...variantLookups.values()].map(async ({ productId, variantId }) => {
+        try {
+          const response = await productsListVariantsRetrieve({
+            path: {
+              product_product_id: String(productId),
+              variant_id: variantId,
+            },
+          })
+          const payload = getResponseData<ProductVariantDetail>(response)
+          return payload ? ([variantId, payload] as const) : null
+        } catch {
+          return null
+        }
+      })
+    )
+
+    const variantsMap: Record<string, ProductVariantDetail> = {}
+    for (const entry of variantEntries) {
+      if (!entry) continue
+      variantsMap[entry[0]] = entry[1]
+    }
+    variantsByVariantId.value = variantsMap
+  },
+  { immediate: true }
+)
+
 const donationMetadata = computed<any>(() => {
   if (metadataType.value !== 'DONATION') return null
   return metadata.value?.donation || null
@@ -875,6 +1072,96 @@ function getDraftAttendeeName(attendeeDraft: any): string {
   const firstName = attendeeDraft.first_name || ''
   const lastName = attendeeDraft.last_name || ''
   return `${firstName} ${lastName}`.trim()
+}
+
+function getAttendeeAge(dateOfBirth?: string): number | null {
+  if (!dateOfBirth) return null
+  const dob = new Date(dateOfBirth)
+  if (Number.isNaN(dob.getTime())) return null
+
+  const today = new Date()
+  let age = today.getFullYear() - dob.getFullYear()
+  const monthDelta = today.getMonth() - dob.getMonth()
+  if (monthDelta < 0 || (monthDelta === 0 && today.getDate() < dob.getDate())) {
+    age -= 1
+  }
+
+  return age >= 0 ? age : null
+}
+
+function isMinor(dateOfBirth?: string): boolean {
+  const age = getAttendeeAge(dateOfBirth)
+  return age !== null && age < 18
+}
+
+function getResolvedPackageProduct(packageId: unknown, packageProductId: unknown): PackageProduct | null {
+  const pid = Number(packageId)
+  const ppid = Number(packageProductId)
+  if (!Number.isFinite(pid) || !Number.isFinite(ppid)) return null
+
+  const products = packageProductsByPackageId.value[pid] || []
+  return products.find((item) => Number(item.id) === ppid) || null
+}
+
+function getResolvedVariant(variantId: unknown): ProductVariantDetail | null {
+  const id = String(variantId || '').trim()
+  if (!id) return null
+  return variantsByVariantId.value[id] || null
+}
+
+function getResolvedProductSelectionImageUrl(selection: any): string {
+  const variant = getResolvedVariant(selection?.variant_id)
+  const imageUrl = variant?.images?.main?.url || null
+  return resolveImageUrl(imageUrl)
+}
+
+function getResolvedBasePriceLabel(packageId: unknown, selection: any): string {
+  const packageProduct = getResolvedPackageProduct(packageId, selection?.package_product_id)
+  const variant = getResolvedVariant(selection?.variant_id)
+
+  const basePrice = variant?.base_amount || packageProduct?.base_amount
+  const currency = variant?.base_amount_currency || packageProduct?.base_amount_currency
+  if (!basePrice) return 'N/A'
+
+  return formatDisplayAmount(basePrice, currency)
+}
+
+function getResolvedCheckoutPriceLabel(packageId: unknown, selection: any): string {
+  const packageProduct = getResolvedPackageProduct(packageId, selection?.package_product_id)
+  const variant = getResolvedVariant(selection?.variant_id)
+
+  const checkoutPrice = packageProduct?.modified_amount || variant?.context_final_price || variant?.final_price
+  const currency = packageProduct?.base_amount_currency || variant?.base_amount_currency
+  if (!checkoutPrice) return 'N/A'
+
+  return formatDisplayAmount(checkoutPrice, currency)
+}
+
+function getResolvedProductSelectionLabel(packageId: unknown, selection: any): string {
+  const packageProduct = getResolvedPackageProduct(packageId, selection?.package_product_id)
+  const variant = getResolvedVariant(selection?.variant_id)
+
+  if (variant?.product_title) return variant.product_title
+  if (packageProduct?.product_title) return packageProduct.product_title
+  return `Package product #${selection?.package_product_id || 'N/A'}`
+}
+
+function getResolvedProductSelectionSubtitle(packageId: unknown, selection: any): string {
+  const packageProduct = getResolvedPackageProduct(packageId, selection?.package_product_id)
+  const variant = getResolvedVariant(selection?.variant_id)
+
+  const details: string[] = []
+
+  if (variant) {
+    if (variant.size_display) details.push(`Size: ${variant.size_display}`)
+    if (variant.color) details.push(`Color: ${variant.color}`)
+  }
+
+  if (packageProduct?.quantity_per_attendee) {
+    details.push(`Units per attendee ${packageProduct.quantity_per_attendee}`)
+  }
+
+  return details.join(' • ')
 }
 
 function calculateModifier(baseAmount: string | number, percentage: string | number): number {
