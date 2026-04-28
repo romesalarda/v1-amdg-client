@@ -17194,6 +17194,34 @@ export type StripeConfigResponse = {
 };
 
 /**
+ * Response serializer for Stripe Connect account status.
+ */
+export type StripeConnectAccount = {
+    connected_account_id?: string | null;
+    stripe_account_id?: string | null;
+    /**
+     * * `NOT_CREATED` - Not Created
+     * * `ONBOARDING` - Onboarding
+     * * `ACTIVE` - Active
+     * * `RESTRICTED` - Restricted
+     * * `DISABLED` - Disabled
+     */
+    status: 'NOT_CREATED' | 'ONBOARDING' | 'ACTIVE' | 'RESTRICTED' | 'DISABLED';
+    charges_enabled: boolean;
+    payouts_enabled: boolean;
+    details_submitted: boolean;
+    disabled_reason?: string | null;
+    country?: string | null;
+    email?: string | null;
+    business_type?: string | null;
+    onboarding_url?: string | null;
+    requires_onboarding: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
+    synced_at?: string | null;
+};
+
+/**
  * Detailed serializer for Ticket with full information.
  */
 export type TicketDetail = {
@@ -46068,6 +46096,32 @@ export type ConfirmPaymentIntentResponses = {
 };
 
 export type ConfirmPaymentIntentResponse2 = ConfirmPaymentIntentResponses[keyof ConfirmPaymentIntentResponses];
+
+export type GetStripeConnectStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/stripe/connect/';
+};
+
+export type GetStripeConnectStatusResponses = {
+    200: StripeConnectAccount;
+};
+
+export type GetStripeConnectStatusResponse = GetStripeConnectStatusResponses[keyof GetStripeConnectStatusResponses];
+
+export type CreateStripeConnectOnboardingLinkData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/stripe/connect/onboard/';
+};
+
+export type CreateStripeConnectOnboardingLinkResponses = {
+    200: StripeConnectAccount;
+};
+
+export type CreateStripeConnectOnboardingLinkResponse = CreateStripeConnectOnboardingLinkResponses[keyof CreateStripeConnectOnboardingLinkResponses];
 
 export type CreatePaymentIntentData = {
     body: CreatePaymentIntentRequest;
