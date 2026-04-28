@@ -266,16 +266,21 @@
                       </span>
                     </div>
 
-                    <div class="mt-4 space-y-3">
-                      <div class="rounded-xl border border-deep-navy/10 bg-mist-blue/35 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Amount</p>
-                        <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Current amount</p>
+                      <p class="mt-2 text-2xl font-black text-deep-navy">{{ formatCurrencyAmount(paymentCurrentAmount(payment)) }}</p>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="font-semibold text-slate-500">Before refunds:</span>
+                        <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(paymentOriginalAmount(payment)) }}</span>
+                        <span v-if="paymentRefundedAmount(payment) > 0" class="font-black text-rose-700">- {{ formatCurrencyAmount(paymentRefundedAmount(payment)) }}</span>
                       </div>
-                      <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
-                        <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                        <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
-                      </div>
+                    </div>
+
+                    <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                      <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                      <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
                     </div>
 
                     <div class="mt-3 flex flex-wrap gap-2">
@@ -348,16 +353,21 @@
                       </span>
                     </div>
 
-                    <div class="mt-4 space-y-3">
-                      <div class="rounded-xl border border-deep-navy/10 bg-mist-blue/35 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/55">Amount</p>
-                        <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Current amount</p>
+                      <p class="mt-2 text-2xl font-black text-deep-navy">{{ formatCurrencyAmount(paymentCurrentAmount(payment)) }}</p>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="font-semibold text-slate-500">Before refunds:</span>
+                        <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(paymentOriginalAmount(payment)) }}</span>
+                        <span v-if="paymentRefundedAmount(payment) > 0" class="font-black text-rose-700">- {{ formatCurrencyAmount(paymentRefundedAmount(payment)) }}</span>
                       </div>
-                      <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
-                        <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
-                        <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
-                        <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
-                      </div>
+                    </div>
+
+                    <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3 mt-4">
+                      <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                      <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                      <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
                     </div>
 
                     <div class="mt-3 flex flex-wrap gap-2">
@@ -1114,23 +1124,38 @@
             </section> -->
 
             <section>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Spent so far</p>
-              <div class="mt-3 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-mist-blue/40 p-4">
-                <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Total completed spend</p>
-                <p class="mt-2 text-3xl font-black text-emerald-900">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
-                <p class="mt-2 text-1xl font-black text-red-900">{{refundedTotalAmount}}</p>
-                <dl class="mt-3 space-y-2 text-xs">
-                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
-                    <dt class="font-semibold text-deep-navy/70">Booking payments</dt>
-                    <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
+              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Payment summary</p>
+              <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Total spent</p>
+                    <p class="mt-2 text-3xl font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Current amount after refunds.</p>
                   </div>
-                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
-                    <dt class="font-semibold text-deep-navy/70">Extra Products</dt>
-                    <dd class="font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
+                  <span class="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">
+                    {{ completedPaymentsCount }} completed
+                  </span>
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                  <span class="font-semibold text-slate-500">Original total:</span>
+                  <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(originalSpentSoFar) }}</span>
+                  <span class="font-semibold text-slate-500">Refunded:</span>
+                  <span class="font-black text-rose-700">- {{ formatCurrencyAmount(refundedTotalAmount) }}</span>
+                </div>
+
+                <dl class="mt-4 grid gap-3 text-xs sm:grid-cols-1">
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="font-semibold text-deep-navy/60">Booking payments</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
                   </div>
-                  <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
-                    <dt class="font-semibold text-deep-navy/70">Completed payments</dt>
-                    <dd class="font-black text-deep-navy">{{ completedPaymentsCount }}</dd>
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="font-semibold text-deep-navy/60">Extra products</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="font-semibold text-deep-navy/60">Completed payments</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ completedPaymentsCount }}</dd>
                   </div>
                 </dl>
               </div>
@@ -1452,22 +1477,47 @@ const completedSummaryPayments = computed(() => {
   return allSummaryPayments.value.filter(payment => isCompletedPaymentStatus(payment.status))
 })
 
+function paymentMoneyAmount(payment: unknown, field: 'amount' | 'original_amount' | 'total_refunded_amount'): number {
+  if (!payment || typeof payment !== 'object') return 0
+  const source = payment as Record<string, unknown>
+  return parseAmountValue(source[field])
+}
+
+function paymentOriginalAmount(payment: unknown): number {
+  const originalAmount = paymentMoneyAmount(payment, 'original_amount')
+  if (originalAmount > 0) return originalAmount
+  return paymentCurrentAmount(payment) + paymentRefundedAmount(payment)
+}
+
+function paymentRefundedAmount(payment: unknown): number {
+  return paymentMoneyAmount(payment, 'total_refunded_amount')
+}
+
+function paymentCurrentAmount(payment: unknown): number {
+  return paymentMoneyAmount(payment, 'amount')
+}
+
+const originalSpentSoFar = computed(() => {
+  return allSummaryPayments.value
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + paymentOriginalAmount(payment), 0)
+})
+
 const refundedTotalAmount = computed(() => {
-  return bookingLevelPayments.value
-    .filter(payment => Number((payment as any).total_refunded_amount) > 0)
-    .reduce((sum, payment) => sum + parseAmountValue(Number.parseFloat((payment as any).total_refunded_amount), Number.parseFloat((payment as any).total_refunded_amount)), 0)
+  return allSummaryPayments.value
+    .reduce((sum, payment) => sum + paymentRefundedAmount(payment), 0)
 })
 
 const spentSoFarBooking = computed(() => {
   return bookingLevelPayments.value
     .filter(payment => isCompletedPaymentStatus(payment.status))
-    .reduce((sum, payment) => sum + parseAmountValue(payment.amount, paymentAmountValue(payment)), 0)
+    .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
 })
 
 const spentSoFarOrders = computed(() => {
   return (paymentSummaryData.value?.shop_payments || [])
     .filter(payment => isCompletedPaymentStatus(payment.status))
-    .reduce((sum, payment) => sum + parseAmountValue(payment.amount, paymentAmountValue(payment)), 0)
+    .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
 })
 
 const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)

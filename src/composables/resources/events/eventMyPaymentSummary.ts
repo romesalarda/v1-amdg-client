@@ -20,6 +20,8 @@ export interface EventMyPaymentSummaryItem {
   amount?: string
   currency?: string | null
   created_at?: string | null
+  original_amount?: string | null
+  total_refunded_amount?: string | null
   method_type?: string | null
   method_title?: string | null
   provided_details?: Record<string, unknown> | null
