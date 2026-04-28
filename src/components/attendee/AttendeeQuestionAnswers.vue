@@ -127,6 +127,14 @@
             </div>
 
             <div v-else-if="question.question_type === 'upload'" class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+              <!-- Image Preview -->
+              <div v-if="filePreviewUrls[`draft-${question.id}`] && !uploadAnswerMutation.isPending.value" class="mb-4">
+                <img
+                  :src="filePreviewUrls[`draft-${question.id}`] || ''"
+                  alt="Preview"
+                  class="max-h-56 rounded-lg border border-gray-200 object-contain bg-white mx-auto"
+                />
+              </div>
               <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
               <p class="text-xs text-gray-500">Upload a file</p>
               <input
@@ -326,6 +334,14 @@
             <!-- Upload -->
             <div v-else-if="question.question_type === 'upload'">
               <div class="text-center py-4 border-2 border-dashed border-gray-300 rounded-lg">
+                <!-- Image Preview -->
+                <div v-if="filePreviewUrls[`edit-${question.id}`] && !uploadAnswerMutation.isPending.value" class="mb-4">
+                  <img
+                    :src="filePreviewUrls[`edit-${question.id}`] || ''"
+                    alt="Preview"
+                    class="max-h-56 rounded-lg border border-gray-200 object-contain bg-white mx-auto"
+                  />
+                </div>
                 <UIcon name="i-heroicons-arrow-up-tray" class="w-6 h-6 text-gray-400 mx-auto mb-2" />
                 <p class="text-xs text-gray-500">Replace uploaded file</p>
                 <input
@@ -381,7 +397,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount, reactive } from 'vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { useField, useForm } from 'vee-validate'
 import { z } from 'zod'
@@ -452,6 +468,32 @@ const isSaving = ref(false)
 const lastSavedAt = ref<Date | null>(null)
 const saveError = ref<string | null>(null)
 const isHydrating = ref(false)
+const filePreviewUrls = reactive<Record<string, string>>({})
+
+// TODO: Hydrate from a global preview store so previews survive component unmounts
+// Quite hacky, use a dedicated endpoint, store the resource ID, then 
+// fetch when rendered. 
+if (typeof window !== 'undefined') {
+  ;(window as any).__amdgPreviewStore = (window as any).__amdgPreviewStore || {}
+  try {
+    Object.assign(filePreviewUrls, (window as any).__amdgPreviewStore)
+  } catch (e) {
+    // ignore
+  }
+
+  // Revoke global previews on page unload to avoid leaking blob URLs forever
+  if (!(window as any).__amdgPreviewStoreUnloadHooked) {
+    window.addEventListener('beforeunload', () => {
+      Object.values((window as any).__amdgPreviewStore || {}).forEach((u: any) => {
+        if (u?.startsWith && u.startsWith('blob:')) {
+          try { URL.revokeObjectURL(u) } catch (e) {}
+        }
+      })
+      ;(window as any).__amdgPreviewStore = {}
+    })
+    ;(window as any).__amdgPreviewStoreUnloadHooked = true
+  }
+}
 
 const buildQuestionSchema = (question: EventQuestion | null) => {
   const base = z.object({
@@ -1031,10 +1073,27 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
   const file = input.files?.[0]
   if (!file) return
 
+  // Create local preview for images
+  const isImage = file.type.startsWith('image/')
+  if (isImage) {
+    const previewUrl = URL.createObjectURL(file)
+    const previewKey = editingQuestionId.value === questionId ? `edit-${questionId}` : `draft-${questionId}`
+
+    // Clean up old preview URL if it exists
+    const oldPreviewUrl = filePreviewUrls[previewKey]
+    if (oldPreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(oldPreviewUrl)
+    }
+
+    // Store preview on reactive object so Vue notices the change
+    filePreviewUrls[previewKey] = previewUrl
+    // persist in global store so it survives unmounts
+    if (typeof window !== 'undefined') (window as any).__amdgPreviewStore[previewKey] = previewUrl
+  }
+
   const formData = new FormData()
   formData.append('event_id', props.event.event_id)
 
-  const isImage = file.type.startsWith('image/')
   if (isImage) {
     formData.append('resource_type', 'IMAGE')
     formData.append('image', file)
@@ -1063,4 +1122,10 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
     toast.add({ title: 'Error', description: 'Failed to upload file.', color: 'red' })
   }
 }
+
+// Cleanup preview URLs on component unmount
+onBeforeUnmount(() => {
+  // Clear local references but keep global store intact so previews survive step changes
+  Object.keys(filePreviewUrls).forEach((k) => delete filePreviewUrls[k])
+})
 </script>

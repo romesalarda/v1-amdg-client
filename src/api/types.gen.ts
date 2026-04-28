@@ -6845,6 +6845,8 @@ export type EventMyPaymentSummaryItem = {
     readonly status: string;
     readonly amount: string;
     readonly amount_value: string | null;
+    readonly original_amount: string | null;
+    readonly total_refunded_amount: string | null;
     readonly currency: string | null;
     readonly created_at: string | null;
     readonly method_type: string | null;
@@ -20843,6 +20845,14 @@ export type EventQuestionAnswerRequestWritable = {
      * List of option IDs to select for choice questions
      */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource for upload-type questions
+     */
+    upload_resource_id?: number;
+    /**
+     * Direct URL/path to uploaded file (alternative to upload_resource_id)
+     */
+    upload_url?: string;
 };
 
 /**
@@ -22955,6 +22965,14 @@ export type PatchedEventQuestionAnswerRequestWritable = {
      * List of option IDs to select for choice questions
      */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource for upload-type questions
+     */
+    upload_resource_id?: number;
+    /**
+     * Direct URL/path to uploaded file (alternative to upload_resource_id)
+     */
+    upload_url?: string;
 };
 
 /**

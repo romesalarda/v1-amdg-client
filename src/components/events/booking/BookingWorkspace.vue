@@ -1118,6 +1118,7 @@
               <div class="mt-3 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50 via-white to-mist-blue/40 p-4">
                 <p class="text-[10px] font-black uppercase tracking-[0.22em] text-emerald-700">Total completed spend</p>
                 <p class="mt-2 text-3xl font-black text-emerald-900">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
+                <p class="mt-2 text-1xl font-black text-red-900">{{refundedTotalAmount}}</p>
                 <dl class="mt-3 space-y-2 text-xs">
                   <div class="flex items-center justify-between rounded-lg border border-emerald-100 bg-white/80 px-3 py-2">
                     <dt class="font-semibold text-deep-navy/70">Booking payments</dt>
@@ -1444,11 +1445,17 @@ function paymentAmountValue(payment: unknown): unknown {
 
 function isCompletedPaymentStatus(status: unknown): boolean {
   const normalized = String(status || '').toUpperCase()
-  return normalized === 'COMPLETED' || normalized === 'PAID'
+  return normalized === 'COMPLETED' || normalized === 'PAID' || normalized === 'PARTIALLY_REFUNDED'
 }
 
 const completedSummaryPayments = computed(() => {
   return allSummaryPayments.value.filter(payment => isCompletedPaymentStatus(payment.status))
+})
+
+const refundedTotalAmount = computed(() => {
+  return bookingLevelPayments.value
+    .filter(payment => Number((payment as any).total_refunded_amount) > 0)
+    .reduce((sum, payment) => sum + parseAmountValue(Number.parseFloat((payment as any).total_refunded_amount), Number.parseFloat((payment as any).total_refunded_amount)), 0)
 })
 
 const spentSoFarBooking = computed(() => {

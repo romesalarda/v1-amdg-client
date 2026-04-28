@@ -409,7 +409,7 @@
                       </div>
                       <div v-if="attendee.frozen_price" class="text-right">
                         <div class="text-xs text-gray-500">Price</div>
-                        <div class="text-sm font-bold text-gray-900">{{ formatDisplayAmount((Number(attendee.frozen_price) + Number(attendee.order_total)).toFixed(2), attendee.currency) }}</div>
+                        <div class="text-sm font-bold text-gray-900">{{ formatDisplayAmount((Number(attendee.frozen_price) + Number(attendee.order_total ? attendee.order_total : 0)).toFixed(2), attendee.currency) }}</div>
                       </div>
                     </div>
                   </div>
