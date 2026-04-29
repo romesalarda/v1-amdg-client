@@ -73,19 +73,30 @@ const hasQuestionAnswerContent = (answer: EventQuestionAnswerDraft): boolean => 
   if (answer.selectedOptionIds && answer.selectedOptionIds.length > 0) return true
   if (answer.uploadResourceId) return true
   if (answer.uploadUrl) return true
+  if (answer.uploadFile) return true
   return false
 }
 
 const buildQuestionAnswers = (answers: EventQuestionAnswerDraft[]): EventQuestionAnswerDraftRequest[] =>
   answers
     .filter((answer) => hasQuestionAnswerContent(answer))
-    .map((answer) => ({
-      question_id: answer.questionId,
-      answer_text: typeof answer.answerText === 'number' ? String(answer.answerText) : (answer.answerText ?? null),
-      selected_option_ids: answer.selectedOptionIds,
-      upload_resource_id: answer.uploadResourceId,
-      upload_url: answer.uploadUrl,
-    }))
+    .map((answer) => {
+      const payload: EventQuestionAnswerDraftRequest & { upload_file_key?: string } = {
+        question_id: answer.questionId,
+        answer_text: typeof answer.answerText === 'number' ? String(answer.answerText) : (answer.answerText ?? null),
+        selected_option_ids: answer.selectedOptionIds,
+        upload_resource_id: answer.uploadResourceId,
+        upload_url: answer.uploadUrl,
+      }
+
+      // Preview and JSON validation paths need a non-empty upload marker
+      // when a local file is attached but not uploaded yet.
+      if (answer.uploadFile && !answer.uploadResourceId && !answer.uploadUrl) {
+        payload.upload_file_key = '__multipart_pending__'
+      }
+
+      return payload
+    })
 
 const buildProductSelections = (selections: ProductSelectionDraft[] | undefined): ProductSelectionRequest[] | undefined => {
   if (!selections || selections.length === 0) return undefined
@@ -183,15 +194,42 @@ export const buildCheckoutMultipartPayload = (params: {
   bookingIntentId: string
   paymentMethodId: number
   attendees: AttendeeDraft[]
+  paymentId?: string
+  bankTransferEvidenceId?: string
   stripePaymentIntentId?: string
   bankTransferEvidence?: BankTransferEvidenceInput
 }): FormData => {
   const formData = new FormData()
   const attendeesPayload = params.attendees.map(buildAttendeeCheckout)
 
+  params.attendees.forEach((attendee, attendeeIndex) => {
+    attendee.questionAnswers.forEach((answer, answerIndex) => {
+      if (!answer.uploadFile) return
+
+      const uploadKey = `question_uploads[${attendeeIndex}][${answer.questionId}]`
+      const attendeePayload = attendeesPayload[attendeeIndex] as any
+      const questionAnswers = attendeePayload?.attendee?.question_answers as any[] | undefined
+      const questionAnswerPayload = questionAnswers?.[answerIndex]
+      if (!questionAnswerPayload) return
+
+      questionAnswerPayload.upload_file_key = uploadKey
+      questionAnswerPayload.upload_resource_id = undefined
+      questionAnswerPayload.upload_url = undefined
+      formData.append(uploadKey, answer.uploadFile)
+    })
+  })
+
   formData.append('booking_intent_id', params.bookingIntentId)
   formData.append('payment_method_id', String(params.paymentMethodId))
   formData.append('attendees', JSON.stringify(attendeesPayload))
+
+  if (params.paymentId) {
+    formData.append('payment_id', params.paymentId)
+  }
+
+  if (params.bankTransferEvidenceId) {
+    formData.append('bank_transfer_evidence_id', params.bankTransferEvidenceId)
+  }
 
   if (params.stripePaymentIntentId) {
     formData.append('stripe_payment_intent_id', params.stripePaymentIntentId)

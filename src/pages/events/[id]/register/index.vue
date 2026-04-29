@@ -1396,6 +1396,7 @@ import { useStripeConfig } from '~/composables/resources/common/stripe'
 import { bookingsListRetrieve, bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import {
 	buildCheckoutPayload,
+	buildCheckoutMultipartPayload,
 	buildCheckoutPreviewPayload,
 	createIdempotencyKey,
 } from '~/composables/registration/checkout'
@@ -3496,19 +3497,33 @@ const handleCheckout = async () => {
 		}
 
 		const bankTransferPaymentId = reservedBankTransferPaymentId.value || undefined
+		const hasQuestionFiles = store.attendees.some((attendee) =>
+			attendee.questionAnswers.some((answer) => Boolean(answer.uploadFile))
+		)
 
-		const response = await checkoutMutation.mutateAsync({
-			body: buildCheckoutPayload({
+		const checkoutBody = hasQuestionFiles
+			? buildCheckoutMultipartPayload({
+				bookingIntentId: store.bookingIntentId,
+				paymentMethodId,
+				attendees: store.attendees,
+				paymentId: bankTransferPaymentId,
+				bankTransferEvidenceId,
+			})
+			: buildCheckoutPayload({
 				bookingIntentId: store.bookingIntentId,
 				paymentMethodId,
 				attendees: store.attendees,
 				paymentId: bankTransferPaymentId,
 				bankTransferEvidenceId,
 				// TODO missing: stripePaymentIntentId:
-			}),
+			})
+
+		const response = await checkoutMutation.mutateAsync({
+			body: checkoutBody as any,
 			idempotencyKey: idempotencyKey.value,
 		})
-		checkoutResult.value = ((response as { data?: Record<string, any> }).data || null) as any
+		const normalizedCheckoutResponse = response as Record<string, any>
+		checkoutResult.value = ((normalizedCheckoutResponse?.data ?? normalizedCheckoutResponse) || null) as any
 
 		if (isBankTransferMethod.value && !checkoutResult.value?.bank_transfer_reference) {
 			const paymentId = Number(checkoutResult.value?.payment_id || 0)

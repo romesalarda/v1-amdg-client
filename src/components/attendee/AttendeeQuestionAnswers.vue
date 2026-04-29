@@ -151,8 +151,8 @@
                 <UIcon name="i-heroicons-cloud-arrow-up" class="w-4 h-4" />
                 <span>{{ uploadAnswerMutation.isPending.value ? 'Uploading...' : 'Upload File' }}</span>
               </label>
-              <p v-if="Boolean(getDraftAnswer(question.id)?.uploadResourceId)" class="mt-2 text-xs text-emerald-600">
-                File uploaded and ready to submit.
+              <p v-if="Boolean(getDraftAnswer(question.id)?.uploadFile || getDraftAnswer(question.id)?.uploadResourceId)" class="mt-2 text-xs text-emerald-600">
+                File attached and ready to submit.
               </p>
             </div>
 
@@ -630,6 +630,7 @@ const hasQuestionAnswerContent = (answer: EventQuestionAnswerDraft): boolean => 
   if (answer.selectedOptionIds && answer.selectedOptionIds.length > 0) return true
   if (answer.uploadResourceId) return true
   if (answer.uploadUrl) return true
+  if (answer.uploadFile) return true
   return false
 }
 
@@ -1091,6 +1092,19 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
     if (typeof window !== 'undefined') (window as any).__amdgPreviewStore[previewKey] = previewUrl
   }
 
+  if (isDraftMode.value) {
+    upsertDraftAnswer(questionId, {
+      uploadFile: file,
+      uploadResourceId: undefined,
+      uploadUrl: undefined,
+      answerText: undefined,
+    })
+
+    input.value = ''
+    toast.add({ title: 'Added', description: 'File attached for checkout.', color: 'green' })
+    return
+  }
+
   const formData = new FormData()
   formData.append('event_id', props.event.event_id)
 
@@ -1105,11 +1119,7 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
   try {
     const response = await uploadAnswerMutation.mutateAsync(formData)
 
-    if (isDraftMode.value) {
-      upsertDraftAnswer(questionId, {
-        uploadResourceId: response.id,
-      })
-    } else if (editingQuestionId.value === questionId) {
+    if (editingQuestionId.value === questionId) {
       setFieldValue('upload_resource_id', response.id)
       setFieldValue('upload_url', response.resource_url || '')
       setFieldValue('answer_text', response.resource_url || answerText.value || '')

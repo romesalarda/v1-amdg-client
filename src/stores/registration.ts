@@ -38,6 +38,7 @@ type EventQuestionAnswerDraft = {
   selectedOptionIds?: number[]
   uploadResourceId?: number
   uploadUrl?: string
+  uploadFile?: File | null
 }
 
 type ProductSelectionDraft = {
