@@ -34,16 +34,16 @@ export function useOrganisations(params?: MaybeRefOrGetter<OrganisationsListList
 }
 
 /**
- * Retrieve a single organisation by ID
+ * Retrieve a single organisation by url_safe_title (or compatible identifier)
  */
-export function useOrganisation(organisationId: MaybeRefOrGetter<number>) {
+export function useOrganisation(organisationIdentifier: MaybeRefOrGetter<string | number>) {
   return useQuery({
-    queryKey: [...QUERY_KEY, 'detail', organisationId] as const,
+    queryKey: [...QUERY_KEY, 'detail', organisationIdentifier] as const,
     queryFn: () => {
-      const id = toValue(organisationId)
-      return organisationsListRetrieve({ path: { id } })
+      const identifier = toValue(organisationIdentifier)
+      return organisationsListRetrieve({ path: { url_safe_title: String(identifier) } })
     },
-    enabled: () => !!toValue(organisationId),
+    enabled: () => !!toValue(organisationIdentifier),
   })
 }
 
@@ -68,8 +68,8 @@ export function useUpdateOrganisation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ organisationId, body }: { organisationId: number; body: OrganisationsListUpdateData['body'] }) =>
-      organisationsListUpdate({ path: { id: organisationId }, body }),
+    mutationFn: ({ organisationId, body }: { organisationId: string | number; body: OrganisationsListUpdateData['body'] }) =>
+      organisationsListUpdate({ path: { url_safe_title: String(organisationId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -87,14 +87,14 @@ export function usePartialUpdateOrganisation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ organisationId, body }: { organisationId: number; body?: OrganisationsListPartialUpdateData['body'] | FormData }) => {
+    mutationFn: ({ organisationId, body }: { organisationId: string | number; body?: OrganisationsListPartialUpdateData['body'] | FormData }) => {
       // Handle multipart uploads (e.g., with logo or landing_image)
       if (isFormData(body)) {
-        return uploadMultipart(`/api/organisations/list/${organisationId}/`, body, { method: 'PATCH' })
+        return uploadMultipart(`/api/organisations/list/${encodeURIComponent(String(organisationId))}/`, body, { method: 'PATCH' })
       }
       
       // Handle regular JSON updates via SDK
-      return organisationsListPartialUpdate({ path: { id: organisationId }, body })
+      return organisationsListPartialUpdate({ path: { url_safe_title: String(organisationId) }, body })
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -112,7 +112,7 @@ export function useDeleteOrganisation() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (organisationId: number) => organisationsListDestroy({ path: { id: organisationId } }),
+    mutationFn: (organisationId: string | number) => organisationsListDestroy({ path: { url_safe_title: String(organisationId) } }),
     onSuccess: (_, organisationId) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.removeQueries({

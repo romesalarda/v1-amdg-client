@@ -111,6 +111,16 @@
                 </UButton>
                 <UButton
                   size="sm"
+                  variant="outline"
+                  color="gray"
+                  icon="i-heroicons-shopping-cart"
+                  @click="navigateTo(`/events/${id}/m/shop/orders`)"
+                  title="View orders"
+                >
+                  Orders
+                </UButton>
+                <UButton
+                  size="sm"
                   variant="solid"
                   color="primary"
                   icon="i-heroicons-plus"
@@ -167,7 +177,7 @@
             <div v-if="isLoading" class="p-6 space-y-3">
               <div v-for="i in 10" :key="i" class="h-16 bg-gray-100 rounded-lg animate-pulse" />
             </div>
-
+            
             <!-- Empty State -->
             <div v-else-if="products.length === 0" class="p-12 text-center">
               <UIcon name="i-heroicons-cube" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -1041,6 +1051,38 @@
       </div>
     </div>
 
+    <!-- Product Preview Modal -->
+    <ProductPreviewModal 
+      v-model="isPreviewOpen"
+      :product="selectedProduct"
+    />
+
+    <!-- Floating Action Bar -->
+    <div class="fixed bottom-0 left-64 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl">
+      <div class="max-w-screen-xl mx-auto px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <UIcon name="i-heroicons-shopping-bag" class="w-5 h-5 text-primary" />
+            <div>
+              <p class="text-xs font-black text-primary uppercase tracking-widest">Shop Dashboard</p>
+              <p class="text-[10px] text-deep-navy/60 font-medium">Manage products, orders, and categories</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <UButton
+              size="sm"
+              variant="outline"
+              color="gray"
+              icon="i-heroicons-shopping-cart"
+              @click="navigateTo(`/events/${id}/m/shop/orders`)"
+            >
+              View Orders
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </div>
   </EventManagementLayout>
 </template>
 
@@ -1060,6 +1102,7 @@ import { useProductCategories } from '~/composables/resources/products/productCa
 import { useProductEventCategories } from '~/composables/resources/products/productEventCategories'
 import { useBulkAssignCategoryToProducts, useBulkRemoveCategoryFromProducts } from '~/composables/resources/products/productCategoryAssignments'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import ProductPreviewModal from '~/components/events/shop/ProductPreviewModal.vue'
 import StatisticsIndex from './statistics/index.vue'
 import { 
   getStockStatus, 
@@ -1080,6 +1123,10 @@ const id = computed(() => route.params.id as string)
 
 // Event Data
 const { data: event } = useEvent(id)
+
+// Product Preview Modal State
+const isPreviewOpen = ref(false)
+const selectedProduct = ref<ProductList | null>(null)
 
 // Tab State
 const currentTab = ref('products')
@@ -1137,7 +1184,7 @@ function setSorting(field: string) {
 // Computed query parameters for API
 const queryParams = computed(() => {
   const params: any = {
-    event: event.value?.data?.id,
+    event: event.value?.data?.url_safe_title,
     page: currentPage.value,
     page_size: pageSize.value,
   }
@@ -1239,8 +1286,8 @@ function toggleSelectAll() {
 
 // Actions
 function viewProductDetails(product: ProductList) {
-  // TODO: Open product detail modal
-  console.log('View product:', product)
+  selectedProduct.value = product
+  isPreviewOpen.value = true
 }
 
 function deleteProduct(product: ProductList) {
@@ -1276,7 +1323,7 @@ function getProductStockStatus(product: ProductList) {
 // Fetch EventCategories for this event (associations between event and categories)
 const { data: eventCategoriesData, isLoading: categoriesLoadingEventCategories } = useProductEventCategories(
   computed(() => {
-    const eventId = event.value?.data?.id
+    const eventId = event.value?.data?.url_safe_title 
     if (!eventId) return undefined
 
     return {
@@ -1325,7 +1372,7 @@ const categoryMappingSelectedCategoryId = ref<number | null>(null)
 const categoryMappingSelectedProductIds = ref<string[]>([])
 
 const categoryMappingProductsQuery = computed(() => {
-  const eventId = event.value?.data?.id
+  const eventId = event.value?.data?.url_safe_title
   if (!eventId) return undefined
 
   return {
@@ -1567,7 +1614,7 @@ function getStockAlertLabel(product: ProductList) {
 // ============================================
 
 const bookingPackagesQuery = computed(() => {
-  const eventId = event.value?.data?.id
+  const eventId = event.value?.data?.url_safe_title
   if (!eventId) return undefined
 
   return {
@@ -1614,7 +1661,7 @@ const {
 const packageProducts = computed<BookingPackageProduct[]>(() => packageProductsData.value?.data?.results || [])
 
 const packageProductsEventProductQuery = computed(() => {
-  const eventId = event.value?.data?.id
+  const eventId = event.value?.data?.url_safe_title
   if (!eventId) return undefined
 
   return {

@@ -1,12 +1,12 @@
 <template>
-  <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm">
+  <div class="overflow-hidden rounded-[1.5rem] border border-slate-200/80 bg-white shadow-[0_12px_32px_rgba(15,23,42,0.06)]">
     <!-- Section Header -->
-    <div v-if="title || $slots.header" class="px-6 py-4 border-b border-gray-200">
+    <div v-if="title || $slots.header" class="border-b border-slate-100 px-6 py-4">
       <slot name="header">
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-lg font-bold text-deep-navy">{{ title }}</h3>
-            <p v-if="description" class="text-sm text-gray-500 mt-1">{{ description }}</p>
+            <h3 class="text-[0.95rem] font-black uppercase tracking-[0.16em] text-deep-navy">{{ title }}</h3>
+            <p v-if="description" class="mt-1 text-sm text-slate-500">{{ description }}</p>
           </div>
           <slot name="header-actions"></slot>
         </div>
@@ -19,7 +19,7 @@
     </div>
 
     <!-- Section Footer -->
-    <div v-if="$slots.footer" class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+    <div v-if="$slots.footer" class="border-t border-slate-100 bg-slate-50 px-6 py-4">
       <slot name="footer"></slot>
     </div>
   </div>

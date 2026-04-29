@@ -13,6 +13,26 @@
               <div class="px-8 py-6 border-b-2 border-deep-navy/10">
                 <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Members</h2>
                 <p class="text-sm text-deep-navy/60 mt-2 font-medium">View active members and manage verification.</p>
+
+                <div class="mt-5">
+                  <label for="member-search" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+                    Search Members
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <svg class="h-5 w-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                    <input
+                      id="member-search"
+                      v-model="membersSearchInput"
+                      type="text"
+                      placeholder="Search by username, name, or email..."
+                      class="w-full pl-12 pr-4 py-4 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div v-if="isLoadingMembers" class="p-8 space-y-3">
@@ -94,8 +114,12 @@
               </div>
 
               <div v-else class="px-8 py-16 text-center">
-                <p class="text-sm font-bold text-deep-navy/60">No members found</p>
-                <p class="text-xs text-deep-navy/40 mt-2 font-medium">Invite users to start building your community.</p>
+                <p class="text-sm font-bold text-deep-navy/60">
+                  {{ membersSearchQuery ? 'No members matched your search' : 'No members found' }}
+                </p>
+                <p class="text-xs text-deep-navy/40 mt-2 font-medium">
+                  {{ membersSearchQuery ? 'Try a different name or email.' : 'Invite users to start building your community.' }}
+                </p>
               </div>
 
               <div v-if="!isLoadingMembers && memberships.length > 0" class="px-6 py-4 border-t border-deep-navy/10 flex items-center justify-between">
@@ -483,6 +507,8 @@ const { $notyf } = useNuxtApp()
 const organisationId = computed(() => route.params.id as string)
 // Search functionality
 const searchQuery = ref('')
+const membersSearchInput = ref('')
+const membersSearchQuery = ref('')
 const tabItems = [
   { key: 'members', label: 'Members' },
   { key: 'invites', label: 'Invitations' },
@@ -493,8 +519,9 @@ useHead({
 })
 
 // Fetch organization data
-const { data: orgData } = useOrganisation(computed(() => Number(organisationId.value)))
+const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 // Fetch all users for search
 const { data: usersData, isLoading: isLoadingUsers } = useUsers(computed(() => ({
@@ -507,7 +534,8 @@ const membersPage = ref(1)
 const membersPageSize = ref(10)
 
 const { data: membershipsData, isLoading: isLoadingMembers } = useOrganisationMemberships(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
+  search: membersSearchQuery.value || undefined,
   page: membersPage.value,
   page_size: membersPageSize.value,
 })))
@@ -518,7 +546,7 @@ const membersFrom = computed(() => membersTotalCount.value === 0 ? 0 : (membersP
 const membersTo = computed(() => Math.min(membersPage.value * membersPageSize.value, membersTotalCount.value))
 
 const { data: membershipLookupData } = useOrganisationMemberships(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: 1,
   page_size: 200,
 })))
@@ -529,7 +557,7 @@ const invitesPage = ref(1)
 const invitesPageSize = ref(10)
 
 const { data: invitesData, isLoading: isLoadingInvites } = useOrganisationInvites(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: invitesPage.value,
   page_size: invitesPageSize.value,
   is_valid: true,
@@ -543,7 +571,7 @@ const invitesFrom = computed(() => invitesTotalCount.value === 0 ? 0 : (invitesP
 const invitesTo = computed(() => Math.min(invitesPage.value * invitesPageSize.value, invitesTotalCount.value))
 
 const { data: invitesLookupData } = useOrganisationInvites(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   page: 1,
   page_size: 200,
   is_valid: true,
@@ -563,6 +591,10 @@ const debouncedSearch = useDebounceFn(() => {
   // Search is reactive via the query parameter
 }, 300)
 
+const debouncedMembersSearch = useDebounceFn(() => {
+  membersSearchQuery.value = membersSearchInput.value.trim()
+}, 300)
+
 // Check if user already has an invite
 const hasInvite = (userId: number) => inviteLookupIds.value.has(userId)
 
@@ -574,10 +606,15 @@ const { mutate: createInvite } = useCreateOrganisationInvite()
 const sendingInviteToUserId = ref<number | null>(null)
 
 const sendInvite = (userId: number) => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
   sendingInviteToUserId.value = userId
   
   createInvite({
-    organisation: Number(organisationId.value),
+    organisation: organisationNumericId.value,
     target_user: userId,
   }, {
     onSuccess: () => {
@@ -617,7 +654,7 @@ const removeInvite = (inviteId: string) => {
 
 // Access Codes Management
 const { data: codesData, isLoading: isLoadingCodes } = useOrganisationAcceptanceCodes(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
 })))
 
 const accessCodes = computed(() => codesData.value?.data?.results || [])
@@ -632,8 +669,13 @@ const newAccessCode = ref({
 const { mutate: createCode, isPending: isCreatingCode } = useCreateOrganisationAcceptanceCode()
 
 const createAccessCode = () => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
   const body: any = {
-    organisation: Number(organisationId.value),
+    organisation: organisationNumericId.value,
   }
 
   if (newAccessCode.value.max_uses) {
@@ -749,6 +791,11 @@ const openMembershipModal = (membershipId: number) => {
 
 watch(membersPageSize, () => {
   membersPage.value = 1
+})
+
+watch(membersSearchInput, () => {
+  membersPage.value = 1
+  debouncedMembersSearch()
 })
 
 watch(invitesPageSize, () => {

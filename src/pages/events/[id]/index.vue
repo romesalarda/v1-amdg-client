@@ -203,8 +203,9 @@
             <!-- Countdown Timer Card -->
             <div class="space-y-6">
               <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] mb-6 text-center text-white/50">
-                  {{ countdown.isExpired ? 'Event Started' : 'Event Starts In' }}
+                <p class="text-sm font-bold text-center text-white/80 mb-4">
+                  <span v-if="!countdown.isExpired">{{ countdownDisplay.statusText }}</span>
+                  <span v-else>{{ countdownDisplay.expiredLabel }}</span>
                 </p>
                 
                 <!-- Countdown Display -->
@@ -231,7 +232,7 @@
                 </div>
                 
                 <h2 v-if="countdown.isExpired" class="text-3xl font-black text-center">
-                  Happening Now!
+                  {{ countdownDisplay.expiredHeadline }}
                 </h2>
               </div>
 
@@ -239,7 +240,7 @@
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || !event.can_participants_register"
+                  :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
@@ -248,7 +249,15 @@
                   </svg>
                   {{ countdown.isExpired ? 'Registration Closed' : 'Register Now' }}
                 </button>
-                
+
+                <NuxtLink
+                  v-if="bookingData?.bookings && bookingData.bookings.length > 0 && !isPreview"
+                  :href="`/events/${event.url_safe_title}/b`"
+                  class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  View my bookings
+                </NuxtLink>
+
                 <!-- Capacity Status -->
                 <div v-if="event.maximum_attendance && !countdown.isExpired" class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
                   <div class="flex justify-between items-center text-xs font-black mb-3">
@@ -472,6 +481,7 @@ import { useToast } from '#ui/composables/useToast'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useCreateBookingIntent } from '~/composables/resources/booking/bookingIntents'
+import { useEventMyBooking } from '~/composables/resources/events'
 import { useRegistrationStore } from '~/stores/registration'
 import { formatDate, useCountdown, formatTime } from '~/utils/time'
 import { resolveImageUrl, onImageError } from '~/utils/image'
@@ -494,11 +504,38 @@ const { data: venuesData } = useEventVenues(computed(() => ({
 const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
 
+const countdownTicker = ref(Date.now())
+let countdownTickerId: ReturnType<typeof setInterval> | null = null
+
+onMounted(() => {
+  countdownTickerId = setInterval(() => {
+    countdownTicker.value = Date.now()
+  }, 1000)
+})
+
+onBeforeUnmount(() => {
+  if (countdownTickerId) {
+    clearInterval(countdownTickerId)
+    countdownTickerId = null
+  }
+})
+
+const { data: bookingData } = useEventMyBooking(eventId)
+const userBookings = computed(() => bookingData.value?.bookings)
+
 // Registration modal state
 const showRegistrationModal = ref(false)
 const registrarAttending = ref(true)
 const registeringOthers = ref(false)
 const otherAttendeeCount = ref(1)
+
+const isPreview = ref(false)
+
+onMounted(() => {
+  if (route.query.view === 'preview') {
+    isPreview.value = true
+  }
+})
 
 // Booking intent creation state
 const showWaitScreen = ref(false)
@@ -547,10 +584,80 @@ const selectRegisteringOthers = (value: boolean) => {
   registeringOthers.value = value
 }
 
+const getCountdownDisplay = (eventData?: any) => {
+  const fallback = {
+    date: eventData?.start_datetime,
+    timezone: eventData?.timezone,
+    windowName: null,
+    statusText: 'Event Starts In',
+    expiredLabel: 'Event Started',
+    expiredHeadline: 'Happening Now!',
+    isOpen: false,
+  }
+
+  const windows = Array.isArray(eventData?.availability_windows)
+    ? eventData.availability_windows
+    : []
+
+  const registrationWindows = windows.filter((window: any) => {
+    return window?.availability_type === 'REGISTRATION_WINDOW' && !!window?.available_from && !!window?.available_to
+  })
+
+  if (!registrationWindows.length) {
+    return fallback
+  }
+
+  const now = Date.now()
+  const toMillis = (value?: string) => {
+    const parsed = value ? Date.parse(value) : NaN
+    return Number.isNaN(parsed) ? null : parsed
+  }
+
+  const sortedWindows = [...registrationWindows].sort((a: any, b: any) => {
+    const aTime = toMillis(a?.available_from) ?? Number.POSITIVE_INFINITY
+    const bTime = toMillis(b?.available_from) ?? Number.POSITIVE_INFINITY
+    return aTime - bTime
+  })
+
+  const activeWindow = sortedWindows.find((window: any) => {
+    const startAt = toMillis(window?.available_from)
+    const endAt = toMillis(window?.available_to)
+    return startAt !== null && endAt !== null && startAt <= now && endAt > now
+  })
+
+  const nextWindow = sortedWindows.find((window: any) => {
+    const startAt = toMillis(window?.available_from)
+    return startAt !== null && startAt > now
+  })
+
+  const selectedWindow = activeWindow || nextWindow
+
+  if (!selectedWindow) {
+    return fallback
+  }
+
+  const isOpen = !!activeWindow
+
+  return {
+    date: isOpen ? selectedWindow.available_to : selectedWindow.available_from,
+    timezone: selectedWindow.timezone || eventData?.timezone,
+    windowName: selectedWindow.name || null,
+    statusText: `${selectedWindow.name || 'Registration'} ${isOpen ? 'ends in' : 'opens in'}`,
+    expiredLabel: isOpen ? 'Registration Closed' : 'Registration Opens Soon',
+    expiredHeadline: isOpen ? 'Registration Closed' : 'Registration Opens Soon',
+    isOpen,
+  }
+}
+
+const countdownDisplay = computed(() => {
+  countdownTicker.value
+  return getCountdownDisplay(event.value)
+})
+
 // Setup countdown timer
 const { countdown } = useCountdown(
-  computed(() => event.value?.start_datetime),
-  computed(() => event.value?.timezone)
+  computed(() => countdownDisplay.value.date),
+  computed(() => countdownDisplay.value.timezone)
 )
 
 // Helper function for status class
@@ -576,7 +683,7 @@ const getStatusClass = (status?: string) => {
 }
 
 const openRegistrationModal = () => {
-  if (countdown.value.isExpired || event.value?.status !== 'OPEN') {
+  if (countdown.value.isExpired || !countdownDisplay.value.isOpen || event.value?.status !== 'OPEN') {
     return
   }
 

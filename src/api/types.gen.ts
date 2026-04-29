@@ -158,6 +158,8 @@ export type AreaLocationDetail = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -200,6 +202,8 @@ export type AreaLocationList = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -431,6 +435,9 @@ export type AttendeeCancellationRefundRequestRequest = {
     override_used_ticket_block?: boolean;
     override_reason?: string;
     attendee_ids?: Array<string>;
+    refund_items?: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type AttendeeCancellationRefundResponse = {
@@ -443,15 +450,40 @@ export type AttendeeCancellationRefundResponse = {
 };
 
 /**
- * Serializer for a single attendee's package and product selections.
+ * Attendee selection for a specific checkout transaction.
+ *
+ * Each attendee selection includes:
+ * - Either an existing attendee_id OR attendee draft data (not both)
+ * - A booking package selection
+ * - Optional product variant selections
+ *
+ * Example:
+ * {
+ * "attendee_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "package_id": 5,
+ * "product_selections": [
+ * {
+ * "package_product_id": 1,
+ * "variant_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "quantity": 2
+ * }
+ * ]
+ * }
+ *
+ * Or with attendee draft:
+ * {
+ * "attendee": {...AttendeeDraftSerializer...},
+ * "package_id": 5,
+ * "product_selections": [...]
+ * }
  */
 export type AttendeeCheckoutRequest = {
     /**
-     * UUID of the attendee this selection is for
+     * UUID of an existing attendee (use this OR attendee, not both)
      */
     attendee_id?: string;
     /**
-     * Draft attendee data to create during checkout
+     * Draft attendee data to create during checkout (use this OR attendee_id, not both)
      */
     attendee?: AttendeeDraftRequest;
     /**
@@ -490,8 +522,26 @@ export type AttendeeConsent = {
     };
 };
 
+/**
+ * Consent record indicating whether attendee consents to something.
+ *
+ * The 'consent_id' references a Consent record in the database.
+ * 'consent_given' must be True for all required consents.
+ *
+ * Example:
+ * {
+ * "consent_id": 5,
+ * "consent_given": true
+ * }
+ */
 export type AttendeeConsentDraftRequest = {
+    /**
+     * ID of the Consent record
+     */
     consent_id: number;
+    /**
+     * Whether attendee gave consent (must be True for required consents)
+     */
     consent_given?: boolean;
 };
 
@@ -667,14 +717,61 @@ export type AttendeeDietaryRequirementRequest = {
     verified_by?: number | null;
 };
 
+/**
+ * Complete attendee draft data for creation during checkout.
+ *
+ * Creates a new Attendee record with full personal information.
+ * Validates all nested personal info, consents, and event responses.
+ *
+ * Key fields:
+ * - attendee_id: UUID of existing attendee (use this OR attendee_draft, not both)
+ * - personal_info: Medical, dietary, accessibility, emergency contact
+ * - consents: Event consent records
+ * - question_answers: Event question responses
+ *
+ * Example:
+ * {
+ * "first_name": "John",
+ * "last_name": "Smith",
+ * "email": "john@example.com",
+ * "phone_number": "+44 7123 456789",
+ * "date_of_birth": "1990-05-15",
+ * "gender": "male",
+ * "relationship_to_user": "self",
+ * "area_from": 1,
+ * "personal_info": {...},
+ * "consents": [...],
+ * "question_answers": [...]
+ * }
+ */
 export type AttendeeDraftRequest = {
+    /**
+     * First name of attendee
+     */
     first_name: string;
+    /**
+     * Last name of attendee
+     */
     last_name: string;
+    /**
+     * Email address (optional, for contact purposes)
+     */
     email?: string | null;
+    /**
+     * Phone number (optional, international format supported)
+     */
     phone_number?: string | null;
+    /**
+     * Date of birth (YYYY-MM-DD) - used for age validation and pricing
+     */
     date_of_birth: string;
+    /**
+     * Gender (free-form text for inclusivity)
+     */
     gender?: string | null;
     /**
+     * Relationship to the user making the booking
+     *
      * * `self` - self
      * * `spouse` - spouse
      * * `child` - child
@@ -684,9 +781,21 @@ export type AttendeeDraftRequest = {
      * * `other` - other
      */
     relationship_to_user: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
-    area_from: number;
+    /**
+     * Optional ID of AreaLocation (active areas only)
+     */
+    area_from?: number | null;
+    /**
+     * Personal information (medical, dietary, accessibility, emergency contact)
+     */
     personal_info?: AttendeePersonalInfoDraftRequest;
+    /**
+     * Consent records (required consents must be True)
+     */
     consents?: Array<AttendeeConsentDraftRequest>;
+    /**
+     * Event question responses (required questions must have answers)
+     */
     question_answers?: Array<EventQuestionAnswerDraftRequest>;
 };
 
@@ -1021,11 +1130,162 @@ export type AttendeeOverviewStats = {
     };
 };
 
+/**
+ * Complete personal information payload for attendee.
+ *
+ * Includes dietary restrictions, medical conditions, accessibility needs,
+ * and emergency contact. Most fields are optional unless marked as required
+ * (e.g., emergency contact for minors).
+ *
+ * Example:
+ * {
+ * "dietary_requirements": [
+ * {"id": 1, "details": "Vegetarian", "notes": "No substitute needed"}
+ * ],
+ * "medical_conditions": [
+ * {"id": 3, "details": "Asthma", "severity": "mild", "notes": "Inhaler on site"}
+ * ],
+ * "accessibility_requirements": [
+ * {"id": 2, "details": "Wheelchair", "notes": "Accessible parking requested"}
+ * ],
+ * "emergency_contact": {
+ * "first_name": "Jane",
+ * "last_name": "Doe",
+ * "relationship": "parent",
+ * "phone_number": "+44 1234 567890"
+ * }
+ * }
+ */
 export type AttendeePersonalInfoDraftRequest = {
+    /**
+     * Dietary restrictions and requirements
+     */
     dietary_requirements?: Array<PersonalInfoItemRequest>;
+    /**
+     * Medical conditions and allergies
+     */
     medical_conditions?: Array<MedicalConditionItemRequest>;
+    /**
+     * Accessibility needs and accommodations
+     */
     accessibility_requirements?: Array<PersonalInfoItemRequest>;
+    /**
+     * Emergency contact (REQUIRED for attendees under 18)
+     */
     emergency_contact?: EmergencyContactDraftRequest;
+};
+
+export type AttendeePreRemovalBlocker = {
+    code: string;
+    /**
+     * * `critical` - critical
+     * * `high` - high
+     * * `medium` - medium
+     * * `low` - low
+     */
+    severity: 'critical' | 'high' | 'medium' | 'low';
+    count: number;
+    message: string;
+    items: Array<AttendeePreRemovalBlockerItem>;
+    pagination?: AttendeePreRemovalBlockerPagination;
+    action_hint: string;
+};
+
+export type AttendeePreRemovalBlockerItem = {
+    payment_id?: string | null;
+    payment_reference?: string | null;
+    payment_type?: string | null;
+    payment_descriptor?: string | null;
+    payment_status?: string | null;
+    payment_status_bucket?: string | null;
+    amount?: string | null;
+    currency?: string | null;
+    method_type?: string | null;
+    method_title?: string | null;
+    can_request_refund?: boolean;
+    refund_block_reason?: string | null;
+    booking_id?: string | null;
+    booking_reference?: string | null;
+    booking_attendee_count?: number;
+    order_id?: string | null;
+    order_reference?: string | null;
+    order_status?: string | null;
+    order_amount?: string | null;
+    order_attendee_id?: string | null;
+    order_attendee_name?: string | null;
+    ticket_id?: string | null;
+    ticket_code?: string | null;
+    ticket_type?: string | null;
+    ticket_scope?: string | null;
+    status?: string | null;
+    event_id?: string | null;
+    event_title?: string | null;
+    check_in_time?: string | null;
+    check_out_time?: string | null;
+    attendance_id?: string | null;
+    active_refunds?: Array<AttendeePreRemovalRefundSummary>;
+    active_refund_count?: number;
+    /**
+     *  links
+     */
+    _links?: AttendeePreRemovalLinks;
+};
+
+export type AttendeePreRemovalBlockerPagination = {
+    count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    has_next: boolean;
+    has_previous: boolean;
+    next_page?: number | null;
+    previous_page?: number | null;
+};
+
+export type AttendeePreRemovalLinks = {
+    self?: string | null;
+    refund_requests?: string | null;
+    method?: string | null;
+};
+
+export type AttendeePreRemovalRefundSummary = {
+    refund_id: string;
+    tracking_reference: string;
+    verification_status: string;
+    is_active: boolean;
+    amount: string;
+    requested_at?: string | null;
+    requested_by_name?: string | null;
+    reason?: string;
+};
+
+export type AttendeePreRemovalSuggestedAction = {
+    code: string;
+    message: string;
+};
+
+export type AttendeePreRemovalSummary = {
+    attendee: AttendeePreRemovalSummaryAttendee;
+    can_delete: boolean;
+    blockers: Array<AttendeePreRemovalBlocker>;
+    summary_counts: AttendeePreRemovalSummaryCounts;
+    suggested_actions: Array<AttendeePreRemovalSuggestedAction>;
+};
+
+export type AttendeePreRemovalSummaryAttendee = {
+    attendee_id: string;
+    attendee_display_id: string;
+    full_name: string;
+};
+
+export type AttendeePreRemovalSummaryCounts = {
+    linked_payments: number;
+    outstanding_payments: number;
+    active_refund_requests: number;
+    active_tickets: number;
+    unresolved_orders: number;
+    open_attendance: number;
+    family_memberships: number;
 };
 
 /**
@@ -1242,6 +1502,157 @@ export type AvailabilityWindowTemplate = {
 };
 
 /**
+ * Create serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceCreate = {
+    transfer_id: string;
+    evidence_file: string;
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    amount_on_evidence?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+};
+
+/**
+ * Create serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceCreateRequest = {
+    transfer_id: string;
+    evidence_file: Blob | File;
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    amount_on_evidence?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+};
+
+/**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetail = {
+    readonly bank_transfer_id: string;
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    readonly payment_reference: string | null;
+    readonly payer_name: string | null;
+    readonly payer_account_last4: string | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly uploaded_at: string;
+    readonly auto_expiry_date: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        payment?: string;
+    };
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetailRequest = {
+    transfer_id: string;
+    evidence_file: Blob | File;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceList = {
+    readonly bank_transfer_id: string;
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    readonly payment_reference: string | null;
+    readonly payer_name: string | null;
+    readonly payer_account_last4: string | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly uploaded_at: string;
+    readonly auto_expiry_date: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        payment?: string;
+    };
+};
+
+/**
+ * Update serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceUpdate = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceUpdateRequest = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Serializer for booking completion rate.
  */
 export type BookingCompletionRate = {
@@ -1288,7 +1699,7 @@ export type BookingCreateRequest = {
 export type BookingDetail = {
     readonly id: number;
     readonly booking_reference: string;
-    event: number;
+    readonly event: string;
     readonly event_name: string;
     made_by?: number | null;
     readonly made_by_name: string | null;
@@ -1297,6 +1708,7 @@ export type BookingDetail = {
      */
     readonly attendee_count: number;
     readonly booked_at: string;
+    readonly event_url_safe_title: string;
     /**
      *  links
      */
@@ -1325,7 +1737,15 @@ export type BookingDetail = {
         payment_reference?: string;
         status?: string;
         amount?: string;
+        original_amount?: string;
+        final_amount?: string;
+        method?: string;
         url?: string;
+        description?: string;
+        method_id?: string;
+        method_type?: string;
+        method_title?: string;
+        bank_reference?: string;
     }>;
 };
 
@@ -1451,7 +1871,7 @@ export type BookingIntentUpdateRequest = {
 export type BookingList = {
     readonly id: number;
     readonly booking_reference: string;
-    event: number;
+    readonly event: string;
     readonly event_name: string;
     made_by?: number | null;
     readonly made_by_name: string | null;
@@ -1460,6 +1880,7 @@ export type BookingList = {
      */
     readonly attendee_count: number;
     readonly booked_at: string;
+    readonly event_url_safe_title: string;
     /**
      *  links
      */
@@ -1982,6 +2403,8 @@ export type ChapterLocationDetail = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -2023,6 +2446,8 @@ export type ChapterLocationList = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -2041,9 +2466,47 @@ export type ChapterLocationList = {
 };
 
 /**
- * Read-only checkout preview serializer.
+ * Read-only checkout preview serializer (safe for calculations without persistence).
  *
- * Mirrors checkout attendee payload but does not require a payment method.
+ * Similar to CheckoutSerializer but:
+ * - Does not require payment method
+ * - Does not create any database records
+ * - Used only to calculate totals and preview what would happen
+ *
+ * Response includes calculated totals but NO booking/attendee creation.
+ *
+ * **Example request:**
+ * {
+ * "booking_intent_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "attendees": [
+ * {
+ * "attendee": {...AttendeeDraftSerializer...},
+ * "package_id": 5
+ * }
+ * ]
+ * }
+ *
+ * **Example response:**
+ * {
+ * "total_amount": "150.00",
+ * "currency": "GBP",
+ * "attendees": [
+ * {
+ * "name": "John Smith",
+ * "package_name": "Standard Package",
+ * "package_price": "150.00",
+ * "products": [
+ * {
+ * "product_name": "Merchandise",
+ * "variant_name": "Large",
+ * "quantity": 1,
+ * "price": "25.00"
+ * }
+ * ],
+ * "total": "175.00"
+ * }
+ * ]
+ * }
  */
 export type CheckoutPreviewRequest = {
     /**
@@ -2057,13 +2520,75 @@ export type CheckoutPreviewRequest = {
 };
 
 /**
- * Checkout serializer for creating bookings with payments.
+ * Main checkout serializer for creating bookings with payments.
  *
- * This serializer:
- * 1. Accepts booking intent ID, payment method, and attendee selections
- * 2. Validates all data comprehensively
- * 3. Does NOT accept prices from frontend (backend calculates all)
- * 4. Returns booking, payment, orders, and tickets (or client_secret for Stripe)
+ * **Two-phase flow:**
+ * 1. **Validation phase**: Validates intent, payment method, attendees
+ * 2. **Processing phase**: (handled by viewset) Creates payment or finalizes booking
+ *
+ * **Important notes:**
+ * - All prices are calculated server-side; frontend must not send prices
+ * - Booking & attendees created on checkout submission (not after payment)
+ * - Payment status tracked via Payment model
+ * - Stripe payments auto-create tickets; bank transfers await manual approval
+ *
+ * **Request flow:**
+ * 1. Frontend submits checkout with valid intent, payment method, attendees
+ * 2. Serializer validates all data (throws ValidationError if invalid)
+ * 3. Viewset creates Payment model with metadata
+ * 4. For Stripe: payment already confirmed, so finalize immediately
+ * 5. For bank transfer: return reference, await manual admin approval
+ *
+ * **Example request:**
+ * {
+ * "booking_intent_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "payment_method_id": 1,
+ * "stripe_payment_intent_id": "pi_1234567890abcdef" (optional),
+ * "attendees": [
+ * {
+ * "attendee_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "package_id": 5,
+ * "product_selections": []
+ * }
+ * ]
+ * }
+ *
+ * **Example response (Stripe, payment confirmed):**
+ * {
+ * "booking_id": 123,
+ * "booking_reference": "BKG-ABC-2025",
+ * "payment_id": "550e8400-e29b-41d4-a716-446655440002",
+ * "payment_reference": "PAY-XYZ-2025",
+ * "total_amount": "150.00",
+ * "currency": "GBP",
+ * "status": "confirmed",
+ * "message": "Booking confirmed and tickets created",
+ * "tickets": [
+ * {
+ * "ticket_id": "550e8400-e29b-41d4-a716-446655440003",
+ * "ticket_code": "TC-ABC-001",
+ * "attendee_name": "John Smith",
+ * "_links": {"self": "..."}
+ * }
+ * ],
+ * "_links": {"self": "...", "attendees": "...", "tickets": "..."}
+ * }
+ *
+ * **Example response (Bank transfer, awaiting payment verification):**
+ * {
+ * "booking_id": 124,
+ * "booking_reference": "BKG-DEF-2025",
+ * "payment_id": "550e8400-e29b-41d4-a716-446655440004",
+ * "payment_reference": "PAY-UVW-2025",
+ * "total_amount": "200.00",
+ * "currency": "GBP",
+ * "status": "pending_payment",
+ * "message": "Booking created. Complete bank transfer to finalize.",
+ * "bank_transfer_reference": "BT-XYZ-2025",
+ * "bank_transfer_instructions": "Transfer £200.00 to our account...",
+ * "tickets": [],
+ * "_links": {"self": "...", "attendees": "...", "tickets": "..."}
+ * }
  */
 export type CheckoutRequest = {
     /**
@@ -2071,13 +2596,21 @@ export type CheckoutRequest = {
      */
     booking_intent_id: string;
     /**
-     * ID of the PaymentMethod to use
+     * Payment method ID for checkout.
      */
     payment_method_id: number;
     /**
-     * Stripe PaymentIntent ID when payment is already confirmed
+     * Optional draft payment ID reserved before checkout for bank transfer flows
+     */
+    payment_id?: string | null;
+    /**
+     * Stripe PaymentIntent ID when payment is already confirmed (Stripe only)
      */
     stripe_payment_intent_id?: string;
+    /**
+     * Pre-uploaded bank transfer evidence ID bound to this booking intent
+     */
+    bank_transfer_evidence_id?: string | null;
     /**
      * List of attendee selections with packages and products
      */
@@ -3224,6 +3757,8 @@ export type CountryLocationDetail = {
     readonly country_name: string;
     readonly general_sector_display: string;
     readonly specific_sector_display: string;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -3553,6 +4088,8 @@ export type CountryLocationList = {
     readonly country_name: string;
     readonly general_sector_display: string;
     readonly specific_sector_display: string;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -3588,6 +4125,195 @@ export type CreatePaymentIntentRequest = {
      * Optional: Specific PaymentMethod to use (must be Stripe type)
      */
     payment_method_id?: number | null;
+};
+
+/**
+ * Create serializer for CreditExpense.
+ */
+export type CreditExpenseCreate = {
+    event?: number | null;
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Create serializer for CreditExpense.
+ */
+export type CreditExpenseCreateRequest = {
+    event?: number | null;
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Detailed serializer for CreditExpense.
+ */
+export type CreditExpenseDetail = {
+    readonly credit_id: string;
+    amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly target: string;
+    readonly target_type: string | null;
+    readonly target_type_name: string | null;
+    readonly target_id: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for CreditExpense with read-only generic target details.
+ */
+export type CreditExpenseList = {
+    readonly credit_id: string;
+    amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly target: string;
+    readonly target_type: string | null;
+    readonly target_type_name: string | null;
+    readonly target_id: string | null;
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+};
+
+/**
+ * Update serializer for CreditExpense.
+ */
+export type CreditExpenseUpdate = {
+    description: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for CreditExpense.
+ */
+export type CreditExpenseUpdateRequest = {
+    description: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -4203,10 +4929,34 @@ export type EmergencyContact = {
     };
 };
 
+/**
+ * Emergency contact information for attendee.
+ *
+ * Required for minors (under 18). Validates phone number format
+ * and email format.
+ *
+ * Example:
+ * {
+ * "first_name": "Jane",
+ * "last_name": "Doe",
+ * "relationship": "parent",
+ * "phone_number": "+44 1234 567890",
+ * "email": "jane@example.com",
+ * "primary_contact": true
+ * }
+ */
 export type EmergencyContactDraftRequest = {
+    /**
+     * First name of emergency contact
+     */
     first_name: string;
+    /**
+     * Last name of emergency contact
+     */
     last_name: string;
     /**
+     * Relationship to attendee
+     *
      * * `parent` - parent
      * * `sibling` - sibling
      * * `child` - child
@@ -4215,8 +4965,17 @@ export type EmergencyContactDraftRequest = {
      * * `other` - other
      */
     relationship: 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other';
+    /**
+     * Phone number of emergency contact (international format supported)
+     */
     phone_number: string;
+    /**
+     * Email address of emergency contact (optional)
+     */
     email?: string | null;
+    /**
+     * Whether this is the primary emergency contact
+     */
     primary_contact?: boolean;
 };
 
@@ -4516,6 +5275,10 @@ export type EventCreateUpdate = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -4571,6 +5334,10 @@ export type EventCreateUpdateRequest = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -6006,6 +6773,32 @@ export type EventList = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    readonly attendee_overview: {
+        /**
+         * Total number of attendees
+         */
+        total_attendees: number;
+        /**
+         * Number of confirmed attendees
+         */
+        confirmed_attendees: number;
+        /**
+         * Number of pending attendees
+         */
+        pending_attendees: number;
+        /**
+         * Number of cancelled attendees
+         */
+        cancelled_attendees: number;
+        /**
+         * Maximum attendance for the event
+         */
+        max_attendance: number;
+        /**
+         * Percentage of confirmed attendees relative to maximum attendance
+         */
+        percentage_full?: number;
+    };
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -6034,6 +6827,62 @@ export type EventList = {
          */
         settings: string;
     };
+};
+
+export type EventMyPaymentSummary = {
+    readonly booking_reference: string;
+    readonly attendee_filter: string | null;
+    totals: EventMyPaymentSummaryTotals;
+    readonly booking_payments: Array<EventMyPaymentSummaryItem>;
+    readonly shop_payments: Array<EventMyPaymentSummaryItem>;
+    readonly attendee_payments: Array<EventMyPaymentSummaryItem>;
+    readonly outstanding_payments: Array<EventMyPaymentSummaryItem>;
+};
+
+export type EventMyPaymentSummaryItem = {
+    readonly payment_id: string;
+    readonly payment_reference: string;
+    readonly status: string;
+    readonly amount: string;
+    readonly amount_value: string | null;
+    readonly original_amount: string | null;
+    readonly total_refunded_amount: string | null;
+    readonly currency: string | null;
+    readonly created_at: string | null;
+    readonly method_type: string | null;
+    readonly method_title: string | null;
+    readonly provided_details: unknown;
+    readonly bank_reference: string | null;
+    /**
+     * * `BOOKING` - BOOKING
+     * * `SHOP_ORDER` - SHOP_ORDER
+     */
+    source: 'BOOKING' | 'SHOP_ORDER';
+    readonly is_outstanding: boolean;
+    readonly descriptor: string | null;
+    readonly target_type: string | null;
+    readonly target_id: string | null;
+    readonly booking_id: string | null;
+    readonly booking_reference: string | null;
+    readonly order_id: string | null;
+    readonly order_reference: string | null;
+    readonly order_status: string | null;
+    readonly attendee_id: string | null;
+    readonly attendee_display_id: string | null;
+    readonly attendee_name: string | null;
+    readonly related_orders: unknown;
+    readonly summary_context: unknown;
+};
+
+export type EventMyPaymentSummaryTotals = {
+    readonly total_payments: number;
+    readonly outstanding_payments: number;
+    readonly booking_outstanding_payments: number;
+    readonly shop_outstanding_payments: number;
+    readonly booking_payments_count: number;
+    readonly shop_payments_count: number;
+    readonly attendee_payments_count: number;
+    readonly total_outstanding_amount: string;
 };
 
 export type EventOutstandingTask = {
@@ -6250,7 +7099,7 @@ export type EventQuestion = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOption>;
+    options?: Array<EventQuestionNestedOption>;
     readonly created_at: string;
     readonly updated_at: string;
     /**
@@ -6282,6 +7131,20 @@ export type EventQuestionAnswer = {
     readonly attendee_name: string;
     answer_text: string;
     readonly selected_options: Array<EventQuestionAnswerChoice>;
+    readonly resource_info: {
+        /**
+         * URL of the resource
+         */
+        resource_url?: string;
+        /**
+         * Type of the resource (file, link, image)
+         */
+        resource_type?: string;
+        /**
+         * ID of the resource
+         */
+        resource_id?: number;
+    };
     readonly submitted_at: string;
     readonly updated_at: string;
     /**
@@ -6329,11 +7192,53 @@ export type EventQuestionAnswerChoiceRequest = {
     option: number;
 };
 
+/**
+ * Answer to an event question with support for multiple formats.
+ *
+ * Supports:
+ * - Text answers (free-form text)
+ * - Multiple choice (selected_option_ids)
+ * - File uploads (upload_resource_id or upload_url)
+ * - Numeric answers (answer_text with numeric value)
+ *
+ * Validation ensures at least one answer format is provided.
+ *
+ * Examples:
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "answer_text": "Yes, I am available"
+ * }
+ *
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440001",
+ * "selected_option_ids": [1, 3]
+ * }
+ *
+ * {
+ * "question_id": "550e8400-e29b-41d4-a716-446655440002",
+ * "upload_resource_id": 42
+ * }
+ */
 export type EventQuestionAnswerDraftRequest = {
+    /**
+     * UUID of the EventQuestion
+     */
     question_id: string;
+    /**
+     * Text answer (for text/numeric questions)
+     */
     answer_text?: string | null;
+    /**
+     * IDs of selected options (for choice questions)
+     */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource (for file questions)
+     */
     upload_resource_id?: number;
+    /**
+     * URL of uploaded file (alternative to upload_resource_id)
+     */
     upload_url?: string;
 };
 
@@ -6349,9 +7254,26 @@ export type EventQuestionAnswerRequest = {
     answer_text: string;
 };
 
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOption = {
+    readonly id: number;
+    option_text: string;
+    order?: number;
+};
+
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOptionRequest = {
+    option_text: string;
+    order?: number;
+};
+
 export type EventQuestionOption = {
     readonly id: number;
-    readonly question: string;
+    question?: string;
     option_text: string;
     order?: number;
     readonly created_at: string;
@@ -6372,6 +7294,7 @@ export type EventQuestionOption = {
 };
 
 export type EventQuestionOptionRequest = {
+    question?: string;
     option_text: string;
     order?: number;
 };
@@ -6405,7 +7328,7 @@ export type EventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionRequest>;
+    options?: Array<EventQuestionNestedOptionRequest>;
 };
 
 /**
@@ -8987,6 +9910,26 @@ export type LocationBreakdown = {
     };
 };
 
+export type LocationDistributionFeature = {
+    type: string;
+    geometry: {
+        [key: string]: unknown;
+    };
+    properties: {
+        [key: string]: unknown;
+    };
+};
+
+export type LocationDistributionMap = {
+    level: string;
+    event_id?: string | null;
+    total_attendees: number;
+    total_with_location: number;
+    total_without_location: number;
+    type: string;
+    features: Array<LocationDistributionFeature>;
+};
+
 /**
  * Create/update serializer for location leader invites.
  */
@@ -9138,11 +10081,33 @@ export type MedicalCondition = {
     };
 };
 
+/**
+ * Medical condition item with severity level.
+ *
+ * Example:
+ * {
+ * "id": 3,
+ * "details": "Nut allergy - severe",
+ * "notes": "Keep EpiPen on hand",
+ * "severity": "severe"
+ * }
+ */
 export type MedicalConditionItemRequest = {
+    /**
+     * ID of the requirement (dietary requirement ID, etc)
+     */
     id: number;
+    /**
+     * Additional details about this requirement
+     */
     details?: string | null;
+    /**
+     * Notes or special instructions for this requirement
+     */
     notes?: string | null;
     /**
+     * Severity level of the medical condition
+     *
      * * `mild` - mild
      * * `moderate` - moderate
      * * `severe` - severe
@@ -9189,9 +10154,13 @@ export type MedicalConditionsStats = {
 
 export type OrderCheckoutRequestRequest = {
     /**
-     * ID of payment method to use
+     * Optional payment method ID. Required when order total is greater than 0.
      */
-    payment_method_id: number;
+    payment_method_id?: number | null;
+    /**
+     * Optional reserved bank transfer payment UUID to reuse during checkout.
+     */
+    payment_id?: string | null;
 };
 
 /**
@@ -9199,7 +10168,7 @@ export type OrderCheckoutRequestRequest = {
  */
 export type OrderCreate = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
     readonly order_id: string;
 };
 
@@ -9208,7 +10177,7 @@ export type OrderCreate = {
  */
 export type OrderCreateRequest = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
 };
 
 /**
@@ -9245,6 +10214,10 @@ export type OrderDetail = {
         attendee?: string;
     };
     readonly order_items: Array<OrderItem>;
+    /**
+     * Whether this order has been refunded
+     */
+    readonly is_refunded: boolean;
     payment?: number | null;
     created_by?: number | null;
     readonly created_by_name: string | null;
@@ -9326,6 +10299,34 @@ export type OrderList = {
         attendee?: string;
     };
     readonly order_items: Array<OrderItem>;
+    /**
+     * Whether this order has been refunded
+     */
+    readonly is_refunded: boolean;
+};
+
+export type OrderPricingPreviewItemRequest = {
+    product_variant_id: string;
+    quantity: number;
+};
+
+export type OrderPricingPreviewRequestRequest = {
+    /**
+     * Attendee UUID used for pricing context
+     */
+    attendee_id: string;
+    items: Array<OrderPricingPreviewItemRequest>;
+};
+
+export type OrderRemoveItemRequestRequest = {
+    order_item_id: number;
+};
+
+export type OrderReserveBankTransferRequestRequest = {
+    /**
+     * Bank transfer payment method ID for this order event.
+     */
+    payment_method_id: number;
 };
 
 /**
@@ -9410,6 +10411,11 @@ export type OrderUpdate = {
      * * `refunded` - Refunded
      */
     status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+};
+
+export type OrderUpdateItemQuantityRequestRequest = {
+    order_item_id: number;
+    quantity: number;
 };
 
 /**
@@ -9655,6 +10661,7 @@ export type OrganisationCreateUpdateRequest = {
 export type OrganisationDetail = {
     readonly id: number;
     title: string;
+    readonly url_safe_title: string;
     description?: string;
     external_website?: string | null;
     required_acceptance_code?: boolean;
@@ -9831,6 +10838,7 @@ export type OrganisationLeaderDistributionStatistics = {
 export type OrganisationList = {
     readonly id: number;
     title: string;
+    readonly url_safe_title: string;
     description?: string;
     external_website?: string | null;
     required_acceptance_code?: boolean;
@@ -10395,6 +11403,13 @@ export type PaginatedAvailabilityWindowTemplateList = {
     results: Array<AvailabilityWindowTemplate>;
 };
 
+export type PaginatedBankTransferEvidenceListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BankTransferEvidenceList>;
+};
+
 export type PaginatedBookingIntentListList = {
     count: number;
     next?: string | null;
@@ -10456,6 +11471,13 @@ export type PaginatedCountryLocationListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<CountryLocationList>;
+};
+
+export type PaginatedCreditExpenseListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<CreditExpenseList>;
 };
 
 export type PaginatedDietaryRequirementList = {
@@ -11177,6 +12199,23 @@ export type PatchedAvailabilityWindowTemplateRequest = {
 };
 
 /**
+ * Update serializer for bank transfer evidence.
+ */
+export type PatchedBankTransferEvidenceUpdateRequest = {
+    payer_name?: string | null;
+    payer_account_last4?: string | null;
+    metadata?: unknown;
+    payment?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Update serializer for BookingIntent (limited fields).
  */
 export type PatchedBookingIntentUpdateRequest = {
@@ -11563,6 +12602,22 @@ export type PatchedCountryLocationCreateUpdateRequest = {
 };
 
 /**
+ * Update serializer for CreditExpense.
+ */
+export type PatchedCreditExpenseUpdateRequest = {
+    description?: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Serializer for DietaryRequirement.
  */
 export type PatchedDietaryRequirementRequest = {
@@ -11745,6 +12800,10 @@ export type PatchedEventCreateUpdateRequest = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime?: string;
     end_datetime?: string;
     /**
@@ -12435,6 +13494,7 @@ export type PatchedEventQuestionAnswerRequest = {
 };
 
 export type PatchedEventQuestionOptionRequest = {
+    question?: string;
     option_text?: string;
     order?: number;
 };
@@ -12468,7 +13528,7 @@ export type PatchedEventQuestionRequest = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionRequest>;
+    options?: Array<EventQuestionNestedOptionRequest>;
 };
 
 export type PatchedEventReviewRequest = {
@@ -13439,6 +14499,10 @@ export type PatchedPaymentMethodCreateUpdateRequest = {
     method_type?: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -13461,6 +14525,17 @@ export type PatchedPaymentUpdateRequest = {
     metadata?: unknown;
     stripe_payment_intent?: string | null;
     stripe_charge_id?: string | null;
+};
+
+/**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type PatchedProductCategoryCreateUpdateRequest = {
+    /**
+     * Category Name
+     */
+    name?: string;
+    description?: string;
 };
 
 /**
@@ -13814,6 +14889,26 @@ export type PaymentDetail = {
      * Base amount as float for easier frontend handling
      */
     readonly amount_value: number;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
+    /**
+     * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
+     */
+    readonly outstanding_bank_transfer_evidence: boolean;
+    /**
+     * Calculate the total refunded amount for this payment by summing all related refunds.
+     */
+    readonly total_refunded_amount: number;
+    /**
+     * Original base amount before modifications
+     */
+    readonly original_amount: string;
+    /**
+     * Final amount after percentage modifier
+     */
+    readonly final_amount: string;
     description?: string | null;
     readonly base_amount_currency: string | null;
     /**
@@ -13838,7 +14933,6 @@ export type PaymentDetail = {
      */
     readonly history_actions: Array<unknown>;
     readonly updated_at: string;
-    target_type?: number | null;
 };
 
 /**
@@ -13943,6 +15037,26 @@ export type PaymentList = {
      * Base amount as float for easier frontend handling
      */
     readonly amount_value: number;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
+    /**
+     * Check if there is outstanding bank transfer evidence that has not been verified for this payment. Only applicable for bank transfer payments.
+     */
+    readonly outstanding_bank_transfer_evidence: boolean;
+    /**
+     * Calculate the total refunded amount for this payment by summing all related refunds.
+     */
+    readonly total_refunded_amount: number;
+    /**
+     * Original base amount before modifications
+     */
+    readonly original_amount: string;
+    /**
+     * Final amount after percentage modifier
+     */
+    readonly final_amount: string;
 };
 
 /**
@@ -13960,6 +15074,10 @@ export type PaymentMethod = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     readonly event_name: string;
     created_by?: number | null;
@@ -13992,6 +15110,10 @@ export type PaymentMethodCreateUpdate = {
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14009,6 +15131,10 @@ export type PaymentMethodCreateUpdateRequest = {
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     provided_details?: unknown;
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -14026,6 +15152,10 @@ export type PaymentMethodDetail = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     readonly event_name: string;
     created_by?: number | null;
@@ -14088,6 +15218,12 @@ export type PaymentOverviewStats = {
         [key: string]: unknown;
     };
     revenue: {
+        [key: string]: unknown;
+    };
+    credits?: {
+        [key: string]: unknown;
+    };
+    net_flow?: {
         [key: string]: unknown;
     };
     discounts: {
@@ -14247,9 +15383,28 @@ export type PersonalInfoCombined = {
     };
 };
 
+/**
+ * Generic personal requirement item (dietary, accessibility, etc).
+ *
+ * Example:
+ * {
+ * "id": 1,
+ * "details": "Gluten-free",
+ * "notes": "Also avoid cross-contamination"
+ * }
+ */
 export type PersonalInfoItemRequest = {
+    /**
+     * ID of the requirement (dietary requirement ID, etc)
+     */
     id: number;
+    /**
+     * Additional details about this requirement
+     */
     details?: string | null;
+    /**
+     * Notes or special instructions for this requirement
+     */
     notes?: string | null;
 };
 
@@ -14273,6 +15428,28 @@ export type ProductCategory = {
         self?: string;
         products?: string;
     };
+};
+
+/**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type ProductCategoryCreateUpdate = {
+    /**
+     * Category Name
+     */
+    name: string;
+    description?: string;
+};
+
+/**
+ * Create/Update serializer for ProductCategory with validation.
+ */
+export type ProductCategoryCreateUpdateRequest = {
+    /**
+     * Category Name
+     */
+    name: string;
+    description?: string;
 };
 
 /**
@@ -14320,6 +15497,19 @@ export type ProductDetail = {
         id?: number;
         url?: string | null;
     } | null;
+    /**
+     * Return attendee-context eligibility for product-level purchase rules.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * Whether attendee context matches at least one product-level discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context price at product level.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly added_at: string;
     /**
      *  links
@@ -14381,6 +15571,19 @@ export type ProductList = {
         id?: number;
         url?: string | null;
     } | null;
+    /**
+     * Return attendee-context eligibility for product-level purchase rules.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * Whether attendee context matches at least one product-level discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context price at product level.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly added_at: string;
     /**
      *  links
@@ -14578,7 +15781,20 @@ export type ProductRevenueTrends = {
 };
 
 /**
- * Serializer for product variant selection within a package.
+ * Serializer for product variant selection within a booking package.
+ *
+ * Validates:
+ * - PackageProduct exists and belongs to package
+ * - ProductVariant exists and belongs to product
+ * - Variant is purchasable
+ * - Quantity does not exceed package limits
+ *
+ * Example:
+ * {
+ * "package_product_id": 1,
+ * "variant_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "quantity": 2
+ * }
  */
 export type ProductSelectionRequest = {
     /**
@@ -14761,6 +15977,23 @@ export type ProductVariantDetail = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    /**
+     * Whether attendee can purchase this variant in current context.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * How many units attendee can still purchase for this variant.
+     */
+    readonly context_remaining_quantity: number;
+    /**
+     * Whether attendee context matches at least one variant discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context unit price for this variant.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly images: {
         main?: {
             id?: number;
@@ -14832,6 +16065,23 @@ export type ProductVariantList = {
      * Check if variant has stock.
      */
     readonly is_in_stock: boolean;
+    /**
+     * Whether attendee can purchase this variant in current context.
+     */
+    readonly context_can_purchase: boolean;
+    /**
+     * How many units attendee can still purchase for this variant.
+     */
+    readonly context_remaining_quantity: number;
+    /**
+     * Whether attendee context matches at least one variant discount.
+     */
+    readonly context_has_discount: boolean;
+    /**
+     * Final attendee-context unit price for this variant.
+     */
+    readonly context_final_price: string;
+    readonly context_discounts: Array<unknown>;
     readonly images: {
         main?: {
             id?: number;
@@ -15781,6 +17031,32 @@ export type SponsorableEventList = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    readonly attendee_overview: {
+        /**
+         * Total number of attendees
+         */
+        total_attendees: number;
+        /**
+         * Number of confirmed attendees
+         */
+        confirmed_attendees: number;
+        /**
+         * Number of pending attendees
+         */
+        pending_attendees: number;
+        /**
+         * Number of cancelled attendees
+         */
+        cancelled_attendees: number;
+        /**
+         * Maximum attendance for the event
+         */
+        max_attendance: number;
+        /**
+         * Percentage of confirmed attendees relative to maximum attendance
+         */
+        percentage_full?: number;
+    };
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -15915,6 +17191,34 @@ export type StripeConfigResponse = {
      * Whether Stripe is in test mode
      */
     test_mode: boolean;
+};
+
+/**
+ * Response serializer for Stripe Connect account status.
+ */
+export type StripeConnectAccount = {
+    connected_account_id?: string | null;
+    stripe_account_id?: string | null;
+    /**
+     * * `NOT_CREATED` - Not Created
+     * * `ONBOARDING` - Onboarding
+     * * `ACTIVE` - Active
+     * * `RESTRICTED` - Restricted
+     * * `DISABLED` - Disabled
+     */
+    status: 'NOT_CREATED' | 'ONBOARDING' | 'ACTIVE' | 'RESTRICTED' | 'DISABLED';
+    charges_enabled: boolean;
+    payouts_enabled: boolean;
+    details_submitted: boolean;
+    disabled_reason?: string | null;
+    country?: string | null;
+    email?: string | null;
+    business_type?: string | null;
+    onboarding_url?: string | null;
+    requires_onboarding: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
+    synced_at?: string | null;
 };
 
 /**
@@ -16959,6 +18263,8 @@ export type AreaLocationDetailWritable = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -16980,6 +18286,8 @@ export type AreaLocationListWritable = {
      * description of the area location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-area
      */
@@ -17403,6 +18711,46 @@ export type AvailabilityWindowTemplateWritable = {
 };
 
 /**
+ * Detailed serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceDetailWritable = {
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    metadata?: unknown;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for bank transfer evidence.
+ */
+export type BankTransferEvidenceListWritable = {
+    transfer_id: string;
+    evidence_file: string;
+    payment?: number | null;
+    amount_on_evidence?: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Create serializer for Booking with validation.
  */
 export type BookingCreateWritable = {
@@ -17416,7 +18764,6 @@ export type BookingCreateWritable = {
  * Detailed serializer for Booking with metadata.
  */
 export type BookingDetailWritable = {
-    event: number;
     made_by?: number | null;
 };
 
@@ -17469,7 +18816,6 @@ export type BookingIntentListWritable = {
  * List serializer for Booking with HATEOAS links.
  */
 export type BookingListWritable = {
-    event: number;
     made_by?: number | null;
 };
 
@@ -17565,6 +18911,8 @@ export type ChapterLocationDetailWritable = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -17586,6 +18934,8 @@ export type ChapterLocationListWritable = {
      * description of the chapter location
      */
     description?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-chapter
      */
@@ -17974,6 +19324,8 @@ export type CountryLocationDetailWritable = {
      * * `PERSIAN` - Persian Region
      */
     specific_sector: 'NORTH_EUROPE' | 'SOUTH_EUROPE' | 'WEST_EUROPE' | 'EAST_EUROPE' | 'CENTRAL_EUROPE' | 'EAST_ASIA' | 'SOUTH_ASIA' | 'SOUTHEAST_ASIA' | 'CENTRAL_ASIA' | 'WEST_ASIA' | 'NORTH_AMERICA' | 'CENTRAL_AMERICA' | 'CARIBBEAN' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'ANDES' | 'CONO_SUR' | 'NORTH_AFRICA' | 'WEST_AFRICA' | 'EAST_AFRICA' | 'CENTRAL_AFRICA' | 'SOUTH_AFRICA' | 'AUSTRALIA_NEWZEALAND' | 'MELANESIA' | 'MICRONESIA' | 'POLYNESIA' | 'GULF' | 'LEVANT' | 'PERSIAN';
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
@@ -18283,10 +19635,83 @@ export type CountryLocationListWritable = {
      * * `PERSIAN` - Persian Region
      */
     specific_sector: 'NORTH_EUROPE' | 'SOUTH_EUROPE' | 'WEST_EUROPE' | 'EAST_EUROPE' | 'CENTRAL_EUROPE' | 'EAST_ASIA' | 'SOUTH_ASIA' | 'SOUTHEAST_ASIA' | 'CENTRAL_ASIA' | 'WEST_ASIA' | 'NORTH_AMERICA' | 'CENTRAL_AMERICA' | 'CARIBBEAN' | 'SOUTH_AMERICA_NORTH' | 'SOUTH_AMERICA_SOUTH' | 'ANDES' | 'CONO_SUR' | 'NORTH_AFRICA' | 'WEST_AFRICA' | 'EAST_AFRICA' | 'CENTRAL_AFRICA' | 'SOUTH_AFRICA' | 'AUSTRALIA_NEWZEALAND' | 'MELANESIA' | 'MICRONESIA' | 'POLYNESIA' | 'GULF' | 'LEVANT' | 'PERSIAN';
+    latitude?: number | null;
+    longitude?: number | null;
     /**
      * Is-active-country
      */
     active?: boolean;
+};
+
+/**
+ * Detailed serializer for CreditExpense.
+ */
+export type CreditExpenseDetailWritable = {
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for CreditExpense with read-only generic target details.
+ */
+export type CreditExpenseListWritable = {
+    amount: string;
+    description: string;
+    /**
+     * * `VENUE_COST` - Venue Cost
+     * * `FOOD_COST` - Food Cost
+     * * `CLERGY_COST` - Clergy Cost
+     * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+     * * `LOGISTICS_COST` - Logistics Cost
+     * * `TRANSPORT_COST` - Transport Cost
+     * * `STAFF_COST` - Staff Cost
+     * * `CREATIVES_COST` - Creatives Cost
+     * * `TECHNICAL_COST` - Technical Cost
+     * * `STIPEND` - Stipend
+     * * `OTHER` - Other
+     */
+    expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
 };
 
 /**
@@ -18665,6 +20090,10 @@ export type EventCreateUpdateWritable = {
     anchor_verse?: string | null;
     expected_attendance?: number | null;
     maximum_attendance?: number | null;
+    /**
+     * URL safe title
+     */
+    url_safe_title?: string | null;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -19410,7 +20839,7 @@ export type EventQuestionWritable = {
     order?: number;
     max_value?: number | null;
     min_value?: number | null;
-    options?: Array<EventQuestionOptionWritable>;
+    options?: Array<EventQuestionNestedOptionWritable>;
 };
 
 /**
@@ -19444,9 +20873,26 @@ export type EventQuestionAnswerRequestWritable = {
      * List of option IDs to select for choice questions
      */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource for upload-type questions
+     */
+    upload_resource_id?: number;
+    /**
+     * Direct URL/path to uploaded file (alternative to upload_resource_id)
+     */
+    upload_url?: string;
+};
+
+/**
+ * Nested option serializer used for create/update question payloads.
+ */
+export type EventQuestionNestedOptionWritable = {
+    option_text: string;
+    order?: number;
 };
 
 export type EventQuestionOptionWritable = {
+    question?: string;
     option_text: string;
     order?: number;
 };
@@ -20516,7 +21962,7 @@ export type MedicalConditionsStatsWritable = {
  */
 export type OrderCreateWritable = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
 };
 
 /**
@@ -20524,7 +21970,7 @@ export type OrderCreateWritable = {
  */
 export type OrderCreateRequestWritable = {
     customer?: number | null;
-    attendee?: number | null;
+    attendee?: string | null;
     /**
      * Items to add to the order
      */
@@ -20902,6 +22348,13 @@ export type PaginatedAvailabilityWindowTemplateListWritable = {
     results: Array<AvailabilityWindowTemplateWritable>;
 };
 
+export type PaginatedBankTransferEvidenceListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BankTransferEvidenceListWritable>;
+};
+
 export type PaginatedBookingIntentListListWritable = {
     count: number;
     next?: string | null;
@@ -20956,6 +22409,13 @@ export type PaginatedCountryLocationListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<CountryLocationListWritable>;
+};
+
+export type PaginatedCreditExpenseListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<CreditExpenseListWritable>;
 };
 
 export type PaginatedDietaryRequirementListWritable = {
@@ -21533,6 +22993,14 @@ export type PatchedEventQuestionAnswerRequestWritable = {
      * List of option IDs to select for choice questions
      */
     selected_option_ids?: Array<number>;
+    /**
+     * ID of uploaded Resource for upload-type questions
+     */
+    upload_resource_id?: number;
+    /**
+     * Direct URL/path to uploaded file (alternative to upload_resource_id)
+     */
+    upload_url?: string;
 };
 
 /**
@@ -21605,16 +23073,15 @@ export type PaymentCreateRequestWritable = {
     base_amount_currency?: string;
     description?: string | null;
     /**
-     * Payment target type: booking, order, ticket, donation, sponsorship, or none.
+     * Payment target type: booking, order, ticket, sponsorship, or none.
      *
      * * `booking` - Booking
      * * `order` - Order
      * * `ticket` - Ticket
-     * * `donation` - Donation
      * * `sponsorship` - Sponsorship
      * * `none` - None
      */
-    target?: 'booking' | 'order' | 'ticket' | 'donation' | 'sponsorship' | 'none' | null;
+    target?: 'booking' | 'order' | 'ticket' | 'sponsorship' | 'none' | null;
     /**
      * Target identifier (UUID or numeric ID).
      */
@@ -21649,6 +23116,10 @@ export type PaymentDetailWritable = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
     description?: string | null;
     /**
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
@@ -21658,7 +23129,6 @@ export type PaymentDetailWritable = {
     stripe_charge_id?: string | null;
     bank_transfer_reference?: string | null;
     metadata?: unknown;
-    target_type?: number | null;
 };
 
 /**
@@ -21694,6 +23164,10 @@ export type PaymentListWritable = {
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
     base_amount?: string | null;
+    /**
+     * Snapshot of payment method policy at payment creation time.
+     */
+    bank_transfer_required_immediately?: boolean;
 };
 
 /**
@@ -21708,6 +23182,10 @@ export type PaymentMethodWritable = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
     provided_details?: unknown;
@@ -21725,6 +23203,10 @@ export type PaymentMethodDetailWritable = {
      */
     method_type: 'BANK_TRANSFER' | 'STRIPE' | 'CASH';
     is_active?: boolean;
+    /**
+     * If true, checkout must include bank transfer evidence immediately for this method.
+     */
+    bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
     provided_details?: unknown;
@@ -21763,6 +23245,12 @@ export type PaymentOverviewStatsWritable = {
         [key: string]: unknown;
     };
     revenue: {
+        [key: string]: unknown;
+    };
+    credits?: {
+        [key: string]: unknown;
+    };
+    net_flow?: {
         [key: string]: unknown;
     };
     discounts: {
@@ -22295,6 +23783,12 @@ export type RefundRequestCreateRequestWritable = {
      * Required for PARTIAL booking refunds. List of attendee UUIDs to refund.
      */
     attendee_ids?: Array<string>;
+    /**
+     * Optional granular refund targets. For booking-linked partial refunds, use items with: attendee_id (required), quantity (required), and one of order_item_id or unique variant/package selector.
+     */
+    refund_items?: Array<{
+        [key: string]: unknown;
+    }>;
     /**
      * Short reason code for immutable audit metadata.
      */
@@ -24264,11 +25758,10 @@ export type AttendeesPreRemovalSummaryRetrieveData = {
 };
 
 export type AttendeesPreRemovalSummaryRetrieveResponses = {
-    /**
-     * Comprehensive pre-removal summary payload
-     */
-    200: unknown;
+    200: AttendeePreRemovalSummary;
 };
+
+export type AttendeesPreRemovalSummaryRetrieveResponse = AttendeesPreRemovalSummaryRetrieveResponses[keyof AttendeesPreRemovalSummaryRetrieveResponses];
 
 export type AttendeesRequestCancellationRefundCreateData = {
     body: AttendeeCancellationRefundRequestRequest;
@@ -24847,9 +26340,9 @@ export type BookingsAlternativeSigninsListData = {
     path?: never;
     query?: {
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25131,7 +26624,10 @@ export type BookingsIntentsListData = {
          * Filter intents created on or before this datetime
          */
         created_before?: string;
-        event?: number;
+        /**
+         * Filter by event PK, UUID, or URL-safe title
+         */
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25345,9 +26841,9 @@ export type BookingsListListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25551,9 +27047,9 @@ export type BookingsBookingTicketsListData = {
          */
         booking_reference__contains?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25718,6 +27214,57 @@ export type BookingsListPingIntentRetrieveResponses = {
 
 export type BookingsListPingIntentRetrieveResponse = BookingsListPingIntentRetrieveResponses[keyof BookingsListPingIntentRetrieveResponses];
 
+export type BookingsReserveBankTransferPaymentData = {
+    body?: {
+        booking_intent_id: string;
+        payment_method_id: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/reserve-bank-transfer-payment/';
+};
+
+export type BookingsReserveBankTransferPaymentErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+};
+
+export type BookingsReserveBankTransferPaymentResponses = {
+    /**
+     * Draft bank transfer payment reserved.
+     */
+    201: unknown;
+};
+
+export type BookingsUploadBankTransferEvidenceData = {
+    body?: {
+        booking_intent_id: string;
+        evidence_file: Blob | File;
+        payer_name: string;
+        payer_account_last4: string;
+        amount_on_evidence: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/upload-bank-transfer-evidence/';
+};
+
+export type BookingsUploadBankTransferEvidenceErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+};
+
+export type BookingsUploadBankTransferEvidenceResponses = {
+    /**
+     * Evidence uploaded and bound to intent.
+     */
+    201: unknown;
+};
+
 export type BookingsPackagesListData = {
     body?: never;
     path?: never;
@@ -25727,9 +27274,9 @@ export type BookingsPackagesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -25915,9 +27462,9 @@ export type BookingsPackageAvailabilityWindowsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26035,9 +27582,9 @@ export type BookingsPackageProductsListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -26286,9 +27833,9 @@ export type BookingsPackageRulesListData = {
          */
         eligible_for_attendee?: string;
         /**
-         * Filter by event ID
+         * Filter by event PK, UUID, or URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -27270,6 +28817,10 @@ export type BookingsTicketTypesListData = {
          */
         currently_valid?: boolean;
         /**
+         * Filter by event PK, UUID, or URL-safe title
+         */
+        event?: string;
+        /**
          * Filter by event ID
          */
         event_id?: string;
@@ -27435,6 +28986,10 @@ export type BookingsTicketsListData = {
          * Filter by booking reference
          */
         booking__reference?: string;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
         /**
          * Filter by event UUID (through attendee's booking)
          */
@@ -28920,6 +30475,44 @@ export type EventListMyOutstandingBookingPaymentsRetrieveResponses = {
      */
     200: unknown;
 };
+
+export type EventListMyPaymentSummaryRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
+    };
+    query?: {
+        /**
+         * Optional attendee UUID filter for attendee-specific payment section.
+         */
+        attendee_id?: string;
+        /**
+         * Optional booking reference to target a specific booking within this event.
+         */
+        booking_reference?: string;
+    };
+    url: '/api/event/list/{url_safe_title}/my-payment-summary/';
+};
+
+export type EventListMyPaymentSummaryRetrieveErrors = {
+    /**
+     * Authentication required
+     */
+    401: unknown;
+    /**
+     * Event or booking not found
+     */
+    404: unknown;
+};
+
+export type EventListMyPaymentSummaryRetrieveResponses = {
+    200: EventMyPaymentSummary;
+};
+
+export type EventListMyPaymentSummaryRetrieveResponse = EventListMyPaymentSummaryRetrieveResponses[keyof EventListMyPaymentSummaryRetrieveResponses];
 
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
@@ -30837,7 +32430,7 @@ export type EventQuestionAnswersSubmitFormCreateData = {
         /**
          * Filter by question ID
          */
-        question?: number;
+        question?: string;
         /**
          * Filter by event ID (through question)
          */
@@ -32722,6 +34315,7 @@ export type EventVenuesListData = {
          * Filter by event URL-safe title
          */
         event?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -35441,6 +37035,32 @@ export type LocationsRoomsUpdateResponses = {
 
 export type LocationsRoomsUpdateResponse = LocationsRoomsUpdateResponses[keyof LocationsRoomsUpdateResponses];
 
+export type LocationsStatisticsDistributionMapRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Optional event UUID or url-safe title to scope attendee counts.
+         */
+        event_id?: string;
+        /**
+         * Include inactive locations if true.
+         */
+        include_inactive?: boolean;
+        /**
+         * Location granularity for distribution points.
+         */
+        level?: 'area' | 'chapter' | 'cluster' | 'country';
+    };
+    url: '/api/locations/statistics/distribution-map/';
+};
+
+export type LocationsStatisticsDistributionMapRetrieveResponses = {
+    200: LocationDistributionMap;
+};
+
+export type LocationsStatisticsDistributionMapRetrieveResponse = LocationsStatisticsDistributionMapRetrieveResponses[keyof LocationsStatisticsDistributionMapRetrieveResponses];
+
 export type LocationsVenueContactsListData = {
     body?: never;
     path?: never;
@@ -36298,9 +37918,9 @@ export type OrganisationsAcceptanceCodesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -36420,9 +38040,9 @@ export type OrganisationsContactsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -36554,9 +38174,9 @@ export type OrganisationsControlsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -36664,9 +38284,9 @@ export type OrganisationsInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -36820,9 +38440,9 @@ export type OrganisationsInvolvedEventsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -36974,9 +38594,9 @@ export type OrganisationsLeaderInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37151,9 +38771,9 @@ export type OrganisationsLeadersListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37281,9 +38901,9 @@ export type OrganisationsLeadersCandidateUsersRetrieveData = {
          */
         location_type?: string;
         /**
-         * Organisation ID
+         * Organisation id or url_safe_title
          */
-        organisation: number;
+        organisation: string;
         /**
          * Search by name, username, or email
          */
@@ -37383,12 +39003,12 @@ export type OrganisationsListDestroyData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListDestroyResponses = {
@@ -37404,12 +39024,12 @@ export type OrganisationsListRetrieveData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListRetrieveResponses = {
@@ -37422,12 +39042,12 @@ export type OrganisationsListPartialUpdateData = {
     body?: PatchedOrganisationCreateUpdateRequest;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListPartialUpdateResponses = {
@@ -37440,12 +39060,12 @@ export type OrganisationsListUpdateData = {
     body: OrganisationCreateUpdateRequest;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: never;
-    url: '/api/organisations/list/{id}/';
+    url: '/api/organisations/list/{url_safe_title}/';
 };
 
 export type OrganisationsListUpdateResponses = {
@@ -37458,9 +39078,9 @@ export type OrganisationsListContactsListData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -37517,7 +39137,7 @@ export type OrganisationsListContactsListData = {
          */
         updated_before?: string;
     };
-    url: '/api/organisations/list/{id}/contacts/';
+    url: '/api/organisations/list/{url_safe_title}/contacts/';
 };
 
 export type OrganisationsListContactsListResponses = {
@@ -37530,9 +39150,9 @@ export type OrganisationsListMembershipsListData = {
     body?: never;
     path: {
         /**
-         * A unique integer value identifying this organisation.
+         * URL-safe version of the title, auto-generated if not provided.
          */
-        id: number;
+        url_safe_title: string;
     };
     query?: {
         /**
@@ -37589,7 +39209,7 @@ export type OrganisationsListMembershipsListData = {
          */
         updated_before?: string;
     };
-    url: '/api/organisations/list/{id}/memberships/';
+    url: '/api/organisations/list/{url_safe_title}/memberships/';
 };
 
 export type OrganisationsListMembershipsListResponses = {
@@ -37620,9 +39240,9 @@ export type OrganisationsMembershipsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation ID
+         * Filter by organisation id or url_safe_title
          */
-        organisation?: number;
+        organisation?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -37635,6 +39255,10 @@ export type OrganisationsMembershipsListData = {
          * Filter by whether verification is required
          */
         requires_verification?: boolean;
+        /**
+         * A search term.
+         */
+        search?: string;
         /**
          * Filter by user ID
          */
@@ -37768,7 +39392,7 @@ export type OrganisationsSponsorInvitesListData = {
          */
         email?: string;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -37776,7 +39400,7 @@ export type OrganisationsSponsorInvitesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -37932,7 +39556,7 @@ export type OrganisationsSponsorPackagesListData = {
          */
         added_before?: string;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38074,7 +39698,7 @@ export type OrganisationsSponsorsListData = {
          */
         chapter_location_id?: number;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38082,7 +39706,7 @@ export type OrganisationsSponsorsListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -38223,7 +39847,7 @@ export type OrganisationsSponsorsPackagesListData = {
          */
         chapter_location_id?: number;
         /**
-         * Filter by event UUID
+         * Filter by event URL-safe title
          */
         event_id?: string;
         /**
@@ -38231,7 +39855,7 @@ export type OrganisationsSponsorsPackagesListData = {
          */
         ordering?: string;
         /**
-         * Filter by organisation UUID
+         * Filter by organisation id or url_safe_title
          */
         organisation_id?: string;
         /**
@@ -38315,9 +39939,9 @@ export type OrganisationsSponsorsInboundListData = {
          */
         ordering?: string;
         /**
-         * Organisation ID.
+         * Organisation id or url_safe_title.
          */
-        organisation_id: number;
+        organisation_id: string;
         /**
          * Filter by selected package UUID
          */
@@ -38339,9 +39963,9 @@ export type OrganisationsSponsorsInboundListData = {
          */
         search?: string;
         /**
-         * Sponsor organisation ID.
+         * Sponsor organisation id or url_safe_title.
          */
-        sponsor_organisation_id?: number;
+        sponsor_organisation_id?: string;
         /**
          * Filter by verification status
          *
@@ -38386,17 +40010,17 @@ export type OrganisationsSponsorsOutboundListData = {
          */
         event_id?: string;
         /**
-         * Event organisation ID.
+         * Event organisation id or url_safe_title.
          */
-        event_organisation_id?: number;
+        event_organisation_id?: string;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         /**
-         * Organisation ID.
+         * Organisation id or url_safe_title.
          */
-        organisation_id: number;
+        organisation_id: string;
         /**
          * Filter by selected package UUID
          */
@@ -38505,9 +40129,9 @@ export type OrganisationsStatisticsEventPerformanceRetrieveData = {
          */
         limit?: number;
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/event-performance/';
 };
@@ -38523,9 +40147,9 @@ export type OrganisationsStatisticsEventsOnMapRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/events-on-map/';
 };
@@ -38545,9 +40169,9 @@ export type OrganisationsStatisticsLeadersDistributionRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/leaders-distribution/';
 };
@@ -38563,9 +40187,9 @@ export type OrganisationsStatisticsLeadersOnMapRetrieveData = {
     path?: never;
     query?: {
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/leaders-on-map/';
 };
@@ -38593,9 +40217,9 @@ export type OrganisationsStatisticsOverviewRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/overview/';
 };
@@ -38623,9 +40247,9 @@ export type OrganisationsStatisticsPaymentsBySourceRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/payments-by-source/';
 };
@@ -38657,9 +40281,9 @@ export type OrganisationsStatisticsSponsorInviteConversionRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsor-invite-conversion/';
 };
@@ -38695,9 +40319,9 @@ export type OrganisationsStatisticsSponsorPackagesPerformanceRetrieveData = {
          */
         limit?: number;
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsor-packages-performance/';
 };
@@ -38729,9 +40353,9 @@ export type OrganisationsStatisticsSponsorsFlowRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsors-flow/';
 };
@@ -38763,9 +40387,9 @@ export type OrganisationsStatisticsSponsorsOverviewRetrieveData = {
          */
         format?: 'echarts' | 'raw';
         /**
-         * Organisation id. Non-superusers can only access organisations they control. Superusers may request any organisation id.
+         * Organisation id or url_safe_title. Non-superusers can only access organisations they control. Superusers may request any organisation identifier.
          */
-        organisation_id?: number;
+        organisation_id?: string;
     };
     url: '/api/organisations/statistics/sponsors-overview/';
 };
@@ -38775,6 +40399,362 @@ export type OrganisationsStatisticsSponsorsOverviewRetrieveResponses = {
 };
 
 export type OrganisationsStatisticsSponsorsOverviewRetrieveResponse = OrganisationsStatisticsSponsorsOverviewRetrieveResponses[keyof OrganisationsStatisticsSponsorsOverviewRetrieveResponses];
+
+export type PaymentsBankTransferEvidenceListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter evidence expiring on or after this date
+         */
+        expiry_after?: string;
+        /**
+         * Filter evidence expiring on or before this date
+         */
+        expiry_before?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by linked payment ID
+         */
+        payment?: number;
+        /**
+         * Filter by linked payment UUID
+         */
+        payment__payment_id?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter evidence uploaded after this timestamp
+         */
+        uploaded_after?: string;
+        /**
+         * Filter evidence uploaded before this timestamp
+         */
+        uploaded_before?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/bank-transfer-evidence/';
+};
+
+export type PaymentsBankTransferEvidenceListResponses = {
+    200: PaginatedBankTransferEvidenceListList;
+};
+
+export type PaymentsBankTransferEvidenceListResponse = PaymentsBankTransferEvidenceListResponses[keyof PaymentsBankTransferEvidenceListResponses];
+
+export type PaymentsBankTransferEvidenceCreateData = {
+    body: BankTransferEvidenceCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/';
+};
+
+export type PaymentsBankTransferEvidenceCreateResponses = {
+    201: BankTransferEvidenceCreate;
+};
+
+export type PaymentsBankTransferEvidenceCreateResponse = PaymentsBankTransferEvidenceCreateResponses[keyof PaymentsBankTransferEvidenceCreateResponses];
+
+export type PaymentsBankTransferEvidenceDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsBankTransferEvidenceDestroyResponse = PaymentsBankTransferEvidenceDestroyResponses[keyof PaymentsBankTransferEvidenceDestroyResponses];
+
+export type PaymentsBankTransferEvidenceRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceRetrieveResponses = {
+    200: BankTransferEvidenceDetail;
+};
+
+export type PaymentsBankTransferEvidenceRetrieveResponse = PaymentsBankTransferEvidenceRetrieveResponses[keyof PaymentsBankTransferEvidenceRetrieveResponses];
+
+export type PaymentsBankTransferEvidencePartialUpdateData = {
+    body?: PatchedBankTransferEvidenceUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidencePartialUpdateResponses = {
+    200: BankTransferEvidenceUpdate;
+};
+
+export type PaymentsBankTransferEvidencePartialUpdateResponse = PaymentsBankTransferEvidencePartialUpdateResponses[keyof PaymentsBankTransferEvidencePartialUpdateResponses];
+
+export type PaymentsBankTransferEvidenceUpdateData = {
+    body?: BankTransferEvidenceUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/';
+};
+
+export type PaymentsBankTransferEvidenceUpdateResponses = {
+    200: BankTransferEvidenceUpdate;
+};
+
+export type PaymentsBankTransferEvidenceUpdateResponse = PaymentsBankTransferEvidenceUpdateResponses[keyof PaymentsBankTransferEvidenceUpdateResponses];
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateData = {
+    body: BankTransferEvidenceDetailRequest;
+    path: {
+        /**
+         * A UUID string identifying this Bank Transfer Evidence.
+         */
+        bank_transfer_id: string;
+    };
+    query?: never;
+    url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/confirm_payment_match/';
+};
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses = {
+    200: BankTransferEvidenceDetail;
+};
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponse = PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses[keyof PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses];
+
+export type PaymentsCreditsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter credits created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter credits created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by creator user ID
+         */
+        created_by?: number;
+        /**
+         * Filter by creator username
+         */
+        created_by__username?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event UUID
+         */
+        event__event_id?: string;
+        /**
+         * Filter by expense type
+         *
+         * * `VENUE_COST` - Venue Cost
+         * * `FOOD_COST` - Food Cost
+         * * `CLERGY_COST` - Clergy Cost
+         * * `CONSECRATED_RELIGIOUS_COST` - Consecrated Religious Cost
+         * * `LOGISTICS_COST` - Logistics Cost
+         * * `TRANSPORT_COST` - Transport Cost
+         * * `STAFF_COST` - Staff Cost
+         * * `CREATIVES_COST` - Creatives Cost
+         * * `TECHNICAL_COST` - Technical Cost
+         * * `STIPEND` - Stipend
+         * * `OTHER` - Other
+         */
+        expense_type?: Array<'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'CREATIVES_COST' | 'FOOD_COST' | 'LOGISTICS_COST' | 'OTHER' | 'STAFF_COST' | 'STIPEND' | 'TECHNICAL_COST' | 'TRANSPORT_COST' | 'VENUE_COST'>;
+        /**
+         * Filter by settlement state
+         */
+        is_settled?: boolean;
+        /**
+         * Maximum credit amount
+         */
+        max_amount?: number;
+        /**
+         * Minimum credit amount
+         */
+        min_amount?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by paid date on or after this value
+         */
+        paid_after?: string;
+        /**
+         * Filter by paid date on or before this value
+         */
+        paid_before?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/credits/';
+};
+
+export type PaymentsCreditsListResponses = {
+    200: PaginatedCreditExpenseListList;
+};
+
+export type PaymentsCreditsListResponse = PaymentsCreditsListResponses[keyof PaymentsCreditsListResponses];
+
+export type PaymentsCreditsCreateData = {
+    body: CreditExpenseCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/credits/';
+};
+
+export type PaymentsCreditsCreateResponses = {
+    201: CreditExpenseCreate;
+};
+
+export type PaymentsCreditsCreateResponse = PaymentsCreditsCreateResponses[keyof PaymentsCreditsCreateResponses];
+
+export type PaymentsCreditsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsCreditsDestroyResponse = PaymentsCreditsDestroyResponses[keyof PaymentsCreditsDestroyResponses];
+
+export type PaymentsCreditsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsRetrieveResponses = {
+    200: CreditExpenseDetail;
+};
+
+export type PaymentsCreditsRetrieveResponse = PaymentsCreditsRetrieveResponses[keyof PaymentsCreditsRetrieveResponses];
+
+export type PaymentsCreditsPartialUpdateData = {
+    body?: PatchedCreditExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsPartialUpdateResponses = {
+    200: CreditExpenseUpdate;
+};
+
+export type PaymentsCreditsPartialUpdateResponse = PaymentsCreditsPartialUpdateResponses[keyof PaymentsCreditsPartialUpdateResponses];
+
+export type PaymentsCreditsUpdateData = {
+    body: CreditExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Credit.
+         */
+        credit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/credits/{credit_id}/';
+};
+
+export type PaymentsCreditsUpdateResponses = {
+    200: CreditExpenseUpdate;
+};
+
+export type PaymentsCreditsUpdateResponse = PaymentsCreditsUpdateResponses[keyof PaymentsCreditsUpdateResponses];
 
 export type PaymentsDiscountRulesListData = {
     body?: never;
@@ -38947,13 +40927,9 @@ export type PaymentsDiscountsListData = {
          */
         discount_type?: string;
         /**
-         * Filter discounts by event ID (shows discounts for objects within this event)
+         * Filter discounts by event URL-safe title (shows discounts for objects within this event)
          */
-        event?: number;
-        /**
-         * Filter discounts by event UUID
-         */
-        event__event_id?: string;
+        event?: string;
         /**
          * Filter discounts by event UUID (alias of event__event_id)
          */
@@ -39083,6 +41059,40 @@ export type PaymentsDiscountsUpdateResponses = {
 };
 
 export type PaymentsDiscountsUpdateResponse = PaymentsDiscountsUpdateResponses[keyof PaymentsDiscountsUpdateResponses];
+
+export type PaymentsDiscountsEligibilityPreviewRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Attendee UUID to evaluate discount eligibility for
+         */
+        attendee_id: string;
+        /**
+         * Optional event UUID to limit results
+         */
+        event_id?: string;
+    };
+    url: '/api/payments/discounts/eligibility-preview/';
+};
+
+export type PaymentsDiscountsEligibilityPreviewRetrieveErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type PaymentsDiscountsEligibilityPreviewRetrieveResponses = {
+    /**
+     * Discount eligibility diagnostics
+     */
+    200: unknown;
+};
 
 export type PaymentsDonationsListData = {
     body?: never;
@@ -39392,13 +41402,17 @@ export type PaymentsListListData = {
          */
         descriptor?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
         event_id?: string;
+        /**
+         * Filter bank transfer payments with/without any evidence records
+         */
+        has_bank_transfer_evidence?: boolean;
         /**
          * Filter payments with/without donations
          */
@@ -39407,6 +41421,14 @@ export type PaymentsListListData = {
          * Filter payments with/without refund requests
          */
         has_refund?: boolean;
+        /**
+         * Filter bank transfer payments with/without verified evidence
+         */
+        has_verified_bank_transfer_evidence?: boolean;
+        /**
+         * Filter bank transfer payments pending evidence beyond overdue_hours (default 72)
+         */
+        is_overdue_bank_transfer_evidence?: boolean;
         /**
          * Filter payments created in the last 7 days
          */
@@ -39664,6 +41686,10 @@ export type PaymentsMethodsListData = {
     path?: never;
     query?: {
         /**
+         * Filter payment methods that require evidence immediately at checkout
+         */
+        bank_transfer_required_immediately?: boolean;
+        /**
          * Filter methods created after this date
          */
         created_after?: string;
@@ -39672,9 +41698,9 @@ export type PaymentsMethodsListData = {
          */
         created_before?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title
          */
-        event?: number;
+        event?: string;
         /**
          * Filter by event UUID
          */
@@ -40053,6 +42079,10 @@ export type PaymentsRefundsListData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Filter by event URL-safe title (filters refunds for payments associated with the event)
+         */
+        event?: string;
         /**
          * Filter by event UUID (filters refunds for payments associated with the event)
          */
@@ -40851,6 +42881,40 @@ export type ProductsCategoriesListResponses = {
 
 export type ProductsCategoriesListResponse = ProductsCategoriesListResponses[keyof ProductsCategoriesListResponses];
 
+export type ProductsCategoriesCreateData = {
+    body: ProductCategoryCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/products/categories/';
+};
+
+export type ProductsCategoriesCreateResponses = {
+    201: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesCreateResponse = ProductsCategoriesCreateResponses[keyof ProductsCategoriesCreateResponses];
+
+export type ProductsCategoriesDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type ProductsCategoriesDestroyResponse = ProductsCategoriesDestroyResponses[keyof ProductsCategoriesDestroyResponses];
+
 export type ProductsCategoriesRetrieveData = {
     body?: never;
     path: {
@@ -40868,6 +42932,42 @@ export type ProductsCategoriesRetrieveResponses = {
 };
 
 export type ProductsCategoriesRetrieveResponse = ProductsCategoriesRetrieveResponses[keyof ProductsCategoriesRetrieveResponses];
+
+export type ProductsCategoriesPartialUpdateData = {
+    body?: PatchedProductCategoryCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesPartialUpdateResponses = {
+    200: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesPartialUpdateResponse = ProductsCategoriesPartialUpdateResponses[keyof ProductsCategoriesPartialUpdateResponses];
+
+export type ProductsCategoriesUpdateData = {
+    body: ProductCategoryCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Category.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/products/categories/{id}/';
+};
+
+export type ProductsCategoriesUpdateResponses = {
+    200: ProductCategoryCreateUpdate;
+};
+
+export type ProductsCategoriesUpdateResponse = ProductsCategoriesUpdateResponses[keyof ProductsCategoriesUpdateResponses];
 
 export type ProductsEventCategoriesListData = {
     body?: never;
@@ -40890,9 +42990,9 @@ export type ProductsEventCategoriesListData = {
          */
         category__name?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title (case-insensitive)
          */
-        event?: number;
+        event?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -40992,6 +43092,10 @@ export type ProductsListListData = {
          */
         added_date?: string;
         /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
          * Filter by category ID (can specify multiple, comma-separated)
          */
         category?: Array<number>;
@@ -40999,6 +43103,10 @@ export type ProductsListListData = {
          * Filter by category name
          */
         category__name?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
         /**
          * Filter by display code (case-insensitive)
          */
@@ -41008,9 +43116,9 @@ export type ProductsListListData = {
          */
         display_code__contains?: string;
         /**
-         * Filter by event ID
+         * Filter by event URL-safe title (case-insensitive)
          */
-        event?: number;
+        event?: string;
         /**
          * Filter products that have variants
          */
@@ -41124,7 +43232,16 @@ export type ProductsListRetrieveData = {
     path: {
         product_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
+    };
     url: '/api/products/list/{product_id}/';
 };
 
@@ -41672,6 +43789,10 @@ export type ProductsListVariantsListData = {
          */
         added_before?: string;
         /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
          * Filter by color (case-insensitive)
          */
         color?: string;
@@ -41680,9 +43801,13 @@ export type ProductsListVariantsListData = {
          */
         color__contains?: string;
         /**
-         * Filter by event ID
+         * Optional customer identifier override (admin/staff only).
          */
-        event?: number;
+        customer_id?: string;
+        /**
+         * Filter by event URL-safe title (case-insensitive)
+         */
+        event?: string;
         /**
          * Filter variants with stock available
          */
@@ -41821,7 +43946,16 @@ export type ProductsListVariantsRetrieveData = {
         product_product_id: string;
         variant_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional attendee UUID to enable attendee-specific pricing and eligibility context.
+         */
+        attendee_id?: string;
+        /**
+         * Optional customer identifier override (admin/staff only).
+         */
+        customer_id?: string;
+    };
     url: '/api/products/list/{product_product_id}/variants/{variant_id}/';
 };
 
@@ -42556,9 +44690,9 @@ export type ProductsOrdersListData = {
          */
         customer__username?: string;
         /**
-         * Filter by event ID
+         * Optional event url_safe_title. If provided, event staff can view all orders for that event in addition to their own orders.
          */
-        event?: number;
+        event?: string;
         /**
          * Filter orders with or without payment
          */
@@ -42681,7 +44815,12 @@ export type ProductsOrdersRetrieveData = {
     path: {
         order_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional event url_safe_title used for queryset scoping and event staff access checks.
+         */
+        event?: string;
+    };
     url: '/api/products/orders/{order_id}/';
 };
 
@@ -42784,7 +44923,7 @@ export type ProductsOrdersCancelCreateResponses = {
 };
 
 export type ProductsOrdersCheckoutCreateData = {
-    body: OrderCheckoutRequestRequest;
+    body?: OrderCheckoutRequestRequest;
     path: {
         order_id: string;
     };
@@ -42845,6 +44984,68 @@ export type ProductsOrdersCompleteCreateResponses = {
     200: unknown;
 };
 
+export type ProductsOrdersRemoveItemCreateData = {
+    body: OrderRemoveItemRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/remove-item/';
+};
+
+export type ProductsOrdersRemoveItemCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Order or order item not found
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersRemoveItemCreateResponses = {
+    /**
+     * Order item removed successfully
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersReserveBankTransferPaymentData = {
+    body: OrderReserveBankTransferRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/reserve-bank-transfer-payment/';
+};
+
+export type ProductsOrdersReserveBankTransferPaymentErrors = {
+    /**
+     * Validation error.
+     */
+    400: unknown;
+    /**
+     * Order not found.
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersReserveBankTransferPaymentResponses = {
+    /**
+     * Existing bank transfer reference reused.
+     */
+    200: unknown;
+    /**
+     * Bank transfer reference reserved.
+     */
+    201: unknown;
+};
+
 export type ProductsOrdersSubmitCreateData = {
     body?: never;
     path: {
@@ -42872,6 +45073,62 @@ export type ProductsOrdersSubmitCreateErrors = {
 export type ProductsOrdersSubmitCreateResponses = {
     /**
      * Order submitted successfully
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersUpdateItemCreateData = {
+    body: OrderUpdateItemQuantityRequestRequest;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/update-item/';
+};
+
+export type ProductsOrdersUpdateItemCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+    /**
+     * Order or order item not found
+     */
+    404: unknown;
+};
+
+export type ProductsOrdersUpdateItemCreateResponses = {
+    /**
+     * Order item updated successfully
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersPreviewPricingCreateData = {
+    body: OrderPricingPreviewRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/products/orders/preview-pricing/';
+};
+
+export type ProductsOrdersPreviewPricingCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type ProductsOrdersPreviewPricingCreateResponses = {
+    /**
+     * Pricing preview result
      */
     200: unknown;
 };
@@ -43839,6 +46096,32 @@ export type ConfirmPaymentIntentResponses = {
 };
 
 export type ConfirmPaymentIntentResponse2 = ConfirmPaymentIntentResponses[keyof ConfirmPaymentIntentResponses];
+
+export type GetStripeConnectStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/stripe/connect/';
+};
+
+export type GetStripeConnectStatusResponses = {
+    200: StripeConnectAccount;
+};
+
+export type GetStripeConnectStatusResponse = GetStripeConnectStatusResponses[keyof GetStripeConnectStatusResponses];
+
+export type CreateStripeConnectOnboardingLinkData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/stripe/connect/onboard/';
+};
+
+export type CreateStripeConnectOnboardingLinkResponses = {
+    200: StripeConnectAccount;
+};
+
+export type CreateStripeConnectOnboardingLinkResponse = CreateStripeConnectOnboardingLinkResponses[keyof CreateStripeConnectOnboardingLinkResponses];
 
 export type CreatePaymentIntentData = {
     body: CreatePaymentIntentRequest;

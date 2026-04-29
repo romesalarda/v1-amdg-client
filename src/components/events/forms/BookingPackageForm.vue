@@ -59,6 +59,24 @@
       <p v-if="errors.ticket_type" class="text-xs text-red-500">{{ errors.ticket_type }}</p>
     </div>
 
+    <div class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <p class="text-sm font-semibold text-emerald-900">Free package</p>
+          <p class="mt-1 text-xs text-emerald-700">Set this package to be free of charge.</p>
+        </div>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition"
+          :class="isFree ? 'border-emerald-400 bg-emerald-100 text-emerald-900' : 'border-slate-300 bg-white text-slate-700 hover:border-slate-400'"
+          @click="toggleFreePackage"
+        >
+          <span class="h-2.5 w-2.5 rounded-full" :class="isFree ? 'bg-emerald-600' : 'bg-slate-400'"></span>
+          {{ isFree ? 'Free enabled' : 'Set as free' }}
+        </button>
+      </div>
+    </div>
+
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <div class="sm:col-span-2 space-y-2">
         <label class="block text-sm font-medium text-background-dark-600" for="base-amount">
@@ -71,10 +89,12 @@
           type="number"
           step="0.01"
           min="0"
+          :disabled="isFree"
           placeholder="0.00"
-          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+          class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-slate-100"
         />
         <p v-if="errors.base_amount" class="text-xs text-red-500">{{ errors.base_amount }}</p>
+        <p v-if="isFree" class="text-xs font-semibold text-emerald-700">Free package enabled: amount is locked to 0.00.</p>
       </div>
 
       <div class="space-y-2">
@@ -173,9 +193,29 @@ const [base_amount, base_amountAttrs] = defineField('base_amount')
 const [base_amount_currency, base_amount_currencyAttrs] = defineField('base_amount_currency')
 const [is_active, is_activeAttrs] = defineField('is_active')
 
+const isFree = ref(false)
+
+const normalizeAmount = (value: unknown): number => {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const setFreeAmount = () => {
+  base_amount.value = '0.00'
+}
+
+const toggleFreePackage = () => {
+  isFree.value = !isFree.value
+  if (isFree.value) {
+    setFreeAmount()
+  }
+}
+
 // Watch for modelValue changes and populate form
 watch(() => props.modelValue, (pkg) => {
   if (pkg) {
+    const amount = normalizeAmount(pkg.base_amount)
+    isFree.value = amount === 0
     setValues({
       name: pkg.name || '',
       description: ('description' in pkg && pkg.description) ? pkg.description : '',
@@ -184,13 +224,32 @@ watch(() => props.modelValue, (pkg) => {
       base_amount_currency: ('base_amount_currency' in pkg && pkg.base_amount_currency) ? pkg.base_amount_currency : 'GBP',
       is_active: pkg.is_active ?? true,
     })
+    if (isFree.value) {
+      setFreeAmount()
+    }
   }
 }, { immediate: true })
+
+watch(base_amount, (value) => {
+  const amount = normalizeAmount(value)
+  if (amount === 0 && !isFree.value) {
+    isFree.value = true
+    setFreeAmount()
+    return
+  }
+
+  if (amount > 0 && isFree.value) {
+    isFree.value = false
+  }
+})
 
 const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true
   try {
-    emit('submit', values)
+    emit('submit', {
+      ...values,
+      base_amount: isFree.value ? '0.00' : values.base_amount,
+    })
   } finally {
     isSubmitting.value = false
   }

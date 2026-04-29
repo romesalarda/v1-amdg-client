@@ -456,6 +456,13 @@
                         size="xs"
                         variant="ghost"
                         color="blue"
+                        icon="i-heroicons-clock"
+                        @click="openVariantAvailabilityModal(variant)"
+                      />
+                      <UButton
+                        size="xs"
+                        variant="ghost"
+                        color="blue"
                         icon="i-heroicons-pencil"
                         @click="startEditingVariant(variant)"
                       />
@@ -543,6 +550,69 @@
                       >
                         Upload Images
                       </UButton>
+                    </div>
+
+                    <div class="mt-4 pt-4 border-t border-gray-100 space-y-3">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <span class="text-xs font-semibold text-gray-700">Variant Availability Windows</span>
+                          <p class="text-xs text-gray-500 mt-0.5">Product windows are checked first, then variant windows.</p>
+                        </div>
+                        <UButton
+                          size="xs"
+                          variant="outline"
+                          color="primary"
+                          icon="i-heroicons-plus"
+                          @click="openVariantAvailabilityModal(variant)"
+                        >
+                          Add Window
+                        </UButton>
+                      </div>
+
+                      <div v-if="getVariantAvailabilityWindows(variant).length" class="space-y-2">
+                        <div
+                          v-for="window in getVariantAvailabilityWindows(variant)"
+                          :key="window.availability_id"
+                          class="flex items-center justify-between gap-3 rounded-lg border border-gray-200 bg-gray-50 p-3"
+                        >
+                          <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2">
+                              <p class="truncate text-sm font-semibold text-gray-900">{{ window.name }}</p>
+                              <UBadge :color="getWindowStatusBadgeColor(window)" size="xs" variant="soft">
+                                {{ getWindowStatus(window) }}
+                              </UBadge>
+                              <UBadge :color="window.availability_type === 'PRODUCT_WINDOW' ? 'blue' : 'purple'" size="xs" variant="soft">
+                                {{ window.availability_type === 'PRODUCT_WINDOW' ? 'Purchase' : 'Preview' }}
+                              </UBadge>
+                            </div>
+                            <p class="mt-1 text-xs text-gray-500">
+                              {{ formatDateTime(window.available_from || '') }} -> {{ formatDateTime(window.available_to || '') }}
+                            </p>
+                          </div>
+                          <div class="flex items-center gap-1">
+                            <UButton
+                              size="xs"
+                              variant="ghost"
+                              color="blue"
+                              icon="i-heroicons-pencil"
+                              @click="openVariantAvailabilityModal(variant, window)"
+                            />
+                            <UButton
+                              size="xs"
+                              variant="ghost"
+                              color="red"
+                              icon="i-heroicons-trash"
+                              :loading="deletingVariantWindowId === `${variant.variant_id}-${window.availability_id}`"
+                              @click="handleDeleteVariantAvailabilityWindow(variant, window.availability_id)"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div v-else class="rounded-lg border border-dashed border-gray-300 bg-white px-4 py-5 text-center">
+                        <p class="text-sm text-gray-600">No variant windows configured</p>
+                        <p class="mt-1 text-xs text-gray-500">This variant currently follows product-level availability only.</p>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -2235,10 +2305,124 @@
         </div>
       </div>
     </UModal>
+
+    <!-- Variant Availability Window Modal -->
+    <UModal v-model="showVariantAvailabilityModal" :ui="{ width: 'max-w-2xl' }">
+      <div class="p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-2">
+          {{ editingVariantWindow ? 'Edit Variant Availability Window' : 'Add Variant Availability Window' }}
+        </h3>
+        <p class="text-sm text-gray-500 mb-6">
+          {{ selectedVariantForAvailability ? `${selectedVariantForAvailability.size_display} (${selectedVariantForAvailability.color})` : 'Selected variant' }}
+        </p>
+
+        <div class="space-y-5">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Name *</label>
+            <input
+              v-model="variantAvailabilityForm.name"
+              type="text"
+              placeholder="e.g., XL Early Access"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+            <textarea
+              v-model="variantAvailabilityForm.description"
+              rows="2"
+              placeholder="Optional description..."
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Type *</label>
+            <div class="grid grid-cols-2 gap-3">
+              <label
+                v-for="option in PRODUCT_VARIANT_AVAILABILITY_TYPES"
+                :key="option.value"
+                class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
+                :class="variantAvailabilityForm.availability_type === option.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
+              >
+                <input
+                  v-model="variantAvailabilityForm.availability_type"
+                  type="radio"
+                  :value="option.value"
+                  class="text-primary focus:ring-primary mt-1"
+                />
+                <div class="flex-1">
+                  <div class="font-semibold text-gray-900 text-sm">{{ option.label }}</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Available From *</label>
+              <input
+                v-model="variantAvailabilityForm.available_from"
+                type="datetime-local"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-gray-700 mb-2">Available To *</label>
+              <input
+                v-model="variantAvailabilityForm.available_to"
+                type="datetime-local"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
+            <input
+              v-model="variantAvailabilityForm.timezone"
+              type="text"
+              placeholder="UTC"
+              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            />
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p class="text-xs text-blue-700">
+              Product windows are checked first, then this variant window is applied as a finer restriction.
+            </p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3 mt-6 pt-6 border-t border-gray-200">
+          <UButton
+            class="flex-1"
+            variant="outline"
+            color="gray"
+            @click="closeVariantAvailabilityModal"
+          >
+            Cancel
+          </UButton>
+          <UButton
+            class="flex-1"
+            variant="solid"
+            color="primary"
+            icon="i-heroicons-check"
+            :loading="addVariantAvailabilityWindow.isPending.value || updateVariantAvailabilityWindow.isPending.value"
+            @click="submitVariantAvailabilityForm"
+          >
+            {{ editingVariantWindow ? 'Update' : 'Create' }} Window
+          </UButton>
+        </div>
+      </div>
+    </UModal>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
+import { productVariantsAvailabilityWindowsList } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useProduct, useCreateProduct, useUpdateProduct } from '~/composables/resources/products/products'
 import { useProductVariants, useCreateProductVariant, useUpdateProductVariant, useDeleteProductVariant } from '~/composables/resources/products/productVariants'
@@ -2248,9 +2432,19 @@ import { useAddProductImage, useRemoveProductImage } from '~/composables/resourc
 import { useAddVariantImage, useRemoveVariantImage } from '~/composables/resources/products/productVariantImages'
 import { useProductDiscounts, useCreateProductDiscount, useUpdateProductDiscount, useDeleteProductDiscount } from '~/composables/resources/products/productDiscounts'
 import { useProductAvailabilityWindows, useAddProductAvailabilityWindow, useUpdateProductAvailabilityWindow, useRemoveProductAvailabilityWindow } from '~/composables/resources/products/productAvailabilityWindows'
+import {
+  useAddProductVariantAvailabilityWindow,
+  useUpdateProductVariantAvailabilityWindow,
+  useRemoveProductVariantAvailabilityWindow,
+} from '~/composables/resources/products/productVariantAvailabilityWindows'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import type { ProductVariantDetail, AvailabilityWindow } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { parseDateTimeLocal, formatDateTimeLocal } from '~/utils/format/dates'
+import {
+  ProductVariantAvailabilityWindowSchema,
+  PRODUCT_VARIANT_AVAILABILITY_TYPES,
+} from '~/schemas/events/productVariantAvailability'
 import type { LocationQueryValue } from 'vue-router'
 import Swal from 'sweetalert2'
 
@@ -2291,10 +2485,10 @@ const { data: allCategoriesData, isLoading: allCategoriesLoading } = useProductC
 
 const { data: eventCategoriesData, isLoading: eventCategoriesLoading } = useProductEventCategories(
   computed(() => {
-    const eventNumericId = event.value?.data?.id
-    if (!eventNumericId) return undefined
+    const eventURLSafeTitle = event.value?.data?.url_safe_title
+    if (!eventURLSafeTitle) return undefined
     return {
-      event: eventNumericId,
+      event: eventURLSafeTitle,
       page_size: 100,
     }
   })
@@ -2739,6 +2933,41 @@ const editingVariants = ref<Record<string, boolean>>({})
 const variantEditForms = ref<Record<string, any>>({})
 const variantFileInputs = ref<Record<string, HTMLInputElement | null>>({})
 const collapsedVariants = ref<Record<string, boolean>>({})
+const variantAvailabilityWindowsByVariant = ref<Record<string, AvailabilityWindow[]>>({})
+
+async function loadVariantAvailabilityWindows(variantIds?: string[]) {
+  if (!productId.value || isNewProduct.value) {
+    variantAvailabilityWindowsByVariant.value = {}
+    return
+  }
+
+  const ids = (variantIds || existingVariants.value.map((variant) => variant.variant_id)).filter(Boolean)
+  if (!ids.length) {
+    variantAvailabilityWindowsByVariant.value = {}
+    return
+  }
+
+  const next = { ...variantAvailabilityWindowsByVariant.value }
+
+  await Promise.all(
+    ids.map(async (variantId) => {
+      try {
+        const response = await productVariantsAvailabilityWindowsList({
+          path: {
+            product_product_id: productId.value,
+            variant_id: variantId,
+          },
+        })
+        const rows = (response.data as { results?: AvailabilityWindow[] } | undefined)?.results
+        next[variantId] = Array.isArray(rows) ? rows : []
+      } catch {
+        next[variantId] = []
+      }
+    })
+  )
+
+  variantAvailabilityWindowsByVariant.value = next
+}
 
 // Set all variants to collapsed by default when they load
 watch(() => existingVariants.value, (variants) => {
@@ -2747,6 +2976,8 @@ watch(() => existingVariants.value, (variants) => {
       collapsedVariants.value[variant.variant_id] = true
     }
   })
+
+  void loadVariantAvailabilityWindows(variants.map((variant) => variant.variant_id))
 }, { immediate: true })
 
 // Toggle variant collapse
@@ -3632,6 +3863,166 @@ const availabilityForm = reactive({
 const addAvailabilityWindow = useAddProductAvailabilityWindow()
 const updateAvailabilityWindow = useUpdateProductAvailabilityWindow()
 const removeAvailabilityWindow = useRemoveProductAvailabilityWindow()
+const addVariantAvailabilityWindow = useAddProductVariantAvailabilityWindow()
+const updateVariantAvailabilityWindow = useUpdateProductVariantAvailabilityWindow()
+const removeVariantAvailabilityWindow = useRemoveProductVariantAvailabilityWindow()
+
+const showVariantAvailabilityModal = ref(false)
+const selectedVariantForAvailability = ref<ProductVariantDetail | null>(null)
+const editingVariantWindow = ref<AvailabilityWindow | null>(null)
+const deletingVariantWindowId = ref<string | null>(null)
+
+const variantAvailabilityForm = reactive({
+  name: '',
+  description: '',
+  availability_type: 'PRODUCT_WINDOW' as 'PRODUCT_WINDOW' | 'PRODUCT_PREVIEW_WINDOW',
+  available_from: '',
+  available_to: '',
+  timezone: '',
+})
+
+function getVariantAvailabilityWindows(variant: ProductVariantDetail): AvailabilityWindow[] {
+  const rows = variantAvailabilityWindowsByVariant.value[variant.variant_id] || variant.availability_windows || []
+  return rows.filter(
+    (window) => window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PRODUCT_PREVIEW_WINDOW'
+  )
+}
+
+function openVariantAvailabilityModal(variant: ProductVariantDetail, window?: AvailabilityWindow) {
+  selectedVariantForAvailability.value = variant
+  editingVariantWindow.value = window || null
+
+  if (window) {
+    variantAvailabilityForm.name = window.name || ''
+    variantAvailabilityForm.description = window.description || ''
+    variantAvailabilityForm.availability_type =
+      window.availability_type === 'PRODUCT_PREVIEW_WINDOW' ? 'PRODUCT_PREVIEW_WINDOW' : 'PRODUCT_WINDOW'
+    variantAvailabilityForm.available_from = window.available_from ? formatDateTimeLocal(window.available_from) : ''
+    variantAvailabilityForm.available_to = window.available_to ? formatDateTimeLocal(window.available_to) : ''
+    variantAvailabilityForm.timezone = window.timezone || event.value?.data?.timezone || 'UTC'
+  } else {
+    variantAvailabilityForm.name = ''
+    variantAvailabilityForm.description = ''
+    variantAvailabilityForm.availability_type = 'PRODUCT_WINDOW'
+    variantAvailabilityForm.available_from = ''
+    variantAvailabilityForm.available_to = ''
+    variantAvailabilityForm.timezone = event.value?.data?.timezone || 'UTC'
+  }
+
+  showVariantAvailabilityModal.value = true
+}
+
+function closeVariantAvailabilityModal() {
+  showVariantAvailabilityModal.value = false
+  selectedVariantForAvailability.value = null
+  editingVariantWindow.value = null
+}
+
+async function submitVariantAvailabilityForm() {
+  const variant = selectedVariantForAvailability.value
+  if (!variant) return
+
+  const payload = {
+    name: variantAvailabilityForm.name,
+    description: variantAvailabilityForm.description || undefined,
+    availability_type: variantAvailabilityForm.availability_type,
+    available_from: parseDateTimeLocal(variantAvailabilityForm.available_from) || variantAvailabilityForm.available_from,
+    available_to: parseDateTimeLocal(variantAvailabilityForm.available_to) || variantAvailabilityForm.available_to,
+    timezone: variantAvailabilityForm.timezone || event.value?.data?.timezone || 'UTC',
+  }
+
+  const validationResult = ProductVariantAvailabilityWindowSchema.safeParse(payload)
+  if (!validationResult.success) {
+    toast.add({
+      title: 'Validation Error',
+      description: validationResult.error.issues[0]?.message || 'Please check all required fields',
+      color: 'red',
+    })
+    return
+  }
+
+  try {
+    if (editingVariantWindow.value) {
+      await updateVariantAvailabilityWindow.mutateAsync({
+        productId: productId.value,
+        variantId: variant.variant_id,
+        windowId: editingVariantWindow.value.availability_id,
+        body: validationResult.data,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Variant availability window updated successfully',
+        color: 'green',
+      })
+    } else {
+      await addVariantAvailabilityWindow.mutateAsync({
+        productId: productId.value,
+        variantId: variant.variant_id,
+        body: validationResult.data,
+      })
+
+      toast.add({
+        title: 'Success',
+        description: 'Variant availability window created successfully',
+        color: 'green',
+      })
+    }
+
+    closeVariantAvailabilityModal()
+    await loadVariantAvailabilityWindows([variant.variant_id])
+    refetchVariants()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to save variant availability window',
+      color: 'red',
+    })
+  }
+}
+
+async function handleDeleteVariantAvailabilityWindow(variant: ProductVariantDetail, windowId: string) {
+  const result = await Swal.fire({
+    title: 'Delete Variant Window?',
+    text: 'Are you sure you want to delete this variant availability window?',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#6b7280',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+    focusCancel: true,
+  })
+
+  if (!result.isConfirmed) return
+
+  deletingVariantWindowId.value = `${variant.variant_id}-${windowId}`
+
+  try {
+    await removeVariantAvailabilityWindow.mutateAsync({
+      productId: productId.value,
+      variantId: variant.variant_id,
+      windowId,
+    })
+
+    toast.add({
+      title: 'Success',
+      description: 'Variant availability window deleted successfully',
+      color: 'green',
+    })
+
+    await loadVariantAvailabilityWindows([variant.variant_id])
+    refetchVariants()
+  } catch (err: any) {
+    toast.add({
+      title: 'Error',
+      description: err.message || 'Failed to delete variant availability window',
+      color: 'red',
+    })
+  } finally {
+    deletingVariantWindowId.value = null
+  }
+}
 
 function openAvailabilityModal(window?: AvailabilityWindow) {
   editingWindow.value = window || null
@@ -3741,8 +4132,8 @@ async function submitAvailabilityForm() {
     name: availabilityForm.name,
     description: availabilityForm.description || undefined,
     availability_type: availabilityForm.availability_type,
-    available_from: availabilityForm.available_from,
-    available_to: availabilityForm.available_to,
+    available_from: parseDateTimeLocal(availabilityForm.available_from) || availabilityForm.available_from,
+    available_to: parseDateTimeLocal(availabilityForm.available_to) || availabilityForm.available_to,
     timezone: availabilityForm.timezone || 'UTC',
   }
 
@@ -3801,9 +4192,6 @@ async function handleDeleteAvailabilityWindow(windowId: string) {
   if (!result.isConfirmed) return
 
   deletingWindowId.value = windowId
-
-  console.log(windowId);
-  
 
   try {
     await removeAvailabilityWindow.mutateAsync({
@@ -3864,10 +4252,6 @@ function formatDateTime(dateString: string): string {
 }
 
 function formatDateTimeForInput(dateString: string): string {
-  if (!dateString) return ''
-  const date = new Date(dateString)
-  // Format: YYYY-MM-DDTHH:mm
-  const pad = (n: number) => n.toString().padStart(2, '0')
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`
+  return formatDateTimeLocal(dateString)
 }
 </script>

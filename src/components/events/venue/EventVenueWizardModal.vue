@@ -62,7 +62,6 @@
                       <p class="text-xs text-navy-500 mt-1">{{ item.poi_address || item.poi?.address || 'No address' }}</p>
                       <p class="text-xs text-navy-400 mt-1">{{ item.poi_city || item.poi?.city || 'No city' }}</p>
                     </div>
-                    <UBadge color="blue" variant="soft" size="xs">ID: {{ item.id }}</UBadge>
                   </div>
                 </button>
               </div>
@@ -75,30 +74,18 @@
 
           <form v-else class="space-y-6" @submit.prevent="handleCreateNew">
             <div>
-              <h4 class="text-xs font-black text-primary uppercase tracking-widest mb-3">POI Details</h4>
+              <h4 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Quick Venue Details</h4>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input v-model="poiForm.name" required type="text" placeholder="POI Name" class="input" />
+                <input v-model="poiForm.name" required type="text" placeholder="Venue name" class="input" />
                 <select v-model="poiForm.poi_type" class="input">
                   <option value="VENUE">Venue</option>
                   <option value="SPORTS_VENUE">Sports Venue</option>
                 </select>
                 <input v-model="poiForm.city" type="text" placeholder="City" class="input" />
-                <input v-model="poiForm.postcode" type="text" placeholder="Postcode" class="input" />
-                <input v-model="poiForm.latitude" type="text" placeholder="Latitude (optional)" class="input" />
-                <input v-model="poiForm.longitude" type="text" placeholder="Longitude (optional)" class="input" />
+                <input v-model="venueForm.capacity" min="0" type="number" placeholder="Capacity (optional)" class="input" />
               </div>
               <textarea v-model="poiForm.address" required rows="2" placeholder="Address" class="input mt-3 resize-none" />
-              <textarea v-model="poiForm.description" rows="2" placeholder="POI description" class="input mt-3 resize-none" />
-            </div>
-
-            <div>
-              <h4 class="text-xs font-black text-primary uppercase tracking-widest mb-3">Venue Details</h4>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <input v-model="venueForm.capacity" min="0" type="number" placeholder="Capacity" class="input" />
-                <input v-model="venueForm.description" type="text" placeholder="Venue description" class="input" />
-              </div>
-              <textarea v-model="venueForm.instructions" rows="2" placeholder="Instructions" class="input mt-3 resize-none" />
-              <textarea v-model="venueForm.notes" rows="2" placeholder="Notes" class="input mt-3 resize-none" />
+              <p class="mt-2 text-xs text-navy-500">Only name and address are required. You can add full venue metadata later from Manage Details.</p>
             </div>
 
             <p v-if="createError" class="text-sm text-red-600">{{ createError }}</p>
@@ -157,21 +144,22 @@ const poiForm = reactive({
   name: '',
   address: '',
   city: '',
-  postcode: '',
-  description: '',
   poi_type: 'VENUE' as 'VENUE' | 'SPORTS_VENUE',
-  latitude: '',
-  longitude: '',
 })
 
 const venueForm = reactive({
-  description: '',
-  instructions: '',
-  notes: '',
   capacity: '' as string | number,
 })
 
 const { isBusy, createVenueFromPoiAndVenueData } = useEventVenueManagement()
+
+const resetCreateForm = () => {
+  poiForm.name = ''
+  poiForm.address = ''
+  poiForm.city = ''
+  poiForm.poi_type = 'VENUE'
+  venueForm.capacity = ''
+}
 
 watch(() => props.open, (isOpen) => {
   if (!isOpen)
@@ -180,6 +168,7 @@ watch(() => props.open, (isOpen) => {
   mode.value = 'existing'
   selectedVenueId.value = null
   createError.value = ''
+  resetCreateForm()
 })
 
 const emitSelect = () => {
@@ -210,16 +199,9 @@ const handleCreateNew = async () => {
         name: poiForm.name.trim(),
         address: poiForm.address.trim(),
         city: poiForm.city.trim() || '',
-        postcode: poiForm.postcode.trim() || '',
-        description: poiForm.description.trim() || '',
         poi_type: poiForm.poi_type,
-        latitude: poiForm.latitude.trim() || null,
-        longitude: poiForm.longitude.trim() || null,
       },
       venue: {
-        description: venueForm.description.trim() || '',
-        instructions: venueForm.instructions.trim() || '',
-        notes: venueForm.notes.trim() || '',
         capacity: venueForm.capacity === '' ? null : Number(venueForm.capacity),
       },
     })

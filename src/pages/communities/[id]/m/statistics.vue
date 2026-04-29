@@ -297,17 +297,17 @@ const buildLocationPieOption = (rows: { name: string; count: number }[]) => {
 }
 
 const baseQuery = computed(() => ({
-	organisation_id: Number(organisationId.value),
+	organisation_id: organisationId.value,
 	format: 'raw' as const,
 }))
 
 const eventPerformanceQuery = computed(() => ({
-	organisation_id: Number(organisationId.value),
+	organisation_id: organisationId.value,
 	format: 'raw' as const,
 	limit: 12,
 }))
 
-const { data: organisationData } = useOrganisation(computed(() => Number(organisationId.value)))
+const { data: organisationData } = useOrganisation(organisationId)
 const organisation = computed(() => organisationData.value?.data)
 
 const {

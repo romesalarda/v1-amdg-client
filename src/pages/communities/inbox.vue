@@ -69,7 +69,7 @@
               >
                 {{ acceptingOrgInviteId === invite.id ? 'Accepting...' : 'Accept' }}
               </button>
-              <NuxtLink :to="`/communities/${invite.organisation}`" class="px-4 py-2 border-2 border-deep-navy/20 text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider hover:border-deep-navy/50 transition-colors">
+              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border-2 border-deep-navy/20 text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider hover:border-deep-navy/50 transition-colors">
                 View
               </NuxtLink>
             </div>
@@ -95,12 +95,12 @@
               <button
                 v-if="isInviteAcceptable(invite)"
                 :disabled="acceptingLeaderInviteId === invite.id"
-                @click="handleAcceptLeaderInvite(invite.id, invite.organisation)"
+                @click="handleAcceptLeaderInvite(invite.id, invite)"
                 class="px-4 py-2 bg-blue-600 text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {{ acceptingLeaderInviteId === invite.id ? 'Accepting...' : 'Accept' }}
               </button>
-              <NuxtLink :to="`/communities/${invite.organisation}`" class="px-4 py-2 border-2 border-blue-200 text-blue-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-blue-400 transition-colors">
+              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border-2 border-blue-200 text-blue-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-blue-400 transition-colors">
                 View
               </NuxtLink>
             </div>
@@ -185,10 +185,29 @@ const acceptingStaffInviteId = ref<string | null>(null)
 type InboxInviteLike = {
   id: string
   organisation?: number | null
+  _links?: Record<string, string | undefined>
   accepted?: boolean
   is_valid?: boolean
   is_active?: boolean
   expires_at?: string | null
+}
+
+const extractOrganisationIdentifierFromLink = (link?: string | null): string | null => {
+  if (!link) return null
+  const match = link.match(/\/api\/organisations\/list\/([^/]+)\/?$/)
+  return match?.[1] ? decodeURIComponent(match[1]) : null
+}
+
+const getInviteOrganisationIdentifier = (invite: InboxInviteLike): string | null => {
+  const fromLink = extractOrganisationIdentifierFromLink(invite._links?.organisation)
+  if (fromLink) return fromLink
+  if (invite.organisation) return String(invite.organisation)
+  return null
+}
+
+const resolveInviteCommunityPath = (invite: InboxInviteLike): string => {
+  const identifier = getInviteOrganisationIdentifier(invite)
+  return identifier ? `/communities/${identifier}` : '/communities'
 }
 
 // Fetch user's organization invites
@@ -245,7 +264,7 @@ const handleAcceptOrgInvite = (inviteId: string) => {
       const invite = orgInvites.value.find(inv => inv.id === inviteId)
       if (invite) {
         setTimeout(() => {
-          navigateTo(`/communities/${invite.organisation}`)
+          navigateTo(resolveInviteCommunityPath(invite))
         }, 1500)
       }
     },
@@ -258,7 +277,7 @@ const handleAcceptOrgInvite = (inviteId: string) => {
 
 const { mutate: acceptLeaderInvite } = useAcceptOrganisationLeaderInvite()
 
-const handleAcceptLeaderInvite = (inviteId: string, organisationId?: number | null) => {
+const handleAcceptLeaderInvite = (inviteId: string, invite: InboxInviteLike) => {
   acceptingLeaderInviteId.value = inviteId
 
   acceptLeaderInvite(inviteId, {
@@ -266,9 +285,10 @@ const handleAcceptLeaderInvite = (inviteId: string, organisationId?: number | nu
       $notyf?.success('Leader invitation accepted successfully!')
       acceptingLeaderInviteId.value = null
 
-      if (organisationId) {
+      const organisationIdentifier = getInviteOrganisationIdentifier(invite)
+      if (organisationIdentifier) {
         setTimeout(() => {
-          navigateTo(`/communities/${organisationId}`)
+          navigateTo(`/communities/${organisationIdentifier}`)
         }, 1200)
       }
     },

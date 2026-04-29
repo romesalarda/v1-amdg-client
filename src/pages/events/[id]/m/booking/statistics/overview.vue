@@ -49,7 +49,7 @@
       <!-- Summary Cards Row 2: Packages, Intents & Revenue -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         <StatCard
-          :value="overviewData.data?.packages?.total ?? 0"
+          :value="overviewData.data?.packages?.active ?? 0"
           label="Active Packages"
           icon="i-heroicons-cube"
           icon-color="indigo"
@@ -63,7 +63,7 @@
         <StatCard
           :value="formatCurrency(overviewData.data?.revenue?.total ?? 0)"
           label="Total Revenue"
-          icon="i-heroicons-currency-dollar"
+          icon="i-heroicons-currency-pound"
           icon-color="green"
         />
         <StatCard
@@ -80,6 +80,7 @@
         <StatSection 
           title="Booking Status"
           description="Distribution by payment status"
+          padding="sm"
         >
           <PieChart
             v-if="bookingStatusData.length"
@@ -97,6 +98,7 @@
         <StatSection 
           title="Ticket Status"
           description="Distribution by ticket status"
+          padding="sm"
         >
           <PieChart
             v-if="ticketStatusData.length"
@@ -114,32 +116,42 @@
         <StatSection 
           title="Intent Status"
           description="Booking intent conversion funnel"
+          padding="sm"
         >
           <BarChart
             v-if="intentStatusData.length"
             :data="intentStatusData"
             height="300px"
-            color="#06b6d4"
+            color="#0f172a"
           />
           <div v-else class="text-center text-gray-500 py-8">
             No intent data available
           </div>
         </StatSection>
 
-        <!-- Package Distribution -->
+        <!-- Package Popularity -->
         <StatSection 
-          title="Package Distribution"
-          description="Top packages by usage"
+          title="Package Popularity"
+          description="Top packages by ticket count"
+          padding="sm"
         >
+          <div v-if="packagePopularityLoading" class="flex items-center justify-center h-64">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-700"></div>
+          </div>
+          <div v-else-if="packagePopularityError" class="text-center text-red-600 py-8">
+            Error loading package popularity
+          </div>
           <BarChart
-            v-if="packageDistData.length"
-            :data="packageDistData"
+            v-else-if="packagePopularityChartData.length"
+            :data="packagePopularityChartData"
             height="300px"
-            color="#8b5cf6"
-            :horizontal="true"
+            color="#1f3c88"
+            value-unit="tickets"
+            value-label="Tickets"
+            :show-values="true"
           />
           <div v-else class="text-center text-gray-500 py-8">
-            No package data available
+            No package popularity data available
           </div>
         </StatSection>
       </div>
@@ -206,7 +218,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useDashboardOverview } from '~/composables/statistics/bookings/booking-statistics'
+import { useDashboardOverview, usePackagePopularity } from '~/composables/statistics/bookings/booking-statistics'
 import StatCard from '~/components/statistics/StatCard.vue'
 import StatSection from '~/components/statistics/StatSection.vue'
 import PieChart from '~/components/charts/PieChart.vue'
@@ -222,6 +234,7 @@ const props = defineProps<Props>()
 
 // Fetch dashboard overview
 const { data: overviewData, isLoading, error, refetch } = useDashboardOverview(() => props.queryParams)
+const { data: packagePopularityData, isLoading: packagePopularityLoading, error: packagePopularityError } = usePackagePopularity(() => props.queryParams)
 
 // Transform booking status data for pie chart
 const bookingStatusData = computed<PieChartData[]>(() => {
@@ -253,11 +266,15 @@ const intentStatusData = computed<BarChartData[]>(() => {
   }))
 })
 
-// Transform package distribution data
-const packageDistData = computed<BarChartData[]>(() => {
-  // This would ideally come from a separate endpoint, but for overview we can show placeholder
-  // or fetch from package popularity endpoint
-  return []
+// Transform package popularity data
+const packagePopularityChartData = computed<BarChartData[]>(() => {
+  const popularity = packagePopularityData.value?.data?.popularity
+  if (!popularity) return []
+
+  return popularity.slice(0, 8).map((item: any) => ({
+    label: item.package_name,
+    value: item.ticket_count,
+  }))
 })
 
 // Helper function to format status
@@ -267,9 +284,9 @@ const formatStatus = (status: string) => {
 
 // Helper function to format currency
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'GBP',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)

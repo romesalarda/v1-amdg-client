@@ -236,7 +236,7 @@ useHead({
 })
 
 // Fetch organization data
-const { data: orgData, isLoading } = useOrganisation(computed(() => Number(organisationId.value)))
+const { data: orgData, isLoading } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
 
 // Form validation
@@ -376,7 +376,7 @@ const handleSubmit = handleFormSubmit(async (values) => {
       if (logo.value) formData.append('logo', logo.value)
 
       updateOrganisation({
-        organisationId: Number(organisationId.value),
+        organisationId: organisationId.value,
         body: formData,
       }, {
         onSuccess: () => {
@@ -406,7 +406,7 @@ const handleSubmit = handleFormSubmit(async (values) => {
     } else {
       // JSON update only
       updateOrganisation({
-        organisationId: Number(organisationId.value),
+        organisationId: organisationId.value,
         body: values,
       }, {
         onSuccess: () => {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import { isFormData, uploadMultipart } from '~/utils/upload'
 import {
   bookingsListList,
   bookingsListRetrieve,
@@ -103,12 +104,24 @@ export function useCheckoutBooking() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (input: BookingsCheckoutData['body'] | { body: BookingsCheckoutData['body']; idempotencyKey?: string }) => {
+    mutationFn: (
+      input:
+        | BookingsCheckoutData['body']
+        | { body: BookingsCheckoutData['body'] | FormData; idempotencyKey?: string }
+        | FormData
+    ) => {
+      if (isFormData(input)) {
+        return uploadMultipart('/api/bookings/list/checkout/', input, { method: 'POST' })
+      }
+
       if ('body' in input) {
-        return bookingsCheckout({
-          body: input.body,
-          headers: input.idempotencyKey ? { 'Idempotency-Key': input.idempotencyKey } : undefined,
-        })
+        if (isFormData(input.body)) {
+          return uploadMultipart('/api/bookings/list/checkout/', input.body, {
+            method: 'POST',
+          })
+        }
+
+        return bookingsCheckout({ body: input.body })
       }
 
       return bookingsCheckout({ body: input })

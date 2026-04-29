@@ -36,6 +36,9 @@ interface Props {
   donut?: boolean
   colors?: string[]
   showLegend?: boolean
+  valueUnit?: string
+  valueFormatter?: (value: number) => string
+  valueLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -45,30 +48,37 @@ const props = withDefaults(defineProps<Props>(), {
   showLegend: true,
 })
 
+const formatChartValue = (value: number) => {
+  if (props.valueFormatter) return props.valueFormatter(value)
+  return props.valueUnit ? `${value.toLocaleString('en-GB')} ${props.valueUnit}` : value.toLocaleString('en-GB')
+}
+
 const option = computed(() => ({
   title: props.title ? {
     text: props.title,
     left: 'center',
     top: 10,
     textStyle: {
-      color: '#0a192f',
-      fontSize: 16,
+      color: '#0f172a',
+      fontSize: 15,
       fontWeight: 600,
     },
   } : undefined,
   tooltip: {
     trigger: 'item',
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderColor: '#e5e7eb',
+    backgroundColor: 'rgba(255, 255, 255, 0.98)',
+    borderColor: '#e2e8f0',
     borderWidth: 1,
+    borderRadius: 14,
+    padding: [10, 12],
     textStyle: {
-      color: '#0a192f',
+      color: '#0f172a',
     },
     formatter: (params: any) => {
       return `<div style="padding: 4px;">
         <div style="font-weight: 600; margin-bottom: 4px;">${params.name}</div>
-        <div style="color: #6b7280;">
-          Count: <strong>${params.value}</strong><br/>
+        <div style="color: #64748b;">
+          ${props.valueLabel || 'Value'}: <strong>${formatChartValue(Number(params.value ?? 0))}</strong><br/>
           Percentage: <strong>${params.percent}%</strong>
         </div>
       </div>`
@@ -79,7 +89,7 @@ const option = computed(() => ({
     bottom: 10,
     left: 'center',
     textStyle: {
-      color: '#6b7280',
+      color: '#64748b',
       fontSize: 12,
     },
     itemWidth: 12,
@@ -102,7 +112,7 @@ const option = computed(() => ({
       label: {
         show: !props.showLegend,
         formatter: '{b}: {d}%',
-        color: '#6b7280',
+        color: '#64748b',
         fontSize: 12,
       },
       labelLine: {

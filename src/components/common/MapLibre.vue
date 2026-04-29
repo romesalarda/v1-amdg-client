@@ -1,9 +1,10 @@
 <template>
 	<ClientOnly>
-		<div class="relative">
-			<div ref="mapContainer" class="h-[384px] w-full bg-slate-100"></div>
+		<div class="relative overflow-hidden rounded-3xl bg-mist-blue/40">
+			<div ref="mapContainer" class="h-[384px] w-full bg-mist-blue"></div>
+			<div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/85 to-transparent"></div>
 			<div
-				class="absolute left-2 top-2 z-10 rounded bg-white/90 px-2 py-1 text-[11px] text-gray-700 shadow"
+				class="absolute left-4 top-4 z-10 rounded-full bg-white/85 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-deep-navy shadow backdrop-blur-md"
 			>
 				Map status: {{ status }}
 			</div>

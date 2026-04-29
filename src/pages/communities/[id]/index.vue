@@ -335,11 +335,12 @@ const route = useRoute()
 const authStore = useAuthStore()
 const { $notyf } = useNuxtApp()
 
-const organisationId = computed(() => Number(route.params.id))
+const organisationId = computed(() => route.params.id as string)
 
 // Fetch organisation details
 const { data: orgData, isLoading, isError } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 // Check if user is a member
 const { data: membershipsData } = useOrganisationMemberships(computed(() => ({
@@ -371,9 +372,12 @@ const canViewEvents = computed(() => {
 })
 
 // Fetch events for this organization
-const { data: eventsData, isLoading: isLoadingEvents } = useEvents(computed(() => ({
-  organisation: organisationId.value,
-})))
+const { data: eventsData, isLoading: isLoadingEvents } = useEvents(computed(() => {
+  if (!organisationNumericId.value) return undefined
+  return {
+    organisation: organisationNumericId.value,
+  }
+}))
 const organizationEvents = computed(() => eventsData.value?.data?.results || [])
 
 // Request membership mutation
@@ -386,8 +390,13 @@ const requestMembership = () => {
     return
   }
 
+  if (!organisationNumericId.value) {
+    $notyf?.error('Community information is still loading. Please try again.')
+    return
+  }
+
   createMembership({
-    organisation: organisationId.value,
+    organisation: organisationNumericId.value,
     user: authStore.user!.id,
   }, {
     onSuccess: () => {

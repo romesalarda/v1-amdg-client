@@ -13,7 +13,7 @@
               <h3 class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Authorization Required</h3>
               <p class="text-sm text-yellow-800 leading-relaxed mb-3">This event requires authorization before it can be published or opened for registration.</p>
               <NuxtLink
-                :to="`/communities/${event.organisation}/m/events/${event.event_id}/authorise`"
+                :to="`/communities/${event.organisation}/m/events/${event.url_safe_title}/authorise`"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider shadow-lg shadow-yellow-600/20"
               >
                 <span class="material-symbols-outlined text-base">verified</span>
@@ -882,7 +882,7 @@ const handleStatusAction = (newStatus: string) => {
   confirmModal.value = {
     ...config,
     isOpen: true,
-    expectedText: config.requireTyping ? event.value.title : '',
+    expectedText: config.requireTyping ? event.value.title.toUpperCase() : '',
     action: () => executeStatusChange(newStatus),
   }
 }
@@ -921,7 +921,7 @@ const handleDeleteAction = () => {
     message: `<strong>Warning:</strong> This will permanently delete the event "${event.value.title}". This action cannot be undone. All associated data will be lost.<br><br>Type <strong>${event.value.title}</strong> to confirm deletion.`,
     confirmText: 'Delete Forever',
     requireTyping: true,
-    expectedText: event.value.title,
+    expectedText: event.value.title.toUpperCase(),
     buttonColor: 'danger',
     isDestructive: true,
     icon: 'delete_forever',

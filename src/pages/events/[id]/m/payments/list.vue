@@ -42,9 +42,12 @@
               </div>
               <div>
                 <div class="text-2xl font-black text-deep-navy">
-                  {{ formatCurrency(stats.totalRevenue) }}
+                  {{ revenueOverviewLoading ? '...' : formatCurrency(eventTotalRevenue) }}
                 </div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Total Revenue</div>
+                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Event Total Revenue</div>
+                <div class="text-xs text-gray-500 mt-1">
+                  Current list: <span class="font-semibold text-deep-navy">{{ formatCurrency(stats.listRevenue) }}</span>
+                </div>
               </div>
             </div>
           </div>
@@ -463,7 +466,7 @@
                   </td>
                   <td class="px-4 py-3">
                     <div class="text-sm font-semibold text-gray-900">
-                      {{ payment.amount }}
+                      {{ payment.final_amount }}
                     </div>
                   </td>
                   <td class="px-4 py-3">
@@ -506,7 +509,7 @@
                         <span class="material-symbols-outlined text-lg">vertical_align_bottom</span>
                       </button>
                       <button
-                        v-if="payment.status === 'PENDING'"
+                        v-if="payment.status === 'PENDING' && !payment.outstanding_bank_transfer_evidence"
                         @click="handlePendingVerification(payment)"
                         class="p-1.5 text-amber-600 hover:text-amber-700 hover:bg-amber-50 rounded-lg transition-colors"
                         :title="isBankTransferPayment(payment) ? 'Verify Bank Transfer' : 'Mark as Verified'"
@@ -514,7 +517,7 @@
                         <span class="material-symbols-outlined text-lg">verified</span>
                       </button>
                       <button
-                        v-if="payment.status === 'COMPLETED'"
+                        v-if="payment.status === 'COMPLETED' || payment.status == 'PARTIALLY_REFUNDED'"
                         @click="initiateRefund(payment)"
                         class="p-1.5 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Initiate Refund"
@@ -655,6 +658,7 @@
     <RefundRequestModal
       v-if="paymentToRefund"
       :payment="paymentToRefund"
+      :event-detail="event?.data"
       :open="showRefundModal"
       @close="closeRefundModal"
       @created="handleRefundCreated"
@@ -680,7 +684,7 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
-import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
+import { useRevenueOverview } from '~/composables/statistics/payments/payment-statistics'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -898,7 +902,7 @@ async function syncStateToQuery() {
 // Computed query params for API
 const paymentsQueryParams = computed(() => {
   const params: any = {
-    event_id: route.params.id as string,
+    event: route.params.id as string,
     page: paymentsCurrentPage.value,
     page_size: paymentsPageSize.value,
   }
@@ -960,12 +964,20 @@ const paymentsQueryParams = computed(() => {
   return params
 })
 
+const revenueOverviewQueryParams = computed(() => ({
+  event_id: id.value,
+  format: 'raw' as const,
+  include_deleted: false,
+}))
+
 // Fetch payments
 const { data: paymentsData, isLoading: paymentsLoading, refetch: refetchPayments } = usePayments(paymentsQueryParams)
+const { data: revenueOverviewData, isLoading: revenueOverviewLoading } = useRevenueOverview(revenueOverviewQueryParams)
 
 const payments = computed(() => paymentsData.value?.data?.results || [])
 const paymentsTotalCount = computed(() => paymentsData.value?.data?.count || 0)
 const totalPages = computed(() => Math.ceil(paymentsTotalCount.value / paymentsPageSize.value))
+const eventTotalRevenue = computed(() => revenueOverviewData.value?.data?.total_revenue ?? 0)
 
 // Mutations
 const cancelPaymentMutation = useCancelPayment()
@@ -1015,7 +1027,7 @@ const stats = computed(() => {
   }
 
   return {
-    totalRevenue,
+    listRevenue: totalRevenue,
     pendingCount: pending.length,
     pendingAmount,
     refundedCount: refunded.length,

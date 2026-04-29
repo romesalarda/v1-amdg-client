@@ -20,7 +20,7 @@
         <!-- Type-to-confirm input -->
         <div v-if="requireTyping" class="space-y-2">
           <label class="block text-xs font-black text-primary uppercase tracking-wider">
-            Type <span class="font-mono bg-gray-100 px-2 py-1 rounded text-red-600">{{ expectedText }}</span> to confirm
+            Type <span class="font-mono bg-gray-100 px-2 py-1 rounded text-red-600">{{ expectedText.toUpperCase() }}</span> to confirm
           </label>
           <input
             v-model="typedConfirmation"

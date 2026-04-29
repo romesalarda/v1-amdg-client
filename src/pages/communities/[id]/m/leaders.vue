@@ -225,7 +225,7 @@
         </div>
 
         <UModal v-model="isInviteModalOpen" prevent-focus>
-            <InviteLeaderModal :organisation-id="organisationId" :leaders="leadersSnapshot" :pending-invites="pendingInvites" />
+            <InviteLeaderModal :organisation-id="organisationNumericId" :leaders="leadersSnapshot" :pending-invites="pendingInvites" />
         </UModal>
     </CommunitiesManagementLayout>
 </template>
@@ -257,10 +257,11 @@ useHead({
 const route = useRoute()
 const { $notyf } = useNuxtApp()
 
-const organisationId = computed(() => Number(route.params.id))
+const organisationId = computed(() => route.params.id as string)
 
 const { data: organisationData } = useOrganisation(organisationId)
 const organisation = computed(() => organisationData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id || 0)
 
 const isInviteModalOpen = ref(false)
 const showInviteHistory = ref(false)

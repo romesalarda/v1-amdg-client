@@ -15,11 +15,11 @@ import { eventListWsTokenCreate } from '~/api/sdk.gen'
  * // Use tokenData.token to connect to WebSocket
  * ```
  */
-export async function getWebSocketToken(eventId: string): Promise<WSTokenResponse> {
+export async function getWebSocketToken(eventIdentifier: string): Promise<WSTokenResponse> {
   try {
     const response = await eventListWsTokenCreate({
       path: {
-        event_id: eventId
+        url_safe_title: eventIdentifier
       }
     } as any) // Cast to any - OpenAPI spec incorrectly requires body
     

@@ -1,5 +1,8 @@
 <template>
-  <header class="bg-deep-navy text-white py-2 border-b border-white/10 sticky top-0 z-50">
+  <header
+    class="text-white py-2 sticky top-0 z-50 transition-all duration-300"
+    :class="headerClass"
+  >
     <div class="max-container-fluid flex justify-between items-center">
       <!-- Logo Section -->
       <div class="flex items-center space-x-3">
@@ -162,6 +165,19 @@ import { useLogout } from '~/composables/resources/user/auth'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 
 const route = useRoute()
+const isScrolled = ref(false)
+
+const isLandingPage = computed(() => route.path === '/')
+
+const headerClass = computed(() => {
+  if (!isLandingPage.value) {
+    return 'bg-deep-navy border-b border-white/10'
+  }
+
+  return isScrolled.value
+    ? 'bg-[#0B132B]/82 backdrop-blur-xl border-b border-white/10 shadow-lg shadow-black/20'
+    : 'bg-transparent border-b border-transparent'
+})
 
 // Fetch current user and profile
 const { data: userData, isLoading: isUserLoading } = useMe()
@@ -238,11 +254,18 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 }
 
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 18
+}
+
 onMounted(() => {
+  handleScroll()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', handleScroll, { passive: true })
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('scroll', handleScroll)
 })
 </script>

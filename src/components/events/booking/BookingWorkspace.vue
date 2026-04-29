@@ -11,36 +11,40 @@
       <div class="absolute inset-0 bg-gradient-to-r from-deep-navy/95 via-deep-navy/85 to-deep-navy/70"></div>
 
       <div class="absolute inset-0 flex items-center">
-        <div class="max-w-screen-xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-300">Booking workspace</p>
-            <h1 class="mt-3 text-4xl md:text-5xl font-black leading-tight text-white">{{ eventTitle }}</h1>
-            <p class="mt-2 text-white/80 text-sm">Reference {{ booking?.booking_reference || '-' }}</p>
-            <p class="mt-1 text-white/70 text-sm">Owner {{ booking?.made_by_name || 'Unknown' }}</p>
+        <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-8 md:flex-row md:items-end md:justify-between">
+          <div class="space-y-4 md:max-w-xl md:justify-self-start">
+            <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Live Event Portal</span>
+            </div>
+            <h1 class="font-headline text-5xl font-extrabold tracking-tighter text-white md:text-6xl">{{ eventTitle }}</h1>
+            <p class="max-w-lg text-xl text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>.</p>
           </div>
 
-          <div class="bg-white/10 backdrop-blur-xl border border-white/15 rounded-2xl p-6 text-white">
-            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">Event countdown</p>
+          <div class="md:ml-auto md:max-w-xl md:pl-8">
+            <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">We will see you in...</p>
             <div v-if="hasStarted" class="mt-4">
-              <p class="text-2xl font-black">Event started</p>
-              <p class="text-xs text-white/75 mt-1">{{ formatEventDate(eventStart) }}</p>
+              <p class="text-2xl font-black text-white">Event started</p>
+              <p class="mt-1 text-xs text-white/75">{{ formatDate(eventStart) }}</p>
             </div>
-            <div v-else class="mt-4 grid grid-cols-4 gap-3 text-center">
-              <div>
-                <p class="text-2xl font-black">{{ countdown.days }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60">Days</p>
+            <div v-else class="mt-4 flex items-end gap-3 font-headline text-4xl font-bold tracking-tighter text-white">
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.days }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">DAYS</span>
               </div>
-              <div>
-                <p class="text-2xl font-black">{{ countdown.hours }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60">Hours</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.hours }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">HRS</span>
               </div>
-              <div>
-                <p class="text-2xl font-black">{{ countdown.minutes }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60">Mins</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.minutes }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">MIN</span>
               </div>
-              <div>
-                <p class="text-2xl font-black">{{ countdown.seconds }}</p>
-                <p class="text-[9px] uppercase tracking-widest text-white/60">Secs</p>
+              <span class="pb-12 opacity-30">:</span>
+              <div class="flex flex-col items-center">
+                <span>{{ countdown.seconds }}</span>
+                <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">SEC</span>
               </div>
             </div>
           </div>
@@ -48,7 +52,59 @@
       </div>
     </section>
 
-    <div class="max-w-screen-xl mx-auto px-6 py-8">
+    <div v-if="booking" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
+      <div class="max-w-6xl mx-auto px-3 py-2">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div class="flex items-center gap-3 p-4 min-w-0">
+            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Date</p>
+              <p class="text-sm font-black text-deep-navy truncate">{{ formatDate(eventStart) }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-4 min-w-0">
+            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Timing</p>
+              <p class="text-sm font-black text-deep-navy truncate">{{ formatDateTime(eventStart) }}</p>
+              <p class="text-[11px] text-deep-navy/70 truncate">{{ myBookingData?.event?.timezone }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-4 min-w-0">
+            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Location</p>
+              <p class="text-sm font-black text-deep-navy truncate">{{ eventLocation }}</p>
+              <p v-if="primaryVenue?.venue_city" class="text-[11px] text-deep-navy/70 truncate">{{ primaryVenue.venue_city }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 p-4 min-w-0">
+            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <div class="min-w-0">
+              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Booking status</p>
+              <p class="text-sm font-black" :class="outstandingPayments.length ? 'text-blue-700' : 'text-green-700'">
+                {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) outstanding` : 'No outstanding payments' }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+   
+
+    <div class="max-w-screen-xl mx-auto px-6 py-8 pb-28">
       <div v-if="myBooking.isLoading.value" class="rounded-2xl bg-white border border-deep-navy/10 p-6 text-sm text-deep-navy/70">
         Loading booking details...
       </div>
@@ -58,129 +114,617 @@
       </div>
 
       <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
         <section class="lg:col-span-8 space-y-4">
-          <article class="bg-white border border-deep-navy/10 rounded-2xl p-4">
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="tab in tabs"
-                :key="tab.id"
-                type="button"
-                :disabled="tab.needsAttendee && !selectedAttendeeId"
-                @click="setActiveTab(tab.id)"
-                :class="[
-                  'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all',
-                  activeTab === tab.id ? 'bg-deep-navy text-white' : 'bg-mist-blue text-deep-navy',
-                  tab.needsAttendee && !selectedAttendeeId ? 'opacity-45 cursor-not-allowed' : 'hover:bg-blue-100'
-                ]"
-              >
-                {{ tab.label }}
-              </button>
-            </div>
-          </article>
-
-          <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
-            <div class="grid md:grid-cols-2 gap-4">
-              <div class="rounded-xl border border-deep-navy/10 p-4">
-                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking summary</p>
-                <dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
-                  <div class="flex justify-between">
-                    <dt>Booked at</dt>
-                    <dd class="font-semibold">{{ formattedBookedAt }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Selection reason</dt>
-                    <dd class="font-semibold">{{ selectedBookingItem?.selection_reason || '-' }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Attendees</dt>
-                    <dd class="font-semibold">{{ attendees.length }}</dd>
-                  </div>
-                  <div class="flex justify-between">
-                    <dt>Payments</dt>
-                    <dd class="font-semibold">{{ booking.payments?.length || 0 }}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <div class="rounded-xl border border-deep-navy/10 p-4">
-                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Access status</p>
-                <p class="mt-3 text-sm" :class="canManageAllAttendees ? 'text-green-700' : 'text-amber-700'">
-                  {{ canManageAllAttendees ? 'You can fully manage attendees for this booking.' : 'You have limited attendee management access.' }}
-                </p>
-                <p class="mt-2 text-xs text-deep-navy/65">
-                  {{ attendees.length > 1 ? 'This booking contains multiple attendees.' : 'This booking contains a single attendee.' }}
-                </p>
-              </div>
-            </div>
-
-            <div class="rounded-xl border border-deep-navy/10 p-4">
-              <div class="flex items-center justify-between mb-3">
-                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Attendees</p>
-                <p class="text-xs text-deep-navy/60">Select to open tabs</p>
-              </div>
-              <div v-if="attendees.length" class="space-y-2">
+            <div v-if="booking && selectedAttendeeId" class="rounded-2xl border border-deep-navy/10 bg-white/95 p-3 shadow-sm">
+              <div class="overflow-x-auto">
+                <div class="min-w-max flex items-center gap-2">
                 <button
-                  v-for="item in attendees"
-                  :key="item.id || item.display_id"
+                  v-for="tab in tabs"
+                  :key="tab.id"
                   type="button"
-                  @click="selectAttendee(item.id || '')"
-                  class="w-full text-left rounded-lg border px-3 py-3 transition-all"
-                  :class="selectedAttendeeId === item.id ? 'border-blue-500 bg-blue-50' : 'border-deep-navy/10 bg-white hover:border-blue-300'"
+                  @click="setActiveTab(tab.id)"
+                  :class="[
+                    'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70',
+                    activeTab === tab.id
+                      ? 'bg-deep-navy text-white border-deep-navy shadow-sm'
+                      : 'bg-white text-deep-navy border-deep-navy/15 hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-700'
+                  ]"
                 >
-                  <p class="text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
-                  <p class="text-xs text-deep-navy/55">{{ item.display_id || item.id || 'No identifier' }}</p>
+                  {{ tab.label }}
+                </button>
+                </div>
+              </div>
+            </div>
+          <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
+              <div class="flex items-center justify-between gap-3">
+                <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking steps</p>
+                <button
+                  type="button"
+                  class="rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                  @click="hideAllJourneyDetails = !hideAllJourneyDetails"
+                >
+                  {{ hideAllJourneyDetails ? 'Show all details' : 'Hide all details' }}
                 </button>
               </div>
-              <p v-else class="text-sm text-deep-navy/60">No attendees found for this booking.</p>
+              <div class="mt-4 relative">
+                <div class="pointer-events-none absolute left-3 top-6 bottom-6 w-px bg-blue-200"></div>
+                <ol class="space-y-4 relative">
+                  <li
+                    v-for="step in journeySteps"
+                    :key="step.id"
+                    class="relative pl-10"
+                  >
+                  <div
+                    class="absolute left-0 top-1 h-6 w-6 rounded-full border text-[11px] font-black flex items-center justify-center"
+                    :class="step.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+                  >
+                    {{ step.id }}
+                  </div>
+                  <div class="min-w-0 rounded-lg border border-deep-navy/10 bg-white p-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm font-semibold text-deep-navy">{{ step.title }}</p>
+                        <span
+                          class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
+                          :class="step.done ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'"
+                        >
+                          {{ step.done ? 'Done' : 'Next' }}
+                        </span>
+                      </div>
+                      <p class="mt-1 text-xs text-deep-navy/70">{{ step.description }}</p>
+                      <button
+                        type="button"
+                        class="mt-2 rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                        @click="handleJourneyStepAction(step.action)"
+                      >
+                        {{ step.cta }}
+                      </button>
+
+                      <div v-if="!hideAllJourneyDetails" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3 text-xs text-deep-navy/80 space-y-2">
+                        <template v-if="step.action === 'shop'">
+                          <p class="font-semibold text-deep-navy">
+                            {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) still outstanding.` : 'Registration complete. No outstanding payments.' }}
+                          </p>
+                          <OutstandingPaymentCarouselCard
+                            v-if="outstandingPayments.length"
+                            :payments="outstandingPayments"
+                            @refresh="refreshOutstandingPayments"
+                          />
+                        </template>
+
+                        <template v-else-if="step.action === 'info'">
+                          <div>
+                            <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">What to bring</p>
+                            <p class="mt-1 whitespace-pre-line">{{ eventWhatToBring }}</p>
+                          </div>
+                          <div>
+                            <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">Important info</p>
+                            <p class="mt-1 whitespace-pre-line">{{ eventCheckInInstructions }}</p>
+                          </div>
+                        </template>
+
+                        <template v-else-if="step.action === 'location'">
+                          <p class="font-semibold text-deep-navy">{{ eventLocation }}</p>
+                          <p v-if="primaryVenue?.venue_address">{{ primaryVenue.venue_address }}</p>
+                          <p v-if="primaryVenue?.venue_city">{{ primaryVenue.venue_city }}</p>
+                          <iframe
+                            v-if="venueMapEmbedUrl"
+                            :src="venueMapEmbedUrl"
+                            class="w-full h-40 border-0 rounded-md"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                          ></iframe>
+                        </template>
+
+                        <template v-else-if="step.action === 'time'">
+                          <p><span class="font-black text-deep-navy">Starts:</span> {{ formatDateTime(eventStart) }}</p>
+                          <p><span class="font-black text-deep-navy">Ends:</span> {{ formatDateTime(eventEnd) }}</p>
+                          <p><span class="font-black text-deep-navy">Timezone:</span> {{ myBookingData?.event?.timezone || 'UTC' }}</p>
+                        </template>
+                      </div>
+                    </div>
+                  </li>
+                </ol>
+              </div>
             </div>
           </article>
 
-          <article v-if="activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+          <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Payments</p>
+                <p class="mt-1 text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
+              </div>
+            </div>
+
+            <div v-if="paymentSummary.isLoading.value" class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/70">
+              Loading payments...
+            </div>
+            <div v-else-if="paymentSummary.error.value" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              Unable to load payment summary right now.
+            </div>
+            <template v-else>
+              <section class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4 shadow-sm" v-if="paymentSummaryData?.totals?.outstanding_payments">
+                <p class="text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">Outstanding now</p>
+                <p class="mt-3 text-4xl font-black text-blue-900">{{ paymentSummaryData?.totals?.outstanding_payments || outstandingPayments.length }}</p>
+                <p class="mt-1 text-sm text-blue-900/80">{{ paymentSummaryData?.totals?.total_outstanding_amount || '0.00' }} outstanding</p>
+              </section>
+
+              <section class="space-y-4">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Attendee payments</p>
+                <div v-if="attendeeLevelPayments.length" class="space-y-4">
+                  <article v-for="payment in attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/45">Payment</p>
+                        <p class="mt-1 truncate text-sm font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/65">{{ paymentContextSummary(payment) }}</p>
+                      </div>
+                      <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'">
+                        {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
+                      </span>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Current amount</p>
+                      <p class="mt-2 text-2xl font-black text-deep-navy">{{ formatCurrencyAmount(paymentCurrentAmount(payment)) }}</p>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="font-semibold text-slate-500">Before refunds:</span>
+                        <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(paymentOriginalAmount(payment)) }}</span>
+                        <span v-if="paymentRefundedAmount(payment) > 0" class="font-black text-rose-700">- {{ formatCurrencyAmount(paymentRefundedAmount(payment)) }}</span>
+                      </div>
+                    </div>
+
+                    <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                      <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                      <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">{{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}</span>
+                      <button
+                        v-if="payment.order_reference"
+                        type="button"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        @click="openOrderFromPayment(payment.order_reference || '')"
+                      >
+                        View {{ payment.order_reference }}
+                      </button>
+                    </div>
+
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 space-y-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
+                        <button
+                          v-if="getRequiredTransferReference(payment)"
+                          type="button"
+                          class="rounded-full border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-white"
+                          @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                        >
+                          Copy ref
+                        </button>
+                      </div>
+                      <div class="space-y-2">
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account name</p>
+                          <p class="mt-1 break-words text-sm font-black text-blue-900">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account number</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                        <div v-if="getRequiredTransferReference(payment)" class="rounded-xl border border-blue-300 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Transfer reference</p>
+                          <p class="mt-1 break-all text-sm font-black text-blue-900">{{ getRequiredTransferReference(payment) }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+                <p v-else class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/65">No attendee-level payments yet.</p>
+              </section>
+
+              <section class="space-y-4 pt-2 border-t border-deep-navy/10">
+                <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Booking-wide payments</p>
+                <div v-if="bookingLevelPayments.length" class="space-y-4">
+                  <article v-for="payment in bookingLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/45">Payment</p>
+                        <p class="mt-1 truncate text-sm font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/65">{{ paymentContextSummary(payment) }}</p>
+                      </div>
+                      <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'">
+                        {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
+                      </span>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Current amount</p>
+                      <p class="mt-2 text-2xl font-black text-deep-navy">{{ formatCurrencyAmount(paymentCurrentAmount(payment)) }}</p>
+
+                      <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="font-semibold text-slate-500">Before refunds:</span>
+                        <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(paymentOriginalAmount(payment)) }}</span>
+                        <span v-if="paymentRefundedAmount(payment) > 0" class="font-black text-rose-700">- {{ formatCurrencyAmount(paymentRefundedAmount(payment)) }}</span>
+                      </div>
+                    </div>
+
+                    <div class="rounded-xl border border-deep-navy/10 bg-blue-50 p-3 mt-4">
+                      <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Method</p>
+                      <p class="mt-1 text-sm font-semibold text-blue-900">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                      <p class="mt-1 text-[11px] text-blue-800/80">{{ payment.source === 'SHOP_ORDER' ? 'Order payment' : 'Booking payment' }}</p>
+                    </div>
+
+                    <div class="mt-3 flex flex-wrap gap-2">
+                      <span class="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">{{ payment.source === 'SHOP_ORDER' ? 'Order' : 'Booking' }}</span>
+                      <button
+                        v-if="payment.order_reference"
+                        type="button"
+                        class="rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                        @click="openOrderFromPayment(payment.order_reference || '')"
+                      >
+                        View {{ payment.order_reference }}
+                      </button>
+                    </div>
+
+                    <div v-if="isOutstandingBankTransfer(payment) && hasSummaryBankMetadata(payment)" class="mt-4 rounded-2xl border border-blue-200 bg-blue-50 p-3 space-y-3">
+                      <div class="flex items-center justify-between gap-2">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
+                        <button
+                          v-if="getRequiredTransferReference(payment)"
+                          type="button"
+                          class="rounded-full border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-white"
+                          @click="copyTransferReference(getRequiredTransferReference(payment) || '')"
+                        >
+                          Copy ref
+                        </button>
+                      </div>
+                      <div class="space-y-2">
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account name</p>
+                          <p class="mt-1 break-words text-sm font-black text-blue-900">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Sort code</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-xl border border-white bg-white/90 p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-blue-700/70">Account number</p>
+                          <p class="mt-1 text-lg font-black text-blue-900">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                        <div v-if="getRequiredTransferReference(payment)" class="rounded-xl border border-blue-300 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-800">Transfer reference</p>
+                          <p class="mt-1 break-all text-sm font-black text-blue-900">{{ getRequiredTransferReference(payment) }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                      <div class="mt-2 flex flex-wrap gap-2">
+                        <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
+                      </div>
+                    </div>
+                  </article>
+                </div>
+                <p v-else class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/65">No booking-level payments found.</p>
+              </section>
+            </template>
+          </article>
+
+          <article v-if="selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <div class="flex items-center justify-between">
+              <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Orders</p>
+              <p class="text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
+            </div>
+
+            <div v-if="attendeeOrders.isLoading.value" class="text-sm text-deep-navy/60">Loading orders...</div>
+            <div v-else-if="attendeeOrders.error.value" class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+              Unable to load orders right now.
+            </div>
+            <template v-else>
+              <div v-if="attendeeOrderList.length" class="space-y-3">
+                <section class="rounded-xl border border-blue-200 bg-blue-50 p-4 mt-3 space-y-2"  v-if="outstandingPayments.length">
+                    <div
+                      v-for="payment in outstandingPayments"
+                      :key="payment.payment_id || payment.payment_reference"
+                      :class="paymentAttentionCardClass(payment)"
+                    >
+                      <div class="flex items-center justify-between gap-3">
+                        <div>
+                          <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
+                          <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
+                          <p class="text-xs" :class="needsEvidenceUpload(payment) ? 'text-red-700' : 'text-blue-700'">
+                            {{ paymentAttentionLabel(payment) }}
+                          </p>
+                          <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+                        </div>
+                        <button
+                          type="button"
+                          class="rounded-lg border border-blue-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                          @click="togglePaymentExpand(payment)"
+                        >
+                          {{ isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
+                        </button>
+                      </div>
+
+                      <p v-if="isOutstandingBankTransfer(payment) && hasUploadedEvidence(String(payment.payment_id || ''))" class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800">
+                        Evidence uploaded. Waiting for verification.
+                      </p>
+
+                      <div v-if="isOutstandingBankTransfer(payment) && needsEvidenceUpload(payment)" class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2">
+                        <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
+                          <input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" @change="onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)">
+                        </div>
+                        <div class="space-y-2">
+                          <div>
+                            <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
+                            <input v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_name" type="text" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="Full name">
+                          </div>
+                          <div>
+                            <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
+                            <input v-model="evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="1234">
+                          </div>
+                        </div>
+                        <div>
+                          <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
+                          <input v-model="evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="0.00">
+                        </div>
+                        <p v-if="evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">{{ evidenceUploadError[String(payment.payment_id || '')] }}</p>
+                        <p v-if="evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">{{ evidenceUploadSuccess[String(payment.payment_id || '')] }}</p>
+                        <div class="flex justify-end">
+                          <button type="button" class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60" :disabled="!!evidenceUploadPending[String(payment.payment_id || '')]" @click="uploadOutstandingEvidence(payment)">
+                            {{ evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div v-if="isPaymentExpanded(payment.payment_id || '')" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3 text-xs text-deep-navy/80 space-y-2">
+                        <p v-if="paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
+                        <template v-else>
+                          <p><span class="font-black text-deep-navy">Method:</span> {{ getPaymentMethodType(payment.payment_id || '') }}</p>
+                          <div v-if="isOutstandingBankTransfer(payment)" class="rounded-md border border-blue-200 bg-white p-3 space-y-2">
+                            <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
+                            <ol class="space-y-2 text-[12px] text-deep-navy/90">
+                              <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
+                                <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
+                              </li>
+                              <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
+                                <div class="mt-1 space-y-2">
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
+                                    <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                                  </div>
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
+                                    <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                                  </div>
+                                  <div class="rounded-md border border-deep-navy/10 bg-white p-2">
+                                    <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
+                                    <p class="mt-1 text-lg font-black text-deep-navy">{{ getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                                  </div>
+                                </div>
+                              </li>
+                              <li v-if="getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
+                                <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
+                                <div class="mt-1 flex items-center justify-between gap-2">
+                                  <p class="text-sm font-black text-blue-900 break-all">{{ getRequiredTransferReference(payment) }}</p>
+                                  <button type="button" class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100" @click="copyTransferReference(getRequiredTransferReference(payment) || '')">
+                                    Copy
+                                  </button>
+                                </div>
+                              </li>
+                            </ol>
+                          </div>
+                          <p v-if="!isOutstandingBankTransfer(payment)" class="text-[11px] text-deep-navy/70">This payment is {{ payment.method_title || payment.method_type || 'not bank transfer' }}.</p>
+                          <p v-if="getBankTransferReference(payment.payment_id || '')"><span class="font-black text-deep-navy">Bank transfer reference:</span> {{ getBankTransferReference(payment.payment_id || '') }}</p>
+                          <p v-if="getBankTransferInstructions(payment.payment_id || '')" class="whitespace-pre-line"><span class="font-black text-deep-navy">Instructions:</span> {{ getBankTransferInstructions(payment.payment_id || '') }}</p>
+                        </template>
+                      </div>
+
+                      <div v-if="getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
+                        <div class="mt-2 flex flex-wrap gap-2">
+                          <span v-for="label in getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
+                        </div>
+                      </div>
+                    </div>
+                </section>
+
+                <div class="rounded-2xl border border-deep-navy/10 bg-white p-5 shadow-sm">
+                <article v-for="order in attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden"> 
+                  <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
+                    <div>
+                      <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
+                      <p class="text-xs text-deep-navy/60">{{ formatDateTime(order.created_at) }}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide"
+                        :class="getOrderStatusBadgeClass(order.status)">
+                        {{ order.status_display || order.status || 'Unknown' }}
+                      </span>
+                      <span class="text-xs text-deep-navy/70">{{ order.item_count }} item(s)</span>
+                      <span class="text-sm font-bold text-deep-navy">{{ order.total_amount }}</span>
+                      <button
+                        v-if="canCancelOrder(order.status)"
+                        type="button"
+                        class="rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50"
+                        @click="cancelOrder(order.id)"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="p-4 space-y-3" v-if="order.status !== 'draft'">
+                    <div
+                      v-for="item in order.order_items || []"
+                      :key="item.id"
+                      class="rounded-lg border border-deep-navy/10 p-3"
+                    >
+                      <div class="flex items-start gap-3">
+                        <img
+                          v-if="getOrderItemImageUrl(item)"
+                          :src="resolveImageUrl(getOrderItemImageUrl(item) || '')"
+                          alt="Order item"
+                          class="h-14 w-14 rounded-lg object-cover border border-deep-navy/10"
+                          @error="onImageError"
+                        >
+                        <div class="min-w-0 flex-1">
+                          <p class="text-sm font-semibold text-deep-navy truncate">{{ getOrderItemTitle(item) }}</p>
+                          <p class="text-xs text-deep-navy/60">{{ getOrderItemCode(item) }}</p>
+                          <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                            <span class="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 font-semibold">Qty {{ item.quantity }}</span>
+                            <span class="rounded-full bg-mist-blue text-deep-navy px-2 py-0.5 font-semibold">Unit {{ item.unit_price }}</span>
+                            <span class="rounded-full bg-deep-navy text-white px-2 py-0.5 font-semibold">Total {{ item.total_price }}</span>
+                            <span v-if="getOrderItemSize(item)" class="rounded-full border border-deep-navy/20 px-2 py-0.5">{{ getOrderItemSize(item) }}</span>
+                            <span v-if="getOrderItemColor(item)" class="inline-flex items-center gap-1 rounded-full border border-deep-navy/20 px-2 py-0.5">
+                              <span class="h-3 w-3 rounded-full border border-deep-navy/20" :style="getOrderItemColorStyle(item)"></span>
+                              {{ getOrderItemColor(item) }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+              </div>
+              <div v-else class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+                  <UIcon name="i-heroicons-inbox" class="h-7 w-7" />
+                </div>
+                <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No orders yet</p>
+                <p class="mt-2 text-sm text-slate-500">This attendee does not have any linked orders, so there are no outstanding payment actions to show here.</p>
+              </div>
+            </template>
+          </article>
+
+          <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
             <div v-else-if="attendee.isLoading.value" class="text-sm text-deep-navy/60">Loading attendee...</div>
             <div v-else class="space-y-4">
-              <div class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Editing attendee</p>
+              <!-- <div class="rounded-2xl border border-blue-200 bg-gradient-to-br from-blue-50 to-white p-4">
+                <p class="text-[10px] font-black uppercase tracking-[0.24em] text-blue-700">Editing attendee</p>
                 <p class="mt-1 text-sm font-semibold text-blue-900">{{ attendee.data.value?.data?.full_name || selectedAttendee?.name || 'Attendee' }}</p>
-                <p class="text-xs text-blue-800/80">{{ attendee.data.value?.data?.attendee_display_id || selectedAttendee?.display_id || selectedAttendeeId }}</p>
-              </div>
-              <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Attendee editor</p>
-              <form class="space-y-4" @submit.prevent="saveAttendee">
-                <div class="grid md:grid-cols-2 gap-4">
+                <div v-if="attendeeForm.area_from_name || areaSearch" class="mt-3 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-white px-3 py-1 text-xs font-semibold text-blue-800">
+                  <span class="h-2 w-2 rounded-full bg-blue-500"></span>
+                  <span>{{ attendeeForm.area_from_name || areaSearch }}</span>
+                </div>
+              </div> -->
+
+              <form class="space-y-5" @submit.prevent="saveAttendee">
+                <section class="rounded-2xl border border-deep-navy/10 bg-white">
+                  <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
+                    <div>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Personal info</p>
+                      <p class="mt-1 text-xs text-deep-navy/60">{{ isPersonalInfoEditing ? 'Edit attendee profile details.' : 'Review attendee profile details.' }}</p>
+                    </div>
+                    <button
+                      type="button"
+                      class="rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-wide"
+                      :class="isPersonalInfoEditing ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-blue-400 hover:text-blue-700'"
+                      @click="togglePersonalInfoEdit"
+                    >
+                      {{ isPersonalInfoEditing ? 'Stop editing' : 'Edit details' }}
+                    </button>
+                  </div>
+
+                  <div class="p-4">
+                    <div v-if="!isPersonalInfoEditing" class="space-y-3">
+                      <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-3">
+                        <p class="text-sm font-black text-deep-navy">{{ attendeeForm.first_name }} {{ attendeeForm.last_name }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ attendeeForm.relationship_to_user && attendeeForm.relationship_to_user !== 'self' ? attendeeForm.relationship_to_user.charAt(0).toUpperCase() + attendeeForm.relationship_to_user.slice(1) : 'Self' }}</p>
+                      </div>
+                      <div class="grid gap-3 md:grid-cols-2">
+                        <div v-if="attendeeForm.email" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Email</p>
+                          <p class="mt-1 truncate text-sm text-deep-navy">{{ attendeeForm.email }}</p>
+                        </div>
+                        <div v-if="attendeeForm.phone_number" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Phone</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.phone_number }}</p>
+                        </div>
+                        <div v-if="attendeeForm.date_of_birth" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Date of birth</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.date_of_birth }}</p>
+                        </div>
+                        <div v-if="attendeeForm.gender" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Gender</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.gender }}</p>
+                        </div>
+                        <div v-if="attendeeForm.area_from_name" class="rounded-lg border border-deep-navy/10 bg-white p-3 md:col-span-2">
+                          <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Area from</p>
+                          <p class="mt-1 text-sm text-deep-navy">{{ attendeeForm.area_from_name }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div v-else class="space-y-4">
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>First name</span>
-                    <input v-model="attendeeForm.first_name" type="text" required class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">First name <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.first_name" :disabled="!isPersonalInfoEditing" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.first_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.first_name }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
-                    <span>Last name</span>
-                    <input v-model="attendeeForm.last_name" type="text" required class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Last name <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.last_name" :disabled="!isPersonalInfoEditing" type="text" required class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.last_name" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.last_name }}</p>
                   </label>
                 </div>
-                <div class="grid md:grid-cols-2 gap-4">
+
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>Email</span>
-                    <input v-model="attendeeForm.email" type="email" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Email <span class="text-deep-navy/45">optional</span></span>
+                    <input v-model="attendeeForm.email" :disabled="!isPersonalInfoEditing" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.email" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.email }}</p>
                   </label>
                   <label class="space-y-1 text-sm">
-                    <span>Phone</span>
-                    <input v-model="attendeeForm.phone_number" type="text" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
-                </div>
-                <div class="grid md:grid-cols-2 gap-4">
-                  <label class="space-y-1 text-sm">
-                    <span>Date of birth</span>
-                    <input v-model="attendeeForm.date_of_birth" type="date" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
-                  <label class="space-y-1 text-sm">
-                    <span>Gender</span>
-                    <input v-model="attendeeForm.gender" type="text" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Phone <span class="text-deep-navy/45">optional</span></span>
+                    <input v-model="attendeeForm.phone_number" :disabled="!isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.phone_number" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.phone_number }}</p>
                   </label>
                 </div>
-                <div class="grid md:grid-cols-2 gap-4">
+
+                <div class="grid gap-4 md:grid-cols-2">
                   <label class="space-y-1 text-sm">
-                    <span>Relationship</span>
-                    <select v-model="attendeeForm.relationship_to_user" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                      <option value="">Not set</option>
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Date of birth <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.date_of_birth" :disabled="!isPersonalInfoEditing" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.date_of_birth" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.date_of_birth }}</p>
+                  </label>
+                  <label class="space-y-1 text-sm">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Gender <span class="text-red-500">*</span></span>
+                    <input v-model="attendeeForm.gender" :disabled="!isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                    <p v-if="attendeeValidationErrors.gender" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.gender }}</p>
+                  </label>
+                </div>
+
+                <div class="grid gap-4 md:grid-cols-2">
+                  <label class="space-y-1 text-sm">
+                    <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Relationship <span class="text-red-500">*</span></span>
+                    <select 
+                    :disabled="!isPersonalInfoEditing || attendeeForm.relationship_to_user == 'self'"
+                    v-model="attendeeForm.relationship_to_user" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400">
                       <option value="self">Self</option>
                       <option value="spouse">Spouse</option>
                       <option value="child">Child</option>
@@ -189,178 +733,379 @@
                       <option value="sibling">Sibling</option>
                       <option value="other">Other</option>
                     </select>
+                    <p v-if="attendeeValidationErrors.relationship_to_user" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.relationship_to_user }}</p>
                   </label>
-                  <label class="space-y-1 text-sm">
-                    <span>Area id</span>
-                    <input v-model.number="attendeeForm.area_from" type="number" min="1" class="w-full rounded-lg border border-deep-navy/15 px-3 py-2">
-                  </label>
-                </div>
-                <div class="flex justify-end">
-                  <button type="submit" :disabled="updateAttendee.isPending.value" class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-blue-600 disabled:opacity-55">
-                    {{ updateAttendee.isPending.value ? 'Saving...' : 'Save attendee' }}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </article>
 
-          <article v-if="activeTab === 'health'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-6">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <section class="space-y-3">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Medical conditions</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addMedicalCondition">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newMedical.medical_condition" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select condition</option>
-                    <option v-for="item in medicalConditions.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newMedical.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeMedicalConditions.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
+                  <div class="space-y-2 rounded-2xl border border-deep-navy/10 bg-mist-blue/35 p-4">
                     <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.condition_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy/60">Area from <span class="text-red-500">*</span></p>
+                      <p class="mt-1 text-xs text-deep-navy/65">Search for an area and select the matching result.</p>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeMedicalCondition(item.id)">Remove</button>
+                    <div class="relative">
+                      <input
+                        v-model="areaSearch"
+                        :disabled="!isPersonalInfoEditing"
+                        type="text"
+                        placeholder="Search area name"
+                        class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65"
+                      >
+                      <div v-if="isPersonalInfoEditing && areaOptions.length && areaSearch.trim().length >= 2" class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-deep-navy/10 bg-white shadow-xl">
+                        <button
+                          v-for="option in areaOptions"
+                          :key="option.value"
+                          type="button"
+                          class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition hover:bg-blue-50"
+                          :class="option.value === attendeeForm.area_from ? 'bg-blue-50 text-blue-700' : 'text-deep-navy'"
+                          @click="applyAreaOption(option)"
+                        >
+                          <span class="min-w-0 truncate font-medium">{{ option.label }}</span>
+                          <span v-if="option.value === attendeeForm.area_from" class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
+                        </button>
+                      </div>
+                    </div>
+                    <p v-if="areaLookupLoading" class="text-xs font-semibold text-blue-700">Searching areas...</p>
+                    <div v-if="attendeeForm.area_from" class="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-white px-3 py-2.5">
+                      <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Selected area</p>
+                        <p class="truncate text-sm font-semibold text-blue-900">{{ attendeeForm.area_from_name || areaSearch || 'Area selected' }}</p>
+                      </div>
+                      <button v-if="isPersonalInfoEditing" type="button" class="rounded-full border border-blue-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-50" @click="clearAreaFrom">
+                        Clear
+                      </button>
+                    </div>
+                    <p v-if="attendeeValidationErrors.area_from" class="text-xs font-semibold text-red-700">{{ attendeeValidationErrors.area_from }}</p>
                   </div>
                 </div>
-              </section>
-
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Dietary requirements</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addDietaryRequirement">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newDietary.dietary_requirement" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select requirement</option>
-                    <option v-for="item in dietaryRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newDietary.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeDietaryRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeDietaryRequirement(item.id)">Remove</button>
                   </div>
-                </div>
-              </section>
+                </section>
 
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <div class="flex items-center justify-between">
-                  <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Accessibility requirements</p>
-                  <button type="button" class="text-xs text-blue-700 font-semibold" @click="addAccessibilityRequirement">Add</button>
-                </div>
-                <div class="grid md:grid-cols-2 gap-2">
-                  <select v-model.number="newAccessibility.accessibility_requirement" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                    <option :value="null">Select requirement</option>
-                    <option v-for="item in accessibilityRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
-                  </select>
-                  <input v-model="newAccessibility.details" type="text" placeholder="Details" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
+                <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/20">
+                  <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
                     <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.details || 'No details' }}</p>
+                      <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Safeguarding</p>
+                      <p class="mt-1 text-xs text-deep-navy/60">Medical, dietary, accessibility, and emergency records.</p>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeAccessibilityRequirement(item.id)">Remove</button>
+                    <button
+                      type="button"
+                      class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700"
+                      @click="toggleAttendeeSection('safeguarding')"
+                    >
+                      {{ attendeeSectionsOpen.safeguarding ? 'Collapse' : 'Expand' }}
+                    </button>
                   </div>
-                </div>
-              </section>
-            </template>
-          </article>
 
-          <article v-if="activeTab === 'consents'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Consents</p>
-              <div class="space-y-2">
-                <div
-                  v-for="item in attendeeConsents.data.value?.data?.results || []"
-                  :key="item.id"
-                  class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between"
-                >
+                  <div class="p-4">
+                    <div v-if="!attendeeSectionsOpen.safeguarding" class="space-y-3">
+                      <div v-if="attendeeMedicalConditions.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Medical conditions</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeMedicalConditions.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.condition_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeDietaryRequirements.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Dietary requirements</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeDietaryRequirements.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeAccessibilityRequirements.data.value?.data?.results?.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Accessibility requirements</p>
+                        <div class="space-y-2">
+                          <div v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results" :key="item.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ item.requirement_details.label }}</p>
+                            <p v-if="item.details" class="mt-1 text-xs text-deep-navy/60">{{ item.details }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div v-if="attendeeEmergencyContactList.length" class="space-y-2">
+                        <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Emergency contacts</p>
+                        <div class="space-y-2">
+                          <div v-for="contact in attendeeEmergencyContactList" :key="contact.id" class="rounded-lg border border-deep-navy/10 bg-white p-3">
+                            <p class="text-sm font-semibold text-deep-navy">{{ contact.full_name }}</p>
+                            <p class="mt-1 text-xs text-deep-navy/60">{{ contact.relationship_display }} • {{ contact.phone_number }}</p>
+                            <p v-if="contact.email" class="mt-1 truncate text-xs text-deep-navy/60">{{ contact.email }}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <p v-if="!attendeeMedicalConditions.data.value?.data?.results?.length && !attendeeDietaryRequirements.data.value?.data?.results?.length && !attendeeAccessibilityRequirements.data.value?.data?.results?.length && !attendeeEmergencyContactList.length" class="rounded-lg border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No safeguarding information added yet.</p>
+                    </div>
+                      
+                    <div v-else class="space-y-5">
+                <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                <div class="flex items-center justify-between gap-3">
                   <div>
-                    <p class="text-sm font-semibold text-deep-navy">{{ item.consent_details.title }}</p>
-                    <p class="text-xs text-deep-navy/60">{{ item.consent_details.required ? 'Required' : 'Optional' }}</p>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Medical conditions</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked conditions are shown below.</p>
                   </div>
-                  <button type="button" class="text-xs font-semibold" :class="item.consent_given ? 'text-green-700' : 'text-amber-700'" @click="toggleConsent(item)">
-                    {{ item.consent_given ? 'Given' : 'Not given' }}
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showMedicalForm = !showMedicalForm">
+                    {{ showMedicalForm ? 'Hide form' : 'Add condition' }}
                   </button>
                 </div>
-              </div>
-
-              <div class="pt-3 border-t border-deep-navy/10 grid md:grid-cols-2 gap-2">
-                <select v-model.number="newConsent.consent" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm">
-                  <option :value="null">Add consent</option>
-                  <option v-for="item in eventConsents.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.title }}</option>
-                </select>
-                <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addConsent">Add consent</button>
-              </div>
-            </template>
-          </article>
-
-          <article v-if="activeTab === 'family'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-6">
-            <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
-            <template v-else>
-              <section class="space-y-3">
-                <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Guardians</p>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <select v-model="guardianCandidateId" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                    <option value="">Select attendee as guardian</option>
-                    <option v-for="item in guardianCandidates" :key="item.attendee_id" :value="item.attendee_id">{{ item.full_name }} ({{ item.attendee_display_id }})</option>
-                  </select>
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addGuardian">Add</button>
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in guardians.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.user_name || item.user_email || 'Guardian' }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.relationship_display }}</p>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeMedicalConditions.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.condition_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeMedicalCondition(item.id)">
+                        Remove
+                      </button>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeGuardian(item.id)">Remove</button>
+                  </article>
+                  <p v-if="!attendeeMedicalConditions.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No medical conditions linked to this attendee yet.</p>
+                </div>
+                <div v-if="showMedicalForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-white p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newMedical.medical_condition" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select condition</option>
+                      <option v-for="item in medicalConditions.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newMedical.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addMedicalCondition">
+                        Add condition
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              
+              </section>
+
+              <section class="rounded-2xl border border-deep-navy/10 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Dietary requirements</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked requirements are shown below. Add new ones only when needed.</p>
+                  </div>
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showDietaryForm = !showDietaryForm">
+                    {{ showDietaryForm ? 'Hide form' : 'Add requirement' }}
+                  </button>
+                </div>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeDietaryRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-mist-blue/20 p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.requirement_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeDietaryRequirement(item.id)">
+                        Remove
+                      </button>
+                    </div>
+                  </article>
+                  <p v-if="!attendeeDietaryRequirements.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-mist-blue/20 p-4 text-sm text-deep-navy/60">No dietary requirements linked to this attendee yet.</p>
+                </div>
+                <div v-if="showDietaryForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newDietary.dietary_requirement" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select requirement</option>
+                      <option v-for="item in dietaryRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newDietary.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addDietaryRequirement">
+                        Add requirement
+                      </button>
+                    </div>
                   </div>
                 </div>
               </section>
 
-              <section class="space-y-3 pt-4 border-t border-deep-navy/10">
-                <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Family groups</p>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <input v-model="newFamilyGroupName" type="text" placeholder="New family group" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="createFamilyGroup">Create</button>
+              <section class="rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Accessibility requirements</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Linked requirements are shown below. Add new ones only when needed.</p>
+                  </div>
+                  <button type="button" class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700" @click="showAccessibilityForm = !showAccessibilityForm">
+                    {{ showAccessibilityForm ? 'Hide form' : 'Add requirement' }}
+                  </button>
                 </div>
-                <div class="grid md:grid-cols-3 gap-2">
-                  <select v-model.number="newFamilyMembership.family_group" class="rounded-lg border border-deep-navy/15 px-3 py-2 text-sm md:col-span-2">
-                    <option :value="null">Select family group</option>
-                    <option v-for="item in familyGroups.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.family_name }}</option>
-                  </select>
-                  <button type="button" class="rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase" @click="addFamilyMembership">Add membership</button>
-                </div>
-                <div class="space-y-2">
-                  <div v-for="item in familyMemberships.data.value?.data?.results || []" :key="item.id" class="rounded-lg border border-deep-navy/10 p-3 flex items-center justify-between">
-                    <div>
-                      <p class="text-sm font-semibold text-deep-navy">{{ item.family_name }}</p>
-                      <p class="text-xs text-deep-navy/60">{{ item.relationship_display }}</p>
+                <div class="mt-4 space-y-3">
+                  <article v-for="item in attendeeAccessibilityRequirements.data.value?.data?.results || []" :key="item.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-sm font-black text-deep-navy">{{ item.requirement_details.label }}</p>
+                        <p class="mt-1 text-xs text-deep-navy/60">{{ item.details || 'No details provided.' }}</p>
+                      </div>
+                      <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeAccessibilityRequirement(item.id)">
+                        Remove
+                      </button>
                     </div>
-                    <button type="button" class="text-xs text-red-600 font-semibold" @click="removeFamilyMembership(item.id)">Remove</button>
+                  </article>
+                  <p v-if="!attendeeAccessibilityRequirements.data.value?.data?.results?.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No accessibility requirements linked to this attendee yet.</p>
+                </div>
+                <div v-if="showAccessibilityForm" class="mt-4 rounded-2xl border border-deep-navy/10 bg-white p-4">
+                  <div class="space-y-3">
+                    <select v-model.number="newAccessibility.accessibility_requirement" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                      <option :value="null">Select requirement</option>
+                      <option v-for="item in accessibilityRequirements.data.value?.data?.results || []" :key="item.id" :value="item.id">{{ item.label }}</option>
+                    </select>
+                    <input v-model="newAccessibility.details" type="text" placeholder="Details or notes" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-sm text-deep-navy shadow-sm">
+                    <div class="flex justify-end">
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addAccessibilityRequirement">
+                        Add requirement
+                      </button>
+                    </div>
                   </div>
                 </div>
               </section>
-            </template>
+
+              <section class="rounded-2xl border border-deep-navy/10 bg-white p-4">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Emergency contacts</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Required for minors and useful for all attendees.</p>
+                  </div>
+                </div>
+                <div class="mt-4 space-y-4">
+                  <div class="rounded-2xl border border-deep-navy/10 bg-mist-blue/30 p-4">
+                    <div class="grid gap-3 md:grid-cols-2">
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">First name</span>
+                        <input v-model="emergencyContactForm.first_name" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Last name</span>
+                        <input v-model="emergencyContactForm.last_name" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Phone number</span>
+                        <input v-model="emergencyContactForm.phone_number" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                      <label class="space-y-1 text-sm">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Relationship</span>
+                        <select v-model="emergencyContactForm.relationship" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                          <option v-for="option in emergencyRelationshipOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
+                        </select>
+                      </label>
+                      <label class="space-y-1 text-sm md:col-span-2">
+                        <span class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Email</span>
+                        <input v-model="emergencyContactForm.email" type="email" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm">
+                      </label>
+                    </div>
+                    <div class="mt-3 flex flex-wrap items-center justify-between gap-3">
+                      <label class="inline-flex items-center gap-2 text-xs font-semibold text-deep-navy/70">
+                        <input v-model="emergencyContactForm.primary_contact" type="checkbox" class="h-4 w-4 rounded border-deep-navy/30 text-blue-600">
+                        Primary contact
+                      </label>
+                      <button type="button" class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-white hover:bg-blue-600" @click="addEmergencyContact">
+                        Add contact
+                      </button>
+                    </div>
+                  </div>
+                  <div class="space-y-2">
+                    <article v-for="contact in attendeeEmergencyContactList" :key="contact.id" class="rounded-2xl border border-deep-navy/10 bg-white p-3 shadow-sm">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="text-sm font-black text-deep-navy">{{ contact.full_name }}</p>
+                          <p class="mt-1 text-xs text-deep-navy/60">{{ contact.relationship_display }} • {{ contact.phone_number }}</p>
+                          <p v-if="contact.email" class="mt-1 truncate text-xs text-deep-navy/60">{{ contact.email }}</p>
+                        </div>
+                        <button type="button" class="rounded-full border border-red-200 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50" @click="removeEmergencyContact(contact.id)">
+                          Remove
+                        </button>
+                      </div>
+                    </article>
+                    <p v-if="!attendeeEmergencyContactList.length" class="rounded-2xl border border-dashed border-deep-navy/15 bg-white p-4 text-sm text-deep-navy/60">No emergency contacts linked yet.</p>
+                  </div>
+                </div>
+              </section>
+                    </div>
+                  </div>
+                </section>
+              </form>
+
+              <section class="rounded-2xl border border-deep-navy/10 bg-white">
+                <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
+                  <div>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Consents</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Link or unlink attendee consents here to keep profile setup complete.</p>
+                  </div>
+                  <button
+                    type="button"
+                    class="rounded-full border border-deep-navy/15 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-400 hover:text-blue-700"
+                    @click="toggleAttendeeSection('consents')"
+                  >
+                    {{ attendeeSectionsOpen.consents ? 'Collapse' : 'Expand' }}
+                  </button>
+                </div>
+
+                <div v-if="attendeeSectionsOpen.consents" class="space-y-4 p-4">
+                  <div v-if="eventConsents.data.value?.data?.results?.length" class="space-y-3">
+                    <article v-for="consent in eventConsents.data.value?.data?.results || []" :key="consent.id" class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+                      <label class="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          class="mt-1 h-4 w-4 rounded border-deep-navy/30 text-blue-600 focus:ring-blue-500"
+                          :checked="isConsentLinked(consent.id)"
+                          @change="toggleConsentLink(consent.id, ($event.target as HTMLInputElement).checked)"
+                        >
+                        <div class="min-w-0 flex-1">
+                          <div class="flex flex-wrap items-center gap-2">
+                            <p class="text-sm font-black text-deep-navy">{{ consent.title }}</p>
+                            <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="consent.required ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'">
+                              {{ consent.required ? 'Required' : 'Optional' }}
+                            </span>
+                            <span class="rounded-full bg-mist-blue px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy/70">
+                              {{ consentToggleLabel(consent.id) }}
+                            </span>
+                          </div>
+                          <p class="mt-2 text-xs text-deep-navy/60">{{ consent.description }}</p>
+                        </div>
+                      </label>
+                    </article>
+                  </div>
+                  <p v-else class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">No consents are configured for this event yet.</p>
+                </div>
+              </section>
+            </div>
           </article>
         </section>
 
         <aside class="lg:col-span-4">
           <article class="sticky top-24 bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <section>
+              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Select attendee</p>
+              <p class="mt-1 text-xs text-deep-navy/60">Pick an attendee to unlock tabs, orders, and editor sections.</p>
+              <div v-if="attendees.length" class="mt-3 space-y-2 max-h-72 overflow-y-auto pr-1">
+                <button
+                  v-for="item in attendees"
+                  :key="item.id || item.display_id"
+                  type="button"
+                  @click="selectAttendee(item.id || '')"
+                  class="w-full rounded-xl border px-3 py-3 text-left transition-all"
+                  :class="[
+                    selectedAttendeeId === item.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-deep-navy/10 bg-white hover:border-blue-300 hover:bg-blue-50/40',
+                    !selectedAttendeeId ? 'attendee-pulse' : ''
+                  ]"
+                >
+                  <div class="flex items-center gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-black"
+                      :class="selectedAttendeeId === item.id ? 'border-blue-300 bg-white text-blue-700' : 'border-deep-navy/15 bg-mist-blue text-deep-navy'"
+                    >
+                      {{ attendeeInitial(item.name) }}
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
+                      <p class="mt-0.5 truncate text-[11px] font-medium text-deep-navy/60">{{ item.display_id || item.id || 'Attendee profile' }}</p>
+                    </div>
+                    <span v-if="selectedAttendeeId === item.id" class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
+                  </div>
+                </button>
+              </div>
+              <p v-else class="mt-3 text-sm text-deep-navy/60">No attendees found for this booking.</p>
+            </section>
+
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Current editing scope</p>
               <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
                 <p v-if="selectedAttendee" class="text-sm font-semibold text-blue-900">
@@ -372,19 +1117,60 @@
                 <p v-else class="text-sm text-blue-900/80">
                   Editing booking overview. Select an attendee to edit attendee-specific tabs.
                 </p>
+                <p v-if="isSingleAttendeeBooking" class="mt-2 text-[11px] font-black uppercase tracking-wide text-blue-700">
+                  Single attendee is auto-selected and locked.
+                </p>
+              </div>
+            </section> -->
+
+            <section>
+              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Payment summary</p>
+              <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Total spent</p>
+                    <p class="mt-2 text-3xl font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
+                    <p class="mt-1 text-xs text-deep-navy/60">Current amount after refunds.</p>
+                  </div>
+                  <span class="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">
+                    {{ completedPaymentsCount }} completed
+                  </span>
+                </div>
+
+                <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" v-if="refundedTotalAmount > 0">
+                  <span class="font-semibold text-slate-500">Original total:</span>
+                  <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(originalSpentSoFar) }}</span>
+                  <span class="font-semibold text-slate-500">Refunded:</span>
+                  <span class="font-black text-rose-700">- {{ formatCurrencyAmount(refundedTotalAmount) }}</span>
+                </div>
+
+                <dl class="mt-4 grid gap-3 text-xs sm:grid-cols-1">
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="font-semibold text-deep-navy/60">Booking payments</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3" v-if="spentSoFarOrders > 0">
+                    <dt class="font-semibold text-deep-navy/60">Extra products</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
+                  </div>
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                    <dt class="font-semibold text-deep-navy/60">Completed payments</dt>
+                    <dd class="mt-1 text-base font-black text-deep-navy">{{ completedPaymentsCount }}</dd>
+                  </div>
+                </dl>
               </div>
             </section>
 
-            <section>
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Important alerts</p>
               <div class="mt-3 space-y-2 text-sm">
-                <p v-if="!canManageAllAttendees" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-amber-800">Limited attendee permissions for this booking.</p>
+                <p v-if="!canManageAllAttendees" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">Limited attendee permissions for this booking.</p>
                 <p v-if="attendees.length > 1" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">This is a group booking with multiple attendees.</p>
                 <p v-if="!outstandingPayments.length" class="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-800">No outstanding payments detected.</p>
               </div>
-            </section>
+            </section> -->
 
-            <section>
+            <!-- <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Event info</p>
               <dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
                 <div class="flex justify-between gap-3">
@@ -393,28 +1179,41 @@
                 </div>
                 <div class="flex justify-between gap-3">
                   <dt>Starts</dt>
-                  <dd class="font-semibold text-right">{{ formatEventDate(eventStart) }}</dd>
+                  <dd class="font-semibold text-right">{{ formatDateTime(eventStart) }}</dd>
                 </div>
                 <div class="flex justify-between gap-3">
                   <dt>Timezone</dt>
                   <dd class="font-semibold">{{ myBookingData?.event?.timezone || '-' }}</dd>
                 </div>
               </dl>
-            </section>
+            </section> -->
 
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
               <div class="mt-3 space-y-2">
-                <NuxtLink :to="`/events/${eventId}`" class="block rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
+                <NuxtLink
+                  :to="bookingShopHref"
+                  class="flex w-full items-center justify-between rounded-xl border border-emerald-300 bg-emerald-600 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-700"
+                >
+                  <span class="inline-flex items-center gap-2">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l1 12h11l2-8H7" />
+                      <circle cx="10" cy="20" r="1" />
+                      <circle cx="18" cy="20" r="1" />
+                    </svg>
+                    Open shop
+                  </span>
+                </NuxtLink>
+                <NuxtLink :to="`/events/${eventId}`" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event
                 </NuxtLink>
-                <button type="button" class="w-full rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700" @click="setActiveTab('overview')">
+                <button type="button" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700" @click="setActiveTab('overview')">
                   Go to overview
                 </button>
                 <button
                   type="button"
-                  class="w-full rounded-lg border border-deep-navy/20 px-3 py-2 text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
-                  :disabled="!selectedAttendeeId"
+                  class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
+                  :disabled="!selectedAttendeeId || isSingleAttendeeBooking"
                   @click="clearSelectedAttendee"
                 >
                   Clear attendee selection
@@ -423,37 +1222,68 @@
             </section>
 
             <section>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
-              <div v-if="outstandingPayments.length" class="mt-3 space-y-2">
-                <div v-for="item in outstandingPayments" :key="item.payment_id || item.payment_reference" class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-                  <p class="text-xs font-black text-blue-800">{{ item.payment_reference || 'Payment' }}</p>
-                  <p class="text-sm font-semibold text-deep-navy">{{ item.amount || '-' }}</p>
-                  <p class="text-xs text-blue-700">{{ item.status || 'PENDING' }}</p>
-                </div>
-              </div>
-              <p v-else class="mt-3 text-sm text-deep-navy/60">No outstanding payments.</p>
+              <OutstandingPaymentCarouselCard
+                :payments="outstandingPayments"
+                @refresh="refreshOutstandingPayments"
+              />
             </section>
           </article>
         </aside>
       </div>
     </div>
+
+    <div v-if="booking && activeTab === 'attendee' && isPersonalInfoEditing && hasPersonalInfoChanges" class="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 animate-soft-up">
+      <div class="rounded-2xl border border-deep-navy/15 bg-white/95 p-3 shadow-2xl backdrop-blur-xl">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Unsaved personal info changes</p>
+          <div class="flex items-center gap-2">
+            <button
+              type="button"
+              class="rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+              :disabled="updateAttendee.isPending.value"
+              @click="discardPersonalInfoChanges"
+            >
+              Discard
+            </button>
+            <button
+              type="button"
+              class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-blue-700 disabled:opacity-55"
+              :disabled="updateAttendee.isPending.value"
+              @click="saveAttendee"
+            >
+              {{ updateAttendee.isPending.value ? 'Saving...' : 'Save changes' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watch, watchEffect, computed } from 'vue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
 import { useQueryClient } from '@tanstack/vue-query'
+import { bookingAttendeeFormSchema, type BookingAttendeeFormData } from '~/schemas/events/booking'
+import OutstandingPaymentCarouselCard from '~/components/events/booking/OutstandingPaymentCarouselCard.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { uploadMultipart } from '~/utils/upload'
+import { locationsAreasList } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
+import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import {
   useEventMyBooking,
   invalidateEventMyBookingQuery,
+  useEventMyPaymentSummary,
   type ApiErrorLike,
 } from '~/composables/resources/events'
-import { useAttendee, useAttendees, useUpdateAttendee } from '~/composables/resources/attendee/attendees'
+import { useAttendee, useUpdateAttendee } from '~/composables/resources/attendee/attendees'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { useAttendeeEmergencyContacts, useCreateAttendeeEmergencyContact, useDeleteAttendeeEmergencyContact } from '~/composables/resources/attendee/attendeeEmergencyContacts'
 import {
   useAttendeeMedicalConditions,
   useCreateAttendeeMedicalCondition,
@@ -473,14 +1303,14 @@ import { useConsents } from '~/composables/resources/attendee/attendeeConsents'
 import {
   useAttendeeConsents,
   useCreateAttendeeConsent,
-  usePartialUpdateAttendeeConsent,
+  useDeleteAttendeeConsent,
 } from '~/composables/resources/attendee/attendeeConsentsRelationship'
-import { useGuardians, useCreateGuardian, useDeleteGuardian } from '~/composables/resources/common/guardians'
-import { useFamilyAttendees, useCreateFamilyAttendee, useDeleteFamilyAttendee } from '~/composables/resources/common/familyAttendees'
-import { useFamilyGroups, useCreateFamilyGroup } from '~/composables/resources/common/familyGroups'
+import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
+import { formatDate, formatDateTime } from '~/utils/time'
 
-type RelationshipType = 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other' | ''
-type TabId = 'overview' | 'attendee' | 'health' | 'consents' | 'family'
+type TabId = 'overview' | 'attendee' | 'orders' | 'payments'
+type AreaOption = { label: string; value: number }
+type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 
 const props = defineProps<{
   eventId: string
@@ -491,6 +1321,7 @@ const props = defineProps<{
 
 const { $notyf } = useNuxtApp()
 const queryClient = useQueryClient()
+const requestFetch = useRequestFetch()
 const route = useRoute()
 const router = useRouter()
 const eventId = computed(() => props.eventId)
@@ -513,6 +1344,7 @@ watchEffect(() => {
 })
 
 const myBookingData = computed(() => myBooking.data.value)
+const currencySymbol = computed(() => myBookingData.value?.bookings?.[0]?.booking?.payments?.[0]?.amount?.slice(0, 1) || '£')
 const selectedBookingItem = computed(() => {
   return myBookingData.value?.bookings?.find(item => item.booking?.booking_reference === bookingReference.value)
 })
@@ -528,6 +1360,50 @@ const attendees = computed(() => booking.value?.attendees || [])
 const canManageAllAttendees = computed(() => !!selectedBookingItem.value?.can_manage_all_attendees)
 const eventTitle = computed(() => myBookingData.value?.event?.title || 'Booking workspace')
 const eventStart = computed(() => myBookingData.value?.event?.start_datetime || '')
+const eventEnd = computed(() => myBookingData.value?.event?.end_datetime || '')
+
+const { data: venuesData } = useEventVenues(computed(() => ({
+  event: eventId.value,
+})))
+const eventVenues = computed(() => venuesData.value?.data?.results || [])
+const primaryVenue = computed(() => eventVenues.value[0])
+
+const eventLocation = computed(() => {
+  return primaryVenue.value?.venue_name || 'Venue to be confirmed'
+})
+
+const eventWhatToBring = computed(() => {
+  const details = event.data.value?.data as any
+  return details?.what_to_bring || 'No specific items are required at this time.'
+})
+
+const eventCheckInInstructions = computed(() => {
+  const details = event.data.value?.data as any
+  return details?.check_in_instructions || details?.important_information || 'Please arrive a little early and have your booking reference ready.'
+})
+
+const hasBringInfo = computed(() => {
+  const details = event.data.value?.data as any
+  const whatToBring = String(details?.what_to_bring || '').trim()
+  const checkInInfo = String(details?.check_in_instructions || details?.important_information || '').trim()
+  return Boolean(whatToBring || checkInInfo)
+})
+
+const hasLocationInfo = computed(() => {
+  return Boolean(primaryVenue.value?.venue_name || primaryVenue.value?.venue_address || primaryVenue.value?.venue_city)
+})
+
+const hasTimingInfo = computed(() => {
+  return Boolean(eventStart.value && eventEnd.value)
+})
+
+const venueMapEmbedUrl = computed(() => {
+  const address = String(primaryVenue.value?.venue_address || '').trim()
+  const city = String(primaryVenue.value?.venue_city || '').trim()
+  const query = `${address} ${city}`.trim()
+  if (!query) return ''
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`
+})
 
 const heroImage = computed(() => {
   const image = event.data.value?.data?.main_landing_image?.image
@@ -542,18 +1418,253 @@ const formattedBookedAt = computed(() => {
   return date.toLocaleString()
 })
 
-const outstandingPayments = computed(() => {
-  return (booking.value?.payments || []).filter(item => {
-    const status = String(item.status || '').toUpperCase()
-    return status !== 'COMPLETED' && status !== 'PAID'
-  })
-})
-
 const selectedAttendeeId = ref(props.initialAttendeeId || '')
 const activeTab = ref<TabId>(props.initialTab || 'overview')
 const applyingRouteState = ref(false)
 
+const paymentSummary = useEventMyPaymentSummary(eventId, computed(() => {
+  if (!bookingReference.value) return undefined
+  return {
+    booking_reference: bookingReference.value,
+    attendee_id: selectedAttendeeId.value || undefined,
+  }
+}))
+
+const paymentSummaryData = computed(() => paymentSummary.data.value)
+
+const outstandingPayments = computed(() => {
+  return paymentSummaryData.value?.outstanding_payments || []
+})
+
+const bookingLevelPayments = computed(() => {
+  return paymentSummaryData.value?.booking_payments || []
+})
+
+const attendeeLevelPayments = computed(() => {
+  return paymentSummaryData.value?.shop_payments || []
+})
+
+const isSingleAttendeeBooking = computed(() => attendees.value.length === 1)
+
+const allSummaryPayments = computed(() => {
+  const bookingItems = bookingLevelPayments.value || []
+  const orderItems = paymentSummaryData.value?.shop_payments || []
+  return [...bookingItems, ...orderItems]
+})
+
+function parseAmountValue(rawAmount: unknown, rawAmountValue?: unknown): number {
+  const direct = Number.parseFloat(String(rawAmountValue || '').trim())
+  if (Number.isFinite(direct)) return direct
+
+  const text = String(rawAmount || '').trim()
+  if (!text) return 0
+  const numericPart = text.replace(/[^\d.-]/g, '')
+  const value = Number.parseFloat(numericPart)
+  return Number.isFinite(value) ? value : 0
+}
+
+function paymentAmountValue(payment: unknown): unknown {
+  if (!payment || typeof payment !== 'object') return undefined
+  return (payment as Record<string, unknown>).amount_value
+}
+
+function isCompletedPaymentStatus(status: unknown): boolean {
+  const normalized = String(status || '').toUpperCase()
+  return normalized === 'COMPLETED' || normalized === 'PAID' || normalized === 'PARTIALLY_REFUNDED'
+}
+
+const completedSummaryPayments = computed(() => {
+  return allSummaryPayments.value.filter(payment => isCompletedPaymentStatus(payment.status))
+})
+
+function paymentMoneyAmount(payment: unknown, field: 'amount' | 'original_amount' | 'total_refunded_amount'): number {
+  if (!payment || typeof payment !== 'object') return 0
+  const source = payment as Record<string, unknown>
+  return parseAmountValue(source[field])
+}
+
+function paymentOriginalAmount(payment: unknown): number {
+  const originalAmount = paymentMoneyAmount(payment, 'original_amount')
+  if (originalAmount > 0) return originalAmount
+  return paymentCurrentAmount(payment) + paymentRefundedAmount(payment)
+}
+
+function paymentRefundedAmount(payment: unknown): number {
+  return paymentMoneyAmount(payment, 'total_refunded_amount')
+}
+
+function paymentCurrentAmount(payment: unknown): number {
+  return paymentMoneyAmount(payment, 'amount')
+}
+
+const originalSpentSoFar = computed(() => {
+  return allSummaryPayments.value
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + paymentOriginalAmount(payment), 0)
+})
+
+const refundedTotalAmount = computed(() => {
+  return allSummaryPayments.value
+    .reduce((sum, payment) => sum + paymentRefundedAmount(payment), 0)
+})
+
+const spentSoFarBooking = computed(() => {
+  return bookingLevelPayments.value
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
+})
+
+const spentSoFarOrders = computed(() => {
+  return (paymentSummaryData.value?.shop_payments || [])
+    .filter(payment => isCompletedPaymentStatus(payment.status))
+    .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
+})
+
+const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)
+const completedPaymentsCount = computed(() => completedSummaryPayments.value.length)
+const briefingInfoRef = ref<HTMLElement | null>(null)
+const briefingLocationRef = ref<HTMLElement | null>(null)
+const briefingTimeRef = ref<HTMLElement | null>(null)
+
+function formatCurrencyAmount(value: number): string {
+  return `${currencySymbol.value}${value.toFixed(2)}`
+}
+
+function paymentContextSummary(payment: any): string {
+  const relatedLabels = getRelatedOrderLabels(payment)
+
+  if (payment?.source === 'BOOKING') {
+    const count = relatedLabels.length
+    return count > 0
+      ? `Covers ${count} linked order${count > 1 ? 's' : ''}`
+      : 'Booking-level payment'
+  }
+
+  if (payment?.source === 'SHOP_ORDER') {
+    if (payment?.order_reference) return `Order ${payment.order_reference}`
+    if (relatedLabels.length) return `Order ${relatedLabels[0]}`
+    return 'Order payment'
+  }
+
+  return 'Payment'
+}
+
+function getRelatedOrders(payment: unknown): Array<Record<string, any>> {
+  if (!payment || typeof payment !== 'object') return []
+  const source = payment as Record<string, any>
+  const direct = source.related_orders
+  if (Array.isArray(direct)) return direct as Array<Record<string, any>>
+
+  const metadata = source.metadata as Record<string, unknown> | undefined
+  const fromMetadata = metadata?.related_orders
+  if (Array.isArray(fromMetadata)) return fromMetadata as Array<Record<string, any>>
+
+  return []
+}
+
+function orderLabel(order: Record<string, any>): string {
+  return String(order?.order_reference || order?.order_id || 'Order')
+}
+
+function getRelatedOrderLabels(payment: unknown): string[] {
+  if (!payment || typeof payment !== 'object') return []
+
+  const source = payment as Record<string, any>
+  const labels = new Set<string>()
+
+  getRelatedOrders(source).forEach((order) => {
+    const label = orderLabel(order).trim()
+    if (label && label !== 'Order') labels.add(label)
+  })
+
+  const summaryRefs = Array.isArray(source.summary_context?.related_order_references)
+    ? source.summary_context.related_order_references
+    : []
+  summaryRefs.forEach((ref: unknown) => {
+    const label = String(ref || '').trim()
+    if (label) labels.add(label)
+  })
+
+  const topLevelRefs = Array.isArray(source.related_order_references)
+    ? source.related_order_references
+    : []
+  topLevelRefs.forEach((ref: unknown) => {
+    const label = String(ref || '').trim()
+    if (label) labels.add(label)
+  })
+
+  const singleOrderRef = String(source.order_reference || '').trim()
+  if (singleOrderRef && source.source === 'BOOKING') {
+    labels.add(singleOrderRef)
+  }
+
+  return Array.from(labels)
+}
+
+const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
+const hideAllJourneyDetails = ref(false)
+
+type JourneyStepAction = 'shop' | 'info' | 'location' | 'time'
+
+const journeySteps = computed<Array<{
+  id: number
+  title: string
+  description: string
+  done: boolean
+  action: JourneyStepAction
+  cta: string
+}>>(() => [
+  {
+    id: 1,
+    title: 'Finish registration',
+    description: registrationStepComplete.value
+      ? 'Registration is complete and there are no outstanding payments.'
+      : 'Complete checkout in the shop and clear any outstanding payments.',
+    done: registrationStepComplete.value,
+    action: 'shop',
+    cta: 'Open shop',
+  },
+  {
+    id: 2,
+    title: 'What to bring + important info',
+    description: hasBringInfo.value
+      ? 'Review event briefing guidance before arrival.'
+      : 'Important preparation info is limited right now; check updates closer to event day.',
+    done: hasBringInfo.value,
+    action: 'info',
+    cta: 'View info',
+  },
+  {
+    id: 3,
+    title: 'Location',
+    description: hasLocationInfo.value
+      ? 'Confirm the venue details and map before travel.'
+      : 'Venue details are still being finalized.',
+    done: hasLocationInfo.value,
+    action: 'location',
+    cta: 'View location',
+  },
+  {
+    id: 4,
+    title: 'Time',
+    description: hasTimingInfo.value
+      ? 'Double-check start and end times in your timezone.'
+      : 'Event timing has not been published yet.',
+    done: hasTimingInfo.value,
+    action: 'time',
+    cta: 'View time',
+  },
+])
+
 watch(attendees, () => {
+  if (attendees.value.length === 1) {
+    const onlyAttendeeId = attendees.value[0]?.id || ''
+    if (onlyAttendeeId) {
+      selectedAttendeeId.value = onlyAttendeeId
+    }
+    return
+  }
+
   if (!selectedAttendeeId.value) return
   const exists = attendees.value.some(item => item.id === selectedAttendeeId.value)
   if (!exists) {
@@ -567,17 +1678,33 @@ if (props.initialAttendeeId) {
 }
 
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
-  { id: 'overview', label: 'Booking Overview' },
-  { id: 'attendee', label: 'Attendee Editor', needsAttendee: true },
-  { id: 'health', label: 'Medical + Dietary + Accessibility', needsAttendee: true },
-  { id: 'consents', label: 'Consents', needsAttendee: true },
-  { id: 'family', label: 'Family + Guardians', needsAttendee: true },
+  { id: 'overview', label: 'Booking' },
+  { id: 'attendee', label: 'Attendee Info', needsAttendee: true },
+  { id: 'payments', label: 'Payments', needsAttendee: false },
+  { id: 'orders', label: 'Orders', needsAttendee: true },
 ]
 
 const selectedAttendee = computed(() => {
   if (!selectedAttendeeId.value) return null
   return attendees.value.find(item => item.id === selectedAttendeeId.value) || null
 })
+
+const bookingShopHref = computed(() => {
+  const base = `/events/${eventId.value}/b/${bookingReference.value}/shop`
+  if (!selectedAttendeeId.value) return base
+  return {
+    path: base,
+    query: {
+      attendee: selectedAttendeeId.value,
+    },
+  }
+})
+
+function attendeeInitial(name: string | undefined): string {
+  const cleaned = String(name || '').trim()
+  if (!cleaned) return '?'
+  return cleaned.charAt(0).toUpperCase()
+}
 
 function toAttendeeSlug(name: string | undefined, attendeeId: string | undefined) {
   const base = String(name || '').trim().toLowerCase()
@@ -605,8 +1732,49 @@ function selectAttendee(attendeeId: string) {
 }
 
 function clearSelectedAttendee() {
+  if (isSingleAttendeeBooking.value) return
   selectedAttendeeId.value = ''
   activeTab.value = 'overview'
+}
+
+async function refreshOutstandingPayments() {
+  await paymentSummary.refetch()
+}
+
+function openOrderFromPayment(orderReference: string) {
+  if (!orderReference) return
+  activeTab.value = 'orders'
+  $notyf?.success(`Switched to Orders tab for ${orderReference}.`)
+}
+
+function scrollToBriefingSection(target: 'info' | 'location' | 'time') {
+  if (typeof window === 'undefined') return
+  const el = target === 'info'
+    ? briefingInfoRef.value
+    : target === 'location'
+      ? briefingLocationRef.value
+      : briefingTimeRef.value
+  if (!el) return
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+}
+
+function handleJourneyStepAction(action: JourneyStepAction) {
+  if (action === 'shop') {
+    navigateTo(bookingShopHref.value)
+    return
+  }
+
+  if (action === 'info') {
+    scrollToBriefingSection('info')
+    return
+  }
+
+  if (action === 'location') {
+    scrollToBriefingSection('location')
+    return
+  }
+
+  scrollToBriefingSection('time')
 }
 
 watch(
@@ -639,7 +1807,7 @@ watch(
     applyingRouteState.value = true
     try {
       const routeTab = String(route.query.tab || '')
-      if (routeTab === 'overview' || routeTab === 'attendee' || routeTab === 'health' || routeTab === 'consents' || routeTab === 'family') {
+      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'orders') {
         activeTab.value = routeTab
       }
 
@@ -655,6 +1823,9 @@ watch(
         if (matchedById?.id) {
           selectedAttendeeId.value = matchedById.id
         }
+      } else {
+        selectedAttendeeId.value = ''
+        activeTab.value = 'overview'
       }
     } finally {
       applyingRouteState.value = false
@@ -665,16 +1836,626 @@ watch(
 
 const attendee = useAttendee(computed(() => selectedAttendeeId.value || ''))
 const updateAttendee = useUpdateAttendee()
+const attendeeOrders = useProductOrders(computed(() => {
+  if (!selectedAttendeeId.value) return undefined
+  return { attendee_id: selectedAttendeeId.value }
+}))
+const cancelOrderMutation = useCancelProductOrder()
 
-const attendeeForm = ref({
+const attendeeOrderList = computed(() => {
+  const payload = attendeeOrders.data.value?.data as any
+  return payload?.results || []
+})
+
+const areaSearch = ref('')
+const areaOptions = ref<AreaOption[]>([])
+const areaLookupLoading = ref(false)
+let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+const attendeeEmergencyContacts = useAttendeeEmergencyContacts(computed(() => selectedAttendeeId.value || ''))
+const createEmergencyContact = useCreateAttendeeEmergencyContact()
+const deleteEmergencyContact = useDeleteAttendeeEmergencyContact()
+
+const attendeeEmergencyContactList = computed(() => attendeeEmergencyContacts.data.value?.data?.results || [])
+
+const emergencyContactForm = ref({
+  first_name: '',
+  last_name: '',
+  phone_number: '',
+  email: '',
+  relationship: 'parent' as EmergencyContactRelationship,
+  primary_contact: true,
+})
+
+const emergencyRelationshipOptions = [
+  { label: 'Parent', value: 'parent' },
+  { label: 'Sibling', value: 'sibling' },
+  { label: 'Child', value: 'child' },
+  { label: 'Spouse', value: 'spouse' },
+  { label: 'Friend', value: 'friend' },
+  { label: 'Other', value: 'other' },
+]
+
+function normalizeEmergencyContactForm() {
+  emergencyContactForm.value = {
+    first_name: '',
+    last_name: '',
+    phone_number: '',
+    email: '',
+    relationship: 'parent',
+    primary_contact: true,
+  }
+}
+
+function applyAreaOption(option: AreaOption) {
+  attendeeForm.value.area_from = option.value
+  attendeeForm.value.area_from_name = option.label
+  areaSearch.value = option.label
+  areaOptions.value = []
+}
+
+function clearAreaFrom() {
+  attendeeForm.value.area_from = undefined
+  attendeeForm.value.area_from_name = ''
+  areaSearch.value = ''
+  areaOptions.value = []
+}
+
+async function addEmergencyContact() {
+  if (!selectedAttendeeId.value) return
+
+  const firstName = String(emergencyContactForm.value.first_name || '').trim()
+  const lastName = String(emergencyContactForm.value.last_name || '').trim()
+  const phoneNumber = String(emergencyContactForm.value.phone_number || '').trim()
+  const email = String(emergencyContactForm.value.email || '').trim()
+
+  if (!firstName || !lastName || !phoneNumber) {
+    $notyf?.error('Emergency contact first name, last name, and phone number are required.')
+    return
+  }
+
+  try {
+    await createEmergencyContact.mutateAsync({
+      attendeeId: selectedAttendeeId.value,
+      body: {
+        first_name: firstName,
+        last_name: lastName,
+        phone_number: phoneNumber,
+        relationship: emergencyContactForm.value.relationship,
+        email: email || undefined,
+        primary_contact: emergencyContactForm.value.primary_contact,
+      },
+    })
+    normalizeEmergencyContactForm()
+    $notyf?.success('Emergency contact added.')
+  } catch (error) {
+    console.error('Failed to add emergency contact', error)
+    $notyf?.error('Could not add emergency contact.')
+  }
+}
+
+async function removeEmergencyContact(contactId: number) {
+  if (!selectedAttendeeId.value) return
+  try {
+    await deleteEmergencyContact.mutateAsync({ attendeeId: selectedAttendeeId.value, contactId })
+    $notyf?.success('Emergency contact removed.')
+  } catch (error) {
+    console.error('Failed to remove emergency contact', error)
+    $notyf?.error('Could not remove emergency contact.')
+  }
+}
+
+watch(areaSearch, (term) => {
+  if (areaSearchDebounceTimer) {
+    clearTimeout(areaSearchDebounceTimer)
+    areaSearchDebounceTimer = null
+  }
+
+  if (!isPersonalInfoEditing.value) {
+    areaOptions.value = []
+    areaLookupLoading.value = false
+    return
+  }
+
+  const query = term.trim()
+  if (query.length < 2) {
+    areaOptions.value = []
+    areaLookupLoading.value = false
+    return
+  }
+
+  areaLookupLoading.value = true
+  areaSearchDebounceTimer = setTimeout(async () => {
+    try {
+      const response = await locationsAreasList({
+        query: {
+          search: query,
+          page_size: 5,
+        },
+      })
+      areaOptions.value = (response.data?.results || []).map((area: any) => ({
+        label: area.area_name,
+        value: area.id,
+      }))
+    } catch (error) {
+      console.error('Failed to search areas', error)
+      areaOptions.value = []
+    } finally {
+      areaLookupLoading.value = false
+    }
+  }, 300)
+})
+
+const expandedPaymentIds = ref<string[]>([])
+const paymentDetailLoading = ref<Record<string, boolean>>({})
+const paymentDetails = ref<Record<string, any>>({})
+const evidenceUploadPending = ref<Record<string, boolean>>({})
+const evidenceUploadError = ref<Record<string, string>>({})
+const evidenceUploadSuccess = ref<Record<string, string>>({})
+const evidenceUploadFormVisible = ref<Record<string, boolean>>({})
+const evidenceUploadForm = ref<Record<string, {
+  evidence_file: File | null
+  payer_name: string
+  payer_account_last4: string
+  amount_on_evidence: string
+}>>({})
+
+function ensureEvidenceForm(paymentId: string) {
+  if (!paymentId) return
+  if (!evidenceUploadForm.value[paymentId]) {
+    evidenceUploadForm.value[paymentId] = {
+      evidence_file: null,
+      payer_name: '',
+      payer_account_last4: '',
+      amount_on_evidence: '',
+    }
+  }
+}
+
+function hasUploadedEvidence(paymentId: string): boolean {
+  return !!paymentDetails.value[paymentId]?.bank_transfer_evidence?.bank_transfer_id
+}
+
+function needsEvidenceUpload(payment: any): boolean {
+  const paymentId = String(payment?.payment_id || '')
+  if (!paymentId || !isOutstandingBankTransfer(payment)) return false
+  return !hasUploadedEvidence(paymentId)
+}
+
+function paymentAttentionCardClass(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'rounded-lg border border-red-300 bg-red-50 p-3 outstanding-attention-pulse'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-lg border border-blue-300 bg-blue-50 p-3'
+  return 'rounded-lg border border-blue-300 bg-blue-50/70 p-3 outstanding-attention-pulse'
+}
+
+function paymentAttentionLabel(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'Evidence required'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'Pending review'
+  return String(payment?.status || 'PENDING')
+}
+
+function paymentAttentionLabelClass(payment: any): string {
+  const paymentId = String(payment?.payment_id || '')
+  if (needsEvidenceUpload(payment)) return 'rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-red-700'
+  if (isOutstandingBankTransfer(payment) && hasUploadedEvidence(paymentId)) return 'rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700'
+  return 'rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700'
+}
+
+function toggleEvidenceUploadForm(paymentId: string) {
+  if (!paymentId) return
+  ensureEvidenceForm(paymentId)
+  evidenceUploadFormVisible.value[paymentId] = !evidenceUploadFormVisible.value[paymentId]
+}
+
+function onEvidenceUploadFileChange(paymentId: string, event: Event) {
+  ensureEvidenceForm(paymentId)
+  const input = event.target as HTMLInputElement
+  evidenceUploadForm.value[paymentId].evidence_file = input.files?.[0] || null
+  evidenceUploadError.value[paymentId] = ''
+}
+
+async function uploadOutstandingEvidence(payment: any) {
+  const paymentId = String(payment?.payment_id || '')
+  if (!paymentId) return
+
+  ensureEvidenceForm(paymentId)
+  evidenceUploadError.value[paymentId] = ''
+  evidenceUploadSuccess.value[paymentId] = ''
+
+  const form = evidenceUploadForm.value[paymentId]
+  if (!form.evidence_file) {
+    evidenceUploadError.value[paymentId] = 'Evidence file is required.'
+    return
+  }
+
+  const payerName = String(form.payer_name || '').trim()
+  const payerLast4 = String(form.payer_account_last4 || '').trim()
+  const amountOnEvidence = String(form.amount_on_evidence || '').trim()
+
+  if (!payerName) {
+    evidenceUploadError.value[paymentId] = 'Payer name is required.'
+    return
+  }
+  if (!/^\d{4}$/.test(payerLast4)) {
+    evidenceUploadError.value[paymentId] = 'Payer account last 4 must be exactly 4 digits.'
+    return
+  }
+  if (!amountOnEvidence || Number(amountOnEvidence) <= 0) {
+    evidenceUploadError.value[paymentId] = 'Amount on evidence must be greater than zero.'
+    return
+  }
+
+  if (!paymentDetails.value[paymentId]?.id) {
+    await fetchPaymentDetails(paymentId)
+  }
+
+  const paymentDbId = paymentDetails.value[paymentId]?.id
+  if (!paymentDbId) {
+    evidenceUploadError.value[paymentId] = 'Unable to resolve payment details for evidence upload.'
+    return
+  }
+
+  const transferRef = getRequiredTransferReference(payment) || `BT-${paymentId.slice(0, 8)}-${Date.now()}`
+  const formData = new FormData()
+  formData.append('transfer_id', transferRef)
+  formData.append('evidence_file', form.evidence_file)
+  formData.append('payment', String(paymentDbId))
+  formData.append('payer_name', payerName)
+  formData.append('payer_account_last4', payerLast4)
+  formData.append('amount_on_evidence', amountOnEvidence)
+
+  evidenceUploadPending.value[paymentId] = true
+  try {
+    await uploadMultipart('/api/payments/bank-transfer-evidence/', formData, { method: 'POST' })
+    evidenceUploadSuccess.value[paymentId] = 'Evidence uploaded. Awaiting verification.'
+    evidenceUploadFormVisible.value[paymentId] = false
+    evidenceUploadForm.value[paymentId] = {
+      evidence_file: null,
+      payer_name: '',
+      payer_account_last4: '',
+      amount_on_evidence: '',
+    }
+    await fetchPaymentDetails(paymentId)
+    await paymentSummary.refetch()
+    $notyf?.success('Evidence uploaded. Payment is now pending review.')
+  } catch (error) {
+    const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
+    if (typeof payload === 'string' && payload) {
+      evidenceUploadError.value[paymentId] = payload
+    } else if (payload && typeof payload === 'object') {
+      const firstValue = Object.values(payload)[0] as any
+      if (Array.isArray(firstValue) && firstValue[0]) {
+        evidenceUploadError.value[paymentId] = String(firstValue[0])
+      } else if (typeof firstValue === 'string') {
+        evidenceUploadError.value[paymentId] = firstValue
+      } else {
+        evidenceUploadError.value[paymentId] = 'Could not upload evidence.'
+      }
+    } else {
+      evidenceUploadError.value[paymentId] = 'Could not upload evidence.'
+    }
+  } finally {
+    evidenceUploadPending.value[paymentId] = false
+  }
+}
+
+function isPaymentExpanded(paymentId: string): boolean {
+  if (!paymentId) return false
+  return expandedPaymentIds.value.includes(paymentId)
+}
+
+async function fetchPaymentDetails(paymentId: string) {
+  if (!paymentId || paymentDetails.value[paymentId] || paymentDetailLoading.value[paymentId]) return
+
+  paymentDetailLoading.value[paymentId] = true
+  try {
+    const paymentData = await requestFetch(`/api/payments/list/${paymentId}/`)
+    paymentDetails.value[paymentId] = paymentData
+  } catch (error) {
+    console.error('Failed to fetch payment detail', error)
+    $notyf?.error('Could not load payment method details.')
+  } finally {
+    paymentDetailLoading.value[paymentId] = false
+  }
+}
+
+watch(
+  outstandingPayments,
+  (payments) => {
+    payments.forEach((payment: any) => {
+      const paymentId = String(payment?.payment_id || '')
+      if (!paymentId || !isOutstandingBankTransfer(payment)) return
+      ensureEvidenceForm(paymentId)
+      if (!paymentDetails.value[paymentId] && !paymentDetailLoading.value[paymentId]) {
+        void fetchPaymentDetails(paymentId)
+      }
+    })
+  },
+  { immediate: true }
+)
+
+async function togglePaymentExpand(payment: any) {
+  const paymentId = String(payment?.payment_id || '')
+  if (!paymentId) return
+
+  if (isPaymentExpanded(paymentId)) {
+    expandedPaymentIds.value = expandedPaymentIds.value.filter(id => id !== paymentId)
+    return
+  }
+
+  expandedPaymentIds.value.push(paymentId)
+  await fetchPaymentDetails(paymentId)
+}
+
+function getPaymentMethodType(paymentId: string): string {
+  const methodType = paymentDetails.value[paymentId]?.method_type
+  if (methodType) return methodType
+
+  const fallback = paymentDetails.value[paymentId]?.method_title || paymentDetails.value[paymentId]?.method
+  return fallback || 'Unavailable'
+}
+
+function getBankTransferReference(paymentId: string): string | null {
+  return paymentDetails.value[paymentId]?.bank_transfer_reference || null
+}
+
+function getBankTransferInstructions(paymentId: string): string | null {
+  const metadata = paymentDetails.value[paymentId]?.metadata as Record<string, any> | undefined
+  return metadata?.bank_transfer_instructions || null
+}
+
+function isOutstandingBankTransfer(payment: any): boolean {
+  const type = String(payment?.method_type || payment?.metadata?.method_type || '').toUpperCase().replace(/-/g, '_')
+  const title = String(payment?.method_title || payment?.metadata?.method_title || '').toUpperCase()
+  return (type === 'BANK_TRANSFER' || title.includes('BANK TRANSFER')) && String(payment?.status || '').toUpperCase() === 'PENDING'
+}
+
+function getProvidedDetail(payment: any, key: 'account_name' | 'sort_code' | 'account_number'): string | null {
+  const provided = (
+    payment?.provided_details ||
+    payment?.metadata?.provided_details ||
+    payment?.metadata ||
+    {}
+  ) as Record<string, any>
+  const value = provided?.[key]
+  if (value === undefined || value === null || value === '') return null
+  return String(value)
+}
+
+function getRequiredTransferReference(payment: any): string | null {
+  const provided = (
+    payment?.provided_details ||
+    payment?.metadata?.provided_details ||
+    payment?.metadata ||
+    {}
+  ) as Record<string, any>
+  const direct = payment?.bank_reference || payment?.metadata?.bank_reference || provided?.bank_reference
+  if (direct !== undefined && direct !== null && String(direct).trim() !== '') {
+    return String(direct)
+  }
+
+  const paymentId = String(payment?.payment_id || '')
+  const fromDetail = paymentDetails.value[paymentId]?.bank_reference || paymentDetails.value[paymentId]?.bank_transfer_reference
+  if (fromDetail !== undefined && fromDetail !== null && String(fromDetail).trim() !== '') {
+    return String(fromDetail)
+  }
+
+  return null
+}
+
+function hasSummaryBankMetadata(payment: any): boolean {
+  return Boolean(
+    getProvidedDetail(payment, 'account_name') ||
+    getProvidedDetail(payment, 'sort_code') ||
+    getProvidedDetail(payment, 'account_number') ||
+    getRequiredTransferReference(payment)
+  )
+}
+
+async function copyTransferReference(reference: string) {
+  if (!reference) return
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(reference)
+      $notyf?.success('Transfer reference copied.')
+      return
+    }
+    $notyf?.error('Clipboard is not available in this browser.')
+  } catch (error) {
+    console.error('Failed to copy transfer reference', error)
+    $notyf?.error('Could not copy transfer reference.')
+  }
+}
+
+function canCancelOrder(status?: string): boolean {
+  const normalized = String(status || '').toLowerCase()
+  return normalized === 'draft' || normalized === 'pending'
+}
+
+async function cancelOrder(orderId: number | string) {
+  if (!confirm('Are you sure you want to cancel this order?')) return
+
+  try {
+    await cancelOrderMutation.mutateAsync(orderId)
+    $notyf?.success('Order cancelled.')
+  } catch (error) {
+    console.error('Failed to cancel order', error)
+    $notyf?.error('Could not cancel order.')
+  }
+}
+
+function getOrderItemDetails(item: any): Record<string, any> | null {
+  const details = item?.product_variant_details
+  if (!details || typeof details !== 'object') return null
+  return details as Record<string, any>
+}
+
+function getOrderItemTitle(item: any): string {
+  const details = getOrderItemDetails(item)
+  return details?.product_title || `Variant ${details?.variant_id || item?.product_variant || 'N/A'}`
+}
+
+function getOrderItemCode(item: any): string {
+  const details = getOrderItemDetails(item)
+  if (details?.product_display_code) return String(details.product_display_code)
+  if (details?.variant_id) return `Variant ${details.variant_id}`
+  return `Variant ${item?.product_variant || 'N/A'}`
+}
+
+function getOrderItemImageUrl(item: any): string | null {
+  const details = getOrderItemDetails(item)
+  return details?.image_url || details?.variant_image_url || details?.product_image_url || null
+}
+
+function getOrderItemSize(item: any): string | null {
+  const details = getOrderItemDetails(item)
+  return details?.size || null
+}
+
+function getOrderItemColor(item: any): string | null {
+  const details = getOrderItemDetails(item)
+  return details?.color || null
+}
+
+function getOrderItemColorStyle(item: any): Record<string, string> | undefined {
+  const color = getOrderItemColor(item)
+  if (!color) return undefined
+  return { backgroundColor: color }
+}
+
+function getOrderStatusBadgeClass(status?: string): string {
+  const normalized = String(status || '').toLowerCase()
+  const classes: Record<string, string> = {
+    draft: 'bg-gray-100 text-gray-700',
+    pending: 'bg-blue-100 text-blue-700',
+    processing: 'bg-blue-100 text-blue-700',
+    completed: 'bg-green-100 text-green-700',
+    cancelled: 'bg-red-100 text-red-700',
+    pending_refund: 'bg-orange-100 text-orange-700',
+    refunded: 'bg-purple-100 text-purple-700',
+  }
+  return classes[normalized] || 'bg-gray-100 text-gray-700'
+}
+
+const attendeeForm = ref<BookingAttendeeFormData>({
   first_name: '',
   last_name: '',
   email: '',
   phone_number: '',
   date_of_birth: '',
   gender: '',
-  relationship_to_user: '' as RelationshipType,
-  area_from: null as number | null,
+  relationship_to_user: 'self',
+  area_from: undefined,
+  area_from_name: '',
+})
+
+const attendeeSectionsOpen = ref({
+  personal: false,
+  safeguarding: false,
+  consents: false,
+})
+
+const isPersonalInfoEditing = ref(false)
+
+const personalInfoBaseline = ref<BookingAttendeeFormData>({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone_number: '',
+  date_of_birth: '',
+  gender: '',
+  relationship_to_user: 'self',
+  area_from: undefined,
+  area_from_name: '',
+})
+
+function attendeeFormSnapshot(): BookingAttendeeFormData {
+  return {
+    first_name: attendeeForm.value.first_name || '',
+    last_name: attendeeForm.value.last_name || '',
+    email: attendeeForm.value.email || '',
+    phone_number: attendeeForm.value.phone_number || '',
+    date_of_birth: attendeeForm.value.date_of_birth || '',
+    gender: attendeeForm.value.gender || '',
+    relationship_to_user: attendeeForm.value.relationship_to_user || 'self',
+    area_from: attendeeForm.value.area_from,
+    area_from_name: attendeeForm.value.area_from_name || '',
+  }
+}
+
+const hasPersonalInfoChanges = computed(() => {
+  const current = attendeeFormSnapshot()
+  const baseline = personalInfoBaseline.value
+  return (
+    current.first_name !== baseline.first_name ||
+    current.last_name !== baseline.last_name ||
+    current.email !== baseline.email ||
+    current.phone_number !== baseline.phone_number ||
+    current.date_of_birth !== baseline.date_of_birth ||
+    current.gender !== baseline.gender ||
+    current.relationship_to_user !== baseline.relationship_to_user ||
+    current.area_from !== baseline.area_from ||
+    current.area_from_name !== baseline.area_from_name
+  )
+})
+
+function toggleAttendeeSection(section: 'personal' | 'safeguarding' | 'consents') {
+  attendeeSectionsOpen.value[section] = !attendeeSectionsOpen.value[section]
+}
+
+function discardPersonalInfoChanges() {
+  attendeeForm.value = {
+    ...personalInfoBaseline.value,
+  }
+  areaSearch.value = personalInfoBaseline.value.area_from_name || ''
+  areaOptions.value = []
+  isPersonalInfoEditing.value = false
+}
+
+function togglePersonalInfoEdit() {
+  if (isPersonalInfoEditing.value && hasPersonalInfoChanges.value) {
+    discardPersonalInfoChanges()
+    return
+  }
+  isPersonalInfoEditing.value = !isPersonalInfoEditing.value
+}
+
+const {
+  errors: attendeeValidationErrors,
+  validate: validateAttendeeForm,
+  resetForm: resetAttendeeForm,
+  setValues: setAttendeeFormValues,
+} = useForm({
+  validationSchema: toTypedSchema(bookingAttendeeFormSchema),
+  initialValues: {
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone_number: '',
+    date_of_birth: '',
+    gender: '',
+    relationship_to_user: '',
+    area_from: undefined,
+    area_from_name: '',
+  },
+})
+
+watch(
+  attendeeForm,
+  (value) => {
+    setAttendeeFormValues({ ...value })
+  },
+  { deep: true },
+)
+
+const showMedicalForm = ref(false)
+const showDietaryForm = ref(false)
+const showAccessibilityForm = ref(false)
+
+watch(selectedAttendeeId, () => {
+  isPersonalInfoEditing.value = false
 })
 
 watch(
@@ -688,15 +2469,41 @@ watch(
       phone_number: value.phone_number || '',
       date_of_birth: value.date_of_birth || '',
       gender: value.gender || '',
-      relationship_to_user: (value.relationship_to_user as RelationshipType) || '',
-      area_from: value.area_from || null,
+      relationship_to_user: (value.relationship_to_user as BookingAttendeeFormData['relationship_to_user']) || '',
+      area_from: value.area_from || undefined,
+      area_from_name: value.area_from_name || '',
     }
+    personalInfoBaseline.value = {
+      ...attendeeForm.value,
+    }
+    isPersonalInfoEditing.value = false
+    areaSearch.value = value.area_from_name || ''
+    areaOptions.value = []
+    normalizeEmergencyContactForm()
+    resetAttendeeForm({
+      values: {
+        first_name: attendeeForm.value.first_name,
+        last_name: attendeeForm.value.last_name,
+        email: attendeeForm.value.email,
+        phone_number: attendeeForm.value.phone_number,
+        date_of_birth: attendeeForm.value.date_of_birth,
+        gender: attendeeForm.value.gender,
+        relationship_to_user: attendeeForm.value.relationship_to_user || undefined,
+        area_from: attendeeForm.value.area_from || undefined,
+        area_from_name: attendeeForm.value.area_from_name,
+      },
+    })
   },
   { immediate: true },
 )
 
 async function saveAttendee() {
   if (!selectedAttendeeId.value) return
+  const validation = await validateAttendeeForm()
+  if (!validation.valid) {
+    $notyf?.error('Please complete the required attendee fields.')
+    return
+  }
   try {
     await updateAttendee.mutateAsync({
       attendeeId: selectedAttendeeId.value,
@@ -705,13 +2512,17 @@ async function saveAttendee() {
         last_name: attendeeForm.value.last_name,
         email: attendeeForm.value.email || null,
         phone_number: attendeeForm.value.phone_number || null,
-        date_of_birth: attendeeForm.value.date_of_birth || null,
-        gender: attendeeForm.value.gender || null,
+        date_of_birth: attendeeForm.value.date_of_birth,
+        gender: attendeeForm.value.gender,
         relationship_to_user: attendeeForm.value.relationship_to_user || undefined,
         area_from: attendeeForm.value.area_from,
       },
     })
     await invalidateEventMyBookingQuery(queryClient, eventId.value)
+    personalInfoBaseline.value = {
+      ...attendeeFormSnapshot(),
+    }
+    isPersonalInfoEditing.value = false
     $notyf?.success('Changes were saved successfully.')
   } catch (error) {
     console.error('Failed to update attendee', error)
@@ -829,163 +2640,49 @@ async function removeAccessibilityRequirement(requirementId: number) {
 const eventConsents = useConsents(computed(() => ({ event: eventId.value })))
 const attendeeConsents = useAttendeeConsents(computed(() => selectedAttendeeId.value || ''))
 const createConsent = useCreateAttendeeConsent()
-const partialUpdateConsent = usePartialUpdateAttendeeConsent()
-const newConsent = ref({ consent: null as number | null })
+const deleteConsent = useDeleteAttendeeConsent()
 
-async function addConsent() {
-  if (!selectedAttendeeId.value || !newConsent.value.consent) return
-  try {
-    await createConsent.mutateAsync({
-      attendeeId: selectedAttendeeId.value,
-      body: {
-        consent: newConsent.value.consent,
-        consent_given: false,
-      } as any,
-    })
-    newConsent.value = { consent: null }
-    $notyf?.success('Consent record added.')
-  } catch (error) {
-    console.error('Failed to add consent', error)
-    $notyf?.error('Could not add consent.')
-  }
+const attendeeConsentRecords = computed(() => attendeeConsents.data.value?.data?.results || [])
+
+function getAttendeeConsentRecord(consentId: number) {
+  return attendeeConsentRecords.value.find((item: any) => item.consent_details?.id === consentId) || null
 }
 
-async function toggleConsent(item: any) {
+function isConsentLinked(consentId: number): boolean {
+  return !!getAttendeeConsentRecord(consentId)
+}
+
+function consentToggleLabel(consentId: number): string {
+  const record = getAttendeeConsentRecord(consentId)
+  if (!record) return 'Not linked'
+  return record.consent_given ? 'Linked' : 'Linked, not confirmed'
+}
+
+async function toggleConsentLink(consentId: number, checked: boolean) {
   if (!selectedAttendeeId.value) return
-  try {
-    await partialUpdateConsent.mutateAsync({
-      attendeeId: selectedAttendeeId.value,
-      consentId: item.id,
-      body: {
-        consent_given: !item.consent_given,
-        given_at: !item.consent_given ? new Date().toISOString() : null,
-      } as any,
-    })
-  } catch (error) {
-    console.error('Failed to toggle consent', error)
-    $notyf?.error('Could not update consent.')
-  }
-}
 
-const guardians = useGuardians(computed(() => {
-  if (!selectedAttendeeId.value) return undefined
-  return { attendee: selectedAttendeeId.value, page_size: 100 }
-}))
-const createGuardian = useCreateGuardian()
-const deleteGuardian = useDeleteGuardian()
-const guardianSourceAttendees = useAttendees(computed(() => ({ event: eventId.value, page_size: 200 })))
-const guardianCandidateId = ref('')
-
-const guardianCandidates = computed(() => {
-  return (guardianSourceAttendees.data.value?.data?.results || []).filter((item: any) => {
-    if (!selectedAttendeeId.value) return false
-    return item.attendee_id !== selectedAttendeeId.value && !!item?._links?.user
-  })
-})
-
-async function addGuardian() {
-  if (!selectedAttendeeId.value || !guardianCandidateId.value) return
-  const candidate = guardianCandidates.value.find((item: any) => item.attendee_id === guardianCandidateId.value) as any
-  const userMatch = String(candidate?._links?.user || '').match(/\/users\/(\d+)\//)
-  const userId = userMatch ? parseInt(userMatch[1], 10) : null
-  if (!userId) {
-    $notyf?.error('Selected attendee has no linked user.')
-    return
-  }
+  const existing = getAttendeeConsentRecord(consentId)
 
   try {
-    await createGuardian.mutateAsync({
-      attendee: selectedAttendeeId.value,
-      user: userId,
-      relationship: 'parent',
-    } as any)
-    guardianCandidateId.value = ''
-    $notyf?.success('Guardian linked.')
-  } catch (error) {
-    console.error('Failed to add guardian', error)
-    $notyf?.error('Could not link guardian.')
-  }
-}
-
-async function removeGuardian(guardianId: number) {
-  try {
-    await deleteGuardian.mutateAsync(guardianId)
-    $notyf?.success('Guardian removed.')
-  } catch (error) {
-    console.error('Failed to remove guardian', error)
-    $notyf?.error('Could not remove guardian.')
-  }
-}
-
-const familyMemberships = useFamilyAttendees(computed(() => {
-  if (!selectedAttendeeId.value) return undefined
-  return { attendee: selectedAttendeeId.value, page_size: 100 }
-}))
-const createFamilyMembership = useCreateFamilyAttendee()
-const deleteFamilyMembership = useDeleteFamilyAttendee()
-const familyGroups = useFamilyGroups(computed(() => ({ page_size: 100, event: eventId.value } as any)))
-const createFamilyGroupMutation = useCreateFamilyGroup()
-
-const newFamilyGroupName = ref('')
-const newFamilyMembership = ref({
-  family_group: null as number | null,
-  relationship: 'sibling' as 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other',
-  is_primary_guardian: false,
-})
-
-async function createFamilyGroup() {
-  const familyName = newFamilyGroupName.value.trim()
-  if (!familyName) return
-
-  const eventNumericId = event.data.value?.data?.id
-  const organisationId = (event.data.value?.data as any)?.organisation
-  if (!eventNumericId || !organisationId) {
-    $notyf?.error('Event context is not ready for group creation.')
-    return
-  }
-
-  try {
-    await createFamilyGroupMutation.mutateAsync({
-      family_name: familyName,
-      event: eventNumericId,
-      organisation: organisationId,
-    } as any)
-    newFamilyGroupName.value = ''
-    $notyf?.success('Family group created.')
-  } catch (error) {
-    console.error('Failed to create family group', error)
-    $notyf?.error('Could not create family group.')
-  }
-}
-
-async function addFamilyMembership() {
-  if (!selectedAttendeeId.value || !newFamilyMembership.value.family_group) return
-  try {
-    await createFamilyMembership.mutateAsync({
-      family_group: newFamilyMembership.value.family_group,
-      attendee: selectedAttendeeId.value,
-      relationship: newFamilyMembership.value.relationship,
-      is_primary_guardian: newFamilyMembership.value.is_primary_guardian,
-    } as any)
-    newFamilyMembership.value = {
-      family_group: null,
-      relationship: 'sibling',
-      is_primary_guardian: false,
+    if (checked && !existing) {
+      await createConsent.mutateAsync({
+        attendeeId: selectedAttendeeId.value,
+        body: {
+          consent: consentId,
+          consent_given: true,
+        },
+      })
+      $notyf?.success('Consent linked.')
+      return
     }
-    $notyf?.success('Family membership added.')
-  } catch (error) {
-    console.error('Failed to add family membership', error)
-    $notyf?.error('Could not add family membership.')
-  }
-}
 
-async function removeFamilyMembership(membershipId: number) {
-  try {
-    await deleteFamilyMembership.mutateAsync(membershipId)
-    $notyf?.success('Family membership removed.')
+    if (!checked && existing) {
+      await deleteConsent.mutateAsync({ attendeeId: selectedAttendeeId.value, consentId: existing.id })
+      $notyf?.success('Consent removed.')
+    }
   } catch (error) {
-    console.error('Failed to remove family membership', error)
-    $notyf?.error('Could not remove family membership.')
+    console.error('Failed to update consent link', error)
+    $notyf?.error('Could not update consent.')
   }
 }
 
@@ -1028,12 +2725,96 @@ onUnmounted(() => {
   if (countdownInterval) {
     clearInterval(countdownInterval)
   }
+  if (areaSearchDebounceTimer) {
+    clearTimeout(areaSearchDebounceTimer)
+    areaSearchDebounceTimer = null
+  }
 })
 
-function formatEventDate(value: string) {
-  if (!value) return '-'
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleString()
-}
 </script>
+
+<style scoped>
+.countdown-tile {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.4rem;
+}
+
+.countdown-tile-live {
+  animation: softPulse 1.3s ease-in-out infinite;
+}
+
+.animate-soft-in {
+  animation: softIn 420ms ease-out both;
+}
+
+.animate-soft-in-delay {
+  animation: softIn 520ms ease-out both;
+}
+
+.animate-soft-up {
+  animation: softUp 380ms ease-out both;
+}
+
+.attendee-pulse {
+  animation: attendeePulse 2.1s ease-in-out infinite;
+}
+
+.outstanding-attention-pulse {
+  animation: outstandingAttentionPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes softIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes softUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+@keyframes softPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(147, 197, 253, 0);
+    border-color: rgba(255, 255, 255, 0.22);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(147, 197, 253, 0.08);
+    border-color: rgba(191, 219, 254, 0.75);
+  }
+}
+
+@keyframes attendeePulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.24);
+  }
+}
+
+@keyframes outstandingAttentionPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    border-color: rgba(252, 211, 77, 0.9);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.85);
+  }
+}
+</style>

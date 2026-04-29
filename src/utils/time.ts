@@ -139,11 +139,8 @@ export function useCountdown(
       const tz = toValue(timezone);
       if (date) {
         countdown.value = calculateCountdown(date, tz || 'UTC');
-        
-        if (countdown.value.isExpired && intervalId) {
-          clearInterval(intervalId);
-          intervalId = null;
-        }
+      } else {
+        countdown.value = { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
       }
     }, 1000);
   };

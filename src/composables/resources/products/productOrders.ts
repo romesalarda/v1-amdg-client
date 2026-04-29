@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import { isFormData, uploadMultipart } from '~/utils/upload'
 import {
   productsOrdersList,
   productsOrdersRetrieve,
@@ -12,6 +13,7 @@ import {
   productsOrdersCancelCreate,
   productsOrdersCheckoutCreate,
   productsOrdersCompleteCreate,
+  productsOrdersReserveBankTransferPayment,
   productsOrdersSubmitCreate,
 } from '~/api/sdk.gen'
 import type {
@@ -25,7 +27,9 @@ import type {
   ProductsOrdersCancelCreateData,
   ProductsOrdersCheckoutCreateData,
   ProductsOrdersCompleteCreateData,
+  ProductsOrdersReserveBankTransferPaymentData,
   ProductsOrdersSubmitCreateData,
+  ProductsOrdersRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['productOrders'] as const
@@ -46,14 +50,15 @@ export function useProductOrders(params?: MaybeRefOrGetter<ProductsOrdersListDat
 /**
  * Get a single order by ID
  */
-export function useProductOrder(orderId: MaybeRefOrGetter<string>) {
+export function useProductOrder(params: MaybeRefOrGetter<ProductsOrdersRetrieveData['query'] | undefined>, orderId: MaybeRefOrGetter<string>, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'detail', orderId] as const,
     queryFn: () => {
       const id = toValue(orderId)
-      return productsOrdersRetrieve({ path: { order_id: String(id) } })
+      const retrieveParams = toValue(params)
+      return productsOrdersRetrieve({ path: { order_id: String(id) }, query: retrieveParams ?? undefined })
     },
-    enabled: () => !!toValue(orderId),
+    enabled: () => !!toValue(orderId) && (options?.enabled ?? true),
   })
 }
 
@@ -105,7 +110,7 @@ export function useUpdateProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ orderId, body }: { orderId: number; body: ProductsOrdersUpdateData['body'] }) =>
+    mutationFn: ({ orderId, body }: { orderId: string | number; body: ProductsOrdersUpdateData['body'] }) =>
       productsOrdersUpdate({ path: { order_id: String(orderId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -123,7 +128,7 @@ export function usePartialUpdateProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ orderId, body }: { orderId: number; body: ProductsOrdersPartialUpdateData['body'] }) =>
+    mutationFn: ({ orderId, body }: { orderId: string | number; body: ProductsOrdersPartialUpdateData['body'] }) =>
       productsOrdersPartialUpdate({ path: { order_id: String(orderId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
@@ -158,8 +163,71 @@ export function useAddProductOrderItem() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ orderId, body }: { orderId: number; body: ProductsOrdersAddItemCreateData['body'] }) =>
+    mutationFn: ({ orderId, body }: { orderId: string | number; body: ProductsOrdersAddItemCreateData['body'] }) =>
       productsOrdersAddItemCreate({ path: { order_id: String(orderId) }, body }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
+ * Update quantity for an item in a draft order
+ */
+export function useUpdateProductOrderItem() {
+  const queryClient = useQueryClient()
+  const requestFetch = useRequestFetch()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      orderItemId,
+      quantity,
+    }: {
+      orderId: string | number
+      orderItemId: number
+      quantity: number
+    }) =>
+      requestFetch(`/api/products/orders/${String(orderId)}/update-item/`, {
+        method: 'POST',
+        body: {
+          order_item_id: orderItemId,
+          quantity,
+        },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
+ * Remove an item from a draft order
+ */
+export function useRemoveProductOrderItem() {
+  const queryClient = useQueryClient()
+  const requestFetch = useRequestFetch()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      orderItemId,
+    }: {
+      orderId: string | number
+      orderItemId: number
+    }) =>
+      requestFetch(`/api/products/orders/${String(orderId)}/remove-item/`, {
+        method: 'POST',
+        body: {
+          order_item_id: orderItemId,
+        },
+      }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
@@ -193,8 +261,42 @@ export function useCheckoutProductOrder() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ orderId, body }: { orderId: number; body: ProductsOrdersCheckoutCreateData['body'] }) =>
-      productsOrdersCheckoutCreate({ path: { order_id: String(orderId) }, body }),
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string | number
+      body: ProductsOrdersCheckoutCreateData['body'] | FormData
+    }) => {
+      if (isFormData(body)) {
+        return uploadMultipart(`/api/products/orders/${String(orderId)}/checkout/`, body, { method: 'POST' })
+      }
+
+      return productsOrdersCheckoutCreate({ path: { order_id: String(orderId) }, body })
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+  })
+}
+
+/**
+ * Reserve a bank transfer reference for a draft order before checkout
+ */
+export function useReserveProductOrderBankTransferPayment() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({
+      orderId,
+      body,
+    }: {
+      orderId: string | number
+      body: ProductsOrdersReserveBankTransferPaymentData['body']
+    }) => productsOrdersReserveBankTransferPayment({ path: { order_id: String(orderId) }, body }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({

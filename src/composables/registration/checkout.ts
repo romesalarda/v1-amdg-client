@@ -20,6 +20,14 @@ import type {
   ProductSelectionDraft,
 } from '~/stores/registration'
 
+export type BankTransferEvidenceInput = {
+  transfer_id?: string
+  evidence_file: File | Blob
+  payer_name?: string
+  payer_account_last4?: string
+  amount_on_evidence?: string | number
+}
+
 const buildPersonalInfoItem = (item: PersonalInfoItemDraft): PersonalInfoItemRequest => ({
   id: item.id,
   details: item.details ?? null,
@@ -103,9 +111,22 @@ const buildAttendeeDraft = (attendee: AttendeeDraft): AttendeeDraftRequest => ({
   question_answers: attendee.questionAnswers.length ? buildQuestionAnswers(attendee.questionAnswers) : undefined,
 })
 
+const resolveAttendeePackageId = (attendee: AttendeeDraft): number => {
+  const legacyValue = (attendee as unknown as { package_id?: number | string | null }).package_id
+  const candidate = attendee.packageId ?? legacyValue
+  const parsed = Number(candidate)
+
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    const attendeeName = [attendee.first_name, attendee.last_name].filter(Boolean).join(' ').trim() || 'Unknown attendee'
+    throw new Error(`Package is required for ${attendeeName}.`)
+  }
+
+  return parsed
+}
+
 const buildAttendeeCheckout = (attendee: AttendeeDraft): AttendeeCheckoutRequest => ({
   attendee: buildAttendeeDraft(attendee),
-  package_id: attendee.packageId as number,
+  package_id: resolveAttendeePackageId(attendee),
   product_selections: buildProductSelections(attendee.productSelections),
 })
 
@@ -113,13 +134,87 @@ export const buildCheckoutPayload = (params: {
   bookingIntentId: string
   paymentMethodId: number
   attendees: AttendeeDraft[]
+  paymentId?: string
   stripePaymentIntentId?: string
+  bankTransferEvidenceId?: string
 }): CheckoutRequest => ({
   booking_intent_id: params.bookingIntentId,
   payment_method_id: params.paymentMethodId,
+  payment_id: params.paymentId,
   stripe_payment_intent_id: params.stripePaymentIntentId,
+  bank_transfer_evidence_id: params.bankTransferEvidenceId,
   attendees: params.attendees.map(buildAttendeeCheckout),
 })
+
+const appendFormDataValue = (formData: FormData, key: string, value: unknown): void => {
+  if (value === undefined || value === null) return
+
+  if (value instanceof Blob) {
+    formData.append(key, value)
+    return
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item, index) => {
+      appendFormDataValue(formData, `${key}[${index}]`, item)
+    })
+    return
+  }
+
+  if (typeof value === 'object') {
+    Object.entries(value as Record<string, unknown>).forEach(([childKey, childValue]) => {
+      appendFormDataValue(formData, `${key}[${childKey}]`, childValue)
+    })
+    return
+  }
+
+  formData.append(key, String(value))
+}
+
+export const toMultipartFormData = (payload: Record<string, unknown>): FormData => {
+  const formData = new FormData()
+  Object.entries(payload).forEach(([key, value]) => {
+    appendFormDataValue(formData, key, value)
+  })
+  return formData
+}
+
+export const buildCheckoutMultipartPayload = (params: {
+  bookingIntentId: string
+  paymentMethodId: number
+  attendees: AttendeeDraft[]
+  stripePaymentIntentId?: string
+  bankTransferEvidence?: BankTransferEvidenceInput
+}): FormData => {
+  const formData = new FormData()
+  const attendeesPayload = params.attendees.map(buildAttendeeCheckout)
+
+  formData.append('booking_intent_id', params.bookingIntentId)
+  formData.append('payment_method_id', String(params.paymentMethodId))
+  formData.append('attendees', JSON.stringify(attendeesPayload))
+
+  if (params.stripePaymentIntentId) {
+    formData.append('stripe_payment_intent_id', params.stripePaymentIntentId)
+  }
+
+  if (params.bankTransferEvidence) {
+    if (params.bankTransferEvidence.transfer_id) {
+      formData.append('bank_transfer_evidence[transfer_id]', params.bankTransferEvidence.transfer_id)
+    }
+    formData.append('bank_transfer_evidence[evidence_file]', params.bankTransferEvidence.evidence_file)
+    if (params.bankTransferEvidence.payer_name) {
+      formData.append('bank_transfer_evidence[payer_name]', params.bankTransferEvidence.payer_name)
+    }
+    if (params.bankTransferEvidence.payer_account_last4) {
+      formData.append('bank_transfer_evidence[payer_account_last4]', params.bankTransferEvidence.payer_account_last4)
+    }
+    if (params.bankTransferEvidence.amount_on_evidence !== undefined) {
+      formData.append('bank_transfer_evidence[amount_on_evidence]', String(params.bankTransferEvidence.amount_on_evidence))
+    }
+  }
+
+  return formData
+}
 
 export const buildCheckoutPreviewPayload = (params: {
   bookingIntentId: string

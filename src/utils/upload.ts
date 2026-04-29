@@ -18,6 +18,7 @@ export async function uploadMultipart<T = unknown>(
   formData: FormData,
   options?: {
     method?: 'POST' | 'PUT' | 'PATCH'
+    headers?: Record<string, string>
   },
 ): Promise<T> {
   const config = useRuntimeConfig()
@@ -33,6 +34,7 @@ export async function uploadMultipart<T = unknown>(
     method: options?.method || 'POST',
     body: formData,
     credentials: 'include', // Include cookies for authentication
+    headers: options?.headers,
     // Don't set Content-Type - browser will set it with boundary
   })
 }

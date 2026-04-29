@@ -250,12 +250,8 @@
                     <p class="font-mono text-slate-900">{{ order.order_reference_id }}</p>
                   </div>
                   <div class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
-                    <p class="text-slate-500">UUID</p>
+                    <p class="text-slate-500">Tag</p>
                     <p class="font-mono text-slate-900 break-all">{{ order.order_id }}</p>
-                  </div>
-                  <div class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
-                    <p class="text-slate-500">Database ID</p>
-                    <p class="font-mono text-slate-900">{{ order.id }}</p>
                   </div>
                 </div>
 
@@ -327,7 +323,7 @@ type PaymentDetails = {
 const { data: event } = useEvent(eventId)
 
 // Order Data
-const { data: orderData, isLoading, refetch } = useProductOrder(computed(() => orderId.value))
+const { data: orderData, isLoading, refetch } = useProductOrder({"event": event.value?.data.url_safe_title || event.value?.data.event_id}, computed(() => orderId.value))
 const order = computed(() => orderData.value?.data)
 
 // Mutations

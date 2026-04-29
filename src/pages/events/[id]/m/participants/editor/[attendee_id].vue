@@ -994,7 +994,7 @@
                     <div v-for="payment in booking.data.value.data.payments" :key="payment.payment_id" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                       <div>
                         <p class="text-xs font-semibold text-gray-900">{{ payment.payment_reference }}</p>
-                        <p class="text-xs text-gray-600">{{ payment.amount }}</p>
+                        <p class="text-xs text-gray-600">{{ payment.original_amount }} -> {{ payment.final_amount }}</p>
                       </div>
                       <div class="flex">
                           <UBadge
@@ -3316,7 +3316,7 @@ const exportActionsToCSV = () => {
 const handleCreateOrder = async () => {
   try {
     await createOrderMutation.mutateAsync({
-      attendee: parseInt(attendeeId.value),
+      attendee: attendeeId.value,
       items: [], // Empty items array for draft order
     })
     showCreateOrderForm.value = false

@@ -56,7 +56,7 @@ const eventUUID = computed(() => event.value?.data?.event_id || String(route.par
 const {
   data: productsData,
   isLoading: isLoadingProducts,
-} = useProducts(computed(() => ({ event: event.value?.data?.id })))
+} = useProducts(computed(() => ({ event: event.value?.data?.url_safe_title || undefined, is_active: true, page_size: 100 })))
 
 const products = computed(() => {
   const results = productsData.value?.data?.results || []

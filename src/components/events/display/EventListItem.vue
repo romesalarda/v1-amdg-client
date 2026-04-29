@@ -94,7 +94,7 @@
           <!-- Manage Button (if staff) -->
           <button
             v-if="isStaff"
-            @click.stop="navigateTo(`/events/${event.event_id}/m/dashboard`)"
+            @click.stop="navigateTo(`/events/${event.url_safe_title}/m/dashboard`)"
             class="flex-1 bg-deep-navy hover:bg-deep-navy/90 text-white py-3 rounded-xl font-black text-xs uppercase tracking-wider transition-all"
           >
             Manage
@@ -145,13 +145,13 @@ const { $notyf } = useNuxtApp()
 
 const linkTo = computed(() => {
   if (props.linkTo) return props.linkTo
-  return `/events/${props.event.event_id}`
+  return `/events/${props.event.url_safe_title}`
 })
 
 // Check if user is staff member for this event
 const { data: staffData } = useEventStaff(
   computed(() => props.showStaffControls !== false ? {
-    event: props.event.event_id,
+    event: props.event.url_safe_title || undefined,
     user: authStore.user?.id,
   } : undefined)
 )

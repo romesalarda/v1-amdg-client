@@ -34,11 +34,14 @@ export const bookingPackageSchema = z.object({
   description: z.string().optional(),
   ticket_type: z.number({ required_error: 'Ticket type is required' }),
   base_amount: z
-    .coerce.string()
-    .min(1, 'Base amount is required')
-    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
-      message: 'Base amount must be a valid positive number',
-    }),
+  .coerce.string()
+  .optional()
+  .refine((val) => {
+    if (val === undefined || val === '') return true; // allow missing/empty
+    return !isNaN(Number(val)) && Number(val) >= 0;
+  }, {
+    message: 'Base amount must be a valid positive number',
+  }),
   base_amount_currency: z.string().min(1, 'Currency is required').default('GBP'),
   is_active: z.boolean().default(true),
 })

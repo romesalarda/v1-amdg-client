@@ -99,7 +99,6 @@
           :data="ticketTypesChartData"
           height="300px"
           color="#6366f1"
-          :horizontal="true"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No ticket type data available
@@ -266,7 +265,7 @@ const ticketScopeChartData = computed<PieChartData[]>(() => {
 const ticketTypesChartData = computed<BarChartData[]>(() => {
   if (!typesData.value?.data?.distribution) return []
   return typesData.value.data.distribution.map((item: any) => ({
-    label: item.ticket_type || 'Unknown',
+    label: item.scope || 'Unknown',
     value: item.count,
   }))
 })

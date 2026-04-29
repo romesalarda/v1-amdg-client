@@ -742,7 +742,7 @@ type PackageItem = {
 const route = useRoute()
 const { $notyf } = useNuxtApp()
 
-const organisationId = computed(() => Number(route.params.id))
+const organisationId = computed(() => route.params.id as string)
 const activeTab = ref<'overview' | 'flow' | 'invites'>('overview')
 const activeStep = ref(1)
 const steps = [
@@ -753,6 +753,7 @@ const steps = [
 
 const { data: organisationData } = useOrganisation(organisationId)
 const organisation = computed(() => organisationData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 const eventSearch = ref('')
 const eventPage = ref(1)
@@ -776,7 +777,7 @@ watch(ledgerSearch, () => {
 })
 
 const { data: sponsorableEventsResponse, isLoading: isLoadingSponsorableEvents } = useSponsorableEvents(computed(() => ({
-	organisation: organisationId.value,
+	organisation: organisationNumericId.value,
 	search: eventSearch.value.trim() || undefined,
 	page: eventPage.value,
 	page_size: eventPageSize,
@@ -871,12 +872,12 @@ const sponsorshipPackages = computed<PackageItem[]>(() => {
 })
 
 const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods } = usePaymentMethods(computed(() => {
-	if (!selectedEvent.value?.id) {
+	if (!selectedEventId.value) {
 		return undefined
 	}
 
 	return {
-		event: selectedEvent.value.id,
+		event: selectedEventId.value,
 		is_active: true,
 		page_size: 100,
 	}
@@ -903,13 +904,13 @@ const pendingInvites = computed(() => eventInvites.value.filter(invite => invite
 const acceptedInvites = computed(() => eventInvites.value.filter(invite => invite.accepted))
 
 const { data: paymentHistory, isLoading: isLoadingPaymentHistory } = useOrganisationSponsorshipPaymentHistory(computed(() => {
-	if (!selectedEventId.value || !organisationId.value) {
+	if (!selectedEventId.value || !organisationNumericId.value) {
 		return undefined
 	}
 
 	return {
 		event_id: selectedEventId.value,
-		organisation_id: organisationId.value,
+		organisation_id: organisationNumericId.value,
 	}
 }))
 
@@ -1319,7 +1320,12 @@ async function submitCheckout() {
 	if (checkoutForm.mode === 'token') {
 		payload.invite_token = checkoutForm.inviteToken.trim()
 	} else {
-		payload.organisation_id = organisationId.value
+		if (!organisationNumericId.value) {
+			$notyf.error('Community information is still loading. Please try again.')
+			return
+		}
+
+		payload.organisation_id = organisationNumericId.value
 	}
 
 	if (checkoutForm.name.trim()) {

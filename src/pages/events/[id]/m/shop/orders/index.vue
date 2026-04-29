@@ -579,7 +579,7 @@ function setSorting(field: string) {
 // Computed query parameters for API
 const queryParams = computed(() => {
   const params: NonNullable<ProductsOrdersListData['query']> = {
-    event: event.value?.data?.id,
+    event: event.value?.data?.url_safe_title || "",
     page: currentPage.value,
     page_size: pageSize.value,
   }
@@ -715,7 +715,7 @@ function canTransitionStatus(status: OrderStatus | undefined): boolean {
 
 function canCancelOrder(status: OrderStatus | undefined): boolean {
   if (!status) return false
-  return ['draft', 'pending', 'processing'].includes(status)
+  return ['draft', 'pending', 'processing', 'completed'].includes(status)
 }
 
 const transitioningOrderId = ref<string | null>(null)

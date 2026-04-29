@@ -29,13 +29,14 @@ useHead({
 })
 
 // Fetch organization data
-const { data: orgData, isLoading: orgLoading, isError: orgError } = useOrganisation(Number(organisationId.value))
+const { data: orgData, isLoading: orgLoading, isError: orgError } = useOrganisation(organisationId)
 
 const organisation = computed(() => orgData.value?.data)
+const organisationNumericId = computed(() => organisation.value?.id)
 
 // Check if user is already a member
 const { data: membershipsData } = useOrganisationMemberships(computed(() => ({
-  organisation: Number(organisationId.value),
+  organisation: organisationId.value,
   user: authStore.user?.id,
 })))
 
@@ -85,8 +86,13 @@ const onSubmit = handleSubmit((values) => {
 
   // If no membership, create one first then verify
   if (!isMember.value) {
+    if (!organisationNumericId.value) {
+      $notyf?.error('Community information is still loading. Please try again.')
+      return
+    }
+
     createMembership({
-      organisation: Number(organisationId.value),
+      organisation: organisationNumericId.value,
       user: authStore.user!.id,
       access_code: values.code,
     }, {
