@@ -18,6 +18,7 @@ export const paymentMethodSchema = z.object({
     account_name: z.string().optional(),
     sort_code: z.string().optional(),
     account_number: z.string().optional(),
+    stripe_account_id: z.string().optional(),
   }).optional(),
 }).refine(
   (data) => {
@@ -36,6 +37,17 @@ export const paymentMethodSchema = z.object({
   { 
     message: 'Bank transfer details are required for bank transfer payment methods', 
     path: ['provided_details'] 
+  }
+).refine(
+  (data) => {
+    if (data.method_type === 'STRIPE') {
+      return Boolean(data.provided_details?.stripe_account_id)
+    }
+    return true
+  },
+  {
+    message: 'Stripe Connect account is required for Stripe payment methods',
+    path: ['provided_details'],
   }
 )
 

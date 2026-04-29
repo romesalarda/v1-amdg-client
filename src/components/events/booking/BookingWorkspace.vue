@@ -1137,7 +1137,7 @@
                   </span>
                 </div>
 
-                <div class="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" v-if="refundedTotalAmount > 0">
                   <span class="font-semibold text-slate-500">Original total:</span>
                   <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(originalSpentSoFar) }}</span>
                   <span class="font-semibold text-slate-500">Refunded:</span>
@@ -1149,7 +1149,7 @@
                     <dt class="font-semibold text-deep-navy/60">Booking payments</dt>
                     <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
                   </div>
-                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3" v-if="spentSoFarOrders > 0">
                     <dt class="font-semibold text-deep-navy/60">Extra products</dt>
                     <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
                   </div>

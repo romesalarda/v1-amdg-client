@@ -132,16 +132,38 @@
     <template v-if="method_type === 'STRIPE'">
       <div class="space-y-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
         <div class="flex items-start gap-3">
-          <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">info</span>
+          <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">account_balance_wallet</span>
           <div class="flex-1 space-y-2">
-            <h4 class="font-semibold text-sm text-primary">Platform Stripe Account</h4>
+            <h4 class="font-semibold text-sm text-primary">Stripe Connect account required</h4>
             <p class="text-xs text-navy-600 leading-relaxed">
-              Stripe payments are processed through the official platform account for security and compliance. 
-              This ensures PCI compliance, fraud protection, and seamless transaction management.
+              Stripe methods must be linked to a connected Stripe account before they can be saved.
+              Open the Connect page in a new tab, finish onboarding, then come back here to save.
             </p>
-            <div class="flex items-center gap-2 pt-1">
-              <span class="material-symbols-outlined text-green-600 text-base">check_circle</span>
-              <span class="text-xs font-medium text-green-600">Automatically configured</span>
+            <div v-if="stripeConnectAccount" class="flex flex-wrap items-center gap-2 pt-1">
+              <span
+                class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold"
+                :class="stripeConnectAccountReady ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'"
+              >
+                {{ stripeConnectAccountReady ? 'Connected' : 'Needs onboarding' }}
+              </span>
+              <span class="text-[11px] text-navy-500 font-medium">
+                {{ stripeConnectAccount.stripe_account_id }}
+              </span>
+            </div>
+            <div v-else class="flex items-center gap-2 pt-1">
+              <span class="material-symbols-outlined text-amber-600 text-base">warning</span>
+              <span class="text-xs font-medium text-amber-700">No connected Stripe account yet</span>
+            </div>
+            <div class="flex flex-wrap gap-2 pt-2">
+              <button
+                type="button"
+                @click="openStripeConnectPage"
+                class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600"
+              >
+                Open Connect Page
+                <span class="material-symbols-outlined text-sm">open_in_new</span>
+              </button>
+              <span class="text-[11px] text-navy-500 self-center">Opens in a new tab.</span>
             </div>
           </div>
         </div>
@@ -179,7 +201,7 @@
       </button>
       <button
         type="submit"
-        :disabled="isLoading"
+        :disabled="isLoading || (method_type === 'STRIPE' && !stripeConnectAccountReady)"
         class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
       >
         Save Payment Method
@@ -197,6 +219,7 @@ import {
   paymentMethodTypeDescriptions,
   type PaymentMethodFormData 
 } from '~/schemas/events/paymentConfig'
+import { useStripeConnectStatus } from '~/composables/resources/payments/stripeConnect'
 
 interface Props {
   modelValue?: any
@@ -208,6 +231,12 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
   isLoading: false,
 })
+
+const route = useRoute()
+const stripeConnectStatus = useStripeConnectStatus()
+const stripeConnectAccount = computed(() => stripeConnectStatus.data.value?.data)
+const stripeConnectAccountReady = computed(() => stripeConnectAccount.value?.status === 'ACTIVE')
+const stripeConnectPagePath = computed(() => `/events/${String(route.params.id)}/m/payments/connect-your-account`)
 
 const emit = defineEmits<{
   submit: [data: PaymentMethodFormData]
@@ -246,6 +275,7 @@ const { errors, handleSubmit, defineField, resetForm } = useForm({
       account_name: '',
       sort_code: '',
       account_number: '',
+      stripe_account_id: '',
     },
   },
 })
@@ -283,17 +313,14 @@ const onSubmit = handleSubmit((values) => {
       account_number: values.provided_details.account_number,
     }
   } else if (values.method_type === 'STRIPE') {
-    // Always use platform account for Stripe
+    const stripeAccountId = stripeConnectAccount.value?.stripe_account_id || values.provided_details?.stripe_account_id || props.modelValue?.provided_details?.stripe_account_id
     cleanedData.provided_details = {
-      use_platform_account: true
+      stripe_account_id: stripeAccountId,
     }
   } else if (values.method_type === 'CASH') {
     // No provided_details needed for cash
     cleanedData.provided_details = {}
   }
-
-  console.log("s");
-  
 
   emit('submit', cleanedData)
 })
@@ -312,6 +339,7 @@ watch(() => props.modelValue, (newValue) => {
           account_name: '',
           sort_code: '',
           account_number: '',
+          stripe_account_id: '',
         },
       },
     })
@@ -328,4 +356,9 @@ watch(
     }
   }
 )
+
+const openStripeConnectPage = () => {
+  if (typeof window === 'undefined') return
+  window.open(stripeConnectPagePath.value, '_blank', 'noopener,noreferrer')
+}
 </script>

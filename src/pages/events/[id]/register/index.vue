@@ -2451,6 +2451,37 @@ const stripeCardError = ref('')
 const stripePaymentAttemptError = ref('')
 const stripeClientSecret = ref<string | null>(null)
 
+const getStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value): string | null => {
+	const details = paymentMethod?.provided_details
+	if (!details || typeof details !== 'object' || Array.isArray(details)) return null
+	const stripeAccountId = (details as Record<string, unknown>).stripe_account_id
+	return typeof stripeAccountId === 'string' && stripeAccountId.trim().length ? stripeAccountId.trim() : null
+}
+
+const requireStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value, context: string): string => {
+	const stripeAccountId = getStripeAccountIdFromPaymentMethod(paymentMethod)
+	console.debug(`[${context}] Stripe payment method inspection`, {
+		paymentMethodId: paymentMethod?.id || null,
+		paymentMethodTitle: paymentMethod?.title || null,
+		methodType: paymentMethod?.method_type || null,
+		hasProvidedDetails: !!paymentMethod?.provided_details,
+		stripeAccountId,
+	})
+
+	if (!stripeAccountId) {
+		const error = new Error(
+			`Stripe checkout requires provided_details.stripe_account_id on the selected payment method (${paymentMethod?.id || 'unknown'}).`
+		)
+		console.error(`[${context}] ${error.message}`, {
+			paymentMethod,
+			providedDetails: paymentMethod?.provided_details ?? null,
+		})
+		throw error
+	}
+
+	return stripeAccountId
+}
+
 const isPollingPaymentStatus = ref(false)
 const paymentProcessingMessage = ref('')
 
@@ -2895,7 +2926,7 @@ const redirectToEventHome = () => {
 	store.reset()
 	stopIntentCountdown()
 	// Redirect to dashboard after intent expiration
-	router.push({ path: '/' })
+	router.push({ path: `events/${eventId}` })
 }
 
 const markIntentExpired = () => {
@@ -3063,10 +3094,17 @@ const ensureStripeCardMounted = async () => {
 	const publishableKey = effectiveStripePublishableKey.value
 	if (!publishableKey) return
 
+	const stripeAccountId = requireStripeAccountIdFromPaymentMethod(selectedPaymentMethod.value, 'register checkout stripe init')
+	console.debug('[register checkout stripe init] loading Stripe.js', {
+		paymentMethodId: selectedPaymentMethod.value?.id || null,
+		paymentMethodTitle: selectedPaymentMethod.value?.title || null,
+		stripeAccountId,
+	})
+
 	await nextTick()
 	if (!stripeCardMountRef.value) return
 
-	const stripe = await loadStripe(publishableKey)
+	const stripe = await loadStripe(publishableKey, { stripeAccount: stripeAccountId } as any)
 	if (!stripe) {
 		stripeCardError.value = 'Could not initialize Stripe card form.'
 		return
@@ -3098,6 +3136,9 @@ watch(
 			teardownStripeElements()
 		}
 		void ensureStripeCardMounted()
+				.catch((error) => {
+					console.error('[register checkout stripe init] Stripe card mount failed', error)
+				})
 	},
 	{ immediate: true }
 )
@@ -3380,6 +3421,7 @@ const handleCheckout = async () => {
 				attendees: store.attendees,
 				paymentId: bankTransferPaymentId,
 				bankTransferEvidenceId,
+				// TODO missing: stripePaymentIntentId:
 			}),
 			idempotencyKey: idempotencyKey.value,
 		})
@@ -3420,34 +3462,69 @@ const handleCheckout = async () => {
 				throw new Error('Stripe card form is not ready yet.')
 			}
 
-			const confirmation = await stripeInstance.value.confirmCardPayment(stripeClientSecret.value, {
-				payment_method: {
-					card: stripeCardElement.value,
-					billing_details: {
-						name: attendeeDisplayName(store.attendees[0], 0),
-						email: store.attendees[0]?.email || undefined,
-					},
-				},
+			const stripeAccountOption = requireStripeAccountIdFromPaymentMethod(selectedPaymentMethod.value, 'register checkout stripe confirm')
+			console.debug('[register checkout stripe confirm] confirming card payment', {
+				paymentMethodId: selectedPaymentMethod.value?.id || null,
+				paymentMethodTitle: selectedPaymentMethod.value?.title || null,
+				stripeAccountId: stripeAccountOption,
+				clientSecretTail: stripeClientSecret.value.slice(-6),
 			})
 
+			const confirmation = await stripeInstance.value.confirmCardPayment(
+				stripeClientSecret.value,
+				{
+					payment_method: {
+						card: stripeCardElement.value,
+						billing_details: {
+							name: attendeeDisplayName(store.attendees[0], 0),
+							email: store.attendees[0]?.email || undefined,
+						},
+					},
+				},
+				({ stripeAccount: stripeAccountOption } as any)
+			)
+			isSaving.value = false
+
 			if (confirmation.error) {
+				console.error('[register checkout stripe confirm] Stripe confirmation failed', {
+					paymentMethodId: selectedPaymentMethod.value?.id || null,
+					stripeAccountId: stripeAccountOption,
+					message: confirmation.error.message || null,
+					code: (confirmation.error as any)?.code || null,
+					type: (confirmation.error as any)?.type || null,
+				})
 				stripePaymentAttemptError.value = confirmation.error.message || 'Card confirmation failed.'
 				idempotencyKey.value = createIdempotencyKey()
 				toast.add({ title: 'Payment failed', description: stripePaymentAttemptError.value, color: 'red' })
 				return
 			}
 
+			console.info('[register checkout stripe confirm] Stripe confirmation succeeded', {
+				paymentMethodId: selectedPaymentMethod.value?.id || null,
+				stripeAccountId: stripeAccountOption,
+				paymentIntentId: confirmation.paymentIntent?.id || null,
+				status: confirmation.paymentIntent?.status || null,
+			})
+
 			if (confirmation.paymentIntent?.status === 'succeeded') {
 				checkoutCompleted.value = true
+
+				const paymentId = String(checkoutResult.value?.payment_id || '')
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
-				const paymentId = checkoutResult.value?.payment_id
-				if (paymentId > 0) {
-					startPaymentStatusPolling(String(paymentId), bookingId > 0 ? bookingId : undefined)
+				if (paymentId) {
+					startPaymentStatusPolling(paymentId, bookingId > 0 ? bookingId : undefined)
+					toast.add({
+						title: 'Payment confirmed',
+						description: 'Stripe confirmed your payment. Finalizing your registration now.',
+						color: 'amber',
+					})
+					return
 				}
+
 				showCheckoutSuccessModal.value = true
 				toast.add({
 					title: 'Payment confirmed',
-					description: 'Stripe payment confirmed. Finalizing your booking now.',
+					description: 'Stripe payment confirmed. Registration is complete.',
 					color: 'green',
 				})
 				return
@@ -3496,7 +3573,7 @@ const handleCheckout = async () => {
 	} finally {
 		isSaving.value = false
 	}
-}
+	}
 
 const closeSuccessModalAndRedirect = () => {
 	showCheckoutSuccessModal.value = false

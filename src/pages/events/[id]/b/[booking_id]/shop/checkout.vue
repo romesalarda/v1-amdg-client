@@ -284,9 +284,6 @@
 						<p class="mt-2 text-sm text-deep-navy/80">Order {{ checkoutResult.order_reference || checkoutResult.order_id }}</p>
 						<p class="mt-1 text-sm text-deep-navy/80">Status {{ checkoutResult.status || 'pending' }}</p>
 
-						<div v-if="checkoutResult.stripe_client_secret" class="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-3 text-xs text-blue-900">
-							Stripe payment intent created. Complete the inline card step to finish payment.
-						</div>
 
 						<div v-if="checkoutResult.bank_transfer_reference" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-900">
 							<p class="font-black">Reference: {{ checkoutResult.bank_transfer_reference }}</p>
@@ -645,6 +642,38 @@ const successRedirectSeconds = 10
 const successModalCountdown = ref(successRedirectSeconds)
 const successModalTitle = ref('Payment successful')
 const successModalMessage = ref('Your purchase has been confirmed.')
+
+const getStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value): string | null => {
+	const details = paymentMethod?.provided_details
+	if (!details || typeof details !== 'object' || Array.isArray(details)) return null
+	const stripeAccountId = (details as Record<string, unknown>).stripe_account_id
+	return typeof stripeAccountId === 'string' && stripeAccountId.trim().length ? stripeAccountId.trim() : null
+}
+
+const requireStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value, context: string): string => {
+	const stripeAccountId = getStripeAccountIdFromPaymentMethod(paymentMethod)
+	console.debug(`[${context}] Stripe payment method inspection`, {
+		paymentMethodId: paymentMethod?.id || null,
+		paymentMethodTitle: paymentMethod?.title || null,
+		methodType: paymentMethod?.method_type || null,
+		hasProvidedDetails: !!paymentMethod?.provided_details,
+		stripeAccountId,
+	})
+
+	if (!stripeAccountId) {
+		const error = new Error(
+			`Stripe checkout requires provided_details.stripe_account_id on the selected payment method (${paymentMethod?.id || 'unknown'}).`
+		)
+		console.error(`[${context}] ${error.message}`, {
+			paymentMethod,
+			providedDetails: paymentMethod?.provided_details ?? null,
+		})
+		throw error
+	}
+
+	return stripeAccountId
+}
+
 let successRedirectTimer: ReturnType<typeof setTimeout> | null = null
 let successCountdownTimer: ReturnType<typeof setInterval> | null = null
 
@@ -887,10 +916,17 @@ const ensureStripeCardMounted = async () => {
 		return
 	}
 
+	const stripeAccountId = requireStripeAccountIdFromPaymentMethod(selectedPaymentMethod.value, 'booking shop stripe init')
+	console.debug('[booking shop stripe init] loading Stripe.js', {
+		paymentMethodId: selectedPaymentMethod.value?.id || null,
+		paymentMethodTitle: selectedPaymentMethod.value?.title || null,
+		stripeAccountId,
+	})
+
 	await nextTick()
 	if (!stripeCardMountRef.value) return
 
-	const stripe = await loadStripe(key)
+	const stripe = await loadStripe(key, { stripeAccount: stripeAccountId } as any)
 	if (!stripe) {
 		stripeCardError.value = 'Unable to initialize Stripe card form.'
 		return
@@ -919,6 +955,9 @@ watch(
 		}
 
 		void ensureStripeCardMounted()
+			.catch((error) => {
+				console.error('[booking shop stripe init] Stripe card mount failed', error)
+			})
 	},
 	{ immediate: true }
 )
@@ -1019,14 +1058,33 @@ async function submitCheckout() {
 			}
 
 			isConfirmingStripePayment.value = true
-			const result = await stripeInstance.value.confirmCardPayment(clientSecret, {
-				payment_method: {
-					card: stripeCardElement.value,
-				},
+			const stripeAccountOption = requireStripeAccountIdFromPaymentMethod(selectedPaymentMethod.value, 'booking shop stripe confirm')
+			console.debug('[booking shop stripe confirm] confirming card payment', {
+				paymentMethodId: selectedPaymentMethod.value?.id || null,
+				paymentMethodTitle: selectedPaymentMethod.value?.title || null,
+				stripeAccountId: stripeAccountOption,
+				clientSecretTail: clientSecret.slice(-6),
 			})
+
+			const result = await stripeInstance.value.confirmCardPayment(
+				clientSecret,
+				{
+					payment_method: {
+						card: stripeCardElement.value,
+					},
+				},
+				({ stripeAccount: stripeAccountOption } as any)
+			)
 			isConfirmingStripePayment.value = false
 
 			if (result.error) {
+				console.error('[booking shop stripe confirm] Stripe confirmation failed', {
+					paymentMethodId: selectedPaymentMethod.value?.id || null,
+					stripeAccountId: stripeAccountOption,
+					message: result.error.message || null,
+					code: (result.error as any)?.code || null,
+					type: (result.error as any)?.type || null,
+				})
 				stripeCardError.value = result.error.message || 'Card payment could not be confirmed.'
 				toast.add({
 					title: 'Card payment failed',
@@ -1038,6 +1096,12 @@ async function submitCheckout() {
 			}
 
 			const statusValue = result.paymentIntent?.status || 'processing'
+			console.info('[booking shop stripe confirm] Stripe confirmation succeeded', {
+				paymentMethodId: selectedPaymentMethod.value?.id || null,
+				stripeAccountId: stripeAccountOption,
+				paymentIntentId: result.paymentIntent?.id || null,
+				status: statusValue,
+			})
 
 			const orderStatus = await waitForOrderStatusAfterStripePayment()
 			if (isPurchaseSuccessfulStatus(orderStatus)) {
