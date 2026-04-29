@@ -1,5 +1,5 @@
 <template>
-	<div class="min-h-screen bg-slate-100 text-slate-900">
+	<div class="min-h-screen bg-slate-100 text-slate-900" :class="{ 'checkout-lock': isCheckoutUiBusy }">
 		<header class="relative h-[32vh] min-h-[280px] w-full overflow-hidden">
 			<img :src="heroImageSrc" alt="Registration hero" class="absolute inset-0 h-full w-full object-cover" />
 			<div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/45 to-slate-900/20"></div>
@@ -73,6 +73,13 @@
 					>
 						<UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
 						<span>Session expires in {{ intentCountdownLabel }}</span>
+					</div>
+					<div
+						v-if="isCheckoutUiBusy"
+						class="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-blue-800"
+					>
+						<span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+						<span>{{ checkoutProcessingStageLabel }}</span>
 					</div>
 				</div>
 			</div>
@@ -1030,6 +1037,7 @@
 										type="button"
 										class="rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
 										:class="method.id === selectedPaymentMethodId ? 'border-slate-900 bg-slate-900 text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'"
+										:disabled="isCheckoutUiBusy"
 										@click="selectedPaymentMethodId = method.id"
 									>
 										<div class="flex items-center justify-between gap-2">
@@ -1172,22 +1180,22 @@
 							</div>
 						</div>
 					<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
-										<UButton color="gray" variant="ghost" @click="handleBack">Back</UButton>
+										<UButton color="gray" variant="ghost" :disabled="isCheckoutUiBusy" @click="handleBack">Back</UButton>
 										<div class="flex items-center gap-3">
 											<UButton
 												v-if="activeStepIndex === reviewStepIndex"
 												color="primary"
-												:loading="isSaving"
-												:disabled="!canContinue || checkoutCompleted"
+												:loading="isCheckoutUiBusy"
+												:disabled="!canContinue || shouldDisableCheckoutButton"
 												@click="handleCheckout"
 											>
-												Complete registration
+												{{ checkoutPrimaryButtonLabel }}
 											</UButton>
 											<UButton
 												v-else
 												color="primary"
 												:loading="isSaving"
-												:disabled="!canContinue"
+												:disabled="!canContinue || isCheckoutUiBusy"
 												@click="handleNext"
 											>
 												{{ primaryActionLabel }}
@@ -1268,6 +1276,45 @@
 		</div>
 	</div>
 
+	<Transition
+		enter-active-class="transition duration-300 ease-out"
+		enter-from-class="opacity-0"
+		enter-to-class="opacity-100"
+		leave-active-class="transition duration-200 ease-in"
+		leave-from-class="opacity-100"
+		leave-to-class="opacity-0"
+	>
+		<div
+			v-if="isCheckoutUiBusy"
+			class="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm"
+		>
+			<div class="w-full max-w-xl overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-2xl">
+				<div class="checkout-overlay-top" />
+				<div class="space-y-4 px-6 pb-6 pt-5">
+					<div class="flex items-start gap-3">
+						<span class="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700">
+							<svg class="checkout-orbit h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+							</svg>
+						</span>
+						<div>
+							<p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Checkout in progress</p>
+							<h3 class="mt-1 text-xl font-black text-slate-900">{{ checkoutProcessingStageLabel }}</h3>
+							<p class="mt-1 text-sm text-slate-600">{{ checkoutProcessingDescription }}</p>
+						</div>
+					</div>
+
+					<div class="rounded-xl border border-blue-200 bg-blue-50/70 p-3">
+						<div class="checkout-progress-line">
+							<span class="checkout-progress-dot" />
+						</div>
+						<p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-800">Please keep this page open</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</Transition>
+
 	<UModal v-if="!showCheckoutSuccessModal" v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
 		<div class="space-y-4 p-6 md:p-8">
 			<div class="flex items-start gap-3">
@@ -1290,6 +1337,11 @@
 	<UModal v-model="showCheckoutSuccessModal" :prevent-close="true" :ui="{ width: 'sm:max-w-5xl' }">
 		<div class="success-modal space-y-8 p-8 md:p-14">
 			<div class="success-glow"></div>
+			<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-4">
+				<span class="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" />
+				<span class="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
+				<span class="h-2 w-2 rounded-full bg-amber-400 animate-bounce" />
+			</div>
 			<div class="success-pop text-center">
 				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-100/60 md:h-24 md:w-24">
 					<UIcon name="i-heroicons-check" class="h-11 w-11 text-emerald-600 success-check md:h-14 md:w-14" />
@@ -1299,12 +1351,12 @@
 				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
 					{{ event?.title || 'this event' }}
 				</p>
-				<!-- <div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
+				<div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
 					<p class="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Bank transfer reference</p>
 					<p class="mt-1 text-2xl font-black tracking-[0.12em] text-amber-900">{{ checkoutBankTransferReference }}</p>
 					<p class="mt-2 text-xs text-amber-800">Use this exact reference when making the transfer so your payment can be matched quickly.</p>
 					<p v-if="checkoutBankTransferInstructions" class="mt-2 text-xs text-amber-800">{{ checkoutBankTransferInstructions }}</p>
-				</div> -->
+				</div>
 			</div>
 
 			<div class="flex justify-center success-cta-wrap">
@@ -2450,6 +2502,37 @@ const stripeCardReady = ref(false)
 const stripeCardError = ref('')
 const stripePaymentAttemptError = ref('')
 const stripeClientSecret = ref<string | null>(null)
+
+const isCheckoutUiBusy = computed(() => isSaving.value || isPollingPaymentStatus.value)
+const shouldDisableCheckoutButton = computed(() => checkoutCompleted.value || isCheckoutUiBusy.value)
+
+const checkoutPrimaryButtonLabel = computed(() => {
+	if (isPollingPaymentStatus.value) return 'Finalizing payment...'
+	if (isSaving.value && isStripeMethod.value) return 'Processing card payment...'
+	if (isSaving.value && isBankTransferMethod.value) return 'Submitting transfer checkout...'
+	if (isSaving.value) return 'Completing checkout...'
+	return 'Complete registration'
+})
+
+const checkoutProcessingStageLabel = computed(() => {
+	if (isPollingPaymentStatus.value) return 'Finalizing your registration'
+	if (isStripeMethod.value) return 'Confirming card payment'
+	if (isBankTransferMethod.value) return 'Submitting bank transfer checkout'
+	return 'Submitting checkout'
+})
+
+const checkoutProcessingDescription = computed(() => {
+	if (isPollingPaymentStatus.value) {
+		return paymentProcessingMessage.value || 'We are verifying payment status and preparing your booking.'
+	}
+	if (isStripeMethod.value) {
+		return 'Your card is being securely processed via Stripe. Please do not close this page.'
+	}
+	if (isBankTransferMethod.value) {
+		return 'We are locking in your transfer details and creating your booking.'
+	}
+	return 'We are completing your checkout request.'
+})
 
 const getStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value): string | null => {
 	const details = paymentMethod?.provided_details
@@ -3711,6 +3794,40 @@ const goBack = () => {
 	animation: successFadeIn 0.9s ease-out 1.95s forwards;
 }
 
+.checkout-lock {
+	user-select: none;
+}
+
+.checkout-overlay-top {
+	height: 72px;
+	background: linear-gradient(180deg, rgba(219, 234, 254, 0.85) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.checkout-orbit {
+	animation: checkoutOrbit 1.1s linear infinite;
+	transform-origin: center;
+}
+
+.checkout-progress-line {
+	position: relative;
+	height: 6px;
+	border-radius: 999px;
+	background: rgba(59, 130, 246, 0.25);
+	overflow: hidden;
+}
+
+.checkout-progress-dot {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	width: 110px;
+	height: 110%;
+	border-radius: 999px;
+	background: linear-gradient(90deg, rgba(37, 99, 235, 0), rgba(37, 99, 235, 0.95), rgba(37, 99, 235, 0));
+	transform: translateY(-50%);
+	animation: checkoutProgress 1.4s ease-in-out infinite;
+}
+
 @keyframes successRise {
 	from {
 		opacity: 0;
@@ -3755,6 +3872,27 @@ const goBack = () => {
 	to {
 		opacity: 1;
 		transform: translateY(0);
+	}
+}
+
+@keyframes checkoutOrbit {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes checkoutProgress {
+	0% {
+		left: -28%;
+	}
+	50% {
+		left: 42%;
+	}
+	100% {
+		left: 100%;
 	}
 }
 </style>

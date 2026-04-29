@@ -6059,6 +6059,7 @@ export type EventDetail = {
     readonly can_event_be_published: boolean;
     readonly registration_open_date: string;
     readonly registration_close_date: string;
+    readonly uptime: string;
     /**
      *  links
      */
@@ -7546,6 +7547,14 @@ export type EventSettings = {
      */
     sponsor_checkout_policy_notes?: string | null;
     /**
+     * Maximum number of attendees that can be included in a single booking.
+     */
+    max_attendees_per_booking?: number;
+    /**
+     * Maximum number of attendees that a single user can register across all their bookings for this event.
+     */
+    max_attendees_per_user?: number;
+    /**
      * Default timezone for event
      *
      * * `Africa/Abidjan` - Africa/Abidjan
@@ -8203,6 +8212,14 @@ export type EventSettingsRequest = {
      * Optional organiser notes describing sponsorship checkout policy.
      */
     sponsor_checkout_policy_notes?: string | null;
+    /**
+     * Maximum number of attendees that can be included in a single booking.
+     */
+    max_attendees_per_booking?: number;
+    /**
+     * Maximum number of attendees that a single user can register across all their bookings for this event.
+     */
+    max_attendees_per_user?: number;
     /**
      * Default timezone for event
      *
@@ -13606,6 +13623,14 @@ export type PatchedEventSettingsRequest = {
      * Optional organiser notes describing sponsorship checkout policy.
      */
     sponsor_checkout_policy_notes?: string | null;
+    /**
+     * Maximum number of attendees that can be included in a single booking.
+     */
+    max_attendees_per_booking?: number;
+    /**
+     * Maximum number of attendees that a single user can register across all their bookings for this event.
+     */
+    max_attendees_per_user?: number;
     /**
      * Default timezone for event
      *
@@ -21040,6 +21065,14 @@ export type EventSettingsWritable = {
      * Optional organiser notes describing sponsorship checkout policy.
      */
     sponsor_checkout_policy_notes?: string | null;
+    /**
+     * Maximum number of attendees that can be included in a single booking.
+     */
+    max_attendees_per_booking?: number;
+    /**
+     * Maximum number of attendees that a single user can register across all their bookings for this event.
+     */
+    max_attendees_per_user?: number;
     /**
      * Default timezone for event
      *
@@ -46240,6 +46273,24 @@ export type StripeConnectAccountsCreateResponses = {
 
 export type StripeConnectAccountsCreateResponse = StripeConnectAccountsCreateResponses[keyof StripeConnectAccountsCreateResponses];
 
+export type StripeConnectAccountsDestroyData = {
+    body?: never;
+    path: {
+        stripe_account_id: string;
+    };
+    query?: never;
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/';
+};
+
+export type StripeConnectAccountsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type StripeConnectAccountsDestroyResponse = StripeConnectAccountsDestroyResponses[keyof StripeConnectAccountsDestroyResponses];
+
 export type StripeConnectAccountsRetrieveData = {
     body?: never;
     path: {
@@ -46284,21 +46335,6 @@ export type StripeConnectAccountsSetPrimaryCreateResponses = {
 };
 
 export type StripeConnectAccountsSetPrimaryCreateResponse = StripeConnectAccountsSetPrimaryCreateResponses[keyof StripeConnectAccountsSetPrimaryCreateResponses];
-
-export type StripeConnectAccountsDestroyData = {
-    body?: never;
-    path: {
-        stripe_account_id: string;
-    };
-    query?: never;
-    url: '/api/stripe/connect-accounts/{stripe_account_id}/';
-};
-
-export type StripeConnectAccountsDestroyResponses = {
-    204: void;
-};
-
-export type StripeConnectAccountsDestroyResponse = StripeConnectAccountsDestroyResponses[keyof StripeConnectAccountsDestroyResponses];
 
 export type CreateStripeConnectOnboardingLinkData = {
     body?: {

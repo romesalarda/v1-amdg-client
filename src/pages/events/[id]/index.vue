@@ -455,6 +455,7 @@
       <input
       v-model.number="otherAttendeeCount"
       type="number"
+      :max="getMaxRegistrationBooking()"
       :min="registrarAttending ? 1 : 1"
       class="w-full rounded-xl border border-deep-navy/20 bg-white px-4 py-3 text-sm text-deep-navy focus:border-deep-navy focus:outline-none focus:ring-2 focus:ring-deep-navy/20"
       />
@@ -493,6 +494,8 @@ definePageMeta({
 const route = useRoute()
 const eventId = computed(() => String(route.params.id))
 
+
+
 // Fetch event details
 const { data, isLoading, isError } = useEvent(eventId)
 const event = computed(() => data.value?.data)
@@ -528,6 +531,13 @@ const showRegistrationModal = ref(false)
 const registrarAttending = ref(true)
 const registeringOthers = ref(false)
 const otherAttendeeCount = ref(1)
+
+const getMaxRegistrationBooking = () => {
+    if (registrarAttending.value && registeringOthers.value) {
+      return (event.value?.settings.max_attendees_per_booking || 1) - 1
+    }
+    return event.value?.settings.max_attendees_per_booking || 1
+}
 
 const isPreview = ref(false)
 

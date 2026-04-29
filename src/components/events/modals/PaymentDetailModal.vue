@@ -96,7 +96,7 @@
                   <span class="text-sm text-gray-600">Modified Amount:</span>
                   <span class="font-semibold">{{ formatAmount(paymentData.modified_amount) }}</span>
                 </div>
-                <div class="flex justify-between items-center">
+                <div class="flex justify-between items-center" v-if="paymentData.total_refunded_amount > 0">
                   <span class="text-sm text-gray-600">Refunded Amount:</span>
                   <span class="font-semibold text-red-600">- {{ formatAmount(paymentData.total_refunded_amount) }}</span>
                 </div>

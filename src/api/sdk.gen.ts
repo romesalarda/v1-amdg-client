@@ -12566,6 +12566,19 @@ export const stripeConnectAccountsCreate = <ThrowOnError extends boolean = false
 /**
  * Manage Stripe connected accounts for the authenticated user.
  */
+export const stripeConnectAccountsDestroy = <ThrowOnError extends boolean = false>(options: Options<StripeConnectAccountsDestroyData, ThrowOnError>) => (options.client ?? client).delete<StripeConnectAccountsDestroyResponses, unknown, ThrowOnError>({
+    security: [{ scheme: 'bearer', type: 'http' }, {
+            in: 'cookie',
+            name: 'sessionid',
+            type: 'apiKey'
+        }],
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/',
+    ...options
+});
+
+/**
+ * Manage Stripe connected accounts for the authenticated user.
+ */
 export const stripeConnectAccountsRetrieve = <ThrowOnError extends boolean = false>(options: Options<StripeConnectAccountsRetrieveData, ThrowOnError>) => (options.client ?? client).get<StripeConnectAccountsRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
             in: 'cookie',
@@ -12591,19 +12604,6 @@ export const stripeConnectAccountsPartialUpdate = <ThrowOnError extends boolean 
         'Content-Type': 'application/json',
         ...options.headers
     }
-});
-
-/**
- * Manage Stripe connected accounts for the authenticated user.
- */
-export const stripeConnectAccountsDestroy = <ThrowOnError extends boolean = false>(options: Options<StripeConnectAccountsDestroyData, ThrowOnError>) => (options.client ?? client).delete<StripeConnectAccountsDestroyResponses, unknown, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
-            in: 'cookie',
-            name: 'sessionid',
-            type: 'apiKey'
-        }],
-    url: '/api/stripe/connect-accounts/{stripe_account_id}/',
-    ...options,
 });
 
 /**
