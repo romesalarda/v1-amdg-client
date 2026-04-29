@@ -20,9 +20,17 @@ export function useCreateStripeConnectOnboardingLink() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: () => createStripeConnectOnboardingLink(),
+    mutationFn: (forceNew?: boolean) => {
+      // Pass force_new in the request body if creating a new account
+      if (forceNew) {
+        return createStripeConnectOnboardingLink({ body: { force_new: true } })
+      }
+      return createStripeConnectOnboardingLink({ body: { force_new: false } })
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      // Also invalidate the connected accounts list
+      queryClient.invalidateQueries({ queryKey: ['stripeConnectedAccounts'] })
     },
   })
 }

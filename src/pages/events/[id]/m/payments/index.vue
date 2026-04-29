@@ -147,6 +147,9 @@
                     <div>Account: {{ (method as any).provided_details.account_name }}</div>
                     <div>Sort Code: {{ (method as any).provided_details.sort_code }}</div>
                   </div>
+                  <div v-if="method.method_type === 'STRIPE' && (method as any).provided_details?.stripe_account_id" class="text-xs text-navy-400 space-y-0.5">
+                    <div>Stripe Account: {{ getStripeAccountDisplay((method as any).provided_details.stripe_account_id) }}</div>
+                  </div>
                 </div>
                 <div class="flex items-center gap-2 ml-4">
                   <!-- Toggle -->
@@ -379,6 +382,7 @@ import {
   usePartialUpdatePaymentMethod,
   useDeletePaymentMethod 
 } from '~/composables/resources/payments/paymentMethods'
+import { useStripeConnectedAccounts } from '~/composables/resources/payments/stripeConnectedAccounts'
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
@@ -407,6 +411,10 @@ const { data: event } = useEvent(id)
 const { data: settingsData, isLoading: settingsLoading } = useEventSettings(id)
 const eventIdFilter = computed(() => ({ event: route.params.id as string }))
 const { data: paymentMethodsData, isLoading: paymentMethodsLoading, refetch: refetchPaymentMethods } = usePaymentMethods(eventIdFilter)
+
+// Fetch Stripe connected accounts for display
+const { data: stripeAccountsData } = useStripeConnectedAccounts()
+const allStripeAccounts = computed(() => stripeAccountsData.value?.data?.results || [])
 
 const paymentMethods = computed(() => paymentMethodsData.value?.data?.results || [])
 const settings = computed(() => settingsData.value?.data)
@@ -571,6 +579,14 @@ const removePaymentMethod = async (methodId: string) => {
 
 const getMethodTypeLabel = (methodType: string) => {
   return paymentMethodTypeLabels[methodType as keyof typeof paymentMethodTypeLabels] || methodType
+}
+
+const getStripeAccountDisplay = (stripeAccountId: string) => {
+  const account = allStripeAccounts.value.find(a => a.stripe_account_id === stripeAccountId)
+  if (account) {
+    return `${account.display_name} (${account.is_primary ? 'primary' : 'active'})`
+  }
+  return stripeAccountId
 }
 
 // Discount modal

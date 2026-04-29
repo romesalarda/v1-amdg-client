@@ -30,7 +30,7 @@
                       {{ statusDescription }}
                     </p>
                     <p v-if="stripeConnectAccount?.stripe_account_id" class="mt-2 text-xs font-semibold text-navy-500">
-                      Connected account: {{ stripeConnectAccount.stripe_account_id }}
+                      Connected account: {{ stripeConnectAccount.email }}
                     </p>
                   </div>
 
@@ -73,6 +73,159 @@
                   Back to payments
                 </button>
               </div>
+
+              <!-- Connected Accounts Manager -->
+              <div class="mt-12 pt-8 border-t border-deep-navy/10">
+                <h2 class="text-lg font-bold text-navy-900 mb-4">Your connected accounts</h2>
+
+                <div v-if="accountsLoading" class="space-y-3">
+                  <div class="h-20 rounded-2xl bg-mist-blue/70 animate-pulse" />
+                  <div class="h-20 rounded-2xl bg-mist-blue/70 animate-pulse" />
+                </div>
+
+                <div v-else-if="accounts && accounts.length > 0" class="space-y-3">
+                  <div
+                    v-for="account in accounts"
+                    :key="account.stripe_account_id"
+                    class="rounded-2xl border p-4 transition-all hover:border-primary/30 hover:bg-primary/2"
+                  >
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <h3 class="font-semibold text-navy-900 truncate">{{ account.display_name }}</h3>
+                          <span
+                            v-if="account.is_primary"
+                            class="inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-bold text-primary"
+                          >
+                            Primary
+                          </span>
+                          <span
+                            v-if="!account.is_active"
+                            class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xs font-bold text-gray-600"
+                          >
+                            Inactive
+                          </span>
+                        </div>
+                        <p class="text-xs text-navy-500">{{ account.stripe_account_id }}</p>
+                        <p class="text-sm text-navy-600 mt-1">
+                          <span
+                            :class="{
+                              'text-green-600': account.status === 'ACTIVE',
+                              'text-amber-600': account.status === 'RESTRICTED',
+                              'text-red-600': account.status === 'DISABLED',
+                            }"
+                          >
+                            {{ account.status }}
+                          </span>
+                        </p>
+                      </div>
+
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <button
+                          v-if="!account.is_primary && account.is_active"
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-lg border border-deep-navy/10 bg-white p-2 text-navy-600 transition-all hover:bg-primary/5 hover:text-primary disabled:opacity-50"
+                          :disabled="setPrimaryMutation.isPending.value"
+                          @click="setAccountAsPrimary(account.stripe_account_id)"
+                          title="Set as primary"
+                        >
+                          <span class="material-symbols-outlined text-base">check_circle</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-lg border border-deep-navy/10 bg-white p-2 text-navy-600 transition-all hover:bg-mist-blue disabled:opacity-50"
+                          :disabled="updateAccountMutation.isPending.value"
+                          @click="editAccount(account)"
+                          title="Edit account"
+                        >
+                          <span class="material-symbols-outlined text-base">edit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          class="inline-flex items-center justify-center rounded-lg border border-deep-navy/10 bg-white p-2 text-red-600 transition-all hover:bg-red-50 disabled:opacity-50"
+                          :disabled="updateAccountMutation.isPending.value"
+                          @click="deactivateAccount(account)"
+                          title="Deactivate account"
+                        >
+                          <span class="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-else class="text-center py-8 text-navy-500">
+                  <p>No connected Stripe accounts yet. Start onboarding above to add your first account.</p>
+                </div>
+
+                <button
+                  v-if="accounts && accounts.length > 0"
+                  type="button"
+                  class="mt-4 inline-flex items-center gap-2 rounded-xl border border-primary bg-white px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary/5 disabled:opacity-50"
+                  :disabled="onboardingMutation.isPending.value"
+                  @click="startNewAccountOnboarding"
+                >
+                  <span class="material-symbols-outlined text-base">add</span>
+                  Add another account
+                </button>
+              </div>
+
+              <!-- Edit/Add Account Modal -->
+              <Teleport v-if="showAddAccountForm" to="body">
+                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                  <div class="bg-white rounded-2xl shadow-lg max-w-md w-full p-6">
+                    <h3 class="text-lg font-bold text-navy-900 mb-4">
+                      {{ editingAccount ? 'Edit account' : 'Add account' }}
+                    </h3>
+
+                    <form @submit.prevent="saveAccountChanges" class="space-y-4">
+                      <div>
+                        <label class="block text-sm font-semibold text-navy-700 mb-1">Display name</label>
+                        <input
+                          v-model="accountFormData.display_name"
+                          type="text"
+                          class="w-full rounded-lg border border-deep-navy/10 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                          placeholder="E.g., Main account, Backup account"
+                        />
+                      </div>
+
+                      <div class="flex items-center gap-2">
+                        <input
+                          v-model="accountFormData.is_active"
+                          type="checkbox"
+                          :id="`is_active_${editingAccount?.stripe_account_id}`"
+                          class="rounded border-gray-300"
+                        />
+                        <label
+                          :for="`is_active_${editingAccount?.stripe_account_id}`"
+                          class="text-sm font-medium text-navy-700"
+                        >
+                          Active (can be used for payment methods)
+                        </label>
+                      </div>
+
+                      <div class="flex gap-2 pt-4">
+                        <button
+                          type="button"
+                          class="flex-1 rounded-lg border border-deep-navy/10 bg-white px-4 py-2 text-sm font-semibold text-navy-700 transition-all hover:bg-mist-blue"
+                          @click="closeAccountForm"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          class="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-navy-600 disabled:opacity-60"
+                          :disabled="updateAccountMutation.isPending.value"
+                        >
+                          {{ updateAccountMutation.isPending.value ? 'Saving...' : 'Save' }}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </Teleport>
             </template>
           </div>
         </section>
@@ -107,11 +260,17 @@ import {
   useCreateStripeConnectOnboardingLink,
   useStripeConnectStatus,
 } from '~/composables/resources/payments/stripeConnect'
+import {
+  useStripeConnectedAccounts,
+  useUpdateStripeConnectedAccount,
+  useSetPrimaryStripeAccount,
+} from '~/composables/resources/payments/stripeConnectedAccounts'
 
 definePageMeta({
   layout: false,
 })
 
+const toast = useToast()
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 
@@ -119,8 +278,23 @@ const { data: event } = useEvent(id)
 const stripeConnectStatus = useStripeConnectStatus()
 const onboardingMutation = useCreateStripeConnectOnboardingLink()
 
+// Multi-account queries and mutations
+const accountsQuery = useStripeConnectedAccounts()
+const updateAccountMutation = useUpdateStripeConnectedAccount()
+const setPrimaryMutation = useSetPrimaryStripeAccount()
+
 const stripeConnectAccount = computed(() => stripeConnectStatus.data.value?.data)
 const stripeConnectLoading = computed(() => stripeConnectStatus.isLoading.value || stripeConnectStatus.isFetching.value)
+
+// Multi-account state
+const accounts = computed(() => accountsQuery.data.value?.data?.results || [])
+const accountsLoading = computed(() => accountsQuery.isLoading.value || accountsQuery.isFetching.value)
+const showAddAccountForm = ref(false)
+const editingAccount = ref<any>(null)
+const accountFormData = ref({
+  display_name: '',
+  is_active: true,
+})
 
 const statusLabel = computed(() => stripeConnectAccount.value?.status || 'Not created')
 const statusDescription = computed(() => {
@@ -170,11 +344,112 @@ const statusIconClass = computed(() => {
 })
 
 const startOnboarding = async () => {
-  const response = await onboardingMutation.mutateAsync()
+  const response = await onboardingMutation.mutateAsync(false)
   const onboardingUrl = response?.data?.onboarding_url
 
   if (onboardingUrl) {
+    // Refresh accounts after onboarding returns
+    accountsQuery.refetch()
     await navigateTo(onboardingUrl, { external: true })
+  }
+}
+
+const startNewAccountOnboarding = async () => {
+  const response = await onboardingMutation.mutateAsync(true) // Pass true for force_new
+  const onboardingUrl = response?.data?.onboarding_url
+
+  if (onboardingUrl) {
+    // Refresh accounts after onboarding returns
+    accountsQuery.refetch()
+    await navigateTo(onboardingUrl, { external: true })
+  }
+}
+
+const editAccount = (account: any) => {
+  editingAccount.value = account
+  accountFormData.value = {
+    display_name: account.display_name,
+    is_active: account.is_active,
+  }
+  showAddAccountForm.value = true
+}
+
+const closeAccountForm = () => {
+  showAddAccountForm.value = false
+  editingAccount.value = null
+  accountFormData.value = {
+    display_name: '',
+    is_active: true,
+  }
+}
+
+const saveAccountChanges = async () => {
+  if (!editingAccount.value?.stripe_account_id) return
+
+  try {
+    await updateAccountMutation.mutateAsync({
+      stripeAccountId: editingAccount.value.stripe_account_id,
+      body: {
+        display_name: accountFormData.value.display_name,
+        is_active: accountFormData.value.is_active,
+      },
+    })
+    toast.add({
+      title: 'Account updated',
+      description: 'Your account settings have been saved.',
+      color: 'green',
+    })
+    closeAccountForm()
+  } catch (error) {
+    console.error('Failed to update account:', error)
+    toast.add({
+      title: 'Failed to update account',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const setAccountAsPrimary = async (stripeAccountId: string) => {
+  try {
+    await setPrimaryMutation.mutateAsync(stripeAccountId)
+    toast.add({
+      title: 'Primary account updated',
+      description: 'This account is now your primary account.',
+      color: 'green',
+    })
+  } catch (error) {
+    console.error('Failed to set primary account:', error)
+    toast.add({
+      title: 'Failed to set primary account',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const deactivateAccount = async (account: any) => {
+  if (confirm(`Deactivate "${account.display_name}"? This account won't be available for new payment methods.`)) {
+    try {
+      await updateAccountMutation.mutateAsync({
+        stripeAccountId: account.stripe_account_id,
+        body: {
+          is_active: false,
+        },
+      })
+      toast.add({
+        title: 'Account deactivated',
+        description: 'The account is no longer available for payment methods.',
+        color: 'green',
+      })
+    } catch (error) {
+      console.error('Failed to deactivate account:', error)
+      toast.add({
+        title: 'Failed to deactivate account',
+        description: error instanceof Error ? error.message : 'An error occurred',
+        color: 'red',
+      })
+    }
   }
 }
 </script>

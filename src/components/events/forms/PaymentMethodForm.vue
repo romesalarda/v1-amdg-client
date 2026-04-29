@@ -134,58 +134,68 @@
         <div class="flex items-start gap-3">
           <span class="material-symbols-outlined text-primary text-xl flex-shrink-0 mt-0.5">account_balance_wallet</span>
           <div class="flex-1 space-y-2">
-            <h4 class="font-semibold text-sm text-primary">Stripe Connect account required</h4>
+            <h4 class="font-semibold text-sm text-primary">Select a Stripe account</h4>
             <p class="text-xs text-navy-600 leading-relaxed">
-              Stripe methods must be linked to a connected Stripe account before they can be saved.
-              Open the Connect page in a new tab, finish onboarding, then come back here to save.
+              Choose which of your connected Stripe accounts to use for this payment method. Only active accounts that are ready for payments are shown.
             </p>
-            <div v-if="stripeConnectAccount" class="flex flex-wrap items-center gap-2 pt-1">
-              <span
-                class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold"
-                :class="stripeConnectAccountReady ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'"
-              >
-                {{ stripeConnectAccountReady ? 'Connected' : 'Needs onboarding' }}
-              </span>
-              <span class="text-[11px] text-navy-500 font-medium">
-                {{ stripeConnectAccount.stripe_account_id }}
-              </span>
-            </div>
-            <div v-else class="flex items-center gap-2 pt-1">
-              <span class="material-symbols-outlined text-amber-600 text-base">warning</span>
-              <span class="text-xs font-medium text-amber-700">No connected Stripe account yet</span>
-            </div>
             <div class="flex flex-wrap gap-2 pt-2">
               <button
                 type="button"
                 @click="openStripeConnectPage"
                 class="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600"
               >
-                Open Connect Page
+                Manage Accounts
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
               </button>
-              <button
-                type="button"
-                class="inline-flex items-center gap-2 rounded-xl border border-deep-navy/10 bg-white px-4 py-2 text-[11px] font-medium text-navy-700 transition-all hover:bg-mist-blue"
-                @click="stripeAccountId = stripeConnectAccount?.stripe_account_id || ''"
-                v-if="stripeConnectAccount"
-              >
-                Use my connected account
-              </button>
-              <div class="w-full pt-3">
-                <label class="block text-sm font-medium text-background-dark-600" for="stripe-account-id">Stripe account ID</label>
-                <input
-                  id="stripe-account-id"
-                  v-model="stripeAccountId"
-                  v-bind="stripeAccountIdAttrs"
-                  type="text"
-                  readonly
-                  placeholder="Set via 'Use my connected account'"
-                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 mt-2"
-                />
-                <p v-if="errors['provided_details.stripe_account_id']" class="text-xs text-red-500">{{ errors['provided_details.stripe_account_id'] }}</p>
-                <p class="text-xs text-navy-500 pt-1">Manual entry is not allowed — connect a Stripe account and use the button above to attach it.</p>
+            </div>
+
+            <!-- Account selector -->
+            <div class="w-full pt-3">
+              <label class="block text-sm font-medium text-background-dark-600 mb-2" for="stripe-account-selector">
+                Connected account <span class="text-red-500">*</span>
+              </label>
+
+              <div v-if="eligibleAccountsLoading" class="animate-pulse">
+                <div class="h-10 rounded-lg bg-mist-blue/70" />
               </div>
-              <span class="text-[11px] text-navy-500 self-center">Opens in a new tab.</span>
+
+              <select
+                v-else-if="eligibleAccounts.length > 0"
+                id="stripe-account-selector"
+                v-model="stripeAccountId"
+                v-bind="stripeAccountIdAttrs"
+                class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">-- Select an account --</option>
+                <option v-for="account in eligibleAccounts" :key="account.stripe_account_id" :value="account.stripe_account_id">
+                  {{ account.display_name }} ({{ account.stripe_account_id }})
+                  <span v-if="account.is_primary"> • Primary</span>
+                </option>
+              </select>
+
+              <div v-else class="rounded-lg border border-amber-200 bg-amber-50/70 p-3">
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-amber-600 text-base flex-shrink-0 mt-0.5">warning</span>
+                  <div class="text-sm text-amber-700">
+                    <p class="font-semibold mb-1">No active Stripe accounts available</p>
+                    <p class="text-xs">Click "Manage Accounts" above to create or activate a connected Stripe account.</p>
+                  </div>
+                </div>
+              </div>
+
+              <p v-if="errors['provided_details.stripe_account_id']" class="text-xs text-red-500 pt-1">
+                {{ errors['provided_details.stripe_account_id'] }}
+              </p>
+
+              <!-- Warning if editing with invalid current account -->
+              <div v-if="showAccountWarning" class="rounded-lg border border-amber-200 bg-amber-50/70 p-3 mt-3">
+                <div class="flex items-start gap-2">
+                  <span class="material-symbols-outlined text-amber-600 text-base flex-shrink-0 mt-0.5">info</span>
+                  <p class="text-xs text-amber-700">
+                    The currently selected account is no longer active. Please select an eligible account to update this payment method.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -242,6 +252,7 @@ import {
   type PaymentMethodFormData 
 } from '~/schemas/events/paymentConfig'
 import { useStripeConnectStatus } from '~/composables/resources/payments/stripeConnect'
+import { useStripeConnectedAccounts } from '~/composables/resources/payments/stripeConnectedAccounts'
 
 interface Props {
   modelValue?: any
@@ -256,9 +267,18 @@ const props = withDefaults(defineProps<Props>(), {
 
 const route = useRoute()
 const stripeConnectStatus = useStripeConnectStatus()
+const { data: accountsData, isLoading: accountsIsLoading } = useStripeConnectedAccounts()
+
 const stripeConnectAccount = computed(() => stripeConnectStatus.data.value?.data)
 const stripeConnectAccountReady = computed(() => stripeConnectAccount.value?.status === 'ACTIVE')
 const stripeConnectPagePath = computed(() => `/events/${String(route.params.id)}/m/payments/connect-your-account`)
+
+// Filter accounts: only show active + ACTIVE status
+const allAccounts = computed(() => accountsData.value?.data?.results || [])
+const eligibleAccounts = computed(() => 
+  allAccounts.value.filter(acc => acc.is_active && acc.status === 'ACTIVE')
+)
+const eligibleAccountsLoading = computed(() => accountsIsLoading.value)
 
 const emit = defineEmits<{
   submit: [data: PaymentMethodFormData]
@@ -380,6 +400,18 @@ watch(
     }
   }
 )
+
+// Check if the current stripe account is still eligible (used for warning on edit)
+const showAccountWarning = computed(() => {
+  if (method_type.value !== 'STRIPE') return false
+  if (!stripeAccountId.value) return false
+  
+  // Check if the current account is not in the eligible list
+  const currentAccountStillEligible = eligibleAccounts.value.some(
+    acc => acc.stripe_account_id === stripeAccountId.value
+  )
+  return !currentAccountStillEligible
+})
 
 const openStripeConnectPage = () => {
   if (typeof window === 'undefined') return

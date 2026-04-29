@@ -11907,6 +11907,13 @@ export type PaginatedSponsorableEventListList = {
     results: Array<SponsorableEventList>;
 };
 
+export type PaginatedStripeConnectedAccountListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<StripeConnectedAccountList>;
+};
+
 export type PaginatedTicketListList = {
     count: number;
     next?: string | null;
@@ -14691,6 +14698,15 @@ export type PatchedRoomVenueCreateUpdateRequest = {
 };
 
 /**
+ * Serializer for updating mutable Stripe connected account fields only.
+ */
+export type PatchedStripeConnectedAccountUpdateRequest = {
+    display_name?: string;
+    is_active?: boolean;
+    is_primary?: boolean;
+};
+
+/**
  * Create/Update serializer for TicketType with validation.
  */
 export type PatchedTicketTypeCreateUpdateRequest = {
@@ -17219,6 +17235,65 @@ export type StripeConnectAccount = {
     created_at?: string | null;
     updated_at?: string | null;
     synced_at?: string | null;
+};
+
+/**
+ * Serializer for creating a user-owned Stripe connected account record.
+ */
+export type StripeConnectedAccountCreate = {
+    stripe_account_id: string;
+    display_name?: string;
+    is_primary?: boolean;
+};
+
+/**
+ * Serializer for creating a user-owned Stripe connected account record.
+ */
+export type StripeConnectedAccountCreateRequest = {
+    stripe_account_id: string;
+    display_name?: string;
+    is_primary?: boolean;
+};
+
+/**
+ * Serializer for listing and retrieving user Stripe connected accounts.
+ */
+export type StripeConnectedAccountList = {
+    readonly connected_account_id: string;
+    readonly stripe_account_id: string;
+    display_name?: string;
+    is_active?: boolean;
+    is_primary?: boolean;
+    readonly account_type: string;
+    readonly country: string;
+    readonly email: string;
+    readonly business_type: string;
+    readonly charges_enabled: boolean;
+    readonly payouts_enabled: boolean;
+    readonly details_submitted: boolean;
+    readonly disabled_reason: string;
+    readonly status: string;
+    readonly created_at: string;
+    readonly updated_at: string;
+    readonly synced_at: string;
+};
+
+/**
+ * Serializer for listing and retrieving user Stripe connected accounts.
+ */
+export type StripeConnectedAccountListRequest = {
+    display_name?: string;
+    is_active?: boolean;
+    is_primary?: boolean;
+};
+
+/**
+ * Serializer for updating mutable Stripe connected account fields only.
+ */
+export type StripeConnectedAccountUpdate = {
+    display_name?: string;
+    is_active?: boolean;
+    is_primary?: boolean;
 };
 
 /**
@@ -22838,6 +22913,13 @@ export type PaginatedSponsorableEventListListWritable = {
     results: Array<SponsorableEventListWritable>;
 };
 
+export type PaginatedStripeConnectedAccountListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<StripeConnectedAccountListWritable>;
+};
+
 export type PaginatedTicketListListWritable = {
     count: number;
     next?: string | null;
@@ -24125,6 +24207,15 @@ export type StockLevelsWritable = {
     distribution: Array<{
         [key: string]: unknown;
     }>;
+};
+
+/**
+ * Serializer for listing and retrieving user Stripe connected accounts.
+ */
+export type StripeConnectedAccountListWritable = {
+    display_name?: string;
+    is_active?: boolean;
+    is_primary?: boolean;
 };
 
 /**
@@ -46110,8 +46201,101 @@ export type GetStripeConnectStatusResponses = {
 
 export type GetStripeConnectStatusResponse = GetStripeConnectStatusResponses[keyof GetStripeConnectStatusResponses];
 
-export type CreateStripeConnectOnboardingLinkData = {
+export type StripeConnectAccountsListData = {
     body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/stripe/connect-accounts/';
+};
+
+export type StripeConnectAccountsListResponses = {
+    200: PaginatedStripeConnectedAccountListList;
+};
+
+export type StripeConnectAccountsListResponse = StripeConnectAccountsListResponses[keyof StripeConnectAccountsListResponses];
+
+export type StripeConnectAccountsCreateData = {
+    body: StripeConnectedAccountCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/stripe/connect-accounts/';
+};
+
+export type StripeConnectAccountsCreateResponses = {
+    201: StripeConnectedAccountCreate;
+};
+
+export type StripeConnectAccountsCreateResponse = StripeConnectAccountsCreateResponses[keyof StripeConnectAccountsCreateResponses];
+
+export type StripeConnectAccountsRetrieveData = {
+    body?: never;
+    path: {
+        stripe_account_id: string;
+    };
+    query?: never;
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/';
+};
+
+export type StripeConnectAccountsRetrieveResponses = {
+    200: StripeConnectedAccountList;
+};
+
+export type StripeConnectAccountsRetrieveResponse = StripeConnectAccountsRetrieveResponses[keyof StripeConnectAccountsRetrieveResponses];
+
+export type StripeConnectAccountsPartialUpdateData = {
+    body?: PatchedStripeConnectedAccountUpdateRequest;
+    path: {
+        stripe_account_id: string;
+    };
+    query?: never;
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/';
+};
+
+export type StripeConnectAccountsPartialUpdateResponses = {
+    200: StripeConnectedAccountUpdate;
+};
+
+export type StripeConnectAccountsPartialUpdateResponse = StripeConnectAccountsPartialUpdateResponses[keyof StripeConnectAccountsPartialUpdateResponses];
+
+export type StripeConnectAccountsSetPrimaryCreateData = {
+    body?: StripeConnectedAccountListRequest;
+    path: {
+        stripe_account_id: string;
+    };
+    query?: never;
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/set-primary/';
+};
+
+export type StripeConnectAccountsSetPrimaryCreateResponses = {
+    200: StripeConnectedAccountList;
+};
+
+export type StripeConnectAccountsSetPrimaryCreateResponse = StripeConnectAccountsSetPrimaryCreateResponses[keyof StripeConnectAccountsSetPrimaryCreateResponses];
+
+export type CreateStripeConnectOnboardingLinkData = {
+    body?: {
+        /**
+         * Optional country code
+         */
+        country?: string;
+        /**
+         * Force creation of a new account
+         */
+        force_new?: boolean;
+    };
     path?: never;
     query?: never;
     url: '/api/stripe/connect/onboard/';
