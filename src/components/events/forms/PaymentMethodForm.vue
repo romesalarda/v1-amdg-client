@@ -163,6 +163,28 @@
                 Open Connect Page
                 <span class="material-symbols-outlined text-sm">open_in_new</span>
               </button>
+              <button
+                type="button"
+                class="inline-flex items-center gap-2 rounded-xl border border-deep-navy/10 bg-white px-4 py-2 text-[11px] font-medium text-navy-700 transition-all hover:bg-mist-blue"
+                @click="stripeAccountId = stripeConnectAccount?.stripe_account_id || ''"
+                v-if="stripeConnectAccount"
+              >
+                Use my connected account
+              </button>
+              <div class="w-full pt-3">
+                <label class="block text-sm font-medium text-background-dark-600" for="stripe-account-id">Stripe account ID</label>
+                <input
+                  id="stripe-account-id"
+                  v-model="stripeAccountId"
+                  v-bind="stripeAccountIdAttrs"
+                  type="text"
+                  readonly
+                  placeholder="Set via 'Use my connected account'"
+                  class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 mt-2"
+                />
+                <p v-if="errors['provided_details.stripe_account_id']" class="text-xs text-red-500">{{ errors['provided_details.stripe_account_id'] }}</p>
+                <p class="text-xs text-navy-500 pt-1">Manual entry is not allowed — connect a Stripe account and use the button above to attach it.</p>
+              </div>
               <span class="text-[11px] text-navy-500 self-center">Opens in a new tab.</span>
             </div>
           </div>
@@ -291,6 +313,8 @@ const [bankTransferRequiredImmediately, bankTransferRequiredImmediatelyAttrs] = 
 const [accountName, accountNameAttrs] = defineField('provided_details.account_name')
 const [sortCode, sortCodeAttrs] = defineField('provided_details.sort_code')
 const [accountNumber, accountNumberAttrs] = defineField('provided_details.account_number')
+// Stripe account id field (allows explicit override or using connected account)
+const [stripeAccountId, stripeAccountIdAttrs] = defineField('provided_details.stripe_account_id')
 
 // Handle form submission
 const onSubmit = handleSubmit((values) => {
