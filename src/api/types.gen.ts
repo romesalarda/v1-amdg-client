@@ -46285,6 +46285,21 @@ export type StripeConnectAccountsSetPrimaryCreateResponses = {
 
 export type StripeConnectAccountsSetPrimaryCreateResponse = StripeConnectAccountsSetPrimaryCreateResponses[keyof StripeConnectAccountsSetPrimaryCreateResponses];
 
+export type StripeConnectAccountsDestroyData = {
+    body?: never;
+    path: {
+        stripe_account_id: string;
+    };
+    query?: never;
+    url: '/api/stripe/connect-accounts/{stripe_account_id}/';
+};
+
+export type StripeConnectAccountsDestroyResponses = {
+    204: void;
+};
+
+export type StripeConnectAccountsDestroyResponse = StripeConnectAccountsDestroyResponses[keyof StripeConnectAccountsDestroyResponses];
+
 export type CreateStripeConnectOnboardingLinkData = {
     body?: {
         /**

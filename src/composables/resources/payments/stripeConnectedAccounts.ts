@@ -7,6 +7,7 @@ import {
   stripeConnectAccountsCreate,
   stripeConnectAccountsPartialUpdate,
   stripeConnectAccountsSetPrimaryCreate,
+  stripeConnectAccountsDestroy,
 } from '~/api/sdk.gen'
 import type {
   StripeConnectAccountsListData,
@@ -94,6 +95,21 @@ export function useSetPrimaryStripeAccount() {
   return useMutation({
     mutationFn: (stripeAccountId: string) =>
       stripeConnectAccountsSetPrimaryCreate({ path: { stripe_account_id: stripeAccountId } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}
+
+/**
+ * Delete a Stripe connected account permanently
+ */
+export function useDeleteStripeConnectedAccount() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (stripeAccountId: string) =>
+      stripeConnectAccountsDestroy({ path: { stripe_account_id: stripeAccountId } }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
     },

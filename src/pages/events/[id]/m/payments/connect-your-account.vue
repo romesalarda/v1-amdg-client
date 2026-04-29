@@ -145,9 +145,9 @@
                         <button
                           type="button"
                           class="inline-flex items-center justify-center rounded-lg border border-deep-navy/10 bg-white p-2 text-red-600 transition-all hover:bg-red-50 disabled:opacity-50"
-                          :disabled="updateAccountMutation.isPending.value"
-                          @click="deactivateAccount(account)"
-                          title="Deactivate account"
+                          :disabled="deleteAccountMutation.isPending.value"
+                          @click="deleteAccount(account)"
+                          title="Delete account"
                         >
                           <span class="material-symbols-outlined text-base">delete</span>
                         </button>
@@ -264,6 +264,7 @@ import {
   useStripeConnectedAccounts,
   useUpdateStripeConnectedAccount,
   useSetPrimaryStripeAccount,
+  useDeleteStripeConnectedAccount,
 } from '~/composables/resources/payments/stripeConnectedAccounts'
 
 definePageMeta({
@@ -282,6 +283,7 @@ const onboardingMutation = useCreateStripeConnectOnboardingLink()
 const accountsQuery = useStripeConnectedAccounts()
 const updateAccountMutation = useUpdateStripeConnectedAccount()
 const setPrimaryMutation = useSetPrimaryStripeAccount()
+const deleteAccountMutation = useDeleteStripeConnectedAccount()
 
 const stripeConnectAccount = computed(() => stripeConnectStatus.data.value?.data)
 const stripeConnectLoading = computed(() => stripeConnectStatus.isLoading.value || stripeConnectStatus.isFetching.value)
@@ -428,25 +430,35 @@ const setAccountAsPrimary = async (stripeAccountId: string) => {
   }
 }
 
-const deactivateAccount = async (account: any) => {
-  if (confirm(`Deactivate "${account.display_name}"? This account won't be available for new payment methods.`)) {
+const deleteAccount = async (account: any) => {
+  const isPrimary = account.is_primary
+  const otherActiveExists = accounts.value.some(
+    (a: any) => a.stripe_account_id !== account.stripe_account_id && a.is_active,
+  )
+
+  if (isPrimary && otherActiveExists) {
+    toast.add({
+      title: 'Cannot delete primary account',
+      description: 'Set a different account as primary before deleting this one.',
+      color: 'red',
+    })
+    return
+  }
+
+  const confirmMsg = `Permanently delete "${account.display_name}"? This cannot be undone.`
+  if (confirm(confirmMsg)) {
     try {
-      await updateAccountMutation.mutateAsync({
-        stripeAccountId: account.stripe_account_id,
-        body: {
-          is_active: false,
-        },
-      })
+      await deleteAccountMutation.mutateAsync(account.stripe_account_id)
       toast.add({
-        title: 'Account deactivated',
-        description: 'The account is no longer available for payment methods.',
+        title: 'Account deleted',
+        description: 'The Stripe account has been removed.',
         color: 'green',
       })
-    } catch (error) {
-      console.error('Failed to deactivate account:', error)
+    } catch (error: any) {
+      const detail = error?.response?.data?.detail ?? (error instanceof Error ? error.message : 'An error occurred')
       toast.add({
-        title: 'Failed to deactivate account',
-        description: error instanceof Error ? error.message : 'An error occurred',
+        title: 'Failed to delete account',
+        description: detail,
         color: 'red',
       })
     }
