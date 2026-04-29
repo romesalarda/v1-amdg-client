@@ -4,7 +4,7 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   srcDir: 'src/',
   ssr: false,  // Disable SSR - run as SPA for simpler auth
-  modules: ['@nuxt/ui', '@pinia/nuxt', '@hebilicious/vue-query-nuxt'],
+  modules: ['@nuxt/ui', '@pinia/nuxt', '@hebilicious/vue-query-nuxt', 'nuxt-qrcode'],
   typescript: {
     strict: true,
     typeCheck: true

@@ -230,6 +230,11 @@
             </div>
           </article>
 
+          <!-- Tickets tab -->
+          <article v-if="selectedAttendeeId && activeTab === 'tickets'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+            <TicketsTab :selected-attendee-id="selectedAttendeeId" />
+          </article>
+
           <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <div class="flex items-center justify-between gap-3">
               <div>
@@ -1268,6 +1273,11 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useQueryClient } from '@tanstack/vue-query'
 import { bookingAttendeeFormSchema, type BookingAttendeeFormData } from '~/schemas/events/booking'
 import OutstandingPaymentCarouselCard from '~/components/events/booking/OutstandingPaymentCarouselCard.vue'
+import BookingOverviewTab from '~/components/events/booking/tabs/BookingOverviewTab.vue'
+import AttendeeInfoTab from '~/components/events/booking/tabs/AttendeeInfoTab.vue'
+import TicketsTab from '~/components/events/booking/tabs/TicketsTab.vue'
+import OrdersTab from '~/components/events/booking/tabs/OrdersTab.vue'
+import PaymentsTab from '~/components/events/booking/tabs/PaymentsTab.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { uploadMultipart } from '~/utils/upload'
 import { locationsAreasList } from '~/api/sdk.gen'
@@ -1308,7 +1318,7 @@ import {
 import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
 import { formatDate, formatDateTime } from '~/utils/time'
 
-type TabId = 'overview' | 'attendee' | 'orders' | 'payments'
+type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments'
 type AreaOption = { label: string; value: number }
 type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 
@@ -1680,6 +1690,7 @@ if (props.initialAttendeeId) {
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
   { id: 'overview', label: 'Booking' },
   { id: 'attendee', label: 'Attendee Info', needsAttendee: true },
+  { id: 'tickets', label: 'Tickets', needsAttendee: true },
   { id: 'payments', label: 'Payments', needsAttendee: false },
   { id: 'orders', label: 'Orders', needsAttendee: true },
 ]
@@ -1687,6 +1698,92 @@ const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
 const selectedAttendee = computed(() => {
   if (!selectedAttendeeId.value) return null
   return attendees.value.find(item => item.id === selectedAttendeeId.value) || null
+})
+
+/**
+ * Map tab IDs to their corresponding component and props
+ */
+const tabComponentMap = computed(() => ({
+  overview: {
+    component: BookingOverviewTab,
+    props: {
+      booking,
+      event: event.data.value?.data,
+      attendees,
+      journeySteps,
+      eventTitle,
+      eventStart,
+      eventEnd,
+      eventLocation,
+      eventWhatToBring,
+      eventCheckInInstructions,
+      venueMapEmbedUrl,
+      eventVenues,
+      formattedBookedAt,
+      isSingleAttendeeBooking,
+    },
+  },
+  attendee: {
+    component: AttendeeInfoTab,
+    props: {
+      selectedAttendeeId,
+      selectedAttendee,
+      booking,
+      isPersonalInfoEditing,
+      attendeeSectionsOpen,
+      attendeeForm,
+      areaOptions,
+      areaSearch,
+      areaLookupLoading,
+      emergencyContactForm,
+      attendeeEmergencyContactList,
+      showMedicalForm,
+      showDietaryForm,
+      showAccessibilityForm,
+      attendeeMedicalConditions,
+      attendeeDietaryRequirements,
+      attendeeAccessibilityRequirements,
+      attendeeConsents,
+      medicalConditions,
+      dietaryRequirements,
+      accessibilityRequirements,
+    },
+  },
+  tickets: {
+    component: TicketsTab,
+    props: {
+      selectedAttendeeId,
+    },
+  },
+  orders: {
+    component: OrdersTab,
+    props: {
+      selectedAttendeeId,
+      booking,
+      attendeeOrderList,
+      attendeeOrders,
+    },
+  },
+  payments: {
+    component: PaymentsTab,
+    props: {
+      bookingData: selectedBookingItem.value,
+      selectedAttendeeId,
+      outstandingPayments,
+      completedSummaryPayments,
+      currencySymbol,
+      spentSoFarTotal,
+      refundedTotalAmount,
+      allSummaryPayments,
+    },
+  },
+}))
+
+/**
+ * Get the current tab component and its props
+ */
+const currentTabConfig = computed(() => {
+  return tabComponentMap.value[activeTab.value] || tabComponentMap.value.overview
 })
 
 const bookingShopHref = computed(() => {
@@ -1807,7 +1904,7 @@ watch(
     applyingRouteState.value = true
     try {
       const routeTab = String(route.query.tab || '')
-      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'orders') {
+      if (routeTab === 'overview' || routeTab === 'payments' || routeTab === 'attendee' || routeTab === 'tickets' || routeTab === 'orders') {
         activeTab.value = routeTab
       }
 
