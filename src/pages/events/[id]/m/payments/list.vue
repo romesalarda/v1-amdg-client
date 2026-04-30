@@ -187,6 +187,15 @@
                     Cancel
                   </button>
                   <button
+                    @click="bulkDelete"
+                    :disabled="!canBulkDelete || bulkActionLoading"
+                    :title="bulkDeleteDisabledReason"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-1"
+                  >
+                    <span class="material-symbols-outlined text-sm">delete</span>
+                    Delete (max 5)
+                  </button>
+                  <button
                     @click="clearSelection"
                     class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
                   >
@@ -1072,6 +1081,55 @@ const isAllSelected = computed(() => {
   return payments.value.length > 0 && payments.value.every((p: any) => selectedPayments.value.has(p.payment_id))
 })
 
+const selectedPaymentRecords = computed(() => {
+  return payments.value.filter((p: any) => selectedPayments.value.has(p.payment_id))
+})
+
+const bulkDeleteValidation = computed(() => {
+  const selectedCount = selectedPayments.value.size
+  if (selectedCount === 0) {
+    return {
+      valid: false,
+      reason: 'Select at least one payment to delete.',
+      deletablePayments: [] as any[],
+    }
+  }
+
+  if (selectedCount > 5) {
+    return {
+      valid: false,
+      reason: 'You can delete at most 5 payments at a time.',
+      deletablePayments: [] as any[],
+    }
+  }
+
+  if (selectedPaymentRecords.value.length !== selectedCount) {
+    return {
+      valid: false,
+      reason: 'Some selected payments are not available in the current list.',
+      deletablePayments: [] as any[],
+    }
+  }
+
+  const nonDeletable = selectedPaymentRecords.value.filter((payment: any) => !canDeletePayment(payment))
+  if (nonDeletable.length > 0) {
+    return {
+      valid: false,
+      reason: 'Only FAILED, DRAFTING, or REFUNDED payments after event end can be deleted.',
+      deletablePayments: [] as any[],
+    }
+  }
+
+  return {
+    valid: true,
+    reason: '',
+    deletablePayments: selectedPaymentRecords.value,
+  }
+})
+
+const canBulkDelete = computed(() => bulkDeleteValidation.value.valid)
+const bulkDeleteDisabledReason = computed(() => bulkDeleteValidation.value.reason)
+
 function toggleSelectAll() {
   if (isAllSelected.value) {
     selectedPayments.value.clear()
@@ -1218,6 +1276,54 @@ async function bulkCancel() {
   toast.add({
     title: 'Bulk Action Complete',
     description: `${successCount} succeeded, ${failCount} failed`,
+    color: failCount > 0 ? 'amber' : 'green',
+  })
+}
+
+async function bulkDelete() {
+  if (!canBulkDelete.value) {
+    toast.add({
+      title: 'Bulk delete unavailable',
+      description: bulkDeleteDisabledReason.value || 'Selected payments are not eligible for deletion.',
+      color: 'amber',
+    })
+    return
+  }
+
+  const deletablePayments = bulkDeleteValidation.value.deletablePayments
+
+  const result = await Swal.fire({
+    title: 'Delete selected payments?',
+    text: `Permanently delete ${deletablePayments.length} payment(s)? This cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+  })
+
+  if (!result.isConfirmed) return
+
+  bulkActionLoading.value = true
+  let successCount = 0
+  let failCount = 0
+
+  for (const payment of deletablePayments) {
+    try {
+      await deletePaymentMutation.mutateAsync(payment.payment_id)
+      successCount++
+    } catch (error) {
+      failCount++
+    }
+  }
+
+  bulkActionLoading.value = false
+  clearSelection()
+  refetchPayments()
+
+  toast.add({
+    title: 'Bulk Delete Complete',
+    description: `${successCount} deleted, ${failCount} failed`,
     color: failCount > 0 ? 'amber' : 'green',
   })
 }

@@ -158,6 +158,30 @@
                 >
                   Clear selection
                 </UButton>
+                <select
+                  v-model="selectedBulkTargetStatus"
+                  class="px-2.5 py-1.5 text-xs border border-gray-300 rounded-lg bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                >
+                  <option value="">Target status...</option>
+                  <option
+                    v-for="status in bulkTransitionTargets"
+                    :key="status"
+                    :value="status"
+                  >
+                    {{ statusLabelMap[status] || status }}
+                  </option>
+                </select>
+                <UButton
+                  size="xs"
+                  variant="soft"
+                  color="blue"
+                  icon="i-heroicons-arrow-path"
+                  :disabled="!canBulkUpdateStatus"
+                  :title="bulkUpdateDisabledReason"
+                  @click="bulkUpdateOrdersStatus"
+                >
+                  Update status
+                </UButton>
                 <UButton
                   size="xs"
                   variant="soft"
@@ -166,6 +190,17 @@
                   @click="bulkCancelOrders"
                 >
                   Cancel selected
+                </UButton>
+                <UButton
+                  size="xs"
+                  variant="soft"
+                  color="red"
+                  icon="i-heroicons-trash"
+                  :disabled="!canBulkDeleteOrders"
+                  :title="bulkDeleteDisabledReason"
+                  @click="bulkDeleteOrders"
+                >
+                  Delete selected
                 </UButton>
                 <UButton
                   size="xs"
@@ -374,6 +409,17 @@
                         @click="cancelOrder(order)"
                         title="Cancel order"
                       />
+
+                      <UButton
+                        v-if="canDeleteOrder(order.status)"
+                        size="xs"
+                        variant="ghost"
+                        color="red"
+                        icon="i-heroicons-trash"
+                        :disabled="transitioningOrderId === order.order_id"
+                        @click="deleteOrder(order)"
+                        title="Delete order"
+                      />
                     </div>
                   </td>
                 </tr>
@@ -505,11 +551,17 @@
 import { DateTime } from 'luxon'
 import type { OrderList, ProductsOrdersListData } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
-import { useProductOrders, useCancelProductOrder, useCompleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
+import { useProductOrders, useCancelProductOrder, useCompleteProductOrder, useDeleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
+import {
+  useOrderStatusDistribution,
+  useOrderTrends,
+  useRevenueOverview as useProductRevenueOverview,
+} from '~/composables/statistics/products/product-statistics'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { orderStatusColors } from '~/schemas/events/productConstants'
 import { formatMoney } from '~/utils/money'
 import { formatDate } from '~/utils/time'
+import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
@@ -562,6 +614,23 @@ const availableStatuses: Array<{ value: OrderStatus; label: string }> = [
   { value: 'pending_refund', label: 'Pending Refund' },
   { value: 'refunded', label: 'Refunded' },
 ]
+
+const orderStatusTransitions: Record<OrderStatus, OrderStatus[]> = {
+  draft: ['pending', 'cancelled'],
+  pending: ['processing', 'cancelled'],
+  processing: ['completed', 'pending_refund', 'refunded', 'cancelled'],
+  completed: ['pending_refund', 'refunded', 'cancelled'],
+  cancelled: [],
+  pending_refund: ['refunded', 'cancelled'],
+  refunded: [],
+}
+
+const statusLabelMap = computed<Record<string, string>>(() => {
+  return availableStatuses.reduce((acc, item) => {
+    acc[item.value] = item.label
+    return acc
+  }, {} as Record<string, string>)
+})
 
 // Sorting
 const currentSort = ref<string | null>('created_at')
@@ -626,27 +695,69 @@ const queryParams = computed(() => {
 // Orders Data
 const { data: ordersData, isLoading, refetch } = useProductOrders(queryParams)
 const orders = computed(() => ordersData.value?.data?.results || [])
-const totalOrders = computed(() => ordersData.value?.data?.count || 0)
+
+const statisticsQueryParams = computed(() => ({
+  event_id: (event.value?.data as any)?.event_id,
+  format: 'raw' as const,
+  include_deleted: false,
+}))
+
+const completedTodayQueryParams = computed(() => {
+  const today = DateTime.now().toISODate() || ''
+
+  return {
+    event_id: (event.value?.data as any)?.event_id,
+    format: 'raw' as const,
+    include_deleted: false,
+    status: 'completed',
+    group_by: 'day' as const,
+    cumulative: false,
+    date_from: today,
+    date_to: today,
+  }
+})
+
+const { data: orderStatusDistributionData } = useOrderStatusDistribution(statisticsQueryParams)
+const { data: revenueOverviewData } = useProductRevenueOverview(statisticsQueryParams)
+const { data: completedTodayTrendsData } = useOrderTrends(completedTodayQueryParams)
+
+function normalizeStatusValue(value: unknown): string {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+}
+
+function parseDistributionCount(item: Record<string, unknown>): number {
+  const countValue = item.count ?? item.orders ?? item.total ?? item.value
+  const parsed = Number(countValue)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+const statusCounts = computed<Record<string, number>>(() => {
+  const entries = orderStatusDistributionData.value?.data?.distribution || []
+  const counts: Record<string, number> = {}
+
+  for (const entry of entries) {
+    const item = entry as Record<string, unknown>
+    const key = normalizeStatusValue(item.status ?? item.label ?? item.name ?? item.key)
+    if (!key) continue
+    counts[key] = parseDistributionCount(item)
+  }
+
+  return counts
+})
+
+const totalOrders = computed(() => {
+  return Number(orderStatusDistributionData.value?.data?.total_orders || 0)
+})
 
 // Statistics
-const pendingOrdersCount = computed(() => 
-  orders.value.filter((o: OrderList) => o.status === 'pending').length
-)
+const pendingOrdersCount = computed(() => statusCounts.value.pending || 0)
 
-const completedTodayCount = computed(() => {
-  const today = DateTime.now().startOf('day')
-  return orders.value.filter((o: OrderList) => {
-    if (o.status !== 'completed') return false
-    const createdAt = DateTime.fromISO(o.created_at)
-    return createdAt >= today
-  }).length
-})
+const completedTodayCount = computed(() => Number(completedTodayTrendsData.value?.data?.total_orders || 0))
 
-const totalRevenue = computed(() => {
-  return orders.value
-    .filter((o: OrderList) => o.status === 'completed')
-    .reduce((sum: number, o: OrderList) => sum + parseFloat(o.total_amount), 0)
-})
+const totalRevenue = computed(() => Number(revenueOverviewData.value?.data?.total_revenue || 0))
 
 const pageGrossAmount = computed(() => {
   return orders.value.reduce((sum: number, o: OrderList) => sum + parseFloat(o.total_amount.slice(1)), 0)
@@ -690,6 +801,7 @@ watch(filters, () => {
 // Table Selection
 const selectAll = ref(false)
 const selectedOrders = ref<string[]>([])
+const selectedBulkTargetStatus = ref<OrderStatus | ''>('')
 
 function toggleSelectAll() {
   if (selectAll.value) {
@@ -701,6 +813,62 @@ function toggleSelectAll() {
 
 watch(selectedOrders, (newVal) => {
   selectAll.value = newVal.length === orders.value.length && orders.value.length > 0
+})
+
+const selectedOrderRecords = computed(() => {
+  return orders.value.filter((o: OrderList) => selectedOrders.value.includes(o.order_id!))
+})
+
+const selectedStatusSet = computed(() => {
+  const set = new Set<OrderStatus>()
+  for (const order of selectedOrderRecords.value) {
+    if (order.status) set.add(order.status)
+  }
+  return set
+})
+
+const selectedSourceStatus = computed<OrderStatus | null>(() => {
+  if (selectedStatusSet.value.size !== 1) return null
+  return Array.from(selectedStatusSet.value)[0] ?? null
+})
+
+const bulkTransitionTargets = computed<OrderStatus[]>(() => {
+  if (!selectedSourceStatus.value) return []
+  return orderStatusTransitions[selectedSourceStatus.value] || []
+})
+
+const bulkUpdateDisabledReason = computed(() => {
+  if (selectedOrders.value.length === 0) return 'Select at least one order.'
+  if (selectedOrderRecords.value.length !== selectedOrders.value.length) {
+    return 'Some selected orders are not available in the current list.'
+  }
+  if (!selectedSourceStatus.value) return 'Bulk update requires all selected orders to have the same status.'
+  if (!selectedBulkTargetStatus.value) return 'Select a target status for bulk update.'
+  if (!bulkTransitionTargets.value.includes(selectedBulkTargetStatus.value)) {
+    return 'Selected transition is not allowed for this status.'
+  }
+  return ''
+})
+
+const canBulkUpdateStatus = computed(() => bulkUpdateDisabledReason.value === '')
+
+const bulkDeleteDisabledReason = computed(() => {
+  if (selectedOrders.value.length === 0) return 'Select at least one order.'
+  if (selectedOrders.value.length > 5) return 'You can delete at most 5 orders at a time.'
+  if (selectedOrderRecords.value.length !== selectedOrders.value.length) {
+    return 'Some selected orders are not available in the current list.'
+  }
+
+  const invalid = selectedOrderRecords.value.filter((order) => !['cancelled', 'draft'].includes(order.status || ''))
+  if (invalid.length > 0) return 'Only CANCELLED or DRAFT orders can be deleted.'
+
+  return ''
+})
+
+const canBulkDeleteOrders = computed(() => bulkDeleteDisabledReason.value === '')
+
+watch(selectedSourceStatus, () => {
+  selectedBulkTargetStatus.value = ''
 })
 
 // Actions
@@ -718,11 +886,17 @@ function canCancelOrder(status: OrderStatus | undefined): boolean {
   return ['draft', 'pending', 'processing', 'completed'].includes(status)
 }
 
+function canDeleteOrder(status: OrderStatus | undefined): boolean {
+  if (!status) return false
+  return ['draft', 'cancelled'].includes(status)
+}
+
 const transitioningOrderId = ref<string | null>(null)
 
 const { mutateAsync: updateOrderStatusMutation } = useUpdateProductOrderStatus()
 const { mutateAsync: completeOrderMutation } = useCompleteProductOrder()
 const { mutateAsync: cancelOrderMutation } = useCancelProductOrder()
+const { mutateAsync: deleteOrderMutation } = useDeleteProductOrder()
 
 async function transitionOrderToProcessing(order: OrderList) {
   if (transitioningOrderId.value) return
@@ -801,7 +975,16 @@ function getAvailableTransitions(order: OrderList) {
 }
 
 async function cancelOrder(order: OrderList) {
-  if (!confirm(`Are you sure you want to cancel order ${order.order_reference_id}?`)) {
+  const result = await Swal.fire({
+    title: 'Cancel order?',
+    text: `Are you sure you want to cancel order ${order.order_reference_id}?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, cancel',
+    cancelButtonText: 'No',
+  })
+
+  if (!result.isConfirmed) {
     return
   }
 
@@ -822,14 +1005,59 @@ async function cancelOrder(order: OrderList) {
   }
 }
 
-function bulkCancelOrders() {
+async function deleteOrder(order: OrderList) {
+  if (!canDeleteOrder(order.status)) {
+    toast.add({
+      title: 'Delete blocked',
+      description: 'Only DRAFT or CANCELLED orders can be deleted.',
+      color: 'amber',
+    })
+    return
+  }
+
+  const result = await Swal.fire({
+    title: 'Delete order?',
+    text: `Delete order ${order.order_reference_id}? This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+  })
+  if (!result.isConfirmed) return
+
+  try {
+    await deleteOrderMutation(order.order_id)
+    toast.add({
+      title: 'Order deleted',
+      description: `Order ${order.order_reference_id} has been deleted.`,
+      color: 'green',
+    })
+
+    selectedOrders.value = selectedOrders.value.filter((id) => id !== order.order_id)
+    await refetch()
+  } catch {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to delete order. Please try again.',
+      color: 'red',
+    })
+  }
+}
+
+async function bulkCancelOrders() {
   if (selectedOrders.value.length === 0) return
 
-  const confirmed = confirm(
-    `Are you sure you want to cancel ${selectedOrders.value.length} order${selectedOrders.value.length > 1 ? 's' : ''}? This action cannot be undone.`
-  )
-  
-  if (!confirmed) return
+  const result = await Swal.fire({
+    title: 'Cancel selected orders?',
+    text: `Are you sure you want to cancel ${selectedOrders.value.length} order${selectedOrders.value.length > 1 ? 's' : ''}? This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, cancel selected',
+    cancelButtonText: 'No',
+  })
+
+  if (!result.isConfirmed) return
 
   // Cancel each selected order
   const cancelPromises = selectedOrders.value.map(async (orderId) => {
@@ -844,27 +1072,119 @@ function bulkCancelOrders() {
     }
   })
 
-  Promise.all(cancelPromises).then((results) => {
-    const successCount = results.filter(r => r?.success).length
-    const failCount = results.filter(r => !r?.success).length
+  const results = await Promise.all(cancelPromises)
+  const successCount = results.filter(r => r?.success).length
+  const failCount = results.filter(r => !r?.success).length
 
-    if (successCount > 0) {
-      toast.add({
-        title: 'Orders cancelled',
-        description: `Successfully cancelled ${successCount} order${successCount > 1 ? 's' : ''}.${failCount > 0 ? ` Failed to cancel ${failCount} order${failCount > 1 ? 's' : ''}.` : ''}`,
-        color: failCount > 0 ? 'amber' : 'green',
-      })
-    } else {
-      toast.add({
-        title: 'Error',
-        description: 'Failed to cancel orders. Please try again.',
-        color: 'red',
-      })
-    }
+  if (successCount > 0) {
+    toast.add({
+      title: 'Orders cancelled',
+      description: `Successfully cancelled ${successCount} order${successCount > 1 ? 's' : ''}.${failCount > 0 ? ` Failed to cancel ${failCount} order${failCount > 1 ? 's' : ''}.` : ''}`,
+      color: failCount > 0 ? 'amber' : 'green',
+    })
+  } else {
+    toast.add({
+      title: 'Error',
+      description: 'Failed to cancel orders. Please try again.',
+      color: 'red',
+    })
+  }
 
-    selectedOrders.value = []
-    refetch()
+  selectedOrders.value = []
+  refetch()
+}
+
+async function bulkUpdateOrdersStatus() {
+  if (!canBulkUpdateStatus.value) {
+    toast.add({
+      title: 'Bulk update unavailable',
+      description: bulkUpdateDisabledReason.value || 'Selected orders cannot be updated together.',
+      color: 'amber',
+    })
+    return
+  }
+
+  const targetStatus = selectedBulkTargetStatus.value as OrderStatus
+  const targetLabel = statusLabelMap.value[targetStatus] || targetStatus
+
+  const result = await Swal.fire({
+    title: 'Update selected orders?',
+    text: `Update ${selectedOrderRecords.value.length} order${selectedOrderRecords.value.length > 1 ? 's' : ''} to ${targetLabel}?`,
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, update',
+    cancelButtonText: 'Cancel',
   })
+  if (!result.isConfirmed) return
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const order of selectedOrderRecords.value) {
+    try {
+      await updateOrderStatusMutation({
+        orderId: order.order_id,
+        status: targetStatus,
+      })
+      successCount++
+    } catch {
+      failCount++
+    }
+  }
+
+  toast.add({
+    title: 'Bulk update complete',
+    description: `${successCount} updated, ${failCount} failed.`,
+    color: failCount > 0 ? 'amber' : 'green',
+  })
+
+  selectedOrders.value = []
+  selectedBulkTargetStatus.value = ''
+  await refetch()
+}
+
+async function bulkDeleteOrders() {
+  if (!canBulkDeleteOrders.value) {
+    toast.add({
+      title: 'Bulk delete unavailable',
+      description: bulkDeleteDisabledReason.value || 'Selected orders cannot be deleted.',
+      color: 'amber',
+    })
+    return
+  }
+
+  const result = await Swal.fire({
+    title: 'Delete selected orders?',
+    text: `Delete ${selectedOrderRecords.value.length} order${selectedOrderRecords.value.length > 1 ? 's' : ''}? This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete',
+    cancelButtonText: 'Cancel',
+    confirmButtonColor: '#dc2626',
+  })
+  if (!result.isConfirmed) return
+
+  let successCount = 0
+  let failCount = 0
+
+  for (const order of selectedOrderRecords.value) {
+    try {
+      await deleteOrderMutation(order.order_id)
+      successCount++
+    } catch {
+      failCount++
+    }
+  }
+
+  toast.add({
+    title: 'Bulk delete complete',
+    description: `${successCount} deleted, ${failCount} failed.`,
+    color: failCount > 0 ? 'amber' : 'green',
+  })
+
+  selectedOrders.value = []
+  selectedBulkTargetStatus.value = ''
+  await refetch()
 }
 
 function exportOrdersToCSV() {
