@@ -1289,6 +1289,14 @@ export type AttendeePreRemovalSummaryCounts = {
 };
 
 /**
+ * Precheck payload item supporting existing attendee reference or draft payload.
+ */
+export type AttendeePrecheckItemRequest = {
+    attendee_id?: string;
+    attendee?: AttendeeDraftRequest;
+};
+
+/**
  * Serializer for registration trends statistics.
  */
 export type AttendeeRegistrationTrends = {
@@ -1653,6 +1661,20 @@ export type BankTransferEvidenceUpdateRequest = {
 };
 
 /**
+ * Validate attendee payload for duplicate and limit guardrails before checkout.
+ */
+export type BookingAttendeePrecheckRequest = {
+    /**
+     * UUID of the BookingIntent to precheck
+     */
+    booking_intent_id: string;
+    /**
+     * Full attendee list for this intended booking
+     */
+    attendees: Array<AttendeePrecheckItemRequest>;
+};
+
+/**
  * Serializer for booking completion rate.
  */
 export type BookingCompletionRate = {
@@ -1729,6 +1751,7 @@ export type BookingDetail = {
         ticket_id?: string;
         ticket_code?: string;
         attendee_name?: string;
+        attendee_id?: string;
         status?: string;
         url?: string;
     }>;
@@ -6060,6 +6083,9 @@ export type EventDetail = {
     readonly registration_open_date: string;
     readonly registration_close_date: string;
     readonly uptime: string;
+    readonly user_registered_attendee_count: number;
+    readonly user_remaining_registration_slots: number;
+    readonly user_self_registered: boolean;
     /**
      *  links
      */
@@ -7241,6 +7267,10 @@ export type EventQuestionAnswerDraftRequest = {
      * URL of uploaded file (alternative to upload_resource_id)
      */
     upload_url?: string;
+    /**
+     * Multipart-only file field key mapped to this answer. Example: question_uploads[0][<question_uuid>]
+     */
+    upload_file_key?: string;
 };
 
 /**
@@ -27219,6 +27249,27 @@ export type BookingsBookingTicketsListResponses = {
 };
 
 export type BookingsBookingTicketsListResponse = BookingsBookingTicketsListResponses[keyof BookingsBookingTicketsListResponses];
+
+export type BookingsAttendeePrecheckData = {
+    body: BookingAttendeePrecheckRequest;
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/attendee-precheck/';
+};
+
+export type BookingsAttendeePrecheckErrors = {
+    /**
+     * Precheck validation failed
+     */
+    400: unknown;
+};
+
+export type BookingsAttendeePrecheckResponses = {
+    /**
+     * Precheck passed
+     */
+    200: unknown;
+};
 
 export type BookingsCheckoutData = {
     body: CheckoutRequest;

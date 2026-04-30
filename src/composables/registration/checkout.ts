@@ -108,7 +108,7 @@ const buildProductSelections = (selections: ProductSelectionDraft[] | undefined)
   }))
 }
 
-const buildAttendeeDraft = (attendee: AttendeeDraft): AttendeeDraftRequest => ({
+export const buildAttendeeDraft = (attendee: AttendeeDraft): AttendeeDraftRequest => ({
   first_name: attendee.first_name,
   last_name: attendee.last_name,
   email: attendee.email ?? null,

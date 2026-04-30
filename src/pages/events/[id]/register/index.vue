@@ -75,6 +75,12 @@
 
 							<div v-if="!currentAttendee" class="mt-8 text-sm text-slate-500">Preparing registration details...</div>
 
+							<RegisterPrecheckErrorAlert
+								v-if="currentAttendee && shouldShowStepPrecheckAlert"
+								:booking-errors="precheckBookingErrors"
+								:attendee-errors="precheckAttendeeErrors"
+							/>
+
 							<Transition name="step-fade" mode="out-in">
 								<div v-if="currentAttendee" :key="`step-${store.currentIndex}-${activeStepIndex}`" class="mt-8 space-y-6">
 									<RegisterStepAttendeeDetails
@@ -167,41 +173,42 @@
 										:toggle-consent="toggleConsent"
 									/>
 
-									<RegisterStepReview
-										v-else-if="activeStepIndex === reviewStepIndex"
-										:attendees="store.attendees"
-										:package-by-id="packageById"
-										:calculate-age="calculateAge"
-										:attendee-review-amount="attendeeReviewAmount"
-										:is-booking-free="isBookingFree"
-										:payment-methods="paymentMethods"
-										:selected-payment-method-id="selectedPaymentMethodId ?? null"
-										:is-checkout-ui-busy="isCheckoutUiBusy"
-										:get-method-icon="getMethodIcon"
-										:payment-method-type-label="paymentMethodTypeLabel"
-										:selected-payment-method="selectedPaymentMethod"
-										:is-bank-transfer-method="isBankTransferMethod"
-										:is-stripe-method="isStripeMethod"
-										:bank-details="bankDetails"
-										:reserved-bank-transfer-loading="reservedBankTransferLoading"
-										:reserved-bank-transfer-reference="reservedBankTransferReference"
-										:reserved-bank-transfer-error="reservedBankTransferError"
-										:reserved-bank-transfer-payment-reference="reservedBankTransferPaymentReference"
-										:is-bank-transfer-evidence-required-immediately="isBankTransferEvidenceRequiredImmediately"
-										:bank-transfer-evidence="bankTransferEvidence"
-										:bank-transfer-evidence-errors="bankTransferEvidenceErrors"
-										:on-bank-transfer-evidence-file-change="onBankTransferEvidenceFileChange"
-										:is-stripe-test-mode="isStripeTestMode"
-										:effective-stripe-publishable-key="effectiveStripePublishableKey"
-										:manual-stripe-public-key="manualStripePublicKey"
-										:on-stripe-mount-ready="(el: HTMLElement | null) => { stripeCardMountRef = el }"
-										:stripe-card-error="stripeCardError"
-										:stripe-payment-attempt-error="stripePaymentAttemptError"
-										:stripe-card-ready="stripeCardReady"
-										@jump-to-attendee="jumpToAttendee"
-										@update:selected-payment-method-id="(id) => { selectedPaymentMethodId = id ?? undefined }"
-										@update:manual-stripe-public-key="(val) => { manualStripePublicKey = val }"
-									/>
+										<template v-else-if="activeStepIndex === reviewStepIndex">
+										<RegisterStepReview
+											:attendees="store.attendees"
+											:package-by-id="packageById"
+											:calculate-age="calculateAge"
+											:attendee-review-amount="attendeeReviewAmount"
+											:is-booking-free="isBookingFree"
+											:payment-methods="paymentMethods"
+											:selected-payment-method-id="selectedPaymentMethodId ?? null"
+											:is-checkout-ui-busy="isCheckoutUiBusy"
+											:get-method-icon="getMethodIcon"
+											:payment-method-type-label="paymentMethodTypeLabel"
+											:selected-payment-method="selectedPaymentMethod"
+											:is-bank-transfer-method="isBankTransferMethod"
+											:is-stripe-method="isStripeMethod"
+											:bank-details="bankDetails"
+											:reserved-bank-transfer-loading="reservedBankTransferLoading"
+											:reserved-bank-transfer-reference="reservedBankTransferReference"
+											:reserved-bank-transfer-error="reservedBankTransferError"
+											:reserved-bank-transfer-payment-reference="reservedBankTransferPaymentReference"
+											:is-bank-transfer-evidence-required-immediately="isBankTransferEvidenceRequiredImmediately"
+											:bank-transfer-evidence="bankTransferEvidence"
+											:bank-transfer-evidence-errors="bankTransferEvidenceErrors"
+											:on-bank-transfer-evidence-file-change="onBankTransferEvidenceFileChange"
+											:is-stripe-test-mode="isStripeTestMode"
+											:effective-stripe-publishable-key="effectiveStripePublishableKey"
+											:manual-stripe-public-key="manualStripePublicKey"
+											:on-stripe-mount-ready="(el: HTMLElement | null) => { stripeCardMountRef = el }"
+											:stripe-card-error="stripeCardError"
+											:stripe-payment-attempt-error="stripePaymentAttemptError"
+											:stripe-card-ready="stripeCardReady"
+											@jump-to-attendee="jumpToAttendee"
+											@update:selected-payment-method-id="(id) => { selectedPaymentMethodId = id ?? undefined }"
+											@update:manual-stripe-public-key="(val) => { manualStripePublicKey = val }"
+										/>
+									</template>
 
 									<RegisterStepNavBar
 										class="border-t border-slate-100 pt-6"
@@ -344,6 +351,7 @@ import RegisterStepPackage from '~/components/registration/RegisterStepPackage.v
 import RegisterStepProducts from '~/components/registration/RegisterStepProducts.vue'
 import RegisterStepConsents from '~/components/registration/RegisterStepConsents.vue'
 import RegisterStepReview from '~/components/registration/RegisterStepReview.vue'
+import RegisterPrecheckErrorAlert from '~/components/registration/RegisterPrecheckErrorAlert.vue'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -373,6 +381,8 @@ import { usePersonalInfoManager } from '~/composables/registration/usePersonalIn
 import { useRegistrationStepManager } from '~/composables/registration/useRegistrationStepManager'
 import { usePaymentMethodManager } from '~/composables/registration/usePaymentMethodManager'
 import { useStripeCheckoutFlow } from '~/composables/registration/useStripeCheckoutFlow'
+import { usePrecheckBooking, parsePrecheckAttendeeErrors, parsePrecheckBookingErrorCodes, formatPrecheckErrorCode, extractPrecheckResult } from '~/composables/registration/usePrecheckValidation'
+import type { PrecheckResult, PrecheckAttendeeError } from '~/composables/registration/usePrecheckValidation'
 import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
@@ -754,6 +764,9 @@ const effectiveStripePublishableKey = computed(() => {
 
 const idempotencyKey = ref(createIdempotencyKey())
 const isSaving = ref(false)
+const precheckMutation = usePrecheckBooking()
+const precheckBookingErrors = ref<string[]>([])
+const precheckAttendeeErrors = ref<PrecheckAttendeeError[]>([])
 const checkoutResult = ref<any>(null)
 const showCheckoutSuccessModal = ref(false)
 const checkoutPreview = ref<CheckoutPreviewData | null>(null)
@@ -1241,6 +1254,11 @@ const hasAttendeeDetailsErrors = computed(() => {
 	return !!(errors.value.first_name || errors.value.last_name || errors.value.date_of_birth)
 })
 
+const shouldShowStepPrecheckAlert = computed(() =>
+	(activeStepIndex.value === 0 || activeStepIndex.value === 1 || activeStepIndex.value === 2 || activeStepIndex.value === reviewStepIndex)
+	&& (precheckBookingErrors.value.length > 0 || precheckAttendeeErrors.value.length > 0)
+)
+
 // Sync form values when current attendee changes
 watchEffect(() => {
 	if (!currentAttendee.value || activeStepIndex.value !== 0) return
@@ -1258,6 +1276,60 @@ watchEffect(() => {
 })
 
 const handleNext = async () => {
+	const runStepPrecheck = async (): Promise<boolean> => {
+		if (!store.bookingIntentId || !currentAttendee.value) return true
+
+		try {
+			const precheckResponse = await precheckMutation.mutateAsync({
+				bookingIntentId: store.bookingIntentId,
+				attendees: [currentAttendee.value],
+			})
+			const result = extractPrecheckResult(precheckResponse)
+			if (result && !result.valid) {
+				const bookingCodes = parsePrecheckBookingErrorCodes(result)
+				const attendeeItems = parsePrecheckAttendeeErrors(result)
+				precheckBookingErrors.value = bookingCodes
+				precheckAttendeeErrors.value = attendeeItems
+				const firstCode = bookingCodes[0] || attendeeItems[0]?.codes?.[0]
+				toast.add({
+					title: 'Registration check failed',
+					description: firstCode ? formatPrecheckErrorCode(firstCode) : 'This attendee could not be validated yet.',
+					color: 'red',
+				})
+				return false
+			}
+			if (!result) {
+				throw new Error('Unable to parse precheck response.')
+			}
+
+			precheckBookingErrors.value = []
+			precheckAttendeeErrors.value = []
+			return true
+		} catch (precheckError) {
+			const result = extractPrecheckResult(precheckError)
+			if (result?.booking_errors || result?.attendee_errors) {
+				const bookingCodes = parsePrecheckBookingErrorCodes(result)
+				const attendeeItems = parsePrecheckAttendeeErrors(result)
+				precheckBookingErrors.value = bookingCodes
+				precheckAttendeeErrors.value = attendeeItems
+				const firstCode = bookingCodes[0] || attendeeItems[0]?.codes?.[0]
+				toast.add({
+					title: 'Registration check failed',
+					description: firstCode ? formatPrecheckErrorCode(firstCode) : 'This attendee could not be validated yet.',
+					color: 'red',
+				})
+				return false
+			}
+			toast.add({
+				title: 'Registration check failed',
+				description: 'Unable to validate attendee details right now. Please try again.',
+				color: 'red',
+			})
+			console.warn('Step precheck failed and was blocked', precheckError)
+			return false
+		}
+	}
+
 	if (activeStepIndex.value === 0) {
 		await runSafeValidation()
 	}
@@ -1269,6 +1341,12 @@ const handleNext = async () => {
 		})
 		return
 	}
+
+	if (activeStepIndex.value === 0 || activeStepIndex.value === 1 || activeStepIndex.value === 2) {
+		const passedPrecheck = await runStepPrecheck()
+		if (!passedPrecheck) return
+	}
+
 	if (!(await pingBookingIntent(true))) return
 
 	if (activeStepIndex.value < attendeeStepCount - 1) {
@@ -1318,6 +1396,38 @@ const handleCheckout = async () => {
 	// Only require payment method for paid bookings
 	if (!isBookingFree.value && !selectedPaymentMethodId.value) return
 	if (!(await pingBookingIntent(false))) return
+
+	// Run server-side precheck before committing to checkout
+	try {
+		const precheckResponse = await precheckMutation.mutateAsync({
+			bookingIntentId: store.bookingIntentId,
+			attendees: store.attendees,
+		})
+		const result = extractPrecheckResult(precheckResponse)
+		if (result && !result.valid) {
+			precheckBookingErrors.value = parsePrecheckBookingErrorCodes(result)
+			precheckAttendeeErrors.value = parsePrecheckAttendeeErrors(result)
+			toast.add({ title: 'Registration check failed', description: 'Some attendees could not be registered. Please review the errors shown.', color: 'red' })
+			return
+		}
+		if (!result) {
+			throw new Error('Unable to parse precheck response.')
+		}
+		precheckBookingErrors.value = []
+		precheckAttendeeErrors.value = []
+	} catch (precheckError) {
+		const result = extractPrecheckResult(precheckError)
+		if (result?.booking_errors || result?.attendee_errors) {
+			precheckBookingErrors.value = parsePrecheckBookingErrorCodes(result)
+			precheckAttendeeErrors.value = parsePrecheckAttendeeErrors(result)
+			toast.add({ title: 'Registration check failed', description: 'Some attendees could not be registered. Please review the errors shown.', color: 'red' })
+			return
+		}
+		toast.add({ title: 'Registration check failed', description: 'Unable to validate registration right now. Please try again.', color: 'red' })
+		console.warn('Checkout precheck failed and was blocked', precheckError)
+		return
+	}
+
 	isSaving.value = true
 	checkoutResult.value = null
 	stripeCardError.value = ''

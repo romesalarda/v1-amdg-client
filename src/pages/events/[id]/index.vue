@@ -238,16 +238,35 @@
 
               <!-- Registration Card -->
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
+                <!-- User registration context -->
+                <div
+                  v-if="event.user_self_registered || (event.user_registered_attendee_count != null && event.user_registered_attendee_count > 0)"
+                  class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm"
+                >
+                  <p class="font-bold text-emerald-700">
+                    <span v-if="event.user_self_registered">You are registered for this event.</span>
+                    <span v-else>You have {{ event.user_registered_attendee_count }} registered {{ event.user_registered_attendee_count === 1 ? 'attendee' : 'attendees' }} for this event.</span>
+                  </p>
+                  <p
+                    v-if="event.user_remaining_registration_slots != null"
+                    class="mt-0.5 text-xs text-emerald-600"
+                  >
+                    {{ event.user_remaining_registration_slots > 0 ? `${event.user_remaining_registration_slots} slot${event.user_remaining_registration_slots !== 1 ? 's' : ''} remaining for additional registrations.` : 'You have reached your registration limit for this event.' }}
+                  </p>
+                </div>
+
                 <!-- Registration Button -->
                 <button
-                  :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview"
+                  :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview || (event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0)"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
                 >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                   </svg>
-                  {{ countdown.isExpired ? 'Registration Closed' : 'Register Now' }}
+                  <span v-if="countdown.isExpired">Registration Closed</span>
+                  <span v-else-if="event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0">Unavailable</span>
+                  <span v-else>Register Now</span>
                 </button>
 
                 <NuxtLink
@@ -400,22 +419,25 @@
       </div>
 
       <div class="space-y-4">
-    <div class="rounded-xl border border-deep-navy/10 p-4">
+    <div class="rounded-xl border border-deep-navy/10 p-4" :class="event?.user_self_registered ? 'opacity-60' : ''">
       <p class="text-sm font-black text-deep-navy uppercase tracking-widest">Will you as registrar be attending?</p>
-      <p class="text-xs text-deep-navy/60 mt-1">If yes, your registration is included automatically.</p>
+      <p v-if="event?.user_self_registered" class="text-xs text-amber-600 mt-1 font-semibold">You are already registered for this event and cannot register yourself again.</p>
+      <p v-else class="text-xs text-deep-navy/60 mt-1">If yes, your registration is included automatically.</p>
       <div class="mt-3 grid grid-cols-2 gap-2">
         <button
           type="button"
+          :disabled="event?.user_self_registered"
           @click="selectRegistrarAttendance(true)"
-          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           :class="registrarAttending ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
         >
           Yes
         </button>
         <button
           type="button"
+          :disabled="event?.user_self_registered"
           @click="selectRegistrarAttendance(false)"
-          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors"
+          class="rounded-lg border px-3 py-2 text-sm font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-50"
           :class="!registrarAttending ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-deep-navy/15 bg-white text-deep-navy/70 hover:bg-deep-navy/5'"
         >
           No
@@ -697,8 +719,8 @@ const openRegistrationModal = () => {
     return
   }
 
-  registrarAttending.value = true
-  registeringOthers.value = false
+  registrarAttending.value = event.value?.user_self_registered ? false : true
+  registeringOthers.value = event.value?.user_self_registered ? true : false
   otherAttendeeCount.value = 1
   showRegistrationModal.value = true
 }
