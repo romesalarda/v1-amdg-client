@@ -1,89 +1,27 @@
 <template>
 	<div class="min-h-screen bg-slate-100 text-slate-900" :class="{ 'checkout-lock': isCheckoutUiBusy }">
-		<header class="relative h-[32vh] min-h-[280px] w-full overflow-hidden">
-			<img :src="heroImageSrc" alt="Registration hero" class="absolute inset-0 h-full w-full object-cover" />
-			<div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/45 to-slate-900/20"></div>
+<RegisterHero
+		:hero-image-src="heroImageSrc"
+		:active-step-index="activeStepIndex"
+		:steps-length="steps.length"
+		:event-title="event?.title || 'Event Registration'"
+		:current-attendee-number="currentAttendeeNumber"
+		:ticket-count="store.ticketCount || 1"
+		:step-progress-percent="stepProgressPercent"
+		@go-back="goBack"
+	/>
 
-			<div class="absolute inset-x-0 top-0 z-10 p-6 md:p-8">
-				<div class="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4">
-					<div class="text-2xl font-black tracking-tight text-white md:text-3xl">AMDG</div>
-					<div class="flex items-center gap-3">
-						<div class="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 md:block">
-							Registration flow
-						</div>
-						<UButton color="white" variant="soft" @click="goBack">Back to event</UButton>
-					</div>
-				</div>
-			</div>
-
-			<div class="absolute inset-x-0 bottom-0 z-10 px-6 pb-8 md:px-8 md:pb-10">
-				<div class="mx-auto w-full max-w-[1200px]">
-					<span class="inline-block rounded-full bg-blue-500/90 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white">
-						Step {{ activeStepIndex + 1 }} of {{ steps.length }}
-					</span>
-					<h1 class="mt-3 text-3xl font-black tracking-tight text-white md:text-5xl">
-						{{ event?.title || 'Event Registration' }}
-					</h1>
-					<p class="mt-2 text-sm font-semibold uppercase tracking-wider text-white/80">
-						Attendee {{ currentAttendeeNumber }} of {{ store.ticketCount || 1 }}
-					</p>
-					<div class="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/20 md:max-w-lg">
-						<div
-							class="h-full rounded-full bg-blue-400 transition-all duration-500 ease-out"
-							:style="{ width: `${stepProgressPercent}%` }"
-						></div>
-					</div>
-				</div>
-			</div>
-		</header>
-
-		<section class="sticky top-0 z-20 border-y border-slate-200 bg-white/95 backdrop-blur">
-			<div class="mx-auto flex w-full max-w-[1200px] flex-wrap items-center justify-between gap-4 px-6 py-4">
-				<div class="flex flex-wrap items-center gap-x-8 gap-y-3">
-					<div class="flex items-center gap-2">
-						<UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-slate-400" />
-						<div>
-							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Date</p>
-							<p class="text-sm font-bold text-slate-700">{{ reminderDate }}</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						<UIcon name="i-heroicons-clock" class="h-5 w-5 text-slate-400" />
-						<div>
-							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Time</p>
-							<p class="text-sm font-bold text-slate-700">{{ reminderTime }}</p>
-						</div>
-					</div>
-					<div class="flex items-center gap-2">
-						<UIcon name="i-heroicons-map-pin" class="h-5 w-5 text-slate-400" />
-						<div>
-							<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Location</p>
-							<p class="text-sm font-bold text-slate-700">{{ reminderLocation }}</p>
-						</div>
-					</div>
-				</div>
-				<div class="flex flex-col items-end gap-2">
-					<div class="rounded-full bg-slate-900 px-4 py-2 text-[11px] font-bold uppercase tracking-[0.2em] text-white">
-						Editing attendee {{ currentAttendeeNumber }}
-					</div>
-					<div
-						v-if="showIntentCountdown"
-						class="flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em]"
-						:class="intentTimerToneClass"
-					>
-						<UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
-						<span>Session expires in {{ intentCountdownLabel }}</span>
-					</div>
-					<div
-						v-if="isCheckoutUiBusy"
-						class="flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-blue-800"
-					>
-						<span class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-						<span>{{ checkoutProcessingStageLabel }}</span>
-					</div>
-				</div>
-			</div>
-		</section>
+<RegisterEventBar
+		:reminder-date="reminderDate"
+		:reminder-time="reminderTime"
+		:reminder-location="reminderLocation"
+		:current-attendee-number="currentAttendeeNumber"
+		:show-intent-countdown="showIntentCountdown"
+		:intent-countdown-label="intentCountdownLabel"
+		:intent-timer-tone-class="intentTimerToneClass"
+		:is-checkout-ui-busy="isCheckoutUiBusy"
+		:checkout-processing-stage-label="checkoutProcessingStageLabel"
+	/>
 
 		<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-6 py-8 lg:flex-row lg:py-10">
 			<div v-if="eventLoading" class="w-full rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
@@ -93,121 +31,29 @@
 				Event not found.
 			</div>
 			<template v-else>
-				<aside class="w-full space-y-4 lg:w-72 lg:flex-shrink-0">
-					<div>
-						<p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Registration group</p>
-					</div>
+				<RegisterAttendeeSidebar
+					:attendees="store.attendees"
+					:current-index="store.currentIndex"
+					:current-attendee="currentAttendee"
+					:show-checkout-pricing-sidebar="showCheckoutPricingSidebar"
+					:attendee-display-name="attendeeDisplayName"
+					:is-attendee-minor="isAttendeeMinor"
+					:minor-has-emergency-contact="minorHasEmergencyContact"
+					:attendee-status-label="attendeeStatusLabel"
+					:attendee-status-badge-class="attendeeStatusBadgeClass"
+					:attendee-sidebar-card-class="attendeeSidebarCardClass"
+					:attendee-step-summary="attendeeStepSummary"
+					:package-by-id="packageById"
+					:checkout-preview-loading="checkoutPreviewLoading"
+					:checkout-preview-error="checkoutPreviewError"
+					:breakdown-lines="breakdownLines"
+					:payment-breakdown-total="paymentBreakdownTotal"
+					:is-polling-payment-status="isPollingPaymentStatus"
+					:payment-processing-message="paymentProcessingMessage"
+					@jump-to-attendee="jumpToAttendee"
+				/>
 
-					<button
-						v-for="(attendee, index) in store.attendees"
-						:key="index"
-						type="button"
-						@click="jumpToAttendee(index)"
-						class="w-full rounded-2xl border p-4 text-left transition-all duration-300"
-						:class="attendeeSidebarCardClass(index, attendee)"
-					>
-						<div class="flex items-start justify-between gap-3">
-							<div>
-								<div class="flex items-center gap-2">
-									<p class="text-base font-black text-slate-900">
-										{{ attendeeDisplayName(attendee, index) }}
-									</p>
-									<UBadge v-if="isAttendeeMinor(attendee)" color="amber" variant="subtle" size="xs">
-										Minor
-									</UBadge>
-								</div>
-								<p class="mt-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-									{{ attendeeStepSummary(index) }}
-								</p>
-								<p v-if="isAttendeeMinor(attendee) && !minorHasEmergencyContact(attendee)" class="mt-1 text-[10px] font-bold text-red-600 uppercase tracking-wider">
-									⚠ Emergency contact required
-								</p>
-							</div>
-							<span
-								class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wider"
-								:class="attendeeStatusBadgeClass(index, attendee)"
-							>
-								{{ attendeeStatusLabel(index, attendee) }}
-							</span>
-						</div>
-					</button>
-
-					<div class="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-5" v-if="!showCheckoutPricingSidebar">
-						<p class="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">Current attendee snapshot</p>
-						<div v-if="currentAttendee" class="mt-3 space-y-2">
-							<p class="text-sm font-bold text-slate-800">{{ attendeeDisplayName(currentAttendee, store.currentIndex) }}</p>
-							<p class="text-xs text-slate-600">
-								Email: {{ currentAttendee.email || 'Not provided yet' }}
-							</p>
-							<p class="text-xs text-slate-600">
-								DOB: {{ currentAttendee.date_of_birth || 'Not provided yet' }}
-							</p>
-							<p class="text-xs text-slate-600">
-								Package: {{ packageById(currentAttendee.packageId)?.name || 'Not selected' }}
-							</p>
-						</div>
-						<p class="mt-3 text-[11px] leading-relaxed text-slate-500">
-							Keep medical, dietary, and emergency details accurate to support safe event safeguarding.
-						</p>
-					</div>
-					<div class="space-y-4 lg:sticky lg:top-24" v-if="showCheckoutPricingSidebar">
-						<div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-							<div class="flex items-center justify-between">
-								<h3 class="text-sm font-semibold text-slate-900">Payment breakdown</h3>
-							</div>
-							<p v-if="checkoutPreviewLoading" class="mt-3 text-xs text-slate-500">Refreshing payment breakdown...</p>
-							<p v-else-if="checkoutPreviewError" class="mt-3 text-xs font-semibold text-red-600">{{ checkoutPreviewError }}</p>
-							<div class="mt-3 space-y-2">
-								<div
-									v-for="item in breakdownLines"
-									:key="item.id"
-									class="rounded-lg border border-slate-100 bg-slate-50 px-3 py-3 text-sm"
-								>
-									<div class="flex items-center justify-between gap-3">
-										<div>
-											<p class="font-semibold text-slate-800">{{ item.name }}</p>
-											<p class="text-xs text-slate-500">{{ item.description }}</p>
-											<p v-if="item.discountHint" class="text-[10px] font-semibold uppercase tracking-wider text-emerald-700">{{ item.discountHint }}</p>
-										</div>
-										<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
-									</div>
-									<p class="mt-2 text-[11px] text-slate-600">
-										{{ formatMoney(item.originalAmount, item.currency) }}
-										<span class="text-slate-400"> - </span>
-										<span class="text-emerald-700">{{ formatMoney(item.discountAmount, item.currency) }}</span>
-										<span class="text-slate-400"> = </span>
-										<span class="font-semibold text-slate-800">{{ formatMoney(item.finalAmount, item.currency) }}</span>
-									</p>
-								</div>
-								<p v-if="!breakdownLines.length && !checkoutPreviewLoading" class="text-xs text-slate-500">No payable items selected yet.</p>
-							</div>
-							<div class="mt-4 border-t border-slate-100 pt-3 text-sm">
-								<div class="flex items-center justify-between text-slate-600">
-									<span>Subtotal</span>
-									<span>{{ formatMoney(paymentBreakdownTotal.originalAmount, paymentBreakdownTotal.currency) }}</span>
-								</div>
-								<div class="mt-1 flex items-center justify-between text-emerald-700">
-									<span>Total discount</span>
-									<span>-{{ formatMoney(paymentBreakdownTotal.discountAmount, paymentBreakdownTotal.currency) }}</span>
-								</div>
-								<div class="mt-2 flex items-center justify-between text-base font-bold text-slate-900">
-									<span>Total due</span>
-									<span>{{ formatMoney(paymentBreakdownTotal.amount, paymentBreakdownTotal.currency) }}</span>
-								</div>
-								<p v-if="isPollingPaymentStatus" class="mt-2 text-xs font-semibold text-amber-700">{{ paymentProcessingMessage || 'Finalizing your payment...' }}</p>
-							</div>
-						</div>
-
-						<div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
-							<div class="flex items-center gap-2 font-semibold">
-								<UIcon name="i-heroicons-lock-closed" class="h-4 w-4" />
-								Powered and secured by Stripe
-							</div>
-							<p class="mt-1 text-xs text-emerald-700">We do not store any card data.</p>
-						</div>
-					</div>
-				</aside>
-
+	
 				<main class="min-w-0 flex-1">
 					<div class="rounded-3xl border-2 border-slate-900/80 bg-white shadow-[10px_10px_0px_0px_rgba(15,23,42,0.2)]">
 						<div class="p-6 md:p-10">
@@ -219,220 +65,41 @@
 							</div>
 
 							<div class="mt-6 overflow-hidden pb-2">
-								<Transition :name="stepperTransitionName" mode="out-in">
-									<ol :key="`step-window-${stepWindowStart}`" class="flex items-center gap-2 md:gap-3">
-										<li
-											v-for="(step, localIndex) in visibleSteps"
-											:key="step.index"
-											class="flex flex-1 items-center"
-										>
-											<div class="flex items-center gap-2">
-												<div
-													class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-black transition-all duration-300"
-													:class="
-														step.index === activeStepIndex
-															? 'border-blue-600 bg-blue-600 text-white shadow-lg shadow-blue-200'
-															: step.index < activeStepIndex
-																? 'border-emerald-500 bg-emerald-500 text-white'
-																: 'border-slate-300 bg-white text-slate-500'
-													"
-												>
-													{{ step.index + 1 }}
-												</div>
-												<p
-													class="text-[11px] font-bold uppercase tracking-[0.14em] transition-colors"
-													:class="step.index <= activeStepIndex ? 'text-slate-800' : 'text-slate-400'"
-												>
-													{{ step.label }}
-												</p>
-											</div>
-											<div
-												v-if="localIndex < visibleSteps.length - 1"
-												class="mx-2 h-px flex-1"
-												:class="step.index < activeStepIndex ? 'bg-emerald-500' : 'bg-slate-300'"
-											></div>
-										</li>
-									</ol>
-								</Transition>
+							<RegisterStepperHeader
+							:stepper-transition-name="stepperTransitionName"
+							:step-window-start="stepWindowStart"
+							:visible-steps="visibleSteps"
+							:active-step-index="activeStepIndex"
+						/>
 							</div>
 
 							<div v-if="!currentAttendee" class="mt-8 text-sm text-slate-500">Preparing registration details...</div>
 
 							<Transition name="step-fade" mode="out-in">
 								<div v-if="currentAttendee" :key="`step-${store.currentIndex}-${activeStepIndex}`" class="mt-8 space-y-6">
-									<div v-if="activeStepIndex === 0" class="space-y-6">
-										<div>
-											<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
-											<p class="text-sm text-gray-600" v-if="isRegistrarSelf">Please provide <b>YOUR</b> details.</p>
-											<p class="text-sm text-gray-600" v-else>Tell us about this attendee and their relationship to you.</p>
-										</div>
+									<RegisterStepAttendeeDetails
+										v-if="activeStepIndex === 0"
+										:values="values"
+										:errors="errors"
+										:is-registrar-self="isRegistrarSelf"
+										:show-relationship-field="showRelationshipField"
+										:gender-options="genderOptions"
+										:relationship-options="relationshipOptions"
+										:current-attendee-age="currentAttendeeAge"
+										:has-current-area-from="hasCurrentAreaFrom"
+										:current-area-from="currentAttendee.area_from ?? null"
+										:current-area-from-name="currentAttendee.area_from_name ?? null"
+										:area-search="areaSearch"
+										:area-options="areaOptions"
+										:area-lookup-loading="areaLookupLoading"
+										@update-field="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val) }"
+										@update-field-validate="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val); void runSafeValidation() }"
+										@update:area-search="(val) => { areaSearch = val }"
+										@select-area="(val, label) => { store.setAreaFrom(store.currentIndex, val, label); areaSearch = label }"
+										@clear-area-from="clearAreaFrom"
+									/>
 
-							<div class="grid gap-4 sm:grid-cols-2">
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
-									<UInput
-										:model-value="values.first_name"
-										placeholder="First name"
-										@update:model-value="
-											(val) => {
-												currentAttendee.first_name = val
-												setFieldValue('first_name', val)
-											}
-										"
-										:color="errors.first_name ? 'red' : 'gray'"
-									/>
-									<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
-								</div>
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
-									<UInput
-										:model-value="values.last_name"
-										placeholder="Last name"
-										@update:model-value="
-											(val) => {
-												currentAttendee.last_name = val
-												setFieldValue('last_name', val)
-											}
-										"
-										:color="errors.last_name ? 'red' : 'gray'"
-									/>
-									<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
-								</div>
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
-									<UInput
-										:model-value="values.email"
-										type="email"
-										placeholder="email@example.com"
-										@update:model-value="
-											(val) => {
-												currentAttendee.email = val
-												setFieldValue('email', val)
-												void runSafeValidation()
-											}
-										"
-										:color="errors.email ? 'red' : 'gray'"
-									/>
-									<p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
-								</div>
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
-									<UInput
-										:model-value="values.phone_number"
-										placeholder="Phone number"
-										@update:model-value="
-											(val) => {
-												currentAttendee.phone_number = val
-												setFieldValue('phone_number', val)
-												void runSafeValidation()
-											}
-										"
-										:color="errors.phone_number ? 'red' : 'gray'"
-									/>
-									<p v-if="errors.phone_number" class="mt-1 text-xs text-red-500">{{ errors.phone_number }}</p>
-								</div>
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth <span class="text-red-500">*</span></label>
-									<UInput
-										:model-value="values.date_of_birth"
-										type="date"
-										@update:model-value="
-											(val) => {
-												currentAttendee.date_of_birth = val
-												setFieldValue('date_of_birth', val)
-												void runSafeValidation()
-											}
-										"
-										:color="errors.date_of_birth ? 'red' : 'gray'"
-									/>
-									<p v-if="errors.date_of_birth" class="mt-1 text-xs text-red-500">{{ errors.date_of_birth }}</p>
-									<p v-if="currentAttendeeAge !== null" class="mt-2 text-sm font-medium text-slate-600">
-										Age: <span class="font-bold text-slate-900">{{ currentAttendeeAge }}</span> years old
-									</p>
-								</div>
-								<div>
-									<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
-									<USelectMenu
-										:model-value="values.gender"
-										:options="genderOptions"
-										value-attribute="value"
-										option-attribute="label"
-										placeholder="Select gender"
-										@update:model-value="
-											(val) => {
-												currentAttendee.gender = val
-												setFieldValue('gender', val)
-											}
-										"
-									/>
-								</div>
-								<div v-if="showRelationshipField && !isRegistrarSelf" class="sm:col-span-2">
-									
-									<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
-									<USelectMenu
-										:model-value="values.relationship_to_user"
-										:options="relationshipOptions"
-										value-attribute="value"
-										option-attribute="label"
-										placeholder="Select relationship"
-										@update:model-value="
-											(val) => {
-												currentAttendee.relationship_to_user = val
-												setFieldValue('relationship_to_user', val)
-											}
-										"
-										:disabled="isRegistrarSelf"
-									/>
-								</div>
-
-								<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
-									<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
-									<p class="mt-1 text-xs text-slate-600">
-										Start typing to search for an area, then select from the list.
-									</p>
-									<div class="mt-4">
-										<div class="relative">
-											<UInput
-												v-model="areaSearch"
-												placeholder="Search area name (min 2 chars)"
-												class="w-full"
-											/>
-											<div
-												v-if="areaOptions.length > 0 && areaSearch.length >= 2"
-												class="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg border border-slate-200 bg-white shadow-lg"
-											>
-												<div class="max-h-64 overflow-y-auto">
-													<button
-														v-for="option in areaOptions"
-														:key="option.value"
-														type="button"
-														class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
-														:class="option.value === currentAttendee.area_from ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700'"
-														@click="
-															store.setAreaFrom(store.currentIndex, option.value, option.label);
-															areaSearch = option.label;
-														"
-													>
-														{{ option.label }}
-													</button>
-												</div>
-											</div>
-										</div>
-										<p v-if="areaLookupLoading" class="mt-2 text-xs text-slate-500">Searching...</p>
-									</div>
-									<div v-if="hasCurrentAreaFrom" class="mt-3">
-										<UButton size="xs" color="gray" variant="ghost" @click="clearAreaFrom">
-											Change area
-										</UButton>
-									</div>
-									<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-										{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAttendee.area_from_name}` : 'Select an area to continue.' }}
-									</p>
-								</div>
-							</div>
-						</div>
-
-						<div v-else-if="activeStepIndex === 1" class="space-y-6">
+									<div v-else-if="activeStepIndex === 1" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Event questions</h2>
 								<p class="text-sm text-gray-600">Answer any questions the organizer added.</p>
@@ -444,764 +111,111 @@
 							/>
 						</div>
 
-						<div v-else-if="activeStepIndex === 2" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Personal info</h2>
-								<p class="text-sm text-gray-600">Add any dietary, medical, or accessibility needs.</p>
-								<div v-if="isAttendeeMinor(currentAttendee)" class="mt-3 rounded-lg bg-amber-50 border border-amber-200 p-4">
-									<p class="text-sm font-semibold text-amber-800">⚠️ Emergency contact required</p>
-									<p class="mt-1 text-xs text-amber-700">As this attendee is a minor, an emergency contact is required to continue.</p>
-								</div>
-							</div>
+						<RegisterStepPersonalInfo
+						v-else-if="activeStepIndex === 2"
+						:current-attendee="currentAttendee"
+						:is-attendee-minor="isAttendeeMinor"
+						:dietary-requirements="dietaryRequirements"
+						:medical-conditions="medicalConditions"
+						:accessibility-requirements="accessibilityRequirements"
+						:emergency-relationship-options="emergencyRelationshipOptions"
+						:has-personal-info-item="hasPersonalInfoItem"
+						:is-other-option="isOtherOption"
+						:get-details-for-item="getDetailsForItem"
+						:get-personal-info-item-validation-error="getPersonalInfoItemValidationError"
+						:toggle-dietary-requirement="toggleDietaryRequirement"
+						:toggle-medical-condition="toggleMedicalCondition"
+						:toggle-accessibility-requirement="toggleAccessibilityRequirement"
+						:update-dietary-requirement-details="updateDietaryRequirementDetails"
+						:update-medical-condition-severity="updateMedicalConditionSeverity"
+						:update-medical-condition-details="updateMedicalConditionDetails"
+						:update-accessibility-requirement-details="updateAccessibilityRequirementDetails"
+						:add-emergency-contact="addEmergencyContact"
+					/>
 
-							<div class="grid gap-6">
-								<!-- Dietary Requirements Section -->
-								<div>
-									<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
-									<div v-if="dietaryRequirements.length" class="mt-3 space-y-3">
-										<div
-											v-for="requirement in dietaryRequirements"
-											:key="requirement.id"
-											class="rounded-lg border border-gray-200 p-3 transition-all"
-										>
-											<div class="flex items-center gap-2">
-												<input
-													type="checkbox"
-													:id="`dietary-${requirement.id}`"
-													:value="requirement.id"
-													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
-													@change="toggleDietaryRequirement(requirement.id, $event)"
-													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-												/>
-												<label :for="`dietary-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
-													{{ requirement.label }}
-												</label>
-											</div>
-											<div
-												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
-												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
-											>
-												<div>
-													<label class="mb-1 block text-xs font-semibold text-gray-700">
-														Details
-														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
-													</label>
-													<textarea
-														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.dietaryRequirements)"
-														placeholder="Describe your dietary requirement..."
-														@input="updateDietaryRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
-														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
-														rows="2"
-													/>
-													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and catering team</p>
-													<p
-														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
-														class="mt-1 text-xs text-red-600"
-													>
-														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id) }}
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-									<p v-else class="mt-2 text-xs text-gray-500">No dietary requirements available.</p>
-								</div>
+									<RegisterStepPackage
+						v-else-if="activeStepIndex === 3"
+						:current-attendee="currentAttendee"
+						:available-booking-packages="availableBookingPackages"
+						:is-current-attendee-package-available="isCurrentAttendeePackageAvailable"
+					/>
 
-								<!-- Medical Conditions Section -->
-								<div>
-									<h3 class="text-sm font-semibold text-gray-900">Medical conditions</h3>
-									<div v-if="medicalConditions.length" class="mt-3 space-y-3">
-										<div
-											v-for="condition in medicalConditions"
-											:key="condition.id"
-											class="rounded-lg border border-gray-200 p-3 transition-all"
-										>
-											<div class="flex items-center gap-2">
-												<input
-													type="checkbox"
-													:id="`medical-${condition.id}`"
-													:value="condition.id"
-													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
-													@change="toggleMedicalCondition(condition.id, $event)"
-													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-												/>
-												<label :for="`medical-${condition.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
-													{{ condition.label }}
-												</label>
-											</div>
-											<div
-												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.medicalConditions, condition.id)"
-												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
-											>
-												<div>
-													<label class="mb-1 block text-xs font-semibold text-gray-700">Severity</label>
-													<USelectMenu
-														:model-value="currentAttendee.personalInfo.medicalConditions.find(d => d.id === condition.id)?.severity || ''"
-														:options="[
-															{ label: 'Mild', value: 'mild' },
-															{ label: 'Moderate', value: 'moderate' },
-															{ label: 'Severe', value: 'severe' }
-														]"
-														value-attribute="value"
-														option-attribute="label"
-														placeholder="Select severity"
-														@update:model-value="(val) => updateMedicalConditionSeverity(condition.id, val as 'mild' | 'moderate' | 'severe' | null)"
-													/>
-												</div>
-												<div>
-													<label class="mb-1 block text-xs font-semibold text-gray-700">
-														Details (public-facing)
-														<span v-if="isOtherOption(condition.id)" class="text-red-500">*</span>
-													</label>
-													<textarea
-														:value="getDetailsForItem(condition.id, currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[])"
-														placeholder="Describe the condition..."
-														@input="updateMedicalConditionDetails(condition.id, ($event.target as HTMLTextAreaElement).value)"
-														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
-														rows="2"
-													/>
-													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and first aid team</p>
-													<p
-														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id)"
-														class="mt-1 text-xs text-red-600"
-													>
-														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id) }}
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-									<p v-else class="mt-2 text-xs text-gray-500">No medical conditions available.</p>
-								</div>
-
-								<!-- Accessibility Requirements Section -->
-								<div>
-									<h3 class="text-sm font-semibold text-gray-900">Accessibility requirements</h3>
-									<div v-if="accessibilityRequirements.length" class="mt-3 space-y-3">
-										<div
-											v-for="requirement in accessibilityRequirements"
-											:key="requirement.id"
-											class="rounded-lg border border-gray-200 p-3 transition-all"
-										>
-											<div class="flex items-center gap-2">
-												<input
-													type="checkbox"
-													:id="`accessibility-${requirement.id}`"
-													:value="requirement.id"
-													:checked="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
-													@change="toggleAccessibilityRequirement(requirement.id, $event)"
-													class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-												/>
-												<label :for="`accessibility-${requirement.id}`" class="flex-1 text-sm font-medium text-gray-700 cursor-pointer">
-													{{ requirement.label }}
-												</label>
-											</div>
-											<div
-												v-if="hasPersonalInfoItem(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
-												class="mt-3 ml-6 space-y-3 pt-3 border-t border-gray-200"
-											>
-												<div>
-													<label class="mb-1 block text-xs font-semibold text-gray-700">
-														Details (public-facing)
-														<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
-													</label>
-													<textarea
-														:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.accessibilityRequirements)"
-														placeholder="Describe your accessibility needs..."
-														@input="updateAccessibilityRequirementDetails(requirement.id, ($event.target as HTMLTextAreaElement).value)"
-														class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
-														rows="2"
-													/>
-													<p class="mt-1 text-xs text-gray-500">Visible to event organizers and accessibility team</p>
-													<p
-														v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
-														class="mt-1 text-xs text-red-600"
-													>
-														{{ getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id) }}
-													</p>
-												</div>
-											</div>
-										</div>
-									</div>
-									<p v-else class="mt-2 text-xs text-gray-500">No accessibility requirements available.</p>
-								</div>
-
-								<!-- Emergency Contact Section -->
-								<div>
-									<div class="flex items-center justify-between">
-										<h3 class="text-sm font-semibold text-gray-900">
-											Emergency contact
-											<span v-if="isAttendeeMinor(currentAttendee)" class="text-red-500">*</span>
-										</h3>
-										<UButton
-											v-if="!currentAttendee?.personalInfo?.emergencyContact"
-											size="xs"
-											color="gray"
-											variant="ghost"
-											@click="addEmergencyContact"
-										>
-											Add contact
-										</UButton>
-									</div>
-
-									<div
-										v-if="currentAttendee?.personalInfo?.emergencyContact"
-										class="mt-3 grid gap-4 sm:grid-cols-2"
-									>
-										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
-											<UInput 
-												v-model="currentAttendee.personalInfo.emergencyContact.first_name"
-												placeholder="First name"
-											/>
-										</div>
-										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
-											<UInput 
-												v-model="currentAttendee.personalInfo.emergencyContact.last_name"
-												placeholder="Last name"
-											/>
-										</div>
-										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Phone number <span class="text-red-500">*</span></label>
-											<UInput 
-												v-model="currentAttendee.personalInfo.emergencyContact.phone_number"
-												placeholder="Phone number"
-											/>
-										</div>
-										<div>
-											<label class="mb-1 block text-sm font-medium text-gray-700">Relationship</label>
-											<USelectMenu
-												v-model="currentAttendee.personalInfo.emergencyContact.relationship"
-												:options="emergencyRelationshipOptions"
-												value-attribute="value"
-												option-attribute="label"
-												placeholder="Select relationship"
-											/>
-										</div>
-										<div class="sm:col-span-2">
-											<label class="mb-1 block text-sm font-medium text-gray-700">Email (optional)</label>
-											<UInput 
-												v-model="currentAttendee.personalInfo.emergencyContact.email" 
-												type="email"
-												placeholder="Email address"
-											/>
-										</div>
-									</div>
-									<p
-										v-else-if="isAttendeeMinor(currentAttendee)"
-										class="mt-2 text-xs font-semibold text-red-600"
-									>
-										Emergency contact is required for attendees under 18.
-									</p>
-								</div>
-							</div>
-						</div>
-
-									<div v-else-if="activeStepIndex === 3" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Ticket package</h2>
-								<p class="text-sm text-gray-600">Choose the package for this attendee.</p>
-							</div>
-
-							<div v-if="availableBookingPackages.length" class="grid gap-4 sm:grid-cols-2">
-								<label
-									v-for="pkg in availableBookingPackages"
-									:key="pkg.id"
-									class="flex cursor-pointer flex-col rounded-xl border p-4 text-sm"
-									:class="pkg.id === currentAttendee.packageId ? 'border-primary bg-primary/5' : 'border-gray-200'"
-								>
-									<div class="flex items-center justify-between">
-										<span class="font-semibold text-gray-900">{{ pkg.name }}</span>
-										<input
-											type="radio"
-											class="h-4 w-4 text-primary"
-											:value="pkg.id"
-											v-model="currentAttendee.packageId"
-										/>
-									</div>
-									<p class="mt-2 text-xs text-gray-600">{{ pkg.description || 'No description provided.' }}</p>
-									<p class="mt-3 text-sm font-semibold text-gray-900">
-										{{ pkg.modified_amount }} {{ pkg.base_amount_currency }}
-									</p>
-								</label>
-							</div>
-							<p v-else class="text-sm text-gray-500">No packages are currently available for this attendee.</p>
-							<p v-if="currentAttendee.packageId && !isCurrentAttendeePackageAvailable" class="text-xs font-semibold text-amber-700">
-								The previously selected package is outside its availability window. Please pick another package.
-							</p>
-						</div>
-
-									<div v-else-if="activeStepIndex === 4" class="space-y-6">
-										<div>
-											<h2 class="text-lg font-semibold text-gray-900">Products</h2>
-											<p class="text-sm text-gray-600">Optional add-ons linked to the selected package.</p>
-										</div>
-
-										<p v-if="!currentAttendee?.packageId" class="text-sm text-gray-500">
-											Select a package first to see available products.
-										</p>
-										<p v-else-if="packageProductsLoading" class="text-sm text-gray-500">
-											Loading package products...
-										</p>
-										<p v-else-if="packageProductsError" class="text-sm font-semibold text-red-600">
-											{{ packageProductsError }}
-										</p>
-
-										<div v-else-if="currentPackageProducts.length" class="space-y-4">
-											<div
-												v-for="packageProduct in currentPackageProducts"
-												:key="packageProduct.id"
-												class="rounded-xl border border-gray-200 overflow-hidden"
-											>
-												<!-- Product Header -->
-												<div class="border-b border-gray-200 bg-white p-4">
-													<div class="flex flex-wrap items-start justify-between gap-3">
-														<div>
-															<p class="text-sm font-semibold text-gray-900">{{ packageProduct.productTitle }}</p>
-															<p class="mt-1 text-xs text-gray-600">Pick a size, then choose your color.</p>
-														</div>
-														<UBadge color="gray" variant="soft" size="xs">
-															Max {{ packageProduct.quantityPerAttendee }}
-														</UBadge>
-													</div>
-												</div>
-
-												<!-- Product Content: Image + Selection -->
-												<div class="grid gap-4 p-4 sm:grid-cols-3 lg:grid-cols-4">
-													<!-- Left: Product Image (Portrait) -->
-													<div class="sm:col-span-1">
-														<div class="overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-															<img
-																:src="getPackageProductImageSrc(packageProduct)"
-																:alt="`${packageProduct.productTitle} image`"
-																class="aspect-[3/4] w-full object-cover"
-															/>
-														</div>
-													</div>
-
-													<!-- Right: Selection Options -->
-													<div class="sm:col-span-2 lg:col-span-3 flex flex-col gap-4">
-														<!-- Step 1: Size Selection -->
-														<div>
-															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 1: Size</label>
-															<div v-if="getUniqueSizesForPackageProduct(packageProduct.id).length" class="flex flex-wrap gap-2">
-																<button
-																	v-for="sizeOption in getUniqueSizesForPackageProduct(packageProduct.id)"
-																	:key="sizeOption.size"
-																	type="button"
-																	class="rounded-lg border px-4 py-2 text-sm font-medium transition"
-																	:class="[
-																		getSelectedSizeForProduct(packageProduct.id) === sizeOption.size
-																			? 'border-blue-500 bg-blue-50 text-blue-700'
-																			: 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
-																		!sizeOption.Available ? 'cursor-not-allowed opacity-50' : ''
-																	]"
-																	:disabled="!sizeOption.Available"
-																	@click="setSelectedSizeForProduct(packageProduct.id, sizeOption.size)"
-																>
-																	{{ sizeOption.size }}
-																</button>
-															</div>
-															<p v-else class="text-xs text-amber-700 font-semibold">No sizes available.</p>
-														</div>
-
-														<!-- Step 2: Color Selection (only show if size selected) -->
-														<div v-if="getSelectedSizeForProduct(packageProduct.id)">
-															<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-600">Step 2: Color</label>
-															<div class="flex flex-wrap gap-3">
-																<button
-																	v-for="colorOption in getColorsForPackageProductAndSize(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!)"
-																	:key="colorOption.colorHex"
-																	type="button"
-																	class="flex flex-col items-center gap-1 transition"
-																	:disabled="!colorOption.isActive || colorOption.stockQuantity <= 0"
-																	@click="
-																		() => {
-																			const variantId = getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
-																			if (variantId) {
-																				setPackageProductVariantSelection(packageProduct.id, variantId)
-																			}
-																		}
-																	"
-																>
-																	<!-- Color Swatch -->
-																	<div
-																		class="h-10 w-10 rounded-lg border-2 transition"
-																		:style="{ backgroundColor: colorOption.colorHex }"
-																		:class="[
-																			getSelectionForPackageProduct(packageProduct.id)?.variantId === getVariantIdForPackageProductSizeColor(packageProduct.id, getSelectedSizeForProduct(packageProduct.id)!, colorOption.colorHex)
-																				? 'border-blue-500 ring-2 ring-blue-300'
-																				: 'border-slate-300',
-																			!colorOption.isActive || colorOption.stockQuantity <= 0 ? 'opacity-50' : ''
-																		]"
-																	/>
-																	<!-- Stock Label -->
-																	<!-- <span class="text-xs font-semibold" :class="colorOption.stockQuantity > 0 ? 'text-emerald-700' : 'text-slate-500'">
-																		{{ colorOption.stockQuantity > 0 ? `${colorOption.stockQuantity}` : 'Out' }}
-																	</span> -->
-																</button>
-															</div>
-														</div>
-
-
-														<!-- Quantity and Pricing -->
-														<div v-if="getSelectedSizeForProduct(packageProduct.id)" class="border-t border-slate-200 pt-4 space-y-4">
-															<!-- Quantity Selection -->
-															<div>
-																<label class="mb-2 block text-xs font-semibold uppercase tracking-wide text-gray-500">Quantity</label>
-																<UInput
-																	type="number"
-																	:min="1"
-																	:max="packageProduct.quantityPerAttendee"
-																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
-																	:model-value="getSelectionForPackageProduct(packageProduct.id)?.quantity || 1"
-																	@update:model-value="setPackageProductQuantity(packageProduct.id, Number($event || 1))"
-																/>
-																<p class="mt-1 text-xs text-slate-500">Up to {{ packageProduct.quantityPerAttendee }} per attendee</p>
-															</div>
-
-															<!-- Price Breakdown -->
-															<div v-if="getSelectionForPackageProduct(packageProduct.id) && getSelectedVariantPriceInfo(packageProduct)" class="rounded-xl bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 p-4 space-y-3">
-																<p class="text-xs font-bold uppercase tracking-wide text-blue-900">Price breakdown</p>
-
-																<!-- Standard vs Bundle Comparison -->
-																<div class="space-y-2">
-																	<div class="flex items-center justify-between">
-																		<span class="text-xs text-slate-700">Standard price per unit</span>
-																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.standardPrice, packageProduct.currency) }}</span>
-																	</div>
-
-																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice !== getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
-																		<span class="text-xs text-emerald-700 font-semibold">Bundle price per unit</span>
-																		<span class="text-sm font-bold text-emerald-700">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
-																	</div>
-
-																	<div v-if="getSelectedVariantPriceInfo(packageProduct)!.bundledPrice === getSelectedVariantPriceInfo(packageProduct)!.standardPrice" class="flex items-center justify-between">
-																		<span class="text-xs text-slate-700">Bundle price per unit</span>
-																		<span class="text-sm font-semibold text-slate-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.bundledPrice, packageProduct.currency) }}</span>
-																	</div>
-																</div>
-
-																<!-- Total Cost -->
-																<div class="border-t border-blue-300 pt-3 flex items-center justify-between">
-																	<div>
-																		<p class="text-xs text-slate-600">Total for {{ getSelectedVariantPriceInfo(packageProduct)!.quantity }} {{ getSelectedVariantPriceInfo(packageProduct)!.quantity === 1 ? 'item' : 'items' }}</p>
-																		<p class="text-xs text-slate-500 mt-0.5">At checkout</p>
-																	</div>
-																	<div class="text-right">
-																		<p class="text-2xl font-black text-blue-900">{{ formatMoney(getSelectedVariantPriceInfo(packageProduct)!.totalPrice, packageProduct.currency) }}</p>
-																	</div>
-																</div>
-															</div>
-
-															<!-- Action Buttons -->
-															<div class="flex justify-end gap-2">
-																<UButton
-																	size="xs"
-																	color="gray"
-																	variant="ghost"
-																	:disabled="!getSelectionForPackageProduct(packageProduct.id)"
-																	@click="removePackageProductSelection(packageProduct.id)"
-																>
-																	Remove
-																</UButton>
-															</div>
-														</div>
-														<!-- Empty State Helper -->
-														<div v-else class="flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs text-blue-700">
-															<UIcon name="i-heroicons-information-circle" class="h-4 w-4" />
-															<span>Select a size to see available colors.</span>
-														</div>
-													</div>
-												</div>
-											</div>
-
-											<div v-if="selectedAddOnsSummary.length" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-												<p class="text-sm font-semibold text-slate-900">Selected add-ons</p>
-												<ul class="mt-2 space-y-2">
-													<li
-														v-for="row in selectedAddOnsSummary"
-														:key="`${row.packageProductId}-${row.variantLabel}`"
-														class="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs"
-													>
-														<div class="text-slate-700">
-															<p class="font-semibold text-slate-900">{{ row.productTitle }}</p>
-															<p>{{ row.variantLabel }}</p>
-														</div>
-														<p class="font-semibold text-slate-800">x{{ row.quantity }}</p>
-													</li>
-												</ul>
-											</div>
-										</div>
-
-										<p v-else class="text-sm text-gray-500">No package products available for this package.</p>
-									</div>
-
-									<div v-else-if="activeStepIndex === 5" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Consents</h2>
-								<p class="text-sm text-gray-600">Review and accept event consents.</p>
-							</div>
-
-							<div v-if="consents.length" class="space-y-4">
-								<label
-									v-for="consent in consents"
-									:key="consent.id"
-									class="flex items-start gap-3 rounded-xl border border-gray-200 p-4"
-								>
-									<input
-										type="checkbox"
-										class="mt-1 h-4 w-4 rounded border-gray-300 text-primary"
-										:checked="isConsentChecked(consent.id)"
-										@change="toggleConsent(consent.id, $event)"
+									<RegisterStepProducts
+										v-else-if="activeStepIndex === 4"
+										:current-attendee="currentAttendee"
+										:package-products-loading="packageProductsLoading"
+										:package-products-error="packageProductsError"
+										:current-package-products="currentPackageProducts"
+										:selected-add-ons-summary="selectedAddOnsSummary"
+										:get-package-product-image-src="getPackageProductImageSrc"
+										:get-unique-sizes-for-package-product="getUniqueSizesForPackageProduct"
+										:get-colors-for-package-product-and-size="getColorsForPackageProductAndSize"
+										:get-variant-id-for-package-product-size-color="getVariantIdForPackageProductSizeColor"
+										:get-selected-size-for-product="getSelectedSizeForProduct"
+										:set-selected-size-for-product="setSelectedSizeForProduct"
+										:get-selection-for-package-product="getSelectionForPackageProduct"
+										:set-package-product-variant-selection="setPackageProductVariantSelection"
+										:set-package-product-quantity="setPackageProductQuantity"
+										:remove-package-product-selection="removePackageProductSelection"
+										:get-selected-variant-price-info="getSelectedVariantPriceInfo"
 									/>
-									<div>
-										<div class="flex items-center gap-2">
-											<span class="text-sm font-semibold text-gray-900">{{ consent.title }}</span>
-											<UBadge v-if="consent.required" color="red" variant="soft" size="xs">Required</UBadge>
-										</div>
-										<p class="mt-1 text-xs text-gray-600">{{ consent.description }}</p>
-										<a
-											v-if="consent.external_link"
-											:href="consent.external_link"
-											target="_blank"
-											class="mt-2 inline-block text-xs font-semibold text-primary"
-										>
-											View details
-										</a>
-									</div>
-								</label>
-							</div>
-							<p v-else class="text-sm text-gray-500">No consents required for this event.</p>
-						</div>
 
-									<div v-else-if="activeStepIndex === reviewStepIndex" class="space-y-6">
-							<div>
-								<h2 class="text-lg font-semibold text-gray-900">Review and pay</h2>
-								<p class="text-sm text-gray-600">Confirm attendee selections and choose a payment method.</p>
-							</div>
+								<RegisterStepConsents
+										v-else-if="activeStepIndex === 5"
+										:consents="consents"
+										:is-consent-checked="isConsentChecked"
+										:toggle-consent="toggleConsent"
+									/>
 
-							<div class="space-y-4">
-								<div
-									v-for="(attendee, index) in store.attendees"
-									:key="index"
-									class="rounded-xl border border-gray-200 p-4"
-								>
-									<div class="flex items-start justify-between">
-										<div>
-											<p class="text-sm font-semibold text-gray-900">
-												Attendee {{ index + 1 }}: {{ attendee.first_name }} {{ attendee.last_name }}
-											</p>
-											<p class="mt-1 text-xs text-gray-600">
-												Package: {{ packageById(attendee.packageId)?.name || 'Not selected' }}
-											</p>
-											<div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
-													Age {{ calculateAge(attendee.date_of_birth || '') ?? 'N/A' }}
-												</span>
-												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
-													{{ attendee.personalInfo.medicalConditions.length }} medical
-												</span>
-												<span class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-700">
-													{{ attendee.personalInfo.dietaryRequirements.length }} dietary
-												</span>
-												<span class="rounded-full px-2.5 py-1 font-semibold" :class="attendeeReviewAmount(attendee, index).amount === 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-emerald-50 text-emerald-700'">
-													Due {{ attendeeReviewAmount(attendee, index).amount === 0 ? 'FREE' : formatMoney(attendeeReviewAmount(attendee, index).amount, attendeeReviewAmount(attendee, index).currency) }}
-												</span>
-											</div>
-										</div>
-										<UButton size="xs" color="gray" variant="ghost" @click="jumpToAttendee(index)">
-											Edit
-										</UButton>
-									</div>
-								</div>
-							</div>
+									<RegisterStepReview
+										v-else-if="activeStepIndex === reviewStepIndex"
+										:attendees="store.attendees"
+										:package-by-id="packageById"
+										:calculate-age="calculateAge"
+										:attendee-review-amount="attendeeReviewAmount"
+										:is-booking-free="isBookingFree"
+										:payment-methods="paymentMethods"
+										:selected-payment-method-id="selectedPaymentMethodId ?? null"
+										:is-checkout-ui-busy="isCheckoutUiBusy"
+										:get-method-icon="getMethodIcon"
+										:payment-method-type-label="paymentMethodTypeLabel"
+										:selected-payment-method="selectedPaymentMethod"
+										:is-bank-transfer-method="isBankTransferMethod"
+										:is-stripe-method="isStripeMethod"
+										:bank-details="bankDetails"
+										:reserved-bank-transfer-loading="reservedBankTransferLoading"
+										:reserved-bank-transfer-reference="reservedBankTransferReference"
+										:reserved-bank-transfer-error="reservedBankTransferError"
+										:reserved-bank-transfer-payment-reference="reservedBankTransferPaymentReference"
+										:is-bank-transfer-evidence-required-immediately="isBankTransferEvidenceRequiredImmediately"
+										:bank-transfer-evidence="bankTransferEvidence"
+										:bank-transfer-evidence-errors="bankTransferEvidenceErrors"
+										:on-bank-transfer-evidence-file-change="onBankTransferEvidenceFileChange"
+										:is-stripe-test-mode="isStripeTestMode"
+										:effective-stripe-publishable-key="effectiveStripePublishableKey"
+										:manual-stripe-public-key="manualStripePublicKey"
+										:on-stripe-mount-ready="(el: HTMLElement | null) => { stripeCardMountRef = el }"
+										:stripe-card-error="stripeCardError"
+										:stripe-payment-attempt-error="stripePaymentAttemptError"
+										:stripe-card-ready="stripeCardReady"
+										@jump-to-attendee="jumpToAttendee"
+										@update:selected-payment-method-id="(id) => { selectedPaymentMethodId = id ?? undefined }"
+										@update:manual-stripe-public-key="(val) => { manualStripePublicKey = val }"
+									/>
 
-<div v-if="isBookingFree" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-							<div class="flex items-center gap-3">
-								<UIcon name="i-heroicons-check-circle" class="h-5 w-5 text-emerald-600" />
-								<div>
-									<p class="font-semibold text-emerald-900">This event is FREE!</p>
-									<p class="mt-1 text-xs text-emerald-700">No payment method required. Complete your registration below.</p>
-								</div>
-							</div>
-						</div>
-
-						<div v-else>
-								<label class="mb-1 block text-sm font-medium text-gray-700">Payment method</label>
-								<div v-if="paymentMethods.length" class="grid gap-3 sm:grid-cols-1 lg:grid-cols-1">
-									<button
-										v-for="method in paymentMethods"
-										:key="method.id"
-										type="button"
-										class="rounded-xl border p-4 text-left transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400"
-										:class="method.id === selectedPaymentMethodId ? 'border-slate-900 bg-slate-900 text-white shadow-lg' : 'border-slate-200 bg-white hover:border-slate-300'"
-										:disabled="isCheckoutUiBusy"
-										@click="selectedPaymentMethodId = method.id"
-									>
-										<div class="flex items-center justify-between gap-2">
-											<div class="flex items-center gap-2">
-												<UIcon :name="getMethodIcon(method.method_type)" class="h-5 w-5" />
-												<p class="text-sm font-semibold">{{ method.title }}</p>
-											</div>
-											<UIcon
-												v-if="method.id === selectedPaymentMethodId"
-												name="i-heroicons-check-circle"
-												class="h-5 w-5 text-emerald-400"
-											/>
-										</div>
-										<p class="mt-2 text-xs uppercase tracking-[0.14em]" :class="method.id === selectedPaymentMethodId ? 'text-white/80' : 'text-slate-500'">
-											{{ method.method_type?.replace('_', ' ') || 'Method' }}
-										</p>
-									</button>
-								</div>
-								<p v-else class="text-sm text-gray-500">No payment methods available for this event.</p>
-							</div>
-
-							<div v-if="selectedPaymentMethod && !isBookingFree" class="rounded-xl border border-slate-200 bg-slate-50 p-4">
-								<div class="flex items-center justify-between gap-3">
-									<p class="text-sm font-semibold text-slate-900">{{ selectedPaymentMethod.title }}</p>
-									<span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">
-										{{ paymentMethodTypeLabel }}
-									</span>
-								</div>
-								<div v-if="isBankTransferMethod" class="mt-4 grid gap-3 sm:grid-cols-2">
-									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account name</p>
-										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_name || 'TBA' }}</p>
-									</div>
-									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Sort code</p>
-										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.sort_code || 'TBA' }}</p>
-									</div>
-									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
-										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account number</p>
-										<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_number || 'TBA' }}</p>
-									</div>
-
-									<!-- <div class="rounded-lg border border-amber-200 bg-amber-50 p-3 sm:col-span-2">
-										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Evidence policy</p>
-										<p class="mt-1 text-sm text-amber-900">
-											{{ isBankTransferEvidenceRequiredImmediately
-												? 'This method requires evidence upload during checkout.'
-												: 'Evidence can be uploaded later before payment completion.' }}
-										</p>
-									</div> -->
-
-									<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
-										<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Reserved transfer reference</p>
-										<p v-if="reservedBankTransferLoading" class="mt-1 text-sm font-semibold text-blue-900">Reserving your reference...</p>
-										<p v-else-if="reservedBankTransferReference" class="mt-1 text-lg font-black tracking-[0.16em] text-blue-900">{{ reservedBankTransferReference }}</p>
-										<p v-else class="mt-1 text-sm text-blue-900">Select bank transfer to reserve your reference before checkout.</p>
-										<p v-if="reservedBankTransferError" class="mt-2 text-xs font-semibold text-red-600">{{ reservedBankTransferError }}</p>
-										<p v-else-if="reservedBankTransferPaymentReference" class="mt-2 text-[11px] text-blue-700">Draft payment {{ reservedBankTransferPaymentReference }} is reserved for this checkout.</p>
-									</div>
-
-									<div v-if="isBankTransferEvidenceRequiredImmediately" class="rounded-lg border border-amber-200 bg-white p-3 sm:col-span-2 space-y-3">
-										<p class="text-xs font-semibold text-slate-800">Upload transfer evidence</p>
-										<p class="text-[11px] text-slate-500">Your transfer reference is already reserved above so you can include it before checkout.</p>
-										<div class="grid gap-3 sm:grid-cols-2">
-											<div class="sm:col-span-2">
-												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Evidence file <span class="text-red-600">*</span></label>
-												<input
-													type="file"
-													accept=".pdf,.jpg,.jpeg,.png"
-													class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm"
-													@change="onBankTransferEvidenceFileChange"
-												>
-												<p class="mt-1 text-[11px] text-slate-500">Accepted: PDF/JPG/JPEG/PNG up to 10MB.</p>
-												<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
-											</div>
-											<div>
-												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer name <span class="text-red-600">*</span></label>
-												<UInput v-model="bankTransferEvidence.payer_name" placeholder="Full name on the transfer" />
-												<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
-											</div>
-											<div>
-												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer account last 4 <span class="text-red-600">*</span></label>
-												<UInput v-model="bankTransferEvidence.payer_account_last4" placeholder="1234" maxlength="4" />
-												<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
-											</div>
-											<div class="sm:col-span-2">
-												<label class="mb-1 block text-[11px] font-semibold text-slate-700">Amount on evidence <span class="text-red-600">*</span></label>
-												<UInput
-													:model-value="bankTransferEvidence.amount_on_evidence ?? undefined"
-													type="number"
-													min="0"
-													step="0.01"
-													placeholder="0.00"
-													@update:model-value="(val) => {
-														if (val === '' || val === null || val === undefined) {
-															bankTransferEvidence.amount_on_evidence = null
-															return
-														}
-														const amount = Number(val)
-														bankTransferEvidence.amount_on_evidence = Number.isFinite(amount) ? amount : null
-													}"
-												/>
-												<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
-											</div>
-										</div>
-									</div>
-								</div>
-
-								<div v-else-if="isStripeMethod" class="mt-4 space-y-3">
-										<div class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-											<div class="flex items-center justify-between gap-2">
-												<p>Enter your card details. Payment is processed securely with Stripe.</p>
-												<div class="flex items-center gap-1 rounded-full bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-700">
-													<UIcon name="i-heroicons-lock-closed" class="h-3.5 w-3.5" />
-													Secured by Stripe
-												</div>
-											</div>
-									</div>
-										<div v-if="isStripeTestMode" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-800">
-											<p class="font-bold uppercase tracking-[0.12em]">Stripe test mode</p>
-											<p class="mt-1">Use card number <span class="font-black">4242 4242 4242 4242</span>, any future expiry date, any CVC.</p>
-											<div class="mt-3">
-												<label class="mb-1 block text-[11px] font-semibold text-amber-900">Stripe publishable key override</label>
-												<UInput v-model="manualStripePublicKey" placeholder="pk_test_..." />
-											</div>
-										</div>
-										<div v-if="!effectiveStripePublishableKey" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
-											Missing Stripe publishable key. Add it in test mode override or Stripe settings.
-										</div>
-									<div class="rounded-lg border border-slate-300 bg-white p-3">
-										<div ref="stripeCardMountRef" class="min-h-[44px]"></div>
-									</div>
-									<p v-if="stripeCardError" class="text-xs font-semibold text-red-600">{{ stripeCardError }}</p>
-									<p v-else-if="stripePaymentAttemptError" class="text-xs font-semibold text-red-600">
-										{{ stripePaymentAttemptError }}
-									</p>
-									<p v-else-if="!stripeCardReady" class="text-xs text-slate-500">Complete card details to enable checkout.</p>
-									<p v-else class="text-xs font-semibold text-emerald-700">Card details ready.</p>
-								</div>
-							</div>
-						</div>
-					<div class="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-6">
-										<UButton color="gray" variant="ghost" :disabled="isCheckoutUiBusy" @click="handleBack">Back</UButton>
-										<div class="flex items-center gap-3">
-											<UButton
-												v-if="activeStepIndex === reviewStepIndex"
-												color="primary"
-												:loading="isCheckoutUiBusy"
-												:disabled="!canContinue || shouldDisableCheckoutButton"
-												@click="handleCheckout"
-											>
-												{{ checkoutPrimaryButtonLabel }}
-											</UButton>
-											<UButton
-												v-else
-												color="primary"
-												:loading="isSaving"
-												:disabled="!canContinue || isCheckoutUiBusy"
-												@click="handleNext"
-											>
-												{{ primaryActionLabel }}
-											</UButton>
-										</div>
-									</div>
+									<RegisterStepNavBar
+										class="border-t border-slate-100 pt-6"
+										:is-review-step="activeStepIndex === reviewStepIndex"
+										:is-checkout-ui-busy="isCheckoutUiBusy"
+										:is-saving="isSaving"
+										:can-continue="canContinue"
+										:should-disable-checkout-button="shouldDisableCheckoutButton"
+										:checkout-primary-button-label="checkoutPrimaryButtonLabel"
+										:primary-action-label="primaryActionLabel"
+										@back="handleBack"
+										@next="handleNext"
+										@checkout="handleCheckout"
+									/>
 								</div>
 							</Transition>
 						</div>
@@ -1284,96 +298,52 @@
 		leave-from-class="opacity-100"
 		leave-to-class="opacity-0"
 	>
-		<div
-			v-if="isCheckoutUiBusy"
-			class="fixed inset-0 z-40 flex items-center justify-center bg-slate-950/45 px-4 backdrop-blur-sm"
-		>
-			<div class="w-full max-w-xl overflow-hidden rounded-3xl border border-blue-200 bg-white shadow-2xl">
-				<div class="checkout-overlay-top" />
-				<div class="space-y-4 px-6 pb-6 pt-5">
-					<div class="flex items-start gap-3">
-						<span class="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-blue-200 bg-blue-50 text-blue-700">
-							<svg class="checkout-orbit h-5 w-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-								<path d="M12 3a9 9 0 1 0 9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-							</svg>
-						</span>
-						<div>
-							<p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Checkout in progress</p>
-							<h3 class="mt-1 text-xl font-black text-slate-900">{{ checkoutProcessingStageLabel }}</h3>
-							<p class="mt-1 text-sm text-slate-600">{{ checkoutProcessingDescription }}</p>
-						</div>
-					</div>
-
-					<div class="rounded-xl border border-blue-200 bg-blue-50/70 p-3">
-						<div class="checkout-progress-line">
-							<span class="checkout-progress-dot" />
-						</div>
-						<p class="mt-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-blue-800">Please keep this page open</p>
-					</div>
-				</div>
-			</div>
-		</div>
+		<RegisterCheckoutOverlay
+			:is-visible="isCheckoutUiBusy"
+			:stage-label="checkoutProcessingStageLabel"
+			:description="checkoutProcessingDescription"
+		/>
 	</Transition>
 
-	<UModal v-if="!showCheckoutSuccessModal" v-model="showIntentExpiredModal" :prevent-close="true" :ui="{ width: 'sm:max-w-xl' }">
-		<div class="space-y-4 p-6 md:p-8">
-			<div class="flex items-start gap-3">
-				<div class="mt-0.5 rounded-full bg-amber-100 p-2">
-					<UIcon name="i-heroicons-exclamation-triangle" class="h-5 w-5 text-amber-700" />
-				</div>
-				<div>
-					<h3 class="text-lg font-bold text-slate-900">Registration session expired</h3>
-					<p class="mt-1 text-sm text-slate-600">
-						Your booking intent is no longer active. To protect checkout integrity, you'll be redirected to the event page.
-					</p>
-				</div>
-			</div>
-			<div class="flex justify-end">
-				<UButton color="primary" @click="redirectToEventHome">Return to event</UButton>
-			</div>
-		</div>
-	</UModal>
+	<RegisterSessionExpiredModal
+		v-if="!showCheckoutSuccessModal"
+		v-model="showIntentExpiredModal"
+		:show-checkout-success-modal="showCheckoutSuccessModal"
+		@return-to-event="redirectToEventHome"
+	/>
 
-	<UModal v-model="showCheckoutSuccessModal" :prevent-close="true" :ui="{ width: 'sm:max-w-5xl' }">
-		<div class="success-modal space-y-8 p-8 md:p-14">
-			<div class="success-glow"></div>
-			<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-4">
-				<span class="h-2 w-2 rounded-full bg-emerald-400 animate-bounce" />
-				<span class="h-2 w-2 rounded-full bg-sky-400 animate-pulse" />
-				<span class="h-2 w-2 rounded-full bg-amber-400 animate-bounce" />
-			</div>
-			<div class="success-pop text-center">
-				<div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 ring-8 ring-emerald-100/60 md:h-24 md:w-24">
-					<UIcon name="i-heroicons-check" class="h-11 w-11 text-emerald-600 success-check md:h-14 md:w-14" />
-				</div>
-				<h3 class="mt-5 text-4xl font-black tracking-tight text-slate-900 success-title md:text-5xl">Booking successful</h3>
-				<p class="mt-4 text-lg font-semibold text-slate-600 success-event-lead md:text-2xl">You're going to</p>
-				<p class="mt-2 text-4xl font-black tracking-tight text-emerald-700 success-event-name md:text-6xl">
-					{{ event?.title || 'this event' }}
-				</p>
-				<div v-if="checkoutBankTransferReference" class="mx-auto mt-6 max-w-xl rounded-2xl border border-amber-200 bg-amber-50 p-4 text-left">
-					<p class="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700">Bank transfer reference</p>
-					<p class="mt-1 text-2xl font-black tracking-[0.12em] text-amber-900">{{ checkoutBankTransferReference }}</p>
-					<p class="mt-2 text-xs text-amber-800">Use this exact reference when making the transfer so your payment can be matched quickly.</p>
-					<p v-if="checkoutBankTransferInstructions" class="mt-2 text-xs text-amber-800">{{ checkoutBankTransferInstructions }}</p>
-				</div>
-			</div>
-
-			<div class="flex justify-center success-cta-wrap">
-				<UButton size="xl" color="primary" @click="closeSuccessModalAndRedirect">View your event dashboard</UButton>
-			</div>
-		</div>
-	</UModal>
+	<RegisterSuccessModal
+		v-model="showCheckoutSuccessModal"
+		:event-title="event?.title || 'this event'"
+		:bank-transfer-reference="checkoutBankTransferReference"
+		:bank-transfer-instructions="checkoutBankTransferInstructions"
+		@view-dashboard="closeSuccessModalAndRedirect"
+	/>
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
+import { computed, onBeforeUnmount, ref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { attendeeValidationSchema } from '~/schemas/registration'
+import type { BreakdownLine } from '~/components/registration/RegisterAttendeeSidebar.vue'
+import RegisterHero from '~/components/registration/RegisterHero.vue'
+import RegisterEventBar from '~/components/registration/RegisterEventBar.vue'
+import RegisterCheckoutOverlay from '~/components/registration/RegisterCheckoutOverlay.vue'
+import RegisterSessionExpiredModal from '~/components/registration/RegisterSessionExpiredModal.vue'
+import RegisterSuccessModal from '~/components/registration/RegisterSuccessModal.vue'
+import RegisterStepperHeader from '~/components/registration/RegisterStepperHeader.vue'
+import RegisterStepNavBar from '~/components/registration/RegisterStepNavBar.vue'
+import RegisterAttendeeSidebar from '~/components/registration/RegisterAttendeeSidebar.vue'
+import RegisterStepAttendeeDetails from '~/components/registration/RegisterStepAttendeeDetails.vue'
+import RegisterStepPersonalInfo from '~/components/registration/RegisterStepPersonalInfo.vue'
+import RegisterStepPackage from '~/components/registration/RegisterStepPackage.vue'
+import RegisterStepProducts from '~/components/registration/RegisterStepProducts.vue'
+import RegisterStepConsents from '~/components/registration/RegisterStepConsents.vue'
+import RegisterStepReview from '~/components/registration/RegisterStepReview.vue'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -1390,7 +360,7 @@ import { useBookingPackages } from '~/composables/resources/booking/bookingPacka
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsListRetrieve, locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
+import { locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
 import {
 	buildCheckoutPayload,
 	buildCheckoutMultipartPayload,
@@ -1407,8 +377,7 @@ import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
 import type { AttendeeDraft } from '~/stores/registration'
-import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
-import { loadStripe } from '@stripe/stripe-js'
+
 import { formatMoney } from '~/utils/money'
 
 const route = useRoute()
@@ -1763,17 +732,6 @@ type CheckoutPreviewData = {
 	total_amount?: string
 	currency?: string
 	attendees?: PreviewAttendee[]
-}
-
-type BreakdownLine = {
-	id: string
-	name: string
-	description: string
-	originalAmount: number
-	discountAmount: number
-	finalAmount: number
-	currency: string
-	discountHint?: string
 }
 
 const checkoutPreviewMutation = useCheckoutPreview()

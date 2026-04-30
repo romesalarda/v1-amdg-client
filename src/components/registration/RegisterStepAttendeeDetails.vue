@@ -1,0 +1,166 @@
+<template>
+	<div class="space-y-6">
+		<div>
+			<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
+			<p class="text-sm text-gray-600" v-if="isRegistrarSelf">Please provide <b>YOUR</b> details.</p>
+			<p class="text-sm text-gray-600" v-else>Tell us about this attendee and their relationship to you.</p>
+		</div>
+
+		<div class="grid gap-4 sm:grid-cols-2">
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+				<UInput
+					:model-value="values.first_name"
+					placeholder="First name"
+					@update:model-value="(val) => emit('update-field', 'first_name', val)"
+					:color="errors.first_name ? 'red' : 'gray'"
+				/>
+				<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+				<UInput
+					:model-value="values.last_name"
+					placeholder="Last name"
+					@update:model-value="(val) => emit('update-field', 'last_name', val)"
+					:color="errors.last_name ? 'red' : 'gray'"
+				/>
+				<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+				<UInput
+					:model-value="values.email"
+					type="email"
+					placeholder="email@example.com"
+					@update:model-value="(val) => emit('update-field-validate', 'email', val)"
+					:color="errors.email ? 'red' : 'gray'"
+				/>
+				<p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
+				<UInput
+					:model-value="values.phone_number"
+					placeholder="Phone number"
+					@update:model-value="(val) => emit('update-field-validate', 'phone_number', val)"
+					:color="errors.phone_number ? 'red' : 'gray'"
+				/>
+				<p v-if="errors.phone_number" class="mt-1 text-xs text-red-500">{{ errors.phone_number }}</p>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth <span class="text-red-500">*</span></label>
+				<UInput
+					:model-value="values.date_of_birth"
+					type="date"
+					@update:model-value="(val) => emit('update-field-validate', 'date_of_birth', val)"
+					:color="errors.date_of_birth ? 'red' : 'gray'"
+				/>
+				<p v-if="errors.date_of_birth" class="mt-1 text-xs text-red-500">{{ errors.date_of_birth }}</p>
+				<p v-if="currentAttendeeAge !== null" class="mt-2 text-sm font-medium text-slate-600">
+					Age: <span class="font-bold text-slate-900">{{ currentAttendeeAge }}</span> years old
+				</p>
+			</div>
+			<div>
+				<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
+				<USelectMenu
+					:model-value="values.gender"
+					:options="genderOptions"
+					value-attribute="value"
+					option-attribute="label"
+					placeholder="Select gender"
+					@update:model-value="(val) => emit('update-field', 'gender', val)"
+				/>
+			</div>
+			<div v-if="showRelationshipField && !isRegistrarSelf" class="sm:col-span-2">
+				<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
+				<USelectMenu
+					:model-value="values.relationship_to_user"
+					:options="relationshipOptions"
+					value-attribute="value"
+					option-attribute="label"
+					placeholder="Select relationship"
+					@update:model-value="(val) => emit('update-field', 'relationship_to_user', val)"
+					:disabled="isRegistrarSelf"
+				/>
+			</div>
+
+			<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+				<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
+				<p class="mt-1 text-xs text-slate-600">
+					Start typing to search for an area, then select from the list.
+				</p>
+				<div class="mt-4">
+					<div class="relative">
+						<UInput
+							:model-value="areaSearch"
+							placeholder="Search area name (min 2 chars)"
+							class="w-full"
+							@update:model-value="(val) => emit('update:areaSearch', val)"
+						/>
+						<div
+							v-if="areaOptions.length > 0 && areaSearch.length >= 2"
+							class="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg border border-slate-200 bg-white shadow-lg"
+						>
+							<div class="max-h-64 overflow-y-auto">
+								<button
+									v-for="option in areaOptions"
+									:key="option.value"
+									type="button"
+									class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
+									:class="option.value === currentAreaFrom ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700'"
+									@click="emit('select-area', option.value, option.label)"
+								>
+									{{ option.label }}
+								</button>
+							</div>
+						</div>
+					</div>
+					<p v-if="areaLookupLoading" class="mt-2 text-xs text-slate-500">Searching...</p>
+				</div>
+				<div v-if="hasCurrentAreaFrom" class="mt-3">
+					<UButton size="xs" color="gray" variant="ghost" @click="emit('clear-area-from')">
+						Change area
+					</UButton>
+				</div>
+				<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
+					{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAreaFromName}` : 'Select an area to continue.' }}
+				</p>
+			</div>
+		</div>
+	</div>
+</template>
+
+<script setup lang="ts">
+defineProps<{
+	values: {
+		first_name?: string
+		last_name?: string
+		email?: string
+		phone_number?: string
+		date_of_birth?: string
+		gender?: string
+		relationship_to_user?: string
+	}
+	errors: Partial<Record<string, string>>
+	isRegistrarSelf: boolean
+	showRelationshipField: boolean
+	genderOptions: Array<{ label: string; value: string }>
+	relationshipOptions: Array<{ label: string; value: string }>
+	currentAttendeeAge: number | null
+	hasCurrentAreaFrom: boolean
+	currentAreaFrom: number | null | undefined
+	currentAreaFromName: string | null | undefined
+	areaSearch: string
+	areaOptions: Array<{ label: string; value: number }>
+	areaLookupLoading: boolean
+}>()
+
+const emit = defineEmits<{
+	'update-field': [field: string, value: string]
+	'update-field-validate': [field: string, value: string]
+	'update:areaSearch': [value: string]
+	'select-area': [value: number, label: string]
+	'clear-area-from': []
+}>()
+</script>
