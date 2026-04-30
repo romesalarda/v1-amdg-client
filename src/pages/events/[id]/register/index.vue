@@ -1373,8 +1373,7 @@ import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
-import { isMinor, validatePersonalInfoItem } from '~/schemas/registration'
+import { attendeeValidationSchema, isMinor, validatePersonalInfoItem } from '~/schemas/registration'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -1400,6 +1399,7 @@ import {
 	buildCheckoutPreviewPayload,
 	createIdempotencyKey,
 } from '~/composables/registration/checkout'
+import { useRegistrationStepManager } from '~/composables/registration/useRegistrationStepManager'
 import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
@@ -1408,54 +1408,12 @@ import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-j
 import { loadStripe } from '@stripe/stripe-js'
 import { formatMoney } from '~/utils/money'
 
-// Create validation schema for attendee details
-const attendeeValidationSchema = z.object({
-	first_name: z
-		.string()
-		.min(1, 'First name is required')
-		.min(2, 'First name must be at least 2 characters'),
-	last_name: z
-		.string()
-		.min(1, 'Last name is required')
-		.min(2, 'Last name must be at least 2 characters'),
-	email: z
-		.string()
-		.optional()
-		.refine(
-			(val) => !val || /^[^@]+@[^@]+\.[^@]+$/.test(val),
-			'Please enter a valid email address'
-		),
-	phone_number: z
-		.string()
-		.optional()
-		.refine(
-			(val) => !val || /^[+]?[\d\s\-()]{10,}$/i.test(val),
-			'Please enter a valid phone number'
-		),
-	date_of_birth: z
-		.string()
-		.min(1, 'Date of birth is required')
-		.refine(
-			(val) => !val || new Date(val) < new Date(),
-			'Date of birth cannot be in the future'
-		),
-	gender: z.string().optional(),
-	relationship_to_user: z.string().optional(),
-}) as z.ZodType<{
-	first_name: string
-	last_name: string
-	email?: string
-	phone_number?: string
-	date_of_birth: string
-	gender?: string
-	relationship_to_user?: string
-}>
-
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const store = useRegistrationStore()
 const runtimeConfig = useRuntimeConfig()
+const currentIndex = computed(() => store.currentIndex)
 
 // Initialize form (will be reset when currentAttendee changes)
 const { values, errors, setFieldValue, resetForm, validate } = useForm({
@@ -1634,46 +1592,30 @@ watchEffect(() => {
 		})
 })
 
-const steps = [
-	'Attendee details',
-	'Event questions',
-	'Personal info',
-	'Ticket package',
-	'Products',
-	'Consents',
-	'Review & pay',
-]
-const attendeeStepCount = 6
-const reviewStepIndex = attendeeStepCount
-const activeStepIndex = ref(0)
-const maxVisibleStepperSteps = 3
-const stepperTransitionName = ref('stepper-slide-forward')
-
-const stepWindowStart = computed(() => {
-	if (steps.length <= maxVisibleStepperSteps) return 0
-	if (activeStepIndex.value <= 1) return 0
-	if (activeStepIndex.value >= steps.length - 2) return steps.length - maxVisibleStepperSteps
-	return activeStepIndex.value - 1
+const {
+	steps,
+	attendeeStepCount,
+	reviewStepIndex,
+	activeStepIndex,
+	stepperTransitionName,
+	stepWindowStart,
+	visibleSteps,
+	stepProgressPercent,
+	attendeeDisplayName,
+	attendeeStatusLabel,
+	attendeeStatusBadgeClass,
+	attendeeSidebarCardClass,
+	attendeeStepSummary,
+} = useRegistrationStepManager({
+	currentIndex,
+	isAttendeeReady: (attendee) => isAttendeeReady(attendee),
+	maxVisibleStepperSteps: 3,
 })
 
-const visibleSteps = computed(() => {
-	return steps
-		.slice(stepWindowStart.value, stepWindowStart.value + maxVisibleStepperSteps)
-		.map((label, offset) => ({
-			label,
-			index: stepWindowStart.value + offset,
-		}))
-})
-
-watch(activeStepIndex, (next, previous) => {
-	stepperTransitionName.value = next >= previous ? 'stepper-slide-forward' : 'stepper-slide-back'
-})
-
-const currentAttendee = computed(() => store.attendees[store.currentIndex])
-const currentAttendeeNumber = computed(() => store.currentIndex + 1)
+const currentAttendee = computed(() => store.attendees[currentIndex.value])
+const currentAttendeeNumber = computed(() => currentIndex.value + 1)
 const isRegistrarSelf = computed(() => store.registrarAttending && store.currentIndex === 0)
 const showRelationshipField = computed(() => !(registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1))
-const stepProgressPercent = computed(() => ((activeStepIndex.value + 1) / steps.length) * 100)
 const hasCurrentAreaFrom = computed(() => !!currentAttendee.value?.area_from)
 
 watchEffect(() => {
@@ -1682,47 +1624,6 @@ watchEffect(() => {
 		currentAttendee.value.relationship_to_user = 'self'
 	}
 })
-
-const attendeeDisplayName = (attendee?: AttendeeDraft | null, index?: number) => {
-	if (!attendee) return 'Attendee'
-	const fullName = `${attendee.first_name || ''} ${attendee.last_name || ''}`.trim()
-	if (fullName) return fullName
-	if (typeof index === 'number') return `Attendee ${index + 1}`
-	return 'Attendee'
-}
-
-const attendeeStatusLabel = (index: number, attendee: AttendeeDraft) => {
-	if (index === store.currentIndex) return 'Editing'
-	if (isAttendeeReady(attendee)) return 'Ready'
-	if (index < store.currentIndex) return 'Needs info'
-	return 'Queued'
-}
-
-const attendeeStatusBadgeClass = (index: number, attendee: AttendeeDraft) => {
-	if (index === store.currentIndex) return 'bg-blue-100 text-blue-700'
-	if (isAttendeeReady(attendee)) return 'bg-emerald-100 text-emerald-700'
-	if (index < store.currentIndex) return 'bg-amber-100 text-amber-700'
-	return 'bg-slate-100 text-slate-500'
-}
-
-const attendeeSidebarCardClass = (index: number, attendee: AttendeeDraft) => {
-	if (index === store.currentIndex) {
-		return 'border-slate-900 bg-white shadow-[4px_4px_0px_0px_rgba(15,23,42,0.2)]'
-	}
-	if (isAttendeeReady(attendee)) {
-		return 'border-emerald-200 bg-emerald-50 hover:border-emerald-300'
-	}
-	if (index < store.currentIndex) {
-		return 'border-amber-200 bg-amber-50 hover:border-amber-300'
-	}
-	return 'border-slate-200 bg-slate-50/90 hover:border-slate-300'
-}
-
-const attendeeStepSummary = (index: number) => {
-	if (index === store.currentIndex) return steps[activeStepIndex.value] || 'In progress'
-	if (index < store.currentIndex) return 'Previously edited'
-	return 'Waiting'
-}
 
 /**
  * Check if an attendee is a minor (under 18 years old)

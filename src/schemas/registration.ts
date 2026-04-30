@@ -1,5 +1,39 @@
 import { z } from 'zod'
 
+export const attendeeValidationSchema = z.object({
+  first_name: z
+    .string()
+    .min(1, 'First name is required')
+    .min(2, 'First name must be at least 2 characters'),
+  last_name: z
+    .string()
+    .min(1, 'Last name is required')
+    .min(2, 'Last name must be at least 2 characters'),
+  email: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[^@]+@[^@]+\.[^@]+$/.test(val),
+      'Please enter a valid email address'
+    ),
+  phone_number: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[+]?[\d\s\-()]{10,}$/i.test(val),
+      'Please enter a valid phone number'
+    ),
+  date_of_birth: z
+    .string()
+    .min(1, 'Date of birth is required')
+    .refine(
+      (val) => !val || new Date(val) < new Date(),
+      'Date of birth cannot be in the future'
+    ),
+  gender: z.string().optional(),
+  relationship_to_user: z.string().optional(),
+})
+
 /**
  * Utility function to determine if an attendee is a minor (under 18)
  */
