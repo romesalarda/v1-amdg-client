@@ -273,7 +273,7 @@
               v-for="event in filteredStaffEvents" 
               :key="'staff-' + event.event_id"
               class="bg-white border border-deep-navy/10 shadow-drawn rounded-2xl overflow-hidden group hover:border-blue-500/20 transition-all cursor-pointer"
-              @click="router.push(`/events/${event.url_safe_title}/m/dashboard`)"
+              @click="router.push(`/events/${event.url_safe_title}/`)"
             >
               <div class="flex flex-col md:flex-row h-auto md:h-48">
                 <div class="w-full md:w-64 h-48 md:h-full overflow-hidden relative">
@@ -313,7 +313,7 @@
                       <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Staff Role</span>
                       <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Leadership</span>
                     </div>
-                    <button class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4">Manage Event</button>
+                    <button @click.stop="router.push(`/events/${event.url_safe_title}/m/dashboard`)" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4">Manage Event</button>
                   </div>
                 </div>
               </div>

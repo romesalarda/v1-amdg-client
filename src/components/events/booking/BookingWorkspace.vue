@@ -573,7 +573,7 @@
                         v-if="canCancelOrder(order.status)"
                         type="button"
                         class="rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50"
-                        @click="cancelOrder(order.id)"
+                        @click="cancelOrder(order.order_id)"
                       >
                         Cancel
                       </button>
