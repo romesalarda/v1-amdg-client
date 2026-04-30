@@ -44,12 +44,14 @@
 
       <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-            <span class="material-symbols-outlined text-blue-600">payments</span>
+          <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+            <span class="material-symbols-outlined text-red-600">block</span>
           </div>
           <div>
-            <div class="text-2xl font-black text-deep-navy">{{ stats.linkedPaymentsCount }}</div>
-            <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Linked to Payments</div>
+            <div class="text-2xl font-black text-deep-navy">{{ stats.rejectedCount }}</div>
+            <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">
+              Rejected ({{ formatCurrency(stats.rejectedAmount) }})
+            </div>
           </div>
         </div>
       </div>
@@ -346,6 +348,7 @@ import {
   useVerifyPaymentDonation,
   useDeletePaymentDonation,
 } from '~/composables/resources/payments/paymentDonations'
+import { useDonationStats } from '~/composables/statistics/payments/payment-statistics'
 import {
   getDonationStatusLabel,
   getDonationStatusColor,
@@ -405,8 +408,14 @@ const queryParams = computed(() => {
   return params
 })
 
+const donationStatsQueryParams = computed(() => ({
+  event_id: props.eventId,
+  format: 'raw' as const,
+}))
+
 // Fetch donations
 const { data: donationsData, isLoading, refetch } = usePaymentDonations(queryParams)
+const { data: donationStatsData } = useDonationStats(donationStatsQueryParams)
 
 const donations = computed(() => donationsData.value?.data?.results || [])
 const totalCount = computed(() => donationsData.value?.data?.count || 0)
@@ -418,28 +427,28 @@ const deleteMutation = useDeletePaymentDonation()
 
 // Stats
 const stats = computed(() => {
-  const allDonations = donations.value
-  const verified = allDonations.filter((d: any) => d.status === 'VERIFIED')
-  const pending = allDonations.filter((d: any) => d.status === 'PENDING')
-  const linkedPayments = allDonations.filter((d: any) => d.payment !== null)
+  const payload = donationStatsData.value?.data
+  const distribution = payload?.status_distribution || []
 
-  const totalDonations = allDonations.reduce((sum: number, d: any) => {
-    if (d.status === 'VERIFIED') {
-      return sum + parseFloat(d.amount || '0')
+  const byStatus = (status: string) => {
+    const entry = distribution.find((item: any) => String(item.status_code || '').toLowerCase() === status)
+    return {
+      count: Number(entry?.value || 0),
+      amount: Number(entry?.total_amount || 0),
     }
-    return sum
-  }, 0)
+  }
 
-  const pendingAmount = pending.reduce((sum: number, d: any) => {
-    return sum + parseFloat(d.amount || '0')
-  }, 0)
+  const verified = byStatus('verified')
+  const pending = byStatus('pending')
+  const rejected = byStatus('rejected')
 
   return {
-    totalDonations,
-    verifiedCount: verified.length,
-    pendingCount: pending.length,
-    pendingAmount,
-    linkedPaymentsCount: linkedPayments.length,
+    totalDonations: Number(payload?.total_amount || 0),
+    verifiedCount: verified.count,
+    pendingCount: pending.count,
+    pendingAmount: pending.amount,
+    rejectedCount: rejected.count,
+    rejectedAmount: rejected.amount,
   }
 })
 

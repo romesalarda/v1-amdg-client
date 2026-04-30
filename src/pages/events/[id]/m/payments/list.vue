@@ -87,31 +87,22 @@
               </div>
               <div>
                 <div class="text-2xl font-black text-deep-navy">{{ stats.failedCount }}</div>
-                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Failed/Cancelled</div>
+                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">
+                  Failed/Cancelled ({{ formatCurrency(stats.failedAmount) }})
+                </div>
               </div>
             </div>
           </div>
 
           <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
             <div class="flex items-center gap-3">
-              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span class="material-symbols-outlined text-purple-600">account_balance</span>
+              <div class="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
+                <span class="material-symbols-outlined text-violet-600">currency_exchange</span>
               </div>
               <div>
-                <div class="text-xs text-gray-500 mb-1">Payment Methods</div>
-                <div class="text-xs space-y-0.5">
-                  <div class="flex justify-between">
-                    <span>Stripe:</span>
-                    <span class="font-semibold">{{ stats.methodBreakdown.stripe }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>Bank:</span>
-                    <span class="font-semibold">{{ stats.methodBreakdown.bank }}</span>
-                  </div>
-                  <div class="flex justify-between">
-                    <span>Cash:</span>
-                    <span class="font-semibold">{{ stats.methodBreakdown.cash }}</span>
-                  </div>
+                <div class="text-2xl font-black text-deep-navy">{{ stats.partiallyRefundedCount }}</div>
+                <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">
+                  Partially Refunded ({{ formatCurrency(stats.partiallyRefundedAmount) }})
                 </div>
               </div>
             </div>
@@ -684,7 +675,7 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
-import { useRevenueOverview } from '~/composables/statistics/payments/payment-statistics'
+import { usePaymentOverview, useRevenueOverview } from '~/composables/statistics/payments/payment-statistics'
 import {
   getPaymentStatusLabel,
   getPaymentStatusColor,
@@ -970,14 +961,24 @@ const revenueOverviewQueryParams = computed(() => ({
   include_deleted: false,
 }))
 
+const paymentOverviewQueryParams = computed(() => ({
+  event_id: id.value,
+  format: 'raw' as const,
+  include_deleted: false,
+}))
+
 // Fetch payments
 const { data: paymentsData, isLoading: paymentsLoading, refetch: refetchPayments } = usePayments(paymentsQueryParams)
 const { data: revenueOverviewData, isLoading: revenueOverviewLoading } = useRevenueOverview(revenueOverviewQueryParams)
+const { data: paymentOverviewData } = usePaymentOverview(paymentOverviewQueryParams)
 
 const payments = computed(() => paymentsData.value?.data?.results || [])
 const paymentsTotalCount = computed(() => paymentsData.value?.data?.count || 0)
 const totalPages = computed(() => Math.ceil(paymentsTotalCount.value / paymentsPageSize.value))
 const eventTotalRevenue = computed(() => revenueOverviewData.value?.data?.total_revenue ?? 0)
+const paymentStatusBreakdown = computed<Record<string, any>>(
+  () => paymentOverviewData.value?.data?.status_breakdown || {}
+)
 
 // Mutations
 const cancelPaymentMutation = useCancelPayment()
@@ -994,47 +995,59 @@ const hasEventEnded = computed(() => {
   return !Number.isNaN(timestamp) && timestamp < Date.now()
 })
 
+function parseMoneyLike(value: unknown): number {
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0
+  if (typeof value === 'string') {
+    const cleaned = value.replace(/[^0-9.-]/g, '')
+    const parsed = parseFloat(cleaned)
+    return Number.isFinite(parsed) ? parsed : 0
+  }
+  return 0
+}
+
+function statusCount(status: string): number {
+  return Number(paymentStatusBreakdown.value?.[status]?.count || 0)
+}
+
+function statusAmount(status: string): number {
+  return parseMoneyLike(paymentStatusBreakdown.value?.[status]?.amount)
+}
+
 // Stats calculations
 const stats = computed(() => {
   const allPayments = payments.value
-
-  const completed = allPayments.filter((p: any) => p.status === 'COMPLETED')
-  const pending = allPayments.filter((p: any) => p.status === 'PENDING')
-  const refunded = allPayments.filter((p: any) => p.status === 'REFUNDED' || p.status === 'PENDING_REFUND' || p.status === 'PARTIALLY_REFUNDED')
-  const failed = allPayments.filter((p: any) => p.status === 'FAILED' || p.status === 'CANCELLED')
 
   const pendingVerification = allPayments.filter(
     (p: any) => p.status === 'PENDING' && p.method?.method_type === 'BANK_TRANSFER'
   )
 
-  const totalRevenue = completed.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.amount.slice(1) || '0')
+  const listRevenue = allPayments.reduce((sum: number, p: any) => {
+    return sum + parseMoneyLike(p.final_amount ?? p.amount ?? p.modified_amount)
   }, 0)
 
-  const pendingAmount = pending.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.amount.slice(1) || '0')
-  }, 0)
+  const pendingCount = statusCount('PENDING')
+  const pendingAmount = statusAmount('PENDING')
 
-  const refundedAmount = refunded.reduce((sum: number, p: any) => {
-    return sum + parseFloat(p.amount.slice(1) || '0')
-  }, 0)
+  const refundedCount = statusCount('REFUNDED') + statusCount('PENDING_REFUND')
+  const refundedAmount = statusAmount('REFUNDED') + statusAmount('PENDING_REFUND')
 
-  // Method breakdown
-  const methodBreakdown = {
-    stripe: allPayments.filter((p: any) => p.method?.method_type === 'STRIPE').length,
-    bank: allPayments.filter((p: any) => p.method?.method_type === 'BANK_TRANSFER').length,
-    cash: allPayments.filter((p: any) => p.method?.method_type === 'CASH').length,
-  }
+  const partiallyRefundedCount = statusCount('PARTIALLY_REFUNDED')
+  const partiallyRefundedAmount = statusAmount('PARTIALLY_REFUNDED')
+
+  const failedCount = statusCount('FAILED') + statusCount('CANCELLED')
+  const failedAmount = statusAmount('FAILED') + statusAmount('CANCELLED')
 
   return {
-    listRevenue: totalRevenue,
-    pendingCount: pending.length,
+    listRevenue,
+    pendingCount,
     pendingAmount,
-    refundedCount: refunded.length,
+    refundedCount,
     refundedAmount,
-    failedCount: failed.length,
+    failedCount,
+    failedAmount,
+    partiallyRefundedCount,
+    partiallyRefundedAmount,
     pendingVerificationCount: pendingVerification.length,
-    methodBreakdown,
   }
 })
 
@@ -1317,7 +1330,7 @@ function handlePaymentCreated() {
 }
 
 function canDeletePayment(payment: any): boolean {
-  if (payment.status === 'DRAFTING') return true
+  if (payment.status === 'DRAFTING' || payment.status === 'FAILED') return true
   return hasEventEnded.value && payment.status === 'REFUNDED'
 }
 

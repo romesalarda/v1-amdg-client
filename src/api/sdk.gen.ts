@@ -10873,7 +10873,7 @@ export const paymentsStatisticsRefundTrendsRetrieve = <ThrowOnError extends bool
 /**
  * Revenue breakdown
  *
- * Detailed revenue breakdown including gross, refunded, and net revenue. CRITICAL: Only COMPLETED payments count toward revenue.
+ * Detailed revenue breakdown including gross, refunded, and net revenue. CRITICAL: Uses COMPLETED and PARTIALLY_REFUNDED payments, with processed refunds deducted.
  */
 export const paymentsStatisticsRevenueBreakdownRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PaymentsStatisticsRevenueBreakdownRetrieveData, ThrowOnError>) => (options?.client ?? client).get<PaymentsStatisticsRevenueBreakdownRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -10888,7 +10888,7 @@ export const paymentsStatisticsRevenueBreakdownRetrieve = <ThrowOnError extends 
 /**
  * Revenue by payment method
  *
- * Revenue breakdown by payment method. CRITICAL: Only COMPLETED payments count toward revenue.
+ * Revenue breakdown by payment method. CRITICAL: Uses COMPLETED and PARTIALLY_REFUNDED payments, with processed refunds deducted.
  */
 export const paymentsStatisticsRevenueByMethodRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PaymentsStatisticsRevenueByMethodRetrieveData, ThrowOnError>) => (options?.client ?? client).get<PaymentsStatisticsRevenueByMethodRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -10903,7 +10903,7 @@ export const paymentsStatisticsRevenueByMethodRetrieve = <ThrowOnError extends b
 /**
  * Revenue overview
  *
- * Revenue overview statistics. CRITICAL: Only COMPLETED payments count toward revenue.
+ * Revenue overview statistics. CRITICAL: Uses COMPLETED and PARTIALLY_REFUNDED payments, with processed refunds deducted.
  */
 export const paymentsStatisticsRevenueOverviewRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PaymentsStatisticsRevenueOverviewRetrieveData, ThrowOnError>) => (options?.client ?? client).get<PaymentsStatisticsRevenueOverviewRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -10918,7 +10918,7 @@ export const paymentsStatisticsRevenueOverviewRetrieve = <ThrowOnError extends b
 /**
  * Revenue trends
  *
- * Revenue trends over time. CRITICAL: Only COMPLETED payments count toward revenue.
+ * Revenue trends over time. CRITICAL: Uses COMPLETED and PARTIALLY_REFUNDED payments, with processed refunds deducted.
  */
 export const paymentsStatisticsRevenueTrendsRetrieve = <ThrowOnError extends boolean = false>(options?: Options<PaymentsStatisticsRevenueTrendsRetrieveData, ThrowOnError>) => (options?.client ?? client).get<PaymentsStatisticsRevenueTrendsRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {

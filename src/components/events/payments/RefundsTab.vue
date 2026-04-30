@@ -337,6 +337,7 @@ import {
   usePaymentRefunds,
   useProcessPaymentRefund,
 } from '~/composables/resources/payments/paymentRefunds'
+import { useRefundRequests } from '~/composables/statistics/payments/payment-statistics'
 import {
   getRefundStatusLabel,
   getRefundStatusColor,
@@ -398,8 +399,14 @@ const queryParams = computed(() => {
   return params
 })
 
+const refundStatsQueryParams = computed(() => ({
+  event_id: props.eventId,
+  format: 'raw' as const,
+}))
+
 // Fetch refunds
 const { data: refundsData, isLoading, refetch } = usePaymentRefunds(queryParams)
+const { data: refundStatsData } = useRefundRequests(refundStatsQueryParams)
 
 const refunds = computed(() => refundsData.value?.data?.results || [])
 const totalCount = computed(() => refundsData.value?.data?.count || 0)
@@ -410,26 +417,28 @@ const processMutation = useProcessPaymentRefund()
 
 // Stats
 const stats = computed(() => {
-  const allRefunds = refunds.value
-  const pending = allRefunds.filter((r: any) => r.status === 'PENDING')
-  const processed = allRefunds.filter((r: any) => r.status === 'PROCESSED')
-  const rejected = allRefunds.filter((r: any) => r.status === 'REJECTED')
+  const payload = refundStatsData.value?.data
+  const distribution = payload?.status_distribution || []
 
-  const pendingAmount = pending.reduce((sum: number, r: any) => {
-    return sum + parseFloat(r.amount || '0')
-  }, 0)
+  const byStatus = (status: string) => {
+    const entry = distribution.find((item: any) => String(item.status_code || '').toLowerCase() === status)
+    return {
+      count: Number(entry?.value || 0),
+      amount: Number(entry?.total_amount || 0),
+    }
+  }
 
-  const processedAmount = processed.reduce((sum: number, r: any) => {
-    return sum + parseFloat(r.amount || '0')
-  }, 0)
+  const pending = byStatus('pending')
+  const processed = byStatus('processed')
+  const rejected = byStatus('rejected')
 
   return {
-    totalCount: allRefunds.length,
-    pendingCount: pending.length,
-    pendingAmount,
-    processedCount: processed.length,
-    processedAmount,
-    rejectedCount: rejected.length,
+    totalCount: Number(payload?.total_requests || 0),
+    pendingCount: pending.count,
+    pendingAmount: pending.amount,
+    processedCount: processed.count,
+    processedAmount: processed.amount,
+    rejectedCount: rejected.count,
   }
 })
 
