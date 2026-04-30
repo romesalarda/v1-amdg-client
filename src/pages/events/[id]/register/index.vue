@@ -1373,7 +1373,7 @@ import { useToast } from '#ui/composables/useToast'
 import { useRegistrationStore } from '~/stores/registration'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { attendeeValidationSchema, isMinor, validatePersonalInfoItem } from '~/schemas/registration'
+import { attendeeValidationSchema } from '~/schemas/registration'
 
 // Use middleware to validate booking intent and URL parameters
 definePageMeta({
@@ -1399,6 +1399,7 @@ import {
 	createIdempotencyKey,
 } from '~/composables/registration/checkout'
 import { useBookingIntentManager } from '~/composables/registration/useBookingIntentManager'
+import { usePersonalInfoManager } from '~/composables/registration/usePersonalInfoManager'
 import { useRegistrationStepManager } from '~/composables/registration/useRegistrationStepManager'
 import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
@@ -1548,52 +1549,37 @@ const isRegistrarSelf = computed(() => store.registrarAttending && store.current
 const showRelationshipField = computed(() => !(registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1))
 const hasCurrentAreaFrom = computed(() => !!currentAttendee.value?.area_from)
 
+const {
+	relationshipOptions,
+	genderOptions,
+	emergencyRelationshipOptions,
+	isAttendeeMinor,
+	minorHasEmergencyContact,
+	hasPersonalInfoItem,
+	hasValidPersonalInfoItems,
+	getPersonalInfoItemValidationError,
+	toggleDietaryRequirement,
+	toggleMedicalCondition,
+	toggleAccessibilityRequirement,
+	updateDietaryRequirementDetails,
+	updateMedicalConditionSeverity,
+	updateMedicalConditionDetails,
+	updateAccessibilityRequirementDetails,
+	isOtherOption,
+	getDetailsForItem,
+	addEmergencyContact,
+} = usePersonalInfoManager({
+	currentAttendee,
+	currentIndex,
+	setPersonalInfo: (index, personalInfo) => store.setPersonalInfo(index, personalInfo),
+})
+
 watchEffect(() => {
 	if (!currentAttendee.value) return
 	if (registrationMode.value === 'self' && isRegistrarSelf.value && store.ticketCount === 1) {
 		currentAttendee.value.relationship_to_user = 'self'
 	}
 })
-
-/**
- * Check if an attendee is a minor (under 18 years old)
- */
-const isAttendeeMinor = (attendee: AttendeeDraft): boolean => {
-	return isMinor(attendee.date_of_birth)
-}
-
-/**
- * Check if a minor has an emergency contact
- */
-const minorHasEmergencyContact = (attendee: AttendeeDraft): boolean => {
-	if (!isAttendeeMinor(attendee)) return true // Not a minor, so requirement doesn't apply
-	return !!attendee.personalInfo.emergencyContact && !!attendee.personalInfo.emergencyContact.first_name && !!attendee.personalInfo.emergencyContact.last_name
-}
-
-const relationshipOptions = [
-	{ label: 'Self', value: 'self' },
-	{ label: 'Spouse', value: 'spouse' },
-	{ label: 'Child', value: 'child' },
-	{ label: 'Friend', value: 'friend' },
-	{ label: 'Parent', value: 'parent' },
-	{ label: 'Sibling', value: 'sibling' },
-	{ label: 'Other', value: 'other' },
-]
-
-const genderOptions = [
-	{ label: 'Female', value: 'female' },
-	{ label: 'Male', value: 'male' },
-	{ label: 'Other', value: 'other' },
-	{ label: 'Prefer not to say', value: 'prefer_not_to_say' },
-]
-
-const emergencyRelationshipOptions = [
-	{ label: 'Parent', value: 'parent' },
-	{ label: 'Sibling', value: 'sibling' },
-	{ label: 'Spouse', value: 'spouse' },
-	{ label: 'Friend', value: 'friend' },
-	{ label: 'Other', value: 'other' },
-]
 
 const dietaryRequirementsQuery = useDietaryRequirements()
 const medicalConditionsQuery = useMedicalConditions()
@@ -2529,122 +2515,6 @@ const requiredConsentsMissing = computed(() => {
 
 const requiredConsentIds = computed(() => consents.value.filter((consent) => consent.required).map((consent) => consent.id))
 
-const hasPersonalInfoItem = (items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[], id: number) => {
-	return items.some((item) => item.id === id)
-}
-
-const hasValidPersonalInfoItems = (attendee: AttendeeDraft) => {
-	const dietaryValid = attendee.personalInfo.dietaryRequirements.every((item) => validatePersonalInfoItem(item).isValid)
-	const medicalValid = attendee.personalInfo.medicalConditions.every((item) => validatePersonalInfoItem(item).isValid)
-	const accessibilityValid = attendee.personalInfo.accessibilityRequirements.every((item) => validatePersonalInfoItem(item).isValid)
-	return dietaryValid && medicalValid && accessibilityValid
-}
-
-const getPersonalInfoItemValidationError = (
-	items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[],
-	id: number,
-) => {
-	const item = items.find((entry) => entry.id === id)
-	if (!item) return ''
-	const result = validatePersonalInfoItem(item)
-	return result.isValid ? '' : result.error || 'Please provide details for this requirement.'
-}
-
-const updatePersonalInfoItems = <T extends PersonalInfoItemDraft | MedicalConditionItemDraft>(
-	items: T[],
-	id: number,
-	checked: boolean,
-) => {
-	const next = items.filter((item) => item.id !== id) as T[]
-	if (checked) {
-		next.push({ id } as T)
-	}
-	return next
-}
-
-const toggleDietaryRequirement = (id: number, eventTarget: Event) => {
-	if (!currentAttendee.value) return
-	const checked = (eventTarget.target as HTMLInputElement).checked
-	const updated = updatePersonalInfoItems(currentAttendee.value.personalInfo.dietaryRequirements, id, checked)
-	store.setPersonalInfo(store.currentIndex, { ...currentAttendee.value.personalInfo, dietaryRequirements: updated })
-}
-
-const toggleMedicalCondition = (id: number, eventTarget: Event) => {
-	if (!currentAttendee.value) return
-	const checked = (eventTarget.target as HTMLInputElement).checked
-	const updated = updatePersonalInfoItems(currentAttendee.value.personalInfo.medicalConditions, id, checked)
-	store.setPersonalInfo(store.currentIndex, { ...currentAttendee.value.personalInfo, medicalConditions: updated })
-}
-
-const toggleAccessibilityRequirement = (id: number, eventTarget: Event) => {
-	if (!currentAttendee.value) return
-	const checked = (eventTarget.target as HTMLInputElement).checked
-	const updated = updatePersonalInfoItems(currentAttendee.value.personalInfo.accessibilityRequirements, id, checked)
-	store.setPersonalInfo(store.currentIndex, { ...currentAttendee.value.personalInfo, accessibilityRequirements: updated })
-}
-
-/**
- * Update details for a dietary requirement item
- */
-const updateDietaryRequirementDetails = (id: number, details: string | null) => {
-	if (!currentAttendee.value) return
-	const item = currentAttendee.value.personalInfo.dietaryRequirements.find((d) => d.id === id)
-	if (item) {
-		item.details = details && details.trim() !== '' ? details : null
-	}
-}
-
-/**
- * Update severity for a medical condition item
- */
-const updateMedicalConditionSeverity = (id: number, severity: 'mild' | 'moderate' | 'severe' | null) => {
-	if (!currentAttendee.value) return
-	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
-	if (item) {
-		item.severity = severity
-	}
-}
-
-/**
- * Update details for a medical condition item
- */
-const updateMedicalConditionDetails = (id: number, details: string | null) => {
-	if (!currentAttendee.value) return
-	const item = currentAttendee.value.personalInfo.medicalConditions.find((d) => d.id === id)
-	if (item) {
-		item.details = details && details.trim() !== '' ? details : null
-	}
-}
-
-/**
- * Update details for an accessibility requirement item
- */
-const updateAccessibilityRequirementDetails = (id: number, details: string | null) => {
-	if (!currentAttendee.value) return
-	const item = currentAttendee.value.personalInfo.accessibilityRequirements.find((d) => d.id === id)
-	if (item) {
-		item.details = details && details.trim() !== '' ? details : null
-	}
-}
-
-/**
- * Check if an item is "OTHER" (typically indicated by a special ID pattern)
- * You can customize this based on your backend's "OTHER" ID convention
- */
-const isOtherOption = (id: number): boolean => {
-	// Customize this based on your actual "OTHER" ID from backend
-	// This is a placeholder - adjust according to your API response
-	return id === -1 || String(id).toLowerCase().includes('other')
-}
-
-/**
- * Get the details field for a requirement item
- */
-const getDetailsForItem = (id: number, items: PersonalInfoItemDraft[]): string => {
-	const item = items.find((d) => d.id === id)
-	return item?.details || ''
-}
-
 const hasQuestionAnswerContent = (answer: AttendeeDraft['questionAnswers'][number]) => {
 	if (typeof answer.answerText === 'string' && answer.answerText.trim().length > 0) return true
 	if (typeof answer.answerText === 'number') return true
@@ -2808,18 +2678,6 @@ const primaryActionLabel = computed(() => {
 	}
 	return 'Continue'
 })
-
-const addEmergencyContact = () => {
-	if (!currentAttendee.value?.personalInfo) return
-	currentAttendee.value.personalInfo.emergencyContact = {
-		first_name: '',
-		last_name: '',
-		phone_number: '',
-		relationship: undefined,
-		email: '',
-		primary_contact: true,
-	}
-}
 
 const isConsentChecked = (consentId: number) => {
 	return currentAttendee.value?.consents?.some((consent) => consent.consentId === consentId && consent.consentGiven) || false
