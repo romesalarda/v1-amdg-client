@@ -1382,7 +1382,6 @@ definePageMeta({
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
-import { useCreateBookingIntent, usePingBookingIntent } from '~/composables/resources/booking/bookingIntents'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
@@ -1399,6 +1398,7 @@ import {
 	buildCheckoutPreviewPayload,
 	createIdempotencyKey,
 } from '~/composables/registration/checkout'
+import { useBookingIntentManager } from '~/composables/registration/useBookingIntentManager'
 import { useRegistrationStepManager } from '~/composables/registration/useRegistrationStepManager'
 import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
@@ -1414,6 +1414,7 @@ const toast = useToast()
 const store = useRegistrationStore()
 const runtimeConfig = useRuntimeConfig()
 const currentIndex = computed(() => store.currentIndex)
+const checkoutCompleted = ref(false)
 
 // Initialize form (will be reset when currentAttendee changes)
 const { values, errors, setFieldValue, resetForm, validate } = useForm({
@@ -1494,102 +1495,31 @@ const reminderLocation = computed(() => {
 	return 'Location TBA'
 })
 
-const bookingIntentMutation = useCreateBookingIntent()
-const pingBookingIntentMutation = usePingBookingIntent()
 const requestFetch = useRequestFetch()
-const isCreatingIntent = ref(false)
-const showIntentExpiredModal = ref(false)
-const intentExpiresAtMs = ref<number | null>(null)
-const intentNowMs = ref(Date.now())
 const areaLookupLoading = ref(false)
 const areaSearch = ref('')
 const areaOptions = ref<Array<{ label: string; value: number }>>([])
 let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
-let intentCountdownTimer: ReturnType<typeof setInterval> | null = null
-
-const setIntentExpiryFromSeconds = (seconds?: number | null) => {
-	if (typeof seconds !== 'number' || Number.isNaN(seconds)) return
-	const safeSeconds = Math.max(0, Math.floor(seconds))
-	intentExpiresAtMs.value = Date.now() + safeSeconds * 1000
-	intentNowMs.value = Date.now()
-}
-
-const setIntentExpiryFromIso = (expiresAt?: string | null) => {
-	if (!expiresAt) return
-	const parsed = new Date(expiresAt).getTime()
-	if (Number.isNaN(parsed)) return
-	intentExpiresAtMs.value = parsed
-	intentNowMs.value = Date.now()
-}
-
-const intentCountdownSeconds = computed(() => {
-	if (!store.bookingIntentId || !intentExpiresAtMs.value || showIntentExpiredModal.value) return null
-	const remaining = Math.ceil((intentExpiresAtMs.value - intentNowMs.value) / 1000)
-	return Math.max(0, remaining)
-})
-
-const showIntentCountdown = computed(() => {
-	return !!store.bookingIntentId && intentCountdownSeconds.value !== null && !showIntentExpiredModal.value
-})
-
-const intentCountdownLabel = computed(() => {
-	const totalSeconds = intentCountdownSeconds.value
-	if (totalSeconds === null) return '--:--'
-	const minutes = Math.floor(totalSeconds / 60)
-	const seconds = totalSeconds % 60
-	return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
-})
-
-const intentTimerToneClass = computed(() => {
-	const remaining = intentCountdownSeconds.value
-	if (remaining === null || remaining > 300) {
-		return 'border-emerald-300 bg-emerald-50 text-emerald-800'
-	}
-	if (remaining > 120) {
-		return 'border-amber-300 bg-amber-50 text-amber-800'
-	}
-	return 'border-red-300 bg-red-50 text-red-800'
-})
-
-const stopIntentCountdown = () => {
-	if (!intentCountdownTimer) return
-	clearInterval(intentCountdownTimer)
-	intentCountdownTimer = null
-}
-
-const startIntentCountdown = () => {
-	stopIntentCountdown()
-	if (!store.bookingIntentId || !intentExpiresAtMs.value) return
-	intentCountdownTimer = setInterval(() => {
-		intentNowMs.value = Date.now()
-	}, 1000)
-}
-
-watchEffect(() => {
-	if (!event.value || store.bookingIntentId || isCreatingIntent.value) return
-	isCreatingIntent.value = true
-	bookingIntentMutation
-		.mutateAsync({
-			event: event.value.event_id,
-			intended_ticket_count: store.ticketCount,
-		})
-		.then((response) => {
-			const intentId = response.data?.booking_intent_id
-			if (intentId) {
-				store.setBookingIntentId(intentId)
-				setIntentExpiryFromIso((response.data as { expires_at?: string | null })?.expires_at)
-				if (!intentExpiresAtMs.value) {
-					setIntentExpiryFromSeconds(20 * 60)
-				}
-				startIntentCountdown()
-			}
-		})
-		.catch(() => {
-			toast.add({ title: 'Error', description: 'Failed to create booking intent.', color: 'red' })
-		})
-		.finally(() => {
-			isCreatingIntent.value = false
-		})
+const {
+	showIntentExpiredModal,
+	showIntentCountdown,
+	intentCountdownLabel,
+	intentTimerToneClass,
+	pingBookingIntent,
+	stopIntentPing,
+	stopIntentCountdown,
+	redirectToEventHome,
+} = useBookingIntentManager({
+	event,
+	eventId,
+	ticketCount,
+	bookingIntentId: computed(() => store.bookingIntentId),
+	checkoutCompleted,
+	setBookingIntentId: (intentId) => store.setBookingIntentId(intentId),
+	resetRegistrationStore: () => store.reset(),
+	onIntentExpired: () => {
+		showCheckoutSuccessModal.value = false
+	},
 })
 
 const {
@@ -2387,8 +2317,6 @@ const effectiveStripePublishableKey = computed(() => {
 })
 
 const idempotencyKey = ref(createIdempotencyKey())
-const checkoutCompleted = ref(false)
-
 const isSaving = ref(false)
 const checkoutResult = ref<any>(null)
 const showCheckoutSuccessModal = ref(false)
@@ -2905,124 +2833,6 @@ const toggleConsent = (consentId: number, eventTarget: Event) => {
 	updated.push({ consentId, consentGiven: checked })
 	store.setConsents(store.currentIndex, updated)
 }
-
-const redirectToEventHome = () => {
-	showIntentExpiredModal.value = false
-	store.reset()
-	stopIntentCountdown()
-	// Redirect to dashboard after intent expiration
-	router.push({ path: `events/${eventId}` })
-}
-
-const markIntentExpired = () => {
-	if (checkoutCompleted.value) return
-	showCheckoutSuccessModal.value = false
-	showIntentExpiredModal.value = true
-	stopIntentCountdown()
-}
-
-const pingBookingIntent = async (silent: boolean = true) => {
-	if (isCreatingIntent.value) {
-		return true
-	}
-
-	if (!store.bookingIntentId) {
-		markIntentExpired()
-		return false
-	}
-
-	try {
-		const response = await pingBookingIntentMutation.mutateAsync({
-			intent: store.bookingIntentId,
-		})
-		const data = response.data as {
-			is_active?: boolean
-			redirect_required?: boolean
-			seconds_remaining?: number
-			expires_at?: string | null
-		}
-
-		setIntentExpiryFromSeconds(data?.seconds_remaining)
-		if (!intentExpiresAtMs.value) {
-			setIntentExpiryFromIso(data?.expires_at)
-		}
-		if (store.bookingIntentId && intentExpiresAtMs.value && !showIntentExpiredModal.value) {
-			startIntentCountdown()
-		}
-
-		if (!data?.is_active || data?.redirect_required) {
-			markIntentExpired()
-			return false
-		}
-
-		return true
-	} catch (error: any) {
-		const statusCode = error?.status || error?.response?.status
-		if (statusCode === 400 || statusCode === 404) {
-			markIntentExpired()
-			return false
-		}
-
-		if (!silent) {
-			toast.add({ title: 'Warning', description: 'Unable to verify booking intent right now.', color: 'amber' })
-		}
-		return true
-	}
-}
-
-let intentPingTimer: ReturnType<typeof setInterval> | null = null
-
-const stopIntentPing = () => {
-	if (!intentPingTimer) return
-	clearInterval(intentPingTimer)
-	intentPingTimer = null
-}
-
-const startIntentPing = () => {
-	stopIntentPing()
-	if (!store.bookingIntentId) return
-	intentPingTimer = setInterval(() => {
-		void pingBookingIntent(true)
-	}, 120000)
-}
-
-watch(
-	() => store.bookingIntentId,
-	(intentId) => {
-		if (!intentId) {
-			stopIntentPing()
-			stopIntentCountdown()
-			intentExpiresAtMs.value = null
-			return
-		}
-		void pingBookingIntent(true)
-		startIntentPing()
-		if (intentExpiresAtMs.value) {
-			startIntentCountdown()
-		}
-	},
-	{ immediate: true }
-)
-
-watch(
-	() => checkoutCompleted.value,
-	(completed) => {
-		if (!completed) return
-		showIntentExpiredModal.value = false
-		stopIntentPing()
-		stopIntentCountdown()
-	}
-)
-
-watch(
-	() => intentCountdownSeconds.value,
-	(seconds) => {
-		if (seconds === null) return
-		if (seconds <= 0) {
-			markIntentExpired()
-		}
-	}
-)
 
 const refreshCheckoutPreview = async () => {
 	if (!store.bookingIntentId) return
