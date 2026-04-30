@@ -50,6 +50,7 @@
             :data="medicalChartData"
             height="300px"
             color="#ef4444"
+            value-label="Attendees"
           />
         </div>
         <div v-if="severityChartData.length">
@@ -59,6 +60,7 @@
             height="300px"
             :donut="true"
             :colors="['#10b981', '#f59e0b', '#ef4444']"
+            value-label="Attendees"
           />
         </div>
       </div>
@@ -84,6 +86,7 @@
         height="300px"
         color="#3b82f6"
         :horizontal="true"
+        value-label="Attendees"
       />
       <div v-else class="text-center text-gray-500 py-8">
         No accessibility requirements data available
@@ -107,6 +110,7 @@
         height="300px"
         color="#10b981"
         :horizontal="true"
+        value-label="Attendees"
       />
       <div v-else class="text-center text-gray-500 py-8">
         No dietary requirements data available
@@ -129,6 +133,7 @@
         :data="emergencyChartData"
         height="300px"
         :colors="['#8b5cf6', '#06b6d4', '#f59e0b', '#10b981', '#ec4899']"
+        value-label="Contacts"
       />
       <div v-else class="text-center text-gray-500 py-8">
         No emergency contacts data available

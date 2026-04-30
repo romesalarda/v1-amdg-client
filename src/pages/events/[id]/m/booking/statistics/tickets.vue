@@ -51,6 +51,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#ef4444', '#6b7280']"
+          value-label="Tickets"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No ticket status data available
@@ -74,6 +75,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899']"
+          value-label="Tickets"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No ticket scope data available
@@ -99,6 +101,7 @@
           :data="ticketTypesChartData"
           height="300px"
           color="#6366f1"
+          value-label="Tickets"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No ticket type data available

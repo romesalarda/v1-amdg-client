@@ -51,7 +51,7 @@
           :data="revenueTrendsChartData.data"
           height="300px"
           color="#10b981"
-          :label="'Revenue'"
+          :label="'Revenue (GBP)'"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No trend data available
@@ -75,6 +75,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#f59e0b', '#ef4444', '#6b7280', '#3b82f6']"
+          value-label="Revenue (GBP)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No breakdown data available
@@ -101,6 +102,7 @@
           height="300px"
           color="#8b5cf6"
           :horizontal="true"
+          value-label="Bookings"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No package revenue data available
@@ -123,6 +125,7 @@
           :data="revenueByTicketTypeChartData"
           height="300px"
           color="#6366f1"
+          value-label="Tickets"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No ticket type revenue data available
@@ -272,9 +275,9 @@ const formatStatus = (status: string) => {
 
 // Helper function to format currency
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'GBP',
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount)

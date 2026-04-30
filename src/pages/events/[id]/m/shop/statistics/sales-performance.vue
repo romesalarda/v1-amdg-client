@@ -53,6 +53,7 @@
           height="300px"
           color="#9333ea"
           y-axis-label="Revenue (£)"
+          label="Revenue (£)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue trends data available
@@ -76,6 +77,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444', '#6b7280']"
+          value-label="Orders"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No order status data available
@@ -100,6 +102,7 @@
           height="300px"
           color="#f59e0b"
           y-axis-label="Orders"
+          label="Orders"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No order trends data available
@@ -123,6 +126,7 @@
           height="300px"
           color="#10b981"
           :horizontal="true"
+          value-label="Revenue (GBP)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No product revenue data available
@@ -146,6 +150,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']"
+          value-label="Revenue (GBP)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No category revenue data available
@@ -169,6 +174,7 @@
           height="300px"
           :donut="true"
           :colors="['#9333ea', '#06b6d4']"
+          value-label="Revenue (GBP)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue breakdown data available

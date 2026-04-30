@@ -39,7 +39,8 @@ interface Props {
   horizontal?: boolean
   showGrid?: boolean
   showValues?: boolean
-  label?: string
+  labelName?: string
+  valueLabel?: string
   valueUnit?: string
   valueFormatter?: (value: number) => string
 }
@@ -106,7 +107,7 @@ const option = computed(() => {
         const point = params[0]
         return `<div style="padding: 4px;">
           <div style="font-weight: 600; margin-bottom: 4px;">${point.name}</div>
-          <div style="color: #64748b;">${props.label || 'Value'}: <strong>${formatChartValue(Number(point.value ?? point.data ?? 0))}</strong></div>
+          <div style="color: #64748b;">${props.valueLabel || 'Value'}: <strong>${formatChartValue(Number(point.value ?? point.data ?? 0))}</strong></div>
         </div>`
       }
     },
@@ -121,7 +122,7 @@ const option = computed(() => {
     },
     xAxis: {
       type: isHorizontal ? 'value' : 'category',
-      data: isHorizontal ? undefined : props.data.map(d => d.label),
+      data: isHorizontal ? undefined : props.data.map(d => d.label.replace("_", " ")),
       axisLine: {
         lineStyle: {
           color: 'rgba(15, 23, 42, 0.12)',
@@ -145,7 +146,7 @@ const option = computed(() => {
     },
     yAxis: {
       type: isHorizontal ? 'category' : 'value',
-      data: isHorizontal ? props.data.map(d => d.label) : undefined,
+      data: isHorizontal ? props.data.map(d => d.label.replace("_", " ")) : undefined,
       axisLine: {
         lineStyle: {
           color: 'rgba(15, 23, 42, 0.12)',

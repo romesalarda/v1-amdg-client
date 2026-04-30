@@ -10,7 +10,7 @@ type PersonalInfoManagerOptions = {
 
 export const usePersonalInfoManager = (options: PersonalInfoManagerOptions) => {
   const relationshipOptions = [
-    { label: 'Self', value: 'self' },
+    // { label: 'Self', value: 'self' },
     { label: 'Spouse', value: 'spouse' },
     { label: 'Child', value: 'child' },
     { label: 'Friend', value: 'friend' },

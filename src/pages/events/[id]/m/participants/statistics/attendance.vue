@@ -92,7 +92,7 @@
           </div>
           <div class="w-full bg-gray-200 rounded-full h-8">
             <div 
-              class="bg-green-600 h-8 rounded-full flex items-center justify-center text-white text-sm font-semibold transition-all duration-500"
+              class="bg-green-600 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-500 ml-10"
               :style="{ width: `${checkInRate}%` }"
             >
               {{ checkInRate.toFixed(1) }}%

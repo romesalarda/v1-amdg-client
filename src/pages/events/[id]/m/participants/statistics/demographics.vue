@@ -46,6 +46,7 @@
           :data="ageChartData"
           height="300px"
           color="#3b82f6"
+          value-label="Attendees"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No age data available
@@ -69,6 +70,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899']"
+          value-label="Attendees"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No gender data available
@@ -92,6 +94,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#06b6d4', '#f59e0b', '#8b5cf6']"
+          value-label="Attendees"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No relationship data available
@@ -128,6 +131,7 @@
           height="300px"
           color="#f59e0b"
           :horizontal="true"
+          value-label="Attendees"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No location data available

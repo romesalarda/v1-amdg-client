@@ -51,6 +51,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899']"
+          value-label="Payments"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No payment method data available
@@ -74,6 +75,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#6b7280']"
+          value-label="Payments"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No payment status data available

@@ -36,6 +36,8 @@
 					:current-index="store.currentIndex"
 					:current-attendee="currentAttendee"
 					:show-checkout-pricing-sidebar="showCheckoutPricingSidebar"
+					:show-quick-review-button="showQuickReviewButton"
+					:quick-review-button-label="quickReviewButtonLabel"
 					:attendee-display-name="attendeeDisplayName"
 					:is-attendee-minor="isAttendeeMinor"
 					:minor-has-emergency-contact="minorHasEmergencyContact"
@@ -51,6 +53,7 @@
 					:is-polling-payment-status="isPollingPaymentStatus"
 					:payment-processing-message="paymentProcessingMessage"
 					@jump-to-attendee="jumpToAttendee"
+					@jump-to-review="jumpToReview"
 				/>
 
 	
@@ -113,6 +116,7 @@
 
 							<AttendeeQuestionAnswers
 								:event="event"
+								:draft-scope-key="`${eventId}-${store.currentIndex}`"
 								v-model="currentAttendee.questionAnswers"
 							/>
 						</div>
@@ -368,7 +372,7 @@ import { useBookingPackages } from '~/composables/resources/booking/bookingPacka
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
+import { bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import {
 	buildCheckoutPayload,
 	buildCheckoutMultipartPayload,
@@ -595,6 +599,142 @@ const allPackagesQuery = useBookingPackages(
 )
 const allPackages = computed(() => allPackagesQuery.data.value?.data?.results || [])
 const packageById = (packageId?: number) => allPackages.value.find((pkg) => pkg.id === packageId)
+
+type ReviewPackageProductRow = {
+	id: number
+	productPublicId: string
+	productTitle: string
+	imageUrl: string | null
+}
+
+type ReviewVariantRow = {
+	variantId: string
+	sizeDisplay: string
+	color: string
+}
+
+const reviewPackageProductsByPackageId = ref<Record<number, ReviewPackageProductRow[]>>({})
+const reviewVariantsByPackageProductId = ref<Record<number, ReviewVariantRow[]>>({})
+
+const ensureReviewCatalogForPackage = async (packageId: number) => {
+	if (reviewPackageProductsByPackageId.value[packageId]) return
+
+	try {
+		const packageResponse = await bookingsPackageProductsList({ path: { id: packageId } })
+		const packageProducts = (packageResponse.data?.results || []).map((row: any) => ({
+			id: Number(row.id),
+			productPublicId: String(row.product_public_id || row.product_id || row.product || '').trim(),
+			productTitle: String(row.product_title || 'Add-on'),
+			imageUrl: null as string | null,
+		}))
+
+		const lookups = await Promise.all(packageProducts.map(async (product) => {
+			if (!product.productPublicId) {
+				return { productId: product.id, imageUrl: null as string | null, variants: [] as ReviewVariantRow[] }
+			}
+
+			try {
+				const [variantsResponse, productResponse] = await Promise.all([
+					productsListVariantsList({
+						path: { product_product_id: product.productPublicId },
+						query: { page_size: 200 },
+					}),
+					productsListRetrieve({
+						path: { product_id: product.productPublicId },
+					}),
+				])
+
+				const variants = (variantsResponse.data?.results || []).map((variant: any) => ({
+					variantId: String(variant.variant_id || variant.id || ''),
+					sizeDisplay: String(variant.size_display || variant.size || 'Unspecified'),
+					color: String(variant.color || ''),
+				}))
+
+				const detail = productResponse.data
+				const mainImage = detail?.main_image?.url || detail?.images?.main?.url || null
+
+				return {
+					productId: product.id,
+					imageUrl: mainImage ? resolveImageUrl(mainImage) : null,
+					variants,
+				}
+			} catch {
+				return { productId: product.id, imageUrl: null as string | null, variants: [] as ReviewVariantRow[] }
+			}
+		}))
+
+		reviewPackageProductsByPackageId.value = {
+			...reviewPackageProductsByPackageId.value,
+			[packageId]: packageProducts.map((product) => {
+				const lookup = lookups.find((entry) => entry.productId === product.id)
+				return {
+					...product,
+					imageUrl: lookup?.imageUrl || null,
+				}
+			}),
+		}
+
+		const mergedVariants = { ...reviewVariantsByPackageProductId.value }
+		lookups.forEach((lookup) => {
+			mergedVariants[lookup.productId] = lookup.variants
+		})
+		reviewVariantsByPackageProductId.value = mergedVariants
+	} catch (error) {
+		console.warn('Unable to load review variant catalog for package', packageId, error)
+	}
+}
+
+const hydrateReviewVariantCatalog = async () => {
+	const packageIds = Array.from(new Set(
+		store.attendees
+			.filter((attendee) => (attendee.productSelections || []).length > 0 && !!attendee.packageId)
+			.map((attendee) => Number(attendee.packageId))
+	))
+
+	if (!packageIds.length) return
+	await Promise.all(packageIds.map((packageId) => ensureReviewCatalogForPackage(packageId)))
+}
+
+const getVariantDetailsForPreviewProduct = (
+	attendeeIndex: number,
+	productTitle: string | undefined,
+	productIndex: number
+) => {
+	const attendee = store.attendees[attendeeIndex]
+	if (!attendee) return []
+
+	const selections = attendee.productSelections || []
+	if (!selections.length) return []
+
+	const packageProducts = attendee.packageId
+		? reviewPackageProductsByPackageId.value[Number(attendee.packageId)] || []
+		: []
+
+	const normalizedTitle = String(productTitle || '').trim().toLowerCase()
+	let selection: typeof selections[number] | null = selections[productIndex] || null
+
+	if (!selection && normalizedTitle) {
+		selection = selections.find((entry) => {
+			const packageProduct = packageProducts.find((row) => row.id === entry.packageProductId)
+			return String(packageProduct?.productTitle || '').trim().toLowerCase() === normalizedTitle
+		}) || null
+	}
+
+	if (!selection) return []
+
+	const packageProduct = packageProducts.find((row) => row.id === selection.packageProductId)
+	const variant = (reviewVariantsByPackageProductId.value[selection.packageProductId] || []).find(
+		(row) => row.variantId === selection.variantId
+	)
+
+	return [{
+		productName: packageProduct?.productTitle || productTitle || 'Add-on',
+		sizeLabel: variant?.sizeDisplay || 'Unspecified',
+		colorLabel: variant?.color || null,
+		quantity: Math.max(1, Number(selection.quantity || 1)),
+		imageUrl: packageProduct?.imageUrl || null,
+	}]
+}
 
 type AvailabilityWindow = {
 	available_from?: string | null
@@ -922,6 +1062,7 @@ const breakdownLines = computed<BreakdownLine[]>(() => {
 				finalAmount: productFinal,
 				currency: product.currency || checkoutPreview.value?.currency || 'GBP',
 				discountHint,
+				variantDetails: getVariantDetailsForPreviewProduct(attendeeIndex, product.product_title, productIndex),
 			})
 		})
 	})
@@ -949,6 +1090,12 @@ const paymentBreakdownTotal = computed(() => {
 })
 
 const showCheckoutPricingSidebar = computed(() => activeStepIndex.value === reviewStepIndex)
+const showQuickReviewButton = computed(() =>
+	store.attendees.length > 1
+	&& activeStepIndex.value !== reviewStepIndex
+	&& store.attendees.every((attendee) => isAttendeeReady(attendee))
+)
+const quickReviewButtonLabel = computed(() => `Review all (${store.attendees.length})`)
 
 // const formatMoney = (value: number | string, currency: string = 'GBP') => {
 // 	const amount = typeof value === 'number' ? value : Number(value || 0)
@@ -1176,6 +1323,15 @@ watch(
 	{ immediate: true }
 )
 
+watch(
+	[() => activeStepIndex.value, previewTriggerSignature],
+	() => {
+		if (activeStepIndex.value !== reviewStepIndex) return
+		void hydrateReviewVariantCatalog()
+	},
+	{ immediate: true }
+)
+
 
 
 watch(
@@ -1388,6 +1544,11 @@ const jumpToAttendee = async (index: number) => {
 	if (!(await pingBookingIntent(true))) return
 	store.setCurrentIndex(index)
 	activeStepIndex.value = 0
+}
+
+const jumpToReview = async () => {
+	if (!(await pingBookingIntent(true))) return
+	activeStepIndex.value = reviewStepIndex
 }
 
 const handleCheckout = async () => {

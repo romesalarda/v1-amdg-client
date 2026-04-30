@@ -86,6 +86,7 @@
             v-if="bookingStatusData.length"
             :data="bookingStatusData"
             height="300px"
+            value-label="Bookings"
             :donut="true"
             :colors="['#10b981', '#f59e0b', '#ef4444', '#6b7280']"
           />
@@ -106,6 +107,7 @@
             height="300px"
             :donut="true"
             :colors="['#3b82f6', '#8b5cf6', '#ec4899']"
+            value-label="Tickets"
           />
           <div v-else class="text-center text-gray-500 py-8">
             No ticket data available
@@ -123,6 +125,8 @@
             :data="intentStatusData"
             height="300px"
             color="#0f172a"
+            value-label="Intents"
+
           />
           <div v-else class="text-center text-gray-500 py-8">
             No intent data available

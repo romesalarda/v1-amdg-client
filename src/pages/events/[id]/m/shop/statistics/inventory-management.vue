@@ -50,6 +50,7 @@
           :data="stockLevelsChartData"
           height="300px"
           color="#3b82f6"
+          value-label="Variants"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No stock levels data available
@@ -73,6 +74,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#06b6d4']"
+          value-label="Variants"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No size distribution data available
@@ -96,6 +98,7 @@
           height="300px"
           :donut="true"
           :colors="colorChartColors"
+          value-label="Variants"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No color distribution data available

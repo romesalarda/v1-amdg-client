@@ -50,6 +50,7 @@
           :data="packagePopularityChartData"
           height="300px"
           color="#3b82f6"
+          value-label="Bookings"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No popularity data available
@@ -72,6 +73,7 @@
           :data="packageRulesChartData"
           height="300px"
           color="#8b5cf6"
+          value-label="Rules"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No rules data available
@@ -259,9 +261,9 @@ const formatRuleType = (text: string) => {
 
 // Helper function to format currency
 const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'GBP',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)

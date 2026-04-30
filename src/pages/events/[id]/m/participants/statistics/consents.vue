@@ -105,6 +105,7 @@
                 height="250px"
                 :colors="['#10b981', '#ef4444', '#9ca3af']"
                 :donut="true"
+                value-label="Attendees"
               />
             </div>
           </div>

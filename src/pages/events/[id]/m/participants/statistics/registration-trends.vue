@@ -56,6 +56,7 @@
           :labels="trendsChartData.labels"
           color="#3b82f6"
           :smooth="true"
+          label="Attendees"
         />
       </div>
       <div v-else class="text-center text-gray-500 py-16">

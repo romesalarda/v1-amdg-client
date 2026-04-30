@@ -71,6 +71,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#f59e0b', '#ef4444', '#6b7280', '#3b82f6']"
+          value-label="Bookings"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No booking status data available
@@ -92,6 +93,7 @@
           :data="bookingsByPackageChartData"
           height="300px"
           color="#6366f1"
+          value-label="Bookings"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No package data available
@@ -115,6 +117,7 @@
           :data="attendeesPerBookingChartData"
           height="300px"
           color="#06b6d4"
+          value-label="Attendees"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No party size data available

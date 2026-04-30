@@ -51,6 +51,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#3b82f6', '#f59e0b', '#ef4444']"
+          value-label="Products"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No status distribution data available
@@ -74,6 +75,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']"
+          value-label="Products"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No category distribution data available
@@ -99,6 +101,7 @@
           height="300px"
           color="#8b5cf6"
           y-axis-label="Products"
+          :label="'Products'"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No product trends data available
@@ -122,6 +125,7 @@
           height="300px"
           color="#10b981"
           :horizontal="true"
+          value-label="Orders"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No popular products data available
@@ -144,6 +148,7 @@
           :data="ordersByCategoryChartData"
           height="300px"
           color="#6366f1"
+          value-label="Orders"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No category orders data available

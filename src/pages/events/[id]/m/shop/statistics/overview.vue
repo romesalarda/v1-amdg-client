@@ -55,6 +55,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#3b82f6', '#f59e0b', '#ef4444']"
+          value-label="Products"  
         />
         <div v-else class="text-center text-gray-500 py-8">
           No product status data available
@@ -75,6 +76,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444', '#6b7280']"
+          value-label="Orders"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No order status data available
@@ -95,6 +97,7 @@
           height="300px"
           color="#10b981"
           :horizontal="true"
+          value-label="Revenue (GBP)"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue data available

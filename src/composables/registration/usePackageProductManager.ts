@@ -40,7 +40,17 @@ export const usePackageProductManager = (options: PackageProductManagerOptions) 
   const packageProductsError = ref('')
   const currentPackageProducts = ref<PackageProductRow[]>([])
   const packageProductVariants = ref<Record<number, VariantRow[]>>({})
-  const selectedProductSizes = ref<Record<number, string | null>>({})
+  const selectedProductSizesByAttendee = ref<Record<number, Record<number, string | null>>>({})
+  const getCurrentAttendeeSizeMap = (): Record<number, string | null> => {
+    const attendeeIndex = options.currentIndex.value
+    if (!selectedProductSizesByAttendee.value[attendeeIndex]) {
+      selectedProductSizesByAttendee.value[attendeeIndex] = {}
+    }
+    return selectedProductSizesByAttendee.value[attendeeIndex]
+  }
+
+  const selectedProductSizes = computed(() => getCurrentAttendeeSizeMap())
+
 
   let packageProductLoadVersion = 0
 
@@ -101,11 +111,18 @@ export const usePackageProductManager = (options: PackageProductManagerOptions) 
   }
 
   const setSelectedSizeForProduct = (packageProductId: number, size: string | null) => {
-    selectedProductSizes.value[packageProductId] = size
+    const next = {
+      ...getCurrentAttendeeSizeMap(),
+      [packageProductId]: size,
+    }
+    selectedProductSizesByAttendee.value = {
+      ...selectedProductSizesByAttendee.value,
+      [options.currentIndex.value]: next,
+    }
   }
 
   const getSelectedSizeForProduct = (packageProductId: number): string | null => {
-    return selectedProductSizes.value[packageProductId] || null
+    return getCurrentAttendeeSizeMap()[packageProductId] || null
   }
 
   const getSelectedVariantPriceInfo = (packageProduct: PackageProductRow): { standardPrice: number; bundledPrice: number; quantity: number; totalPrice: number } | null => {
@@ -200,6 +217,11 @@ export const usePackageProductManager = (options: PackageProductManagerOptions) 
       next.push({ packageProductId, variantId, quantity: 1 })
     }
 
+    const selectedVariant = getVariantsForPackageProduct(packageProductId).find((variant) => variant.variantId === variantId)
+    if (selectedVariant?.sizeDisplay) {
+      setSelectedSizeForProduct(packageProductId, selectedVariant.sizeDisplay)
+    }
+
     setSelectionsForCurrentAttendee(next)
   }
 
@@ -233,6 +255,10 @@ export const usePackageProductManager = (options: PackageProductManagerOptions) 
     if (!packageId) {
       currentPackageProducts.value = []
       packageProductVariants.value = {}
+      selectedProductSizesByAttendee.value = {
+        ...selectedProductSizesByAttendee.value,
+        [options.currentIndex.value]: {},
+      }
       if (attendee?.productSelections?.length) {
         setSelectionsForCurrentAttendee([])
       }
@@ -330,6 +356,18 @@ export const usePackageProductManager = (options: PackageProductManagerOptions) 
 
       if ((attendee?.productSelections || []).length !== normalized.length) {
         setSelectionsForCurrentAttendee(normalized)
+      }
+
+      const syncedSizes: Record<number, string | null> = {}
+      normalized.forEach((selection) => {
+        const variant = (packageProductVariants.value[selection.packageProductId] || []).find((row) => row.variantId === selection.variantId)
+        if (variant?.sizeDisplay) {
+          syncedSizes[selection.packageProductId] = variant.sizeDisplay
+        }
+      })
+      selectedProductSizesByAttendee.value = {
+        ...selectedProductSizesByAttendee.value,
+        [options.currentIndex.value]: syncedSizes,
       }
     } catch (error) {
       if (loadVersion !== packageProductLoadVersion) return

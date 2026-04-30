@@ -1,7 +1,15 @@
 <template>
 	<aside class="w-full space-y-4 lg:w-72 lg:flex-shrink-0">
-		<div>
+		<div class="flex items-center justify-between gap-3">
 			<p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Registration group</p>
+			<button
+				v-if="showQuickReviewButton"
+				type="button"
+				class="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.16em] text-emerald-700 transition-colors hover:bg-emerald-100"
+				@click="emit('jump-to-review')"
+			>
+				{{ quickReviewButtonLabel }}
+			</button>
 		</div>
 
 		<button
@@ -78,6 +86,27 @@
 							</div>
 							<p class="font-semibold text-slate-900">{{ formatMoney(item.finalAmount, item.currency) }}</p>
 						</div>
+						<div v-if="item.variantDetails?.length" class="mt-2 space-y-2">
+							<div
+								v-for="(variant, variantIndex) in item.variantDetails"
+								:key="`${item.id}-variant-${variantIndex}`"
+								class="flex items-center gap-2 rounded-md border border-slate-200 bg-white p-2"
+							>
+								<img
+									:src="variant.imageUrl || '/assets/images/placeholder-product.jpg'"
+									:alt="variant.productName"
+									class="h-9 w-9 rounded object-cover"
+								/>
+								<div class="min-w-0 flex-1">
+									<p class="truncate text-[11px] font-semibold text-slate-800">{{ variant.productName }}</p>
+									<p class="text-[10px] text-slate-600">
+										Size: {{ variant.sizeLabel }}
+										<span v-if="variant.colorLabel"> • Color: {{ variant.colorLabel }}</span>
+									</p>
+								</div>
+								<p class="text-[10px] font-bold text-slate-700">x{{ variant.quantity }}</p>
+							</div>
+						</div>
 						<p class="mt-2 text-[11px] text-slate-600">
 							{{ formatMoney(item.originalAmount, item.currency) }}
 							<span class="text-slate-400"> - </span>
@@ -129,6 +158,13 @@ export type BreakdownLine = {
 	finalAmount: number
 	currency: string
 	discountHint?: string
+	variantDetails?: Array<{
+		productName: string
+		sizeLabel: string
+		colorLabel: string | null
+		quantity: number
+		imageUrl: string | null
+	}>
 }
 
 defineProps<{
@@ -150,9 +186,12 @@ defineProps<{
 	paymentBreakdownTotal: { originalAmount: number; discountAmount: number; amount: number; currency: string }
 	isPollingPaymentStatus: boolean
 	paymentProcessingMessage: string
+	showQuickReviewButton: boolean
+	quickReviewButtonLabel: string
 }>()
 
 const emit = defineEmits<{
 	'jump-to-attendee': [index: number]
+	'jump-to-review': []
 }>()
 </script>

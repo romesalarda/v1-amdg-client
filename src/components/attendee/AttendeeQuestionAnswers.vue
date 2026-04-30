@@ -426,6 +426,7 @@ import {
 const props = defineProps<{
   event: EventDetail
   attendeeId?: string
+  draftScopeKey?: string | number
   modelValue?: EventQuestionAnswerDraft[]
 }>()
 
@@ -469,17 +470,36 @@ const lastSavedAt = ref<Date | null>(null)
 const saveError = ref<string | null>(null)
 const isHydrating = ref(false)
 const filePreviewUrls = reactive<Record<string, string>>({})
+const previewScope = computed(() => {
+  if (props.attendeeId) return `attendee:${props.attendeeId}`
+  if (props.draftScopeKey !== undefined && props.draftScopeKey !== null) return `draft:${String(props.draftScopeKey)}`
+  return 'draft:default'
+})
+
+const getGlobalPreviewKey = (localPreviewKey: string) => `${previewScope.value}:${localPreviewKey}`
+
+const hydrateScopedPreviewUrls = () => {
+  Object.keys(filePreviewUrls).forEach((key) => delete filePreviewUrls[key])
+  if (typeof window === 'undefined') return
+
+  const previewStore = (window as any).__amdgPreviewStore || {}
+  const prefix = `${previewScope.value}:`
+
+  Object.entries(previewStore).forEach(([key, value]) => {
+    if (!key.startsWith(prefix)) return
+    const localKey = key.slice(prefix.length)
+    if (typeof value === 'string') {
+      filePreviewUrls[localKey] = value
+    }
+  })
+}
 
 // TODO: Hydrate from a global preview store so previews survive component unmounts
 // Quite hacky, use a dedicated endpoint, store the resource ID, then 
 // fetch when rendered. 
 if (typeof window !== 'undefined') {
   ;(window as any).__amdgPreviewStore = (window as any).__amdgPreviewStore || {}
-  try {
-    Object.assign(filePreviewUrls, (window as any).__amdgPreviewStore)
-  } catch (e) {
-    // ignore
-  }
+  hydrateScopedPreviewUrls()
 
   // Revoke global previews on page unload to avoid leaking blob URLs forever
   if (!(window as any).__amdgPreviewStoreUnloadHooked) {
@@ -494,6 +514,10 @@ if (typeof window !== 'undefined') {
     ;(window as any).__amdgPreviewStoreUnloadHooked = true
   }
 }
+
+watch(previewScope, () => {
+  hydrateScopedPreviewUrls()
+})
 
 const buildQuestionSchema = (question: EventQuestion | null) => {
   const base = z.object({
@@ -1089,7 +1113,9 @@ const handleUploadFile = async (questionId: string | undefined, event: Event) =>
     // Store preview on reactive object so Vue notices the change
     filePreviewUrls[previewKey] = previewUrl
     // persist in global store so it survives unmounts
-    if (typeof window !== 'undefined') (window as any).__amdgPreviewStore[previewKey] = previewUrl
+    if (typeof window !== 'undefined') {
+      ;(window as any).__amdgPreviewStore[getGlobalPreviewKey(previewKey)] = previewUrl
+    }
   }
 
   if (isDraftMode.value) {
