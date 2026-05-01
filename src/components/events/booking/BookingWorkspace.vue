@@ -2600,6 +2600,7 @@ function toggleAccessibilityForm() {
 const {
   errors: attendeeValidationErrors,
   validate: validateAttendeeForm,
+  validateField: validateAttendeeField,
   resetForm: resetAttendeeForm,
   setValues: setAttendeeFormValues,
 } = useForm({
@@ -2623,6 +2624,22 @@ watch(
     setAttendeeFormValues({ ...value })
   },
   { deep: true },
+)
+
+watch(
+  () => attendeeForm.value.phone_number,
+  () => {
+    if (!isPersonalInfoEditing.value) return
+    void validateAttendeeField('phone_number')
+  },
+)
+
+watch(
+  () => attendeeForm.value.date_of_birth,
+  () => {
+    if (!isPersonalInfoEditing.value) return
+    void validateAttendeeField('date_of_birth')
+  },
 )
 
 const showMedicalForm = ref(false)

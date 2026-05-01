@@ -72,7 +72,7 @@
                 </label>
                 <label class="space-y-1 text-sm">
                   <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Phone <span class="text-deep-navy/45">optional</span></span>
-                  <input v-model="props.attendeeForm.phone_number" :disabled="!props.isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                  <input v-model="props.attendeeForm.phone_number" :disabled="!props.isPersonalInfoEditing" type="text" placeholder="+44 078328388" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                   <p v-if="props.attendeeValidationErrors.phone_number" class="text-xs font-semibold text-red-700">{{ props.attendeeValidationErrors.phone_number }}</p>
                 </label>
               </div>
@@ -80,12 +80,20 @@
               <div class="grid gap-4 md:grid-cols-2">
                 <label class="space-y-1 text-sm">
                   <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Date of birth <span class="text-red-500">*</span></span>
-                  <input v-model="props.attendeeForm.date_of_birth" :disabled="!props.isPersonalInfoEditing" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                  <input v-model="props.attendeeForm.date_of_birth" :disabled="!props.isPersonalInfoEditing" :max="todayDate" type="date" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
                   <p v-if="props.attendeeValidationErrors.date_of_birth" class="text-xs font-semibold text-red-700">{{ props.attendeeValidationErrors.date_of_birth }}</p>
                 </label>
                 <label class="space-y-1 text-sm">
                   <span class="text-xs font-black uppercase tracking-wide text-deep-navy/60">Gender <span class="text-red-500">*</span></span>
-                  <input v-model="props.attendeeForm.gender" :disabled="!props.isPersonalInfoEditing" type="text" class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65">
+                  <select 
+                    v-model="props.attendeeForm.gender"
+                    :disabled="!props.isPersonalInfoEditing"
+                    class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65"
+                  >
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                    <option value="OTHER">Other</option>
+                  </select>
                   <p v-if="props.attendeeValidationErrors.gender" class="text-xs font-semibold text-red-700">{{ props.attendeeValidationErrors.gender }}</p>
                 </label>
               </div>
@@ -502,4 +510,12 @@ const localAreaSearch = computed({
   get: () => props.areaSearch,
   set: (value: string) => props.onAreaSearchChange(value),
 })
+
+const todayDate = (() => {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+})()
 </script>
