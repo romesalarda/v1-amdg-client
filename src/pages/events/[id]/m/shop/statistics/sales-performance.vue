@@ -53,7 +53,7 @@
           height="300px"
           color="#9333ea"
           y-axis-label="Revenue (£)"
-          label="Revenue (£)"
+          :label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue trends data available
@@ -126,8 +126,8 @@
           height="300px"
           color="#10b981"
           :horizontal="true"
-          value-label="Revenue (GBP)"
-        />
+          :value-label="`Revenue (${revenueCurrency})`"
+          />
         <div v-else class="text-center text-gray-500 py-8">
           No product revenue data available
         </div>
@@ -150,7 +150,7 @@
           height="300px"
           :donut="true"
           :colors="['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#10b981']"
-          value-label="Revenue (GBP)"
+          :value-label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No category revenue data available
@@ -174,7 +174,7 @@
           height="300px"
           :donut="true"
           :colors="['#9333ea', '#06b6d4']"
-          value-label="Revenue (GBP)"
+          :value-label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue breakdown data available
@@ -218,6 +218,11 @@ const { data: revenueByCategoryData, isLoading: revenueByCategoryLoading, error:
 const { data: revenueBreakdownData, isLoading: revenueBreakdownLoading, error: revenueBreakdownError } = useRevenueBreakdown(() => props.queryParams)
 const { data: orderStatusData, isLoading: orderStatusLoading, error: orderStatusError } = useOrderStatusDistribution(() => props.queryParams)
 const { data: orderTrendsData, isLoading: orderTrendsLoading, error: orderTrendsError } = useOrderTrends(() => props.queryParams)
+
+const revenueCurrency = computed(() => {
+  const data = revenueOverviewData.value?.data as any
+  return data?.currency?.sign || '£'
+})
 
 // Transform data for charts
 const revenueTrendsChartData = computed(() => {

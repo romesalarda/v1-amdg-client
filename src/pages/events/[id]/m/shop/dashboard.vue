@@ -1104,6 +1104,8 @@ import { useBulkAssignCategoryToProducts, useBulkRemoveCategoryFromProducts } fr
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import ProductPreviewModal from '~/components/events/shop/ProductPreviewModal.vue'
 import StatisticsIndex from './statistics/index.vue'
+import { useProductsOverview } from '~/composables/statistics/products/product-statistics'
+
 import { 
   getStockStatus, 
   getStockStatusLabel, 
@@ -1139,6 +1141,8 @@ const tabs = computed(() => [
   { value: 'stock', label: 'Stock Alerts', icon: 'i-heroicons-bell', badge: lowStockCount.value || undefined },
   { value: 'statistics', label: 'Statistics', icon: 'i-heroicons-chart-bar' },
 ])
+
+const { data: statisticsData, isLoading: isStatisticsLoading } = useProductsOverview({event_id: id.value})
 
 // Pagination
 const currentPage = ref(1)
@@ -1229,16 +1233,13 @@ const totalProducts = computed(() => productsData.value?.data?.count || 0)
 
 // Statistics
 const activeProductsCount = computed(() => 
-  products.value.filter((p: ProductList) => p.is_active && p.verified).length
+  statisticsData.value?.data?.product_summary?.active_products as number || 0
 )
+
 const lowStockCount = computed(() => 
-  products.value.filter((p: ProductList) => {
-    // Since ProductList doesn't include variants, we'll use variant_count as a proxy
-    // Products with 0 variants are likely low stock
-    return p.variant_count === 0
-  }).length
+  statisticsData.value?.data?.variant_summary?.low_stock_count as number || 0
 )
-const totalRevenue = computed(() => 0) // TODO: Calculate from orders
+const totalRevenue = computed(() => statisticsData.value?.data?.revenue_summary?.total_revenue as string || '0.00')
 
 
 const activeFilterCount = computed(() => {

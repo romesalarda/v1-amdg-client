@@ -51,7 +51,7 @@
           :data="revenueTrendsChartData.data"
           height="300px"
           color="#10b981"
-          :label="'Revenue (GBP)'"
+          :label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No trend data available
@@ -75,7 +75,7 @@
           height="300px"
           :donut="true"
           :colors="['#10b981', '#f59e0b', '#ef4444', '#6b7280', '#3b82f6']"
-          value-label="Revenue (GBP)"
+          :value-label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No breakdown data available
@@ -234,6 +234,11 @@ const { data: packageData, isLoading: packageLoading, error: packageError } = us
 const { data: ticketTypeData, isLoading: ticketTypeLoading, error: ticketTypeError } = useRevenueByTicketType(() => props.queryParams)
 const { data: trendsData, isLoading: trendsLoading, error: trendsError } = useRevenueTrends(() => props.queryParams)
 const { data: breakdownData, isLoading: breakdownLoading, error: breakdownError } = useRevenueBreakdown(() => props.queryParams)
+
+const revenueCurrency = computed(() => {
+  const data = revenueOverviewData.value?.data as any
+  return data?.currency?.sign || '£'
+})
 
 // Transform data for charts
 const revenueTrendsChartData = computed(() => {

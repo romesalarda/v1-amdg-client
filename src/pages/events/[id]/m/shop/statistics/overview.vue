@@ -97,7 +97,7 @@
           height="300px"
           color="#10b981"
           :horizontal="true"
-          value-label="Revenue (GBP)"
+          :value-label="`Revenue (${revenueCurrency})`"
         />
         <div v-else class="text-center text-gray-500 py-8">
           No revenue data available
@@ -163,6 +163,11 @@ const props = defineProps<Props>()
 
 // Fetch overview data
 const { data: overviewData, isLoading: overviewLoading, error: overviewError } = useProductsOverview(() => props.queryParams)
+
+const revenueCurrency = computed(() => {
+  const data = overviewData.value?.data as any
+  return data?.currency?.sign || '£'
+})
 
 // Transform data for charts
 const productStatusChartData = computed<PieChartData[]>(() => {

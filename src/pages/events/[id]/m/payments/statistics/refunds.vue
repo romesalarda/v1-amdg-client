@@ -51,6 +51,7 @@
             :labels="refundTrendsData.labels"
             color="#ef4444"
             :smooth="true"
+            label="Refunds"
           />
         </div>
         <div v-else class="text-center text-gray-500 py-8">

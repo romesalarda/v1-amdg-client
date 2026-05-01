@@ -237,6 +237,11 @@ const { data: popularityData, isLoading: popularityLoading, error: popularityErr
 const { data: rulesData, isLoading: rulesLoading, error: rulesError } = usePackageRules(() => props.queryParams)
 const { data: pricingData, isLoading: pricingLoading, error: pricingError } = usePackagePricing(() => props.queryParams)
 
+const currencyCode = computed(() => {
+  const data = packageOverviewData.value?.data
+  return (data?.currency?.code || 'GBP') as string
+})
+
 // Transform data for charts
 const packagePopularityChartData = computed<BarChartData[]>(() => {
   if (!popularityData.value?.data?.popularity) return []
@@ -263,7 +268,7 @@ const formatRuleType = (text: string) => {
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
-    currency: 'GBP',
+    currency: currencyCode.value,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(amount)

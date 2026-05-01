@@ -77,7 +77,7 @@
             height="300px"
             :donut="true"
             :colors="['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b']"
-            value-label="Revenue (GBP)"
+            :value-label="`Revenue (${revenueCurrency})`"
           />
           <div v-else class="text-center text-gray-500 py-8">
             No breakdown data available
@@ -100,7 +100,7 @@
             :data="revenueByMethodChartData"
             height="300px"
             color="#8b5cf6"
-            value-label="Revenue (GBP)"
+            :value-label="`Revenue (${revenueCurrency})`"
           />
           <div v-else class="text-center text-gray-500 py-8">
             No payment method data available
@@ -226,6 +226,8 @@ const revenueBreakdownChartData = computed<PieChartData[]>(() => {
   
   return breakdown
 })
+
+const revenueCurrency = computed(() => revenueOverview.value?.data?.currency?.sign)
 
 // Transform data for revenue by method bar chart
 const revenueByMethodChartData = computed<BarChartData[]>(() => {

@@ -1363,6 +1363,9 @@ export type AttendeeUpdateRequest = {
  * Serializer for attendees per booking distribution.
  */
 export type AttendeesPerBooking = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -1678,6 +1681,9 @@ export type BookingAttendeePrecheckRequest = {
  * Serializer for booking completion rate.
  */
 export type BookingCompletionRate = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -1920,6 +1926,9 @@ export type BookingList = {
  * Serializer for booking overview statistics.
  */
 export type BookingOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2149,6 +2158,9 @@ export type BookingReferenceTypeItem = {
  * Serializer for booking reference types distribution.
  */
 export type BookingReferenceTypes = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2161,6 +2173,9 @@ export type BookingReferenceTypes = {
  * Serializer for revenue breakdown by status.
  */
 export type BookingRevenueBreakdown = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2174,6 +2189,9 @@ export type BookingRevenueBreakdown = {
  * Serializer for revenue overview statistics.
  */
 export type BookingRevenueOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2190,6 +2208,9 @@ export type BookingRevenueOverview = {
  * Serializer for revenue trends.
  */
 export type BookingRevenueTrends = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2203,6 +2224,9 @@ export type BookingRevenueTrends = {
  * Serializer for combined booking statistics overview.
  */
 export type BookingStatisticsOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2218,6 +2242,9 @@ export type BookingStatisticsOverview = {
  * Serializer for booking status distribution.
  */
 export type BookingStatusDistribution = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2230,6 +2257,9 @@ export type BookingStatusDistribution = {
  * Serializer for booking timeline.
  */
 export type BookingTimeline = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2242,6 +2272,9 @@ export type BookingTimeline = {
  * Serializer for booking trends over time.
  */
 export type BookingTrends = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2255,6 +2288,9 @@ export type BookingTrends = {
  * Serializer for bookings by package.
  */
 export type BookingsByPackage = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -2303,6 +2339,9 @@ export type CapacityUtilization = {
  * Serializer for category distribution statistics.
  */
 export type CategoryDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -2748,6 +2787,9 @@ export type ClusterLocationList = {
  * Serializer for color distribution statistics.
  */
 export type ColorDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -4680,6 +4722,9 @@ export type DiscountRuleCreateUpdateRequest = {
  * Serializer for discount rule effectiveness statistics.
  */
 export type DiscountRuleEffectiveness = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -4694,6 +4739,9 @@ export type DiscountRuleEffectiveness = {
  * Serializer for discount usage statistics.
  */
 export type DiscountUsage = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -4839,6 +4887,9 @@ export type DonationList = {
  * Serializer for donation statistics.
  */
 export type DonationStats = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -4855,6 +4906,9 @@ export type DonationStats = {
  * Serializer for donation trends over time.
  */
 export type DonationTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -9701,6 +9755,9 @@ export type GoogleOAuthRequest = {
  * Serializer for intent conversion rate.
  */
 export type IntentConversionRate = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -9719,6 +9776,9 @@ export type IntentConversionRate = {
  * Serializer for intent overview statistics.
  */
 export type IntentOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -9733,6 +9793,9 @@ export type IntentOverview = {
  * Serializer for intent trends over time.
  */
 export type IntentTrends = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -10380,6 +10443,9 @@ export type OrderReserveBankTransferRequestRequest = {
  * Serializer for order status distribution statistics.
  */
 export type OrderStatusDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -10406,6 +10472,9 @@ export type OrderStatusDistribution = {
  * Serializer for order trends over time.
  */
 export type OrderTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -10485,6 +10554,9 @@ export type OrderUpdateRequest = {
  * Serializer for orders by category.
  */
 export type OrdersByCategory = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -10515,6 +10587,9 @@ export type OrdersByCategory = {
  * Serializer for top products by order count.
  */
 export type OrdersByProduct = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -11224,6 +11299,9 @@ export type PoiList = {
  * Serializer for package overview statistics.
  */
 export type PackageOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -11241,6 +11319,9 @@ export type PackageOverview = {
  * Serializer for package popularity.
  */
 export type PackagePopularity = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -11264,6 +11345,9 @@ export type PackagePopularityItem = {
  * Serializer for package pricing analysis.
  */
 export type PackagePricingAnalysis = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -11328,6 +11412,9 @@ export type PackageProductCreateUpdateRequest = {
  * Serializer for package rule distribution.
  */
 export type PackageRuleDistribution = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -15249,6 +15336,9 @@ export type PaymentMethodDetail = {
  * Serializer for payment method distribution statistics.
  */
 export type PaymentMethodDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15265,6 +15355,9 @@ export type PaymentMethodDistribution = {
  * Serializer for payment overview statistics.
  */
 export type PaymentOverview = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15281,6 +15374,9 @@ export type PaymentOverview = {
  * Serializer for combined overview statistics.
  */
 export type PaymentOverviewStats = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15315,6 +15411,9 @@ export type PaymentOverviewStats = {
  * Serializer for detailed revenue breakdown statistics.
  */
 export type PaymentRevenueBreakdown = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15332,6 +15431,9 @@ export type PaymentRevenueBreakdown = {
  * Serializer for revenue overview statistics.
  */
 export type PaymentRevenueOverview = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15348,6 +15450,9 @@ export type PaymentRevenueOverview = {
  * Serializer for revenue trends over time.
  */
 export type PaymentRevenueTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15363,6 +15468,9 @@ export type PaymentRevenueTrends = {
  * Serializer for payment status distribution statistics.
  */
 export type PaymentStatusDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15377,6 +15485,9 @@ export type PaymentStatusDistribution = {
  * Serializer for payment trends over time.
  */
 export type PaymentTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -15671,6 +15782,9 @@ export type ProductList = {
  * Serializer for product overview statistics.
  */
 export type ProductOverview = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15713,6 +15827,9 @@ export type ProductOverview = {
  * Serializer for comprehensive product overview statistics.
  */
 export type ProductOverviewStatistics = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15759,6 +15876,9 @@ export type ProductOverviewStatistics = {
  * Serializer for revenue breakdown by source.
  */
 export type ProductRevenueBreakdown = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15785,6 +15905,9 @@ export type ProductRevenueBreakdown = {
  * Serializer for revenue overview statistics.
  */
 export type ProductRevenueOverview = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15817,6 +15940,9 @@ export type ProductRevenueOverview = {
  * Serializer for revenue trends over time.
  */
 export type ProductRevenueTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15886,6 +16012,9 @@ export type ProductSelectionRequest = {
  * Serializer for status distribution statistics (active/inactive + verified/unverified combinations).
  */
 export type ProductStatusDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -15912,6 +16041,9 @@ export type ProductStatusDistribution = {
  * Serializer for product creation trends over time.
  */
 export type ProductTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -16429,6 +16561,9 @@ export type RefundPolicyCreateUpdateRequest = {
  * Serializer for refund processing time statistics.
  */
 export type RefundProcessingTimes = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -16534,6 +16669,9 @@ export type RefundRequestList = {
  * Serializer for refund request statistics.
  */
 export type RefundRequestStats = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -16577,6 +16715,9 @@ export type RefundRequestUpdateRequest = {
  * Serializer for refund trends over time.
  */
 export type RefundTrends = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -16770,6 +16911,9 @@ export type RevenueBreakdownItem = {
  * Serializer for revenue by category.
  */
 export type RevenueByCategory = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -16813,6 +16957,9 @@ export type RevenueByEvent = {
  * Serializer for revenue by payment method statistics.
  */
 export type RevenueByMethod = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -16829,6 +16976,9 @@ export type RevenueByMethod = {
  * Serializer for revenue by package.
  */
 export type RevenueByPackage = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -16851,6 +17001,9 @@ export type RevenueByPackageItem = {
  * Serializer for revenue by product.
  */
 export type RevenueByProduct = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -16881,6 +17034,9 @@ export type RevenueByProduct = {
  * Serializer for revenue by ticket type.
  */
 export type RevenueByTicketType = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -16999,6 +17155,9 @@ export type ScopeBreakdown = {
  * Serializer for size distribution statistics.
  */
 export type SizeDistribution = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -17025,6 +17184,9 @@ export type SizeDistribution = {
  * Serializer for sponsor package payment status statistics.
  */
 export type SponsorPackagePaymentStatus = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -17228,6 +17390,9 @@ export type StatusBreakdown = {
  * Serializer for stock level distribution statistics.
  */
 export type StockLevels = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
@@ -17428,6 +17593,9 @@ export type TicketList = {
  * Serializer for ticket overview statistics.
  */
 export type TicketOverview = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -17443,6 +17611,9 @@ export type TicketOverview = {
  * Serializer for ticket scope distribution.
  */
 export type TicketScopeDistribution = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -17455,6 +17626,9 @@ export type TicketScopeDistribution = {
  * Serializer for ticket status distribution.
  */
 export type TicketStatusDistribution = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -17546,6 +17720,9 @@ export type TicketTypeDetail = {
  * Serializer for ticket type distribution.
  */
 export type TicketTypeDistribution = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -17600,6 +17777,9 @@ export type TicketTypeList = {
  * Serializer for ticket usage statistics.
  */
 export type TicketUsageStats = {
+    currency?: {
+        [key: string]: unknown;
+    };
     generated_at?: string;
     filters_applied?: {
         [key: string]: unknown;
@@ -17631,6 +17811,9 @@ export type TokenRefreshRequest = {
  * Serializer for top discounts statistics.
  */
 export type TopDiscounts = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -17646,6 +17829,9 @@ export type TopDiscounts = {
  * Serializer for top donors statistics.
  */
 export type TopDonors = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     readonly generated_at: string;
     readonly filters_applied: {
         [key: string]: unknown;
@@ -18062,6 +18248,9 @@ export type UserUpdateRequest = {
  * Serializer for variant stock overview statistics.
  */
 export type VariantStockOverview = {
+    readonly currency: {
+        [key: string]: unknown;
+    };
     /**
      * Timestamp when statistics were generated
      */
