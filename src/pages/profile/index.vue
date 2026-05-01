@@ -214,9 +214,9 @@
             </div>
             <div class="p-6 space-y-6">
               <div class="space-y-1">
-                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">User ID</p>
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Username</p>
                 <p class="text-[11px] font-bold text-primary break-all bg-mist-blue p-2 rounded-lg border border-navy-100/50">
-                  {{ userData.data?.id || '-' }}
+                  {{ userData.data?.username || '-' }}
                 </p>
               </div>
               <div class="space-y-1">

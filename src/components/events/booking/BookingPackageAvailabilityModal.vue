@@ -513,6 +513,7 @@ watch(
       nextTick(() => openWindowForm(win))
     }
   },
+  { immediate: true },
 )
 
 // Reset form when modal closes

@@ -199,12 +199,18 @@ export function useBookingPackageManagement(
         isManualModalOpen.value = false
         return
       }
-      if (route.query['window-id']) return
       if (packageId && packagesLoaded && !showPackageAvailabilityModal.value && !showPackageModal.value) {
         const pkgId = parseInt(packageId as string, 10)
         if (!isNaN(pkgId)) {
           const pkg = packages.value.find(p => p.id === pkgId)
-          if (pkg) openPackageModal(pkg)
+          if (pkg) {
+            if (route.query['window-id']) {
+              // Open the availability windows modal so the window-id watcher inside can auto-open the form
+              openPackageAvailabilityModal(pkgId)
+            } else {
+              openPackageModal(pkg)
+            }
+          }
         }
       }
     },

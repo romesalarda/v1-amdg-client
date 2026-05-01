@@ -338,9 +338,9 @@
 								</div>
 							</div>
 						</div>
-						<button type="button" class="mt-8 w-full rounded-full border border-white/15 py-3 text-xs font-black uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10">
+						<!-- <button type="button" class="mt-8 w-full rounded-full border border-white/15 py-3 text-xs font-black uppercase tracking-[0.22em] text-white transition-colors hover:bg-white/10">
 							View All Tasks
-						</button>
+						</button> -->
 					</div>
 				</aside>
 			</section>

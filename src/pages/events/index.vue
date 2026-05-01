@@ -129,7 +129,7 @@
             </h1>
             <div class="flex flex-wrap gap-4">
               <NuxtLink
-                :to="`/events/${featuredEvent.event_id}`"
+                :to="`/events/${featuredEvent.url_safe_title}`"
                 class="btn-solid-navy px-12 py-5 rounded-xl font-black text-[11px] uppercase tracking-widest shadow-2xl flex items-center space-x-2 hover:scale-105 transition-all no-underline"
               >
                 <span>View Details</span>
@@ -137,9 +137,9 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
               </NuxtLink>
-              <button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-12 py-5 rounded-xl font-black text-[11px] uppercase tracking-widest border border-white/30 transition-all">
+              <!-- <button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-12 py-5 rounded-xl font-black text-[11px] uppercase tracking-widest border border-white/30 transition-all">
                 Learn More
-              </button>
+              </button> -->
             </div>
           </div>
         </div>
