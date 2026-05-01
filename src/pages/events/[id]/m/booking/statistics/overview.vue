@@ -124,7 +124,7 @@
             v-if="intentStatusData.length"
             :data="intentStatusData"
             height="300px"
-            color="#0f172a"
+            color="#6366f1"
             value-label="Intents"
 
           />

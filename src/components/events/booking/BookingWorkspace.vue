@@ -136,7 +136,155 @@
                 </div>
               </div>
             </div>
-          <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+              <BookingOverviewTab
+                :booking="booking"
+                :event="event.data.value?.data"
+                :attendees="attendees"
+                :journey-steps="journeySteps"
+                :hide-all-journey-details="hideAllJourneyDetails"
+                :outstanding-payments="outstandingPayments"
+                :event-title="eventTitle"
+                :event-start="eventStart"
+                :event-end="eventEnd"
+                :event-location="eventLocation"
+                :event-what-to-bring="eventWhatToBring"
+                :event-check-in-instructions="eventCheckInInstructions"
+                :venue-map-embed-url="venueMapEmbedUrl"
+                :event-venues="eventVenues"
+                :primary-venue="primaryVenue"
+                :timezone="myBookingData?.event?.timezone"
+                :formatted-booked-at="formattedBookedAt"
+                :is-single-attendee-booking="isSingleAttendeeBooking"
+                :format-date-time="formatDateTime"
+                :on-toggle-journey-details="toggleJourneyDetails"
+                :on-journey-step-action="handleJourneyStepAction"
+                :on-refresh-outstanding-payments="refreshOutstandingPayments"
+              />
+            </article>
+
+            <article v-if="selectedAttendeeId && activeTab === 'tickets'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+              <TicketsTab :selected-attendee-id="selectedAttendeeId" />
+            </article>
+
+            <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
+              <PaymentsTab
+                :selected-attendee="selectedAttendee"
+                :selected-attendee-id="selectedAttendeeId"
+                :payment-summary="paymentSummary"
+                :payment-summary-data="paymentSummaryData"
+                :outstanding-payments="outstandingPayments"
+                :booking-level-payments="bookingLevelPayments"
+                :attendee-level-payments="attendeeLevelPayments"
+                :payment-context-summary="paymentContextSummary"
+                :payment-current-amount="paymentCurrentAmount"
+                :payment-original-amount="paymentOriginalAmount"
+                :payment-refunded-amount="paymentRefundedAmount"
+                :format-currency-amount="formatCurrencyAmount"
+                :on-open-order-from-payment="openOrderFromPayment"
+                :is-outstanding-bank-transfer="isOutstandingBankTransfer"
+                :has-summary-bank-metadata="hasSummaryBankMetadata"
+                :get-required-transfer-reference="getRequiredTransferReference"
+                :get-provided-detail="getProvidedDetail"
+                :on-copy-transfer-reference="copyTransferReference"
+                :get-related-order-labels="getRelatedOrderLabels"
+              />
+            </article>
+
+            <article v-if="selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+              <OrdersTab
+                :selected-attendee-id="selectedAttendeeId"
+                :selected-attendee="selectedAttendee"
+                :booking="booking"
+                :attendee-order-list="attendeeOrderList"
+                :attendee-orders="attendeeOrders"
+                :outstanding-payments="outstandingPayments"
+                :evidence-upload-form="evidenceUploadForm"
+                :evidence-upload-pending="evidenceUploadPending"
+                :evidence-upload-error="evidenceUploadError"
+                :evidence-upload-success="evidenceUploadSuccess"
+                :payment-detail-loading="paymentDetailLoading"
+                :needs-evidence-upload="needsEvidenceUpload"
+                :payment-attention-card-class="paymentAttentionCardClass"
+                :payment-attention-label="paymentAttentionLabel"
+                :on-toggle-payment-expand="togglePaymentExpand"
+                :is-payment-expanded="isPaymentExpanded"
+                :is-outstanding-bank-transfer="isOutstandingBankTransfer"
+                :has-uploaded-evidence="hasUploadedEvidence"
+                :on-evidence-upload-file-change="onEvidenceUploadFileChange"
+                :on-upload-outstanding-evidence="uploadOutstandingEvidence"
+                :get-payment-method-type="getPaymentMethodType"
+                :get-provided-detail="getProvidedDetail"
+                :get-required-transfer-reference="getRequiredTransferReference"
+                :on-copy-transfer-reference="copyTransferReference"
+                :get-bank-transfer-reference="getBankTransferReference"
+                :get-bank-transfer-instructions="getBankTransferInstructions"
+                :get-related-order-labels="getRelatedOrderLabels"
+                :get-order-status-badge-class="getOrderStatusBadgeClass"
+                :can-cancel-order="canCancelOrder"
+                :on-cancel-order="cancelOrder"
+                :get-order-item-image-url="getOrderItemImageUrl"
+                :get-order-item-title="getOrderItemTitle"
+                :get-order-item-code="getOrderItemCode"
+                :get-order-item-size="getOrderItemSize"
+                :get-order-item-color="getOrderItemColor"
+                :get-order-item-color-style="getOrderItemColorStyle"
+              />
+            </article>
+
+            <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+              <AttendeeInfoTab
+                :selected-attendee-id="selectedAttendeeId"
+                :attendee-loading="attendee.isLoading.value"
+                :selected-attendee="selectedAttendee"
+                :booking="booking"
+                :is-personal-info-editing="isPersonalInfoEditing"
+                :attendee-sections-open="attendeeSectionsOpen"
+                :attendee-form="attendeeForm"
+                :attendee-validation-errors="attendeeValidationErrors"
+                :area-options="areaOptions"
+                :area-search="areaSearch"
+                :area-lookup-loading="areaLookupLoading"
+                :emergency-contact-form="emergencyContactForm"
+                :attendee-emergency-contact-list="attendeeEmergencyContactList"
+                :emergency-relationship-options="emergencyRelationshipOptions"
+                :show-medical-form="showMedicalForm"
+                :show-dietary-form="showDietaryForm"
+                :show-accessibility-form="showAccessibilityForm"
+                :attendee-medical-conditions="attendeeMedicalConditions"
+                :attendee-dietary-requirements="attendeeDietaryRequirements"
+                :attendee-accessibility-requirements="attendeeAccessibilityRequirements"
+                :medical-conditions="medicalConditions"
+                :dietary-requirements="dietaryRequirements"
+                :accessibility-requirements="accessibilityRequirements"
+                :new-medical="newMedical"
+                :new-dietary="newDietary"
+                :new-accessibility="newAccessibility"
+                :event-consents="eventConsents"
+                :is-consent-linked="isConsentLinked"
+                :consent-toggle-label="consentToggleLabel"
+                :on-toggle-consent="toggleConsentLink"
+                :on-toggle-section="toggleAttendeeSection"
+                :on-toggle-personal-info-edit="togglePersonalInfoEdit"
+                :on-save-attendee="saveAttendee"
+                :on-apply-area-option="applyAreaOption"
+                :on-clear-area-from="clearAreaFrom"
+                :on-area-search-change="setAreaSearch"
+                :on-toggle-show-medical-form="toggleMedicalForm"
+                :on-toggle-show-dietary-form="toggleDietaryForm"
+                :on-toggle-show-accessibility-form="toggleAccessibilityForm"
+                :on-add-emergency-contact="addEmergencyContact"
+                :on-remove-emergency-contact="removeEmergencyContact"
+                :on-add-medical-condition="addMedicalCondition"
+                :on-remove-medical-condition="removeMedicalCondition"
+                :on-add-dietary-requirement="addDietaryRequirement"
+                :on-remove-dietary-requirement="removeDietaryRequirement"
+                :on-add-accessibility-requirement="addAccessibilityRequirement"
+                :on-remove-accessibility-requirement="removeAccessibilityRequirement"
+              />
+            </article>
+
+          <article v-if="false && activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
               <div class="flex items-center justify-between gap-3">
                 <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking steps</p>
@@ -231,11 +379,11 @@
           </article>
 
           <!-- Tickets tab -->
-          <article v-if="selectedAttendeeId && activeTab === 'tickets'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+          <article v-if="false && selectedAttendeeId && activeTab === 'tickets'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
             <TicketsTab :selected-attendee-id="selectedAttendeeId" />
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
+          <article v-if="false && selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Payments</p>
@@ -432,7 +580,7 @@
             </template>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+          <article v-if="false && selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div class="flex items-center justify-between">
               <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Orders</p>
               <p class="text-xs text-deep-navy/60">{{ selectedAttendee?.name || 'Attendee' }}</p>
@@ -624,7 +772,7 @@
             </template>
           </article>
 
-          <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+          <article v-if="false && selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
             <div v-if="!selectedAttendeeId" class="text-sm text-deep-navy/60">Select an attendee from Booking Overview first.</div>
             <div v-else-if="attendee.isLoading.value" class="text-sm text-deep-navy/60">Loading attendee...</div>
             <div v-else class="space-y-4">
@@ -1316,6 +1464,8 @@ import {
   useDeleteAttendeeConsent,
 } from '~/composables/resources/attendee/attendeeConsentsRelationship'
 import { useProductOrders, useCancelProductOrder } from '~/composables/resources/products/productOrders'
+import { useBookingOrderDisplay } from '~/composables/booking/useBookingOrderDisplay'
+import { useBookingJourneySteps, type JourneyStepAction } from '~/composables/booking/useBookingJourneySteps'
 import { formatDate, formatDateTime } from '~/utils/time'
 
 type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments'
@@ -1611,60 +1761,15 @@ function getRelatedOrderLabels(payment: unknown): string[] {
   return Array.from(labels)
 }
 
-const registrationStepComplete = computed(() => outstandingPayments.value.length === 0)
-const hideAllJourneyDetails = ref(false)
-
-type JourneyStepAction = 'shop' | 'info' | 'location' | 'time'
-
-const journeySteps = computed<Array<{
-  id: number
-  title: string
-  description: string
-  done: boolean
-  action: JourneyStepAction
-  cta: string
-}>>(() => [
-  {
-    id: 1,
-    title: 'Finish registration',
-    description: registrationStepComplete.value
-      ? 'Registration is complete and there are no outstanding payments.'
-      : 'Complete checkout in the shop and clear any outstanding payments.',
-    done: registrationStepComplete.value,
-    action: 'shop',
-    cta: 'Open shop',
-  },
-  {
-    id: 2,
-    title: 'What to bring + important info',
-    description: hasBringInfo.value
-      ? 'Review event briefing guidance before arrival.'
-      : 'Important preparation info is limited right now; check updates closer to event day.',
-    done: hasBringInfo.value,
-    action: 'info',
-    cta: 'View info',
-  },
-  {
-    id: 3,
-    title: 'Location',
-    description: hasLocationInfo.value
-      ? 'Confirm the venue details and map before travel.'
-      : 'Venue details are still being finalized.',
-    done: hasLocationInfo.value,
-    action: 'location',
-    cta: 'View location',
-  },
-  {
-    id: 4,
-    title: 'Time',
-    description: hasTimingInfo.value
-      ? 'Double-check start and end times in your timezone.'
-      : 'Event timing has not been published yet.',
-    done: hasTimingInfo.value,
-    action: 'time',
-    cta: 'View time',
-  },
-])
+const {
+  hideAllJourneyDetails,
+  journeySteps,
+} = useBookingJourneySteps({
+  outstandingPayments,
+  hasBringInfo,
+  hasLocationInfo,
+  hasTimingInfo,
+})
 
 watch(attendees, () => {
   if (attendees.value.length === 1) {
@@ -1943,6 +2048,17 @@ const attendeeOrderList = computed(() => {
   const payload = attendeeOrders.data.value?.data as any
   return payload?.results || []
 })
+
+const {
+  canCancelOrder,
+  getOrderItemTitle,
+  getOrderItemCode,
+  getOrderItemImageUrl,
+  getOrderItemSize,
+  getOrderItemColor,
+  getOrderItemColorStyle,
+  getOrderStatusBadgeClass,
+} = useBookingOrderDisplay()
 
 const areaSearch = ref('')
 const areaOptions = ref<AreaOption[]>([])
@@ -2366,11 +2482,6 @@ async function copyTransferReference(reference: string) {
   }
 }
 
-function canCancelOrder(status?: string): boolean {
-  const normalized = String(status || '').toLowerCase()
-  return normalized === 'draft' || normalized === 'pending'
-}
-
 async function cancelOrder(orderId: number | string) {
   if (!confirm('Are you sure you want to cancel this order?')) return
 
@@ -2381,59 +2492,6 @@ async function cancelOrder(orderId: number | string) {
     console.error('Failed to cancel order', error)
     $notyf?.error('Could not cancel order.')
   }
-}
-
-function getOrderItemDetails(item: any): Record<string, any> | null {
-  const details = item?.product_variant_details
-  if (!details || typeof details !== 'object') return null
-  return details as Record<string, any>
-}
-
-function getOrderItemTitle(item: any): string {
-  const details = getOrderItemDetails(item)
-  return details?.product_title || `Variant ${details?.variant_id || item?.product_variant || 'N/A'}`
-}
-
-function getOrderItemCode(item: any): string {
-  const details = getOrderItemDetails(item)
-  if (details?.product_display_code) return String(details.product_display_code)
-  if (details?.variant_id) return `Variant ${details.variant_id}`
-  return `Variant ${item?.product_variant || 'N/A'}`
-}
-
-function getOrderItemImageUrl(item: any): string | null {
-  const details = getOrderItemDetails(item)
-  return details?.image_url || details?.variant_image_url || details?.product_image_url || null
-}
-
-function getOrderItemSize(item: any): string | null {
-  const details = getOrderItemDetails(item)
-  return details?.size || null
-}
-
-function getOrderItemColor(item: any): string | null {
-  const details = getOrderItemDetails(item)
-  return details?.color || null
-}
-
-function getOrderItemColorStyle(item: any): Record<string, string> | undefined {
-  const color = getOrderItemColor(item)
-  if (!color) return undefined
-  return { backgroundColor: color }
-}
-
-function getOrderStatusBadgeClass(status?: string): string {
-  const normalized = String(status || '').toLowerCase()
-  const classes: Record<string, string> = {
-    draft: 'bg-gray-100 text-gray-700',
-    pending: 'bg-blue-100 text-blue-700',
-    processing: 'bg-blue-100 text-blue-700',
-    completed: 'bg-green-100 text-green-700',
-    cancelled: 'bg-red-100 text-red-700',
-    pending_refund: 'bg-orange-100 text-orange-700',
-    refunded: 'bg-purple-100 text-purple-700',
-  }
-  return classes[normalized] || 'bg-gray-100 text-gray-700'
 }
 
 const attendeeForm = ref<BookingAttendeeFormData>({
@@ -2517,6 +2575,26 @@ function togglePersonalInfoEdit() {
     return
   }
   isPersonalInfoEditing.value = !isPersonalInfoEditing.value
+}
+
+function setAreaSearch(value: string) {
+  areaSearch.value = value
+}
+
+function toggleJourneyDetails() {
+  hideAllJourneyDetails.value = !hideAllJourneyDetails.value
+}
+
+function toggleMedicalForm() {
+  showMedicalForm.value = !showMedicalForm.value
+}
+
+function toggleDietaryForm() {
+  showDietaryForm.value = !showDietaryForm.value
+}
+
+function toggleAccessibilityForm() {
+  showAccessibilityForm.value = !showAccessibilityForm.value
 }
 
 const {
