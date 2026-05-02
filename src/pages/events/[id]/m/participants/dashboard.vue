@@ -2722,11 +2722,11 @@ function openAttendeeRefundModalFromBlockerItem(item: AttendeePreRemovalBlockerI
 
 function handleAttendeeRefundCreated() {
   showRefundModal.value = false
-  toast.add({
-    title: 'Refund request created',
-    description: 'Refund request has been submitted for review.',
-    color: 'green',
-  })
+  // toast.add({
+  //   title: 'Refund request created',
+  //   description: 'Refund request has been submitted for review.',
+  //   color: 'green',
+  // })
 }
 
 function exportToCSV() {

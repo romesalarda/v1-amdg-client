@@ -10308,9 +10308,10 @@ export type OrderDetail = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
     readonly status_display: string;
     readonly total_amount: string;
     readonly item_count: number;
@@ -10345,6 +10346,14 @@ export type OrderItem = {
     quantity: number;
     readonly unit_price: string;
     readonly total_price: string;
+    /**
+     * * `pending` - Pending
+     * * `completed` - Completed
+     * * `cancelled` - Cancelled
+     * * `pending_refund` - Pending Refund
+     * * `refunded` - Refunded
+     */
+    status: 'pending' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
 };
 
 /**
@@ -10393,9 +10402,10 @@ export type OrderList = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
     readonly status_display: string;
     readonly total_amount: string;
     readonly item_count: number;
@@ -10524,9 +10534,10 @@ export type OrderUpdate = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
 };
 
 export type OrderUpdateItemQuantityRequestRequest = {
@@ -10545,9 +10556,10 @@ export type OrderUpdateRequest = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
 };
 
 /**
@@ -14546,9 +14558,10 @@ export type PatchedOrderUpdateRequest = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
 };
 
 /**
@@ -22317,9 +22330,10 @@ export type OrderDetailWritable = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
     payment?: number | null;
     created_by?: number | null;
     updated_by?: number | null;
@@ -22346,9 +22360,10 @@ export type OrderListWritable = {
      * * `completed` - Completed
      * * `cancelled` - Cancelled
      * * `pending_refund` - Pending Refund
+     * * `partially_refunded` - Partially Refunded
      * * `refunded` - Refunded
      */
-    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'refunded';
+    status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
 };
 
 /**
@@ -24118,7 +24133,7 @@ export type RefundRequestCreateRequestWritable = {
      */
     attendee_ids?: Array<string>;
     /**
-     * Optional granular refund targets. For booking-linked partial refunds, use items with: attendee_id (required), quantity (required), and one of order_item_id or unique variant/package selector.
+     * Optional granular refund targets. Supported only for booking/order payment targets. Booking-item scope requires attendee_id + quantity + (order_item_id OR unique variant/package selector). Order-item scope requires order_item_id + quantity.
      */
     refund_items?: Array<{
         [key: string]: unknown;
@@ -25186,9 +25201,10 @@ export type AttendeesListData = {
          * * `completed` - Completed
          * * `cancelled` - Cancelled
          * * `pending_refund` - Pending Refund
+         * * `partially_refunded` - Partially Refunded
          * * `refunded` - Refunded
          */
-        order_status?: 'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        order_status?: 'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
         /**
          * Exclude order status
          *
@@ -25198,9 +25214,10 @@ export type AttendeesListData = {
          * * `completed` - Completed
          * * `cancelled` - Cancelled
          * * `pending_refund` - Pending Refund
+         * * `partially_refunded` - Partially Refunded
          * * `refunded` - Refunded
          */
-        order_status_not?: 'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        order_status_not?: 'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
         /**
          * Order total maximum amount
          */
@@ -45110,9 +45127,10 @@ export type ProductsOrdersListData = {
          * * `completed` - Completed
          * * `cancelled` - Cancelled
          * * `pending_refund` - Pending Refund
+         * * `partially_refunded` - Partially Refunded
          * * `refunded` - Refunded
          */
-        status?: 'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        status?: 'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
         /**
          * Filter by multiple statuses (comma-separated)
          *
@@ -45122,9 +45140,10 @@ export type ProductsOrdersListData = {
          * * `completed` - Completed
          * * `cancelled` - Cancelled
          * * `pending_refund` - Pending Refund
+         * * `partially_refunded` - Partially Refunded
          * * `refunded` - Refunded
          */
-        status__in?: Array<'cancelled' | 'completed' | 'draft' | 'pending' | 'pending_refund' | 'processing' | 'refunded'>;
+        status__in?: Array<'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded'>;
         /**
          * Filter orders updated after this date
          */

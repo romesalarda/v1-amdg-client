@@ -1418,11 +1418,11 @@ function closeRefundModal() {
 function handleRefundCreated() {
   closeRefundModal()
   refetchPayments()
-  toast.add({
-    title: 'Refund request created',
-    description: 'Refund request has been submitted for review',
-    color: 'green',
-  })
+  // toast.add({
+  //   title: 'Refund request created',
+  //   description: 'Refund request has been submitted for review',
+  //   color: 'green',
+  // })
 }
 
 function handlePaymentCreated() {

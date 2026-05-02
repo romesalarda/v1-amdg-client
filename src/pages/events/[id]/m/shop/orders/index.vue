@@ -612,16 +612,18 @@ const availableStatuses: Array<{ value: OrderStatus; label: string }> = [
   { value: 'completed', label: 'Completed' },
   { value: 'cancelled', label: 'Cancelled' },
   { value: 'pending_refund', label: 'Pending Refund' },
+  { value: 'partially_refunded', label: 'Partially Refunded' },
   { value: 'refunded', label: 'Refunded' },
 ]
 
 const orderStatusTransitions: Record<OrderStatus, OrderStatus[]> = {
   draft: ['pending', 'cancelled'],
   pending: ['processing', 'cancelled'],
-  processing: ['completed', 'pending_refund', 'refunded', 'cancelled'],
-  completed: ['pending_refund', 'refunded', 'cancelled'],
+  processing: ['completed', 'pending_refund', 'partially_refunded', 'refunded', 'cancelled'],
+  completed: ['pending_refund', 'partially_refunded', 'refunded', 'cancelled'],
   cancelled: [],
   pending_refund: ['refunded', 'cancelled'],
+  partially_refunded: ['refunded', 'completed', 'cancelled'],
   refunded: [],
 }
 
