@@ -1836,12 +1836,12 @@
                       </form>
                     </div>
                     <!-- Items Table -->
-                    <div v-if="!(order as any).order_items?.length" class="text-center py-4 text-gray-500 text-xs">
+                    <div v-if="!order.order_items?.length" class="text-center py-4 text-gray-500 text-xs">
                       No items in this order
                     </div>
                     <div v-else class="space-y-2">
                       <div
-                        v-for="item in (order as any).order_items"
+                        v-for="item in order.order_items"
                         :key="item.id"
                         class="p-3 bg-gray-50 rounded-xl border border-gray-200"
                       >
@@ -1867,11 +1867,20 @@
                                 <p class="text-xs text-gray-500 mt-0.5">
                                   {{ getOrderItemCode(item) }}
                                 </p>
+                                
                               </div>
                               <span class="text-sm font-bold text-primary whitespace-nowrap">{{ item.total_price }}</span>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2 mt-2">
+                            <UBadge
+                                size="xs"
+                                color="blue"
+                                variant="soft"
+                                class="ml-2"
+                              >
+                                {{item.status.toUpperCase()}}
+                              </UBadge>
                               <UBadge size="xs" color="gray" variant="soft">
                                 Qty {{ item.quantity }}
                               </UBadge>
@@ -2190,7 +2199,8 @@ const organisations = useOrganisations(computed(() => ({ page_size: 100 })))
 
 // Orders (NEW)
 const attendeeOrders = useProductOrders(computed(() => ({
-  attendee_id: attendee.data.value?.data?.attendee_id
+  attendee_id: attendee.data.value?.data?.attendee_id,
+  event: eventId.value,
 })))
 
 // ====================

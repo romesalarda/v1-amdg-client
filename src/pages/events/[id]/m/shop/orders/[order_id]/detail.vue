@@ -268,7 +268,7 @@
                   </a>
                   <a
                     v-if="order.attendee"
-                    :href="`/events/${eventId}/m/attendees/${order.attendee}`"
+                    :href="`/events/${eventId}/m/participants/dashboard/?search=${order.attendee_name}`"
                     class="flex items-center gap-2 text-sm text-blue-700 hover:text-blue-800"
                   >
                     <UIcon name="i-heroicons-ticket" class="h-4 w-4" />
