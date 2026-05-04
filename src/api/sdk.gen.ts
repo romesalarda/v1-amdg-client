@@ -3124,7 +3124,7 @@ export const eventAuthorizationsUpdate = <ThrowOnError extends boolean = false>(
 /**
  * List Events
  *
- * Retrieve a paginated list of all events with comprehensive filtering and search capabilities. Results include event details, status, type, organization, dates, and registration information. Non-staff users only see published and active events, while staff can view all events including drafts. Supports filtering by status, event type, organization, and text search across titles and descriptions.
+ * Retrieve a paginated list of all events with comprehensive filtering and search capabilities. Results include event details, status, type, organization, dates, and registration information. Non-staff users only see published and active events, while staff can view all events including drafts. Supports filtering by status, event type, organization, area/chapter location, venue details, date windows, thematic fields, and both standard and fuzzy text search. All query parameter names are flat (no double-underscore notation).
  */
 export const eventListList = <ThrowOnError extends boolean = false>(options?: Options<EventListListData, ThrowOnError>) => (options?.client ?? client).get<EventListListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {

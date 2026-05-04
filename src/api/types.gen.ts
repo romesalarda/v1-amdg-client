@@ -6070,6 +6070,7 @@ export type EventDetail = {
     readonly created_by_email: string;
     readonly created_at: string;
     readonly updated_at: string;
+    readonly location: string;
     settings: EventSettings;
     readonly duration_days: number;
     readonly is_ongoing: boolean;
@@ -6880,6 +6881,7 @@ export type EventList = {
          */
         percentage_full?: number;
     };
+    readonly location: string;
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -17303,6 +17305,7 @@ export type SponsorableEventList = {
          */
         percentage_full?: number;
     };
+    readonly location: string;
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -30069,9 +30072,60 @@ export type EventListListData = {
     path?: never;
     query?: {
         /**
+         * Filter by anchor verse
+         */
+        anchor_verse?: string;
+        /**
+         * Filter by area ID (alias of location)
+         */
+        area?: number;
+        /**
+         * Filter by area name
+         */
+        area_name?: string;
+        /**
+         * Filter by chapter ID through event location
+         */
+        chapter?: number;
+        /**
+         * Filter by chapter name through event location
+         */
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        /**
+         * Filter by end datetime greater than or equal
+         */
+        end_after?: string;
+        /**
+         * Filter by end datetime less than or equal
+         */
+        end_before?: string;
+        /**
          * Filter by event type ID
          */
         event_type?: number;
+        /**
+         * Filter by event type code
+         */
+        event_type_code?: string;
+        /**
+         * Filter by event type title
+         */
+        event_type_title?: string;
+        /**
+         * Postgres trigram fuzzy search (falls back to standard search if unavailable)
+         */
+        fuzzy_search?: string;
+        /**
+         * Optional fuzzy similarity threshold between 0.0 and 1.0 (default: 0.2)
+         */
+        fuzzy_threshold?: number;
+        /**
+         * Filter by location (area) ID
+         */
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
@@ -30081,6 +30135,10 @@ export type EventListListData = {
          */
         organisation?: number;
         /**
+         * Filter by organisation name
+         */
+        organisation_name?: string;
+        /**
          * A page number within the paginated result set.
          */
         page?: number;
@@ -30089,13 +30147,46 @@ export type EventListListData = {
          */
         page_size?: number;
         /**
-         * Search by title or description
+         * Standard text search across event, organisation, location, and venue fields
          */
         search?: string;
+        /**
+         * Filter by start datetime greater than or equal
+         */
+        start_after?: string;
+        /**
+         * Filter by start datetime less than or equal
+         */
+        start_before?: string;
         /**
          * Filter by status (DRAFT, PUBLISHED, OPEN, etc.)
          */
         status?: string;
+        /**
+         * Filter by event theme
+         */
+        theme?: string;
+        title?: string;
+        /**
+         * Filter by venue ID through event venues
+         */
+        venue?: number;
+        /**
+         * Filter by venue POI address
+         */
+        venue_address?: string;
+        /**
+         * Filter by venue city
+         */
+        venue_city?: string;
+        /**
+         * Filter by venue POI name
+         */
+        venue_name?: string;
+        /**
+         * Filter by venue postcode
+         */
+        venue_postcode?: string;
     };
     url: '/api/event/list/';
 };
@@ -30388,12 +30479,28 @@ export type EventListApplyAvailabilityTemplateCreateData = {
         url_safe_title: string;
     };
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30406,6 +30513,8 @@ export type EventListApplyAvailabilityTemplateCreateData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -30418,7 +30527,14 @@ export type EventListApplyAvailabilityTemplateCreateData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/{url_safe_title}/apply-availability-template/';
 };
@@ -30506,12 +30622,28 @@ export type EventListAvailabilityWindowsListData = {
         url_safe_title: string;
     };
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30524,6 +30656,8 @@ export type EventListAvailabilityWindowsListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -30536,7 +30670,14 @@ export type EventListAvailabilityWindowsListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/{url_safe_title}/availability-windows/';
 };
@@ -30702,12 +30843,28 @@ export type EventListLandingImagesListData = {
         url_safe_title: string;
     };
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -30720,6 +30877,8 @@ export type EventListLandingImagesListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -30732,7 +30891,14 @@ export type EventListLandingImagesListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/{url_safe_title}/landing-images/';
 };
@@ -31120,12 +31286,28 @@ export type EventListResourcesListData = {
         url_safe_title: string;
     };
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31142,6 +31324,8 @@ export type EventListResourcesListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -31154,11 +31338,18 @@ export type EventListResourcesListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
         /**
          * Filter by resource tag
          */
         tag?: string;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/{url_safe_title}/resources/';
 };
@@ -31919,12 +32110,28 @@ export type EventListStaffListListData = {
         url_safe_title: string;
     };
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -31937,6 +32144,8 @@ export type EventListStaffListListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -31949,7 +32158,14 @@ export type EventListStaffListListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/{url_safe_title}/staff-list/';
 };
@@ -32140,12 +32356,28 @@ export type EventListAvailabilityTemplatesListData = {
     body?: never;
     path?: never;
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * A page number within the paginated result set.
          */
@@ -32158,6 +32390,8 @@ export type EventListAvailabilityTemplatesListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -32170,7 +32404,14 @@ export type EventListAvailabilityTemplatesListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/availability-templates/';
 };
@@ -32259,12 +32500,28 @@ export type EventListOngoingListData = {
     body?: never;
     path?: never;
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * Page number
          */
@@ -32277,6 +32534,8 @@ export type EventListOngoingListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -32289,7 +32548,14 @@ export type EventListOngoingListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/ongoing/';
 };
@@ -32304,12 +32570,28 @@ export type EventListSponsorableListData = {
     body?: never;
     path?: never;
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * Page number.
          */
@@ -32322,6 +32604,8 @@ export type EventListSponsorableListData = {
          * Search by title, description, or display code.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -32334,7 +32618,14 @@ export type EventListSponsorableListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/sponsorable/';
 };
@@ -32349,12 +32640,28 @@ export type EventListUpcomingListData = {
     body?: never;
     path?: never;
     query?: {
+        anchor_verse?: string;
+        area?: number;
+        area_name?: string;
+        chapter?: number;
+        chapter_name?: string;
+        created_by?: number;
+        display_code?: string;
+        display_identifier?: string;
+        end_after?: string;
+        end_before?: string;
         event_type?: number;
+        event_type_code?: string;
+        event_type_title?: string;
+        fuzzy_search?: string;
+        fuzzy_threshold?: number;
+        location?: number;
         /**
          * Which field to use when ordering the results.
          */
         ordering?: string;
         organisation?: number;
+        organisation_name?: string;
         /**
          * Page number
          */
@@ -32367,6 +32674,8 @@ export type EventListUpcomingListData = {
          * A search term.
          */
         search?: string;
+        start_after?: string;
+        start_before?: string;
         /**
          * * `DRAFTING` - Drafting
          * * `PUBLISHED` - Published
@@ -32379,7 +32688,14 @@ export type EventListUpcomingListData = {
          * * `POSTPONED` - Postponed
          * * `ARCHIVED` - Archived
          */
-        status?: 'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED';
+        status?: Array<'ARCHIVED' | 'CANCELLED' | 'CLOSED' | 'COMPLETED' | 'DELETED' | 'DRAFTING' | 'IN_PROGRESS' | 'OPEN' | 'POSTPONED' | 'PUBLISHED'>;
+        theme?: string;
+        title?: string;
+        venue?: number;
+        venue_address?: string;
+        venue_city?: string;
+        venue_name?: string;
+        venue_postcode?: string;
     };
     url: '/api/event/list/upcoming/';
 };
