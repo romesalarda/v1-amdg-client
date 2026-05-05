@@ -52,7 +52,7 @@
                 variant="soft"
                 size="xs"
               >
-                {{ (order.status || 'draft').toUpperCase() }}
+                {{ (order.status || 'draft').toUpperCase().replaceAll('_', ' ') }}
               </UBadge>
               <span class="text-xs text-gray-600">{{ order.item_count }} items</span>
             </div>
@@ -178,7 +178,7 @@
                       variant="soft"
                       class="ml-2"
                     >
-                      {{ item.status.toUpperCase() }}
+                      {{ item.status.toUpperCase().replaceAll('_', ' ') }}
                     </UBadge>
                     <UBadge size="xs" color="gray" variant="soft">
                       Qty {{ item.quantity }}

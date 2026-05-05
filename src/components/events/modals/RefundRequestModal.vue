@@ -811,7 +811,6 @@ function getVariantMetadata(item: SelectableItem): string[] {
   const labels: string[] = []
   if (variant.size_display) labels.push(`Size: ${variant.size_display}`)
   if (variant.color) labels.push(`Color: ${variant.color}`)
-  if (variant.variant_id) labels.push(`Variant: ${variant.variant_id.slice(0, 8)}`)
   return labels
 }
 

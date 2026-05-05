@@ -573,7 +573,7 @@ const id = computed(() => route.params.id as string)
 const toast = useToast()
 type OrderStatus = NonNullable<OrderList['status']>
 
-const DEFAULT_FILTER_STATUSES: OrderStatus[] = ['pending', 'processing', 'completed']
+const DEFAULT_FILTER_STATUSES: OrderStatus[] = ['pending', 'processing', 'completed', 'pending_refund']
 
 // Event Data
 const { data: event } = useEvent(id)

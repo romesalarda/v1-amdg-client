@@ -44,7 +44,7 @@
                 variant="soft"
                 size="xs"
               >
-                {{ payment.status }}
+                {{ payment.status.toUpperCase().replaceAll('_', ' ') }}
               </UBadge>
               <NuxtLink
                 :to="`/events/${eventId}/m/payments/list?search=${payment.payment_reference}`"
