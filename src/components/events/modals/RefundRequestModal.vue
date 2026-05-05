@@ -81,36 +81,84 @@
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 Select Items to Refund
               </label>
-              <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-60 overflow-y-auto">
-                <div v-for="item in selectableItems" :key="item.id" class="flex items-center justify-between p-2 rounded-md hover:bg-gray-100">
-                  <div class="flex items-center">
-                    <input
-                      :disabled="item?.is_refunded || false"
+              <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-72 overflow-y-auto">
+                <div v-for="item in selectableItems" :key="item.id" class="rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200 transition-colors">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="flex items-start gap-3 min-w-0">
+                      <input
+                        :disabled="item?.is_refunded || false"
+                        :id="`item-${item.id}`"
+                        type="checkbox"
+                        :checked="!!selectedItems[item.id]"
+                        @change="toggleItemSelection(item)"
+                        class="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                      />
 
-                      :id="`item-${item.id}`"
-                      type="checkbox"
-                      :checked="!!selectedItems[item.id]"
-                      @change="toggleItemSelection(item)"
-                      class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
-                    />
-                    
-                    <label :for="`item-${item.id}`" class="ml-3 text-sm text-gray-800 cursor-pointer">
-                      <span class="font-semibold">{{ item.name }}</span>
-                      <span class="text-gray-600 ml-2">({{ formatCurrency(item.price) }})</span>
-                    </label>
-                    <span v-if="item.is_refunded" class="ml-2 text-sm text-red-500">Refunded</span>
+                      <label :for="`item-${item.id}`" class="flex items-start gap-3 min-w-0 cursor-pointer">
+                        <div class="h-14 w-14 rounded-md border border-gray-200 bg-gray-50 overflow-hidden flex-shrink-0">
+                          <img
+                            v-if="getVariantImageUrl(item)"
+                            :src="resolveImageUrl(getVariantImageUrl(item))"
+                            alt="Variant preview"
+                            class="h-full w-full object-cover"
+                          >
+                          <div
+                            v-else
+                            class="h-full w-full flex items-center justify-center text-sm font-black uppercase tracking-wide text-gray-500"
+                          >
+                            {{ getItemPlaceholderLetter(item) }}
+                          </div>
+                        </div>
 
-                  </div>
-                  <div v-if="item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
-                    <span class="text-xs text-gray-500">Qty:</span>
-                    <input
-                      type="number"
-                      min="1"
-                      :max="item.quantity"
-                      :value="selectedItems[item.id]?.quantity"
-                      @input="updateItemQuantity(item, parseInt(($event.target as HTMLInputElement).value))"
-                      class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md"
-                    />
+                        <div class="min-w-0">
+                          <div class="text-sm font-semibold text-gray-900 truncate">{{ item.name }}</div>
+                          <div class="mt-1 text-xs text-gray-600">{{ formatCurrency(item.price) }} per unit</div>
+
+                          <div class="mt-2 flex flex-wrap gap-1.5">
+                            <span
+                              v-for="meta in getVariantMetadata(item)"
+                              :key="`${item.id}-${meta}`"
+                              class="rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[11px] font-semibold text-blue-800"
+                            >
+                              {{ meta }}
+                            </span>
+                            <span
+                              v-if="item.variantId && isVariantLoading(item)"
+                              class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+                            >
+                              Loading variant
+                            </span>
+                            <span
+                              v-if="item.variantId && !isVariantLoading(item) && !hasVariantData(item)"
+                              class="rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-700"
+                            >
+                              Variant metadata unavailable
+                            </span>
+                            <span
+                              v-if="!item.variantId"
+                              class="rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-700"
+                            >
+                              Non-variant item
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+
+                    <div class="flex flex-col items-end gap-2">
+                      <span v-if="item.is_refunded" class="text-xs font-semibold text-red-600">Refunded</span>
+                      <div v-if="item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
+                        <span class="text-xs text-gray-500">Qty:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          :max="item.quantity"
+                          :value="selectedItems[item.id]?.quantity"
+                          @input="updateItemQuantity(item, parseInt(($event.target as HTMLInputElement).value))"
+                          class="w-16 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -238,9 +286,10 @@
 import { useCreatePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
 import { useRequestAttendeeCancellationRefund } from '~/composables/resources/attendee/attendees'
 import { usePayment } from '~/composables/resources/payments/payments'
-import { productsOrdersRetrieve } from '~/api/sdk.gen'
+import { productsListVariantsRetrieve, productsOrdersRetrieve } from '~/api/sdk.gen'
 import { parseAmount } from '~/utils/money'
-import type { AttendeeList, EventDetail} from '~/api/types.gen'
+import { onImageError, resolveImageUrl } from '~/utils/image'
+import type { AttendeeList, EventDetail, ProductVariantDetail } from '~/api/types.gen'
 
 interface Props {
   payment?: any
@@ -283,6 +332,7 @@ type SelectableItem = {
   price: number
   quantity: number
   type: 'attendee' | 'order_item' | 'attendee_product_line'
+  productId?: string
   attendeeId?: string
   orderItemId?: string
   orderId?: string
@@ -295,6 +345,7 @@ type SelectedItem = {
   quantity: number
   price: number
   type: SelectableItem['type']
+  productId?: string
   attendeeId?: string
   orderItemId?: string
   orderId?: string
@@ -303,6 +354,8 @@ type SelectedItem = {
 }
 
 const selectedItems = ref<Record<string, SelectedItem>>({})
+const variantDetailsByLookupKey = ref<Record<string, ProductVariantDetail>>({})
+const variantLookupLoading = ref<Record<string, boolean>>({})
 
 const orderRefundState = ref<Record<string, boolean | null>>({})
 const fetchedOrderIds = new Set<string>()
@@ -391,6 +444,7 @@ const selectableItems = computed<SelectableItem[]>(() => {
         price: parseFloat(line.unit_final_amount),
         quantity: line.quantity || 1,
         type: 'attendee_product_line',
+        productId: getProductIdFromUnknown(line),
         attendeeId: item.attendee_id,
         orderId: item.order_id,
         variantId: line.variant_id,
@@ -410,12 +464,68 @@ const selectableItems = computed<SelectableItem[]>(() => {
       price: parseFloat(item.unit_price),
       quantity: item.quantity,
       type: 'order_item',
+      productId: getProductIdFromUnknown(item),
       orderItemId: item.order_item_id,
+      variantId: item.product_variant_id,
       is_refunded: item.is_refunded ?? metadata.order?.is_refunded ?? null,
     }))
   }
   return []
 })
+
+const variantLookupTargets = computed(() => {
+  const seen = new Set<string>()
+  const targets: Array<{ productId: string; variantId: string }> = []
+
+  selectableItems.value.forEach((item) => {
+    const productId = String(item.productId || '').trim()
+    const variantId = String(item.variantId || '').trim()
+    if (!productId || !variantId) return
+
+    const key = toVariantLookupKey(productId, variantId)
+    if (seen.has(key)) return
+
+    seen.add(key)
+    targets.push({ productId, variantId })
+  })
+
+  return targets
+})
+
+watch(
+  variantLookupTargets,
+  async (targets) => {
+    if (!targets.length) return
+
+    await Promise.all(
+      targets.map(async ({ productId, variantId }) => {
+        const lookupKey = toVariantLookupKey(productId, variantId)
+        if (variantDetailsByLookupKey.value[lookupKey] || variantLookupLoading.value[lookupKey]) {
+          return
+        }
+
+        variantLookupLoading.value[lookupKey] = true
+        try {
+          const response = await productsListVariantsRetrieve({
+            path: {
+              product_product_id: productId,
+              variant_id: variantId,
+            },
+          })
+
+          if (response.data) {
+            variantDetailsByLookupKey.value[lookupKey] = response.data as ProductVariantDetail
+          }
+        } catch {
+          // Best effort metadata fetch; UI gracefully falls back to placeholder chips.
+        } finally {
+          variantLookupLoading.value[lookupKey] = false
+        }
+      }),
+    )
+  },
+  { immediate: true },
+)
 
 const selectedItemsAmount = computed(() => {
   return Object.values(selectedItems.value).reduce((total, item) => {
@@ -626,6 +736,7 @@ function toggleItemSelection(item: SelectableItem) {
       quantity: item.quantity,
       price: item.price,
       type: item.type,
+      productId: item.productId,
       attendeeId: item.attendeeId,
       orderItemId: item.orderItemId,
       orderId: item.orderId,
@@ -642,6 +753,7 @@ function updateItemQuantity(item: SelectableItem, quantity: number) {
       quantity,
       price: item.price,
       type: item.type,
+      productId: item.productId,
       attendeeId: item.attendeeId,
       orderItemId: item.orderItemId,
       orderId: item.orderId,
@@ -651,5 +763,71 @@ function updateItemQuantity(item: SelectableItem, quantity: number) {
   } else {
     delete selectedItems.value[item.id]
   }
+}
+
+function toVariantLookupKey(productId: string, variantId: string): string {
+  return `${productId}::${variantId}`
+}
+
+function getProductIdFromUnknown(item: any): string | undefined {
+  const candidates = [
+    item?.product_id,
+    item?.product_public_id,
+    item?.product?.product_id,
+    item?.product?.product_public_id,
+    item?.product?.id,
+    item?.product,
+  ]
+
+  for (const candidate of candidates) {
+    if (candidate === null || candidate === undefined) continue
+    const normalized = String(candidate).trim()
+    if (normalized) return normalized
+  }
+
+  return undefined
+}
+
+function getVariantDetail(item: SelectableItem): ProductVariantDetail | null {
+  const productId = String(item.productId || '').trim()
+  const variantId = String(item.variantId || '').trim()
+  if (!productId || !variantId) return null
+
+  const lookupKey = toVariantLookupKey(productId, variantId)
+  return variantDetailsByLookupKey.value[lookupKey] || null
+}
+
+function getVariantImageUrl(item: SelectableItem): string | null {
+  const variant = getVariantDetail(item)
+  const imageUrl = variant?.images?.main?.url
+  if (!imageUrl) return null
+  return resolveImageUrl(imageUrl)
+}
+
+function getVariantMetadata(item: SelectableItem): string[] {
+  const variant = getVariantDetail(item)
+  if (!variant) return []
+
+  const labels: string[] = []
+  if (variant.size_display) labels.push(`Size: ${variant.size_display}`)
+  if (variant.color) labels.push(`Color: ${variant.color}`)
+  if (variant.variant_id) labels.push(`Variant: ${variant.variant_id.slice(0, 8)}`)
+  return labels
+}
+
+function isVariantLoading(item: SelectableItem): boolean {
+  const productId = String(item.productId || '').trim()
+  const variantId = String(item.variantId || '').trim()
+  if (!productId || !variantId) return false
+  return !!variantLookupLoading.value[toVariantLookupKey(productId, variantId)]
+}
+
+function hasVariantData(item: SelectableItem): boolean {
+  return !!getVariantDetail(item)
+}
+
+function getItemPlaceholderLetter(item: SelectableItem): string {
+  const label = String(item.name || '').trim()
+  return label ? label.charAt(0).toUpperCase() : 'I'
 }
 </script>
