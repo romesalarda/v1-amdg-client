@@ -43,7 +43,7 @@
         :key="order.id"
         class="border border-gray-200 rounded-xl overflow-hidden bg-white"
       >
-        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
+        <div class="px-4 py-3 bg-gray-50 border-b border-gray-200" v-if="order.status != 'draft'">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <h4 class="font-bold text-sm text-gray-900 font-mono">{{ order.order_reference_id }}</h4>
@@ -75,7 +75,7 @@
           </div>
         </div>
 
-        <div class="p-4">
+        <div class="p-4" v-if="order.status != 'draft'">
           <div class="flex items-center justify-between mb-3">
             <h5 class="text-xs font-bold text-gray-700 uppercase">Order Items</h5>
             <UButton

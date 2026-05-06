@@ -86,7 +86,7 @@
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
                       <input
-                        :disabled="refundType === 'full' || item?.is_refunded || false"
+                        :disabled="refundType === 'full' || item?.is_refunded || item.quantity <= 0 || requiresLiveOrderResolution(item)"
                         :id="`item-${item.id}`"
                         type="checkbox"
                         :checked="refundType === 'partial' && !!selectedItems[item.id]"
@@ -117,6 +117,7 @@
                         <div class="min-w-0">
                           <div class="text-sm font-semibold text-gray-900 truncate">{{ item.name }}</div>
                           <div class="mt-1 text-xs text-gray-600">{{ formatCurrency(item.price) }} per unit</div>
+                          <div class="mt-1 text-xs text-gray-500">Available quantity: {{ item.quantity }}</div>
 
                           <div class="mt-2 flex flex-wrap gap-1.5">
                             <span
@@ -143,6 +144,12 @@
                               class="rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-[11px] font-semibold text-gray-700"
                             >
                               Non-variant item
+                            </span>
+                            <span
+                              v-if="requiresLiveOrderResolution(item)"
+                              class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+                            >
+                              Waiting for live order sync
                             </span>
                           </div>
                         </div>
@@ -190,13 +197,13 @@
                 type="number"
                 step="0.01"
                 min="0.01"
-                :max="parseFloat(payment?.amount || '0')"
+                :max="maxRefundableAmount"
                 placeholder="0.00"
                 required
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
               <p class="text-xs text-gray-500 mt-1">
-                Maximum refundable: {{ payment?.final_amount }}
+                Maximum refundable: {{ formatCurrency(maxRefundableAmount) }}
               </p>
               <p v-if="selectableItems.length > 0" class="text-xs text-blue-700 mt-1">
                 Shortcut tip: selecting items auto-fills this amount, but you can edit it manually.
@@ -299,7 +306,7 @@ import { useRequestAttendeeCancellationRefund } from '~/composables/resources/at
 import { usePayment } from '~/composables/resources/payments/payments'
 import { productsListVariantsRetrieve, productsOrdersRetrieve } from '~/api/sdk.gen'
 import { parseAmount } from '~/utils/money'
-import { onImageError, resolveImageUrl } from '~/utils/image'
+import { resolveImageUrl } from '~/utils/image'
 import type { AttendeeList, EventDetail, ProductVariantDetail } from '~/api/types.gen'
 
 interface Props {
@@ -345,7 +352,7 @@ type SelectableItem = {
   type: 'attendee' | 'order_item' | 'attendee_product_line'
   productId?: string
   attendeeId?: string
-  orderItemId?: string
+  orderItemId?: string | number
   orderId?: string
   variantId?: string
   packageProductId?: number
@@ -358,7 +365,7 @@ type SelectedItem = {
   type: SelectableItem['type']
   productId?: string
   attendeeId?: string
-  orderItemId?: string
+  orderItemId?: string | number
   orderId?: string
   variantId?: string
   packageProductId?: number
@@ -368,9 +375,21 @@ const selectedItems = ref<Record<string, SelectedItem>>({})
 const variantDetailsByLookupKey = ref<Record<string, ProductVariantDetail>>({})
 const variantLookupLoading = ref<Record<string, boolean>>({})
 
+const orderDetailsById = ref<Record<string, any>>({})
 const orderRefundState = ref<Record<string, boolean | null>>({})
 const fetchedOrderIds = new Set<string>()
 const loadingOrderIds = new Set<string>()
+
+const eventSlugOrId = computed(() => {
+  const eventIdentifier = props.eventDetail?.url_safe_title || props.eventDetail?.event_id
+  return eventIdentifier ? String(eventIdentifier) : ''
+})
+
+const paymentOrderId = computed(() => {
+  const metadata = payment.value?.metadata as any
+  const rawOrderId = metadata?.order_id || metadata?.order?.order_id
+  return rawOrderId ? String(rawOrderId) : ''
+})
 
 const bookingOrderIds = computed(() => {
   const metadata = payment.value?.metadata as any
@@ -397,19 +416,28 @@ async function fetchOrderIsRefunded(orderId: string) {
   loadingOrderIds.add(orderId)
 
   try {
-    const eventSlugOrId = props.eventDetail?.url_safe_title || props.eventDetail?.event_id
     const response = await productsOrdersRetrieve({
       path: { order_id: orderId },
-      query: eventSlugOrId ? { event: eventSlugOrId } : undefined,
+      query: eventSlugOrId.value ? { event: eventSlugOrId.value } : undefined,
     })
 
+    orderDetailsById.value[orderId] = response.data ?? null
     orderRefundState.value[orderId] = response.data?.is_refunded ?? null
     fetchedOrderIds.add(orderId)
   } catch {
+    orderDetailsById.value[orderId] = null
     orderRefundState.value[orderId] = null
   } finally {
     loadingOrderIds.delete(orderId)
   }
+}
+
+function getLiveOrderDetail(orderId?: string) {
+  if (!orderId) {
+    return null
+  }
+
+  return orderDetailsById.value[orderId] ?? null
 }
 
 function getOrderIsRefunded(orderId?: string) {
@@ -421,7 +449,7 @@ function getOrderIsRefunded(orderId?: string) {
 }
 
 watch(
-  bookingOrderIds,
+  () => Array.from(new Set([...bookingOrderIds.value, paymentOrderId.value].filter(Boolean))),
   (ids) => {
     ids.forEach((orderId) => {
       if (!(orderId in orderRefundState.value)) {
@@ -439,6 +467,7 @@ const selectableItems = computed<SelectableItem[]>(() => {
 
   if (descriptor === 'booking' && metadata?.attendee_selections) {
     return metadata.attendee_selections.flatMap((item: any) => {
+      const liveOrder = getLiveOrderDetail(item.order_id)
       const attendeeEntry: SelectableItem = {
         id: `attendee-${item.attendee_id}-package`,
         name: `${item.attendee_name} - ${item.package_name}`,
@@ -449,35 +478,75 @@ const selectableItems = computed<SelectableItem[]>(() => {
         is_refunded: undefined,
       }
 
-      const productLineEntries: SelectableItem[] = (item.product_lines || []).map((line: any, index: number) => ({
-        id: `attendee-${item.attendee_id}-product-${line.variant_id}-${index}`,
-        name: `${item.attendee_name} - Package Product`,
-        price: parseFloat(line.unit_final_amount),
-        quantity: line.quantity || 1,
-        type: 'attendee_product_line',
-        productId: getProductIdFromUnknown(line),
-        attendeeId: item.attendee_id,
-        orderId: item.order_id,
-        variantId: line.variant_id,
-        packageProductId: line.package_product_id,
-        is_refunded: getOrderIsRefunded(item.order_id),
-      }))
+      const productLineEntries: SelectableItem[] = (item.product_lines || []).map((line: any, index: number) => {
+        const liveOrderItem = findLiveOrderItemForLine(liveOrder, line, index)
+        const liveProductDetails = getLiveOrderItemProductDetails(liveOrderItem)
+
+        return {
+          id: String(liveOrderItem?.id ?? `attendee-${item.attendee_id}-product-${line.variant_id}-${index}`),
+          name: String(
+            liveProductDetails?.product_title ||
+            line?.product_title ||
+            `${item.attendee_name} - Package Product`,
+          ),
+          price: getItemUnitPrice(liveOrderItem?.unit_price, line.unit_final_amount),
+          quantity: getLiveOrderItemQuantity(liveOrderItem, line.quantity || 1),
+          type: 'attendee_product_line',
+          productId: String(liveProductDetails?.product_id || getProductIdFromUnknown(line) || '').trim() || undefined,
+          attendeeId: item.attendee_id,
+          orderId: item.order_id,
+          orderItemId: liveOrderItem?.id,
+          variantId: String(liveProductDetails?.variant_id || liveOrderItem?.product_variant || line.variant_id || '').trim() || undefined,
+          packageProductId: line.package_product_id,
+          is_refunded: getLiveOrderItemRefunded(liveOrder, liveOrderItem),
+        }
+      })
 
       return [attendeeEntry, ...productLineEntries]
     })
   }
 
-  
   if (descriptor === 'order' && metadata?.order?.order_items) {
+    const liveOrder = getLiveOrderDetail(paymentOrderId.value)
+    const liveOrderItems = Array.isArray(liveOrder?.order_items) ? liveOrder.order_items : []
+
+    if (liveOrderItems.length > 0) {
+      return liveOrderItems
+        .map((item: any, index: number) => {
+          const liveProductDetails = getLiveOrderItemProductDetails(item)
+          const fallbackMetadataItem = metadata.order.order_items.find((metadataItem: any) => {
+            const metadataOrderItemId = String(metadataItem?.order_item_id ?? '').trim()
+            return metadataOrderItemId && metadataOrderItemId === String(item?.id ?? '').trim()
+          })
+
+          return {
+            id: String(item?.id ?? `live-order-item-${index}`),
+            name: String(
+              liveProductDetails?.product_title ||
+              fallbackMetadataItem?.product_title ||
+              `Order Item ${index + 1}`,
+            ),
+            price: getItemUnitPrice(item?.unit_price, fallbackMetadataItem?.unit_price),
+            quantity: getLiveOrderItemQuantity(item, fallbackMetadataItem?.quantity),
+            type: 'order_item' as const,
+            productId: String(liveProductDetails?.product_id || getProductIdFromUnknown(fallbackMetadataItem) || '').trim() || undefined,
+            orderItemId: item?.id,
+            variantId: String(liveProductDetails?.variant_id || item?.product_variant || fallbackMetadataItem?.product_variant_id || '').trim() || undefined,
+            is_refunded: getLiveOrderItemRefunded(liveOrder, item),
+          }
+        })
+        .filter((item: SelectableItem) => item.quantity > 0)
+    }
+
     return metadata.order.order_items.map((item: any) => ({
-      id: item.order_item_id,
+      id: String(item.order_item_id),
       name: item.product_title,
-      price: parseFloat(item.unit_price),
+      price: parseAmount(item.unit_price),
       quantity: item.quantity,
       type: 'order_item',
       productId: getProductIdFromUnknown(item),
       orderItemId: item.order_item_id,
-      variantId: item.product_variant_id,
+      variantId: String(item.product_variant_id || '').trim() || undefined,
       is_refunded: item.is_refunded ?? metadata.order?.is_refunded ?? null,
     }))
   }
@@ -550,6 +619,24 @@ const selectableItemsAmount = computed(() => {
   }, 0)
 })
 
+const paymentRemainingAmount = computed(() => {
+  return parseAmount(
+    payment.value?.final_amount ||
+    props.payment?.final_amount ||
+    payment.value?.amount ||
+    props.payment?.amount ||
+    0,
+  )
+})
+
+const maxRefundableAmount = computed(() => {
+  if (selectableItems.value.length > 0) {
+    return Number(Math.min(paymentRemainingAmount.value, selectableItemsAmount.value).toFixed(2))
+  }
+
+  return Number(paymentRemainingAmount.value.toFixed(2))
+})
+
 const selectedAttendeeIdsFromItems = computed(() => {
   return Array.from(
     new Set(
@@ -562,7 +649,7 @@ const selectedAttendeeIdsFromItems = computed(() => {
 
 const selectedBookingProductRefundItems = computed(() => {
   return Object.values(selectedItems.value)
-    .filter(item => item.type === 'attendee_product_line' && !!item.attendeeId)
+    .filter(item => item.type === 'attendee_product_line' && !!item.attendeeId && !!item.orderItemId)
     .map(item => ({
       attendee_id: item.attendeeId,
       order_item_id: item.orderItemId,
@@ -583,7 +670,7 @@ const selectedOrderRefundItems = computed(() => {
 
 watch(selectedItemsAmount, (total) => {
   if (refundType.value === 'partial' && selectableItems.value.length > 0) {
-    refundAmount.value = Number(total.toFixed(2))
+    refundAmount.value = Number(Math.min(total, maxRefundableAmount.value).toFixed(2))
   }
 })
 
@@ -598,7 +685,7 @@ const isFormValid = computed(() => {
   }
   
   if (refundType.value === 'partial') {
-    const maxAmount = parseFloat(String(payment.value?.amount || props.payment?.amount || '0').replace("£", ""))
+    const maxAmount = maxRefundableAmount.value
     const hasValidAmount = refundAmount.value !== null && 
            refundAmount.value > 0 && 
            refundAmount.value <= maxAmount
@@ -633,7 +720,7 @@ async function handleSubmit() {
   try {
     let amount: string | undefined
     if (refundType.value === 'full') {
-      amount = payment.value?.amount || props.payment?.amount
+      amount = maxRefundableAmount.value.toFixed(2)
     } else {
       amount = refundAmount.value?.toString()
     }
@@ -746,7 +833,7 @@ watch(() => props.open, (isOpen) => {
 })
 
 function toggleItemSelection(item: SelectableItem) {
-  if (refundType.value === 'full') {
+  if (refundType.value === 'full' || item.is_refunded || item.quantity <= 0 || requiresLiveOrderResolution(item)) {
     return
   }
 
@@ -772,10 +859,12 @@ function updateItemQuantity(item: SelectableItem, quantity: number) {
     return
   }
 
-  if (quantity > 0) {
+  const normalizedQuantity = Math.max(1, Math.min(Number.isFinite(quantity) ? quantity : 1, item.quantity))
+
+  if (item.quantity > 0) {
     selectedItems.value[item.id] = {
       ...selectedItems.value[item.id],
-      quantity,
+      quantity: normalizedQuantity,
       price: item.price,
       type: item.type,
       productId: item.productId,
@@ -811,6 +900,68 @@ function getProductIdFromUnknown(item: any): string | undefined {
   }
 
   return undefined
+}
+
+function getLiveOrderItemProductDetails(item: any): Record<string, any> | null {
+  if (!item || typeof item !== 'object') {
+    return null
+  }
+
+  const details = item.product_variant_details
+  return details && typeof details === 'object' ? details : null
+}
+
+function findLiveOrderItemForLine(order: any, line: any, fallbackIndex: number) {
+  const orderItems = Array.isArray(order?.order_items) ? order.order_items : []
+  if (!orderItems.length) {
+    return null
+  }
+
+  const lineVariantId = String(line?.variant_id || '').trim()
+  if (lineVariantId) {
+    const matchedByVariant = orderItems.find((item: any) => {
+      const details = getLiveOrderItemProductDetails(item)
+      const candidateIds = [
+        details?.variant_id,
+        details?.variant_db_id,
+        item?.product_variant,
+      ]
+
+      return candidateIds.some(candidate => String(candidate ?? '').trim() === lineVariantId)
+    })
+
+    if (matchedByVariant) {
+      return matchedByVariant
+    }
+  }
+
+  return orderItems[fallbackIndex] ?? null
+}
+
+function getLiveOrderItemQuantity(item: any, fallbackQuantity?: number) {
+  const quantity = Number(item?.quantity ?? fallbackQuantity ?? 0)
+  return Number.isFinite(quantity) && quantity > 0 ? quantity : 0
+}
+
+function getLiveOrderItemRefunded(order: any, item: any) {
+  if (item?.status === 'refunded') {
+    return true
+  }
+
+  return order?.is_refunded ?? false
+}
+
+function getItemUnitPrice(primaryAmount: unknown, fallbackAmount?: unknown) {
+  const primary = parseAmount(String(primaryAmount ?? ''))
+  if (primary > 0) {
+    return primary
+  }
+
+  return parseAmount(String(fallbackAmount ?? 0))
+}
+
+function requiresLiveOrderResolution(item: SelectableItem) {
+  return item.type === 'attendee_product_line' && !!item.orderId && !item.orderItemId
 }
 
 function getVariantDetail(item: SelectableItem): ProductVariantDetail | null {
