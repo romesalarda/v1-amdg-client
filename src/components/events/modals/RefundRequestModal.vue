@@ -76,25 +76,29 @@
               </div>
             </div>
 
-            <!-- Item Selection for Partial Refunds -->
-            <div v-if="refundType === 'partial' && selectableItems.length > 0" class="mb-4">
+            <!-- Item Preview / Selection -->
+            <div v-if="selectableItems.length > 0" class="mb-4">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
-                Select Items to Refund
+                {{ refundType === 'full' ? 'Refund Items (view only)' : 'Select Items to Refund' }}
               </label>
               <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-72 overflow-y-auto">
                 <div v-for="item in selectableItems" :key="item.id" class="rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200 transition-colors">
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
                       <input
-                        :disabled="item?.is_refunded || false"
+                        :disabled="refundType === 'full' || item?.is_refunded || false"
                         :id="`item-${item.id}`"
                         type="checkbox"
-                        :checked="!!selectedItems[item.id]"
+                        :checked="refundType === 'partial' && !!selectedItems[item.id]"
                         @change="toggleItemSelection(item)"
                         class="mt-1 w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
                       />
 
-                      <label :for="`item-${item.id}`" class="flex items-start gap-3 min-w-0 cursor-pointer">
+                      <label
+                        :for="`item-${item.id}`"
+                        class="flex items-start gap-3 min-w-0"
+                        :class="refundType === 'full' ? 'cursor-not-allowed' : 'cursor-pointer'"
+                      >
                         <div class="h-14 w-14 rounded-md border border-gray-200 bg-gray-50 overflow-hidden flex-shrink-0">
                           <img
                             v-if="getVariantImageUrl(item)"
@@ -147,7 +151,7 @@
 
                     <div class="flex flex-col items-end gap-2">
                       <span v-if="item.is_refunded" class="text-xs font-semibold text-red-600">Refunded</span>
-                      <div v-if="item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
+                      <div v-if="refundType === 'partial' && item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
                         <span class="text-xs text-gray-500">Qty:</span>
                         <input
                           type="number"
@@ -163,9 +167,16 @@
                 </div>
               </div>
               <div class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-right">
-                <span class="text-sm text-gray-600">Selected Items Total (suggested): </span>
-                <span class="text-lg font-bold text-primary">{{ formatCurrency(selectedItemsAmount) }}</span>
+                <span class="text-sm text-gray-600">
+                  {{ refundType === 'full' ? 'Items Total:' : 'Selected Items Total (suggested):' }}
+                </span>
+                <span class="text-lg font-bold text-primary">
+                  {{ formatCurrency(refundType === 'full' ? selectableItemsAmount : selectedItemsAmount) }}
+                </span>
               </div>
+              <p v-if="refundType === 'full'" class="text-xs text-gray-500 mt-1">
+                Item selection is disabled for full refunds.
+              </p>
             </div>
 
             <!-- Partial Refund Amount -->
@@ -533,6 +544,12 @@ const selectedItemsAmount = computed(() => {
   }, 0)
 })
 
+const selectableItemsAmount = computed(() => {
+  return selectableItems.value.reduce((total, item) => {
+    return total + item.price * item.quantity
+  }, 0)
+})
+
 const selectedAttendeeIdsFromItems = computed(() => {
   return Array.from(
     new Set(
@@ -729,6 +746,10 @@ watch(() => props.open, (isOpen) => {
 })
 
 function toggleItemSelection(item: SelectableItem) {
+  if (refundType.value === 'full') {
+    return
+  }
+
   if (selectedItems.value[item.id]) {
     delete selectedItems.value[item.id]
   } else {
@@ -747,6 +768,10 @@ function toggleItemSelection(item: SelectableItem) {
 }
 
 function updateItemQuantity(item: SelectableItem, quantity: number) {
+  if (refundType.value === 'full') {
+    return
+  }
+
   if (quantity > 0) {
     selectedItems.value[item.id] = {
       ...selectedItems.value[item.id],
