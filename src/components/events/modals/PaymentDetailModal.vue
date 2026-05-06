@@ -40,106 +40,93 @@
             <p class="text-sm text-red-800">Failed to load payment details. Please try again.</p>
           </div>
 
-          <!-- Basic Info -->
+          <!-- Financial Snapshot -->
           <template v-else>
           <section>
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">info</span>
-              Basic Information
-            </h4>
-            <div class="grid grid-cols-2 gap-4">
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">Payment ID</div>
-                <div class="font-mono text-sm font-semibold">{{ paymentData.payment_id }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">Reference</div>
-                <div class="font-mono text-sm font-semibold">{{ paymentData.payment_reference }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">Created</div>
-                <div class="text-sm font-semibold">{{ formatDateTime(paymentData.created_at) }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">Updated</div>
-                <div class="text-sm font-semibold">{{ formatDateTime(paymentData.updated_at) }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">User</div>
-                <div class="text-sm font-semibold">{{ paymentData.user_name || 'N/A' }}</div>
-              </div>
-              <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-xs text-gray-500 mb-1">Payment Method</div>
-                <div class="text-sm font-semibold">{{ paymentData.method?.title || paymentData.method_title || 'N/A' }}</div>
-                <div class="text-xs text-gray-500">{{ getMethodTypeLabel(paymentData.method?.code) || 'N/A' }}</div>
-              </div>
-            </div>
-            <div class="bg-gray-50 rounded-lg p-4 mt-4">
-                <div class="text-xs text-gray-500 mb-1">Description</div>
-                <div class="text-sm font-semibold">{{ paymentData.description }}</div>
-              </div>
-          </section>
-
-          <!-- Amount Breakdown -->
-          <section>
-            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">calculate</span>
-              Amount Breakdown
+              Receipt Snapshot
             </h4>
-            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border border-green-200">
-              <div class="space-y-2">
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Original Amount:</span>
-                  <span class="font-semibold">{{ formatAmount(paymentData.original_amount) }}</span>
+            <div class="rounded-xl border border-gray-200 bg-white p-4 sm:p-5">
+              <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-dashed border-gray-200">
+                <div class="text-xs text-gray-500">{{ formatDateTime(paymentData.updated_at || paymentData.created_at) }}</div>
+                <div class="flex items-center gap-2">
+                  <UBadge :color="getPaymentStatusColor(paymentData.status || 'PENDING') as any" variant="soft" size="xs">
+                    {{ getPaymentStatusLabel(paymentData.status || 'PENDING') }}
+                  </UBadge>
+                  <UBadge color="gray" variant="soft" size="xs">
+                    {{ paymentData.method?.title || paymentData.method_title || 'N/A' }}
+                  </UBadge>
                 </div>
-                <div class="flex justify-between items-center">
-                  <span class="text-sm text-gray-600">Modified Amount:</span>
-                  <span class="font-semibold">{{ formatAmount(paymentData.modified_amount) }}</span>
+              </div>
+
+              <div class="mt-4 space-y-2 text-sm">
+                <div class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5 text-gray-700">
+                  <span class="font-medium">Original amount</span>
+                  <span class="font-black text-gray-900">{{ formatAmount(paymentData.original_amount) }}</span>
                 </div>
-                <div class="flex justify-between items-center" v-if="paymentData.total_refunded_amount > 0">
-                  <span class="text-sm text-gray-600">Refunded Amount:</span>
-                  <span class="font-semibold text-red-600">- {{ formatAmount(paymentData.total_refunded_amount) }}</span>
+
+                <div
+                  v-for="refund in refundTimelineEntries"
+                  :key="refund.refundId"
+                  class="flex items-center justify-between rounded-md px-3 py-2.5"
+                  :class="isFailedRefund(refund.status) ? 'bg-red-50 text-red-700 line-through decoration-red-400' : 'bg-rose-50 text-rose-700'"
+                >
+                  <div class="min-w-0 pr-3">
+                    <div class="font-medium">{{ refundTimelineLabel(refund) }}</div>
+                    <div class="text-xs opacity-80">{{ formatDateTime(refund.timestamp) }}</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-black">- {{ formatAmount(refund.amount) }}</div>
+                    <div class="text-[11px] uppercase tracking-wide opacity-80">{{ getRefundRequestStatusLabel(refund.status) }}</div>
+                  </div>
                 </div>
-                <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex justify-between items-center text-amber-700">
-                  <span class="text-sm">Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%):</span>
-                  <span class="font-semibold">
+
+                <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5 text-gray-700">
+                  <span>Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%)</span>
+                  <span class="font-semibold text-gray-900">
                     {{ parseAmount(paymentData.percentage_modifier) > 0 ? '+' : '' }}{{ formatAmount(calculateModifier(paymentData.modified_amount, paymentData.percentage_modifier)) }}
                   </span>
                 </div>
-                <div v-if="hasDiscounts" class="flex justify-between items-center text-blue-700">
-                  <span class="text-sm">Discounts Applied:</span>
-                  <span class="font-semibold">-{{ formatAmount(calculateDiscounts()) }}</span>
-                </div>
-                <div class="border-t border-green-300 pt-2 mt-2">
-                  <div class="flex justify-between items-center">
-                    <span class="text-base font-bold text-gray-900">Final Amount:</span>
-                    <span class="text-xl font-black text-green-700">{{ formatAmount(paymentData.final_amount || paymentData.modified_amount || paymentData.amount) }}</span>
+
+                <div class="border-t border-dashed border-gray-200 pt-3 mt-3">
+                  <div class="flex items-end justify-between gap-3 rounded-lg bg-slate-900 px-4 py-3">
+                    <div>
+                      <div class="text-[11px] uppercase tracking-wide text-slate-300">Current Amount</div>
+                      <div class="text-xs text-slate-400 mt-1">Remaining after processed refunds</div>
+                    </div>
+                    <div class="text-2xl font-black text-white">{{ formatAmount(paymentData.final_amount || paymentData.modified_amount || paymentData.amount) }}</div>
                   </div>
                 </div>
               </div>
             </div>
-          </section>
 
-          <!-- Stripe Information -->
-          <section v-if="paymentData.method?.method_type === 'STRIPE' && paymentData.stripe_payment_intent">
-            <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">credit_card</span>
-              Stripe Information
-            </h4>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                <div class="text-xs text-purple-700 mb-1">Payment Intent ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_payment_intent }}</div>
-              </div>
-              <div v-if="paymentData.stripe_charge_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                <div class="text-xs text-purple-700 mb-1">Charge ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_charge_id }}</div>
-              </div>
-              <div v-if="paymentData.stripe_customer_id" class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-                <div class="text-xs text-purple-700 mb-1">Customer ID</div>
-                <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_customer_id }}</div>
-              </div>
+            <div v-if="paymentData.description" class="mt-3 rounded-lg bg-slate-50 px-4 py-3">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-slate-600">Payment Narrative</p>
+              <p class="mt-1 text-sm leading-relaxed text-slate-800">{{ paymentData.description }}</p>
             </div>
+
+            <details class="mt-3 rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+              <summary class="cursor-pointer px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-gray-700 select-none">
+                View Payment Metadata
+              </summary>
+              <div class="border-t border-gray-200 px-4 py-3 grid grid-cols-1 gap-2 text-xs text-gray-600 sm:grid-cols-2">
+                <div><span class="font-semibold text-gray-800">Reference:</span> {{ paymentData.payment_reference || 'N/A' }}</div>
+                <div><span class="font-semibold text-gray-800">Payment ID:</span> <span class="font-mono">{{ paymentData.payment_id || 'N/A' }}</span></div>
+                <div><span class="font-semibold text-gray-800">Created:</span> {{ formatDateTime(paymentData.created_at) }}</div>
+                <div><span class="font-semibold text-gray-800">Updated:</span> {{ formatDateTime(paymentData.updated_at) }}</div>
+                <div><span class="font-semibold text-gray-800">User:</span> {{ paymentData.user_name || 'N/A' }}</div>
+                <div><span class="font-semibold text-gray-800">Method Type:</span> {{ getMethodTypeLabel(paymentData.method?.code) || 'N/A' }}</div>
+                <div v-if="paymentData.method?.method_type === 'STRIPE' && paymentData.stripe_payment_intent" class="sm:col-span-2 mt-2 border-t border-gray-200 pt-2">
+                  <p class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">Stripe Information</p>
+                  <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <div><span class="font-semibold text-gray-800">Payment Intent:</span> <span class="font-mono">{{ paymentData.stripe_payment_intent }}</span></div>
+                    <div v-if="paymentData.stripe_charge_id"><span class="font-semibold text-gray-800">Charge ID:</span> <span class="font-mono">{{ paymentData.stripe_charge_id }}</span></div>
+                    <div v-if="paymentData.stripe_customer_id" class="sm:col-span-2"><span class="font-semibold text-gray-800">Customer ID:</span> <span class="font-mono">{{ paymentData.stripe_customer_id }}</span></div>
+                  </div>
+                </div>
+              </div>
+            </details>
           </section>
 
           <!-- Bank Transfer Information -->
@@ -695,26 +682,49 @@
           </section>
 
           <!-- Refunds -->
-          <section v-if="paymentData.refund_requests_summary && paymentData.refund_requests_summary.total_refunded > 0">
+          <section v-if="relatedRefunds.length > 0 || refundDetailsLoading">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">undo</span>
-              Refund Requests ({{ paymentData.refund_requests_summary.total_refunded }})
+              Related Refunds ({{ relatedRefunds.length }})
             </h4>
-            <div class="space-y-2">
+            <div v-if="refundDetailsLoading" class="rounded-lg border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+              Loading refund details...
+            </div>
+            <div v-else class="space-y-3">
               <div
-                v-for="refund in paymentData.refund_requests_summary.refunds"
-                :key="refund.refund_id"
-                class="bg-blue-50 rounded-lg p-3 border border-blue-200"
+                v-for="refund in relatedRefunds"
+                :key="refund.refund_id || refund.id"
+                class="rounded-lg border border-gray-200 bg-white p-4"
               >
                 <div class="flex items-start justify-between">
                   <div>
-                    <div class="font-mono text-sm font-semibold text-blue-900">{{ refund.tracking_reference }}</div>
-                    <div class="text-xs text-blue-700 mt-1">Amount: {{ formatAmount(refund.amount) }}</div>
-                    <div class="text-xs text-gray-500">{{ refund.reason || 'No reason provided' }}</div>
+                    <div class="font-mono text-sm font-semibold text-gray-900">{{ refund.tracking_reference || refund.refund_id || refund.id }}</div>
+                    <div class="mt-1 text-xs text-gray-600">Requested: {{ formatDateTime(refund.requested_at) }}</div>
+                    <div v-if="refund.processed_at" class="mt-1 text-xs text-gray-600">Processed: {{ formatDateTime(refund.processed_at) }}</div>
+                    <div class="mt-1 text-xs text-gray-600">Amount: <span class="font-semibold text-gray-900">{{ formatAmount(refund.amount) }}</span></div>
+                    <div class="mt-2 text-xs text-gray-500">{{ refund.reason || 'No reason provided' }}</div>
                   </div>
-                  <UBadge :color="getRefundStatusColor(refund.verification_status || 'pending') as any" variant="soft" size="xs">
-                    {{ getRefundStatusLabel(refund.verification_status || 'pending') }}
+                  <UBadge :color="getRefundRequestStatusColor(refund.verification_status || refund.status) as any" variant="soft" size="xs">
+                    {{ getRefundRequestStatusLabel(refund.verification_status || refund.status) }}
                   </UBadge>
+                </div>
+
+                <div v-if="Array.isArray(refund.associations) && refund.associations.length > 0" class="mt-3 border-t border-gray-100 pt-3">
+                  <div class="mb-2 text-[11px] font-semibold uppercase tracking-wide text-gray-600">Refunded Items</div>
+                  <div class="space-y-2">
+                    <div
+                      v-for="association in refund.associations"
+                      :key="association.id"
+                      class="flex items-start justify-between gap-3 rounded-md bg-gray-50 px-3 py-2"
+                    >
+                      <div class="min-w-0">
+                        <div class="text-xs font-medium text-gray-900">{{ getRefundAssociationLabel(association) }}</div>
+                        <div v-if="association.description && association.description !== getRefundAssociationLabel(association)" class="mt-1 text-xs text-gray-500">{{ association.description }}</div>
+                        <div class="text-xs font-semibold text-red-700 mt-2">-{{ formatAmount(association.amount) }}</div>
+
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -785,7 +795,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { bookingsPackageProductsList, productsListVariantsRetrieve } from '~/api/sdk.gen'
+import { bookingsPackageProductsList, paymentsRefundsRetrieve, productsListVariantsRetrieve } from '~/api/sdk.gen'
 import type { PackageProduct, ProductVariantDetail } from '~/api/types.gen'
 import {
   getPaymentStatusLabel,
@@ -1068,6 +1078,8 @@ const showBookingSupplement = computed(() => {
 
 const packageProductsByPackageId = ref<Record<number, PackageProduct[]>>({})
 const variantsByVariantId = ref<Record<string, ProductVariantDetail>>({})
+const refundDetailsById = ref<Record<string, any>>({})
+const refundDetailsLoading = ref(false)
 
 function getResponseData<T>(response: unknown): T | null {
   if (response && typeof response === 'object' && 'data' in (response as Record<string, unknown>)) {
@@ -1177,6 +1189,77 @@ const donationMetadata = computed<any>(() => {
   if (metadataType.value !== 'DONATION') return null
   return metadata.value?.donation || null
 })
+
+const paymentRefundRequests = computed<any[]>(() => {
+  return Array.isArray(paymentData.value?.refund_requests) ? paymentData.value.refund_requests : []
+})
+
+const refundTimelineEntries = computed(() => {
+  return paymentRefundRequests.value
+    .map((refund) => ({
+      refundId: String(refund?.refund_id || refund?.id || '').trim(),
+      amount: refund?.amount || 0,
+      status: normalizeRefundRequestStatus(refund?.verification_status || refund?.status),
+      timestamp: refund?.processed_at || refund?.requested_at || null,
+    }))
+    .filter((refund) => refund.refundId)
+    .sort((left, right) => {
+      const leftTime = left.timestamp ? new Date(left.timestamp).getTime() : 0
+      const rightTime = right.timestamp ? new Date(right.timestamp).getTime() : 0
+      return rightTime - leftTime
+    })
+})
+
+const relatedRefunds = computed<any[]>(() => {
+  return refundTimelineEntries.value.map((entry) => {
+    const detail = refundDetailsById.value[entry.refundId]
+    return detail || {
+      refund_id: entry.refundId,
+      tracking_reference: entry.refundId,
+      amount: entry.amount,
+      verification_status: entry.status,
+      requested_at: entry.timestamp,
+      associations: [],
+    }
+  })
+})
+
+watch(
+  paymentRefundRequests,
+  async (refunds) => {
+    if (!refunds.length) {
+      refundDetailsById.value = {}
+      return
+    }
+
+    refundDetailsLoading.value = true
+    try {
+      const refundEntries = await Promise.all(
+        refunds.map(async (refund) => {
+          const refundId = String(refund?.refund_id || refund?.id || '').trim()
+          if (!refundId) return null
+
+          try {
+            const response = await paymentsRefundsRetrieve({ path: { refund_id: refundId } })
+            return [refundId, getResponseData<any>(response) || refund] as const
+          } catch {
+            return [refundId, refund] as const
+          }
+        })
+      )
+
+      const refundMap: Record<string, any> = {}
+      for (const entry of refundEntries) {
+        if (!entry) continue
+        refundMap[entry[0]] = entry[1]
+      }
+      refundDetailsById.value = refundMap
+    } finally {
+      refundDetailsLoading.value = false
+    }
+  },
+  { immediate: true }
+)
 
 const formattedMetadataJson = computed(() => {
   if (!metadata.value) return '{}'
@@ -1336,5 +1419,61 @@ function formatDateTime(dateString: string): string {
 function getMethodTypeLabel(methodType: string | undefined): string {
   if (!methodType) return 'N/A'
   return paymentMethodTypeLabels[methodType as keyof typeof paymentMethodTypeLabels] || methodType
+}
+
+function normalizeRefundRequestStatus(status: unknown): string {
+  return String(status || 'pending').toLowerCase()
+}
+
+function getRefundRequestStatusColor(status: unknown): 'green' | 'amber' | 'red' | 'blue' | 'gray' {
+  const normalized = normalizeRefundRequestStatus(status)
+  if (normalized === 'processed') return 'green'
+  if (normalized === 'verified') return 'blue'
+  if (normalized === 'rejected' || normalized === 'failed') return 'red'
+  if (normalized === 'pending') return 'amber'
+  return 'gray'
+}
+
+function getRefundRequestStatusLabel(status: unknown): string {
+  const normalized = normalizeRefundRequestStatus(status)
+  if (!normalized) return 'Pending'
+  return normalized.replace(/_/g, ' ')
+}
+
+function refundTimelineLabel(refund: any): string {
+  const status = normalizeRefundRequestStatus(refund?.status)
+  if (status === 'rejected' || status === 'failed') return 'Refund failed'
+  if (status === 'verified') return 'Refund verified'
+  if (status === 'pending') return 'Refund requested'
+  return 'Refunded'
+}
+
+function isFailedRefund(status: unknown): boolean {
+  const normalized = normalizeRefundRequestStatus(status)
+  return normalized === 'rejected' || normalized === 'failed'
+}
+
+function getRefundAssociationLabel(association: any): string {
+  if (association?.description) return association.description
+
+  const metadata = association?.metadata
+  const orderItems = metadata?.order?.order_items
+  if (Array.isArray(orderItems) && orderItems.length > 0) {
+    return orderItems
+      .map((item: any) => `${item?.product_title || 'Product'}${item?.quantity ? ` x${item.quantity}` : ''}`)
+      .join(', ')
+  }
+
+  const ticketBreakdown = metadata?.ticket_breakdown
+  if (ticketBreakdown && typeof ticketBreakdown === 'object') {
+    const tickets = Object.values(ticketBreakdown as Record<string, any>)
+    if (tickets.length > 0) {
+      return tickets
+        .map((ticket: any) => `${ticket?.attendee_name || 'Attendee'}${ticket?.ticket_type ? ` - ${ticket.ticket_type}` : ''}`)
+        .join(', ')
+    }
+  }
+
+  return 'Refunded allocation'
 }
 </script>
