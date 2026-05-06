@@ -12055,6 +12055,13 @@ export type PaginatedSponsorableEventListList = {
     results: Array<SponsorableEventList>;
 };
 
+export type PaginatedStockAuditLogList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<StockAuditLog>;
+};
+
 export type PaginatedStripeConnectedAccountListList = {
     count: number;
     next?: string | null;
@@ -15662,6 +15669,7 @@ export type ProductCreate = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
 };
@@ -15682,6 +15690,7 @@ export type ProductDetail = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     /**
      * Final price after percentage modifier
      */
@@ -15756,6 +15765,7 @@ export type ProductList = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     /**
      * Final price after percentage modifier
      */
@@ -16105,6 +16115,7 @@ export type ProductUpdate = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
 };
@@ -17400,6 +17411,61 @@ export type StatusBreakdown = {
     status: string;
     count: number;
     percentage: number;
+};
+
+/**
+ * Read-only serializer for StockAuditLog with inferred payment and event metadata.
+ */
+export type StockAuditLog = {
+    readonly id: string;
+    readonly product_variant: number;
+    readonly product_variant_code: string;
+    readonly product_title: string;
+    /**
+     * Stock quantity before change
+     */
+    readonly old_quantity: number;
+    /**
+     * Stock quantity after change
+     */
+    readonly new_quantity: number;
+    /**
+     * Net change (positive=increment, negative=decrement)
+     */
+    readonly change_amount: number;
+    /**
+     * * `initial_order_deduction` - Initial Order Deduction
+     * * `order_cancellation_restore` - Order Cancellation Restore
+     * * `payment_failure_restore` - Payment Failure Restore
+     * * `refund_restoration` - Refund Restoration
+     * * `partial_refund_restoration` - Partial Refund Restoration
+     * * `manual_adjustment` - Manual Adjustment
+     * * `admin_action` - Admin Action
+     * * `stock_restoration_safety_net` - Stock Restoration Safety Net
+     */
+    change_reason: 'initial_order_deduction' | 'order_cancellation_restore' | 'payment_failure_restore' | 'refund_restoration' | 'partial_refund_restoration' | 'manual_adjustment' | 'admin_action' | 'stock_restoration_safety_net';
+    /**
+     * Associated Order UUID if applicable
+     */
+    readonly order_id: string | null;
+    /**
+     * Associated Payment UUID if applicable
+     */
+    readonly payment_id: string | null;
+    readonly payment_reference: string | null;
+    readonly event_id: string | null;
+    readonly event_title: string | null;
+    readonly actor: number | null;
+    readonly actor_name: string | null;
+    /**
+     * Stripe webhook event ID for idempotency
+     */
+    readonly webhook_event_id: string | null;
+    /**
+     * Additional context or notes
+     */
+    readonly notes: string | null;
+    readonly created_at: string;
 };
 
 /**
@@ -23183,6 +23249,13 @@ export type PaginatedSponsorableEventListListWritable = {
     results: Array<SponsorableEventListWritable>;
 };
 
+export type PaginatedStockAuditLogListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<unknown>;
+};
+
 export type PaginatedStripeConnectedAccountListListWritable = {
     count: number;
     next?: string | null;
@@ -23717,6 +23790,7 @@ export type ProductCreateWritable = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
 };
@@ -23732,6 +23806,7 @@ export type ProductDetailWritable = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
     description?: string | null;
@@ -23750,6 +23825,7 @@ export type ProductListWritable = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
 };
@@ -23943,6 +24019,7 @@ export type ProductUpdateWritable = {
      * Percentage adjustment applied to the base amount (1.1 for +1%, -2.5 for -2.5%)
      */
     percentage_modifier?: string;
+    max_purchase_quantity_per_order?: number | null;
     verified?: boolean;
     is_active?: boolean;
 };
@@ -43539,6 +43616,91 @@ export type PaymentsStatisticsTopDonorsRetrieveResponses = {
 };
 
 export type PaymentsStatisticsTopDonorsRetrieveResponse = PaymentsStatisticsTopDonorsRetrieveResponses[keyof PaymentsStatisticsTopDonorsRetrieveResponses];
+
+export type PaymentsStockAuditListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by actor user ID
+         */
+        actor?: number;
+        /**
+         * Filter by stock change reason(s)
+         *
+         * * `initial_order_deduction` - Initial Order Deduction
+         * * `order_cancellation_restore` - Order Cancellation Restore
+         * * `payment_failure_restore` - Payment Failure Restore
+         * * `refund_restoration` - Refund Restoration
+         * * `partial_refund_restoration` - Partial Refund Restoration
+         * * `manual_adjustment` - Manual Adjustment
+         * * `admin_action` - Admin Action
+         * * `stock_restoration_safety_net` - Stock Restoration Safety Net
+         */
+        change_reason?: Array<'admin_action' | 'initial_order_deduction' | 'manual_adjustment' | 'order_cancellation_restore' | 'partial_refund_restoration' | 'payment_failure_restore' | 'refund_restoration' | 'stock_restoration_safety_net'>;
+        /**
+         * Filter logs created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter logs created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by event UUID inferred from payment association
+         */
+        event_id?: string;
+        /**
+         * Filter by order UUID
+         */
+        order_id?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by payment UUID
+         */
+        payment_id?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/payments/stock-audit/';
+};
+
+export type PaymentsStockAuditListResponses = {
+    200: PaginatedStockAuditLogList;
+};
+
+export type PaymentsStockAuditListResponse = PaymentsStockAuditListResponses[keyof PaymentsStockAuditListResponses];
+
+export type PaymentsStockAuditRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Stock Audit Log.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/payments/stock-audit/{id}/';
+};
+
+export type PaymentsStockAuditRetrieveResponses = {
+    200: StockAuditLog;
+};
+
+export type PaymentsStockAuditRetrieveResponse = PaymentsStockAuditRetrieveResponses[keyof PaymentsStockAuditRetrieveResponses];
 
 export type ProductsCategoriesListData = {
     body?: never;

@@ -126,7 +126,7 @@
               <span class="material-symbols-outlined text-sm">credit_card</span>
               Stripe Information
             </h4>
-            <div class="grid grid-cols-1 gap-3">
+            <div class="grid grid-cols-2 gap-3">
               <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
                 <div class="text-xs text-purple-700 mb-1">Payment Intent ID</div>
                 <div class="font-mono text-sm font-semibold text-purple-900">{{ paymentData.stripe_payment_intent }}</div>

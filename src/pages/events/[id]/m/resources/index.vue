@@ -57,14 +57,23 @@
                   </div>
                 </div>
                 <div class="flex items-center gap-2 ml-4">
-                  <a
-                    v-if="resource.image"
-                    :href="resource.image"
-                    target="_blank"
+                  <button
+                    v-if="getResourceUrl(resource)"
+                    @click="previewResource(resource)"
                     class="p-2 hover:bg-white/50 rounded-lg transition-colors"
-                    title="Download"
+                    title="Preview"
                   >
-                    <span class="material-symbols-outlined text-navy-600 text-lg">download</span>
+                    <span class="material-symbols-outlined text-navy-600 text-lg">visibility</span>
+                  </button>
+                  <a
+                    v-if="getResourceUrl(resource)"
+                    :href="getResourceUrl(resource)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="p-2 hover:bg-white/50 rounded-lg transition-colors"
+                    title="Open"
+                  >
+                    <span class="material-symbols-outlined text-navy-600 text-lg">open_in_new</span>
                   </a>
                   <button
                     v-if="canEdit"
@@ -186,6 +195,7 @@
             <select
               id="resource-type"
               v-model="resourceForm.resource_type"
+              :disabled="showEditModal"
               required
               class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
             >
@@ -193,6 +203,7 @@
                 {{ type.label }}
               </option>
             </select>
+            <p v-if="showEditModal" class="text-xs text-navy-400">Resource type cannot be changed during edit.</p>
           </div>
 
           <div class="space-y-2">
@@ -208,7 +219,21 @@
             />
           </div>
 
-          <div v-if="!showEditModal" class="space-y-2">
+          <div v-if="!showEditModal && resourceForm.resource_type === 'LINK'" class="space-y-2">
+            <label class="block text-sm font-medium text-navy-900" for="resource-link">
+              Link URL <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="resource-link"
+              v-model="resourceForm.link"
+              type="url"
+              placeholder="https://example.com/resource"
+              :required="!showEditModal && resourceForm.resource_type === 'LINK'"
+              class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500"
+            />
+          </div>
+
+          <div v-if="!showEditModal && resourceForm.resource_type !== 'LINK'" class="space-y-2">
             <label class="block text-sm font-medium text-navy-900" for="resource-file">
               File <span class="text-red-500">*</span>
             </label>
@@ -216,8 +241,9 @@
               ref="fileInput"
               id="resource-file"
               type="file"
+              :accept="resourceFileAccept"
               @change="onFileSelected"
-              :required="!showEditModal"
+              :required="!showEditModal && resourceForm.resource_type !== 'LINK'"
               class="block w-full text-sm text-navy-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
             />
           </div>
@@ -246,7 +272,7 @@
             </button>
             <button
               type="submit"
-              :disabled="isSubmitting || (!showEditModal && !resourceForm.file)"
+              :disabled="isSubmitting || (!showEditModal && requiresUploadValue)"
               class="px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center gap-2"
             >
               <span v-if="isSubmitting" class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -256,12 +282,77 @@
         </form>
       </div>
     </div>
+
+    <!-- Resource Preview Modal -->
+    <div v-if="showPreviewModal && previewingResource" class="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" @click.self="closePreviewModal">
+      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-4xl w-full max-h-[90vh] flex flex-col">
+        <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-navy-50">
+          <div class="min-w-0">
+            <h3 class="text-sm font-black text-primary uppercase tracking-widest truncate">{{ previewingResource.name }}</h3>
+            <p class="text-xs text-navy-500 mt-1">{{ previewingResource.resource_type }}</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <a
+              v-if="getResourceUrl(previewingResource)"
+              :href="getResourceUrl(previewingResource)"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="px-3 py-1.5 text-xs font-bold rounded-lg bg-primary text-white hover:bg-primary/90 transition-colors"
+            >
+              Open in New Tab
+            </a>
+            <button
+              type="button"
+              @click="closePreviewModal"
+              class="p-2 hover:bg-navy-50 rounded-lg transition-colors"
+              title="Close"
+            >
+              <span class="material-symbols-outlined text-navy-700 text-lg">close</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="p-6 overflow-auto">
+          <template v-if="isPreviewImage(previewingResource)">
+            <img :src="getResourceUrl(previewingResource) || ''" :alt="previewingResource.name" class="max-h-[70vh] w-full object-contain rounded-xl bg-mist-blue/30" />
+          </template>
+          <template v-else-if="isPreviewVideo(previewingResource)">
+            <video :src="getResourceUrl(previewingResource) || ''" controls class="w-full rounded-xl bg-black max-h-[70vh]" />
+          </template>
+          <template v-else-if="isPreviewAudio(previewingResource)">
+            <audio :src="getResourceUrl(previewingResource) || ''" controls class="w-full" />
+          </template>
+          <template v-else-if="isPreviewPdf(previewingResource)">
+            <iframe :src="getResourceUrl(previewingResource) || ''" class="w-full h-[70vh] rounded-xl border border-navy-100" title="Resource Preview" />
+          </template>
+          <template v-else>
+            <div class="text-center py-16 bg-mist-blue/30 rounded-xl border border-deep-navy/10">
+              <span class="material-symbols-outlined text-navy-300 text-6xl block mx-auto mb-4">description</span>
+              <p class="text-sm text-navy-700 font-semibold mb-2">Preview not available for this file type.</p>
+              <p class="text-xs text-navy-500 mb-6">Open the resource in a new tab to view or download it.</p>
+              <a
+                v-if="getResourceUrl(previewingResource)"
+                :href="getResourceUrl(previewingResource)"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors"
+              >
+                <span class="material-symbols-outlined text-base">open_in_new</span>
+                Open Resource
+              </a>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
   </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventResources, useAddEventResource, useRemoveEventResource, useUpdateEventResource } from '~/composables/resources/events/eventResources'
+import type { EventListAddResourceCreateData } from '~/api/types.gen'
+import { resolveImageUrl } from '~/utils/image'
 import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
@@ -295,7 +386,9 @@ const resourcesList = computed(() => {
 
 const showUploadModal = ref(false)
 const showEditModal = ref(false)
+const showPreviewModal = ref(false)
 const editingResource = ref<any>(null)
+const previewingResource = ref<any>(null)
 const fileInput = ref<HTMLInputElement>()
 
 const resourceTypes = [
@@ -313,7 +406,29 @@ const resourceForm = ref({
   resource_type: 'DOCUMENT' as any,
   tag: '',
   file: null as File | null,
+  link: '',
   public: true,
+})
+
+const resourceFileAccept = computed(() => {
+  switch (resourceForm.value.resource_type) {
+    case 'IMAGE':
+      return 'image/*'
+    case 'VIDEO':
+      return 'video/*'
+    case 'AUDIO':
+      return 'audio/*'
+    default:
+      return ''
+  }
+})
+
+const requiresUploadValue = computed(() => {
+  if (resourceForm.value.resource_type === 'LINK') {
+    return !resourceForm.value.link?.trim()
+  }
+
+  return !resourceForm.value.file
 })
 
 const onFileSelected = (event: Event) => {
@@ -340,6 +455,7 @@ const editResource = (resource: any) => {
     resource_type: resource.resource_type,
     tag: resource.tag || '',
     file: null,
+    link: resource.link || '',
     public: resource.public,
   }
   showEditModal.value = true
@@ -355,10 +471,58 @@ const closeModals = () => {
     resource_type: 'DOCUMENT',
     tag: '',
     file: null,
+    link: '',
     public: true,
   }
   if (fileInput.value) fileInput.value.value = ''
 }
+
+const getResourceUrl = (resource: any) => {
+  const rawUrl = resource?.image || resource?.file || resource?.link || null
+  if (!rawUrl) return undefined
+  return resolveImageUrl(rawUrl, rawUrl)
+}
+
+const isPreviewImage = (resource: any) => {
+  return resource?.resource_type === 'IMAGE'
+}
+
+const isPreviewVideo = (resource: any) => {
+  return resource?.resource_type === 'VIDEO'
+}
+
+const isPreviewAudio = (resource: any) => {
+  return resource?.resource_type === 'AUDIO'
+}
+
+const isPreviewPdf = (resource: any) => {
+  const url = (getResourceUrl(resource) || '').toLowerCase()
+  return resource?.resource_type === 'DOCUMENT' && url.includes('.pdf')
+}
+
+const previewResource = (resource: any) => {
+  previewingResource.value = resource
+  showPreviewModal.value = true
+}
+
+const closePreviewModal = () => {
+  showPreviewModal.value = false
+  previewingResource.value = null
+}
+
+watch(
+  () => resourceForm.value.resource_type,
+  (nextType) => {
+    if (showEditModal.value) return
+
+    if (nextType === 'LINK') {
+      resourceForm.value.file = null
+      if (fileInput.value) fileInput.value.value = ''
+    } else {
+      resourceForm.value.link = ''
+    }
+  }
+)
 
 const handleSubmit = async () => {
   if (showEditModal.value) {
@@ -393,20 +557,33 @@ const handleSubmit = async () => {
     }
   } else {
     // For upload: create new resource
-    if (!resourceForm.value.file) return
+    if (requiresUploadValue.value) return
 
     try {
+      const payload: EventListAddResourceCreateData['body'] = {
+        name: resourceForm.value.name,
+        description: resourceForm.value.description,
+        resource_type: resourceForm.value.resource_type,
+        tag: resourceForm.value.tag,
+        public: resourceForm.value.public,
+      }
+
+      if (resourceForm.value.resource_type === 'LINK') {
+        payload.link = resourceForm.value.link.trim()
+      } else {
+        const selectedFile = resourceForm.value.file
+        if (!selectedFile) return
+
+        if (resourceForm.value.resource_type === 'IMAGE') {
+          payload.image = selectedFile
+        } else {
+          payload.file = selectedFile
+        }
+      }
+
       await addResourceMutation.mutateAsync({
         eventId: id.value,
-        body: {
-          name: resourceForm.value.name,
-          description: resourceForm.value.description,
-          resource_type: resourceForm.value.resource_type,
-          tag: resourceForm.value.tag,
-          image: resourceForm.value.file,
-          file: resourceForm.value.file,
-          public: resourceForm.value.public,
-        },
+        body: payload,
       })
 
       toast.add({

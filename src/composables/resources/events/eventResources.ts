@@ -2,15 +2,16 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
-  eventListAddResourceCreate,
   eventListRemoveResourceDestroy,
   eventListResourcesList,
   eventListUpdateResourcePartialUpdate,
   eventListPromoteLandingImageCreate,
   eventListDemoteLandingImageCreate,
 } from '~/api/sdk.gen'
+import { uploadMultipart } from '~/utils/upload'
 import type {
   EventListAddResourceCreateData,
+  EventListAddResourceCreateResponse,
   EventListRemoveResourceDestroyData,
   EventListResourcesListData,
   EventListUpdateResourcePartialUpdateData,
@@ -54,10 +55,23 @@ export function useAddEventResource() {
       eventId: string
       body: EventListAddResourceCreateData['body']
     }) => {
-      return eventListAddResourceCreate({
-        path: { url_safe_title: data.eventId },
-        body: data.body,
-      })
+      const formData = new FormData()
+      const body = data.body
+
+      if (body?.name) formData.append('name', body.name)
+      if (body?.description) formData.append('description', body.description)
+      if (body?.tag) formData.append('tag', body.tag)
+      if (body?.resource_type) formData.append('resource_type', body.resource_type)
+      if (typeof body?.public === 'boolean') formData.append('public', String(body.public))
+      if (body?.file) formData.append('file', body.file)
+      if (body?.image) formData.append('image', body.image)
+      if (body?.link) formData.append('link', body.link)
+
+      return uploadMultipart<EventListAddResourceCreateResponse>(
+        `/api/event/list/${data.eventId}/add-resource/`,
+        formData,
+        { method: 'POST' }
+      )
     },
     onSuccess: (_data, variables) => {
       // Invalidate the resources list for this event
