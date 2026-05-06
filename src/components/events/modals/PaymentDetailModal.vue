@@ -314,13 +314,50 @@
             </div>
           </section>
 
-          <section v-if="hasMetadata">
+          <section v-if="showPaymentContentSection">
             <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">inventory_2</span>
               Payment Content
             </h4>
 
-            <div v-if="metadataType === 'ORDER'" class="space-y-3">
+            <div v-if="hasLiveRelation" class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+              Live relation mode
+              <span class="font-semibold">({{ liveRelationType }})</span>
+            </div>
+
+            <div v-if="liveRelationLoading" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div class="animate-pulse space-y-2">
+                <div class="h-3 w-40 rounded bg-gray-200"></div>
+                <div class="h-3 w-3/4 rounded bg-gray-200"></div>
+                <div class="h-3 w-2/3 rounded bg-gray-200"></div>
+              </div>
+            </div>
+
+            <template v-else>
+              <PaymentLiveOrderContent
+                v-if="liveRelationType === 'ORDER' && liveRelationData"
+                :order="liveRelationData"
+              />
+
+              <PaymentLiveBookingContent
+                v-else-if="liveRelationType === 'BOOKING' && liveRelationData"
+                :booking="liveRelationData"
+              />
+
+              <PaymentLiveDonationContent
+                v-else-if="liveRelationType === 'DONATION' && liveRelationData"
+                :donation="liveRelationData"
+              />
+            </template>
+
+            <div
+              v-if="showMetadataFallback && liveRelationFallbackReason"
+              class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+            >
+              {{ liveRelationFallbackReason }}
+            </div>
+
+            <div v-if="showMetadataFallback && metadataType === 'ORDER'" class="space-y-3 mt-3">
               <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-200">
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
@@ -371,7 +408,7 @@
               </div>
             </div>
 
-            <div v-else-if="metadataType === 'BOOKING'" class="space-y-3">
+            <div v-else-if="showMetadataFallback && metadataType === 'BOOKING'" class="space-y-3 mt-3">
               <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
@@ -503,7 +540,94 @@
               </div>
             </div>
 
-            <div v-else-if="metadataType === 'DONATION'" class="space-y-3">
+            <div v-if="showBookingSupplement" class="bg-white rounded-lg p-4 border border-gray-200 mt-3">
+              <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">
+                Checkout Attendee Metadata ({{ checkoutAttendees.length }})
+              </div>
+              <div class="space-y-3">
+                <div
+                  v-for="(checkoutAttendee, index) in checkoutAttendees"
+                  :key="`${checkoutAttendee.package_id || 'pkg'}-${checkoutAttendee.attendee_draft?.email || index}`"
+                  class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="text-sm font-semibold text-gray-900">
+                        {{ getDraftAttendeeName(checkoutAttendee.attendee_draft) || 'Attendee draft' }}
+                      </div>
+                      <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                        <span class="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700">Package: {{ checkoutAttendee.package_id || 'N/A' }}</span>
+                        <span v-if="getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) !== null" class="rounded-full bg-blue-100 px-2 py-0.5 text-blue-800">
+                          Age {{ getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) }}
+                        </span>
+                        <span
+                          v-if="isMinor(checkoutAttendee.attendee_draft?.date_of_birth)"
+                          class="rounded-full bg-amber-100 px-2 py-0.5 text-amber-800 font-semibold"
+                        >
+                          Minor
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-700 sm:grid-cols-2">
+                    <div><span class="font-semibold text-gray-800">Gender:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.gender) }}</div>
+                    <div><span class="font-semibold text-gray-800">Date of birth:</span> {{ checkoutAttendee.attendee_draft?.date_of_birth || 'N/A' }}</div>
+                    <div><span class="font-semibold text-gray-800">Email:</span> {{ checkoutAttendee.attendee_draft?.email || 'N/A' }}</div>
+                    <div><span class="font-semibold text-gray-800">Phone:</span> {{ checkoutAttendee.attendee_draft?.phone_number || 'N/A' }}</div>
+                    <div><span class="font-semibold text-gray-800">Relationship:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.relationship_to_user) }}</div>
+                  </div>
+
+                  <div
+                    v-if="Array.isArray(checkoutAttendee.product_selections) && checkoutAttendee.product_selections.length > 0"
+                    class="mt-3 border-t border-gray-200 pt-3"
+                  >
+                    <div class="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2">Product Selections</div>
+                    <div class="space-y-2">
+                      <div
+                        v-for="(selection, selectionIndex) in checkoutAttendee.product_selections"
+                        :key="`${selection.package_product_id || 'pp'}-${selection.variant_id || 'variant'}-${selectionIndex}`"
+                        class="rounded-md border border-gray-200 bg-white p-2.5"
+                      >
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="flex items-start gap-3 min-w-0">
+                            <img
+                              :src="getResolvedProductSelectionImageUrl(selection)"
+                              alt="Product variant"
+                              class="h-14 w-14 rounded-md border border-gray-200 bg-gray-50 object-cover flex-shrink-0"
+                              @error="onImageError"
+                            >
+                            <div class="min-w-0">
+                              <div class="text-sm font-semibold text-gray-900 truncate">
+                                {{ getResolvedProductSelectionLabel(checkoutAttendee.package_id, selection) }}
+                              </div>
+                              <div class="mt-0.5 text-xs text-gray-600">
+                                {{ getResolvedProductSelectionSubtitle(checkoutAttendee.package_id, selection) }}
+                              </div>
+                              <div class="mt-2 grid grid-cols-1 gap-1 text-xs sm:grid-cols-2">
+                                <div class="rounded bg-gray-50 px-2 py-1 border border-gray-200">
+                                  <span class="text-gray-500">Base price:</span>
+                                  <span class="ml-1 font-semibold text-gray-800">{{ getResolvedBasePriceLabel(checkoutAttendee.package_id, selection) }}</span>
+                                </div>
+                                <div class="rounded bg-emerald-50 px-2 py-1 border border-emerald-200">
+                                  <span class="text-emerald-700">Checkout price:</span>
+                                  <span class="ml-1 font-semibold text-emerald-900">{{ getResolvedCheckoutPriceLabel(checkoutAttendee.package_id, selection) }}</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="text-right text-xs text-gray-600">
+                            Qty {{ selection.quantity || 1 }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="showMetadataFallback && metadataType === 'DONATION'" class="space-y-3 mt-3">
               <div class="bg-rose-50 rounded-lg p-4 border border-rose-200">
                 <div class="grid grid-cols-2 gap-3 text-sm">
                   <div>
@@ -533,11 +657,11 @@
               </div>
             </div>
 
-            <div v-else class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+            <div v-else-if="showMetadataFallback" class="bg-gray-50 rounded-lg p-4 border border-gray-200 mt-3">
               <div class="text-sm text-gray-700">No specialized metadata renderer found for this payment. Raw metadata is available below.</div>
             </div>
 
-            <details class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+            <details v-if="hasMetadata" class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden mt-3">
               <summary class="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-700 select-none">
                 View Raw Metadata JSON
               </summary>
@@ -672,6 +796,10 @@ import {
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import { usePayment } from '~/composables/resources/payments/payments'
 import { usePaymentMethod } from '~/composables/resources/payments/paymentMethods'
+import { usePaymentLiveRelation } from '~/composables/resources/payments/paymentLiveRelation'
+import PaymentLiveOrderContent from '~/components/events/modals/payment-content/PaymentLiveOrderContent.vue'
+import PaymentLiveBookingContent from '~/components/events/modals/payment-content/PaymentLiveBookingContent.vue'
+import PaymentLiveDonationContent from '~/components/events/modals/payment-content/PaymentLiveDonationContent.vue'
 import { parseAmount } from '~/utils/money'
 import { uploadMultipart } from '~/utils/upload'
 import { resolveImageUrl, onImageError } from '~/utils/image'
@@ -710,6 +838,13 @@ const paymentData = computed(() => {
     method: method || payment.method
   }
 })
+
+const liveRelation = usePaymentLiveRelation({ payment: paymentData })
+const hasLiveRelation = computed(() => liveRelation.hasLiveRelation.value)
+const liveRelationType = computed(() => liveRelation.relationType.value)
+const liveRelationData = computed(() => liveRelation.liveData.value)
+const liveRelationLoading = computed(() => liveRelation.isLiveLoading.value)
+const liveRelationFallbackReason = computed(() => liveRelation.fallbackReason.value)
 
 const isBankTransferPayment = computed(() => paymentData.value?.method?.method_type === 'BANK_TRANSFER')
 const bankTransferEvidence = computed<any>(() => paymentData.value?.bank_transfer_evidence || null)
@@ -894,6 +1029,8 @@ const hasDiscounts = computed(() => {
 const metadata = computed<any>(() => paymentData.value?.metadata || null)
 
 const hasMetadata = computed(() => !!metadata.value && typeof metadata.value === 'object')
+const showMetadataFallback = computed(() => hasMetadata.value && liveRelation.shouldFallbackToMetadata.value)
+const showPaymentContentSection = computed(() => hasMetadata.value || hasLiveRelation.value)
 
 const metadataType = computed<'ORDER' | 'BOOKING' | 'DONATION' | 'UNKNOWN'>(() => {
   const value = metadata.value
@@ -923,6 +1060,10 @@ const bookingAttendees = computed<any[]>(() => {
 const checkoutAttendees = computed<any[]>(() => {
   const checkout = bookingMetadata.value?.checkout_attendees
   return Array.isArray(checkout) ? checkout : []
+})
+
+const showBookingSupplement = computed(() => {
+  return liveRelationType.value === 'BOOKING' && !!liveRelationData.value && checkoutAttendees.value.length > 0
 })
 
 const packageProductsByPackageId = ref<Record<number, PackageProduct[]>>({})

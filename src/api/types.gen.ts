@@ -43647,7 +43647,7 @@ export type PaymentsStockAuditListData = {
          */
         created_before?: string;
         /**
-         * Filter by event UUID inferred from payment association
+         * Filter by event URL-safe title inferred from payment association
          */
         event_id?: string;
         /**
