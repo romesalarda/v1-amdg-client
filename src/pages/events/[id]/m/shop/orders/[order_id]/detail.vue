@@ -86,7 +86,12 @@
             </div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Order total</p>
-              <p class="mt-1 text-2xl font-black text-primary">{{ order.total_amount }}</p>
+              <p
+                class="mt-1 text-2xl font-black"
+                :class="isOrderRefunded ? 'text-slate-400 line-through decoration-2' : 'text-primary'"
+              >
+                {{ order.total_amount }}
+              </p>
             </div>
           </div>
         </section>
@@ -110,7 +115,8 @@
                 <article
                   v-for="(item, index) in order.order_items"
                   :key="item.id"
-                  class="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                  class="rounded-xl border p-4"
+                  :class="isItemRefundedOrZero(item) ? 'border-slate-300 bg-slate-100/80 opacity-80' : 'border-slate-200 bg-slate-50'"
                 >
                   <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div class="flex items-start gap-3">
@@ -128,7 +134,7 @@
 
                       <div>
                       <p class="text-xs font-bold uppercase tracking-[0.14em] text-slate-500">Line {{ index + 1 }}</p>
-                      <p class="mt-1 text-sm font-semibold text-slate-900">
+                      <p class="mt-1 text-sm font-semibold" :class="isItemRefundedOrZero(item) ? 'text-slate-500 line-through decoration-2' : 'text-slate-900'">
                         {{ getProductVariantDetails(item)?.product_title || `Product Variant #${item.product_variant || 'N/A'}` }}
                       </p>
                       <p class="text-xs text-slate-500">
@@ -136,21 +142,45 @@
                         <span v-if="getProductVariantDetails(item)?.size"> • Size {{ getProductVariantDetails(item)?.size }}</span>
                         <span v-if="getProductVariantDetails(item)?.color"> • Color {{ getProductVariantDetails(item)?.color }}</span>
                       </p>
+                      <UBadge
+                        v-if="isItemRefundedOrZero(item)"
+                        color="gray"
+                        variant="soft"
+                        size="xs"
+                        class="mt-1"
+                      >
+                        {{ isOrderRefunded ? 'Order Refunded' : 'Zero Value Item' }}
+                      </UBadge>
                       <p class="mt-1 text-xs text-slate-500">Item ID: {{ item.id }}</p>
                       </div>
                     </div>
                     <div class="grid grid-cols-3 gap-2 text-right text-xs sm:min-w-[230px]">
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
                         <p class="font-bold uppercase tracking-wide text-slate-400">Qty</p>
-                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ item.quantity }}</p>
+                        <p
+                          class="mt-1 text-sm font-semibold"
+                          :class="isItemRefundedOrZero(item) ? 'text-slate-500 line-through decoration-2' : 'text-slate-900'"
+                        >
+                          {{ item.quantity }}
+                        </p>
                       </div>
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
                         <p class="font-bold uppercase tracking-wide text-slate-400">Unit</p>
-                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ item.unit_price}}</p>
+                        <p
+                          class="mt-1 text-sm font-semibold"
+                          :class="isItemRefundedOrZero(item) ? 'text-slate-500 line-through decoration-2' : 'text-slate-900'"
+                        >
+                          {{ item.unit_price}}
+                        </p>
                       </div>
                       <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
                         <p class="font-bold uppercase tracking-wide text-slate-400">Total</p>
-                        <p class="mt-1 text-sm font-black text-primary">{{ item.total_price }}</p>
+                        <p
+                          class="mt-1 text-sm font-black"
+                          :class="isItemRefundedOrZero(item) ? 'text-slate-500 line-through decoration-2' : 'text-primary'"
+                        >
+                          {{ item.total_price }}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -160,7 +190,12 @@
               <div class="border-t border-slate-100 bg-slate-50 px-6 py-4">
                 <div class="flex items-center justify-end gap-3">
                   <p class="text-sm font-semibold text-slate-700">Order Total</p>
-                  <p class="text-xl font-black text-primary">{{ order.total_amount }}</p>
+                  <p
+                    class="text-xl font-black"
+                    :class="isOrderRefunded ? 'text-slate-400 line-through decoration-2' : 'text-primary'"
+                  >
+                    {{ order.total_amount }}
+                  </p>
                 </div>
               </div>
             </div>
@@ -518,6 +553,11 @@ const stockAuditActionContextById = computed<Record<string, StockAuditActionCont
   return context
 })
 
+const isOrderRefunded = computed(() => {
+  const currentOrder = order.value as (OrderDetail & { is_refunded?: boolean }) | undefined
+  return currentOrder?.status === 'refunded' || currentOrder?.is_refunded === true
+})
+
 // Helpers
 function getOrderStatusColor(status: string): string {
   return orderStatusColors[status as keyof typeof orderStatusColors] || 'gray'
@@ -535,6 +575,20 @@ function formatRelativeTime(dateString: string): string {
   } else {
     return `${Math.floor(diff.minutes!)} minute${Math.floor(diff.minutes!) !== 1 ? 's' : ''} ago`
   }
+}
+
+function isZeroMoney(value: string | null | undefined): boolean {
+  if (!value) {
+    return false
+  }
+
+  const numericValue = Number(value.replace(/[^0-9.-]/g, ''))
+  return Number.isFinite(numericValue) && numericValue === 0
+}
+
+function isItemRefundedOrZero(item: OrderItem): boolean {
+  const itemStatus = (item as OrderItem & { status?: string }).status
+  return isOrderRefunded.value || itemStatus === 'refunded' || isZeroMoney(item.total_price) || isZeroMoney(item.unit_price)
 }
 
 function canTransitionStatus(status: OrderStatus | undefined): boolean {
