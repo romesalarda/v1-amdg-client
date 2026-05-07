@@ -152,7 +152,7 @@
             >
               <p class="text-[11px] font-semibold uppercase tracking-wide text-sky-700">Currently configured account</p>
               <p class="text-sm text-sky-800 mt-1">
-                {{ existingConfiguredStripeAccount?.display_name || 'Previously linked account' }} ({{ existingConfiguredStripeAccountId }})
+                {{ existingConfiguredStripeAccount?.email }}
               </p>
               <p
                 v-if="existingStripeAccountUnavailable"
@@ -203,7 +203,7 @@
                   <div class="text-sm text-sky-700">
                     <p class="font-semibold mb-1">No eligible Stripe accounts on your profile</p>
                     <p v-if="existingConfiguredStripeAccountId" class="text-xs">
-                      This payment method remains linked to {{ existingConfiguredStripeAccountId }}. Add or activate one of your own accounts only if you want to replace that link.
+                      This payment method remains linked to {{ existingConfiguredStripeAccountId }} ({{ existingConfiguredStripeAccount?.email }}). Add or activate one of your own accounts only if you want to replace that link.
                     </p>
                     <p v-else class="text-xs">Click "Manage Accounts" above to create or activate a connected Stripe account.</p>
                   </div>
