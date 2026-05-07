@@ -11,6 +11,7 @@ import {
 } from '~/api/sdk.gen'
 import type {
   StripeConnectAccountsListData,
+  StripeConnectAccountsRetrieveData,
   StripeConnectAccountsCreateData,
   StripeConnectAccountsPartialUpdateData,
   StripeConnectAccountsSetPrimaryCreateData,
@@ -36,15 +37,56 @@ export function useStripeConnectedAccounts(
 /**
  * Get a single Stripe connected account by stripe_account_id
  */
-export function useStripeConnectedAccount(stripeAccountId: MaybeRefOrGetter<string | undefined>) {
+export function useStripeConnectedAccount(
+  stripeAccountId: MaybeRefOrGetter<string | undefined>,
+  params?: MaybeRefOrGetter<StripeConnectAccountsRetrieveData['query'] | undefined>,
+) {
   return useQuery({
-    queryKey: [...QUERY_KEY, 'detail', stripeAccountId] as const,
+    queryKey: [...QUERY_KEY, 'detail', stripeAccountId, params] as const,
     queryFn: () => {
       const id = toValue(stripeAccountId)
       if (!id) throw new Error('stripe_account_id is required')
-      return stripeConnectAccountsRetrieve({ path: { stripe_account_id: id } })
+      const queryParams = toValue(params)
+      return stripeConnectAccountsRetrieve({
+        path: { stripe_account_id: id },
+        ...(queryParams ? { query: queryParams } : {}),
+      })
     },
     enabled: () => !!toValue(stripeAccountId),
+  })
+}
+
+/**
+ * Retrieve multiple Stripe connected accounts by id.
+ * Missing / unauthorized accounts are skipped.
+ */
+export function useStripeConnectedAccountsByIds(
+  stripeAccountIds: MaybeRefOrGetter<string[]>,
+  params?: MaybeRefOrGetter<StripeConnectAccountsRetrieveData['query'] | undefined>,
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'detail-batch', stripeAccountIds, params] as const,
+    queryFn: async () => {
+      const ids = Array.from(new Set((toValue(stripeAccountIds) || []).filter(Boolean)))
+      const queryParams = toValue(params)
+
+      const settled = await Promise.all(
+        ids.map(async (id) => {
+          try {
+            const response = await stripeConnectAccountsRetrieve({
+              path: { stripe_account_id: id },
+              ...(queryParams ? { query: queryParams } : {}),
+            })
+            return response.data
+          } catch {
+            return null
+          }
+        }),
+      )
+
+      return settled.filter(Boolean)
+    },
+    enabled: () => (toValue(stripeAccountIds) || []).length > 0,
   })
 }
 

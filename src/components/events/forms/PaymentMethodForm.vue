@@ -38,19 +38,26 @@
         <label
           v-for="methodType in methodTypes"
           :key="methodType.value"
-          class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg hover:bg-mist-blue/50 transition-colors cursor-pointer"
-          :class="{ 'border-primary bg-mist-blue/60': method_type === methodType.value }"
+          class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg transition-colors"
+          :class="[
+            method_type === methodType.value ? 'border-primary bg-mist-blue/60' : 'hover:bg-mist-blue/50',
+            isMethodTypeUnavailable(methodType.value) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+          ]"
         >
           <input
             v-model="method_type"
             v-bind="method_typeAttrs"
             type="radio"
             :value="methodType.value"
+            :disabled="isMethodTypeUnavailable(methodType.value)"
             class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
           />
           <div class="flex-1">
             <span class="block font-medium text-primary">{{ methodType.label }}</span>
             <p class="text-sm text-primary-500/60">{{ methodType.description }}</p>
+            <p v-if="isMethodTypeUnavailable(methodType.value)" class="text-xs text-amber-700 mt-1">
+              Already configured for this event.
+            </p>
           </div>
         </label>
       </div>
@@ -138,6 +145,23 @@
             <p class="text-xs text-navy-600 leading-relaxed">
               Choose which of your connected Stripe accounts to use for this payment method. Only active accounts that are ready for payments are shown.
             </p>
+
+            <div
+              v-if="existingConfiguredStripeAccountId"
+              class="rounded-lg border border-sky-200 bg-sky-50/70 p-3"
+            >
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-sky-700">Currently configured account</p>
+              <p class="text-sm text-sky-800 mt-1">
+                {{ existingConfiguredStripeAccount?.display_name || 'Previously linked account' }} ({{ existingConfiguredStripeAccountId }})
+              </p>
+              <p
+                v-if="existingStripeAccountUnavailable"
+                class="text-xs text-amber-700 mt-1"
+              >
+                This account is no longer active for new payouts. Select an active account to replace it.
+              </p>
+            </div>
+
             <div class="flex flex-wrap gap-2 pt-2">
               <button
                 type="button"
@@ -173,12 +197,15 @@
                 </option>
               </select>
 
-              <div v-else class="rounded-lg border border-amber-200 bg-amber-50/70 p-3">
+              <div v-else class="rounded-lg border border-sky-200 bg-sky-50/70 p-3">
                 <div class="flex items-start gap-2">
-                  <span class="material-symbols-outlined text-amber-600 text-base flex-shrink-0 mt-0.5">warning</span>
-                  <div class="text-sm text-amber-700">
-                    <p class="font-semibold mb-1">No active Stripe accounts available</p>
-                    <p class="text-xs">Click "Manage Accounts" above to create or activate a connected Stripe account.</p>
+                  <span class="material-symbols-outlined text-sky-600 text-base flex-shrink-0 mt-0.5">info</span>
+                  <div class="text-sm text-sky-700">
+                    <p class="font-semibold mb-1">No eligible Stripe accounts on your profile</p>
+                    <p v-if="existingConfiguredStripeAccountId" class="text-xs">
+                      This payment method remains linked to {{ existingConfiguredStripeAccountId }}. Add or activate one of your own accounts only if you want to replace that link.
+                    </p>
+                    <p v-else class="text-xs">Click "Manage Accounts" above to create or activate a connected Stripe account.</p>
                   </div>
                 </div>
               </div>
@@ -252,16 +279,21 @@ import {
   type PaymentMethodFormData 
 } from '~/schemas/events/paymentConfig'
 import { useStripeConnectStatus } from '~/composables/resources/payments/stripeConnect'
-import { useStripeConnectedAccounts } from '~/composables/resources/payments/stripeConnectedAccounts'
+import {
+  useStripeConnectedAccount,
+  useStripeConnectedAccounts,
+} from '~/composables/resources/payments/stripeConnectedAccounts'
 
 interface Props {
   modelValue?: any
   eventId: number | undefined
+  existingMethodTypes?: string[]
   isLoading?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
+  existingMethodTypes: () => [],
   isLoading: false,
 })
 
@@ -279,6 +311,27 @@ const eligibleAccounts = computed(() =>
   allAccounts.value.filter(acc => acc.is_active && acc.status === 'ACTIVE')
 )
 const eligibleAccountsLoading = computed(() => accountsIsLoading.value)
+const existingConfiguredStripeAccountId = computed(
+  () => props.modelValue?.provided_details?.stripe_account_id || ''
+)
+
+const stripeAccountRetrieveParams = computed(() => ({
+  event: String(route.params.id || ''),
+}))
+const { data: existingLinkedAccountData } = useStripeConnectedAccount(
+  existingConfiguredStripeAccountId,
+  stripeAccountRetrieveParams,
+)
+
+const existingConfiguredStripeAccount = computed(() =>
+  allAccounts.value.find(acc => acc.stripe_account_id === existingConfiguredStripeAccountId.value)
+  || existingLinkedAccountData.value?.data
+)
+const existingStripeAccountUnavailable = computed(() => {
+  if (!existingConfiguredStripeAccountId.value) return false
+  if (!existingConfiguredStripeAccount.value) return false
+  return !(existingConfiguredStripeAccount.value.is_active && existingConfiguredStripeAccount.value.status === 'ACTIVE')
+})
 
 const emit = defineEmits<{
   submit: [data: PaymentMethodFormData]
@@ -305,7 +358,7 @@ const methodTypes = [
 ]
 
 // Setup form with vee-validate
-const { errors, handleSubmit, defineField, resetForm } = useForm({
+const { errors, handleSubmit, defineField, resetForm, setFieldError } = useForm({
   validationSchema: toTypedSchema(paymentMethodSchema),
   initialValues: {
     title: props.modelValue?.title || '',
@@ -336,8 +389,21 @@ const [accountNumber, accountNumberAttrs] = defineField('provided_details.accoun
 // Stripe account id field (allows explicit override or using connected account)
 const [stripeAccountId, stripeAccountIdAttrs] = defineField('provided_details.stripe_account_id')
 
+const isMethodTypeUnavailable = (type: string) => {
+  const existingTypeSet = new Set(props.existingMethodTypes)
+  const currentType = props.modelValue?.method_type
+  if (props.modelValue && currentType === type) return false
+  return existingTypeSet.has(type)
+}
+
 // Handle form submission
 const onSubmit = handleSubmit((values) => {
+  if (isMethodTypeUnavailable(values.method_type)) {
+    setFieldError('method_type', 'This payment method type already exists for this event.')
+    return
+  }
+  setFieldError('method_type', undefined)
+
   // Clean up the data based on method type
   const cleanedData: any = {
     title: values.title,
@@ -357,9 +423,9 @@ const onSubmit = handleSubmit((values) => {
       account_number: values.provided_details.account_number,
     }
   } else if (values.method_type === 'STRIPE') {
-    const stripeAccountId = stripeConnectAccount.value?.stripe_account_id || values.provided_details?.stripe_account_id || props.modelValue?.provided_details?.stripe_account_id
+    const selectedStripeAccountId = stripeConnectAccount.value?.stripe_account_id || values.provided_details?.stripe_account_id || props.modelValue?.provided_details?.stripe_account_id
     cleanedData.provided_details = {
-      stripe_account_id: stripeAccountId,
+      stripe_account_id: selectedStripeAccountId,
     }
   } else if (values.method_type === 'CASH') {
     // No provided_details needed for cash
@@ -405,6 +471,14 @@ watch(
 const showAccountWarning = computed(() => {
   if (method_type.value !== 'STRIPE') return false
   if (!stripeAccountId.value) return false
+
+  // Do not warn when just showing an inherited/existing linked account.
+  if (
+    existingConfiguredStripeAccountId.value
+    && stripeAccountId.value === existingConfiguredStripeAccountId.value
+  ) {
+    return false
+  }
   
   // Check if the current account is not in the eligible list
   const currentAccountStillEligible = eligibleAccounts.value.some(

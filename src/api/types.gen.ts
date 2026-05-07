@@ -47037,7 +47037,12 @@ export type StripeConnectAccountsRetrieveData = {
     path: {
         stripe_account_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Optional event url_safe_title. If supplied, event staff can retrieve a non-owned account only when that account is linked to a Stripe payment method on the event.
+         */
+        event?: string;
+    };
     url: '/api/stripe/connect-accounts/{stripe_account_id}/';
 };
 

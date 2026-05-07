@@ -125,8 +125,36 @@
               :key="method.id"
               class="p-4 border border-deep-navy/10 rounded-xl bg-mist-blue/40 hover:bg-mist-blue/60 transition-colors"
             >
-              <div class="flex items-start justify-between">
-                <div class="flex-1">
+              <div class="flex items-start justify-between gap-3">
+                <div class="flex items-start gap-3 flex-1 min-w-0">
+                  <div class="h-10 w-10 rounded-lg bg-white border border-deep-navy/10 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                    <img
+                      v-if="method.method_type === 'STRIPE'"
+                      src="/assets/images/stripe.png"
+                      alt="Stripe"
+                      class="h-6 w-6 object-contain"
+                    />
+                    <span
+                      v-else-if="method.method_type === 'BANK_TRANSFER'"
+                      class="material-symbols-outlined text-navy-700 text-xl"
+                    >
+                      account_balance
+                    </span>
+                    <span
+                      v-else-if="method.method_type === 'CASH'"
+                      class="material-symbols-outlined text-emerald-700 text-xl"
+                    >
+                      payments
+                    </span>
+                    <span
+                      v-else
+                      class="material-symbols-outlined text-navy-400 text-xl"
+                    >
+                      credit_card
+                    </span>
+                  </div>
+
+                  <div class="flex-1">
                   <div class="flex items-center gap-2 mb-1">
                     <h3 class="text-sm font-semibold text-navy-900">{{ method.title }}</h3>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
@@ -149,6 +177,12 @@
                   </div>
                   <div v-if="method.method_type === 'STRIPE' && (method as any).provided_details?.stripe_account_id" class="text-xs text-navy-400 space-y-0.5">
                     <div>Stripe Account: {{ getStripeAccountDisplay((method as any).provided_details.stripe_account_id) }}</div>
+                    <div
+                      v-if="isStripeAccountUnavailable((method as any).provided_details.stripe_account_id)"
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold bg-amber-100 text-amber-800"
+                    >
+                      Existing linked account (not currently eligible)
+                    </div>
                   </div>
                 </div>
                 <div class="flex items-center gap-2 ml-4">
@@ -181,6 +215,7 @@
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
           <div v-else class="text-center py-10 text-navy-500">
@@ -327,6 +362,7 @@
             <PaymentMethodForm
               :model-value="editingPaymentMethod"
               :event-id="event?.data?.id"
+              :existing-method-types="paymentMethodTypesInEvent"
               :is-loading="paymentMethodMutationLoading"
               @submit="handlePaymentMethodSubmit"
               @cancel="closePaymentMethodModal"
@@ -382,7 +418,10 @@ import {
   usePartialUpdatePaymentMethod,
   useDeletePaymentMethod 
 } from '~/composables/resources/payments/paymentMethods'
-import { useStripeConnectedAccounts } from '~/composables/resources/payments/stripeConnectedAccounts'
+import {
+  useStripeConnectedAccounts,
+  useStripeConnectedAccountsByIds,
+} from '~/composables/resources/payments/stripeConnectedAccounts'
 import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
@@ -415,8 +454,48 @@ const { data: paymentMethodsData, isLoading: paymentMethodsLoading, refetch: ref
 // Fetch Stripe connected accounts for display
 const { data: stripeAccountsData } = useStripeConnectedAccounts()
 const allStripeAccounts = computed(() => stripeAccountsData.value?.data?.results || [])
-
 const paymentMethods = computed(() => paymentMethodsData.value?.data?.results || [])
+
+
+const linkedStripeAccountIds = computed(() => {
+  return Array.from(
+    new Set(
+      paymentMethods.value
+        .filter((method: any) => method.method_type === 'STRIPE')
+        .map((method: any) => method?.provided_details?.stripe_account_id)
+        .filter(Boolean),
+    ),
+  )
+})
+
+const stripeAccountRetrieveParams = computed(() => ({ event: String(id.value) }))
+const { data: linkedStripeAccountsData } = useStripeConnectedAccountsByIds(
+  linkedStripeAccountIds,
+  stripeAccountRetrieveParams,
+)
+
+const stripeAccountsById = computed(() => {
+  const map = new Map<string, any>()
+
+  for (const account of linkedStripeAccountsData.value || []) {
+    if (account?.stripe_account_id) {
+      map.set(account?.stripe_account_id, account)
+    }
+  }
+
+  // Prefer the current user's account snapshot when available.
+  for (const account of allStripeAccounts.value) {
+    if (account?.stripe_account_id) {
+      map.set(account.stripe_account_id, account)
+    }
+  }
+
+  return map
+})
+
+const paymentMethodTypesInEvent = computed(() => {
+  return Array.from(new Set(paymentMethods.value.map((method: any) => method.method_type).filter(Boolean)))
+})
 const settings = computed(() => settingsData.value?.data)
 const activePaymentMethodsCount = computed(() => paymentMethods.value.filter((m: any) => m.is_active).length)
 
@@ -582,11 +661,20 @@ const getMethodTypeLabel = (methodType: string) => {
 }
 
 const getStripeAccountDisplay = (stripeAccountId: string) => {
-  const account = allStripeAccounts.value.find(a => a.stripe_account_id === stripeAccountId)
+  const account = stripeAccountsById.value.get(stripeAccountId)
   if (account) {
-    return `${account.display_name} (${account.is_primary ? 'primary' : 'active'})`
+    if (account.is_active && account.status === 'ACTIVE') {
+      return `${account.display_name} (${account.is_primary ? 'primary' : 'active'})`
+    }
+    return `${account.display_name} (inactive)`
   }
   return stripeAccountId
+}
+
+const isStripeAccountUnavailable = (stripeAccountId: string) => {
+  const account = stripeAccountsById.value.get(stripeAccountId)
+  if (!account) return true
+  return !(account.is_active && account.status === 'ACTIVE')
 }
 
 // Discount modal
