@@ -164,6 +164,101 @@
                 </div>
               </div>
             </div>
+
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                <div>
+                  <h2 class="text-sm font-black uppercase tracking-[0.14em] text-slate-800">Stock Audit History</h2>
+                  <p class="text-xs text-slate-500">Inventory actions linked to this order</p>
+                </div>
+              </div>
+
+              <div v-if="isLoadingStockAudit" class="space-y-3 p-4">
+                <div class="h-16 rounded-xl bg-slate-100 animate-pulse" />
+                <div class="h-16 rounded-xl bg-slate-100 animate-pulse" />
+              </div>
+
+              <div v-else-if="stockAuditActions.length === 0" class="p-10 text-center text-slate-500">
+                <UIcon name="i-heroicons-archive-box" class="mx-auto mb-2 h-12 w-12 text-slate-300" />
+                No stock audit actions found for this order.
+              </div>
+
+              <div v-else class="space-y-3 p-4">
+                <article
+                  v-for="action in stockAuditActions"
+                  :key="action.id"
+                  class="rounded-xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                    <div class="flex items-start gap-3">
+                      <div class="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+                        <img
+                          v-if="getStockAuditActionContext(action).image_url"
+                          :src="getStockAuditActionContext(action).image_url || ''"
+                          :alt="getStockAuditActionContext(action).product_title || action.product_title"
+                          class="h-full w-full object-cover"
+                        />
+                        <div v-else class="flex h-full w-full items-center justify-center text-slate-300">
+                          <UIcon name="i-heroicons-cube" class="h-5 w-5" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div class="flex flex-wrap items-center gap-2">
+                          <p class="text-sm font-semibold text-slate-900">
+                            {{ getStockAuditActionContext(action).product_title || action.product_title }}
+                          </p>
+                          <UBadge :color="getStockAuditReasonColor(action.change_reason) as any" variant="solid" size="xs">
+                            {{ getStockAuditReasonLabel(action.change_reason) }}
+                          </UBadge>
+                          <UBadge :color="action.change_amount >= 0 ? 'green' : 'red'" variant="soft" size="xs">
+                            {{ action.change_amount >= 0 ? 'Stock Increased' : 'Stock Decreased' }}
+                          </UBadge>
+                        </div>
+                        <p class="text-xs text-slate-500">
+                          <span v-if="getStockAuditActionContext(action).size"> • Size {{ getStockAuditActionContext(action).size }}</span>
+                          <span v-if="getStockAuditActionContext(action).color"> • Color {{ getStockAuditActionContext(action).color }}</span>
+                        </p>
+                        <div class="mt-2 space-y-1 text-xs text-slate-600">
+                          <p class="flex items-center gap-1.5">
+                            <UIcon name="i-heroicons-user-circle" class="h-3.5 w-3.5 text-slate-400" />
+                            <span class="font-semibold text-slate-700">Performed by:</span>
+                            <span>{{ action.actor_name || 'System' }}</span>
+                          </p>
+                          <p class="flex items-center gap-1.5">
+                            <UIcon name="i-heroicons-clock" class="h-3.5 w-3.5 text-slate-400" />
+                            <span class="font-semibold text-slate-700">When:</span>
+                            <span>{{ formatRelativeTime(action.created_at) }}</span>
+                            <span class="text-slate-400">({{ formatDate(action.created_at, 'MMM d, yyyy h:mm a') }})</span>
+                          </p>
+                        </div>
+                        <p v-if="action.notes" class="mt-1 text-xs text-slate-600">{{ action.notes }}</p>
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2 text-right text-xs lg:min-w-[250px]">
+                      <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                        <p class="font-bold uppercase tracking-wide text-slate-400">Before</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ action.old_quantity }}</p>
+                      </div>
+                      <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                        <p class="font-bold uppercase tracking-wide text-slate-400">After</p>
+                        <p class="mt-1 text-sm font-semibold text-slate-900">{{ action.new_quantity }}</p>
+                      </div>
+                      <div class="rounded-lg border border-slate-200 bg-white px-2 py-2">
+                        <p class="font-bold uppercase tracking-wide text-slate-400">Change</p>
+                        <p
+                          class="mt-1 text-sm font-black"
+                          :class="action.change_amount >= 0 ? 'text-emerald-600' : 'text-rose-600'"
+                        >
+                          {{ formatSignedChange(action.change_amount) }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            </div>
           </div>
 
           <div class="space-y-6">
@@ -286,12 +381,12 @@
 
 <script setup lang="ts">
 import { DateTime } from 'luxon'
-import type { OrderDetail, OrderItem } from '~/api/types.gen'
+import type { OrderDetail, OrderItem, StockAuditLog } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useProductOrder, useCancelProductOrder, useCompleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
+import { usePaymentStockAudit } from '~/composables/resources/payments/paymentStockAudit'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { orderStatusColors } from '~/schemas/events/productConstants'
-import { formatMoney } from '~/utils/money'
 import { formatDate } from '~/utils/time'
 
 definePageMeta({
@@ -307,6 +402,7 @@ type OrderStatus = NonNullable<OrderDetail['status']>
 
 type VariantDetails = {
   variant_id?: string
+  product_id?: string
   product_title?: string
   size?: string | null
   color?: string | null
@@ -325,6 +421,16 @@ const { data: event } = useEvent(eventId)
 // Order Data
 const { data: orderData, isLoading, refetch } = useProductOrder({"event": event.value?.data.url_safe_title || event.value?.data.event_id}, computed(() => orderId.value))
 const order = computed(() => orderData.value?.data)
+
+const stockAuditParams = computed(() => ({
+  order_id: orderId.value,
+  event_id: event.value?.data.url_safe_title || undefined,
+  ordering: '-created_at',
+  page_size: 100,
+}))
+const { data: stockAuditData, isLoading: isLoadingStockAudit } = usePaymentStockAudit(stockAuditParams, {
+  enabled: computed(() => Boolean(orderId.value)),
+})
 
 // Mutations
 const { mutateAsync: cancelOrderMutation } = useCancelProductOrder()
@@ -349,6 +455,67 @@ const paymentDetails = computed<PaymentDetails | null>(() => {
     payment_reference: typeof details.payment_reference === 'string' ? details.payment_reference : undefined,
     status: typeof details.status === 'string' ? details.status : undefined,
   }
+})
+
+type StockAuditActionContext = {
+  product_id?: string
+  variant_id?: string
+  product_title?: string
+  size?: string | null
+  color?: string | null
+  image_url?: string | null
+}
+
+const stockAuditActions = computed<StockAuditLog[]>(() => {
+  const listedActions = Array.isArray(stockAuditData.value?.data?.results)
+    ? stockAuditData.value.data.results
+    : []
+  const orderActions = Array.isArray(order.value?.actions)
+    ? order.value.actions
+    : []
+
+  // Merge both sources to avoid dropping initial actions when one endpoint is partial.
+  const byId = new Map<string, StockAuditLog>()
+  for (const action of listedActions) {
+    byId.set(action.id, action)
+  }
+  for (const action of orderActions) {
+    if (!byId.has(action.id)) {
+      byId.set(action.id, action)
+    }
+  }
+
+  return Array.from(byId.values()).sort((a, b) =>
+    DateTime.fromISO(b.created_at).toMillis() - DateTime.fromISO(a.created_at).toMillis(),
+  )
+})
+
+const stockAuditActionContextById = computed<Record<string, StockAuditActionContext>>(() => {
+  const orderItems = order.value?.order_items || []
+  const context: Record<string, StockAuditActionContext> = {}
+
+  for (const action of stockAuditActions.value) {
+    const matchedItem = orderItems.find((item) => {
+      if (item.product_variant === action.product_variant) {
+        return true
+      }
+
+      const itemVariant = getProductVariantDetails(item)
+      return !!itemVariant?.variant_id && itemVariant.variant_id === action.product_variant_code
+    })
+
+    const matchedDetails = matchedItem ? getProductVariantDetails(matchedItem) : null
+    context[action.id] = {
+      product_id: matchedDetails?.product_id,
+      variant_id: matchedDetails?.variant_id || action.product_variant_code,
+      product_title: matchedDetails?.product_title || action.product_title,
+      size: matchedDetails?.size,
+      color: matchedDetails?.color,
+      image_url: matchedDetails?.image_url,
+    }
+  }
+
+  return context
 })
 
 // Helpers
@@ -395,11 +562,54 @@ function getProductVariantDetails(item: OrderItem): VariantDetails | null {
   const details = maybeDetails as Record<string, unknown>
   return {
     variant_id: typeof details.variant_id === 'string' ? details.variant_id : undefined,
+    product_id: typeof details.product_id === 'string' ? details.product_id : undefined,
     product_title: typeof details.product_title === 'string' ? details.product_title : undefined,
     size: typeof details.size === 'string' ? details.size : null,
     color: typeof details.color === 'string' ? details.color : null,
     image_url: typeof details.image_url === 'string' ? details.image_url : null,
   }
+}
+
+function getStockAuditActionContext(action: StockAuditLog): StockAuditActionContext {
+  return stockAuditActionContextById.value[action.id] || {}
+}
+
+function getStockAuditReasonLabel(reason: StockAuditLog['change_reason']): string {
+  const labels: Record<StockAuditLog['change_reason'], string> = {
+    initial_order_deduction: 'Initial Deduction',
+    order_cancellation_restore: 'Order Cancellation Restore',
+    payment_failure_restore: 'Payment Failure Restore',
+    refund_restoration: 'Refund Restoration',
+    partial_refund_restoration: 'Partial Refund Restore',
+    manual_adjustment: 'Manual Adjustment',
+    admin_action: 'Admin Action',
+    stock_restoration_safety_net: 'Safety Net Restore',
+  }
+
+  return labels[reason]
+}
+
+function getStockAuditReasonColor(reason: StockAuditLog['change_reason']): string {
+  const colors: Record<StockAuditLog['change_reason'], string> = {
+    initial_order_deduction: 'red',
+    order_cancellation_restore: 'orange',
+    payment_failure_restore: 'yellow',
+    refund_restoration: 'green',
+    partial_refund_restoration: 'emerald',
+    manual_adjustment: 'blue',
+    admin_action: 'violet',
+    stock_restoration_safety_net: 'teal',
+  }
+
+  return colors[reason] || 'gray'
+}
+
+function formatSignedChange(amount: number): string {
+  if (amount > 0) {
+    return `+${amount}`
+  }
+
+  return String(amount)
 }
 
 function goToLinkedPayment() {

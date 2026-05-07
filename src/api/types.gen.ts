@@ -10337,6 +10337,10 @@ export type OrderDetail = {
     updated_by?: number | null;
     readonly updated_by_name: string | null;
     readonly updated_at: string;
+    /**
+     * Available actions for this order based on its status
+     */
+    readonly actions: Array<StockAuditLog>;
 };
 
 /**
