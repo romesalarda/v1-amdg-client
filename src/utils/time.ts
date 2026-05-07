@@ -99,17 +99,23 @@ export function calculateCountdown(targetDate: string, timezone: string = 'UTC')
       return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
     }
 
-    const diff = target.diff(now, ['days', 'hours', 'minutes', 'seconds']);
-    
-    if (diff.milliseconds < 0) {
+    const totalMilliseconds = target.toMillis() - now.toMillis();
+
+    if (totalMilliseconds <= 0) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0, isExpired: true };
     }
 
+    const totalSeconds = Math.floor(totalMilliseconds / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
     return {
-      days: Math.floor(diff.days),
-      hours: Math.floor(diff.hours % 24),
-      minutes: Math.floor(diff.minutes % 60),
-      seconds: Math.floor(diff.seconds % 60),
+      days,
+      hours,
+      minutes,
+      seconds,
       isExpired: false,
     };
   } catch {

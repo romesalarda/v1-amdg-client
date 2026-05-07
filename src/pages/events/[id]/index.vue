@@ -617,9 +617,46 @@ const selectRegisteringOthers = (value: boolean) => {
 }
 
 const getCountdownDisplay = (eventData?: any) => {
+  const now = Date.now()
+  const toMillis = (value?: string) => {
+    const parsed = value ? Date.parse(value) : NaN
+    return Number.isNaN(parsed) ? null : parsed
+  }
+
+  const getDateKey = (timestamp: number, timezone?: string) => {
+    try {
+      return new Intl.DateTimeFormat('en-CA', {
+        timeZone: timezone || 'UTC',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      }).format(new Date(timestamp))
+    } catch {
+      return new Date(timestamp).toISOString().slice(0, 10)
+    }
+  }
+
+  const eventStartAt = toMillis(eventData?.start_datetime)
+  const eventTimezone = eventData?.timezone || 'UTC'
+  const hasPassedStartDay =
+    eventStartAt !== null &&
+    getDateKey(now, eventTimezone) > getDateKey(eventStartAt, eventTimezone)
+
+  if (hasPassedStartDay) {
+    return {
+      date: eventData?.start_datetime,
+      timezone: eventTimezone,
+      windowName: null,
+      statusText: 'Event Completed',
+      expiredLabel: 'Event Completed',
+      expiredHeadline: 'This Event Has Completed',
+      isOpen: false,
+    }
+  }
+
   const fallback = {
     date: eventData?.start_datetime,
-    timezone: eventData?.timezone,
+    timezone: eventTimezone,
     windowName: null,
     statusText: 'Event Starts In',
     expiredLabel: 'Event Started',
@@ -637,12 +674,6 @@ const getCountdownDisplay = (eventData?: any) => {
 
   if (!registrationWindows.length) {
     return fallback
-  }
-
-  const now = Date.now()
-  const toMillis = (value?: string) => {
-    const parsed = value ? Date.parse(value) : NaN
-    return Number.isNaN(parsed) ? null : parsed
   }
 
   const sortedWindows = [...registrationWindows].sort((a: any, b: any) => {
