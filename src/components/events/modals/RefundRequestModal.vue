@@ -637,10 +637,11 @@ const maxRefundableAmount = computed(() => {
   return Number(paymentRemainingAmount.value.toFixed(2))
 })
 
-const selectedAttendeeIdsFromItems = computed(() => {
+const selectedBookingAttendeeIds = computed(() => {
   return Array.from(
     new Set(
       Object.values(selectedItems.value)
+        .filter(item => item.type === 'attendee')
         .map(item => item.attendeeId)
         .filter((attendeeId): attendeeId is string => Boolean(attendeeId)),
     ),
@@ -692,7 +693,9 @@ const isFormValid = computed(() => {
     const descriptor = payment.value?.descriptor
 
     if (descriptor === 'booking') {
-      return hasValidReason && hasValidAmount && selectedAttendeeIdsFromItems.value.length > 0
+      const hasBookingAttendeeSelection = selectedBookingAttendeeIds.value.length > 0 || (selectableItems.value.length === 0 && selectedAttendeeIds.value.length > 0)
+      const hasBookingOrderItemSelection = selectedBookingProductRefundItems.value.length > 0
+      return hasValidReason && hasValidAmount && (hasBookingAttendeeSelection || hasBookingOrderItemSelection)
     }
 
     if (descriptor === 'order') {
@@ -734,17 +737,23 @@ async function handleSubmit() {
         throw new Error('Attendee and payment are required for attendee refund mode')
       }
 
+      const isPartialBookingPayment = refundType.value === 'partial' && payment.value?.descriptor === 'booking'
       // For partial booking refunds, selected shortcut items suggest attendee scope.
       // If no shortcut was selected, fallback to explicit attendee selection (legacy) or current attendee.
-      const attendeeIds = (refundType.value === 'partial' && props.isBookingPayment)
-        ? (selectedAttendeeIdsFromItems.value.length > 0
-          ? selectedAttendeeIdsFromItems.value
+      const attendeeIds = (isPartialBookingPayment && props.isBookingPayment)
+        ? (selectedBookingAttendeeIds.value.length > 0
+          ? selectedBookingAttendeeIds.value
           : (selectedAttendeeIds.value.length > 0
             ? selectedAttendeeIds.value
-            : [String(props.attendee.attendee_id)]))
+            : []))
         : [String(props.attendee.attendee_id)]
 
       const isPartialOrderPayment = refundType.value === 'partial' && payment.value?.descriptor === 'order'
+      const hasTargetedBookingProductItems = isPartialBookingPayment && selectedBookingProductRefundItems.value.length > 0
+
+      if (isPartialBookingPayment && attendeeIds.length === 0 && !hasTargetedBookingProductItems) {
+        throw new Error('Select at least one attendee or attendee product item for partial booking refunds.')
+      }
 
       await createAttendeeRefundMutation.mutateAsync({
         attendeeId: String(props.attendee.attendee_id),
@@ -752,8 +761,11 @@ async function handleSubmit() {
           payment_id: selectedPaymentId.value,
           amount: parseAmount(amount).toFixed(2),
           reason: reason.value.trim(),
-          ...(props.isBookingPayment && {
+          ...(props.isBookingPayment && attendeeIds.length > 0 && {
             attendee_ids: attendeeIds,
+          }),
+          ...(hasTargetedBookingProductItems && {
+            refund_items: selectedBookingProductRefundItems.value,
           }),
           ...(isPartialOrderPayment && selectedOrderRefundItems.value.length > 0 && {
             refund_items: selectedOrderRefundItems.value,
@@ -764,17 +776,18 @@ async function handleSubmit() {
       const isPartialBookingPayment = refundType.value === 'partial' && payment.value?.descriptor === 'booking'
       const isPartialOrderPayment = refundType.value === 'partial' && payment.value?.descriptor === 'order'
       const hasTargetedBookingProductItems = isPartialBookingPayment && selectedBookingProductRefundItems.value.length > 0
+      const selectedBookingAttendeeEntityIds = selectedBookingAttendeeIds.value
 
-      if (isPartialBookingPayment && selectedAttendeeIdsFromItems.value.length === 0) {
-        throw new Error('Select at least one attendee-linked item for partial booking refunds.')
+      if (isPartialBookingPayment && selectedBookingAttendeeEntityIds.length === 0 && !hasTargetedBookingProductItems) {
+        throw new Error('Select at least one attendee or attendee product item for partial booking refunds.')
       }
 
       await createRefundMutation.mutateAsync({
         payment: props.payment?.payment_id,
         amount: parseAmount(amount) as any,
         reason: reason.value.trim(),
-        ...(isPartialBookingPayment && !hasTargetedBookingProductItems && {
-          attendee_ids: selectedAttendeeIdsFromItems.value,
+        ...(isPartialBookingPayment && selectedBookingAttendeeEntityIds.length > 0 && {
+          attendee_ids: selectedBookingAttendeeEntityIds,
         }),
         ...(hasTargetedBookingProductItems && {
           refund_items: selectedBookingProductRefundItems.value,
