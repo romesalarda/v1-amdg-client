@@ -1186,50 +1186,18 @@ export type AttendeePreRemovalBlocker = {
     severity: 'critical' | 'high' | 'medium' | 'low';
     count: number;
     message: string;
-    items: Array<AttendeePreRemovalBlockerItem>;
+    items: Array<AttendeePreRemovalBlockerItemUnion>;
     pagination?: AttendeePreRemovalBlockerPagination;
     action_hint: string;
 };
 
-export type AttendeePreRemovalBlockerItem = {
-    payment_id?: string | null;
-    payment_reference?: string | null;
-    payment_type?: string | null;
-    payment_descriptor?: string | null;
-    payment_status?: string | null;
-    payment_status_bucket?: string | null;
-    amount?: string | null;
-    currency?: string | null;
-    method_type?: string | null;
-    method_title?: string | null;
-    can_request_refund?: boolean;
-    refund_block_reason?: string | null;
-    booking_id?: string | null;
-    booking_reference?: string | null;
-    booking_attendee_count?: number;
-    order_id?: string | null;
-    order_reference?: string | null;
-    order_status?: string | null;
-    order_amount?: string | null;
-    order_attendee_id?: string | null;
-    order_attendee_name?: string | null;
-    ticket_id?: string | null;
-    ticket_code?: string | null;
-    ticket_type?: string | null;
-    ticket_scope?: string | null;
-    status?: string | null;
-    event_id?: string | null;
-    event_title?: string | null;
-    check_in_time?: string | null;
-    check_out_time?: string | null;
-    attendance_id?: string | null;
-    active_refunds?: Array<AttendeePreRemovalRefundSummary>;
-    active_refund_count?: number;
-    /**
-     *  links
-     */
-    _links?: AttendeePreRemovalLinks;
-};
+export type AttendeePreRemovalBlockerItemUnion = ({
+    type: 'PaymentBlockerItem';
+} & PaymentBlockerItem) | ({
+    type: 'TicketBlockerItem';
+} & TicketBlockerItem) | ({
+    type: 'null';
+} & OrderBlockerItem);
 
 export type AttendeePreRemovalBlockerPagination = {
     count: number;
@@ -1240,23 +1208,6 @@ export type AttendeePreRemovalBlockerPagination = {
     has_previous: boolean;
     next_page?: number | null;
     previous_page?: number | null;
-};
-
-export type AttendeePreRemovalLinks = {
-    self?: string | null;
-    refund_requests?: string | null;
-    method?: string | null;
-};
-
-export type AttendeePreRemovalRefundSummary = {
-    refund_id: string;
-    tracking_reference: string;
-    verification_status: string;
-    is_active: boolean;
-    amount: string;
-    requested_at?: string | null;
-    requested_by_name?: string | null;
-    reason?: string;
 };
 
 export type AttendeePreRemovalSuggestedAction = {
@@ -1286,6 +1237,9 @@ export type AttendeePreRemovalSummaryCounts = {
     unresolved_orders: number;
     open_attendance: number;
     family_memberships: number;
+    total_blockers?: number;
+    high_priority_blockers?: number;
+    medium_priority_blockers?: number;
 };
 
 /**
@@ -10264,6 +10218,37 @@ export type MedicalConditionsStats = {
     }>;
 };
 
+/**
+ * Serializer that rejects unknown fields for stricter union item validation.
+ */
+export type OrderBlockerItem = {
+    payment_id?: string | null;
+    payment_reference?: string | null;
+    payment_type?: string | null;
+    payment_descriptor?: string | null;
+    payment_status?: string | null;
+    payment_status_bucket?: string | null;
+    amount?: string | null;
+    currency?: string | null;
+    method_type?: string | null;
+    method_title?: string | null;
+    can_request_refund?: boolean;
+    refund_block_reason?: string | null;
+    booking_id?: string | null;
+    booking_reference?: string | null;
+    booking_attendee_count?: number;
+    /**
+     * * `order` - order
+     */
+    type: 'order';
+    order_id: string;
+    order_reference?: string | null;
+    order_amount?: string | null;
+    order_attendee_id?: string | null;
+    order_attendee_name?: string | null;
+    status?: string | null;
+};
+
 export type OrderCheckoutRequestRequest = {
     /**
      * Optional payment method ID. Required when order total is greater than 0.
@@ -14976,6 +14961,31 @@ export type PatchedVenueMetadataCreateUpdateRequest = {
 };
 
 /**
+ * Serializer that rejects unknown fields for stricter union item validation.
+ */
+export type PaymentBlockerItem = {
+    payment_id?: string | null;
+    payment_reference?: string | null;
+    payment_type?: string | null;
+    payment_descriptor?: string | null;
+    payment_status?: string | null;
+    payment_status_bucket?: string | null;
+    amount?: string | null;
+    currency?: string | null;
+    method_type?: string | null;
+    method_title?: string | null;
+    can_request_refund?: boolean;
+    refund_block_reason?: string | null;
+    booking_id?: string | null;
+    booking_reference?: string | null;
+    booking_attendee_count?: number;
+    /**
+     * * `payment` - payment
+     */
+    type: 'payment';
+};
+
+/**
  * Create serializer for Payment with validation.
  *
  * Supports frontend-safe target selection fields while preserving temporary
@@ -17600,6 +17610,36 @@ export type StripeConnectedAccountUpdate = {
     display_name?: string;
     is_active?: boolean;
     is_primary?: boolean;
+};
+
+/**
+ * Serializer that rejects unknown fields for stricter union item validation.
+ */
+export type TicketBlockerItem = {
+    payment_id?: string | null;
+    payment_reference?: string | null;
+    payment_type?: string | null;
+    payment_descriptor?: string | null;
+    payment_status?: string | null;
+    payment_status_bucket?: string | null;
+    amount?: string | null;
+    currency?: string | null;
+    method_type?: string | null;
+    method_title?: string | null;
+    can_request_refund?: boolean;
+    refund_block_reason?: string | null;
+    booking_id?: string | null;
+    booking_reference?: string | null;
+    booking_attendee_count?: number;
+    /**
+     * * `ticket` - ticket
+     */
+    type: 'ticket';
+    ticket_id: string;
+    ticket_code?: string | null;
+    ticket_type?: string | null;
+    ticket_scope?: string | null;
+    status?: string | null;
 };
 
 /**

@@ -1413,178 +1413,20 @@
     </UModal>
 
     <!-- Pre-removal Summary Modal -->
-    <UModal v-model="showPreRemovalModal" :ui="{ width: 'sm:max-w-3xl' }">
-      <div class="p-6">
-        <div class="flex items-start justify-between mb-4">
-          <div>
-            <h3 class="text-xl font-bold text-gray-900">Pre-removal summary</h3>
-            <p class="text-sm text-gray-500">
-              {{ selectedDeleteAttendee?.full_name }} ({{ selectedDeleteAttendee?.attendee_display_id }})
-            </p>
-          </div>
-          <UButton
-            color="gray"
-            variant="ghost"
-            icon="i-heroicons-x-mark"
-            @click="showPreRemovalModal = false"
-          />
-        </div>
-
-        <div v-if="preRemovalSummaryLoading" class="space-y-2">
-          <div v-for="i in 4" :key="i" class="h-12 bg-gray-100 rounded-lg animate-pulse" />
-        </div>
-
-        <div v-else-if="preRemovalSummaryError" class="p-4 border border-red-200 bg-red-50 rounded-lg text-sm text-red-700">
-          Unable to load pre-removal summary. Please try again.
-        </div>
-
-        <div v-else-if="preRemovalSummary" class="space-y-4">
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div class="text-xs text-gray-500">Linked Payments</div>
-              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.linked_payments }}</div>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div class="text-xs text-gray-500">Active Tickets</div>
-              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.active_tickets }}</div>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div class="text-xs text-gray-500">Unresolved Orders</div>
-              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.unresolved_orders }}</div>
-            </div>
-            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-              <div class="text-xs text-gray-500">Open Attendance</div>
-              <div class="text-base font-bold text-gray-900">{{ preRemovalSummary.summary_counts.open_attendance }}</div>
-            </div>
-          </div>
-
-          <div
-            :class="[
-              'p-4 rounded-lg border text-sm',
-              preRemovalSummary.can_delete
-                ? 'bg-green-50 border-green-200 text-green-800'
-                : 'bg-amber-50 border-amber-200 text-amber-800'
-            ]"
-          >
-            <span v-if="preRemovalSummary.can_delete">This attendee can be safely deleted.</span>
-            <span v-else>Deletion is blocked until the listed blockers are resolved.</span>
-          </div>
-
-          <div v-if="preRemovalSummary.blockers.length > 0" class="space-y-3">
-            <h4 class="text-xs font-semibold uppercase text-gray-500">Blockers</h4>
-            <div
-              v-for="blocker in preRemovalSummary.blockers"
-              :key="blocker.code"
-              class="p-3 border border-gray-200 rounded-lg space-y-3"
-            >
-              <div class="flex items-center justify-between gap-3">
-                <div>
-                  <div class="text-sm font-semibold text-gray-900">{{ blocker.message }}</div>
-                  <p class="text-xs text-gray-600 mt-1">{{ blocker.count }} item(s). {{ blocker.action_hint }}</p>
-                </div>
-                <UBadge
-                  :color="blocker.severity === 'critical' ? 'red' : blocker.severity === 'high' ? 'orange' : 'gray'"
-                  variant="soft"
-                  size="xs"
-                >
-                  {{ blocker.severity }}
-                </UBadge>
-              </div>
-
-              <div v-if="blocker.items.length > 0" class="space-y-2">
-                <div
-                  v-for="(item, idx) in blocker.items"
-                  :key="`${blocker.code}-${item.payment_id || item.ticket_id || item.order_id || item.attendance_id || idx}`"
-                  class="border border-gray-200 rounded-lg p-3 bg-gray-50/60"
-                >
-                  <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                    <div class="space-y-1 min-w-0">
-                      <div class="flex flex-wrap items-center gap-2">
-                        <span class="text-sm font-semibold text-gray-900 truncate">{{ item.payment_reference || item.ticket_code || item.order_reference || item.event_title || 'Related item' }}</span>
-                        <UBadge v-if="item.payment_descriptor" color="blue" variant="soft" size="xs">{{ item.payment_descriptor }}</UBadge>
-                        <UBadge v-if="item.payment_status" color="gray" variant="soft" size="xs">{{ item.payment_status }}</UBadge>
-                        <UBadge v-else-if="item.payment_status_bucket" color="gray" variant="soft" size="xs">{{ item.payment_status_bucket }}</UBadge>
-                      </div>
-
-                      <p class="text-xs text-gray-600">
-                        <template v-if="item.amount">
-                          {{ item.amount }}
-                          <span v-if="item.currency">({{ item.currency }})</span>
-                        </template>
-                        <template v-else-if="item.order_amount">
-                          {{ item.order_amount }}
-                        </template>
-                        <template v-else>
-                          No amount context
-                        </template>
-                        <span v-if="item.method_title"> • {{ item.method_title }}</span>
-                        <span v-else-if="item.method_type"> • {{ item.method_type }}</span>
-                        <span v-if="item.payment_status_bucket"> • {{ item.payment_status_bucket }}</span>
-                      </p>
-
-                      <p v-if="item.order_attendee_name" class="text-xs text-gray-600">Attendee: {{ item.order_attendee_name }}</p>
-                      <p v-if="item.check_in_time" class="text-xs text-gray-600">Checked in: {{ new Date(item.check_in_time).toLocaleString() }}</p>
-
-                      <div v-if="item.active_refunds && item.active_refunds.length > 0" class="pt-1 space-y-1">
-                        <p class="text-xs font-semibold text-gray-700 uppercase">Active Refund Requests</p>
-                        <div
-                          v-for="refund in item.active_refunds"
-                          :key="refund.refund_id"
-                          class="text-xs text-gray-600 border border-gray-200 rounded px-2 py-1 bg-white"
-                        >
-                          {{ refund.tracking_reference }} • {{ refund.verification_status }} • {{ refund.amount }}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div v-if="item.payment_id" class="flex flex-col md:items-end gap-2 shrink-0">
-                      <UButton
-                        color="blue"
-                        variant="solid"
-                        size="sm"
-                        :disabled="item.can_request_refund === false"
-                        @click="openAttendeeRefundModalFromBlockerItem(item)"
-                      >
-                        Request refund for this payment
-                      </UButton>
-                      <p
-                        v-if="item.can_request_refund === false && item.refund_block_reason"
-                        class="text-xs text-amber-700 max-w-xs text-left md:text-right"
-                      >
-                        {{ item.refund_block_reason }}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <p v-if="blocker.pagination" class="text-xs text-gray-500">
-                Showing {{ blocker.items.length }} of {{ blocker.pagination.count }} items (page {{ blocker.pagination.page }} of {{ blocker.pagination.total_pages }}).
-              </p>
-            </div>
-          </div>
-
-          <div class="pt-2 flex gap-2">
-            <UButton
-              variant="outline"
-              color="gray"
-              class="flex-1"
-              @click="showPreRemovalModal = false"
-            >
-              Cancel
-            </UButton>
-            <UButton
-              color="red"
-              class="flex-1"
-              :disabled="!preRemovalSummary.can_delete || deleteAttendeeMutation.isPending.value"
-              :loading="deleteAttendeeMutation.isPending.value"
-              @click="confirmDeleteAttendee"
-            >
-              Delete Attendee
-            </UButton>
-          </div>
-        </div>
-      </div>
+    <UModal v-model="showPreRemovalModal" :ui="{ width: 'sm:max-w-5xl' }">
+      <PreRemovalSummaryStepper
+        :summary="preRemovalSummary"
+        :loading="preRemovalSummaryLoading"
+        :error="preRemovalSummaryError"
+        :deleting="deleteAttendeeMutation.isPending.value"
+        :attendee-name="selectedDeleteAttendee?.full_name"
+        :attendee-display-id="selectedDeleteAttendee?.attendee_display_id"
+        :event-query-value="orderEventQueryValue"
+        @close="showPreRemovalModal = false"
+        @confirm-delete="confirmDeleteAttendee"
+        @request-refund="openAttendeeRefundModalFromBlockerItem"
+        @page-change="handlePreRemovalPageChange"
+      />
     </UModal>
 
     <RefundRequestModal
@@ -1626,6 +1468,7 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import RefundRequestModal from '~/components/events/modals/RefundRequestModal.vue'
 import TicketsTab from '~/components/events/participants/TicketsTab.vue'
+import PreRemovalSummaryStepper from '~/components/events/participants/preRemoval/PreRemovalSummaryStepper.vue'
 import StatisticsIndex from './statistics/index.vue'
 import type { AttendeeList, OrganisationList, BookingList, BookingDetail, FamilyGroupList, FamilyAttendee, AttendeeCreateRequest, EventQuestion, EventQuestionOption, DietaryRequirement, MedicalCondition, AccessibilityRequirement } from '~/api/types.gen'
 
@@ -1713,6 +1556,8 @@ const showRefundModal = ref(false)
 const selectedRefundPaymentId = ref<string | null>(null)
 const isSelectedRefundBookingPayment = ref(false)
 const selectedRefundBookingAttendees = ref<Array<{ id: string; full_name: string }> | null>(null)
+const preRemovalPage = ref(1)
+const preRemovalPageSize = ref(10)
 
 // Create attendee form state
 const newAttendeeForm = ref<AttendeeCreateRequest>({
@@ -1987,7 +1832,14 @@ const deleteFamilyAttendeeMutation = useDeleteFamilyAttendee()
 const toast = useToast()
 
 const selectedDeleteAttendeeId = computed(() => selectedDeleteAttendee.value?.attendee_id || '')
-const { data: preRemovalSummaryData, isLoading: preRemovalSummaryLoading, error: preRemovalSummaryError } = useAttendeePreRemovalSummary(selectedDeleteAttendeeId)
+const preRemovalSummaryQueryParams = computed(() => ({
+  page: preRemovalPage.value,
+  page_size: preRemovalPageSize.value,
+}))
+const { data: preRemovalSummaryData, isLoading: preRemovalSummaryLoading, error: preRemovalSummaryError } = useAttendeePreRemovalSummary(
+  selectedDeleteAttendeeId,
+  preRemovalSummaryQueryParams,
+)
 
 // Fetch organisations for filter dropdown
 const { data: organisationsData } = useOrganisations({ page_size: 100 })
@@ -2048,6 +1900,7 @@ const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.
 const medicalConditions = computed(() => medicalConditionsData.value?.data?.results || [])
 const accessibilityRequirements = computed(() => accessibilityRequirementsData.value?.data?.results || [])
 const preRemovalSummary = computed(() => preRemovalSummaryData.value?.data as AttendeePreRemovalSummary | undefined)
+const orderEventQueryValue = computed(() => String(event.value?.data?.url_safe_title || event.value?.data?.event_id || id.value || ''))
 
 // Create chips for active filters
 const activeFilterChips = computed(() => {
@@ -2651,10 +2504,18 @@ function goToPaymentListFromBooking(paymentReference?: string) {
 
 function openPreRemovalModal(attendee: ExtendedAttendeeList) {
   selectedDeleteAttendee.value = attendee
+  preRemovalPage.value = 1
   selectedRefundPaymentId.value = null
   isSelectedRefundBookingPayment.value = false
   selectedRefundBookingAttendees.value = null
   showPreRemovalModal.value = true
+}
+
+function handlePreRemovalPageChange(page: number) {
+  if (page < 1) {
+    return
+  }
+  preRemovalPage.value = page
 }
 
 async function confirmDeleteAttendee() {
@@ -2775,6 +2636,7 @@ watch(currentPage, () => {
 
 watch(showPreRemovalModal, (isOpen) => {
   if (!isOpen) {
+    preRemovalPage.value = 1
     selectedRefundPaymentId.value = null
     isSelectedRefundBookingPayment.value = false
     selectedRefundBookingAttendees.value = null

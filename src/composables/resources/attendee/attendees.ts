@@ -32,6 +32,8 @@ export interface AttendeePreRemovalRefundSummary {
 }
 
 export interface AttendeePreRemovalBlockerItem {
+  type?: 'payment' | 'ticket' | 'order'
+
   payment_id?: string | null
   payment_reference?: string | null
   payment_type?: string | null
@@ -60,6 +62,7 @@ export interface AttendeePreRemovalBlockerItem {
   order_amount?: string | null
   order_attendee_id?: string | null
   order_attendee_name?: string | null
+  status?: string | null
 
   event_id?: string | null
   event_title?: string | null
@@ -119,6 +122,11 @@ export interface AttendeePreRemovalSummary {
     code: string
     message: string
   }>
+}
+
+export interface AttendeePreRemovalSummaryQuery {
+  page?: number
+  page_size?: number
 }
 
 /**
@@ -200,12 +208,19 @@ export function useDeleteAttendee() {
 /**
  * Get pre-removal summary and blockers before deleting an attendee
  */
-export function useAttendeePreRemovalSummary(attendeeId: MaybeRefOrGetter<string>) {
+export function useAttendeePreRemovalSummary(
+  attendeeId: MaybeRefOrGetter<string>,
+  query?: MaybeRefOrGetter<AttendeePreRemovalSummaryQuery | undefined>,
+) {
   return useQuery({
-    queryKey: [...QUERY_KEY, 'pre-removal-summary', attendeeId] as const,
+    queryKey: [...QUERY_KEY, 'pre-removal-summary', attendeeId, query] as const,
     queryFn: async () => {
       const id = toValue(attendeeId)
-      const response = await attendeesPreRemovalSummaryRetrieve({ path: { attendee_id: id } })
+      const queryParams = toValue(query)
+      const response = await attendeesPreRemovalSummaryRetrieve({
+        path: { attendee_id: id },
+        ...(queryParams ? { query: queryParams as any } : {}),
+      } as any)
       return response as { data: AttendeePreRemovalSummary }
     },
     enabled: () => !!toValue(attendeeId),
