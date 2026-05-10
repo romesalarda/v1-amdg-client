@@ -44,6 +44,7 @@
         class="border border-gray-200 rounded-xl overflow-hidden bg-white"
       >
         <div class="px-4 py-3 bg-gray-50 border-b border-gray-200" v-if="order.status != 'draft'">
+          {{ order }}
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <h4 class="font-bold text-sm text-gray-900 font-mono">{{ order.order_reference_id }}</h4>
@@ -145,7 +146,7 @@
               :key="item.id"
               class="p-3 bg-gray-50 rounded-xl border border-gray-200"
             >
-              <div class="flex items-start gap-3">
+              <div class="flex items-start gap-3" @click="navigateTo(`/events/${eventId}/m/shop/orders/${order.order_id}/detail`)" style="cursor: pointer">
                 <div class="w-14 h-14 rounded-lg overflow-hidden bg-white border border-gray-200 flex-shrink-0">
                   <img
                     v-if="getOrderItemImageUrl(item)"
@@ -213,6 +214,10 @@
 </template>
 
 <script setup lang="ts">
+
+const route = useRoute()
+const eventId = route.params.id as string
+
 defineProps<{
   showCreateOrderForm: boolean
   createOrderPending: boolean

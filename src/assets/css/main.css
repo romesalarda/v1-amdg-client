@@ -42,6 +42,16 @@
   .bg-primary-500 {
     background-color: #002147 !important;
   }
+
+  .bg-success,
+  .bg-success-500 {
+    background-color: #28a745 !important;
+  }
+  
+  .bg-light-primary,
+  .bg-light-primary-500 {
+    background-color: #334d6f !important;
+  }
   
   .text-primary,
   .text-primary-500 {

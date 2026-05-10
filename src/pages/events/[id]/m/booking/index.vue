@@ -107,7 +107,13 @@
           :packages-count="packages.length"
           :active-discounts-count="discounts.filter((d: any) => d.active).length"
           :sign-ins-count="signIns.length"
+          :max-attendees-per-booking="maxAttendeesPerBooking"
+          :max-attendees-per-user="maxAttendeesPerUser"
+          :is-saving="updateSettingsMutation.isPending.value"
+          :can-edit-limits="canUpdateRegistration"
           @show-guide="showSetupGuide = true"
+          @save-max-attendees-per-booking="saveMaxAttendeesPerBooking"
+          @save-max-attendees-per-user="saveMaxAttendeesPerUser"
         />
       </div>
     </div>
@@ -235,6 +241,7 @@ import { useTicketTypeManagement } from '~/composables/booking/useTicketTypeMana
 import { useBookingPackageManagement } from '~/composables/booking/useBookingPackageManagement'
 import { useDiscountManagement } from '~/composables/booking/useDiscountManagement'
 import { useAlternativeSignInManagement } from '~/composables/booking/useAlternativeSignInManagement'
+import { useEventSettings, usePartialUpdateEventSettings } from '~/composables/resources/events/eventSettings'
 import type { Ref } from 'vue'
 
 definePageMeta({
@@ -244,6 +251,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))
+const toast = useToast()
 
 // View toggle
 const currentView = ref<'management' | 'statistics'>(
@@ -265,7 +273,13 @@ function changeView(view: 'management' | 'statistics') {
 
 // Data fetching
 const { data: event } = useEvent(id)
+const { data: settingsData } = useEventSettings(id)
+const updateSettingsMutation = usePartialUpdateEventSettings()
 const event_pk = computed(() => event.value?.data?.id ?? null) as Ref<number | null>
+
+const settings = computed(() => settingsData.value?.data)
+const maxAttendeesPerBooking = computed(() => Number(settings.value?.max_attendees_per_booking || 5))
+const maxAttendeesPerUser = computed(() => Number(settings.value?.max_attendees_per_user || 5))
 
 const eventIdFilter = computed(() => ({ event: route.params.id as string }))
 const { data: ticketTypesData, isLoading: ticketTypesLoading, refetch: refetchTicketTypes } = useBookingTicketTypes(eventIdFilter)
@@ -341,6 +355,48 @@ const {
   onSubmitSignIn,
   removeSignIn,
 } = useAlternativeSignInManagement(event_pk, signIns, refetchSignIns)
+
+const saveMaxAttendeesPerBooking = async (value: number) => {
+  if (!settings.value?.id) return
+
+  try {
+    await updateSettingsMutation.mutateAsync({
+      settingsId: settings.value.id,
+      body: { max_attendees_per_booking: Number(value ?? 0) },
+    })
+    toast.add({
+      title: 'Booking limit updated',
+      color: 'green',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update booking limit',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const saveMaxAttendeesPerUser = async (value: number) => {
+  if (!settings.value?.id) return
+
+  try {
+    await updateSettingsMutation.mutateAsync({
+      settingsId: settings.value.id,
+      body: { max_attendees_per_user: Number(value ?? 0) },
+    })
+    toast.add({
+      title: 'User limit updated',
+      color: 'green',
+    })
+  } catch (error) {
+    toast.add({
+      title: 'Failed to update user limit',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
 </script>
 
 <style scoped>
