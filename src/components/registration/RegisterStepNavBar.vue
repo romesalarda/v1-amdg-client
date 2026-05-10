@@ -6,7 +6,8 @@
 				v-if="isReviewStep"
 				color="primary"
 				:loading="isCheckoutUiBusy"
-				:disabled="!canContinue || shouldDisableCheckoutButton"
+				:disabled="(!canContinue && !showCheckoutAsDisabled) || shouldDisableCheckoutButton"
+				:class="showCheckoutAsDisabled ? 'cursor-not-allowed opacity-55' : ''"
 				@click="emit('checkout')"
 			>
 				{{ checkoutPrimaryButtonLabel }}
@@ -31,6 +32,7 @@ defineProps<{
 	isSaving: boolean
 	canContinue: boolean
 	shouldDisableCheckoutButton: boolean
+	showCheckoutAsDisabled: boolean
 	checkoutPrimaryButtonLabel: string
 	primaryActionLabel: string
 }>()

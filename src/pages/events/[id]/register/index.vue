@@ -208,9 +208,11 @@
 											:stripe-card-error="stripeCardError"
 											:stripe-payment-attempt-error="stripePaymentAttemptError"
 											:stripe-card-ready="stripeCardReady"
+											:agreed-to-terms="agreedToTerms"
 											@jump-to-attendee="jumpToAttendee"
 											@update:selected-payment-method-id="(id) => { selectedPaymentMethodId = id ?? undefined }"
 											@update:manual-stripe-public-key="(val) => { manualStripePublicKey = val }"
+											@update:agreed-to-terms="(val) => { agreedToTerms = val }"
 										/>
 									</template>
 
@@ -221,6 +223,7 @@
 										:is-saving="isSaving"
 										:can-continue="canContinue"
 										:should-disable-checkout-button="shouldDisableCheckoutButton"
+										:show-checkout-as-disabled="showCheckoutAsDisabled"
 										:checkout-primary-button-label="checkoutPrimaryButtonLabel"
 										:primary-action-label="primaryActionLabel"
 										@back="handleBack"
@@ -952,6 +955,14 @@ const checkoutPrimaryButtonLabel = computed(() => {
 	return 'Complete registration'
 })
 
+const agreedToTerms = ref(false)
+
+const showCheckoutAsDisabled = computed(() => {
+	if (activeStepIndex.value !== reviewStepIndex) return false
+	if (checkoutCompleted.value || isCheckoutUiBusy.value) return false
+	return canContinue.value && !agreedToTerms.value
+})
+
 const checkoutProcessingStageLabel = computed(() => {
 	if (isPollingPaymentStatus.value) return 'Finalizing your registration'
 	if (isStripeMethod.value) return 'Confirming card payment'
@@ -1553,6 +1564,14 @@ const jumpToReview = async () => {
 
 const handleCheckout = async () => {
 	if (checkoutCompleted.value) return
+	if (!agreedToTerms.value) {
+		toast.add({
+			title: 'Agreement required',
+			description: 'Please tick agree to terms and conditions.',
+			color: 'amber',
+		})
+		return
+	}
 	if (!canContinue.value || !store.bookingIntentId) return
 	// Only require payment method for paid bookings
 	if (!isBookingFree.value && !selectedPaymentMethodId.value) return
