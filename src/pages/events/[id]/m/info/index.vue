@@ -147,6 +147,55 @@
                 <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">{{ short_description || '-' }}</p>
                 <span v-if="errors.short_description" class="text-xs text-red-500 font-medium">{{ errors.short_description }}</span>
               </div>
+
+              <!-- External Link -->
+              <div class="space-y-2">
+                <label class="block text-xs font-black text-primary uppercase tracking-wider">External Link</label>
+                <input
+                  v-if="isEditMode"
+                  v-model="external_link"
+                  type="url"
+                  placeholder="https://example.com"
+                  class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all"
+                />
+                <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">
+                  <a v-if="external_link" :href="external_link" target="_blank" class="text-primary hover:underline">{{ external_link }}</a>
+                  <span v-else>-</span>
+                </p>
+                <span v-if="errors.external_link" class="text-xs text-red-500 font-medium">{{ errors.external_link }}</span>
+              </div>
+
+              <!-- External Event Toggle -->
+              <div class="space-y-2">
+                <label class="block text-xs font-black text-primary uppercase tracking-wider">External Event</label>
+                <div v-if="isEditMode" class="flex items-center gap-3 px-4 py-3 bg-mist-blue rounded-xl">
+                  <input
+                    :id="`external_event_toggle`"
+                    v-model="external_event"
+                    type="checkbox"
+                    :disabled="!isValidExternalLink"
+                    :class="[
+                      'w-5 h-5 text-primary rounded',
+                      isValidExternalLink ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
+                    ]"
+                  />
+                  <label :for="`external_event_toggle`" class="text-sm font-medium text-navy-900 cursor-pointer flex-1">
+                    Mark this event as external (limits features)
+                  </label>
+                </div>
+                <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">
+                  <span v-if="external_event" class="inline-flex items-center gap-1 px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs font-bold border border-yellow-300">
+                    <span class="material-symbols-outlined text-sm">info</span>
+                    External Event
+                                  <span v-if="errors.external_event" class="text-xs text-red-500 font-medium">{{ errors.external_event }}</span>
+                                  <span v-if="isEditMode && !isValidExternalLink" class="text-xs text-yellow-600 font-medium flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">info</span>
+                                    A valid external link is required to mark this event as external
+                                  </span>
+                  </span>
+                  <span v-else>-</span>
+                </p>
+              </div>
             </div>
           </section>
 
@@ -661,11 +710,13 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
+import Swal from 'sweetalert2'
 import { useEvent, useUpdateEvent, useDeleteEvent, usePartialUpdateEvent } from '~/composables/resources/events/events'
 import { useEventAuthorizations } from '~/composables/resources/events/eventAuthorizations'
 import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import ConfirmActionModal from '~/components/events/ConfirmActionModal.vue'
+import { EventBaseSchema } from '~/schemas/event.schema'
 
 definePageMeta({
   layout: false,
@@ -703,8 +754,9 @@ const confirmModal = ref({
   action: null as (() => void) | null,
 })
 
-// Form schema
-const eventInfoSchema = z.object({
+
+// Extended form schema with additional required fields not in EventSchema
+const eventInfoSchema = EventBaseSchema.extend({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   display_code: z.string().min(1, 'Display code is required'),
   short_description: z.string().max(255).optional(),
@@ -723,7 +775,6 @@ const eventInfoSchema = z.object({
 const { handleSubmit, errors, defineField, resetForm: resetFormValues, setValues } = useForm({
   validationSchema: toTypedSchema(eventInfoSchema),
 })
-
 const [title] = defineField('title')
 const [display_code] = defineField('display_code')
 const [short_description] = defineField('short_description')
@@ -737,6 +788,8 @@ const [theme] = defineField('theme')
 const [anchor_verse] = defineField('anchor_verse')
 const [what_to_bring] = defineField('what_to_bring')
 const [important_information] = defineField('important_information')
+const [external_link] = defineField('external_link')
+const [external_event] = defineField('external_event')
 
 // Status options
 const statusOptions = [
@@ -781,13 +834,59 @@ watch(event, (newEvent) => {
       anchor_verse: newEvent.anchor_verse || '',
       what_to_bring: newEvent.what_to_bring || '',
       important_information: newEvent.important_information || '',
+      external_link: newEvent.external_link || '',
+      external_event: newEvent.external_event || false,
     })
   }
 }, { immediate: true })
 
+// Watch for external_event toggle to show warning
+watch(external_event, (newVal, oldVal) => {
+  // Only show warning when toggling from false to true
+  if (newVal && !oldVal) {
+        // Validate that external_link is provided
+        if (!isValidExternalLink.value) {
+          external_event.value = false
+          return
+        }
+
+    Swal.fire({
+      title: 'Mark as External Event?',
+      html: '<p class="text-left">Marking this event as external will disable the following features:</p><ul class="text-left mt-3 space-y-2"><li>✗ Booking & Tickets</li><li>✗ Payments</li><li>✗ Registration Form</li><li>✗ Staff Management</li><li>✗ Participants</li><li>✗ Shop/Products</li></ul>',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, mark as external',
+      cancelButtonText: 'Cancel',
+      confirmButtonColor: '#3B82F6',
+      cancelButtonColor: '#6B7280',
+      customClass: {
+        container: 'z-50',
+      }
+    }).then((result) => {
+      if (!result.isConfirmed) {
+        // Revert the toggle if user cancels
+        external_event.value = false
+      }
+    })
+  }
+})
+
 const updateMutation = useUpdateEvent()
 const partialUpdateMutation = usePartialUpdateEvent()
 const deleteMutation = useDeleteEvent()
+// Computed property to check if external link is valid
+const isValidExternalLink = computed(() => {
+  if (!external_link.value || external_link.value === '') {
+    return false
+  }
+  try {
+    new URL(external_link.value)
+    return true
+  } catch {
+    return false
+  }
+})
+
 
 // Computed available actions based on current status and authorization
 const availableActions = computed(() => {
@@ -1016,6 +1115,8 @@ const saveChanges = async () => {
     anchor_verse: anchor_verse.value || '',
     what_to_bring: what_to_bring.value || '',
     important_information: important_information.value || '',
+    external_link: external_link.value || null,
+    external_event: external_event.value || false,
   }
 
   try {
@@ -1055,6 +1156,8 @@ const onSubmit = handleSubmit(async (values) => {
         ...values,
         start_datetime: new Date(values.start_datetime).toISOString(),
         end_datetime: new Date(values.end_datetime).toISOString(),
+        external_link: values.external_link || null,
+        external_event: values.external_event || false,
       },
     })
     
@@ -1088,6 +1191,8 @@ const cancelEdit = () => {
       anchor_verse: event.value.anchor_verse || '',
       what_to_bring: event.value.what_to_bring || '',
       important_information: event.value.important_information || '',
+      external_link: event.value.external_link || '',
+      external_event: event.value.external_event || false,
     })
   }
   isEditMode.value = false
@@ -1109,6 +1214,8 @@ const resetForm = () => {
       anchor_verse: event.value.anchor_verse || '',
       what_to_bring: event.value.what_to_bring || '',
       important_information: event.value.important_information || '',
+      external_link: event.value.external_link || '',
+      external_event: event.value.external_event || false,
     })
   }
 }

@@ -200,6 +200,7 @@ const tabs = computed(() => [
     path: 'booking',
     label: 'Booking & Tickets',
     icon: 'i-heroicons-ticket',
+    disabled: props.event?.external_event,
   },
   {
     path: 'dates',
@@ -210,22 +211,25 @@ const tabs = computed(() => [
     path: 'payments',
     label: 'Payments',
     icon: 'i-heroicons-credit-card',
+    disabled: props.event?.external_event,
   },
   {
     path: 'sponsors',
     label: 'Sponsors',
     icon: 'i-heroicons-building-office-2',
-    disabled: !eventSettings.value?.accepting_sponsorships_enabled,
+    disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
   },
   {
     path: 'registration',
     label: 'Registration Form',
     icon: 'i-heroicons-clipboard-document-list',
+    disabled: props.event?.external_event,
   },
   {
     path: 'staff',
     label: 'Staff',
     icon: 'i-heroicons-user-group',
+    disabled: props.event?.external_event,
   },
   {
     path: 'resources',
@@ -241,12 +245,13 @@ const tabs = computed(() => [
     path: 'participants/dashboard',
     label: 'Participants',
     icon: 'i-heroicons-users',
+    disabled: props.event?.external_event,
   },
   {
     label: 'Shop',
     path: 'shop/dashboard',
     icon: 'i-heroicons-shopping-bag',
-    disabled: !eventSettings.value?.product_selling_enabled,
+    disabled: !eventSettings.value?.product_selling_enabled || props.event?.external_event,
   },
 ])
 

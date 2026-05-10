@@ -295,11 +295,16 @@ export type AttendeeAction = {
     readonly id: number;
     /**
      * * `registered` - Registered
+     * * `made_payment` - Made Payment
+     * * `cancelled_payment` - Cancelled Payment
+     * * `intends_to_refund_payment` - Intends to Refund Payment
+     * * `ordered_from_shop` - Ordered from Shop
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `updated_info` - Updated Information
      */
-    action?: 'registered' | 'checked_in' | 'cancelled' | 'updated_info';
+    action?: 'registered' | 'made_payment' | 'cancelled_payment' | 'intends_to_refund_payment' | 'ordered_from_shop' | 'checked_in' | 'checked_out' | 'cancelled' | 'updated_info';
     readonly action_display: string;
     attendee: number;
     readonly attendee_name: string;
@@ -323,11 +328,16 @@ export type AttendeeAction = {
 export type AttendeeActionRequest = {
     /**
      * * `registered` - Registered
+     * * `made_payment` - Made Payment
+     * * `cancelled_payment` - Cancelled Payment
+     * * `intends_to_refund_payment` - Intends to Refund Payment
+     * * `ordered_from_shop` - Ordered from Shop
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `updated_info` - Updated Information
      */
-    action?: 'registered' | 'checked_in' | 'cancelled' | 'updated_info';
+    action?: 'registered' | 'made_payment' | 'cancelled_payment' | 'intends_to_refund_payment' | 'ordered_from_shop' | 'checked_in' | 'checked_out' | 'cancelled' | 'updated_info';
     attendee: number;
     performed_by?: number | null;
     notes?: string | null;
@@ -644,10 +654,11 @@ export type AttendeeDetail = {
      * * `pending_payment` - Pending Payment
      * * `registered` - Registered
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `whitelisted` - Whitelisted
      */
-    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'checked_out' | 'cancelled' | 'whitelisted';
     readonly is_cancelled: boolean;
     readonly is_registered: boolean;
     readonly is_checked_in: boolean;
@@ -891,10 +902,11 @@ export type AttendeeList = {
      * * `pending_payment` - Pending Payment
      * * `registered` - Registered
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `whitelisted` - Whitelisted
      */
-    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'checked_out' | 'cancelled' | 'whitelisted';
     readonly is_cancelled: boolean;
     readonly is_registered: boolean;
     readonly is_checked_in: boolean;
@@ -5332,6 +5344,14 @@ export type EventCreateUpdate = {
      * URL safe title
      */
     url_safe_title?: string | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -5391,6 +5411,14 @@ export type EventCreateUpdateRequest = {
      * URL safe title
      */
     url_safe_title?: string | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -6118,6 +6146,22 @@ export type EventDetail = {
     readonly user_remaining_registration_slots: number;
     readonly user_self_registered: boolean;
     /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
+    /**
+     * The last time this event was opened for registration.
+     */
+    readonly last_opened: string | null;
+    /**
+     * The last time this event was closed for registration.
+     */
+    readonly last_closed: string | null;
+    /**
      *  links
      */
     readonly _links: {
@@ -6790,6 +6834,14 @@ export type EventDetailRequest = {
      */
     organisation?: number | null;
     created_by?: number | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
 };
 
 export type EventList = {
@@ -6858,6 +6910,22 @@ export type EventList = {
         percentage_full?: number;
     };
     readonly location: string;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
+    /**
+     * The last time this event was opened for registration.
+     */
+    last_opened?: string | null;
+    /**
+     * The last time this event was closed for registration.
+     */
+    last_closed?: string | null;
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -12977,6 +13045,14 @@ export type PatchedEventCreateUpdateRequest = {
      * URL safe title
      */
     url_safe_title?: string | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
     start_datetime?: string;
     end_datetime?: string;
     /**
@@ -13619,6 +13695,14 @@ export type PatchedEventDetailRequest = {
      */
     organisation?: number | null;
     created_by?: number | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
 };
 
 export type PatchedEventPermissionAssignmentRequest = {
@@ -17353,6 +17437,22 @@ export type SponsorableEventList = {
         percentage_full?: number;
     };
     readonly location: string;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
+    /**
+     * The last time this event was opened for registration.
+     */
+    last_opened?: string | null;
+    /**
+     * The last time this event was closed for registration.
+     */
+    last_closed?: string | null;
     timezone: string;
     readonly created_at: string;
     created_by?: number | null;
@@ -18798,11 +18898,16 @@ export type AttendeeAccessibilityRequirementWritable = {
 export type AttendeeActionWritable = {
     /**
      * * `registered` - Registered
+     * * `made_payment` - Made Payment
+     * * `cancelled_payment` - Cancelled Payment
+     * * `intends_to_refund_payment` - Intends to Refund Payment
+     * * `ordered_from_shop` - Ordered from Shop
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `updated_info` - Updated Information
      */
-    action?: 'registered' | 'checked_in' | 'cancelled' | 'updated_info';
+    action?: 'registered' | 'made_payment' | 'cancelled_payment' | 'intends_to_refund_payment' | 'ordered_from_shop' | 'checked_in' | 'checked_out' | 'cancelled' | 'updated_info';
     attendee: number;
     performed_by?: number | null;
     notes?: string | null;
@@ -18897,10 +19002,11 @@ export type AttendeeDetailWritable = {
      * * `pending_payment` - Pending Payment
      * * `registered` - Registered
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `whitelisted` - Whitelisted
      */
-    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'checked_out' | 'cancelled' | 'whitelisted';
     area_from?: number | null;
     booking?: number | null;
     defined_by?: number | null;
@@ -18984,10 +19090,11 @@ export type AttendeeListWritable = {
      * * `pending_payment` - Pending Payment
      * * `registered` - Registered
      * * `checked_in` - Checked In
+     * * `checked_out` - Checked Out
      * * `cancelled` - Cancelled
      * * `whitelisted` - Whitelisted
      */
-    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'checked_out' | 'cancelled' | 'whitelisted';
 };
 
 /**
@@ -20577,6 +20684,14 @@ export type EventCreateUpdateWritable = {
      * URL safe title
      */
     url_safe_title?: string | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
     start_datetime: string;
     end_datetime: string;
     /**
@@ -21219,6 +21334,14 @@ export type EventDetailWritable = {
      */
     organisation?: number | null;
     created_by?: number | null;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
 };
 
 export type EventListWritable = {
@@ -21249,6 +21372,22 @@ export type EventListWritable = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
+    /**
+     * The last time this event was opened for registration.
+     */
+    last_opened?: string | null;
+    /**
+     * The last time this event was closed for registration.
+     */
+    last_closed?: string | null;
     timezone: string;
     created_by?: number | null;
 };
@@ -24618,6 +24757,22 @@ export type SponsorableEventListWritable = {
     short_description?: string | null;
     start_datetime: string;
     end_datetime: string;
+    /**
+     * External link for the event, e.g. a website or registration page.
+     */
+    external_link?: string | null;
+    /**
+     * Whether this event is primarily external and only listed on the platform for visibility. External events will not have registration or product selling features enabled.
+     */
+    external_event?: boolean;
+    /**
+     * The last time this event was opened for registration.
+     */
+    last_opened?: string | null;
+    /**
+     * The last time this event was closed for registration.
+     */
+    last_closed?: string | null;
     timezone: string;
     created_by?: number | null;
 };
@@ -25148,11 +25303,16 @@ export type ActionsListData = {
     query?: {
         /**
          * * `registered` - Registered
+         * * `made_payment` - Made Payment
+         * * `cancelled_payment` - Cancelled Payment
+         * * `intends_to_refund_payment` - Intends to Refund Payment
+         * * `ordered_from_shop` - Ordered from Shop
          * * `checked_in` - Checked In
+         * * `checked_out` - Checked Out
          * * `cancelled` - Cancelled
          * * `updated_info` - Updated Information
          */
-        action?: 'cancelled' | 'checked_in' | 'registered' | 'updated_info';
+        action?: 'cancelled' | 'cancelled_payment' | 'checked_in' | 'checked_out' | 'intends_to_refund_payment' | 'made_payment' | 'ordered_from_shop' | 'registered' | 'updated_info';
         attendee?: string;
         /**
          * Which field to use when ordering the results.

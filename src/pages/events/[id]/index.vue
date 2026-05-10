@@ -238,6 +238,23 @@
 
               <!-- Registration Card -->
               <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 shadow-drawn">
+                <template v-if="event.external_event">
+                  <a
+                    v-if="event.external_link"
+                    :href="event.external_link"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy"
+                  >
+                    <UIcon name="i-heroicons-globe-alt" class="w-6 h-6" />
+                    External Link
+                  </a>
+                  <p v-else class="text-sm text-deep-navy/70 font-medium text-center">
+                    This is an external event.
+                  </p>
+                </template>
+
+                <template v-else>
                 <!-- User registration context -->
                 <div
                   v-if="event.user_self_registered || (event.user_registered_attendee_count != null && event.user_registered_attendee_count > 0)"
@@ -290,6 +307,7 @@
                     ></div>
                   </div>
                 </div>
+                </template>
               </div>
 
               <!-- Quick Actions -->

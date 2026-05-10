@@ -1,6 +1,6 @@
 <template>
   <div class="p-6">
-    <div class="mb-4 flex items-start justify-between gap-4">
+    <div class="mb-4 flex items-start justify-between gap-5">
       <div>
         <h3 class="text-xl font-bold text-gray-900">Pre-removal summary</h3>
         <p class="text-sm text-gray-500">
@@ -31,7 +31,7 @@
     </div>
 
     <div v-else-if="summary" class="space-y-4">
-      <div v-if="activeStep === 'overview'" class="space-y-4">
+      <div v-if="activeStep === 'overview'" class="space-y-3">
         
 
         <div
@@ -319,7 +319,7 @@
 
       </div>
 
-      <div v-else-if="activeStep === 'final'" class="space-y-4">
+      <div v-else-if="activeStep === 'final'" class="space-y-3">
         <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
           <div class="flex items-start gap-3">
             <div class="rounded-full bg-blue-100 p-2">
@@ -374,17 +374,6 @@
           </div>
         </div>
       </div>
-
-      <!-- <div class="pt-2 flex gap-2">
-        <UButton
-          variant="outline"
-          color="gray"
-          class="flex-1"
-          @click="$emit('close')"
-        >
-          Cancel
-        </UButton>
-      </div> -->
     </div>
   </div>
 </template>
