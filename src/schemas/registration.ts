@@ -1,35 +1,71 @@
 import { z } from 'zod'
 
+const optionalTrimmedString = z
+  .string()
+  .optional()
+  .transform((val) => (typeof val === 'string' ? val.trim() : ''))
+
+const namePattern = /^[A-Za-z]+(?:[ -][A-Za-z]+)*$/
+
+const parseAgeFromIsoDate = (dateString: string): number | null => {
+  const isoDatePattern = /^\d{4}-\d{2}-\d{2}$/
+  if (!isoDatePattern.test(dateString)) return null
+
+  const parsedDate = new Date(`${dateString}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) return null
+
+  const [year, month, day] = dateString.split('-').map(Number)
+  if (
+    parsedDate.getFullYear() !== year
+    || parsedDate.getMonth() + 1 !== month
+    || parsedDate.getDate() !== day
+  ) {
+    return null
+  }
+
+  const today = new Date()
+  let age = today.getFullYear() - parsedDate.getFullYear()
+  const monthDiff = today.getMonth() - parsedDate.getMonth()
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < parsedDate.getDate())) {
+    age -= 1
+  }
+
+  return age
+}
+
 export const attendeeValidationSchema = z.object({
   first_name: z
     .string()
+    .trim()
     .min(1, 'First name is required')
-    .min(2, 'First name must be at least 2 characters'),
+    .max(20, 'First name must be 20 characters or less')
+    .regex(namePattern, 'First name can only contain letters, spaces, and hyphens'),
   last_name: z
     .string()
+    .trim()
     .min(1, 'Last name is required')
-    .min(2, 'Last name must be at least 2 characters'),
-  email: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^[^@]+@[^@]+\.[^@]+$/.test(val),
-      'Please enter a valid email address'
-    ),
-  phone_number: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || /^[+]?[\d\s\-()]{10,}$/i.test(val),
-      'Please enter a valid phone number'
-    ),
+    .max(20, 'Last name must be 20 characters or less')
+    .regex(namePattern, 'Last name can only contain letters, spaces, and hyphens'),
+  email: optionalTrimmedString.refine(
+    (val) => !val || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(val),
+    'Please enter a valid email address'
+  ),
+  phone_number: optionalTrimmedString.refine(
+    (val) => !val || /^[+]?[(]?[0-9]{1,4}[)]?(?:[0-9\s-]{5,19})$/.test(val),
+    'Please enter a valid phone number'
+  ),
   date_of_birth: z
     .string()
     .min(1, 'Date of birth is required')
-    .refine(
-      (val) => !val || new Date(val) < new Date(),
-      'Date of birth cannot be in the future'
-    ),
+    .refine((val) => parseAgeFromIsoDate(val) !== null, 'Please enter a valid date of birth')
+    .refine((val) => {
+      const age = parseAgeFromIsoDate(val)
+      return typeof age === 'number' && age >= 0
+    }, 'Date of birth cannot be in the future')
+    .refine((val) => {
+      const age = parseAgeFromIsoDate(val)
+      return typeof age === 'number' && age <= 130
+    }, 'Date of birth cannot be more than 130 years ago'),
   gender: z.string().optional(),
   relationship_to_user: z.string().optional(),
 })

@@ -89,7 +89,7 @@
 									<RegisterStepAttendeeDetails
 										v-if="activeStepIndex === 0"
 										:values="values"
-										:errors="errors"
+										:errors="attendeeStepErrors"
 										:is-registrar-self="isRegistrarSelf"
 										:show-relationship-field="showRelationshipField"
 										:gender-options="genderOptions"
@@ -98,8 +98,8 @@
 										:has-current-area-from="hasCurrentAreaFrom"
 										:current-area-from="currentAttendee.area_from ?? null"
 										:current-area-from-name="currentAttendee.area_from_name ?? null"
-										@update-field="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val) }"
-										@update-field-validate="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val); void runSafeValidation() }"
+										@update-field="(field, val) => { void onAttendeeFieldChange(field, val, false) }"
+										@update-field-validate="(field, val) => { void onAttendeeFieldChange(field, val, true) }"
 										@select-area="(val, label) => { store.setAreaFrom(store.currentIndex, val, label) }"
 										@clear-area-from="clearAreaFrom"
 									/>
@@ -417,6 +417,41 @@ const { values, errors, setFieldValue, resetForm, validate } = useForm({
 		relationship_to_user: '',
 	},
 })
+
+const attendeeTouchedFields = ref<Set<string>>(new Set())
+const forceShowAttendeeErrors = ref(false)
+
+const markAttendeeFieldTouched = (field: string) => {
+	const next = new Set(attendeeTouchedFields.value)
+	next.add(field)
+	attendeeTouchedFields.value = next
+}
+
+const resetAttendeeInlineValidationState = () => {
+	attendeeTouchedFields.value = new Set()
+	forceShowAttendeeErrors.value = false
+}
+
+const attendeeStepErrors = computed(() => {
+	const filteredErrors: Partial<Record<string, string>> = {}
+	for (const [field, message] of Object.entries(errors.value)) {
+		if (!message) continue
+		if (forceShowAttendeeErrors.value || attendeeTouchedFields.value.has(field)) {
+			filteredErrors[field] = message
+		}
+	}
+	return filteredErrors
+})
+
+const onAttendeeFieldChange = async (field: string, value: string, shouldValidateField: boolean) => {
+	if (!currentAttendee.value) return
+	;(currentAttendee.value as any)[field] = value
+	setFieldValue(field as any, value, shouldValidateField)
+
+	if (shouldValidateField) {
+		markAttendeeFieldTouched(field)
+	}
+}
 
 const runSafeValidation = async () => {
 	try {
@@ -1405,20 +1440,35 @@ const shouldShowStepPrecheckAlert = computed(() =>
 )
 
 // Sync form values when current attendee changes
-watchEffect(() => {
-	if (!currentAttendee.value || activeStepIndex.value !== 0) return
-	resetForm({
-		values: {
-			first_name: currentAttendee.value.first_name || '',
-			last_name: currentAttendee.value.last_name || '',
-			email: currentAttendee.value.email || '',
-			phone_number: currentAttendee.value.phone_number || '',
-			date_of_birth: currentAttendee.value.date_of_birth || '',
-			gender: currentAttendee.value.gender || '',
-			relationship_to_user: currentAttendee.value.relationship_to_user || '',
-		},
-	})
-})
+// Only sync form values when the attendee index or step changes — NOT on every field edit.
+// Using watchEffect here would re-run on every keystroke (because it tracks
+// currentAttendee.value.first_name etc.) and would call resetForm, clearing errors.
+watch(
+	[() => store.currentIndex, () => activeStepIndex.value],
+	() => {
+		if (!currentAttendee.value || activeStepIndex.value !== 0) return
+		resetForm({
+			values: {
+				first_name: currentAttendee.value.first_name || '',
+				last_name: currentAttendee.value.last_name || '',
+				email: currentAttendee.value.email || '',
+				phone_number: currentAttendee.value.phone_number || '',
+				date_of_birth: currentAttendee.value.date_of_birth || '',
+				gender: currentAttendee.value.gender || '',
+				relationship_to_user: currentAttendee.value.relationship_to_user || '',
+			},
+		})
+	},
+	{ immediate: true }
+)
+
+watch(
+	[() => store.currentIndex, () => activeStepIndex.value],
+	() => {
+		if (activeStepIndex.value !== 0) return
+		resetAttendeeInlineValidationState()
+	}
+)
 
 const handleNext = async () => {
 	const runStepPrecheck = async (): Promise<boolean> => {
@@ -1479,6 +1529,9 @@ const handleNext = async () => {
 		await runSafeValidation()
 	}
 	if (!canContinue.value) {
+		if (activeStepIndex.value === 0) {
+			forceShowAttendeeErrors.value = true
+		}
 		toast.add({
 			title: 'Cannot continue',
 			description: getCannotContinueMessage(),

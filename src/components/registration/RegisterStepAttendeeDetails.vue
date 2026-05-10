@@ -12,7 +12,8 @@
 				<UInput
 					:model-value="values.first_name"
 					placeholder="First name"
-					@update:model-value="(val) => emit('update-field', 'first_name', val)"
+					maxlength="20"
+					@update:model-value="(val) => emit('update-field-validate', 'first_name', val)"
 					:color="errors.first_name ? 'red' : 'gray'"
 				/>
 				<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
@@ -22,7 +23,8 @@
 				<UInput
 					:model-value="values.last_name"
 					placeholder="Last name"
-					@update:model-value="(val) => emit('update-field', 'last_name', val)"
+					maxlength="20"
+					@update:model-value="(val) => emit('update-field-validate', 'last_name', val)"
 					:color="errors.last_name ? 'red' : 'gray'"
 				/>
 				<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
@@ -103,7 +105,7 @@
 					</UButton>
 				</div>
 				<p class="mt-3 text-xs font-semibold" :class="hasCurrentAreaFrom ? 'text-emerald-700' : 'text-slate-500'">
-					{{ hasCurrentAreaFrom ? `✓ Area locked: ${currentAreaFromName}` : 'Select an area to continue.' }}
+					{{ hasCurrentAreaFrom ? `✓ Area selected: ${currentAreaFromName}` : 'Select an area to continue.' }}
 				</p>
 			</div>
 		</div>
