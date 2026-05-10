@@ -19,11 +19,18 @@ type MedicalConditionItemDraft = PersonalInfoItemDraft & {
   severity?: 'mild' | 'moderate' | 'severe' | null
 }
 
+type AlternativeSigninDraft = {
+  eventAlternativeSigninId: string
+  identifier: string
+}
+
 type PersonalInfoDraft = {
   dietaryRequirements: PersonalInfoItemDraft[]
   medicalConditions: MedicalConditionItemDraft[]
   accessibilityRequirements: PersonalInfoItemDraft[]
   emergencyContact: EmergencyContactDraft | null
+  organisationId?: number | null
+  alternativeSigninIdentifier?: AlternativeSigninDraft | null
   notes?: string
 }
 
@@ -91,6 +98,8 @@ const createEmptyAttendee = (): AttendeeDraft => ({
     medicalConditions: [],
     accessibilityRequirements: [],
     emergencyContact: null,
+    organisationId: null,
+    alternativeSigninIdentifier: null,
   },
   consents: [],
   questionAnswers: [],
@@ -168,6 +177,7 @@ export type {
   EmergencyContactDraft,
   PersonalInfoItemDraft,
   MedicalConditionItemDraft,
+  AlternativeSigninDraft,
   EventQuestionAnswerDraft,
   ProductSelectionDraft,
 }

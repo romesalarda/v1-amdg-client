@@ -10,6 +10,81 @@
 		</div>
 
 		<div class="grid gap-6">
+			<!-- Community identifiers -->
+			<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+				<h3 class="text-sm font-semibold text-slate-900">Community identifiers</h3>
+				<p class="mt-1 text-xs text-slate-600">Optionally link this attendee to an organisation.</p>
+
+				<div class="mt-4">
+					<label class="mb-1 block text-sm font-medium text-gray-700">Organisation</label>
+					<OrganisationSelect
+						:model-value="currentAttendee.personalInfo.organisationId ?? null"
+						@update:model-value="(value) => { currentAttendee.personalInfo.organisationId = value }"
+					/>
+				</div>
+			</div>
+
+			<!-- Alternative sign-in -->
+			<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+				<h3 class="text-sm font-semibold text-slate-900">Alternative sign-in identifier</h3>
+				<p class="mt-1 text-xs text-slate-600">Optionally attach one event-supported external identifier for this attendee.</p>
+
+				<div class="mt-4">
+					<label class="mb-1 block text-sm font-medium text-gray-700">Alternative sign-in type</label>
+					<USelectMenu
+						:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId || undefined"
+						:options="buildAlternativeSigninSelectOptions(alternativeSigninOptions)"
+						value-attribute="value"
+						option-attribute="label"
+						placeholder="Select sign-in type"
+						:loading="alternativeSigninsLoading"
+						@update:model-value="(value) => {
+							if (!value) {
+								currentAttendee.personalInfo.alternativeSigninIdentifier = null
+								return
+							}
+							if (!currentAttendee.personalInfo.alternativeSigninIdentifier) {
+								currentAttendee.personalInfo.alternativeSigninIdentifier = { eventAlternativeSigninId: '', identifier: '' }
+							}
+							currentAttendee.personalInfo.alternativeSigninIdentifier.eventAlternativeSigninId = String(value)
+						}"
+					/>
+					<p
+						v-if="!alternativeSigninsLoading && !alternativeSigninOptions.length"
+						class="mt-2 text-xs text-slate-500"
+					>
+						No alternative sign-in types are currently available for this event.
+					</p>
+				</div>
+
+				<div v-if="currentAttendee.personalInfo.alternativeSigninIdentifier" class="mt-4">
+					<label class="mb-1 block text-sm font-medium text-gray-700">Alternative sign-in identifier</label>
+					<UInput
+						:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier.identifier"
+						placeholder="Enter identifier value"
+						@update:model-value="(value) => {
+							if (!currentAttendee.personalInfo.alternativeSigninIdentifier) return
+							currentAttendee.personalInfo.alternativeSigninIdentifier.identifier = String(value || '')
+						}"
+					/>
+					<p
+						v-if="findAlternativeSigninOption(alternativeSigninOptions, currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId)?.formatMatch"
+						class="mt-2 text-xs text-slate-500"
+					>
+						Expected format:
+						<span class="font-mono">
+							{{ findAlternativeSigninOption(alternativeSigninOptions, currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId)?.formatMatch }}
+						</span>
+					</p>
+					<p
+						v-if="findAlternativeSigninOption(alternativeSigninOptions, currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId)?.description"
+						class="mt-1 text-xs text-slate-500"
+					>
+						{{ findAlternativeSigninOption(alternativeSigninOptions, currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId)?.description }}
+					</p>
+				</div>
+			</div>
+
 			<!-- Dietary Requirements -->
 			<div>
 				<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
@@ -256,6 +331,7 @@
 
 <script setup lang="ts">
 import type { AttendeeDraft, PersonalInfoItemDraft } from '~/stores/registration'
+import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
 
 defineProps<{
 	currentAttendee: AttendeeDraft
@@ -263,6 +339,8 @@ defineProps<{
 	dietaryRequirements: Array<{ id: number; label: string }>
 	medicalConditions: Array<{ id: number; label: string }>
 	accessibilityRequirements: Array<{ id: number; label: string }>
+	alternativeSigninOptions: Array<{ id: string; title: string; description: string | null; formatMatch: string | null }>
+	alternativeSigninsLoading: boolean
 	emergencyRelationshipOptions: Array<{ label: string; value: string }>
 	hasPersonalInfoItem: (items: any[], id: number) => boolean
 	isOtherOption: (id: number) => boolean
@@ -277,4 +355,19 @@ defineProps<{
 	updateAccessibilityRequirementDetails: (id: number, value: string) => void
 	addEmergencyContact: () => void
 }>()
+
+const buildAlternativeSigninSelectOptions = (
+	options: Array<{ id: string; title: string; description: string | null; formatMatch: string | null }>
+) => (options || []).map((option) => ({
+	label: option.title,
+	value: option.id,
+}))
+
+const findAlternativeSigninOption = (
+	options: Array<{ id: string; title: string; description: string | null; formatMatch: string | null }>,
+	selectedId?: string
+) => {
+	if (!selectedId) return null
+	return (options || []).find((option) => option.id === selectedId) || null
+}
 </script>

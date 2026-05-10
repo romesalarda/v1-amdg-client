@@ -44,6 +44,16 @@ const buildMedicalConditionItem = (item: MedicalConditionItemDraft): MedicalCond
 const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersonalInfoDraftRequest | undefined => {
   if (!info) return undefined
 
+  const alternativeSignin = info.alternativeSigninIdentifier
+  const mappedAlternativeSignin =
+    alternativeSignin?.eventAlternativeSigninId
+    && (alternativeSignin.identifier || '').trim().length > 0
+      ? {
+          event_alternative_signin_id: alternativeSignin.eventAlternativeSigninId,
+          identifier: alternativeSignin.identifier.trim(),
+        }
+      : undefined
+
   return {
     dietary_requirements: info.dietaryRequirements.map(buildPersonalInfoItem),
     medical_conditions: info.medicalConditions.map(buildMedicalConditionItem),
@@ -58,6 +68,8 @@ const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersona
           primary_contact: info.emergencyContact.primary_contact ?? true,
         }
       : undefined,
+    organisation_id: info.organisationId ?? null,
+    alternative_signin_identifier: mappedAlternativeSignin,
   }
 }
 

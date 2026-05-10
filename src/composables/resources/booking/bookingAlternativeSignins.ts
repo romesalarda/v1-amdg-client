@@ -8,6 +8,7 @@ import {
   bookingsAlternativeSigninsUpdate,
   bookingsAlternativeSigninsPartialUpdate,
   bookingsAlternativeSigninsDestroy,
+  bookingsCheckoutAlternativeSignins,
   bookingsAttendeeAlternativeSigninsList,
   bookingsAttendeeAlternativeSigninsRetrieve,
   bookingsAttendeeAlternativeSigninsCreate,
@@ -21,6 +22,7 @@ import type {
   BookingsAlternativeSigninsUpdateData,
   BookingsAlternativeSigninsPartialUpdateData,
   BookingsAlternativeSigninsDestroyData,
+  BookingsCheckoutAlternativeSigninsData,
   BookingsAttendeeAlternativeSigninsListData,
   BookingsAttendeeAlternativeSigninsCreateData,
   BookingsAttendeeAlternativeSigninsUpdateData,
@@ -41,6 +43,33 @@ export function useBookingAlternativeSignins(params?: MaybeRefOrGetter<BookingsA
       const queryParams = toValue(params)
       return bookingsAlternativeSigninsList(queryParams ? { query: queryParams } : undefined)
     },
+  })
+}
+
+/**
+ * List checkout-facing alternative sign-in definitions for a booking intent.
+ */
+export function useCheckoutAlternativeSignins(
+  bookingIntentId: MaybeRefOrGetter<string | null | undefined>,
+  params?: MaybeRefOrGetter<Omit<BookingsCheckoutAlternativeSigninsData['query'], 'booking_intent_id'> | undefined>
+) {
+  return useQuery({
+    queryKey: [...BOOKING_QUERY_KEY, 'checkout', bookingIntentId, params] as const,
+    queryFn: () => {
+      const intentId = toValue(bookingIntentId)
+      if (!intentId) {
+        throw new Error('bookingIntentId is required to load checkout alternative sign-ins')
+      }
+
+      const queryParams = toValue(params) || {}
+      return bookingsCheckoutAlternativeSignins({
+        query: {
+          ...queryParams,
+          booking_intent_id: intentId,
+        },
+      })
+    },
+    enabled: () => !!toValue(bookingIntentId),
   })
 }
 

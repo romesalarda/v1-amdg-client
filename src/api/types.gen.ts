@@ -404,6 +404,26 @@ export type AttendeeAlternativeSigninDetail = {
 };
 
 /**
+ * Alternative sign-in payload for a draft attendee.
+ *
+ * Example:
+ * {
+ * "event_alternative_signin_id": "550e8400-e29b-41d4-a716-446655440000",
+ * "identifier": "123456"
+ * }
+ */
+export type AttendeeAlternativeSigninDraftRequest = {
+    /**
+     * UUID of EventAlternativeSigninIdentifier
+     */
+    event_alternative_signin_id: string;
+    /**
+     * Identifier value matching event alternative sign-in format
+     */
+    identifier: string;
+};
+
+/**
  * List serializer for AttendeeAlternativeSigninIdentifier with HATEOAS links.
  */
 export type AttendeeAlternativeSigninList = {
@@ -1209,6 +1229,14 @@ export type AttendeePersonalInfoDraftRequest = {
      * Emergency contact (REQUIRED for attendees under 18)
      */
     emergency_contact?: EmergencyContactDraftRequest;
+    /**
+     * Optional organisation ID to associate with attendee
+     */
+    organisation_id?: number | null;
+    /**
+     * Optional alternative sign-in identifier to create for attendee
+     */
+    alternative_signin_identifier?: AttendeeAlternativeSigninDraftRequest;
 };
 
 export type AttendeePreRemovalBlocker = {
@@ -27868,6 +27896,107 @@ export type BookingsCheckoutResponses = {
 };
 
 export type BookingsCheckoutResponse = BookingsCheckoutResponses[keyof BookingsCheckoutResponses];
+
+export type BookingsCheckoutAlternativeSigninsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter by attendee email (case-insensitive)
+         */
+        attendee_email?: string;
+        /**
+         * Filter by attendee UUID
+         */
+        attendee_id?: string;
+        /**
+         * Filter by attendee name (first or last, case-insensitive)
+         */
+        attendee_name?: string;
+        /**
+         * Filter bookings made after this date (ISO 8601 format)
+         */
+        booked_after?: string;
+        /**
+         * Filter bookings made before this date
+         */
+        booked_before?: string;
+        /**
+         * Filter bookings made on specific date (YYYY-MM-DD)
+         */
+        booked_date?: string;
+        /**
+         * Booking intent UUID used to scope event alternative sign-in definitions
+         */
+        booking_intent_id: string;
+        /**
+         * Exact booking reference (case-insensitive)
+         */
+        booking_reference?: string;
+        /**
+         * Booking reference contains (case-insensitive)
+         */
+        booking_reference__contains?: string;
+        /**
+         * Filter by event PK, UUID, or URL-safe title
+         */
+        event?: string;
+        /**
+         * Filter by event UUID
+         */
+        event_id?: string;
+        /**
+         * Filter by user ID who made the booking
+         */
+        made_by?: number;
+        /**
+         * Filter by username (case-insensitive)
+         */
+        made_by__username?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by ticket status (can specify multiple)
+         *
+         * * `ACTIVE` - Active
+         * * `CANCELLED` - Cancelled
+         * * `USED` - Used
+         */
+        ticket_status?: Array<'ACTIVE' | 'CANCELLED' | 'USED'>;
+    };
+    url: '/api/bookings/list/checkout-alternative-signins/';
+};
+
+export type BookingsCheckoutAlternativeSigninsErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Permission denied
+     */
+    403: unknown;
+};
+
+export type BookingsCheckoutAlternativeSigninsResponses = {
+    200: PaginatedEventAlternativeSigninListList;
+};
+
+export type BookingsCheckoutAlternativeSigninsResponse = BookingsCheckoutAlternativeSigninsResponses[keyof BookingsCheckoutAlternativeSigninsResponses];
 
 export type BookingsCheckoutPreviewData = {
     body: CheckoutPreviewRequest;

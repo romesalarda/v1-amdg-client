@@ -128,6 +128,8 @@
 						:dietary-requirements="dietaryRequirements"
 						:medical-conditions="medicalConditions"
 						:accessibility-requirements="accessibilityRequirements"
+						:alternative-signin-options="alternativeSigninOptions"
+						:alternative-signins-loading="alternativeSigninsLoading"
 						:emergency-relationship-options="emergencyRelationshipOptions"
 						:has-personal-info-item="hasPersonalInfoItem"
 						:is-other-option="isOtherOption"
@@ -385,6 +387,7 @@ import {
 import { useBookingIntentManager } from '~/composables/registration/useBookingIntentManager'
 import { usePackageProductManager } from '~/composables/registration/usePackageProductManager'
 import { usePersonalInfoManager } from '~/composables/registration/usePersonalInfoManager'
+import { useAttendeeEnrichmentOptions } from '~/composables/registration/useAttendeeEnrichmentOptions'
 import { useRegistrationStepManager } from '~/composables/registration/useRegistrationStepManager'
 import { usePaymentMethodManager } from '~/composables/registration/usePaymentMethodManager'
 import { useStripeCheckoutFlow } from '~/composables/registration/useStripeCheckoutFlow'
@@ -560,6 +563,11 @@ const {
 	currentIndex,
 	setPersonalInfo: (index, personalInfo) => store.setPersonalInfo(index, personalInfo),
 })
+
+const {
+	alternativeSigninOptions,
+	alternativeSigninsLoading,
+} = useAttendeeEnrichmentOptions(computed(() => store.bookingIntentId))
 
 watchEffect(() => {
 	if (!currentAttendee.value) return
@@ -1144,6 +1152,15 @@ const attendeeHasRequiredConsents = (attendee: AttendeeDraft) => {
 	)
 }
 
+const attendeeHasCompleteAlternativeSignin = (attendee: AttendeeDraft) => {
+	const signin = attendee.personalInfo.alternativeSigninIdentifier
+	if (!signin) return true
+
+	const hasType = !!String(signin.eventAlternativeSigninId || '').trim()
+	const hasIdentifier = !!String(signin.identifier || '').trim()
+	return (hasType && hasIdentifier) || (!hasType && !hasIdentifier)
+}
+
 const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasNames = !!attendee.first_name && !!attendee.last_name
 	const hasRelationship = !!attendee.relationship_to_user || (store.registrarAttending && attendee === store.attendees[0])
@@ -1152,7 +1169,17 @@ const isAttendeeReady = (attendee: AttendeeDraft) => {
 	const hasPackage = !!attendee.packageId
 	const hasEmergencyContactIfMinor = minorHasEmergencyContact(attendee)
 	const hasPersonalInfoValidity = hasValidPersonalInfoItems(attendee)
-	return hasNames && hasRelationship && hasDob && hasAreaFrom && hasPackage && hasEmergencyContactIfMinor && hasPersonalInfoValidity && attendeeHasRequiredAnswers(attendee) && attendeeHasRequiredConsents(attendee)
+	const hasCompleteAlternativeSignin = attendeeHasCompleteAlternativeSignin(attendee)
+	return hasNames
+		&& hasRelationship
+		&& hasDob
+		&& hasAreaFrom
+		&& hasPackage
+		&& hasEmergencyContactIfMinor
+		&& hasPersonalInfoValidity
+		&& hasCompleteAlternativeSignin
+		&& attendeeHasRequiredAnswers(attendee)
+		&& attendeeHasRequiredConsents(attendee)
 }
 
 const isBookingFree = computed(() => {
@@ -1183,11 +1210,14 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === 2) {
 		const hasValidPersonalInfo = hasValidPersonalInfoItems(currentAttendee.value)
+		const hasCompleteAlternativeSignin = attendeeHasCompleteAlternativeSignin(currentAttendee.value)
 		// Personal info step: enforce emergency contact for minors
 		if (isAttendeeMinor(currentAttendee.value)) {
-			return minorHasEmergencyContact(currentAttendee.value) && hasValidPersonalInfo
+			return minorHasEmergencyContact(currentAttendee.value)
+				&& hasValidPersonalInfo
+				&& hasCompleteAlternativeSignin
 		}
-		return hasValidPersonalInfo
+		return hasValidPersonalInfo && hasCompleteAlternativeSignin
 	}
 	if (activeStepIndex.value === 3) {
 		return !!currentAttendee.value.packageId && isCurrentAttendeePackageAvailable.value
@@ -1243,6 +1273,9 @@ const getCannotContinueMessage = () => {
 	if (activeStepIndex.value === 2) {
 		if (isAttendeeMinor(currentAttendee.value) && !minorHasEmergencyContact(currentAttendee.value)) {
 			return 'Emergency contact is required for minors.'
+		}
+		if (!attendeeHasCompleteAlternativeSignin(currentAttendee.value)) {
+			return 'Alternative sign-in requires both type and identifier.'
 		}
 		if (!hasValidPersonalInfoItems(currentAttendee.value)) {
 			return 'Please add details for selected OTHER requirements.'
