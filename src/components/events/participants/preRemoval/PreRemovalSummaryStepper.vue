@@ -32,24 +32,7 @@
 
     <div v-else-if="summary" class="space-y-4">
       <div v-if="activeStep === 'overview'" class="space-y-4">
-        <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
-          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div class="text-xs text-gray-500">Linked Payments</div>
-            <div class="text-base font-bold text-gray-900">{{ summary.summary_counts.linked_payments }}</div>
-          </div>
-          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div class="text-xs text-gray-500">Active Tickets</div>
-            <div class="text-base font-bold text-gray-900">{{ summary.summary_counts.active_tickets }}</div>
-          </div>
-          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div class="text-xs text-gray-500">Unresolved Orders</div>
-            <div class="text-base font-bold text-gray-900">{{ summary.summary_counts.unresolved_orders }}</div>
-          </div>
-          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3">
-            <div class="text-xs text-gray-500">Active Refunds</div>
-            <div class="text-base font-bold text-gray-900">{{ summary.summary_counts.active_refund_requests }}</div>
-          </div>
-        </div>
+        
 
         <div
           :class="[
@@ -71,7 +54,7 @@
               <p>
                 {{ summary.can_delete
                   ? 'The final delete action is available on the last step.'
-                  : 'Resolve the blocker steps below before the final irreversible delete action is enabled.' }}
+                  : 'Resolve active ticket and unresolved order blockers before the final irreversible delete action is enabled.' }}
               </p>
             </div>
           </div>
@@ -124,7 +107,7 @@
             </div>
 
             <div v-else class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
-              No linked payment blockers on this page.
+              No linked package payments on this page.
             </div>
           </div>
 
@@ -159,7 +142,7 @@
             </div>
 
             <div v-else class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-3 text-sm text-gray-600">
-              No active refunds on this page.
+              No active package refunds on this page.
             </div>
           </div>
         </div>
@@ -167,7 +150,7 @@
 
       <div v-else-if="activeStep === 'packages'" class="space-y-3">
         <div v-if="!dedupedPaymentItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          No package-linked payment blockers on this page.
+          No package-linked payments on this page.
         </div>
 
         <div
@@ -181,7 +164,7 @@
                 <UIcon name="i-heroicons-cube-transparent" class="h-4 w-4 text-indigo-600" />
                 <span class="text-sm font-semibold text-gray-900">{{ payment.item.payment_reference || payment.item.payment_id || 'Payment' }}</span>
                 <UBadge v-if="payment.item.payment_descriptor" color="blue" variant="soft" size="xs">{{ payment.item.payment_descriptor }}</UBadge>
-                <UBadge v-if="payment.item.payment_status" color="gray" variant="soft" size="xs">{{ payment.item.payment_status }}</UBadge>
+                <UBadge v-if="payment.item.payment_status" color="gray" variant="soft" size="xs">{{ payment.item.payment_status.replace("_", " ").toLowerCase() }}</UBadge>
               </div>
 
               <p class="text-xs text-gray-600">
@@ -294,7 +277,7 @@
         </div>
       </div>
 
-      <div v-else class="space-y-3">
+      <div v-else-if="activeStep === 'orders'" class="space-y-3">
         <div v-if="!orderItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
           No unresolved order blockers on this page.
         </div>
@@ -334,6 +317,33 @@
           </div>
         </div>
 
+      </div>
+
+      <div v-else-if="activeStep === 'final'" class="space-y-4">
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
+          <div class="flex items-start gap-3">
+            <div class="rounded-full bg-blue-100 p-2">
+              <UIcon name="i-heroicons-x-circle" class="h-5 w-5 text-blue-700" />
+            </div>
+            <div class="min-w-0 flex-1 space-y-2">
+              <div>
+                <h4 class="text-sm font-bold uppercase tracking-wide text-blue-800">Alternative action: cancel attendee</h4>
+                <p class="mt-1 text-sm text-blue-800">
+                  Mark this attendee as cancelled to preserve historical records while removing them from active participation.
+                </p>
+              </div>
+              <UButton
+                color="blue"
+                :disabled="cancelling"
+                :loading="cancelling"
+                @click="$emit('confirmCancel')"
+              >
+                Set attendee status to CANCELLED
+              </UButton>
+            </div>
+          </div>
+        </div>
+
         <div class="rounded-xl border-2 border-red-200 bg-red-50 p-4">
           <div class="flex items-start gap-3">
             <div class="rounded-full bg-red-100 p-2">
@@ -365,7 +375,7 @@
         </div>
       </div>
 
-      <div class="pt-2 flex gap-2">
+      <!-- <div class="pt-2 flex gap-2">
         <UButton
           variant="outline"
           color="gray"
@@ -374,7 +384,7 @@
         >
           Cancel
         </UButton>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -383,20 +393,20 @@
 import { computed, ref } from 'vue'
 import type {
   AttendeePreRemovalSummary,
-  AttendeePreRemovalBlocker,
   AttendeePreRemovalBlockerItem,
   AttendeePreRemovalRefundSummary,
 } from '~/composables/resources/attendee/attendees'
 import PreRemovalTicketCard from './PreRemovalTicketCard.vue'
 import PreRemovalOrderCard from './PreRemovalOrderCard.vue'
 
-type StepKey = 'overview' | 'packages' | 'tickets' | 'orders'
+type StepKey = 'overview' | 'packages' | 'tickets' | 'orders' | 'final'
 
 const props = defineProps<{
   summary?: AttendeePreRemovalSummary
   loading: boolean
   error?: unknown
   deleting?: boolean
+  cancelling?: boolean
   attendeeName?: string
   attendeeDisplayId?: string
   eventQueryValue?: string
@@ -405,15 +415,18 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'confirmDelete'): void
+  (e: 'confirmCancel'): void
   (e: 'requestRefund', item: AttendeePreRemovalBlockerItem): void
   (e: 'pageChange', page: number): void
 }>()
 
 const activeStepIndex = ref(0)
-const stepOrder: StepKey[] = ['overview', 'packages', 'tickets', 'orders']
+const stepOrder: StepKey[] = ['overview', 'packages', 'tickets', 'orders', 'final']
 const activeStep = computed<StepKey>(() => stepOrder[activeStepIndex.value] || 'overview')
 
 const blockers = computed(() => props.summary?.blockers || [])
+const blockingCodes = ['active_tickets', 'unresolved_orders']
+const blockingBlockers = computed(() => blockers.value.filter(b => blockingCodes.includes(b.code)))
 
 const packageBlockers = computed(() => blockers.value.filter(b => ['outstanding_payments', 'linked_payments', 'active_refunds'].includes(b.code)))
 const activeTicketsBlocker = computed(() => blockers.value.find(b => b.code === 'active_tickets'))
@@ -480,11 +493,11 @@ const steps = computed(() => [
     key: 'overview' as StepKey,
     label: 'Overview',
     icon: 'i-heroicons-list-bullet',
-    count: blockers.value.length,
+    count: blockingBlockers.value.length,
   },
   {
     key: 'packages' as StepKey,
-    label: 'Packages',
+    label: 'Package Payments',
     icon: 'i-heroicons-cube-transparent',
     count: packageBlockers.value.reduce((sum, blocker) => sum + blocker.count, 0),
   },
@@ -499,6 +512,12 @@ const steps = computed(() => [
     label: 'Orders',
     icon: 'i-heroicons-shopping-bag',
     count: ordersBlocker.value?.count || 0,
+  },
+  {
+    key: 'final' as StepKey,
+    label: 'Final Action',
+    icon: 'i-heroicons-exclamation-triangle',
+    count: props.summary?.can_delete ? 0 : blockingBlockers.value.length,
   },
 ])
 

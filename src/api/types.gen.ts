@@ -449,6 +449,10 @@ export type AttendeeCancellationRefundResponse = {
     selected_attendee_ids: Array<string>;
 };
 
+export type AttendeeCancellationRequestRequest = {
+    invalidate?: boolean;
+};
+
 /**
  * Attendee selection for a specific checkout transaction.
  *
@@ -1230,16 +1234,11 @@ export type AttendeePreRemovalSummaryAttendee = {
 };
 
 export type AttendeePreRemovalSummaryCounts = {
-    linked_payments: number;
-    outstanding_payments: number;
-    active_refund_requests: number;
     active_tickets: number;
     unresolved_orders: number;
-    open_attendance: number;
-    family_memberships: number;
-    total_blockers?: number;
-    high_priority_blockers?: number;
-    medium_priority_blockers?: number;
+    total_blockers: number;
+    high_priority_blockers: number;
+    medium_priority_blockers: number;
 };
 
 /**
@@ -25668,6 +25667,29 @@ export type AttendeesAccessibilityRequirementsUpdateResponses = {
 };
 
 export type AttendeesAccessibilityRequirementsUpdateResponse = AttendeesAccessibilityRequirementsUpdateResponses[keyof AttendeesAccessibilityRequirementsUpdateResponses];
+
+export type AttendeesCancelCreateData = {
+    body?: AttendeeCancellationRequestRequest;
+    path: {
+        attendee_id: string;
+    };
+    query?: never;
+    url: '/api/attendees/{attendee_id}/cancel/';
+};
+
+export type AttendeesCancelCreateErrors = {
+    /**
+     * Attendee is already cancelled.
+     */
+    400: unknown;
+};
+
+export type AttendeesCancelCreateResponses = {
+    /**
+     * Attendee registration cancelled successfully.
+     */
+    200: unknown;
+};
 
 export type AttendeesConsentsListData = {
     body?: never;

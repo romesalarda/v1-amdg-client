@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
 import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
 import {
+  attendeesCancelCreate,
   attendeesList,
   attendeesRetrieve,
   attendeesCreate,
@@ -11,6 +12,7 @@ import {
   attendeesRequestCancellationRefundCreate,
 } from '~/api/sdk.gen'
 import type {
+  AttendeesCancelCreateData,
   AttendeesListData,
   AttendeesCreateData,
   AttendeesUpdateData,
@@ -110,13 +112,11 @@ export interface AttendeePreRemovalSummary {
   can_delete: boolean
   blockers: AttendeePreRemovalBlocker[]
   summary_counts: {
-    linked_payments: number
-    outstanding_payments: number
-    active_refund_requests: number
     active_tickets: number
     unresolved_orders: number
-    open_attendance: number
-    family_memberships: number
+    total_blockers: number
+    high_priority_blockers: number
+    medium_priority_blockers: number
   }
   suggested_actions: Array<{
     code: string
@@ -246,6 +246,30 @@ export function useRequestAttendeeCancellationRefund() {
       })
       queryClient.invalidateQueries({ queryKey: ['payments'] })
       queryClient.invalidateQueries({ queryKey: ['paymentRefunds'] })
+    },
+  })
+}
+
+/**
+ * Cancel attendee registration without deleting attendee record
+ */
+export function useCancelAttendee() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ attendeeId, body }: { attendeeId: string; body?: AttendeesCancelCreateData['body'] }) =>
+      attendeesCancelCreate({
+        path: { attendee_id: attendeeId },
+        body: body ?? { invalidate: false },
+      }),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.attendeeId],
+      })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'pre-removal-summary', variables.attendeeId],
+      })
     },
   })
 }

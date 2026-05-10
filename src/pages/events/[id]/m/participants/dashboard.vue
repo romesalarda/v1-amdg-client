@@ -1419,11 +1419,13 @@
         :loading="preRemovalSummaryLoading"
         :error="preRemovalSummaryError"
         :deleting="deleteAttendeeMutation.isPending.value"
+        :cancelling="cancelAttendeeMutation.isPending.value"
         :attendee-name="selectedDeleteAttendee?.full_name"
         :attendee-display-id="selectedDeleteAttendee?.attendee_display_id"
         :event-query-value="orderEventQueryValue"
         @close="showPreRemovalModal = false"
         @confirm-delete="confirmDeleteAttendee"
+        @confirm-cancel="confirmCancelAttendee"
         @request-refund="openAttendeeRefundModalFromBlockerItem"
         @page-change="handlePreRemovalPageChange"
       />
@@ -1449,6 +1451,7 @@ import {
   useAttendees,
   useCreateAttendee,
   useDeleteAttendee,
+  useCancelAttendee,
   useAttendeePreRemovalSummary,
   type AttendeePreRemovalSummary,
   type AttendeePreRemovalBlockerItem,
@@ -1826,6 +1829,7 @@ const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
 // Create attendee mutation
 const createAttendeeMutation = useCreateAttendee()
 const deleteAttendeeMutation = useDeleteAttendee()
+const cancelAttendeeMutation = useCancelAttendee()
 const updateFamilyGroupMutation = usePartialUpdateFamilyGroup()
 const updateFamilyAttendeeMutation = usePartialUpdateFamilyAttendee()
 const deleteFamilyAttendeeMutation = useDeleteFamilyAttendee()
@@ -2546,6 +2550,33 @@ async function confirmDeleteAttendee() {
     const message = error?.message || 'Unable to remove attendee.'
     toast.add({
       title: 'Delete failed',
+      description: message,
+      color: 'red',
+    })
+  }
+}
+
+async function confirmCancelAttendee() {
+  if (!selectedDeleteAttendee.value) {
+    return
+  }
+
+  try {
+    await cancelAttendeeMutation.mutateAsync({
+      attendeeId: selectedDeleteAttendee.value.attendee_id,
+      body: { invalidate: false },
+    })
+    toast.add({
+      title: 'Attendee cancelled',
+      description: 'The attendee status has been set to CANCELLED.',
+      color: 'green',
+    })
+    showPreRemovalModal.value = false
+    selectedDeleteAttendee.value = null
+  } catch (error: any) {
+    const message = error?.message || 'Unable to cancel attendee.'
+    toast.add({
+      title: 'Cancel failed',
       description: message,
       color: 'red',
     })
