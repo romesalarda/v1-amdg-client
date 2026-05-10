@@ -386,9 +386,10 @@
         </div>
         <div>
           <h3 class="text-lg font-black text-red-600 uppercase tracking-widest">Reservation Failed</h3>
-          <p class="text-sm text-red-600/70 mt-2">{{ intentCreationError }}</p>
+          <p class="text-md text-red-600">An error occurred while sending your booking request to our servers. If this issue persists, please contact support.</p>
+          <p class="text-sm text-red-600/70 mt-2">Error: {{ intentCreationError }}</p>
         </div>
-        <div class="flex items-center justify-end gap-3 pt-4">
+        <div class="flex items-center justify-center gap-3 pt-4">
           <UButton color="primary" @click="closeWaitScreen">Try Again</UButton>
         </div>
       </div>
