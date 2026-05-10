@@ -293,16 +293,12 @@
                 <label class="block text-xs font-black text-primary uppercase tracking-wider">
                   Timezone <span class="text-red-500">*</span>
                 </label>
-                <select
+                <TimezoneSelect
                   v-if="isEditMode"
-                  v-model="timezone"
-                  class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all appearance-none"
-                  required
-                >
-                  <option v-for="tz in timezoneOptions" :key="tz" :value="tz">
-                    {{ tz }}
-                  </option>
-                </select>
+                  :model-value="timezone || 'UTC'"
+                  :has-error="!!errors.timezone"
+                  @update:model-value="timezone = $event"
+                />
                 <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">{{ timezone || '-' }}</p>
                 <span v-if="errors.timezone" class="text-xs text-red-500 font-medium">{{ errors.timezone }}</span>
               </div>
@@ -716,6 +712,7 @@ import { useEventAuthorizations } from '~/composables/resources/events/eventAuth
 import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import ConfirmActionModal from '~/components/events/ConfirmActionModal.vue'
+import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 import { EventBaseSchema } from '~/schemas/event.schema'
 
 definePageMeta({
@@ -802,19 +799,6 @@ const statusOptions = [
   { value: 'CANCELLED', label: 'Cancelled' },
   { value: 'POSTPONED', label: 'Postponed' },
   { value: 'ARCHIVED', label: 'Archived' },
-]
-
-// Common timezones
-const timezoneOptions = [
-  'UTC',
-  'Europe/London',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Africa/Lagos',
-  'Africa/Accra',
-  'Africa/Nairobi',
 ]
 
 // Initialize form with event data
