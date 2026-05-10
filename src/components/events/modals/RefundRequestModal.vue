@@ -115,7 +115,16 @@
                         </div>
 
                         <div class="min-w-0">
-                          <div class="text-sm font-semibold text-gray-900 truncate">{{ item.name }}</div>
+                          <div class="flex items-center gap-1.5">
+                            <div class="text-sm font-semibold text-gray-900 truncate">{{ item.name }}</div>
+                            <span
+                              v-if="item.type === 'attendee' && item.is_cancelled && !item.is_refunded"
+                              class="material-symbols-outlined text-base leading-none text-amber-600"
+                              :title="'This user status is set to CANCELLED even though a refund has not occured for this specific PACKAGE.'"
+                            >
+                              warning
+                            </span>
+                          </div>
                           <div class="mt-1 text-xs text-gray-600">{{ formatCurrency(item.price) }} per unit</div>
                           <div class="mt-1 text-xs text-gray-500">Available quantity: {{ item.quantity }}</div>
 
@@ -164,6 +173,12 @@
 
                     <div class="flex flex-col items-end gap-2">
                       <span v-if="item.is_refunded" class="text-xs font-semibold text-red-600">Refunded</span>
+                      <span
+                        v-else-if="item.type === 'attendee' && item.is_cancelled"
+                        class="text-xs font-semibold text-amber-700"
+                      >
+                        Cancelled status
+                      </span>
                       <div v-if="refundType === 'partial' && item.type === 'order_item' && selectedItems[item.id]" class="flex items-center gap-2">
                         <span class="text-xs text-gray-500">Qty:</span>
                         <input
@@ -362,6 +377,7 @@ type SelectableItem = {
   orderId?: string
   variantId?: string
   packageProductId?: number
+  is_cancelled?: boolean | null
   is_refunded: boolean | undefined | null
 }
 
@@ -388,6 +404,7 @@ const loadingOrderIds = new Set<string>()
 
 const attendeeDetailsById = ref<Record<string, any>>({})
 const attendeeCancelledState = ref<Record<string, boolean | null>>({})
+const attendeeRefundState = ref<Record<string, boolean | null>>({})
 const fetchedAttendeeIds = new Set<string>()
 const loadingAttendeeIds = new Set<string>()
 
@@ -457,10 +474,12 @@ async function fetchAttendeeIsCancelled(attendeeId: string) {
 
     attendeeDetailsById.value[attendeeId] = response.data ?? null
     attendeeCancelledState.value[attendeeId] = response.data?.is_cancelled ?? null
+    attendeeRefundState.value[attendeeId] = response.data?.is_refunded ?? null
     fetchedAttendeeIds.add(attendeeId)
   } catch {
     attendeeDetailsById.value[attendeeId] = null
     attendeeCancelledState.value[attendeeId] = null
+    attendeeRefundState.value[attendeeId] = null
   } finally {
     loadingAttendeeIds.delete(attendeeId)
   }
@@ -496,6 +515,14 @@ function getAttendeeIsCancelled(attendeeId?: string) {
   }
 
   return attendeeCancelledState.value[attendeeId] ?? null
+}
+
+function getAttendeeIsRefunded(attendeeId?: string) {
+  if (!attendeeId) {
+    return null
+  }
+
+  return attendeeRefundState.value[attendeeId] ?? null
 }
 
 function isAttendeeLoading(attendeeId?: string) {
@@ -536,6 +563,9 @@ watch(
       if (!(attendeeId in attendeeCancelledState.value)) {
         attendeeCancelledState.value[attendeeId] = null
       }
+      if (!(attendeeId in attendeeRefundState.value)) {
+        attendeeRefundState.value[attendeeId] = null
+      }
       void fetchAttendeeIsCancelled(attendeeId)
     })
   },
@@ -556,7 +586,8 @@ const selectableItems = computed<SelectableItem[]>(() => {
         quantity: 1,
         type: 'attendee',
         attendeeId: item.attendee_id,
-        is_refunded: getAttendeeIsCancelled(item.attendee_id),
+        is_cancelled: getAttendeeIsCancelled(item.attendee_id),
+        is_refunded: getAttendeeIsRefunded(item.attendee_id),
       }
 
       const productLineEntries: SelectableItem[] = (item.product_lines || []).map((line: any, index: number) => {

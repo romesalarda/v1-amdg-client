@@ -1479,9 +1479,10 @@ import type { AttendeeList, OrganisationList, BookingList, BookingDetail, Family
 interface ExtendedAttendeeList extends AttendeeList {
   // area_from_name?: string | null
   is_event_staff?: boolean
-  is_checked_in?: boolean
-  is_registered?: boolean
-  is_cancelled?: boolean
+  is_checked_in: boolean
+  is_registered: boolean
+  is_cancelled: boolean
+  is_refunded: boolean
 }
 
 interface ExtendedBookingList extends Omit<BookingList, 'attendees'> {
@@ -1489,6 +1490,7 @@ interface ExtendedBookingList extends Omit<BookingList, 'attendees'> {
     attendee_id?: number | string
     attendee_display_id?: string
     full_name?: string
+    is_refunded: boolean
   }>
 }
 

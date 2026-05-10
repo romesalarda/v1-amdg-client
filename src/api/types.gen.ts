@@ -640,6 +640,18 @@ export type AttendeeDetail = {
     readonly relationship_display: string;
     event?: number | null;
     readonly event_title: string | null;
+    /**
+     * * `pending_payment` - Pending Payment
+     * * `registered` - Registered
+     * * `checked_in` - Checked In
+     * * `cancelled` - Cancelled
+     * * `whitelisted` - Whitelisted
+     */
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    readonly is_cancelled: boolean;
+    readonly is_registered: boolean;
+    readonly is_checked_in: boolean;
+    readonly is_refunded: boolean;
     readonly created_at: string;
     /**
      *  links
@@ -658,13 +670,9 @@ export type AttendeeDetail = {
     readonly area_from_name: string | null;
     area_from?: number | null;
     booking?: number | null;
-    readonly booking_id: string | null;
     readonly is_event_staff: boolean;
     readonly staff_role_names: Array<unknown>;
     readonly self_registered: boolean;
-    readonly is_cancelled: boolean;
-    readonly is_registered: boolean;
-    readonly is_checked_in: boolean;
     defined_by?: number | null;
     readonly updated_at: string;
     readonly deleted_at: string | null;
@@ -879,6 +887,18 @@ export type AttendeeList = {
     readonly relationship_display: string;
     event?: number | null;
     readonly event_title: string | null;
+    /**
+     * * `pending_payment` - Pending Payment
+     * * `registered` - Registered
+     * * `checked_in` - Checked In
+     * * `cancelled` - Cancelled
+     * * `whitelisted` - Whitelisted
+     */
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
+    readonly is_cancelled: boolean;
+    readonly is_registered: boolean;
+    readonly is_checked_in: boolean;
+    readonly is_refunded: boolean;
     readonly created_at: string;
     /**
      *  links
@@ -1705,6 +1725,9 @@ export type BookingDetail = {
         display_id?: string;
         name?: string;
         url?: string;
+        is_cancelled?: boolean;
+        is_registered?: boolean;
+        is_checked_in?: boolean;
     }>;
     readonly tickets: Array<{
         ticket_id?: string;
@@ -18870,6 +18893,14 @@ export type AttendeeDetailWritable = {
      */
     relationship_to_user?: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
     event?: number | null;
+    /**
+     * * `pending_payment` - Pending Payment
+     * * `registered` - Registered
+     * * `checked_in` - Checked In
+     * * `cancelled` - Cancelled
+     * * `whitelisted` - Whitelisted
+     */
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
     area_from?: number | null;
     booking?: number | null;
     defined_by?: number | null;
@@ -18949,6 +18980,14 @@ export type AttendeeListWritable = {
      */
     relationship_to_user?: 'self' | 'spouse' | 'child' | 'friend' | 'parent' | 'sibling' | 'other';
     event?: number | null;
+    /**
+     * * `pending_payment` - Pending Payment
+     * * `registered` - Registered
+     * * `checked_in` - Checked In
+     * * `cancelled` - Cancelled
+     * * `whitelisted` - Whitelisted
+     */
+    status?: 'pending_payment' | 'registered' | 'checked_in' | 'cancelled' | 'whitelisted';
 };
 
 /**
