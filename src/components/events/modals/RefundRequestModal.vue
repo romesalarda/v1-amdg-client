@@ -82,11 +82,11 @@
                 {{ refundType === 'full' ? 'Refund Items (view only)' : 'Select Items to Refund' }}
               </label>
               <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-72 overflow-y-auto">
-                <div v-for="item in selectableItems" :key="item.id" class="rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200 transition-colors">
+                <div v-for="item in selectableItems" :key="item.id" class="rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200 transition-colors" :class="{ 'opacity-60': item.type === 'attendee' && isAttendeeLoading(item.attendeeId) }">
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
                       <input
-                        :disabled="refundType === 'full' || item?.is_refunded || item.quantity <= 0 || requiresLiveOrderResolution(item)"
+                        :disabled="refundType === 'full' || item?.is_refunded || item.quantity <= 0 || requiresLiveOrderResolution(item) || (item.type === 'attendee' && isAttendeeLoading(item.attendeeId))"
                         :id="`item-${item.id}`"
                         type="checkbox"
                         :checked="refundType === 'partial' && !!selectedItems[item.id]"
@@ -150,6 +150,12 @@
                               class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
                             >
                               Waiting for live order sync
+                            </span>
+                            <span
+                              v-if="item.type === 'attendee' && isAttendeeLoading(item.attendeeId)"
+                              class="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800"
+                            >
+                              Checking attendee status
                             </span>
                           </div>
                         </div>
@@ -304,7 +310,7 @@
 import { useCreatePaymentRefund } from '~/composables/resources/payments/paymentRefunds'
 import { useRequestAttendeeCancellationRefund } from '~/composables/resources/attendee/attendees'
 import { usePayment } from '~/composables/resources/payments/payments'
-import { productsListVariantsRetrieve, productsOrdersRetrieve } from '~/api/sdk.gen'
+import { productsListVariantsRetrieve, productsOrdersRetrieve, attendeesRetrieve } from '~/api/sdk.gen'
 import { parseAmount } from '~/utils/money'
 import { resolveImageUrl } from '~/utils/image'
 import type { AttendeeList, EventDetail, ProductVariantDetail } from '~/api/types.gen'
@@ -356,7 +362,7 @@ type SelectableItem = {
   orderId?: string
   variantId?: string
   packageProductId?: number
-  is_refunded: boolean | undefined
+  is_refunded: boolean | undefined | null
 }
 
 type SelectedItem = {
@@ -379,6 +385,11 @@ const orderDetailsById = ref<Record<string, any>>({})
 const orderRefundState = ref<Record<string, boolean | null>>({})
 const fetchedOrderIds = new Set<string>()
 const loadingOrderIds = new Set<string>()
+
+const attendeeDetailsById = ref<Record<string, any>>({})
+const attendeeCancelledState = ref<Record<string, boolean | null>>({})
+const fetchedAttendeeIds = new Set<string>()
+const loadingAttendeeIds = new Set<string>()
 
 const eventSlugOrId = computed(() => {
   const eventIdentifier = props.eventDetail?.url_safe_title || props.eventDetail?.event_id
@@ -432,6 +443,29 @@ async function fetchOrderIsRefunded(orderId: string) {
   }
 }
 
+async function fetchAttendeeIsCancelled(attendeeId: string) {
+  if (!attendeeId || fetchedAttendeeIds.has(attendeeId) || loadingAttendeeIds.has(attendeeId)) {
+    return
+  }
+
+  loadingAttendeeIds.add(attendeeId)
+
+  try {
+    const response = await attendeesRetrieve({
+      path: { attendee_id: attendeeId },
+    })
+
+    attendeeDetailsById.value[attendeeId] = response.data ?? null
+    attendeeCancelledState.value[attendeeId] = response.data?.is_cancelled ?? null
+    fetchedAttendeeIds.add(attendeeId)
+  } catch {
+    attendeeDetailsById.value[attendeeId] = null
+    attendeeCancelledState.value[attendeeId] = null
+  } finally {
+    loadingAttendeeIds.delete(attendeeId)
+  }
+}
+
 function getLiveOrderDetail(orderId?: string) {
   if (!orderId) {
     return null
@@ -448,6 +482,30 @@ function getOrderIsRefunded(orderId?: string) {
   return orderRefundState.value[orderId] ?? null
 }
 
+function getAttendeeDetail(attendeeId?: string) {
+  if (!attendeeId) {
+    return null
+  }
+
+  return attendeeDetailsById.value[attendeeId] ?? null
+}
+
+function getAttendeeIsCancelled(attendeeId?: string) {
+  if (!attendeeId) {
+    return null
+  }
+
+  return attendeeCancelledState.value[attendeeId] ?? null
+}
+
+function isAttendeeLoading(attendeeId?: string) {
+  if (!attendeeId) {
+    return false
+  }
+
+  return loadingAttendeeIds.has(attendeeId)
+}
+
 watch(
   () => Array.from(new Set([...bookingOrderIds.value, paymentOrderId.value].filter(Boolean))),
   (ids) => {
@@ -456,6 +514,29 @@ watch(
         orderRefundState.value[orderId] = null
       }
       void fetchOrderIsRefunded(orderId)
+    })
+  },
+  { immediate: true },
+)
+
+watch(
+  (): string[] => {
+    const metadata = payment.value?.metadata as any
+    const selections = metadata?.attendee_selections || []
+    return Array.from(
+      new Set(
+        selections
+          .map((item: any) => item?.attendee_id)
+          .filter((attendeeId: unknown): attendeeId is string => typeof attendeeId === 'string' && attendeeId.length > 0),
+      ),
+    )
+  },
+  (attendeeIds: string[]) => {
+    attendeeIds.forEach((attendeeId: string) => {
+      if (!(attendeeId in attendeeCancelledState.value)) {
+        attendeeCancelledState.value[attendeeId] = null
+      }
+      void fetchAttendeeIsCancelled(attendeeId)
     })
   },
   { immediate: true },
@@ -475,7 +556,7 @@ const selectableItems = computed<SelectableItem[]>(() => {
         quantity: 1,
         type: 'attendee',
         attendeeId: item.attendee_id,
-        is_refunded: undefined,
+        is_refunded: getAttendeeIsCancelled(item.attendee_id),
       }
 
       const productLineEntries: SelectableItem[] = (item.product_lines || []).map((line: any, index: number) => {

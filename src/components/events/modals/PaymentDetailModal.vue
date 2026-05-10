@@ -67,10 +67,9 @@
                 </div>
 
                 <div
-                  v-for="refund in refundTimelineEntries"
+                  v-for="refund in successfulRefundEntries"
                   :key="refund.refundId"
-                  class="flex items-center justify-between rounded-md px-3 py-2.5"
-                  :class="isFailedRefund(refund.status) ? 'bg-red-50 text-red-700 line-through decoration-red-400' : 'bg-rose-50 text-rose-700'"
+                  class="flex items-center justify-between rounded-md px-3 py-2.5 bg-rose-50 text-rose-700"
                 >
                   <div class="min-w-0 pr-3">
                     <div class="font-medium">{{ refundTimelineLabel(refund) }}</div>
@@ -81,6 +80,58 @@
                     <div class="text-[11px] uppercase tracking-wide opacity-80">{{ getRefundRequestStatusLabel(refund.status) }}</div>
                   </div>
                 </div>
+
+                <!-- Failed refunds: collapsible when more than 1 -->
+                <template v-if="failedRefundEntries.length === 1">
+                  <div
+                    class="flex items-center justify-between rounded-md px-3 py-2.5 bg-red-50 text-red-700 line-through decoration-red-400"
+                  >
+                    <div class="min-w-0 pr-3">
+                      <div class="font-medium">{{ refundTimelineLabel(failedRefundEntries[0]) }}</div>
+                      <div class="text-xs opacity-80">{{ formatDateTime(failedRefundEntries[0].timestamp) }}</div>
+                    </div>
+                    <div class="text-right">
+                      <div class="font-black">- {{ formatAmount(failedRefundEntries[0].amount) }}</div>
+                      <div class="text-[11px] uppercase tracking-wide opacity-80">{{ getRefundRequestStatusLabel(failedRefundEntries[0].status) }}</div>
+                    </div>
+                  </div>
+                </template>
+
+                <template v-else-if="failedRefundEntries.length > 1">
+                  <button
+                    type="button"
+                    class="flex w-full items-center justify-between rounded-md px-3 py-2.5 bg-red-50 text-red-700 hover:bg-red-100 transition-colors"
+                    @click="failedRefundsCollapsed = !failedRefundsCollapsed"
+                  >
+                    <div class="min-w-0 pr-3 text-left">
+                      <div class="font-medium line-through decoration-red-400">{{ failedRefundEntries.length }} rejected refunds</div>
+                      <div class="text-xs opacity-80 no-underline" style="text-decoration: none">
+                        {{ failedRefundsSummaryDates }}
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                      <span class="font-black line-through decoration-red-400">- {{ formatAmount(failedRefundsTotalAmount) }}</span>
+                      <span class="material-symbols-outlined text-base">{{ failedRefundsCollapsed ? 'expand_more' : 'expand_less' }}</span>
+                    </div>
+                  </button>
+
+                  <template v-if="!failedRefundsCollapsed">
+                    <div
+                      v-for="refund in failedRefundEntries"
+                      :key="refund.refundId"
+                      class="flex items-center justify-between rounded-md px-3 py-2.5 bg-red-50 text-red-700 line-through decoration-red-400 ml-3 border-l-2 border-red-200"
+                    >
+                      <div class="min-w-0 pr-3">
+                        <div class="font-medium">{{ refundTimelineLabel(refund) }}</div>
+                        <div class="text-xs opacity-80">{{ formatDateTime(refund.timestamp) }}</div>
+                      </div>
+                      <div class="text-right">
+                        <div class="font-black">- {{ formatAmount(refund.amount) }}</div>
+                        <div class="text-[11px] uppercase tracking-wide opacity-80">{{ getRefundRequestStatusLabel(refund.status) }}</div>
+                      </div>
+                    </div>
+                  </template>
+                </template>
 
                 <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5 text-gray-700">
                   <span>Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%)</span>
@@ -1194,6 +1245,8 @@ const paymentRefundRequests = computed<any[]>(() => {
   return Array.isArray(paymentData.value?.refund_requests) ? paymentData.value.refund_requests : []
 })
 
+const failedRefundsCollapsed = ref(true)
+
 const refundTimelineEntries = computed(() => {
   return paymentRefundRequests.value
     .map((refund) => ({
@@ -1208,6 +1261,26 @@ const refundTimelineEntries = computed(() => {
       const rightTime = right.timestamp ? new Date(right.timestamp).getTime() : 0
       return rightTime - leftTime
     })
+})
+
+const failedRefundEntries = computed(() => refundTimelineEntries.value.filter((r) => isFailedRefund(r.status)))
+const successfulRefundEntries = computed(() => refundTimelineEntries.value.filter((r) => !isFailedRefund(r.status)))
+
+const failedRefundsTotalAmount = computed(() =>
+  failedRefundEntries.value.reduce((sum, r) => sum + Number(r.amount.slice(1) || 0), 0)
+)
+
+const failedRefundsSummaryDates = computed(() => {
+  const timestamps = failedRefundEntries.value
+    .map((r) => (r.timestamp ? new Date(r.timestamp).getTime() : null))
+    .filter((t): t is number => t !== null)
+  if (!timestamps.length) return ''
+  const earliest = new Date(Math.min(...timestamps))
+  const latest = new Date(Math.max(...timestamps))
+  const fmt = (d: Date) =>
+    new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(d)
+  if (earliest.getTime() === latest.getTime()) return fmt(earliest)
+  return `${fmt(earliest)} – ${fmt(latest)}`
 })
 
 const relatedRefunds = computed<any[]>(() => {

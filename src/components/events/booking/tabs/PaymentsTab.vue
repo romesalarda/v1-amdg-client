@@ -118,7 +118,7 @@
                 <p class="mt-1 text-xs text-deep-navy/65">{{ props.paymentContextSummary(payment) }}</p>
               </div>
               <span class="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="payment.is_outstanding ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'">
-                {{ payment.status || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
+                {{ payment.status.replace("_", " ") || (payment.is_outstanding ? 'PENDING' : 'COMPLETED') }}
               </span>
             </div>
 
