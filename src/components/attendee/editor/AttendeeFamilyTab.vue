@@ -68,7 +68,15 @@
       </div>
 
       <div v-if="guardiansLoading" class="text-center py-4 text-gray-500 text-sm">Loading guardians...</div>
-      <div v-else-if="!guardians.length" class="text-center py-4 text-gray-500 text-sm">No guardians recorded</div>
+      <div v-else-if="!guardians.length" class="text-center py-4 text-gray-500 text-sm">
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+            <UIcon name="i-heroicons-lock-closed" class="h-7 w-7" />
+          </div>
+          <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Guardians</p>
+          <p class="mt-2 text-sm text-slate-500">Press the "Add" button to create a new guardian.</p>
+        </div>
+      </div>
       <div v-else class="space-y-2">
         <div
           v-for="guardian in guardians"
@@ -168,7 +176,15 @@
       </div>
 
       <div v-if="familyMembershipsLoading" class="text-center py-4 text-gray-500 text-sm">Loading family memberships...</div>
-      <div v-else-if="!familyMemberships.length" class="text-center py-4 text-gray-500 text-sm">No family memberships recorded</div>
+      <div v-else-if="!familyMemberships.length" class="text-center py-4 text-gray-500 text-sm">
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+            <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+              <UIcon name="i-heroicons-user" class="h-7 w-7" />
+            </div>
+            <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No family memberships</p>
+            <p class="mt-2 text-sm text-slate-500">Press the "Add" button to create a new family membership.</p>
+        </div>
+      </div>
       <div v-else class="space-y-2">
         <div
           v-for="membership in familyMemberships"

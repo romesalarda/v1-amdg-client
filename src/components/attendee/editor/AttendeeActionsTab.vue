@@ -49,7 +49,13 @@
       Loading actions...
     </div>
     <div v-else-if="!actions.length" class="text-center py-8 text-gray-500 text-sm">
-      No actions recorded
+      <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+        <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+          <UIcon name="i-heroicons-clipboard-document-check" class="h-7 w-7" />
+        </div>
+        <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Actions</p>
+        <p class="mt-2 text-sm text-slate-500">Actions are shown here when they are performed by users or the system.</p>
+      </div>
     </div>
     <div v-else class="space-y-3">
       <div
