@@ -124,8 +124,9 @@
                   :key="tab.id"
                   type="button"
                   @click="setActiveTab(tab.id)"
+                  :disabled="isTabDisabled(tab)"
                   :class="[
-                    'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70',
+                    'px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
                     activeTab === tab.id
                       ? 'bg-deep-navy text-white border-deep-navy shadow-sm'
                       : 'bg-white text-deep-navy border-deep-navy/15 hover:border-blue-400 hover:bg-blue-50/40 hover:text-blue-700'
@@ -136,6 +137,26 @@
                 </div>
               </div>
             </div>
+            <article v-if="selectedAttendeeId && selectedAttendeeIsCancelled" class="rounded-2xl border border-rose-200 bg-rose-50/80 p-4">
+              <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-[0.2em] text-rose-700">Attendee cancelled</p>
+                  <p class="mt-1 text-sm font-semibold text-rose-900">
+                    {{ selectedAttendee?.name || 'This attendee' }} is cancelled.
+                  </p>
+                  <p class="mt-1 text-xs text-rose-800/90">
+                    Editing and attendee-specific flows are disabled for cancelled attendees.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  class="rounded-xl border border-rose-300 bg-white px-3 py-2 text-[11px] font-black uppercase tracking-wide text-rose-700 hover:bg-rose-100"
+                  @click="setActiveTab('overview')"
+                >
+                  View booking overview
+                </button>
+              </div>
+            </article>
             <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
               <BookingOverviewTab
                 :booking="booking"
@@ -163,7 +184,7 @@
               />
             </article>
 
-            <article v-if="selectedAttendeeId && activeTab === 'tickets'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+            <article v-if="selectedAttendeeId && activeTab === 'tickets' && !selectedAttendeeIsCancelled" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
               <TicketsTab :selected-attendee-id="selectedAttendeeId" />
             </article>
 
@@ -191,7 +212,7 @@
               />
             </article>
 
-            <article v-if="selectedAttendeeId && activeTab === 'orders'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <article v-if="selectedAttendeeId && activeTab === 'orders' && !selectedAttendeeIsCancelled" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
               <OrdersTab
                 :selected-attendee-id="selectedAttendeeId"
                 :selected-attendee="selectedAttendee"
@@ -232,7 +253,7 @@
               />
             </article>
 
-            <article v-if="selectedAttendeeId && activeTab === 'attendee'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <article v-if="selectedAttendeeId && activeTab === 'attendee' && !selectedAttendeeIsCancelled" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
               <AttendeeInfoTab
                 :selected-attendee-id="selectedAttendeeId"
                 :attendee-loading="attendee.isLoading.value"
@@ -1237,13 +1258,17 @@
                   @click="selectAttendee(item.id || '')"
                   class="w-full rounded-xl border px-3 py-3 text-left transition-all"
                   :class="[
-                    selectedAttendeeId === item.id ? 'border-blue-500 bg-blue-50 shadow-sm' : 'border-deep-navy/10 bg-white hover:border-blue-300 hover:bg-blue-50/40',
+                    selectedAttendeeId === item.id
+                      ? (isAttendeeCancelled(item) ? 'border-rose-400 bg-rose-50 shadow-sm' : 'border-blue-500 bg-blue-50 shadow-sm')
+                      : (isAttendeeCancelled(item) ? 'border-rose-200 bg-rose-50/50 hover:border-rose-300 hover:bg-rose-50' : 'border-deep-navy/10 bg-white hover:border-blue-300 hover:bg-blue-50/40'),
                     !selectedAttendeeId ? 'attendee-pulse' : ''
                   ]"
                 >
                   <div class="flex items-center gap-3">
                     <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-black"
-                      :class="selectedAttendeeId === item.id ? 'border-blue-300 bg-white text-blue-700' : 'border-deep-navy/15 bg-mist-blue text-deep-navy'"
+                      :class="selectedAttendeeId === item.id
+                        ? (isAttendeeCancelled(item) ? 'border-rose-300 bg-white text-rose-700' : 'border-blue-300 bg-white text-blue-700')
+                        : (isAttendeeCancelled(item) ? 'border-rose-200 bg-white text-rose-700' : 'border-deep-navy/15 bg-mist-blue text-deep-navy')"
                     >
                       {{ attendeeInitial(item.name) }}
                     </div>
@@ -1251,6 +1276,7 @@
                       <p class="truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
                       <p class="mt-0.5 truncate text-[11px] font-medium text-deep-navy/60">{{ item.display_id || item.id || 'Attendee profile' }}</p>
                     </div>
+                    <span v-if="isAttendeeCancelled(item)" class="rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-rose-700">Cancelled</span>
                     <span v-if="selectedAttendeeId === item.id" class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
                   </div>
                 </button>
@@ -1345,6 +1371,7 @@
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
               <div class="mt-3 space-y-2">
                 <NuxtLink
+                  v-if="!selectedAttendeeIsCancelled"
                   :to="bookingShopHref"
                   class="flex w-full items-center justify-between rounded-xl border border-emerald-300 bg-emerald-600 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-700"
                 >
@@ -1357,6 +1384,14 @@
                     Open shop
                   </span>
                 </NuxtLink>
+                <button
+                  v-else
+                  type="button"
+                  disabled
+                  class="flex w-full items-center justify-between rounded-xl border border-slate-300 bg-slate-200 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-slate-600"
+                >
+                  Shop unavailable for cancelled attendee
+                </button>
                 <NuxtLink :to="`/events/${eventId}`" class="flex w-full items-center justify-between rounded-xl border border-deep-navy/20 bg-white px-3 py-2.5 text-left text-xs font-black uppercase tracking-wider text-deep-navy hover:border-blue-500 hover:text-blue-700">
                   Back to event
                 </NuxtLink>
@@ -1471,6 +1506,7 @@ import { formatDate, formatDateTime } from '~/utils/time'
 type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments'
 type AreaOption = { label: string; value: number }
 type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
+type BookingAttendee = { id?: string; name?: string; is_cancelled?: boolean }
 
 const props = defineProps<{
   eventId: string
@@ -1792,18 +1828,32 @@ if (props.initialAttendeeId) {
   activeTab.value = props.initialTab || 'attendee'
 }
 
-const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean }> = [
+const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhenCancelled?: boolean }> = [
   { id: 'overview', label: 'Booking' },
-  { id: 'attendee', label: 'Attendee Info', needsAttendee: true },
-  { id: 'tickets', label: 'Tickets', needsAttendee: true },
+  { id: 'attendee', label: 'Attendee Info', needsAttendee: true, blockWhenCancelled: true },
+  { id: 'tickets', label: 'Tickets', needsAttendee: true, blockWhenCancelled: true },
   { id: 'payments', label: 'Payments', needsAttendee: false },
-  { id: 'orders', label: 'Orders', needsAttendee: true },
+  { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true },
 ]
 
 const selectedAttendee = computed(() => {
   if (!selectedAttendeeId.value) return null
   return attendees.value.find(item => item.id === selectedAttendeeId.value) || null
 })
+
+function isAttendeeCancelled(attendee: BookingAttendee | null | undefined): boolean {
+  return Boolean(attendee?.is_cancelled)
+}
+
+const selectedAttendeeIsCancelled = computed(() => {
+  return isAttendeeCancelled(selectedAttendee.value as BookingAttendee | null)
+})
+
+function isTabDisabled(tab: { needsAttendee?: boolean; blockWhenCancelled?: boolean }): boolean {
+  if (tab.needsAttendee && !selectedAttendeeId.value) return true
+  if (tab.blockWhenCancelled && selectedAttendeeIsCancelled.value) return true
+  return false
+}
 
 /**
  * Map tab IDs to their corresponding component and props
@@ -1921,7 +1971,7 @@ function toAttendeeSlug(name: string | undefined, attendeeId: string | undefined
 
 function setActiveTab(tab: TabId) {
   const entry = tabs.find(item => item.id === tab)
-  if (entry?.needsAttendee && !selectedAttendeeId.value) {
+  if (!entry || isTabDisabled(entry)) {
     return
   }
   activeTab.value = tab
@@ -1930,7 +1980,8 @@ function setActiveTab(tab: TabId) {
 function selectAttendee(attendeeId: string) {
   if (!attendeeId) return
   selectedAttendeeId.value = attendeeId
-  activeTab.value = 'attendee'
+  const item = attendees.value.find(entry => entry.id === attendeeId) as BookingAttendee | undefined
+  activeTab.value = isAttendeeCancelled(item) ? 'overview' : 'attendee'
 }
 
 function clearSelectedAttendee() {
@@ -2031,6 +2082,18 @@ watch(
       }
     } finally {
       applyingRouteState.value = false
+    }
+  },
+  { immediate: true, deep: true },
+)
+
+watch(
+  [selectedAttendee, activeTab],
+  () => {
+    const restrictedTabs: TabId[] = ['attendee', 'tickets', 'orders']
+    if (!selectedAttendeeIsCancelled.value) return
+    if (restrictedTabs.includes(activeTab.value)) {
+      activeTab.value = 'overview'
     }
   },
   { immediate: true, deep: true },
