@@ -91,32 +91,11 @@
 					Start typing to search for an area, then select from the list.
 				</p>
 				<div class="mt-4">
-					<div class="relative">
-						<UInput
-							:model-value="areaSearch"
-							placeholder="Search area name (min 2 chars)"
-							class="w-full"
-							@update:model-value="(val) => emit('update:areaSearch', val)"
-						/>
-						<div
-							v-if="areaOptions.length > 0 && areaSearch.length >= 2"
-							class="absolute top-full left-0 right-0 z-50 mt-2 rounded-lg border border-slate-200 bg-white shadow-lg"
-						>
-							<div class="max-h-64 overflow-y-auto">
-								<button
-									v-for="option in areaOptions"
-									:key="option.value"
-									type="button"
-									class="w-full px-4 py-2 text-left text-sm hover:bg-slate-100 transition-colors"
-									:class="option.value === currentAreaFrom ? 'bg-blue-50 text-blue-700 font-medium' : 'text-slate-700'"
-									@click="emit('select-area', option.value, option.label)"
-								>
-									{{ option.label }}
-								</button>
-							</div>
-						</div>
-					</div>
-					<p v-if="areaLookupLoading" class="mt-2 text-xs text-slate-500">Searching...</p>
+					<AreaSearchSelect
+						:model-value="currentAreaFrom"
+						:selected-label="currentAreaFromName"
+						@select="onAreaSelected"
+					/>
 				</div>
 				<div v-if="hasCurrentAreaFrom" class="mt-3">
 					<UButton size="xs" color="gray" variant="ghost" @click="emit('clear-area-from')">
@@ -132,6 +111,9 @@
 </template>
 
 <script setup lang="ts">
+
+import AreaSearchSelect from '~/components/ui/AreaSearchSelect.vue'
+
 defineProps<{
 	values: {
 		first_name?: string
@@ -151,16 +133,16 @@ defineProps<{
 	hasCurrentAreaFrom: boolean
 	currentAreaFrom: number | null | undefined
 	currentAreaFromName: string | null | undefined
-	areaSearch: string
-	areaOptions: Array<{ label: string; value: number }>
-	areaLookupLoading: boolean
 }>()
 
 const emit = defineEmits<{
 	'update-field': [field: string, value: string]
 	'update-field-validate': [field: string, value: string]
-	'update:areaSearch': [value: string]
 	'select-area': [value: number, label: string]
 	'clear-area-from': []
 }>()
+
+const onAreaSelected = (value: number, label: string) => {
+	emit('select-area', value, label)
+}
 </script>

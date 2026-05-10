@@ -98,13 +98,9 @@
 										:has-current-area-from="hasCurrentAreaFrom"
 										:current-area-from="currentAttendee.area_from ?? null"
 										:current-area-from-name="currentAttendee.area_from_name ?? null"
-										:area-search="areaSearch"
-										:area-options="areaOptions"
-										:area-lookup-loading="areaLookupLoading"
 										@update-field="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val) }"
 										@update-field-validate="(field, val) => { (currentAttendee as any)[field] = val; setFieldValue(field as any, val); void runSafeValidation() }"
-										@update:area-search="(val) => { areaSearch = val }"
-										@select-area="(val, label) => { store.setAreaFrom(store.currentIndex, val, label); areaSearch = label }"
+										@select-area="(val, label) => { store.setAreaFrom(store.currentIndex, val, label) }"
 										@clear-area-from="clearAreaFrom"
 									/>
 
@@ -377,7 +373,7 @@ import { useBookingPackages } from '~/composables/resources/booking/bookingPacka
 import { useCheckoutBooking } from '~/composables/resources/booking/bookings'
 import { useCheckoutPreview } from '~/composables/resources/booking/checkoutPreview'
 import { useStripeConfig } from '~/composables/resources/common/stripe'
-import { bookingsPackageProductsList, locationsAreasList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
+import { bookingsPackageProductsList, paymentsListRetrieve, productsListRetrieve, productsListVariantsList } from '~/api/sdk.gen'
 import {
 	buildCheckoutPayload,
 	buildCheckoutMultipartPayload,
@@ -487,10 +483,6 @@ const reminderLocation = computed(() => {
 	return 'Location TBA'
 })
 
-const areaLookupLoading = ref(false)
-const areaSearch = ref('')
-const areaOptions = ref<Array<{ label: string; value: number }>>([])
-let areaSearchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 const {
 	showIntentExpiredModal,
 	showIntentCountdown,
@@ -1378,56 +1370,9 @@ watch(
 
 
 
-watch(
-	() => store.currentIndex,
-	() => {
-		areaSearch.value = ''
-		areaOptions.value = []
-	}
-)
-
-watch(
-	() => areaSearch.value,
-	(term) => {
-		if (areaSearchDebounceTimer) {
-			clearTimeout(areaSearchDebounceTimer)
-			areaSearchDebounceTimer = null
-		}
-
-		const query = term.trim()
-		if (query.length < 2) {
-			areaOptions.value = []
-			return
-		}
-
-		areaSearchDebounceTimer = setTimeout(async () => {
-			areaLookupLoading.value = true
-			try {
-				const response = await locationsAreasList({
-					query: {
-						search: query,
-						page_size: 5,
-					},
-				})
-				const options = (response.data?.results || []).map((area) => ({
-					label: area.area_name,
-					value: area.id,
-				}))
-				areaOptions.value = options
-			} catch {
-				areaOptions.value = []
-			} finally {
-				areaLookupLoading.value = false
-			}
-		}, 300)
-	}
-)
-
 const clearAreaFrom = () => {
 	if (!currentAttendee.value) return
 	store.setAreaFrom(store.currentIndex, null, null)
-	areaSearch.value = ''
-	areaOptions.value = []
 }
 
 // Calculate age from date of birth
@@ -1880,10 +1825,6 @@ onBeforeUnmount(() => {
 	if (previewDebounceTimer) {
 		clearTimeout(previewDebounceTimer)
 		previewDebounceTimer = null
-	}
-	if (areaSearchDebounceTimer) {
-		clearTimeout(areaSearchDebounceTimer)
-		areaSearchDebounceTimer = null
 	}
 	stopIntentPing()
 	stopIntentCountdown()
