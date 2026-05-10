@@ -25,13 +25,21 @@ export function useTicketTypeManagement(
   const updateTicketTypeMutation = usePartialUpdateBookingTicketType()
   const deleteTicketTypeMutation = useDeleteBookingTicketType()
 
+  function getQueryString(value: unknown): string | undefined {
+    if (Array.isArray(value)) {
+      const first = value.find(v => typeof v === 'string')
+      return typeof first === 'string' ? first : undefined
+    }
+    return typeof value === 'string' ? value : undefined
+  }
+
   const openTicketTypeModal = (ticketType?: any) => {
     editingTicketType.value = ticketType || null
     showTicketTypeModal.value = true
 
     if (ticketType?.id) {
       isManualModalOpen.value = true
-      router.replace({ query: { ...route.query, 'ticket-id': ticketType.id.toString() } })
+      router.replace({ query: { ...route.query, 'ticket-id': ticketType.id.toString(), ticket_id: ticketType.id.toString() } })
     }
   }
 
@@ -39,8 +47,8 @@ export function useTicketTypeManagement(
     showTicketTypeModal.value = false
     editingTicketType.value = null
 
-    if (route.query['ticket-id']) {
-      router.replace({ query: { ...route.query, 'ticket-id': undefined } })
+    if (route.query['ticket-id'] || route.query.ticket_id) {
+      router.replace({ query: { ...route.query, 'ticket-id': undefined, ticket_id: undefined } })
     }
     isManualModalOpen.value = false
   }
@@ -121,7 +129,7 @@ export function useTicketTypeManagement(
   // URL param watcher — opens modal when ?ticket-id= is present on load
   watch(
     () => ({
-      ticketId: route.query['ticket-id'],
+      ticketId: route.query['ticket-id'] || route.query.ticket_id,
       ticketsLoaded: ticketTypes.value.length > 0,
     }),
     ({ ticketId, ticketsLoaded }) => {
@@ -130,9 +138,10 @@ export function useTicketTypeManagement(
         return
       }
       if (ticketId && ticketsLoaded && !showTicketTypeModal.value) {
-        const tktId = parseInt(ticketId as string, 10)
+        const ticketIdValue = getQueryString(ticketId)
+        const tktId = ticketIdValue ? parseInt(ticketIdValue, 10) : NaN
         if (!isNaN(tktId)) {
-          const ticket = ticketTypes.value.find(t => t.id === tktId)
+          const ticket = ticketTypes.value.find(t => Number(t.id) === tktId)
           if (ticket) openTicketTypeModal(ticket)
         }
       }

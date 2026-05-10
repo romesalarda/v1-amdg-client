@@ -1531,12 +1531,68 @@ const currentView = ref<'attendees' | 'bookings' | 'families' | 'statistics' | '
   'attendees'
 )
 
+watch(() => route.query.view, (view) => {
+  const nextView = String(view || '')
+  currentView.value =
+    nextView === 'bookings'
+      ? 'bookings'
+      : nextView === 'families'
+        ? 'families'
+        : nextView === 'statistics'
+          ? 'statistics'
+          : nextView === 'tickets'
+            ? 'tickets'
+            : 'attendees'
+})
+
 // State
 const searchQuery = ref(route.query.search as string || '')
 const currentPage = ref(Number(route.query.page) || 1)
 const pageSize = ref(Number(route.query.page_size) || 25)
 const currentSort = ref<string>(route.query.ordering as string || '')
 const sortDirection = ref<'asc' | 'desc'>('asc')
+
+function getQueryString(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    const first = value.find(v => typeof v === 'string')
+    return typeof first === 'string' ? first : undefined
+  }
+  return typeof value === 'string' ? value : undefined
+}
+
+watch(() => route.query.search, (value) => {
+  const nextSearch = getQueryString(value) || ''
+  if (searchQuery.value !== nextSearch) {
+    searchQuery.value = nextSearch
+  }
+})
+
+watch(() => route.query.page, (value) => {
+  const nextPage = Number(getQueryString(value)) || 1
+  if (currentPage.value !== nextPage) {
+    currentPage.value = nextPage
+  }
+})
+
+watch(() => route.query.page_size, (value) => {
+  const nextPageSize = Number(getQueryString(value)) || 25
+  if (pageSize.value !== nextPageSize) {
+    pageSize.value = nextPageSize
+  }
+})
+
+watch(() => route.query.ordering, (value) => {
+  const ordering = getQueryString(value) || ''
+  const nextSortDirection: 'asc' | 'desc' = ordering.startsWith('-') ? 'desc' : 'asc'
+  const nextSort = ordering.startsWith('-') ? ordering.slice(1) : ordering
+
+  if (sortDirection.value !== nextSortDirection) {
+    sortDirection.value = nextSortDirection
+  }
+  if (currentSort.value !== nextSort) {
+    currentSort.value = nextSort
+  }
+})
 
 // Selection state
 const selectedAttendees = ref<string[]>([])
@@ -2165,6 +2221,7 @@ watch([searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, 
   if (currentView.value === 'families') query.view = 'families'
   if (currentView.value === 'statistics') query.view = 'statistics'
   if (currentView.value === 'tickets') query.view = 'tickets'
+  if (currentView.value === 'tickets' && route.query.ticket_id) query.ticket_id = route.query.ticket_id
   
   if (filters.value.organisation) query.organisation = filters.value.organisation
   if (filters.value.areaFrom) query.area_from = filters.value.areaFrom

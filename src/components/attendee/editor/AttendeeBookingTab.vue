@@ -60,7 +60,9 @@
       <div v-if="booking.data.value.data.tickets?.length" class="pt-4 border-t border-gray-200">
         <h3 class="text-xs font-black text-primary uppercase tracking-widest mb-2">Tickets</h3>
         <div class="space-y-2">
-          <div v-for="ticket in booking.data.value.data.tickets" :key="ticket.ticket_id" class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+          <div v-for="ticket in booking.data.value.data.tickets" :key="ticket.ticket_id" class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-left transition-colors hover:bg-primary/5 hover:border-primary/30 cursor-pointer"
+            @click="navigateTo(`/events/${eventId}/m/participants/dashboard?view=tickets&ticket_id=${ticket.ticket_id}`)"
+          >
             <div>
               <p class="text-xs font-semibold text-gray-900 font-mono">{{ ticket.ticket_code }}</p>
               <p class="text-xs text-gray-600">{{ ticket.attendee_name }}</p>

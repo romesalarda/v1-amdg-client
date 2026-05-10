@@ -37,9 +37,17 @@ export function useBookingPackageManagement(
     () => createPackageMutation.isPending.value || updatePackageMutation.isPending.value,
   )
 
+  function getQueryString(value: unknown): string | undefined {
+    if (Array.isArray(value)) {
+      const first = value.find(v => typeof v === 'string')
+      return typeof first === 'string' ? first : undefined
+    }
+    return typeof value === 'string' ? value : undefined
+  }
+
   const selectedPackageName = computed(() => {
     if (!selectedPackageId.value) return ''
-    const pkg = packages.value.find(p => p.id === selectedPackageId.value)
+    const pkg = packages.value.find(p => Number(p.id) === selectedPackageId.value)
     return pkg?.name || ''
   })
 
@@ -51,7 +59,7 @@ export function useBookingPackageManagement(
 
     if (pkg?.id) {
       isManualModalOpen.value = true
-      router.replace({ query: { ...route.query, 'package-id': pkg.id.toString() } })
+      router.replace({ query: { ...route.query, 'package-id': pkg.id.toString(), package_id: pkg.id.toString() } })
     }
   }
 
@@ -59,8 +67,8 @@ export function useBookingPackageManagement(
     showPackageModal.value = false
     editingPackage.value = null
 
-    if (route.query['package-id']) {
-      router.replace({ query: { ...route.query, 'package-id': undefined } })
+    if (route.query['package-id'] || route.query.package_id) {
+      router.replace({ query: { ...route.query, 'package-id': undefined, package_id: undefined } })
     }
     isManualModalOpen.value = false
   }
@@ -140,15 +148,15 @@ export function useBookingPackageManagement(
     selectedPackageId.value = packageId
     showPackageAvailabilityModal.value = true
     isManualModalOpen.value = true
-    router.replace({ query: { ...route.query, 'package-id': packageId.toString() } })
+    router.replace({ query: { ...route.query, 'package-id': packageId.toString(), package_id: packageId.toString() } })
   }
 
   function closePackageAvailabilityModal() {
     showPackageAvailabilityModal.value = false
     selectedPackageId.value = null
 
-    if (route.query['package-id'] || route.query['window-id']) {
-      router.replace({ query: { ...route.query, 'package-id': undefined, 'window-id': undefined } })
+    if (route.query['package-id'] || route.query.package_id || route.query['window-id']) {
+      router.replace({ query: { ...route.query, 'package-id': undefined, package_id: undefined, 'window-id': undefined } })
     }
     isManualModalOpen.value = false
   }
@@ -160,7 +168,7 @@ export function useBookingPackageManagement(
     () => ({
       packagesLoaded: packages.value.length > 0,
       windowId: route.query['window-id'],
-      packageId: route.query['package-id'],
+      packageId: route.query['package-id'] || route.query.package_id,
     }),
     async ({ packagesLoaded, windowId, packageId }) => {
       if (!packagesLoaded || hasSearchedForPackage.value || !windowId || packageId) return
@@ -175,7 +183,7 @@ export function useBookingPackageManagement(
             const foundWindow = results.find((w: any) => w.availability_id === windowId)
             if (foundWindow) {
               router.replace({
-                query: { ...route.query, 'package-id': pkg.id.toString(), 'window-id': windowId },
+                query: { ...route.query, 'package-id': pkg.id.toString(), package_id: pkg.id.toString(), 'window-id': windowId },
               })
               break
             }
@@ -191,7 +199,7 @@ export function useBookingPackageManagement(
   // When ?package-id= is present (without window-id), open the package edit modal
   watch(
     () => ({
-      packageId: route.query['package-id'],
+      packageId: route.query['package-id'] || route.query.package_id,
       packagesLoaded: packages.value.length > 0,
     }),
     ({ packageId, packagesLoaded }) => {
@@ -200,9 +208,10 @@ export function useBookingPackageManagement(
         return
       }
       if (packageId && packagesLoaded && !showPackageAvailabilityModal.value && !showPackageModal.value) {
-        const pkgId = parseInt(packageId as string, 10)
+        const packageIdValue = getQueryString(packageId)
+        const pkgId = packageIdValue ? parseInt(packageIdValue, 10) : NaN
         if (!isNaN(pkgId)) {
-          const pkg = packages.value.find(p => p.id === pkgId)
+          const pkg = packages.value.find(p => Number(p.id) === pkgId)
           if (pkg) {
             if (route.query['window-id']) {
               // Open the availability windows modal so the window-id watcher inside can auto-open the form

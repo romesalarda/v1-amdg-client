@@ -117,7 +117,7 @@
             <h3 class="text-sm font-black text-primary uppercase tracking-widest">Ticket Detail</h3>
             <p class="text-xs text-gray-500 mt-1">Detailed ticket information and management</p>
           </div>
-          <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" @click="showTicketDetailModal = false" />
+          <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" @click="closeTicketDetailModal" />
         </div>
 
         <div v-if="selectedTicketLoading" class="space-y-3">
@@ -140,21 +140,36 @@
             </div>
           </div>
 
-          <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
-            <div class="flex items-center justify-between gap-2">
-              <p class="text-xs text-slate-300 uppercase font-semibold">Ticket Code</p>
-              <UButton
-                size="2xs"
-                variant="ghost"
-                class="bg-white"
-                color="gray"
-                icon="i-heroicons-clipboard"
-                @click="copyToClipboard(selectedTicket.ticket_code, 'Ticket code copied')"
-              >
-                Copy
-              </UButton>
+          <div class="p-4 rounded-lg bg-white border border-gray-200">
+            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+              <div class="flex h-32 w-32 items-center justify-center rounded-lg border border-gray-200 bg-white">
+                <Qrcode
+                  v-if="qrTicket?.qr_valid"
+                  :value="qrTicket.qr_value"
+                  :width="128"
+                  :height="128"
+                  class="h-32 w-32"
+                />
+                <div v-else class="text-center text-xs text-gray-400 px-2">
+                  QR unavailable
+                </div>
+              </div>
+
+              <div class="flex-1 w-full space-y-2">
+                <p class="text-xs text-gray-500 uppercase font-semibold">QR Code</p>
+                <p class="text-xs text-gray-600">Scan to verify this ticket at check-in.</p>
+                <p class="font-mono text-xs text-gray-900 break-all">{{ qrTicket?.qr_display_code || selectedTicket.ticket_code }}</p>
+                <UButton
+                  size="2xs"
+                  variant="soft"
+                  color="gray"
+                  icon="i-heroicons-clipboard"
+                  @click="copyToClipboard(qrTicket?.qr_value || selectedTicket.ticket_code, 'QR value copied')"
+                >
+                  Copy QR value
+                </UButton>
+              </div>
             </div>
-            <p class="font-mono text-xs text-slate-100 mt-2 break-all leading-relaxed">{{ selectedTicket.ticket_code }}</p>
           </div>
 
           <div class="p-3 rounded-lg bg-slate-900 border border-slate-800">
@@ -176,35 +191,52 @@
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <button
+              type="button"
+              class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-left transition-colors hover:bg-primary/5 hover:border-primary/30 cursor-pointer"
+              @click="goToAttendeeView"
+            >
               <p class="text-xs text-gray-500 uppercase font-semibold">Attendee</p>
-              <p class="font-semibold text-gray-900 mt-1">{{ selectedTicket.attendee_name }}</p>
-              <p class="text-xs text-gray-500 mt-1">ID: {{ selectedTicket.attendee }}</p>
-              <NuxtLink
-                :to="attendeeLink"
-                class="inline-flex mt-2 text-xs font-semibold text-primary hover:text-primary/80"
-              >
-                Open attendee in participants view
-              </NuxtLink>
-            </div>
-            <div class="p-3 rounded-lg bg-gray-50 border border-gray-200">
+              <p class="font-semibold text-gray-900 mt-1">
+                {{ selectedTicket.attendee_name }}
+              </p>
+              <p class="text-xs text-primary mt-2 font-semibold">Click to open attendee</p>
+            </button>
+            <button
+              type="button"
+              class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-left transition-colors hover:bg-primary/5 hover:border-primary/30 cursor-pointer"
+              @click="goToTicketTypeView"
+            >
               <p class="text-xs text-gray-500 uppercase font-semibold">Ticket Type</p>
-              <p class="font-semibold text-gray-900 mt-1">{{ selectedTicket.ticket_type_title }}</p>
-              <NuxtLink
-                :to="`/events/${props.eventId}/m/booking?ticket-id=${selectedTicket.ticket_type}`"
-                class="inline-flex mt-2 text-xs font-semibold text-primary hover:text-primary/80"
-              >
-                View ticket type
-              </NuxtLink>
-            </div>
+              <p class="font-semibold text-gray-900 mt-1">
+                {{ selectedTicket.ticket_type_title }}
+              </p>
+              <p class="text-xs text-primary mt-2 font-semibold">Click to open ticket type</p>
+            </button>
             <div class="p-3 rounded-lg bg-gray-50 border border-gray-200">
               <p class="text-xs text-gray-500 uppercase font-semibold">Usage Count</p>
               <p class="font-semibold text-gray-900 mt-1">{{ selectedTicket.uses ?? 0 }}</p>
             </div>
-            <div class="p-3 rounded-lg bg-gray-50 border border-gray-200">
+            <button
+              type="button"
+              class="p-3 rounded-lg bg-gray-50 border border-gray-200 text-left transition-colors"
+              :class="selectedTicket.package ? 'hover:bg-primary/5 hover:border-primary/30 cursor-pointer' : 'cursor-not-allowed opacity-75'"
+              :disabled="!selectedTicket.package"
+              @click="goToPackageView"
+            >
               <p class="text-xs text-gray-500 uppercase font-semibold">Package</p>
               <p class="font-semibold text-gray-900 mt-1">{{ selectedTicket.package_name || 'N/A' }}</p>
-            </div>
+              <p v-if="selectedTicket.package" class="text-xs text-primary mt-2 font-semibold">Click to open package</p>
+            </button>
+            <button
+              type="button"
+              class="p-3 rounded-lg bg-gray-50 border border-gray-200 sm:col-span-2 text-left transition-colors hover:bg-primary/5 hover:border-primary/30 cursor-pointer"
+              @click="goToTicketUrl"
+            >
+              <p class="text-xs text-gray-500 uppercase font-semibold">Ticket ID</p>
+              <p class="font-mono text-xs text-gray-900 break-all mt-1">{{ selectedTicket.ticket_id }}</p>
+              <p class="text-xs text-primary mt-2 font-semibold">Click to open this ticket URL</p>
+            </button>
           </div>
         </div>
 
@@ -229,8 +261,10 @@
 import Swal from 'sweetalert2'
 import type { TicketDetail, TicketList } from '~/api/types.gen'
 import { useBookingTickets, useBookingTicket, usePartialUpdateBookingTicket } from '~/composables/resources/booking/bookingTickets'
+import { useFormattedTicketForQR } from '~/composables/resources/tickets/useTicketQRCode'
 
 const router = useRouter()
+const route = useRoute()
 
 const props = defineProps<{
   eventId: string
@@ -261,13 +295,21 @@ const disableTicketMutation = usePartialUpdateBookingTicket()
 const tickets = computed(() => (ticketsData.value?.data?.results || []) as TicketList[])
 const ticketsTotal = computed(() => ticketsData.value?.data?.count || 0)
 const selectedTicket = computed(() => selectedTicketData.value?.data as TicketDetail | undefined)
+const qrTicket = useFormattedTicketForQR(selectedTicket)
 const rangeStart = computed(() => (ticketsTotal.value === 0 ? 0 : ((ticketPage.value - 1) * ticketPageSize.value) + 1))
 const rangeEnd = computed(() => Math.min(ticketPage.value * ticketPageSize.value, ticketsTotal.value))
-const attendeeLink = computed(() => {
-  const name = selectedTicket.value?.attendee_name || ''
-  const search = encodeURIComponent(name)
-  return `/events/${props.eventId}/m/participants/dashboard?view=attendees&search=${search}`
-})
+
+function getQueryValue(value: string | string[] | undefined): string | undefined {
+  if (!value) return undefined
+  return Array.isArray(value) ? value[0] : value
+}
+
+function buildParticipantsRouteQuery(extraQuery: Record<string, string | undefined> = {}) {
+  return {
+    ...route.query,
+    ...extraQuery,
+  }
+}
 
 watch(ticketSearch, () => {
   ticketPage.value = 1
@@ -281,6 +323,29 @@ watch(ticketPageSize, () => {
   ticketPage.value = 1
 })
 
+watch(
+  () => [route.query.view, route.query.ticket_id],
+  ([viewValue, ticketValue]) => {
+    const view = getQueryValue(viewValue as string | string[] | undefined)
+    const ticketId = getQueryValue(ticketValue as string | string[] | undefined)
+
+    if (view !== 'tickets' || !ticketId) {
+      if (showTicketDetailModal.value) {
+        showTicketDetailModal.value = false
+        selectedTicketId.value = ''
+      }
+      return
+    }
+
+    if (showTicketDetailModal.value && selectedTicketId.value === ticketId) {
+      return
+    }
+
+    openTicketDetail(ticketId, false)
+  },
+  { immediate: true },
+)
+
 function formatDateTime(value?: string | null): string {
   if (!value) return 'N/A'
   return new Date(value).toLocaleString()
@@ -292,9 +357,85 @@ function statusBadgeColor(status: TicketList['status']) {
   return 'gray'
 }
 
-function openTicketDetail(ticketId: string) {
+function openTicketDetail(ticketId: string, syncUrl = true) {
   selectedTicketId.value = ticketId
   showTicketDetailModal.value = true
+
+  if (!syncUrl) {
+    return
+  }
+
+  router.replace({
+    query: buildParticipantsRouteQuery({
+      view: 'tickets',
+      ticket_id: ticketId,
+    }),
+  })
+}
+
+function closeTicketDetailModal() {
+  showTicketDetailModal.value = false
+  selectedTicketId.value = ''
+  router.replace({
+    query: buildParticipantsRouteQuery({
+      ticket_id: undefined,
+    }),
+  })
+}
+
+async function goToAttendeeView() {
+  const name = selectedTicket.value?.attendee_name?.trim()
+  showTicketDetailModal.value = false
+  await router.push({
+    path: `/events/${props.eventId}/m/participants/dashboard`,
+    query: {
+      view: 'attendees',
+      search: name || undefined,
+    },
+  })
+}
+
+async function goToTicketTypeView() {
+  if (!selectedTicket.value) {
+    return
+  }
+
+  showTicketDetailModal.value = false
+  await router.push({
+    path: `/events/${props.eventId}/m/booking`,
+    query: {
+      'ticket-id': String(selectedTicket.value.ticket_type),
+      ticket_id: String(selectedTicket.value.ticket_type),
+    },
+  })
+}
+
+async function goToPackageView() {
+  if (!selectedTicket.value?.package) {
+    return
+  }
+
+  showTicketDetailModal.value = false
+  await router.push({
+    path: `/events/${props.eventId}/m/booking`,
+    query: {
+      'package_id': String(selectedTicket.value.package),
+    },
+  })
+}
+
+async function goToTicketUrl() {
+  if (!selectedTicket.value) {
+    return
+  }
+
+  await router.push({
+    path: `/events/${props.eventId}/m/participants/dashboard`,
+    query: {
+      view: 'tickets',
+      ticket_id: selectedTicket.value.ticket_id,
+    },
+  })
 }
 
 async function copyToClipboard(value: string, successTitle: string) {
