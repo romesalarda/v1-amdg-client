@@ -44,7 +44,6 @@
         class="border border-gray-200 rounded-xl overflow-hidden bg-white"
       >
         <div class="px-4 py-3 bg-gray-50 border-b border-gray-200" v-if="order.status != 'draft'">
-          {{ order }}
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <h4 class="font-bold text-sm text-gray-900 font-mono">{{ order.order_reference_id }}</h4>

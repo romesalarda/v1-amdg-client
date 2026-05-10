@@ -235,6 +235,17 @@
         :attendee="attendee.data.value?.data"
         :linked-user-profile="linkedUserProfile"
         :linked-user-id="linkedUserId"
+        :attendee-medical-list="attendeeMedicalConditions.data.value?.data?.results || []"
+        :attendee-actions="attendeeActions.data.value?.data?.results || []"
+        :pre-removal-summary="preRemovalSummary"
+        :pre-removal-loading="preRemovalSummaryLoading"
+        :pre-removal-error="preRemovalSummaryError"
+        :pre-removal-deleting="deleteMutation.isPending.value"
+        :pre-removal-cancelling="cancelMutation.isPending.value"
+        :event-query-value="orderEventQueryValue"
+        @confirm-delete="confirmDeleteAttendee"
+        @confirm-cancel="confirmCancelAttendee"
+        @pre-removal-page-change="handlePreRemovalPageChange"
       />
     </div>
   </EventManagementLayout>
@@ -242,12 +253,17 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import type { Ref } from 'vue'
 import { useToast } from '#ui/composables/useToast'
 
 // Composables - Attendee
-import { useAttendee, useDeleteAttendee } from '~/composables/resources/attendee/attendees'
+import {
+  useAttendee,
+  useDeleteAttendee,
+  useCancelAttendee,
+  useAttendeePreRemovalSummary,
+} from '~/composables/resources/attendee/attendees'
 import { useEvent } from '~/composables/resources/events/events'
 import { useAreas } from '~/composables/resources/locations/locations'
 import { useProfiles } from '~/composables/resources/user/profiles'
@@ -284,11 +300,14 @@ definePageMeta({
 
 // Route & Router
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 // Route Params
 const attendeeId = computed(() => route.params.attendee_id as string)
 const eventId = computed(() => route.params.id as string)
+const preRemovalPage = ref(1)
+const preRemovalPageSize = ref(5)
 const { currentTab, tabs, changeTab } = useAttendeeEditorTabs()
 
 // ====================
@@ -483,6 +502,18 @@ const {
   getOrderStatusColor,
 } = useAttendeeOrdersEditor(attendeeId, attendeeResourceId, eventId)
 
+const preRemovalSummaryQueryParams = computed(() => ({
+  page: preRemovalPage.value,
+  page_size: preRemovalPageSize.value,
+}))
+const {
+  data: preRemovalSummaryData,
+  isLoading: preRemovalSummaryLoading,
+  error: preRemovalSummaryError,
+} = useAttendeePreRemovalSummary(attendeeId, preRemovalSummaryQueryParams)
+const preRemovalSummary = computed(() => preRemovalSummaryData.value?.data)
+const orderEventQueryValue = computed(() => String(event.data.value?.data?.url_safe_title || event.data.value?.data?.event_id || eventId.value || ''))
+
 // ====================
 // LOADING STATES
 // ====================
@@ -491,6 +522,7 @@ const {
 // MUTATIONS
 // ====================
 const deleteMutation = useDeleteAttendee()
+const cancelMutation = useCancelAttendee()
 
 // ====================
 // BASIC INFO HANDLERS
@@ -533,5 +565,60 @@ const deleteMutation = useDeleteAttendee()
 // ORDERS HANDLERS (NEW)
 // ====================
 // Orders handlers are managed in useAttendeeOrdersEditor.
+
+function handlePreRemovalPageChange(page: number) {
+  if (page < 1) {
+    return
+  }
+  preRemovalPage.value = page
+}
+
+async function confirmDeleteAttendee() {
+  const summary = preRemovalSummary.value
+  if (!summary?.can_delete) {
+    toast.add({
+      title: 'Deletion blocked',
+      description: 'Resolve blockers before permanently deleting this attendee.',
+      color: 'orange',
+    })
+    return
+  }
+
+  try {
+    await deleteMutation.mutateAsync(attendeeId.value)
+    toast.add({
+      title: 'Attendee removed',
+      description: 'The attendee has been removed successfully.',
+      color: 'green',
+    })
+    router.push(`/events/${eventId.value}/m/participants/dashboard`)
+  } catch (error: any) {
+    toast.add({
+      title: 'Delete failed',
+      description: error?.message || 'Unable to remove attendee.',
+      color: 'red',
+    })
+  }
+}
+
+async function confirmCancelAttendee() {
+  try {
+    await cancelMutation.mutateAsync({
+      attendeeId: attendeeId.value,
+      body: { invalidate: false },
+    })
+    toast.add({
+      title: 'Attendee cancelled',
+      description: 'The attendee status has been set to CANCELLED.',
+      color: 'green',
+    })
+  } catch (error: any) {
+    toast.add({
+      title: 'Cancel failed',
+      description: error?.message || 'Unable to cancel attendee.',
+      color: 'red',
+    })
+  }
+}
 </script>
 

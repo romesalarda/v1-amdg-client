@@ -213,10 +213,17 @@
                 <div class="h-16 rounded-xl bg-slate-100 animate-pulse" />
               </div>
 
-              <div v-else-if="stockAuditActions.length === 0" class="p-10 text-center text-slate-500">
-                <UIcon name="i-heroicons-archive-box" class="mx-auto mb-2 h-12 w-12 text-slate-300" />
-                No stock audit actions found for this order.
+              <div
+                v-else-if="stockAuditActions.length === 0"
+                class="p-10 text-center text-slate-500 flex flex-col items-center justify-center"
+              >
+                <UIcon
+                  name="i-heroicons-archive-box"
+                  class="mb-2 h-12 w-12 text-slate-300"
+                />
+                <div>No stock audit actions found for this order.</div>
               </div>
+
 
               <div v-else class="space-y-3 p-4">
                 <article
@@ -358,7 +365,7 @@
                     </div>
                     <div v-if="paymentDetails?.status" class="rounded-lg border border-slate-200 bg-slate-50 p-2 text-xs">
                       <p class="text-slate-500">Payment Status</p>
-                      <p class="font-semibold uppercase tracking-wide text-slate-900">{{ paymentDetails.status }}</p>
+                      <p class="font-semibold uppercase tracking-wide text-slate-900">{{ paymentDetails.status.replaceAll('_', ' ') }}</p>
                     </div>
                     <UButton
                       size="xs"
@@ -387,7 +394,7 @@
 
                 <div v-if="order._links?.customer || order._links?.attendee" class="space-y-2">
                   <p class="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">Related</p>
-                  <a
+                  <!-- <a
                     v-if="order._links.customer"
                     :href="order._links.customer"
                     target="_blank"
@@ -395,7 +402,7 @@
                   >
                     <UIcon name="i-heroicons-user" class="h-4 w-4" />
                     View Customer
-                  </a>
+                  </a> -->
                   <a
                     v-if="order.attendee"
                     :href="`/events/${eventId}/m/participants/dashboard/?search=${order.attendee_name}`"
