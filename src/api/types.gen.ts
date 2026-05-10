@@ -47395,6 +47395,24 @@ export type CreatePaymentIntentResponses = {
 
 export type CreatePaymentIntentResponse = CreatePaymentIntentResponses[keyof CreatePaymentIntentResponses];
 
+export type TimezonesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Case-insensitive substring filter on timezone names.
+         */
+        search?: string;
+    };
+    url: '/api/timezones/';
+};
+
+export type TimezonesRetrieveResponses = {
+    200: Array<string>;
+};
+
+export type TimezonesRetrieveResponse = TimezonesRetrieveResponses[keyof TimezonesRetrieveResponses];
+
 export type UsersListData = {
     body?: never;
     path?: never;

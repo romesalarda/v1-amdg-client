@@ -12,9 +12,14 @@
             />
             <div
               v-else
-              class="w-32 h-32 rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border-4 border-white shadow-lg"
+              class="rounded-full bg-gradient-to-br from-primary/30 to-primary/10 flex items-center justify-center border-4 border-white shadow-lg"
             >
-              <UIcon name="i-heroicons-user" class="w-16 h-16 text-primary" />
+              <img
+                v-if="attendee?.relationship_display?.toLowerCase() !== 'self'"
+                :src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${attendee?.attendee_id}`"
+                alt="Default profile"
+                class="w-32 h-32 rounded-full object-cover"
+              />
             </div>
 
             <div

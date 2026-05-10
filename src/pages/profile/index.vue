@@ -36,7 +36,7 @@
         <div class="lg:col-span-8 space-y-8">
           <form @submit.prevent="handleSubmit" class="space-y-8">
             <!-- Profile Picture Section -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-visible p-8">
               <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
                 <span class="material-symbols-outlined text-primary">account_circle</span>
                 <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Profile Picture</h2>
@@ -80,7 +80,7 @@
             </section>
 
             <!-- Personal Information -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-visible p-8">
               <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
                 <span class="material-symbols-outlined text-primary">person</span>
                 <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Personal Information</h2>
@@ -148,7 +148,7 @@
             <!-- Contact Information -->
             <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
               <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
-                <span class="material-symbols-outlined text-primary">contact_phone</span>
+                <span class="material-symbols-outlined text-primary">phone</span>
                 <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Contact & Preferences</h2>
               </div>
               
@@ -181,17 +181,13 @@
                   <p v-if="errors.preferred_language" class="text-xs text-red-500 font-medium">{{ errors.preferred_language }}</p>
                 </div>
                 
-                <div class="space-y-2">
+                <div class="relative z-20 space-y-2">
                   <label class="block text-xs font-black text-primary uppercase tracking-wider">Timezone</label>
-                  <input
-                    v-model="timezone"
-                    type="text"
-                    :class="[
-                      'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
-                      errors.timezone ? 'border-red-500 focus:border-red-500' : ''
-                    ]"
-                    placeholder="Europe/London"
-                  />
+                    <TimezoneSelect
+                      :model-value="timezone ?? 'Europe/London'"
+                      :has-error="!!errors.timezone"
+                      @update:model-value="timezone = $event"
+                    />
                   <p v-if="errors.timezone" class="text-xs text-red-500 font-medium">{{ errors.timezone }}</p>
                 </div>
               </div>
@@ -316,6 +312,7 @@
 import { ref, watch, onUnmounted } from 'vue'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
+import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 import type { ProfileRequest } from '~/api/types.gen'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
