@@ -36,120 +36,128 @@
         <div class="lg:col-span-8 space-y-8">
           <form @submit.prevent="handleSubmit" class="space-y-8">
             <!-- Profile Picture Section -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-visible p-8">
-              <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
-                <span class="material-symbols-outlined text-primary">account_circle</span>
-                <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Profile Picture</h2>
+            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-primary px-6 py-4">
+                <h2 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-white">account_circle</span>
+                  Profile Picture
+                </h2>
               </div>
-              
-              <div class="flex items-center gap-6">
-                <div class="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-navy-100/50 shadow-lg">
-                  <img
-                    v-if="imagePreview"
-                    :src="imagePreview"
-                    alt="Preview"
-                    class="w-full h-full object-cover"
-                  />
-                  <img
-                    v-else-if="profileData.data?.profile_picture_url"
-                    :src="resolveImageUrl(profileData.data.profile_picture_url)"
-                    :alt="userData.data?.display_name"
-                    class="w-full h-full object-cover"
-                  />
-                  <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-3xl">
-                    {{ getInitials(userData.data?.display_name) }}
-                  </div>
-                </div>
-                <div class="flex-1">
-                  <label class="block">
-                    <span class="sr-only">Choose profile photo</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/gif"
-                      class="block w-full text-sm text-navy-700 font-medium file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-mist-blue file:text-primary hover:file:bg-primary hover:file:text-white file:transition-all cursor-pointer"
-                      @change="handleFileChange"
+              <div class="p-8">
+                <div class="flex items-center gap-6">
+                  <div class="w-32 h-32 rounded-full overflow-hidden flex-shrink-0 border-4 border-navy-100/50 shadow-lg">
+                    <img
+                      v-if="imagePreview"
+                      :src="imagePreview"
+                      alt="Preview"
+                      class="w-full h-full object-cover"
                     />
-                  </label>
-                  <p class="mt-3 text-xs text-navy-600 font-medium">JPG, PNG or GIF. Maximum size 5MB.</p>
-                  <p v-if="profilePicture" class="mt-2 text-xs text-green-600 font-bold flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">check_circle</span>
-                    New image selected: {{ profilePicture.name }}
-                  </p>
+                    <img
+                      v-else-if="profileData.data?.profile_picture_url"
+                      :src="resolveImageUrl(profileData.data.profile_picture_url)"
+                      :alt="userData.data?.display_name"
+                      class="w-full h-full object-cover"
+                    />
+                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 text-white font-bold text-3xl">
+                      {{ getInitials(userData.data?.display_name) }}
+                    </div>
+                  </div>
+                  <div class="flex-1">
+                    <label class="block">
+                      <span class="sr-only">Choose profile photo</span>
+                      <input
+                        type="file"
+                        accept="image/jpeg,image/png,image/gif"
+                        class="block w-full text-sm text-navy-700 font-medium file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-mist-blue file:text-primary hover:file:bg-primary hover:file:text-white file:transition-all cursor-pointer"
+                        @change="handleFileChange"
+                      />
+                    </label>
+                    <p class="mt-3 text-xs text-navy-600 font-medium">JPG, PNG or GIF. Maximum size 5MB.</p>
+                    <p v-if="profilePicture" class="mt-2 text-xs text-green-600 font-bold flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">check_circle</span>
+                      New image selected: {{ profilePicture.name }}
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
 
             <!-- Personal Information -->
-            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-visible p-8">
-              <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
-                <span class="material-symbols-outlined text-primary">person</span>
-                <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Personal Information</h2>
+            <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+              <div class="bg-primary px-6 py-4">
+                <h2 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-white">person</span>
+                  Personal Information
+                </h2>
               </div>
-              
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-2">
-                  <label class="block text-xs font-black text-primary uppercase tracking-wider">First Name <span class="text-red-500">*</span></label>
-                  <input
-                    v-model="first_name"
-                    type="text"
-                    :class="[
-                      'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
-                      errors.first_name ? 'border-red-500 focus:border-red-500' : ''
-                    ]"
-                    placeholder="Enter first name"
-                  />
-                  <p v-if="errors.first_name" class="text-xs text-red-500 font-medium">{{ errors.first_name }}</p>
-                </div>
-                
-                <div class="space-y-2">
-                  <label class="block text-xs font-black text-primary uppercase tracking-wider">Last Name <span class="text-red-500">*</span></label>
-                  <input
-                    v-model="last_name"
-                    type="text"
-                    :class="[
-                      'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
-                      errors.last_name ? 'border-red-500 focus:border-red-500' : ''
-                    ]"
-                    placeholder="Enter last name"
-                  />
-                  <p v-if="errors.last_name" class="text-xs text-red-500 font-medium">{{ errors.last_name }}</p>
-                </div>
-                
-                <div class="md:col-span-2 space-y-2">
-                  <label class="block text-xs font-black text-primary uppercase tracking-wider">Preferred Name</label>
-                  <input
-                    v-model="preferred_name"
-                    type="text"
-                    :class="[
-                      'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
-                      errors.preferred_name ? 'border-red-500 focus:border-red-500' : ''
-                    ]"
-                    placeholder="How would you like to be called?"
-                  />
-                  <p v-if="errors.preferred_name" class="text-xs text-red-500 font-medium">{{ errors.preferred_name }}</p>
-                </div>
-                
-                <div class="md:col-span-2 space-y-2">
-                  <label class="block text-xs font-black text-primary uppercase tracking-wider">Email Address</label>
-                  <input
-                    :value="userData.data?.email"
-                    type="email"
-                    disabled
-                    class="w-full px-4 py-3 border border-navy-100 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed text-sm font-medium"
-                  />
-                  <p class="text-xs text-navy-600 font-medium flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm">info</span>
-                    Email address cannot be changed
-                  </p>
+              <div class="p-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div class="space-y-2">
+                    <label class="block text-xs font-black text-primary uppercase tracking-wider">First Name <span class="text-red-500">*</span></label>
+                    <input
+                      v-model="first_name"
+                      type="text"
+                      :class="[
+                        'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
+                        errors.first_name ? 'border-red-500 focus:border-red-500' : ''
+                      ]"
+                      placeholder="Enter first name"
+                    />
+                    <p v-if="errors.first_name" class="text-xs text-red-500 font-medium">{{ errors.first_name }}</p>
+                  </div>
+                  
+                  <div class="space-y-2">
+                    <label class="block text-xs font-black text-primary uppercase tracking-wider">Last Name <span class="text-red-500">*</span></label>
+                    <input
+                      v-model="last_name"
+                      type="text"
+                      :class="[
+                        'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
+                        errors.last_name ? 'border-red-500 focus:border-red-500' : ''
+                      ]"
+                      placeholder="Enter last name"
+                    />
+                    <p v-if="errors.last_name" class="text-xs text-red-500 font-medium">{{ errors.last_name }}</p>
+                  </div>
+                  
+                  <div class="md:col-span-2 space-y-2">
+                    <label class="block text-xs font-black text-primary uppercase tracking-wider">Preferred Name</label>
+                    <input
+                      v-model="preferred_name"
+                      type="text"
+                      :class="[
+                        'w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all outline-none',
+                        errors.preferred_name ? 'border-red-500 focus:border-red-500' : ''
+                      ]"
+                      placeholder="How would you like to be called?"
+                    />
+                    <p v-if="errors.preferred_name" class="text-xs text-red-500 font-medium">{{ errors.preferred_name }}</p>
+                  </div>
+                  
+                  <div class="md:col-span-2 space-y-2">
+                    <label class="block text-xs font-black text-primary uppercase tracking-wider">Email Address</label>
+                    <input
+                      :value="userData.data?.email"
+                      type="email"
+                      disabled
+                      class="w-full px-4 py-3 border border-navy-100 rounded-xl bg-gray-50 text-gray-500 cursor-not-allowed text-sm font-medium"
+                    />
+                    <p class="text-xs text-navy-600 font-medium flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">info</span>
+                      Email address cannot be changed
+                    </p>
+                  </div>
                 </div>
               </div>
             </section>
 
             <!-- Contact Information -->
             <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
-              <div class="flex items-center gap-2 mb-8 pb-4 border-b border-navy-50">
-                <span class="material-symbols-outlined text-primary">phone</span>
-                <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Contact & Preferences</h2>
+              <div class="bg-primary -mx-8 -mt-8 px-6 py-4 mb-8">
+                <h2 class="text-[11px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                  <span class="material-symbols-outlined text-base text-white">phone</span>
+                  Contact & Preferences
+                </h2>
               </div>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -304,12 +312,55 @@
           </div>
         </div>
       </Transition>
+
+      <!-- Unsaved Changes Bar -->
+      <Transition
+        enter-active-class="transition ease-out duration-300"
+        enter-from-class="opacity-0 translate-y-4"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition ease-in duration-200"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 translate-y-4"
+      >
+        <div
+          v-if="hasUnsavedChanges"
+          class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-1.5rem)] max-w-4xl bg-primary text-white border border-white/20 rounded-2xl shadow-2xl px-4 md:px-6 py-4"
+        >
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-white">warning</span>
+              <p class="text-xs md:text-sm font-black uppercase tracking-wider">You have unsaved changes</p>
+            </div>
+            <div class="flex items-center gap-2 md:gap-3">
+              <button
+                type="button"
+                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg border border-white/40 text-white hover:bg-white hover:text-primary transition-all disabled:opacity-50"
+                :disabled="isSaving"
+                @click="resetForm"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg bg-white text-primary hover:bg-navy-50 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                :disabled="isSaving"
+                @click="handleSubmit"
+              >
+                <span class="material-symbols-outlined text-base" v-if="!isSaving">save</span>
+                <span class="material-symbols-outlined text-base animate-spin" v-else>progress_activity</span>
+                {{ isSaving ? 'Saving...' : 'Save now' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </Transition>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { onBeforeRouteLeave } from 'vue-router'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
@@ -326,11 +377,11 @@ const { data: userData, isLoading: isUserLoading, error: userError } = useMe()
 const { data: profileData, isLoading: isProfileLoading, error: profileError } = useMyProfile()
 
 // Mutations
-const { mutate: updateUser, isPending: isUpdatingUser, mutateAsync: updateUserAsync } = useUpdateMe()
-const { mutate: updateProfile, isPending: isUpdatingProfile, mutateAsync: updateProfileAsync } = usePartialUpdateProfile()
+const { isPending: isUpdatingUser, mutateAsync: updateUserAsync } = useUpdateMe()
+const { isPending: isUpdatingProfile, mutateAsync: updateProfileAsync } = usePartialUpdateProfile()
 
 // Setup vee-validate form with zod schema
-const { handleSubmit: handleFormSubmit, errors, resetForm: veeResetForm, setValues } = useForm({
+const { handleSubmit: handleFormSubmit, errors, setValues } = useForm({
   validationSchema: toTypedSchema(ProfileSchema),
   initialValues: {
     first_name: '',
@@ -350,17 +401,62 @@ const { value: contact_phone } = useField<string>('contact_phone')
 const { value: preferred_language } = useField<string>('preferred_language')
 const { value: timezone } = useField<string>('timezone')
 
+type ProfileFormValues = {
+  first_name: string
+  last_name: string
+  preferred_name: string
+  contact_phone: string
+  preferred_language: string
+  timezone: string
+}
+
 const profilePicture = ref<File | null>(null)
 const imagePreview = ref<string | null>(null)
 const showSuccess = ref(false)
+const initialFormValues = ref<ProfileFormValues | null>(null)
 
 // Computed states
 const isLoading = computed(() => isUserLoading.value || isProfileLoading.value)
 const isSaving = computed(() => isUpdatingUser.value || isUpdatingProfile.value)
 const error = computed(() => userError.value || profileError.value)
+const hasFieldChanges = computed(() => {
+  if (!initialFormValues.value) return false
+
+  return (
+    first_name.value !== initialFormValues.value.first_name
+    || last_name.value !== initialFormValues.value.last_name
+    || preferred_name.value !== initialFormValues.value.preferred_name
+    || contact_phone.value !== initialFormValues.value.contact_phone
+    || preferred_language.value !== initialFormValues.value.preferred_language
+    || timezone.value !== initialFormValues.value.timezone
+  )
+})
+const hasUnsavedChanges = computed(() => hasFieldChanges.value || !!profilePicture.value)
+
+const captureInitialValues = (values: ProfileFormValues) => {
+  initialFormValues.value = { ...values }
+}
+
+const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+  if (!hasUnsavedChanges.value) return
+
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+onMounted(() => {
+  window.addEventListener('beforeunload', beforeUnloadHandler)
+})
+
+onBeforeRouteLeave(() => {
+  if (!hasUnsavedChanges.value) return true
+  return window.confirm('You have unsaved changes. Are you sure you want to leave this page?')
+})
 
 // Cleanup image preview on unmount
 onUnmounted(() => {
+  window.removeEventListener('beforeunload', beforeUnloadHandler)
+
   if (imagePreview.value) {
     URL.revokeObjectURL(imagePreview.value)
   }
@@ -369,14 +465,17 @@ onUnmounted(() => {
 // Initialize form data when profile loads
 watch([userData, profileData], () => {
   if (userData.value?.data && profileData.value?.data) {
-    setValues({
+    const values = {
       first_name: userData.value.data.first_name || '',
       last_name: userData.value.data.last_name || '',
       preferred_name: profileData.value.data.preferred_name || '',
       contact_phone: profileData.value.data.contact_phone || '',
       preferred_language: profileData.value.data.preferred_language || '',
       timezone: profileData.value.data.timezone || 'Europe/London',
-    })
+    }
+
+    setValues(values)
+    captureInitialValues(values)
   }
 }, { immediate: true })
 
@@ -417,14 +516,17 @@ const handleFileChange = (event: Event) => {
 // Reset form to initial values
 const resetForm = () => {
   if (userData.value?.data && profileData.value?.data) {
-    setValues({
+    const values = {
       first_name: userData.value.data.first_name || '',
       last_name: userData.value.data.last_name || '',
       preferred_name: profileData.value.data.preferred_name || '',
       contact_phone: profileData.value.data.contact_phone || '',
       preferred_language: profileData.value.data.preferred_language || '',
       timezone: profileData.value.data.timezone || 'Europe/London',
-    })
+    }
+
+    setValues(values)
+    captureInitialValues(values)
   }
   
   // Cleanup preview and file
@@ -437,6 +539,8 @@ const resetForm = () => {
   // Clear file input
   const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
   if (fileInput) fileInput.value = ''
+
+  $notyf.success('Changes discarded')
 }
 
 // Handle form submission with vee-validate
@@ -503,6 +607,15 @@ const handleSubmit = handleFormSubmit(async (values) => {
     // Clear file input
     const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement
     if (fileInput) fileInput.value = ''
+
+    captureInitialValues({
+      first_name: values.first_name,
+      last_name: values.last_name,
+      preferred_name: values.preferred_name || '',
+      contact_phone: values.contact_phone || '',
+      preferred_language: values.preferred_language || '',
+      timezone: values.timezone,
+    })
   }
   catch (err) {
     console.error('Error updating profile:', err)
