@@ -86,9 +86,22 @@
 			</div>
 
 			<!-- Dietary Requirements -->
-			<div>
-				<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
-				<div v-if="dietaryRequirements.length" class="mt-3 space-y-3">
+			<div class="rounded-xl border border-slate-200 bg-white p-4">
+				<button
+					type="button"
+					class="flex w-full items-center justify-between gap-3 text-left"
+					@click="toggleSection('dietary')"
+				>
+					<div>
+						<h3 class="text-sm font-semibold text-gray-900">Dietary requirements</h3>
+						<p v-if="!sectionsOpen.dietary" class="mt-1 text-xs text-gray-500">{{ dietarySummary }}</p>
+					</div>
+					<div class="flex items-center gap-1 text-xs font-semibold text-slate-600">
+						<span>{{ sectionsOpen.dietary ? 'Collapse' : 'Add / View' }}</span>
+						<UIcon :name="sectionsOpen.dietary ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" class="h-4 w-4" />
+					</div>
+				</button>
+				<div v-if="sectionsOpen.dietary && dietaryRequirements.length" class="mt-3 space-y-3">
 					<div
 						v-for="requirement in dietaryRequirements"
 						:key="requirement.id"
@@ -134,13 +147,26 @@
 						</div>
 					</div>
 				</div>
-				<p v-else class="mt-2 text-xs text-gray-500">No dietary requirements available.</p>
+				<p v-if="sectionsOpen.dietary && !dietaryRequirements.length" class="mt-2 text-xs text-gray-500">No dietary requirements available.</p>
 			</div>
 
 			<!-- Medical Conditions -->
-			<div>
-				<h3 class="text-sm font-semibold text-gray-900">Medical conditions</h3>
-				<div v-if="medicalConditions.length" class="mt-3 space-y-3">
+			<div class="rounded-xl border border-slate-200 bg-white p-4">
+				<button
+					type="button"
+					class="flex w-full items-center justify-between gap-3 text-left"
+					@click="toggleSection('medical')"
+				>
+					<div>
+						<h3 class="text-sm font-semibold text-gray-900">Medical conditions</h3>
+						<p v-if="!sectionsOpen.medical" class="mt-1 text-xs text-gray-500">{{ medicalSummary }}</p>
+					</div>
+					<div class="flex items-center gap-1 text-xs font-semibold text-slate-600">
+						<span>{{ sectionsOpen.medical ? 'Collapse' : 'Add / View' }}</span>
+						<UIcon :name="sectionsOpen.medical ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" class="h-4 w-4" />
+					</div>
+				</button>
+				<div v-if="sectionsOpen.medical && medicalConditions.length" class="mt-3 space-y-3">
 					<div
 						v-for="condition in medicalConditions"
 						:key="condition.id"
@@ -201,13 +227,26 @@
 						</div>
 					</div>
 				</div>
-				<p v-else class="mt-2 text-xs text-gray-500">No medical conditions available.</p>
+				<p v-if="sectionsOpen.medical && !medicalConditions.length" class="mt-2 text-xs text-gray-500">No medical conditions available.</p>
 			</div>
 
 			<!-- Accessibility Requirements -->
-			<div>
-				<h3 class="text-sm font-semibold text-gray-900">Accessibility requirements</h3>
-				<div v-if="accessibilityRequirements.length" class="mt-3 space-y-3">
+			<div class="rounded-xl border border-slate-200 bg-white p-4">
+				<button
+					type="button"
+					class="flex w-full items-center justify-between gap-3 text-left"
+					@click="toggleSection('accessibility')"
+				>
+					<div>
+						<h3 class="text-sm font-semibold text-gray-900">Accessibility requirements</h3>
+						<p v-if="!sectionsOpen.accessibility" class="mt-1 text-xs text-gray-500">{{ accessibilitySummary }}</p>
+					</div>
+					<div class="flex items-center gap-1 text-xs font-semibold text-slate-600">
+						<span>{{ sectionsOpen.accessibility ? 'Collapse' : 'Add / View' }}</span>
+						<UIcon :name="sectionsOpen.accessibility ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" class="h-4 w-4" />
+					</div>
+				</button>
+				<div v-if="sectionsOpen.accessibility && accessibilityRequirements.length" class="mt-3 space-y-3">
 					<div
 						v-for="requirement in accessibilityRequirements"
 						:key="requirement.id"
@@ -253,77 +292,93 @@
 						</div>
 					</div>
 				</div>
-				<p v-else class="mt-2 text-xs text-gray-500">No accessibility requirements available.</p>
+				<p v-if="sectionsOpen.accessibility && !accessibilityRequirements.length" class="mt-2 text-xs text-gray-500">No accessibility requirements available.</p>
 			</div>
 
 			<!-- Emergency Contact -->
-			<div>
-				<div class="flex items-center justify-between">
-					<h3 class="text-sm font-semibold text-gray-900">
-						Emergency contact
-						<span v-if="isAttendeeMinor(currentAttendee)" class="text-red-500">*</span>
-					</h3>
-					<UButton
-						v-if="!currentAttendee?.personalInfo?.emergencyContact"
-						size="xs"
-						color="gray"
-						variant="ghost"
-						@click="addEmergencyContact"
-					>
-						Add contact
-					</UButton>
-				</div>
+			<div class="rounded-xl border border-slate-200 bg-white p-4">
+				<button
+					type="button"
+					class="flex w-full items-center justify-between gap-3 text-left"
+					@click="toggleSection('emergency')"
+				>
+					<div>
+						<h3 class="text-sm font-semibold text-gray-900">
+							Emergency contact
+							<span v-if="isAttendeeMinor(currentAttendee)" class="text-red-500">*</span>
+						</h3>
+						<p v-if="!sectionsOpen.emergency" class="mt-1 text-xs text-gray-500">{{ emergencyContactSummary }}</p>
+					</div>
+					<div class="flex items-center gap-1 text-xs font-semibold text-slate-600">
+						<span>{{ sectionsOpen.emergency ? 'Collapse' : 'Add / View' }}</span>
+						<UIcon :name="sectionsOpen.emergency ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" class="h-4 w-4" />
+					</div>
+				</button>
 
-				<div
-					v-if="currentAttendee?.personalInfo?.emergencyContact"
-					class="mt-3 grid gap-4 sm:grid-cols-2"
-				>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
-						<UInput
-							v-model="currentAttendee.personalInfo.emergencyContact.first_name"
-							placeholder="First name"
-						/>
+				<div v-if="sectionsOpen.emergency" class="mt-3">
+					<div class="flex items-center justify-end">
+						<UButton
+							v-if="!currentAttendee?.personalInfo?.emergencyContact"
+							size="xs"
+							color="gray"
+							variant="ghost"
+							@click="addEmergencyContact"
+						>
+							Add contact
+						</UButton>
 					</div>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
-						<UInput
-							v-model="currentAttendee.personalInfo.emergencyContact.last_name"
-							placeholder="Last name"
-						/>
+
+					<div
+						v-if="currentAttendee?.personalInfo?.emergencyContact"
+						class="mt-3 grid gap-4 sm:grid-cols-2"
+					>
+						<div>
+							<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
+							<UInput
+								v-model="currentAttendee.personalInfo.emergencyContact.first_name"
+								placeholder="First name"
+							/>
+						</div>
+						<div>
+							<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
+							<UInput
+								v-model="currentAttendee.personalInfo.emergencyContact.last_name"
+								placeholder="Last name"
+							/>
+						</div>
+						<div>
+							<label class="mb-1 block text-sm font-medium text-gray-700">Phone number <span class="text-red-500">*</span></label>
+							<UInput
+								v-model="currentAttendee.personalInfo.emergencyContact.phone_number"
+								placeholder="Phone number"
+							/>
+						</div>
+						<div>
+							<label class="mb-1 block text-sm font-medium text-gray-700">Relationship</label>
+							<USelectMenu
+								v-model="currentAttendee.personalInfo.emergencyContact.relationship"
+								:options="emergencyRelationshipOptions"
+								value-attribute="value"
+								option-attribute="label"
+								placeholder="Select relationship"
+							/>
+						</div>
+						<div class="sm:col-span-2">
+							<label class="mb-1 block text-sm font-medium text-gray-700">Email (optional)</label>
+							<UInput
+								v-model="currentAttendee.personalInfo.emergencyContact.email"
+								type="email"
+								placeholder="Email address"
+							/>
+						</div>
 					</div>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Phone number <span class="text-red-500">*</span></label>
-						<UInput
-							v-model="currentAttendee.personalInfo.emergencyContact.phone_number"
-							placeholder="Phone number"
-						/>
-					</div>
-					<div>
-						<label class="mb-1 block text-sm font-medium text-gray-700">Relationship</label>
-						<USelectMenu
-							v-model="currentAttendee.personalInfo.emergencyContact.relationship"
-							:options="emergencyRelationshipOptions"
-							value-attribute="value"
-							option-attribute="label"
-							placeholder="Select relationship"
-						/>
-					</div>
-					<div class="sm:col-span-2">
-						<label class="mb-1 block text-sm font-medium text-gray-700">Email (optional)</label>
-						<UInput
-							v-model="currentAttendee.personalInfo.emergencyContact.email"
-							type="email"
-							placeholder="Email address"
-						/>
-					</div>
+					<p
+						v-else-if="isAttendeeMinor(currentAttendee)"
+						class="mt-2 text-xs font-semibold text-red-600"
+					>
+						Emergency contact is required for attendees under 18.
+					</p>
 				</div>
-				<p
-					v-else-if="isAttendeeMinor(currentAttendee)"
-					class="mt-2 text-xs font-semibold text-red-600"
-				>
-					Emergency contact is required for attendees under 18.
-				</p>
 			</div>
 		</div>
 	</div>
@@ -333,7 +388,7 @@
 import type { AttendeeDraft, PersonalInfoItemDraft } from '~/stores/registration'
 import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
 
-defineProps<{
+const props = defineProps<{
 	currentAttendee: AttendeeDraft
 	isAttendeeMinor: (attendee: AttendeeDraft) => boolean
 	dietaryRequirements: Array<{ id: number; label: string }>
@@ -356,6 +411,29 @@ defineProps<{
 	addEmergencyContact: () => void
 }>()
 
+const {
+	currentAttendee,
+	isAttendeeMinor,
+	dietaryRequirements,
+	medicalConditions,
+	accessibilityRequirements,
+	alternativeSigninOptions,
+	alternativeSigninsLoading,
+	emergencyRelationshipOptions,
+	hasPersonalInfoItem,
+	isOtherOption,
+	getDetailsForItem,
+	getPersonalInfoItemValidationError,
+	toggleDietaryRequirement,
+	toggleMedicalCondition,
+	toggleAccessibilityRequirement,
+	updateDietaryRequirementDetails,
+	updateMedicalConditionSeverity,
+	updateMedicalConditionDetails,
+	updateAccessibilityRequirementDetails,
+	addEmergencyContact,
+} = toRefs(props)
+
 const buildAlternativeSigninSelectOptions = (
 	options: Array<{ id: string; title: string; description: string | null; formatMatch: string | null }>
 ) => (options || []).map((option) => ({
@@ -370,4 +448,72 @@ const findAlternativeSigninOption = (
 	if (!selectedId) return null
 	return (options || []).find((option) => option.id === selectedId) || null
 }
+
+type SectionKey = 'dietary' | 'medical' | 'accessibility' | 'emergency'
+
+const sectionsOpen = ref<Record<SectionKey, boolean>>({
+	dietary: false,
+	medical: false,
+	accessibility: false,
+	emergency: false,
+})
+
+const toggleSection = (section: SectionKey) => {
+	sectionsOpen.value[section] = !sectionsOpen.value[section]
+}
+
+const getSelectedLabelsSummary = (
+	options: Array<{ id: number; label: string }>,
+	selectedItems: Array<{ id: number }> | undefined,
+	emptyState: string
+) => {
+	if (!selectedItems?.length) return emptyState
+	const selectedIds = new Set(selectedItems.map((item) => item.id))
+	const selectedLabels = options
+		.filter((option) => selectedIds.has(option.id))
+		.map((option) => option.label)
+
+	if (!selectedLabels.length) return `${selectedItems.length} selected`
+	if (selectedLabels.length <= 2) return selectedLabels.join(' • ')
+	return `${selectedLabels.slice(0, 2).join(' • ')} +${selectedLabels.length - 2} more`
+}
+
+const dietarySummary = computed(() => getSelectedLabelsSummary(
+	dietaryRequirements.value,
+	currentAttendee.value.personalInfo.dietaryRequirements,
+	'No dietary requirements selected'
+))
+
+const medicalSummary = computed(() => getSelectedLabelsSummary(
+	medicalConditions.value,
+	currentAttendee.value.personalInfo.medicalConditions,
+	'No medical conditions selected'
+))
+
+const accessibilitySummary = computed(() => getSelectedLabelsSummary(
+	accessibilityRequirements.value,
+	currentAttendee.value.personalInfo.accessibilityRequirements,
+	'No accessibility requirements selected'
+))
+
+const emergencyContactSummary = computed(() => {
+	const emergencyContact = currentAttendee.value.personalInfo.emergencyContact
+	if (!emergencyContact) {
+		return isAttendeeMinor.value(currentAttendee.value)
+			? 'Required for this attendee but not yet added'
+			: 'No emergency contact added'
+	}
+
+	const fullName = [emergencyContact.first_name, emergencyContact.last_name]
+		.filter(Boolean)
+		.join(' ')
+
+	const summaryParts = [
+		fullName || null,
+		emergencyContact.phone_number || null,
+		emergencyContact.relationship || null,
+	].filter(Boolean)
+
+	return summaryParts.length ? summaryParts.join(' • ') : 'Emergency contact added'
+})
 </script>

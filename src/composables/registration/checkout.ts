@@ -41,6 +41,28 @@ const buildMedicalConditionItem = (item: MedicalConditionItemDraft): MedicalCond
   severity: item.severity ?? null,
 })
 
+const normalizeText = (value: string | null | undefined): string | undefined => {
+  if (typeof value !== 'string') return undefined
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
+const hasPersonalInfoItemData = (item: PersonalInfoItemDraft): boolean =>
+  Boolean(normalizeText(item.details) || normalizeText(item.notes))
+
+const hasMedicalConditionItemData = (item: MedicalConditionItemDraft): boolean =>
+  Boolean(item.severity || normalizeText(item.details) || normalizeText(item.notes))
+
+type EmergencyRelationship = NonNullable<AttendeePersonalInfoDraftRequest['emergency_contact']>['relationship']
+
+const isEmergencyRelationship = (value: string | undefined): value is EmergencyRelationship =>
+  value === 'spouse'
+  || value === 'child'
+  || value === 'friend'
+  || value === 'parent'
+  || value === 'sibling'
+  || value === 'other'
+
 const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersonalInfoDraftRequest | undefined => {
   if (!info) return undefined
 
@@ -54,20 +76,41 @@ const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersona
         }
       : undefined
 
-  return {
-    dietary_requirements: info.dietaryRequirements.map(buildPersonalInfoItem),
-    medical_conditions: info.medicalConditions.map(buildMedicalConditionItem),
-    accessibility_requirements: info.accessibilityRequirements.map(buildPersonalInfoItem),
-    emergency_contact: info.emergencyContact
+  const dietaryRequirements = info.dietaryRequirements
+    .filter(hasPersonalInfoItemData)
+    .map(buildPersonalInfoItem)
+
+  const medicalConditions = info.medicalConditions
+    .filter(hasMedicalConditionItemData)
+    .map(buildMedicalConditionItem)
+
+  const accessibilityRequirements = info.accessibilityRequirements
+    .filter(hasPersonalInfoItemData)
+    .map(buildPersonalInfoItem)
+
+  const emergencyFirstName = normalizeText(info.emergencyContact?.first_name)
+  const emergencyLastName = normalizeText(info.emergencyContact?.last_name)
+  const emergencyPhoneNumber = normalizeText(info.emergencyContact?.phone_number)
+  const emergencyEmail = normalizeText(info.emergencyContact?.email)
+  const emergencyRelationship = normalizeText(info.emergencyContact?.relationship)
+
+  const mappedEmergencyContact =
+    emergencyFirstName && emergencyLastName && emergencyPhoneNumber
       ? {
-          first_name: info.emergencyContact.first_name,
-          last_name: info.emergencyContact.last_name,
-          relationship: info.emergencyContact.relationship ?? 'other',
-          phone_number: info.emergencyContact.phone_number,
-          email: info.emergencyContact.email ?? null,
-          primary_contact: info.emergencyContact.primary_contact ?? true,
+          first_name: emergencyFirstName,
+          last_name: emergencyLastName,
+          relationship: isEmergencyRelationship(emergencyRelationship) ? emergencyRelationship : 'other',
+          phone_number: emergencyPhoneNumber,
+          email: emergencyEmail ?? null,
+          primary_contact: info.emergencyContact?.primary_contact ?? true,
         }
-      : undefined,
+      : undefined
+
+  return {
+    dietary_requirements: dietaryRequirements.length ? dietaryRequirements : undefined,
+    medical_conditions: medicalConditions.length ? medicalConditions : undefined,
+    accessibility_requirements: accessibilityRequirements.length ? accessibilityRequirements : undefined,
+    emergency_contact: mappedEmergencyContact,
     organisation_id: info.organisationId ?? null,
     alternative_signin_identifier: mappedAlternativeSignin,
   }

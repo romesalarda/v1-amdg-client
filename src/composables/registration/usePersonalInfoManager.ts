@@ -40,7 +40,10 @@ export const usePersonalInfoManager = (options: PersonalInfoManagerOptions) => {
 
   const minorHasEmergencyContact = (attendee: AttendeeDraft): boolean => {
     if (!isAttendeeMinor(attendee)) return true
-    return !!attendee.personalInfo.emergencyContact && !!attendee.personalInfo.emergencyContact.first_name && !!attendee.personalInfo.emergencyContact.last_name
+    return !!attendee.personalInfo.emergencyContact
+      && !!attendee.personalInfo.emergencyContact.first_name?.trim()
+      && !!attendee.personalInfo.emergencyContact.last_name?.trim()
+      && !!attendee.personalInfo.emergencyContact.phone_number?.trim()
   }
 
   const hasPersonalInfoItem = (items: PersonalInfoItemDraft[] | MedicalConditionItemDraft[], id: number) => {

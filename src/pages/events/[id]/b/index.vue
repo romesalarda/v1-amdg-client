@@ -176,9 +176,14 @@
 							class="group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md"
 						>
 							<div class="flex min-w-0 items-center gap-5">
-								<div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b132b] font-black text-[#bec5e5]">
+								<!-- <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b132b] font-black text-[#bec5e5]">
 									{{ getBookingInitials(getBookingDisplayTitle(item)) }}
-								</div>
+								</div> -->
+								<img
+									:src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${item.booking.booking_reference}`"
+									alt="Default profile"
+									class="w-12 h-12 rounded-full object-cover"
+								/>
 								<div class="min-w-0">
 									<h3 class="font-black text-[#181c20] text-xl md:text-2xl">{{ getBookingDisplayTitle(item) }}</h3>
 									<p class="text-sm font-medium text-[#0b132b]/55">
