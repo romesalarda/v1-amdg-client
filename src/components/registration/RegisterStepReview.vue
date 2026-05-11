@@ -42,6 +42,13 @@
 			</div>
 		</div>
 
+		<!-- Discount code -->
+		<DiscountCodeInput
+			:model-value="discountCode"
+			:event-id="eventId"
+			@update:model-value="emit('update:discountCode', $event)"
+		/>
+
 		<!-- Free booking notice -->
 		<div v-if="isBookingFree" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4">
 			<div class="flex items-center gap-3">
@@ -249,6 +256,7 @@
 import { formatMoney } from '~/utils/money'
 import type { AttendeeDraft } from '~/stores/registration'
 import type { PaymentMethod } from '~/api/types.gen'
+import DiscountCodeInput from '~/components/registration/DiscountCodeInput.vue'
 
 const props = defineProps<{
 	attendees: AttendeeDraft[]
@@ -281,6 +289,8 @@ const props = defineProps<{
 	stripePaymentAttemptError: string
 	stripeCardReady: boolean
 	agreedToTerms: boolean
+	discountCode: string | null
+	eventId: number | string | null | undefined
 }>()
 
 const {
@@ -314,6 +324,8 @@ const {
 	stripePaymentAttemptError,
 	stripeCardReady,
 	agreedToTerms,
+	discountCode,
+	eventId,
 } = toRefs(props)
 
 const bankTransferEvidenceFileInput = ref<HTMLInputElement | null>(null)
@@ -374,5 +386,6 @@ const emit = defineEmits<{
 	'update:selectedPaymentMethodId': [id: number | null]
 	'update:manualStripePublicKey': [value: string]
 	'update:agreedToTerms': [value: boolean]
+	'update:discountCode': [value: string | null]
 }>()
 </script>

@@ -78,6 +78,7 @@ type RegistrationState = {
   ticketCount: number
   registrarAttending: boolean
   bookingIntentId: string | null
+  discountCode: string | null
   attendees: AttendeeDraft[]
   currentIndex: number
 }
@@ -111,6 +112,7 @@ export const useRegistrationStore = defineStore('registration', {
     ticketCount: 1,
     registrarAttending: true,
     bookingIntentId: null,
+    discountCode: null,
     attendees: [],
     currentIndex: 0,
   }),
@@ -130,8 +132,11 @@ export const useRegistrationStore = defineStore('registration', {
       this.ticketCount = 1
       this.registrarAttending = true
       this.bookingIntentId = null
+      this.discountCode = null
       this.attendees = []
       this.currentIndex = 0
+    },    setDiscountCode(code: string | null) {
+      this.discountCode = code
     },
     setBookingIntentId(intentId: string) {
       this.bookingIntentId = intentId

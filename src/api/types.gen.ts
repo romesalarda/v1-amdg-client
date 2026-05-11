@@ -2592,6 +2592,10 @@ export type CheckoutPreviewRequest = {
      */
     booking_intent_id: string;
     /**
+     * Optional discount code to apply across all eligible attendees
+     */
+    discount_code?: string | null;
+    /**
      * List of attendee selections with packages and products
      */
     attendees: Array<AttendeeCheckoutRequest>;
@@ -2689,6 +2693,10 @@ export type CheckoutRequest = {
      * Pre-uploaded bank transfer evidence ID bound to this booking intent
      */
     bank_transfer_evidence_id?: string | null;
+    /**
+     * Optional discount code to apply across all eligible attendees
+     */
+    discount_code?: string | null;
     /**
      * List of attendee selections with packages and products
      */
@@ -42258,6 +42266,34 @@ export type PaymentsDiscountsEligibilityPreviewRetrieveErrors = {
 export type PaymentsDiscountsEligibilityPreviewRetrieveResponses = {
     /**
      * Discount eligibility diagnostics
+     */
+    200: unknown;
+};
+
+export type PaymentsDiscountsValidateCodeCreateData = {
+    body?: {
+        code: string;
+        event_id: number;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/payments/discounts/validate-code/';
+};
+
+export type PaymentsDiscountsValidateCodeCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Rate limit exceeded
+     */
+    429: unknown;
+};
+
+export type PaymentsDiscountsValidateCodeCreateResponses = {
+    /**
+     * Validation result
      */
     200: unknown;
 };

@@ -203,12 +203,14 @@ export const buildCheckoutPayload = (params: {
   paymentId?: string
   stripePaymentIntentId?: string
   bankTransferEvidenceId?: string
+  discountCode?: string | null
 }): CheckoutRequest => ({
   booking_intent_id: params.bookingIntentId,
   payment_method_id: params.paymentMethodId,
   payment_id: params.paymentId,
   stripe_payment_intent_id: params.stripePaymentIntentId,
   bank_transfer_evidence_id: params.bankTransferEvidenceId,
+  discount_code: params.discountCode ?? null,
   attendees: params.attendees.map(buildAttendeeCheckout),
 })
 
@@ -253,6 +255,7 @@ export const buildCheckoutMultipartPayload = (params: {
   bankTransferEvidenceId?: string
   stripePaymentIntentId?: string
   bankTransferEvidence?: BankTransferEvidenceInput
+  discountCode?: string | null
 }): FormData => {
   const formData = new FormData()
   const attendeesPayload = params.attendees.map(buildAttendeeCheckout)
@@ -290,6 +293,10 @@ export const buildCheckoutMultipartPayload = (params: {
     formData.append('stripe_payment_intent_id', params.stripePaymentIntentId)
   }
 
+  if (params.discountCode) {
+    formData.append('discount_code', params.discountCode)
+  }
+
   if (params.bankTransferEvidence) {
     if (params.bankTransferEvidence.transfer_id) {
       formData.append('bank_transfer_evidence[transfer_id]', params.bankTransferEvidence.transfer_id)
@@ -312,8 +319,10 @@ export const buildCheckoutMultipartPayload = (params: {
 export const buildCheckoutPreviewPayload = (params: {
   bookingIntentId: string
   attendees: AttendeeDraft[]
+  discountCode?: string | null
 }): CheckoutPreviewRequest => ({
   booking_intent_id: params.bookingIntentId,
+  discount_code: params.discountCode ?? null,
   attendees: params.attendees.map(buildAttendeeCheckout),
 })
 

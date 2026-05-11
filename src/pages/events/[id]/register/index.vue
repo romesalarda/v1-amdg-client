@@ -207,10 +207,13 @@
 											:stripe-payment-attempt-error="stripePaymentAttemptError"
 											:stripe-card-ready="stripeCardReady"
 											:agreed-to-terms="agreedToTerms"
+											:discount-code="store.discountCode"
+											:event-id="eventId"
 											@jump-to-attendee="jumpToAttendee"
 											@update:selected-payment-method-id="(id) => { selectedPaymentMethodId = id ?? undefined }"
 											@update:manual-stripe-public-key="(val) => { manualStripePublicKey = val }"
 											@update:agreed-to-terms="(val) => { agreedToTerms = val }"
+											@update:discount-code="(val) => { store.setDiscountCode(val) }"
 										/>
 									</template>
 
@@ -1033,7 +1036,9 @@ const checkoutBankTransferInstructions = computed(() => {
 const parseDiscountAmount = (value: string | undefined) => Math.abs(Number(value || 0))
 
 const previewTriggerSignature = computed(() => JSON.stringify(
-	store.attendees.map((attendee) => ({
+	[
+		store.discountCode,
+		...store.attendees.map((attendee) => ({
 		attendeeId: attendee.attendeeId || null,
 		firstName: attendee.first_name,
 		lastName: attendee.last_name,
@@ -1045,6 +1050,7 @@ const previewTriggerSignature = computed(() => JSON.stringify(
 		consents: attendee.consents,
 		answers: attendee.questionAnswers,
 	}))
+	]
 ))
 
 const breakdownLines = computed<BreakdownLine[]>(() => {
@@ -1366,6 +1372,7 @@ const refreshCheckoutPreview = async () => {
 		const payload = buildCheckoutPreviewPayload({
 			bookingIntentId: store.bookingIntentId,
 			attendees: store.attendees,
+			discountCode: store.discountCode,
 		})
 		const response = await checkoutPreviewMutation.mutateAsync(payload)
 		checkoutPreview.value = (response.data || null) as CheckoutPreviewData | null
@@ -1696,6 +1703,7 @@ const handleCheckout = async () => {
 				attendees: store.attendees,
 				paymentId: bankTransferPaymentId,
 				bankTransferEvidenceId,
+				discountCode: store.discountCode,
 			})
 			: buildCheckoutPayload({
 				bookingIntentId: store.bookingIntentId,
@@ -1703,6 +1711,7 @@ const handleCheckout = async () => {
 				attendees: store.attendees,
 				paymentId: bankTransferPaymentId,
 				bankTransferEvidenceId,
+				discountCode: store.discountCode,
 				// TODO missing: stripePaymentIntentId:
 			})
 
