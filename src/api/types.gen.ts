@@ -15238,11 +15238,11 @@ export type PaymentDetail = {
      */
     readonly total_refunded_amount: number;
     /**
-     * Original base amount before modifications
+     * Original amount before discounts were applied
      */
     readonly original_amount: string;
     /**
-     * Final amount after percentage modifier
+     * Final amount after refunds have been processed
      */
     readonly final_amount: string;
     description?: string | null;
@@ -15259,15 +15259,41 @@ export type PaymentDetail = {
     /**
      * Associated refund requests
      */
-    readonly refund_requests: Array<unknown>;
+    readonly refund_requests: Array<{
+        id: string;
+        amount: string;
+        status: string;
+        requested_at: string;
+    }>;
     /**
      * Associated donations
      */
-    readonly donations: Array<unknown>;
+    readonly donations: Array<{
+        id: string;
+        amount: string;
+        status: string;
+        donated_at: string;
+    }>;
     /**
      * Recent payment history
      */
-    readonly history_actions: Array<unknown>;
+    readonly history_actions: Array<{
+        action: string;
+        description: string;
+        performed_by: string | null;
+        timestamp: string;
+    }>;
+    /**
+     * Latest bank transfer evidence summary
+     */
+    readonly bank_transfer_evidence: {
+        bank_transfer_id: string;
+        transfer_id: string;
+        evidence_file: string | null;
+        verification_status: string;
+        uploaded_at: string | null;
+        auto_expiry_date: string | null;
+    } | null;
     readonly updated_at: string;
 };
 
@@ -15386,11 +15412,11 @@ export type PaymentList = {
      */
     readonly total_refunded_amount: number;
     /**
-     * Original base amount before modifications
+     * Original amount before discounts were applied
      */
     readonly original_amount: string;
     /**
-     * Final amount after percentage modifier
+     * Final amount after refunds have been processed
      */
     readonly final_amount: string;
 };

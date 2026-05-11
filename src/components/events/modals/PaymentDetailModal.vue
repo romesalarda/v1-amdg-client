@@ -133,6 +133,76 @@
                   </template>
                 </template>
 
+                <div v-if="receiptDiscountRows.length > 0" class="pt-1">
+                  <template v-if="receiptDiscountRows.length === 1">
+                    <div
+                      class="flex items-start justify-between rounded-md border border-emerald-100 bg-emerald-50/70 px-3 py-2.5"
+                    >
+                      <div class="min-w-0 pr-3">
+                        <div class="text-sm font-semibold text-emerald-900">{{ receiptDiscountRows[0].name || 'Discount' }}</div>
+                        <div class="mt-0.5 text-xs text-emerald-700">
+                          {{ receiptDiscountRows[0].packageName }}
+                          <span v-if="receiptDiscountRows[0].attendeeIndex !== null"> · Attendee {{ receiptDiscountRows[0].attendeeIndex + 1 }}</span>
+                        </div>
+                        <div class="mt-0.5 text-[11px] uppercase tracking-wide text-emerald-700/90">
+                          {{ formatMetadataLabel(receiptDiscountRows[0].discountType) }}
+                          <span v-if="receiptDiscountRows[0].value"> · {{ receiptDiscountRows[0].value }}%</span>
+                          <span v-if="receiptDiscountRows[0].currency"> · {{ receiptDiscountRows[0].currency }}</span>
+                        </div>
+                      </div>
+                      <div class="text-right">
+                        <div class="text-xs font-semibold uppercase tracking-wide text-emerald-700">Applied Discount</div>
+                        <div class="text-sm font-black text-emerald-900">- {{ formatDisplayAmount(receiptDiscountRows[0].amount, receiptDiscountRows[0].currency) }}</div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <template v-else>
+                    <button
+                      type="button"
+                      class="flex w-full items-center justify-between rounded-md px-3 py-2.5 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 transition-colors"
+                      @click="discountsCollapsed = !discountsCollapsed"
+                    >
+                      <div class="min-w-0 pr-3 text-left">
+                        <div class="font-medium">{{ receiptDiscountRows.length }} applied discounts</div>
+                        <div class="text-xs opacity-90">
+                          {{ discountNamesSummary }}
+                        </div>
+                      </div>
+                      <div class="flex items-center gap-2 flex-shrink-0">
+                        <span class="font-black">- {{ formatAmount(totalAppliedDiscountAmount) }}</span>
+                        <span class="material-symbols-outlined text-base">{{ discountsCollapsed ? 'expand_more' : 'expand_less' }}</span>
+                      </div>
+                    </button>
+
+                    <template v-if="!discountsCollapsed">
+                      <div class="mt-1.5 space-y-1.5">
+                        <div
+                          v-for="(discount, index) in receiptDiscountRows"
+                          :key="`${discount.discountId || discount.name}-${index}`"
+                          class="ml-3 flex items-start justify-between rounded-md border border-emerald-100 bg-emerald-50/60 px-3 py-2"
+                        >
+                          <div class="min-w-0 pr-3">
+                            <div class="text-sm font-semibold text-emerald-900">{{ discount.name || 'Discount' }}</div>
+                            <div class="mt-0.5 text-xs text-emerald-700">
+                              {{ discount.packageName }}
+                              <span v-if="discount.attendeeIndex !== null"> · Attendee {{ discount.attendeeIndex + 1 }}</span>
+                            </div>
+                            <div class="mt-0.5 text-[11px] uppercase tracking-wide text-emerald-700/90">
+                              {{ formatMetadataLabel(discount.discountType) }}
+                              <span v-if="discount.value"> · {{ discount.value }}%</span>
+                              <span v-if="discount.currency"> · {{ discount.currency }}</span>
+                            </div>
+                          </div>
+                          <div class="text-right">
+                            <div class="text-sm font-black text-emerald-900">- {{ formatDisplayAmount(discount.amount, discount.currency) }}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </template>
+                </div>
+
                 <div v-if="parseAmount(paymentData.percentage_modifier) !== 0" class="flex items-center justify-between rounded-md bg-gray-50 px-3 py-2.5 text-gray-700">
                   <span>Modifier ({{ parseAmount(paymentData.percentage_modifier) }}%)</span>
                   <span class="font-semibold text-gray-900">
@@ -704,6 +774,16 @@
                 View Raw Metadata JSON
               </summary>
               <div class="px-4 pb-4 border-t border-gray-200">
+                <div class="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    class="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    :disabled="!formattedMetadataJson || metadataCopyPending"
+                    @click="copyRawMetadataJson"
+                  >
+                    {{ metadataCopyPending ? 'Copying...' : 'Copy JSON' }}
+                  </button>
+                </div>
                 <pre class="text-xs text-gray-700 whitespace-pre-wrap font-mono mt-3">{{ formattedMetadataJson }}</pre>
               </div>
             </details>
@@ -1111,6 +1191,55 @@ const orderItems = computed<any[]>(() => {
 
 const bookingMetadata = computed<any>(() => (metadataType.value === 'BOOKING' ? metadata.value : null))
 
+const appliedDiscountSnapshot = computed<any[]>(() => {
+  const rows = bookingMetadata.value?.applied_discounts_snapshot
+  return Array.isArray(rows) ? rows : []
+})
+
+const receiptDiscountRows = computed(() => {
+  return appliedDiscountSnapshot.value.flatMap((entry: any) => {
+    const packageName = String(entry?.package_name || `Package #${entry?.package_id || 'N/A'}`)
+    const attendeeIndex = Number.isFinite(Number(entry?.attendee_index)) ? Number(entry.attendee_index) : null
+    const breakdown = Array.isArray(entry?.discount_breakdown) ? entry.discount_breakdown : []
+
+    return breakdown.map((discount: any) => ({
+      packageName,
+      attendeeIndex,
+      name: String(discount?.name || ''),
+      value: discount?.value,
+      amount: discount?.amount,
+      currency: discount?.currency,
+      discountId: String(discount?.discount_id || ''),
+      discountType: String(discount?.discount_type || ''),
+    }))
+  })
+})
+
+const discountsCollapsed = ref(true)
+
+const discountNamesSummary = computed(() => {
+  const uniqueNames = [...new Set(receiptDiscountRows.value
+    .map((discount) => String(discount.name || '').trim())
+    .filter(Boolean))]
+
+  if (!uniqueNames.length) return 'Discounts applied'
+  return uniqueNames.join(', ')
+})
+
+const totalAppliedDiscountAmount = computed(() => {
+  const totalFromSnapshot = appliedDiscountSnapshot.value.reduce((sum, entry: any) => {
+    const total = Number.parseFloat(String(entry?.total_discount || 0))
+    return Number.isFinite(total) ? sum + total : sum
+  }, 0)
+
+  if (totalFromSnapshot > 0) return totalFromSnapshot
+
+  return receiptDiscountRows.value.reduce((sum, discount) => {
+    const parsed = Number.parseFloat(String(discount.amount || 0))
+    return Number.isFinite(parsed) ? sum + parsed : sum
+  }, 0)
+})
+
 const bookingAttendees = computed<any[]>(() => {
   const selected = bookingMetadata.value?.attendee_selections
   if (Array.isArray(selected) && selected.length > 0) return selected
@@ -1338,6 +1467,22 @@ const formattedMetadataJson = computed(() => {
   if (!metadata.value) return '{}'
   return JSON.stringify(metadata.value, null, 2)
 })
+
+const metadataCopyPending = ref(false)
+
+async function copyRawMetadataJson() {
+  if (!formattedMetadataJson.value) return
+
+  metadataCopyPending.value = true
+  try {
+    await navigator.clipboard.writeText(formattedMetadataJson.value)
+    $notyf?.success('Metadata JSON copied to clipboard.')
+  } catch {
+    $notyf?.error('Unable to copy metadata JSON to clipboard.')
+  } finally {
+    metadataCopyPending.value = false
+  }
+}
 
 function formatAmount(amount: string | number): string {
   return `£${parseAmount(amount).toFixed(2)}`
