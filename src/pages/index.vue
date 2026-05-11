@@ -109,7 +109,7 @@
 
         <div class="relative z-10 mx-auto max-w-5xl text-center" data-reveal data-reveal-delay="0ms">
           <h1 class="mx-auto mb-8 max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white md:text-7xl">
-            Elevating the <span class="italic text-[#dbe1ff]">Sacred Mission</span>
+            Ad majorem Dei <span class="italic text-[#dbe1ff]">gloriam</span>
           </h1>
           <!-- <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-blue-100/90 md:text-xl">
             For His greater glory

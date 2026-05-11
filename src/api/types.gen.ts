@@ -10460,6 +10460,18 @@ export type OrderDetail = {
 export type OrderItem = {
     readonly id: number;
     product_variant?: number | null;
+    readonly product_variant_details: {
+        variant_id?: string;
+        variant_db_id?: number;
+        product_id?: string;
+        product_display_code?: string;
+        product_title?: string;
+        size?: string;
+        color?: string;
+        image_url?: string | null;
+        variant_image_url?: string | null;
+        product_image_url?: string | null;
+    } | null;
     quantity: number;
     readonly unit_price: string;
     readonly total_price: string;
