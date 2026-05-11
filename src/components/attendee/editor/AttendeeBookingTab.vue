@@ -47,7 +47,7 @@
                 {{ payment.status.toUpperCase().replaceAll('_', ' ') }}
               </UBadge>
               <NuxtLink
-                :to="`/events/${eventId}/m/payments/list?search=${payment.payment_reference}`"
+                :to="`/events/${eventId}/m/payments/list?payment=${payment.payment_id}`"
                 class="ml-4 text-xs text-primary hover:underline"
               >
                 View Payment

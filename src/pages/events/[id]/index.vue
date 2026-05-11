@@ -83,6 +83,7 @@
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
                 <p class="font-black text-deep-navy truncate">
                   {{ formatTime(event.start_datetime, event.timezone) }}
+                  <span class="text-xs text-deep-navy/70">({{ event.timezone }})</span>
                 </p>
               </div>
             </div>

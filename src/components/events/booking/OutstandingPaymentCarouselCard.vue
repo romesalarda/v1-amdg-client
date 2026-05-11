@@ -3,7 +3,7 @@
     <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
 
     <div v-if="payments.length" class="mt-3 space-y-3">
-      <div class="rounded-xl border border-deep-navy/10 bg-mist-blue/20 p-3">
+      <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-6">
         <div class="flex items-center justify-between gap-2">
           <div>
             <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/55">
@@ -45,7 +45,7 @@
         </div>
       </div>
 
-      <div v-if="currentPayment" class="rounded-xl border border-deep-navy/10 bg-white p-4 space-y-4">
+      <div v-if="currentPayment" class="border-deep-navy/10 bg-white p-4 space-y-4">
         <div class="flex items-start justify-between gap-3">
           <div>
             <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Method</p>
@@ -86,7 +86,6 @@
               <ol class="space-y-3">
                 <li class="relative pl-10">
                   <div class="absolute left-0 top-1 h-6 w-6 rounded-full border border-blue-300 bg-blue-50 text-[11px] font-black text-blue-700 flex items-center justify-center">1</div>
-                  <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3">
                     <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">First: Use these account details</p>
                     <div class="mt-2 grid grid-cols-1 gap-2">
                       <div class="rounded-md border border-deep-navy/10 bg-white p-2">
@@ -104,7 +103,6 @@
                         </div>
                       </div>
                     </div>
-                  </div>
                 </li>
 
                 <li class="relative pl-10">

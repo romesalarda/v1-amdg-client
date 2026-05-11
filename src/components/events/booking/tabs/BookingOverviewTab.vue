@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <div class="rounded-xl border border-deep-navy/10 p-4 bg-mist-blue/30">
+    <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-4">
       <div class="flex items-center justify-between gap-3">
         <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking steps</p>
         <button
@@ -25,7 +25,7 @@
             >
               {{ step.id }}
             </div>
-            <div class="min-w-0 rounded-lg border border-deep-navy/10 bg-white p-3">
+            <div class="min-w-0  bg-white p-3">
               <div class="flex items-center justify-between gap-2">
                 <p class="text-sm font-semibold text-deep-navy">{{ step.title }}</p>
                 <span

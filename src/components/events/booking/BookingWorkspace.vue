@@ -157,7 +157,7 @@
                 </button>
               </div>
             </article>
-            <article v-if="activeTab === 'overview'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
+            <article v-if="activeTab === 'overview'" class="">
               <BookingOverviewTab
                 :booking="booking"
                 :event="event.data.value?.data"
