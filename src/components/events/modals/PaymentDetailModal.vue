@@ -180,9 +180,10 @@
                         <div
                           v-for="(discount, index) in receiptDiscountRows"
                           :key="`${discount.discountId || discount.name}-${index}`"
-                          class="ml-3 flex items-start justify-between rounded-md border border-emerald-100 bg-emerald-50/60 px-3 py-2"
+                          class="ml-3 flex items-start justify-between rounded-md border border-emerald-100 bg-emerald-50/60 px-3 py-2 hover:bg-emerald-100 transition-colors"
+                          @click="navigateTo(`/events/${eventId}/m/booking/?discount-id=${discount.discountId}`)" style="cursor: pointer"
                         >
-                          <div class="min-w-0 pr-3">
+                          <div class="min-w-0 pr-3" >
                             <div class="text-sm font-semibold text-emerald-900">{{ discount.name || 'Discount' }}</div>
                             <div class="mt-0.5 text-xs text-emerald-700">
                               {{ discount.packageName }}
@@ -944,6 +945,7 @@ import PaymentLiveDonationContent from '~/components/events/modals/payment-conte
 import { parseAmount } from '~/utils/money'
 import { uploadMultipart } from '~/utils/upload'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { useRouter } from 'vue-router'
 
 interface Props {
   payment: any
@@ -954,7 +956,8 @@ const props = defineProps<Props>()
 defineEmits(['close', 'refund', 'verify'])
 const { $notyf } = useNuxtApp()
 const requestFetch = useRequestFetch()
-
+const router = useRouter()
+const eventId = computed(() => router.currentRoute.value.params.id as string)
 // Fetch full payment details
 const { data: fullPaymentData, isLoading: isLoadingPayment, error: paymentError, refetch: refetchPaymentDetail } = usePayment(computed(() => props.payment?.payment_id))
 
@@ -1161,11 +1164,6 @@ async function verifyBankTransferEvidence() {
     evidenceVerifyPending.value = false
   }
 }
-
-const hasDiscounts = computed(() => {
-  // Check if there are discounts in metadata
-  return false // TODO: implement discount checking from metadata
-})
 
 const metadata = computed<any>(() => paymentData.value?.metadata || null)
 
