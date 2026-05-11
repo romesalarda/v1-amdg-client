@@ -2,51 +2,61 @@
   <div class="space-y-4">
     <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-4">
       <div class="flex items-center justify-between gap-3">
-        <p class="text-xs uppercase tracking-wider text-deep-navy/55 font-black">Booking steps</p>
+        <h2 class="text-headline-sm font-headline text-deep-navy">Booking Steps</h2>
         <button
           type="button"
-          class="rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+          class="rounded-lg border border-deep-navy/20 px-3 py-1 text-label-bold font-label-bold uppercase text-deep-navy hover:border-primary hover:text-primary transition-colors"
           @click="props.onToggleJourneyDetails()"
         >
           {{ props.hideAllJourneyDetails ? 'Show all details' : 'Hide all details' }}
         </button>
       </div>
-      <div class="mt-4 relative">
-        <div class="pointer-events-none absolute left-3 top-6 bottom-6 w-px bg-blue-200"></div>
-        <ol class="space-y-4 relative">
+      <div class="mt-4">
+        <ol class="space-y-5 relative">
           <li
-            v-for="step in props.journeySteps"
+            v-for="(step, index) in props.journeySteps"
             :key="step.id"
-            class="relative pl-10"
+            class="relative pl-12"
           >
+            <!-- vertical connector line drawn from circle bottom to next item -->
             <div
-              class="absolute left-0 top-1 h-6 w-6 rounded-full border text-[11px] font-black flex items-center justify-center"
-              :class="step.done ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+              v-if="index < props.journeySteps.length - 1"
+              class="absolute left-[15px] top-8 bottom-[-20px] w-0.5 bg-deep-navy/15 pointer-events-none"
+            ></div>
+            <div
+              class="absolute left-0 top-0.5 h-8 w-8 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10"
+              :class="step.done
+                ? 'border-green-500 bg-green-500 text-white shadow-sm'
+                : 'border-primary bg-primary/10 text-primary shadow-[0_0_0_4px_rgba(0,33,71,0.07)]'"
             >
-              {{ step.id }}
+              <span v-if="step.done" class="material-symbols-outlined" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">check</span>
+              <span v-else class="text-sm font-black leading-none">{{ step.id }}</span>
             </div>
-            <div class="min-w-0  bg-white p-3">
+            <div class="min-w-0 bg-white p-3">
               <div class="flex items-center justify-between gap-2">
-                <p class="text-sm font-semibold text-deep-navy">{{ step.title }}</p>
+                <p class="text-headline-sm font-headline text-deep-navy">{{ step.title }}</p>
                 <span
-                  class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
-                  :class="step.done ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'"
+                  class="rounded px-2 py-0.5 text-label-bold font-label-bold uppercase tracking-widest"
+                  :class="step.done ? 'bg-green-100 text-green-700' : 'bg-primary/10 text-primary'"
                 >
                   {{ step.done ? 'Done' : 'Next' }}
                 </span>
               </div>
-              <p class="mt-1 text-xs text-deep-navy/70">{{ step.description }}</p>
+              <p class="mt-1 text-body-sm font-body-sm text-deep-navy/70">{{ step.description }}</p>
               <button
                 type="button"
-                class="mt-2 rounded-lg border border-deep-navy/20 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                class="mt-3 rounded-lg px-3 py-1.5 text-label-bold font-label-bold uppercase tracking-wide transition-all"
+                :class="step.done
+                  ? 'border border-deep-navy/20 text-deep-navy hover:border-primary hover:text-primary'
+                  : 'bg-primary text-white hover:bg-primary/90 shadow-sm'"
                 @click="props.onJourneyStepAction(step.action)"
               >
                 {{ step.cta }}
               </button>
 
-              <div v-if="!props.hideAllJourneyDetails" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3 text-xs text-deep-navy/80 space-y-2">
+              <div v-if="!props.hideAllJourneyDetails" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3 text-body-sm font-body-sm text-deep-navy/80 space-y-2">
                 <template v-if="step.action === 'shop'">
-                  <p class="font-semibold text-deep-navy">
+                  <p class="font-bold text-deep-navy">
                     {{ props.outstandingPayments.length ? `${props.outstandingPayments.length} payment(s) still outstanding.` : 'Registration complete. No outstanding payments.' }}
                   </p>
                   <OutstandingPaymentCarouselCard
@@ -58,17 +68,17 @@
 
                 <template v-else-if="step.action === 'info'">
                   <div>
-                    <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">What to bring</p>
+                    <p class="text-label-bold font-label-bold uppercase tracking-wide text-deep-navy/60">What to bring</p>
                     <p class="mt-1 whitespace-pre-line">{{ props.eventWhatToBring }}</p>
                   </div>
                   <div>
-                    <p class="font-black uppercase tracking-wide text-[10px] text-deep-navy/60">Important info</p>
+                    <p class="text-label-bold font-label-bold uppercase tracking-wide text-deep-navy/60">Important info</p>
                     <p class="mt-1 whitespace-pre-line">{{ props.eventCheckInInstructions }}</p>
                   </div>
                 </template>
 
                 <template v-else-if="step.action === 'location'">
-                  <p class="font-semibold text-deep-navy">{{ props.eventLocation }}</p>
+                  <p class="font-bold text-deep-navy">{{ props.eventLocation }}</p>
                   <p v-if="props.primaryVenue?.venue_address">{{ props.primaryVenue.venue_address }}</p>
                   <p v-if="props.primaryVenue?.venue_city">{{ props.primaryVenue.venue_city }}</p>
                   <iframe
@@ -81,9 +91,9 @@
                 </template>
 
                 <template v-else-if="step.action === 'time'">
-                  <p><span class="font-black text-deep-navy">Starts:</span> {{ props.formatDateTime(props.eventStart) }}</p>
-                  <p><span class="font-black text-deep-navy">Ends:</span> {{ props.formatDateTime(props.eventEnd) }}</p>
-                  <p><span class="font-black text-deep-navy">Timezone:</span> {{ props.timezone || 'UTC' }}</p>
+                  <p><span class="font-bold text-deep-navy">Starts:</span> {{ props.formatDateTime(props.eventStart) }}</p>
+                  <p><span class="font-bold text-deep-navy">Ends:</span> {{ props.formatDateTime(props.eventEnd) }}</p>
+                  <p><span class="font-bold text-deep-navy">Timezone:</span> {{ props.timezone || 'UTC' }}</p>
                 </template>
               </div>
             </div>

@@ -54,46 +54,49 @@
 
     <div v-if="booking" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
       <div class="max-w-6xl mx-auto px-3 py-2">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div class="flex items-center gap-3 p-4 min-w-0">
-            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-1">
+          <div class="flex items-center gap-3 px-3 py-4 min-w-0">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined" style="font-size:20px">calendar_month</span>
+            </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Date</p>
-              <p class="text-sm font-black text-deep-navy truncate">{{ formatDate(eventStart) }}</p>
+              <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Date</p>
+              <p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ formatDate(eventStart) }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3 p-4 min-w-0">
-            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div class="flex items-center gap-3 px-3 py-4 min-w-0">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined" style="font-size:20px">schedule</span>
+            </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Timing</p>
-              <p class="text-sm font-black text-deep-navy truncate">{{ formatDateTime(eventStart) }}</p>
-              <p class="text-[11px] text-deep-navy/70 truncate">{{ myBookingData?.event?.timezone }}</p>
+              <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Timing</p>
+              <p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ formatDateTime(eventStart) }}</p>
+              <p class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ myBookingData?.event?.timezone }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3 p-4 min-w-0">
-            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-            </svg>
+          <div class="flex items-center gap-3 px-3 py-4 min-w-0">
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <span class="material-symbols-outlined" style="font-size:20px">location_on</span>
+            </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Location</p>
-              <p class="text-sm font-black text-deep-navy truncate">{{ eventLocation }}</p>
-              <p v-if="primaryVenue?.venue_city" class="text-[11px] text-deep-navy/70 truncate">{{ primaryVenue.venue_city }}</p>
+              <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Location</p>
+              <p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ eventLocation }}</p>
+              <p v-if="primaryVenue?.venue_city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.venue_city }}</p>
             </div>
           </div>
 
-          <div class="flex items-center gap-3 p-4 min-w-0">
-            <svg class="w-6 h-6 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div class="flex items-center gap-3 px-3 py-4 min-w-0">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+              :class="outstandingPayments.length ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'"
+            >
+              <span class="material-symbols-outlined" style="font-size:20px">payments</span>
+            </div>
             <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Booking status</p>
-              <p class="text-sm font-black" :class="outstandingPayments.length ? 'text-blue-700' : 'text-green-700'">
+              <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Booking Status</p>
+              <p class="text-body-md font-body-md font-bold" :class="outstandingPayments.length ? 'text-primary' : 'text-green-700'">
                 {{ outstandingPayments.length ? `${outstandingPayments.length} payment(s) outstanding` : 'No outstanding payments' }}
               </p>
             </div>
@@ -1410,10 +1413,10 @@
             </section>
 
             <section>
-              <OutstandingPaymentCarouselCard
+              <!-- <OutstandingPaymentCarouselCard
                 :payments="outstandingPayments"
                 @refresh="refreshOutstandingPayments"
-              />
+              /> -->
             </section>
           </article>
         </aside>

@@ -141,7 +141,7 @@
           <UIcon name="i-heroicons-bars-3" class="w-5 h-5 text-gray-600" />
         </button>
         <div>
-          <h1 class="font-bold text-deep-navy">{{ currentPageTitle }}</h1>
+          <h3 class="font-bold text-deep-navy">{{ currentPageTitle }}</h3>
           <p class="text-xs text-gray-500">{{ event?.title || 'Loading...' }}</p>
         </div>
       </div>

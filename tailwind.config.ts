@@ -81,6 +81,27 @@ export default <Partial<Config>>{
       },
       fontFamily: {
         sans: ['Inter', ...defaultTheme.fontFamily.sans],
+        headline: ['Roboto', ...defaultTheme.fontFamily.sans],
+        // Semantic font-family helpers matching code.html class pattern
+        'display-lg': ['Roboto', ...defaultTheme.fontFamily.sans],
+        'headline-lg': ['Roboto', ...defaultTheme.fontFamily.sans],
+        'headline-md': ['Roboto', ...defaultTheme.fontFamily.sans],
+        'headline-sm': ['Roboto', ...defaultTheme.fontFamily.sans],
+        'body-lg': ['Inter', ...defaultTheme.fontFamily.sans],
+        'body-md': ['Inter', ...defaultTheme.fontFamily.sans],
+        'body-sm': ['Inter', ...defaultTheme.fontFamily.sans],
+        'label-bold': ['Inter', ...defaultTheme.fontFamily.sans],
+      },
+      fontSize: {
+        'display-lg': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '800' }],
+        'headline-lg': ['2rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'headline-lg-mobile': ['1.75rem', { lineHeight: '1.2', fontWeight: '700' }],
+        'headline-md': ['1.5rem', { lineHeight: '1.3', fontWeight: '700' }],
+        'headline-sm': ['1.125rem', { lineHeight: '1.4', fontWeight: '700' }],
+        'body-lg': ['1rem', { lineHeight: '1.6' }],
+        'body-md': ['0.875rem', { lineHeight: '1.5' }],
+        'body-sm': ['0.75rem', { lineHeight: '1.5' }],
+        'label-bold': ['0.75rem', { lineHeight: '1', letterSpacing: '0.05em', fontWeight: '700' }],
       },
       maxWidth: {
         '8xl': '90rem',
