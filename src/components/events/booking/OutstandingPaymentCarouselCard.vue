@@ -1,71 +1,63 @@
 <template>
   <div>
-    <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Outstanding payments</p>
+    <p class="text-label-bold font-label-bold uppercase text-deep-navy">Outstanding Payments</p>
 
     <div v-if="payments.length" class="mt-3 space-y-3">
-      <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-6">
-        <div class="flex items-center justify-between gap-2">
+      <!-- Carousel header -->
+      <div class="rounded-lg border border-outline-variant bg-white p-md">
+        <div class="flex items-center justify-between gap-2 p-5">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/55">
+            <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">
               Payment {{ currentIndex + 1 }} of {{ payments.length }}
             </p>
-            <p class="text-sm font-black text-deep-navy">{{ currentPayment?.payment_reference || 'Outstanding payment' }}</p>
+            <p class="text-body-md font-body-md font-bold text-on-surface font-mono mt-2">{{ currentPayment?.descriptor?.toUpperCase() || 'Outstanding payment' }}</p>
+            <p class="text-body-sm font-body-md text-on-surface font-mono">{{ currentPayment?.payment_reference || 'Outstanding payment' }}</p>
+
           </div>
           <div class="flex items-center gap-1">
             <button
               type="button"
-              class="rounded-lg border border-deep-navy/20 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
+              class="rounded border border-outline-variant px-3 py-1 text-label-bold font-label-bold uppercase text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="payments.length <= 1"
               @click="goPrevious"
             >
-              Prev
+              PREV
             </button>
             <button
               type="button"
-              class="rounded-lg border border-deep-navy/20 px-2 py-1 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700 disabled:opacity-50"
+              class="rounded border border-outline-variant px-3 py-1 text-label-bold font-label-bold uppercase text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="payments.length <= 1"
               @click="goNext"
             >
-              Next
+              NEXT
             </button>
           </div>
         </div>
-
-        <div v-if="payments.length > 1" class="mt-2 flex flex-wrap gap-1.5">
-          <button
-            v-for="(payment, index) in payments"
-            :key="String(payment.payment_id || payment.payment_reference || index)"
-            type="button"
-            class="rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-wide"
-            :class="index === currentIndex ? 'border-blue-400 bg-blue-50 text-blue-700' : 'border-deep-navy/20 bg-white text-deep-navy/70 hover:border-blue-300 hover:text-blue-700'"
-            @click="goTo(index)"
-          >
-            {{ index + 1 }}
-          </button>
-        </div>
       </div>
 
-      <div v-if="currentPayment" class="border-deep-navy/10 bg-white p-4 space-y-4">
-        <div class="flex items-start justify-between gap-3">
+      <!-- Payment detail -->
+      <div v-if="currentPayment" class="space-y-4">
+        <!-- Method + Amount -->
+        <div class="grid grid-cols-2 gap-md items-end">
           <div>
-            <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Method</p>
-            <p class="text-sm font-semibold text-deep-navy">{{ currentPayment.method_title || currentPayment.method_type || 'Unknown method' }}</p>
+            <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60 mb-1">Method</p>
+            <p class="text-headline-sm font-headline text-on-surface">{{ currentPayment.method_title || currentPayment.method_type || 'Unknown method' }}</p>
           </div>
           <div class="text-right">
-            <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Outstanding amount</p>
-            <p class="text-xl font-black text-deep-navy">{{ currentPayment.amount || '-' }}</p>
+            <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60 mb-1">Outstanding Amount</p>
+            <p class="text-headline-md font-headline text-on-surface">{{ currentPayment.amount || '-' }}</p>
           </div>
         </div>
 
-        <div v-if="isCurrentLoading" class="rounded-lg border border-deep-navy/10 bg-mist-blue/20 px-3 py-3 text-sm text-deep-navy/70">
+        <div v-if="isCurrentLoading" class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-body-sm font-body-sm text-on-surface-variant">
           Loading payment details...
         </div>
 
-        <div v-else-if="currentError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-sm text-red-700">
+        <div v-else-if="currentError" class="rounded-lg border border-red-200 bg-red-50 px-3 py-3 text-body-sm font-body-sm text-red-700">
           <p>Unable to load payment details.</p>
           <button
             type="button"
-            class="mt-2 rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-100"
+            class="mt-2 rounded-lg border border-red-300 px-2.5 py-1 text-label-bold font-label-bold uppercase text-red-700 hover:bg-red-100"
             @click="fetchCurrentPaymentDetail(true)"
           >
             Retry
@@ -75,179 +67,176 @@
         <template v-else>
           <div
             v-if="isCurrentBankTransfer && !hasCompleteBankDetails"
-            class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-800"
+            class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-body-sm font-body-sm text-amber-800"
           >
             Bank details are unavailable for this payment. Check back later.
           </div>
 
-          <div v-else-if="isCurrentBankTransfer" class="space-y-3">
-            <div class="relative">
-              <div class="pointer-events-none absolute left-3 top-7 bottom-7 w-px bg-blue-200"></div>
-              <ol class="space-y-3">
-                <li class="relative pl-10">
-                  <div class="absolute left-0 top-1 h-6 w-6 rounded-full border border-blue-300 bg-blue-50 text-[11px] font-black text-blue-700 flex items-center justify-center">1</div>
-                    <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">First: Use these account details</p>
-                    <div class="mt-2 grid grid-cols-1 gap-2">
-                      <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                        <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
-                        <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ currentAccountName }}</p>
-                      </div>
-                      <div class="grid grid-cols-2 gap-2">
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
-                          <p class="mt-1 text-base font-black text-deep-navy">{{ currentSortCode }}</p>
-                        </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
-                          <p class="mt-1 text-base font-black text-deep-navy">{{ currentAccountNumber }}</p>
-                        </div>
-                      </div>
-                    </div>
-                </li>
+          <!-- Bank transfer steps -->
+          <div v-else-if="isCurrentBankTransfer" class="mt-md space-y-md border-outline-variant pt-">
+            <!-- Step 1: Account details — hidden if evidence already uploaded -->
+            <div v-if="!currentEvidenceUploaded" class="relative pl-8">
+              <div class="absolute left-0 top-0 w-6 h-6 rounded-full border border-primary text-primary bg-white flex items-center justify-center text-label-bold font-label-bold">1</div>
+              <p class="text-label-bold font-label-bold uppercase tracking-tighter text-on-surface-variant mb-sm">First: Use these account details</p>
+              <div class="rounded-lg border border-outline-variant bg-white p-sm">
+                <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60 mb-1">Account Name</p>
+                <p class="text-body-lg font-body-lg font-bold text-on-surface break-words">{{ currentAccountName }}</p>
+              </div>
+              <div class="grid grid-cols-2 gap-sm mt-sm">
+                <div class="rounded-lg border border-outline-variant bg-white p-sm">
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60 mb-1">Sort Code</p>
+                  <p class="text-body-lg font-body-lg font-bold text-on-surface">{{ currentSortCode }}</p>
+                </div>
+                <div class="rounded-lg border border-outline-variant bg-white p-sm">
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60 mb-1">Account Number</p>
+                  <p class="text-body-lg font-body-lg font-bold text-on-surface">{{ currentAccountNumber }}</p>
+                </div>
+              </div>
+            </div>
 
-                <li class="relative pl-10">
-                  <div class="absolute left-0 top-1 h-6 w-6 rounded-full border border-blue-300 bg-blue-50 text-[11px] font-black text-blue-700 flex items-center justify-center">2</div>
-                  <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3">
-                    <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Second: Pay this amount</p>
-                    <p class="mt-1 text-2xl font-black text-deep-navy">{{ currentPayment.amount || '-' }}</p>
-                  </div>
-                </li>
+            <!-- Step 2: Amount to pay — hidden if evidence already uploaded -->
+            <div v-if="!currentEvidenceUploaded" class="relative pl-8">
+              <div class="absolute left-0 top-0 w-6 h-6 rounded-full border border-primary text-primary bg-white flex items-center justify-center text-label-bold font-label-bold">2</div>
+              <p class="text-label-bold font-label-bold uppercase tracking-tighter text-on-surface-variant mb-sm">Second: Pay this amount</p>
+              <div class="rounded-lg border border-outline-variant bg-white p-md">
+                <p class="text-headline-md font-headline text-on-surface">{{ currentPayment.amount || '-' }}</p>
+              </div>
+            </div>
 
-                <li class="relative pl-10">
-                  <div
-                    class="absolute left-0 top-1 h-6 w-6 rounded-full border text-[11px] font-black flex items-center justify-center"
-                    :class="currentEvidenceUploaded ? 'border-green-300 bg-green-50 text-green-700' : 'border-blue-300 bg-blue-50 text-blue-700'"
+            <!-- Step 3: Upload evidence -->
+            <div class="relative pl-8">
+              <div
+                class="absolute left-0 top-0 w-6 h-6 rounded-full border flex items-center justify-center text-label-bold font-label-bold"
+                :class="currentEvidenceUploaded ? 'border-green-500 bg-green-500 text-white' : 'border-primary text-primary bg-white'"
+              >
+                <span v-if="currentEvidenceUploaded" class="material-symbols-outlined" style="font-size:14px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">check</span>
+                <span v-else>{{ currentEvidenceUploaded ? '' : (payments.length > 1 || !currentEvidenceUploaded ? '3' : '1') }}</span>
+              </div>
+              <p class="text-label-bold font-label-bold uppercase tracking-tighter text-on-surface-variant mb-sm">
+                {{ currentEvidenceUploaded ? 'Evidence uploaded' : 'Third: Upload a screenshot of payment' }}
+              </p>
+
+              <div v-if="currentEvidenceUploaded" class="rounded-lg border border-green-200 bg-green-50 p-3 mt-3">
+                <p class="text-body-sm font-body-sm font-semibold text-green-800">Evidence uploaded. Awaiting verification.</p>
+              </div>
+
+              <div v-else class="space-y-2 rounded-lg border border-outline-variant bg-white p-3">
+                <p class="text-label-bold font-label-bold uppercase text-on-surface-variant">Upload evidence</p>
+
+                <div>
+                  <label class="mb-1 block text-label-bold font-label-bold text-on-surface-variant">Evidence file <span class="text-red-600">*</span></label>
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    class="w-full rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-body-sm"
+                    @change="onEvidenceFileChange"
                   >
-                    3
+                </div>
+
+                <div class="grid grid-cols-1 gap-2">
+                  <input
+                    v-model="uploadForm.payer_name"
+                    type="text"
+                    class="w-full rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-body-sm"
+                    placeholder="Payer name"
+                  >
+                  <div class="grid grid-cols-2 gap-2">
+                    <input
+                      v-model="uploadForm.payer_account_last4"
+                      type="text"
+                      maxlength="4"
+                      class="w-full rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-body-sm"
+                      placeholder="Last 4"
+                    >
+                    <input
+                      v-model="uploadForm.amount_on_evidence"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      class="w-full rounded-lg border border-outline-variant px-3 py-2 text-body-sm font-body-sm"
+                      placeholder="Amount"
+                    >
                   </div>
-                  <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/20 p-3">
-                    <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Third: Upload a screenshot of payment</p>
+                </div>
 
-                    <div v-if="currentEvidenceUploaded" class="mt-2 rounded-md border border-green-200 bg-green-50 p-3">
-                      <p class="text-xs font-semibold text-green-800">Evidence uploaded. Awaiting verification.</p>
-                    </div>
+                <p v-if="uploadError" class="text-body-sm font-body-sm font-semibold text-red-700">{{ uploadError }}</p>
+                <p v-if="uploadSuccess" class="text-body-sm font-body-sm font-semibold text-primary">{{ uploadSuccess }}</p>
 
-                    <div v-else class="mt-2 space-y-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900">
-                      <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload evidence</p>
-
-                      <div>
-                        <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
-                        <input
-                          type="file"
-                          accept=".pdf,.jpg,.jpeg,.png"
-                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                          @change="onEvidenceFileChange"
-                        >
-                      </div>
-
-                      <div class="grid grid-cols-1 gap-2">
-                        <input
-                          v-model="uploadForm.payer_name"
-                          type="text"
-                          class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                          placeholder="Payer name"
-                        >
-                        <div class="grid grid-cols-2 gap-2">
-                          <input
-                            v-model="uploadForm.payer_account_last4"
-                            type="text"
-                            maxlength="4"
-                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                            placeholder="Last 4"
-                          >
-                          <input
-                            v-model="uploadForm.amount_on_evidence"
-                            type="number"
-                            min="0"
-                            step="0.01"
-                            class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm"
-                            placeholder="Amount"
-                          >
-                        </div>
-                      </div>
-
-                      <p v-if="uploadError" class="text-xs font-semibold text-red-700">{{ uploadError }}</p>
-                      <p v-if="uploadSuccess" class="text-xs font-semibold text-blue-700">{{ uploadSuccess }}</p>
-
-                      <div class="flex justify-end">
-                        <button
-                          type="button"
-                          class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60"
-                          :disabled="uploadPending"
-                          @click="uploadEvidence"
-                        >
-                          {{ uploadPending ? 'Uploading...' : 'Upload evidence' }}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </li>
-              </ol>
+                <div class="flex justify-end">
+                  <button
+                    type="button"
+                    class="rounded-lg bg-primary px-4 py-2 text-label-bold font-label-bold uppercase text-white hover:bg-primary/90 disabled:opacity-60"
+                    :disabled="uploadPending"
+                    @click="uploadEvidence"
+                  >
+                    {{ uploadPending ? 'Uploading...' : 'Upload evidence' }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div v-else class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-3 text-sm text-blue-800">
+          <div v-else class="rounded-lg border border-outline-variant bg-surface px-3 py-3 text-body-sm font-body-sm text-on-surface-variant">
             This payment is not a bank transfer. Please complete payment via the assigned method.
           </div>
 
-          <div v-if="hasRenderableMetadata" class="rounded-lg border border-deep-navy/10 bg-white p-3 space-y-3">
-            <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Payment metadata</p>
+          <div v-if="hasRenderableMetadata" class="rounded-lg border border-outline-variant bg-white p-3 space-y-3">
+            <p class="text-label-bold font-label-bold uppercase text-on-surface-variant">Payment metadata</p>
 
             <div v-if="metadataType === 'ORDER'" class="rounded-md border border-blue-200 bg-blue-50 p-3">
-              <div class="grid grid-cols-2 gap-2 text-xs">
+              <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <p class="text-blue-700">Order reference</p>
-                  <p class="font-semibold text-blue-900">{{ metadata.order_reference }}</p>
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Order reference</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ metadata.order_reference }}</p>
                 </div>
                 <div>
-                  <p class="text-blue-700">Status</p>
-                  <p class="font-semibold text-blue-900">{{ metadata.status }}</p>
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Status</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ metadata.status }}</p>
                 </div>
               </div>
               <div v-if="orderItems.length" class="mt-2 space-y-1">
-                <p class="text-[10px] font-black uppercase tracking-wide text-blue-700">Items</p>
+                <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Items</p>
                 <div
                   v-for="(item, index) in orderItems"
                   :key="String(item.order_item_id || index)"
-                  class="rounded border border-blue-200 bg-white px-2 py-1.5 text-xs"
+                  class="rounded border border-outline-variant bg-white px-2 py-1.5"
                 >
-                  <p class="font-semibold text-deep-navy">{{ String(item.product_title || 'Product') }}</p>
-                  <p class="text-deep-navy/70">Qty {{ Number(item.quantity || 1) }} x {{ formatDisplayAmount(item.unit_price, item.currency) }}</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ String(item.product_title || 'Product') }}</p>
+                  <p class="text-body-sm font-body-sm text-on-surface-variant">Qty {{ Number(item.quantity || 1) }} x {{ formatDisplayAmount(item.unit_price, item.currency) }}</p>
                 </div>
               </div>
             </div>
 
-            <div v-else-if="metadataType === 'BOOKING'" class="rounded-md border border-emerald-200 bg-emerald-50 p-3">
-              <div class="grid grid-cols-1 gap-2 text-xs">
+            <div v-else-if="metadataType === 'BOOKING'" class="rounded-md border border-outline-variant bg-surface p-3">
+              <div class="grid grid-cols-1 gap-2">
                 <div>
-                  <p class="text-emerald-700">Booking reference</p>
-                  <p class="font-semibold text-emerald-900">{{ bookingReference }}</p>
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Booking reference</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ bookingReference }}</p>
                 </div>
               </div>
               <div v-if="bookingAttendees.length" class="mt-2">
-                <p class="text-[10px] font-black uppercase tracking-wide text-emerald-700">Attendees ({{ bookingAttendees.length }})</p>
+                <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Attendees ({{ bookingAttendees.length }})</p>
                 <div class="mt-1 space-y-1">
-                  <p v-for="(name, index) in bookingAttendees" :key="`${name}-${index}`" class="rounded border border-emerald-200 bg-white px-2 py-1 text-xs font-semibold text-deep-navy">
+                  <p v-for="(name, index) in bookingAttendees" :key="`${name}-${index}`" class="rounded border border-outline-variant bg-white px-2 py-1 text-body-sm font-body-sm font-semibold text-on-surface">
                     {{ name }}
                   </p>
                 </div>
               </div>
             </div>
 
-
-            <div v-else-if="metadataType === 'DONATION'" class="rounded-md border border-rose-200 bg-rose-50 p-3">
-              <div class="grid grid-cols-2 gap-2 text-xs">
+            <div v-else-if="metadataType === 'DONATION'" class="rounded-md border border-outline-variant bg-surface p-3">
+              <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <p class="text-rose-700">Event</p>
-                  <p class="font-semibold text-rose-900">{{ donationEvent }}</p>
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Event</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ donationEvent }}</p>
                 </div>
                 <div>
-                  <p class="text-rose-700">Donated by</p>
-                  <p class="font-semibold text-rose-900">{{ donationBy }}</p>
+                  <p class="text-label-bold font-label-bold uppercase text-on-surface-variant opacity-60">Donated by</p>
+                  <p class="text-body-sm font-body-sm font-semibold text-on-surface">{{ donationBy }}</p>
                 </div>
               </div>
-              <p class="mt-2 text-xs text-rose-900">Amount: {{ formatDisplayAmount(donationAmount, donationCurrency) }}</p>
-              <p v-if="donationMessage" class="mt-1 text-xs text-rose-900">{{ donationMessage }}</p>
+              <p class="mt-2 text-body-sm font-body-sm text-on-surface">Amount: {{ formatDisplayAmount(donationAmount, donationCurrency) }}</p>
+              <p v-if="donationMessage" class="mt-1 text-body-sm font-body-sm text-on-surface">{{ donationMessage }}</p>
             </div>
 
           </div>
@@ -255,7 +244,7 @@
       </div>
     </div>
 
-    <p v-else class="mt-3 text-sm text-deep-navy/60">No outstanding payments.</p>
+    <p v-else class="mt-3 text-body-sm font-body-sm text-on-surface-variant">No outstanding payments.</p>
   </div>
 </template>
 
@@ -271,6 +260,7 @@ interface OutstandingPayment {
   method_type?: string | null
   metadata?: Record<string, unknown>
   provided_details?: Record<string, unknown> | null
+  descriptor?: string | null
 }
 
 interface PaymentEvidence {
