@@ -125,8 +125,7 @@
             <div class="mt-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Current amount</p>
               <p class="mt-2 text-2xl font-black text-deep-navy">{{ props.formatCurrencyAmount(props.paymentCurrentAmount(payment)) }}</p>
-
-              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
+              <div class="mt-3 flex flex-wrap items-center gap-2 text-xs" v-if="props.paymentRefundedAmount(payment) > 0">
                 <span class="font-semibold text-slate-500">Before refunds:</span>
                 <span class="font-black text-slate-500 line-through">{{ props.formatCurrencyAmount(props.paymentOriginalAmount(payment)) }}</span>
                 <span v-if="props.paymentRefundedAmount(payment) > 0" class="font-black text-rose-700">- {{ props.formatCurrencyAmount(props.paymentRefundedAmount(payment)) }}</span>

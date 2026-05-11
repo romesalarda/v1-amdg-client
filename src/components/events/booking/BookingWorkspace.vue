@@ -54,10 +54,12 @@
 
     <div v-if="booking" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
       <div class="max-w-6xl mx-auto px-3 py-2">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-1">
+        <div class="flex flex-wrap justify-between gap-3">
           <div class="flex items-center gap-3 px-3 py-4 min-w-0">
-            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span class="material-symbols-outlined" style="font-size:20px">calendar_month</span>
+            <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 ">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                <span class="material-symbols-outlined" style="font-size:20px">calendar_month</span>
+              </div>
             </div>
             <div class="min-w-0">
               <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Date</p>
@@ -67,7 +69,9 @@
 
           <div class="flex items-center gap-3 px-3 py-4 min-w-0">
             <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span class="material-symbols-outlined" style="font-size:20px">schedule</span>
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                <span class="material-symbols-outlined" style="font-size:20px">schedule</span>
+              </div>
             </div>
             <div class="min-w-0">
               <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Timing</p>
@@ -78,7 +82,9 @@
 
           <div class="flex items-center gap-3 px-3 py-4 min-w-0">
             <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span class="material-symbols-outlined" style="font-size:20px">location_on</span>
+              <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+                <span class="material-symbols-outlined" style="font-size:20px">location_on</span>
+              </div>
             </div>
             <div class="min-w-0">
               <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Location</p>
@@ -1268,12 +1274,16 @@
                   ]"
                 >
                   <div class="flex items-center gap-3">
-                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-black"
+                    <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border text-sm font-black"
                       :class="selectedAttendeeId === item.id
                         ? (isAttendeeCancelled(item) ? 'border-rose-300 bg-white text-rose-700' : 'border-blue-300 bg-white text-blue-700')
                         : (isAttendeeCancelled(item) ? 'border-rose-200 bg-white text-rose-700' : 'border-deep-navy/15 bg-mist-blue text-deep-navy')"
                     >
-                      {{ attendeeInitial(item.name) }}
+                      <img
+                        :src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${item.id}`"
+                        alt="Default profile"
+                        class="w-12 h-12 rounded-full object-cover"
+                      />
                     </div>
                     <div class="min-w-0 flex-1">
                       <p class="truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</p>
@@ -1379,11 +1389,7 @@
                   class="flex w-full items-center justify-between rounded-xl border border-emerald-300 bg-emerald-600 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-700"
                 >
                   <span class="inline-flex items-center gap-2">
-                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2l1 12h11l2-8H7" />
-                      <circle cx="10" cy="20" r="1" />
-                      <circle cx="18" cy="20" r="1" />
-                    </svg>
+                    <UIcon name="i-heroicons-shopping-cart" class="w-5 h-5"/>
                     Open shop
                   </span>
                 </NuxtLink>

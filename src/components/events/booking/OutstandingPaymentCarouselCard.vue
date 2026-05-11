@@ -117,7 +117,7 @@
               </p>
 
               <div v-if="currentEvidenceUploaded" class="rounded-lg border border-green-200 bg-green-50 p-3 mt-3">
-                <p class="text-body-sm font-body-sm font-semibold text-green-800">Evidence uploaded. Awaiting verification.</p>
+                <p class="text-body-sm font-body-sm font-semibold text-green-800">You have successfully uploaded the bank transfer evidence. Our team will review it shortly.</p>
               </div>
 
               <div v-else class="space-y-2 rounded-lg border border-outline-variant bg-white p-3">
@@ -180,7 +180,7 @@
             This payment is not a bank transfer. Please complete payment via the assigned method.
           </div>
 
-          <div v-if="hasRenderableMetadata" class="rounded-lg border border-outline-variant bg-white p-3 space-y-3">
+          <div v-if="hasRenderableMetadata && false" class="rounded-lg border border-outline-variant bg-white p-3 space-y-3">
             <p class="text-label-bold font-label-bold uppercase text-on-surface-variant">Payment metadata</p>
 
             <div v-if="metadataType === 'ORDER'" class="rounded-md border border-blue-200 bg-blue-50 p-3">
