@@ -8,30 +8,36 @@
  */
 export function resolveImageUrl(
   src?: string | null,
-  fallback: string = '/images/placeholder.png'
+  fallback = '/images/placeholder.png'
 ): string {
-  // Return fallback if source is null, undefined, or empty
-  if (!src || src.trim() === '') {
+  const config = useRuntimeConfig()
+  if (typeof src !== 'string' || src.trim() === '') {
     return fallback;
   }
 
-  // If already absolute URL or data URI, return as-is
-  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) {
+  // Absolute URLs or data URIs
+  if (/^(https?:\/\/|data:)/.test(src)) {
     return src;
   }
 
-  // If relative path starting with '/', treat as static asset
-  if (src.startsWith('/')) {
-    return src;
-  }
+  // Any leading slash = static or public asset
+  // if (src.startsWith('/')) {
+  //   return src;
+  // }
 
   // Otherwise, prepend API base URL
-  const apiUrl = import.meta.env.VITE_API_URL || '';
-  const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-  const path = src.startsWith('/') ? src : `/${src}`;
+  const apiUrl = config.public.apiBaseUrl;
+  if (!apiUrl) {
+    console.warn('VITE_API_URL missing — returning fallback');
+    return fallback;
+  }
 
-  return `${baseUrl}${path}`;
+  const base = apiUrl.replace(/\/+$/, '');
+  const path = src.replace(/^\/+/, '');
+
+  return `${base}/${path}`;
 }
+
 
 /**
  * Handles image load errors by replacing the src with a fallback.
