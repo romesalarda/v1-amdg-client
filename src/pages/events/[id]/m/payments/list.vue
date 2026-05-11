@@ -678,6 +678,7 @@
 import { useEvent } from '~/composables/resources/events/events'
 import {
   usePayments,
+  usePayment,
   useCancelPayment,
   useDeletePayment,
   useMarkPaymentCompleted,
@@ -1336,15 +1337,29 @@ const paymentToVerify = ref<any>(null)
 const showRefundModal = ref(false)
 const paymentToRefund = ref<any>(null)
 const showCreatePaymentModal = ref(false)
+const suppressPaymentModalHydration = ref(false)
+
+const routePaymentId = computed(() => readQueryString(route.query.payment))
+const { data: routePaymentData } = usePayment(routePaymentId)
 
 function viewPaymentDetails(payment: any) {
   selectedPayment.value = payment
   showPaymentDetailModal.value = true
+
+  if (payment?.payment_id) {
+    suppressPaymentModalHydration.value = false
+    router.replace({ query: { ...route.query, payment: String(payment.payment_id) } })
+  }
 }
 
 function closePaymentDetailModal() {
+  suppressPaymentModalHydration.value = true
   showPaymentDetailModal.value = false
   selectedPayment.value = null
+
+  if (route.query.payment) {
+    router.replace({ query: { ...route.query, payment: undefined } })
+  }
 }
 
 function openVerifyBankTransfer(payment: any) {
@@ -1653,5 +1668,30 @@ watch(
     syncStateToQuery()
   },
   { deep: false }
+)
+
+watch(
+  () => ({
+    paymentId: routePaymentId.value,
+    modalOpen: showPaymentDetailModal.value,
+    fetchedPayment: routePaymentData.value?.data ?? null,
+    listedPayments: payments.value,
+  }),
+  ({ paymentId, modalOpen, fetchedPayment, listedPayments }) => {
+    if (!paymentId) {
+      suppressPaymentModalHydration.value = false
+      return
+    }
+
+    if (suppressPaymentModalHydration.value || modalOpen) return
+
+    const listedPayment = listedPayments.find((entry: any) => String(entry.payment_id) === paymentId)
+    const resolvedPayment = listedPayment || fetchedPayment
+    if (!resolvedPayment) return
+
+    selectedPayment.value = resolvedPayment
+    showPaymentDetailModal.value = true
+  },
+  { immediate: true }
 )
 </script>
