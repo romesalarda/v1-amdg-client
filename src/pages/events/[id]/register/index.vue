@@ -1083,7 +1083,7 @@ const breakdownLines = computed<BreakdownLine[]>(() => {
 			const packageDiscount = parseDiscountAmount(packageLine.discount_total)
 			const packageFinal = Number(packageLine.final_amount || 0)
 			const discountHint = packageLine.applied_discounts?.length
-				? `${packageLine.applied_discounts.length} discount(s)`
+				? `${packageLine.applied_discounts.map(d => d.name).join(", ")} discount(s)`
 				: undefined
 			lines.push({
 				id: `package-${attendeeIndex}`,

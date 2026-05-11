@@ -4,6 +4,7 @@ import {
   usePartialUpdatePaymentDiscount,
   useDeletePaymentDiscount,
 } from '~/composables/resources/payments/paymentDiscounts'
+import { useCreatePaymentDiscountRule } from '~/composables/resources/payments/paymentDiscountRules'
 import Swal from 'sweetalert2'
 
 export function useDiscountManagement(
@@ -22,9 +23,13 @@ export function useDiscountManagement(
   const createDiscountMutation = useCreateBookingPackageDiscount()
   const updateDiscountMutation = usePartialUpdatePaymentDiscount()
   const deleteDiscountMutation = useDeletePaymentDiscount()
+  const createDiscountRuleMutation = useCreatePaymentDiscountRule()
 
   const discountMutationLoading = computed(
-    () => createDiscountMutation.isPending.value || updateDiscountMutation.isPending.value,
+    () =>
+      createDiscountMutation.isPending.value
+      || updateDiscountMutation.isPending.value
+      || createDiscountRuleMutation.isPending.value,
   )
 
   const openDiscountModal = (discount?: any, packageId?: number) => {
@@ -58,13 +63,15 @@ export function useDiscountManagement(
         percentage: data.discount_type === 'PERCENTAGE' ? data.percentage : undefined,
         amount: data.discount_type === 'FIXED' ? data.amount : undefined,
         active: data.active,
-        rules: data.rules || [],
       }
 
       if (editingDiscount.value) {
         await updateDiscountMutation.mutateAsync({
           discountId: editingDiscount.value.discount_id,
-          body: discountData,
+          body: {
+            ...discountData,
+            rules: data.rules || [],
+          },
         })
         toast.add({ title: 'Discount updated', color: 'green' })
       } else {
@@ -73,7 +80,41 @@ export function useDiscountManagement(
           toast.add({ title: 'Please select a booking package', color: 'orange' })
           return
         }
-        await createDiscountMutation.mutateAsync({ packageId, discount: discountData })
+
+        const createdDiscountResponse = await createDiscountMutation.mutateAsync({
+          packageId,
+          discount: discountData,
+        })
+
+        const createdDiscount = createdDiscountResponse?.data as any
+        const createdDiscountId = typeof createdDiscount?.id === 'number'
+          ? createdDiscount.id
+          : Number(createdDiscount?.id)
+
+        const rulesToCreate = Array.isArray(data.rules) ? data.rules : []
+
+        if (rulesToCreate.length > 0) {
+          if (!Number.isFinite(createdDiscountId) || createdDiscountId <= 0) {
+            throw new Error('Discount was created, but rule creation failed because the new discount ID was not returned by the server.')
+          }
+
+          const ruleCreationResults = await Promise.allSettled(
+            rulesToCreate.map((rule: any) => createDiscountRuleMutation.mutateAsync({
+              discount: createdDiscountId,
+              rule_type: rule.rule_type,
+              name: rule.name,
+              description: rule.description || undefined,
+              value: rule.value || undefined,
+              active: rule.active ?? true,
+            })),
+          )
+
+          const failedRuleCount = ruleCreationResults.filter(result => result.status === 'rejected').length
+          if (failedRuleCount > 0) {
+            throw new Error(`Discount was created, but ${failedRuleCount} rule${failedRuleCount > 1 ? 's' : ''} failed to save.`)
+          }
+        }
+
         toast.add({ title: 'Discount created', color: 'green' })
       }
 
