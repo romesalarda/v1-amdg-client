@@ -59,7 +59,7 @@ export function useBookingPackageManagement(
 
     if (pkg?.id) {
       isManualModalOpen.value = true
-      router.replace({ query: { ...route.query, 'package-id': pkg.id.toString(), package_id: pkg.id.toString() } })
+      router.replace({ query: { ...route.query, 'package-id': pkg.id.toString(), package_id: undefined } })
     }
   }
 
@@ -148,7 +148,7 @@ export function useBookingPackageManagement(
     selectedPackageId.value = packageId
     showPackageAvailabilityModal.value = true
     isManualModalOpen.value = true
-    router.replace({ query: { ...route.query, 'package-id': packageId.toString(), package_id: packageId.toString() } })
+    router.replace({ query: { ...route.query, 'package-id': packageId.toString(), package_id: undefined } })
   }
 
   function closePackageAvailabilityModal() {
@@ -183,7 +183,7 @@ export function useBookingPackageManagement(
             const foundWindow = results.find((w: any) => w.availability_id === windowId)
             if (foundWindow) {
               router.replace({
-                query: { ...route.query, 'package-id': pkg.id.toString(), package_id: pkg.id.toString(), 'window-id': windowId },
+                query: { ...route.query, 'package-id': pkg.id.toString(), package_id: undefined, 'window-id': windowId },
               })
               break
             }

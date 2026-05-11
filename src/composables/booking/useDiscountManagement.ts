@@ -32,6 +32,14 @@ export function useDiscountManagement(
       || createDiscountRuleMutation.isPending.value,
   )
 
+  function getQueryString(value: unknown): string | undefined {
+    if (Array.isArray(value)) {
+      const first = value.find(v => typeof v === 'string')
+      return typeof first === 'string' ? first : undefined
+    }
+    return typeof value === 'string' ? value : undefined
+  }
+
   const openDiscountModal = (discount?: any, packageId?: number) => {
     editingDiscount.value = discount || null
     selectedPackageForDiscount.value = packageId || null
@@ -39,7 +47,7 @@ export function useDiscountManagement(
 
     if (discount?.discount_id) {
       isManualModalOpen.value = true
-      router.replace({ query: { ...route.query, 'discount-id': discount.discount_id } })
+      router.replace({ query: { ...route.query, 'discount-id': discount.discount_id, discount_id: undefined } })
     }
   }
 
@@ -48,8 +56,8 @@ export function useDiscountManagement(
     editingDiscount.value = null
     selectedPackageForDiscount.value = null
 
-    if (route.query['discount-id']) {
-      router.replace({ query: { ...route.query, 'discount-id': undefined } })
+    if (route.query['discount-id'] || route.query.discount_id) {
+      router.replace({ query: { ...route.query, 'discount-id': undefined, discount_id: undefined } })
     }
     isManualModalOpen.value = false
   }
@@ -169,7 +177,7 @@ export function useDiscountManagement(
   // URL param watcher — opens modal when ?discount-id= is present
   watch(
     () => ({
-      discountId: route.query['discount-id'],
+      discountId: getQueryString(route.query['discount-id'] || route.query.discount_id),
     }),
     ({ discountId }) => {
       if (isManualModalOpen.value) {

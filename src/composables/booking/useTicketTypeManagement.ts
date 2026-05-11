@@ -39,7 +39,7 @@ export function useTicketTypeManagement(
 
     if (ticketType?.id) {
       isManualModalOpen.value = true
-      router.replace({ query: { ...route.query, 'ticket-id': ticketType.id.toString(), ticket_id: ticketType.id.toString() } })
+      router.replace({ query: { ...route.query, 'ticket-id': ticketType.id.toString(), ticket_id: undefined } })
     }
   }
 

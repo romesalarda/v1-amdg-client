@@ -183,7 +183,7 @@
     </div>
 
     <!-- Discount Modal -->
-    <div v-if="showDiscountModal" @click.self="closeDiscountModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div v-if="showDiscountModal" @click.self="handleDiscountModalClose" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-3xl w-full">
         <div class="flex items-center gap-3 px-6 py-4 border-b border-navy-50">
           <span class="material-symbols-outlined text-primary text-xl">percent</span>
@@ -199,7 +199,7 @@
             :packages="packages"
             :selected-package-id="selectedPackageForDiscount"
             @submit="handleDiscountSubmit"
-            @cancel="closeDiscountModal"
+            @cancel="handleDiscountModalClose"
           />
         </div>
       </div>
@@ -253,6 +253,14 @@ const router = useRouter()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
 
+function getQueryString(value: unknown): string | undefined {
+  if (Array.isArray(value)) {
+    const first = value.find(v => typeof v === 'string')
+    return typeof first === 'string' ? first : undefined
+  }
+  return typeof value === 'string' ? value : undefined
+}
+
 // View toggle
 const currentView = ref<'management' | 'statistics'>(
   route.path.includes('/statistics') ? 'statistics' : 'management'
@@ -291,6 +299,8 @@ const ticketTypes = computed(() => ticketTypesData.value?.data?.results || [])
 const packages = computed(() => packagesData.value?.data?.results || [])
 const signIns = computed(() => signInsData.value?.data?.results || [])
 const discounts = computed(() => discountsData.value?.data?.results || [])
+
+
 
 // Permissions
 const { can } = useCurrentUserEventPermissions(id, {
@@ -345,6 +355,13 @@ const {
   removeDiscount,
 } = useDiscountManagement(packages, refetchDiscounts)
 
+const suppressDiscountModalHydration = ref(false)
+
+function handleDiscountModalClose() {
+  suppressDiscountModalHydration.value = true
+  closeDiscountModal()
+}
+
 // Composable: Alternative Sign-ins
 const {
   showSignInModal,
@@ -355,6 +372,29 @@ const {
   onSubmitSignIn,
   removeSignIn,
 } = useAlternativeSignInManagement(event_pk, signIns, refetchSignIns)
+
+watch(
+  () => ({
+    discountId: getQueryString(route.query['discount-id'] || route.query.discount_id),
+    discountsLoaded: discounts.value.length > 0,
+    isModalOpen: showDiscountModal.value,
+  }),
+  ({ discountId, discountsLoaded, isModalOpen }) => {
+    if (!discountId) {
+      suppressDiscountModalHydration.value = false
+      return
+    }
+
+    if (suppressDiscountModalHydration.value || !discountsLoaded || isModalOpen) return
+
+    const discount = discounts.value.find((entry: any) => entry.discount_id === discountId)
+    if (!discount) return
+
+    const packageId = Number(discount.target_package?.id ?? 0)
+    openDiscountModal(discount, Number.isFinite(packageId) && packageId > 0 ? packageId : undefined)
+  },
+  { immediate: true },
+)
 
 const saveMaxAttendeesPerBooking = async (value: number) => {
   if (!settings.value?.id) return
