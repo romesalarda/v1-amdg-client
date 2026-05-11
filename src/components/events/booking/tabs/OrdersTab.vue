@@ -122,63 +122,61 @@
           </div>
         </section>
 
-        <div class="rounded-2xl border border-deep-navy/10 bg-white p-5 shadow-sm">
-          <article v-for="order in props.attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden">
-            <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
-              <div>
-                <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
-                <p class="text-xs text-deep-navy/60">{{ formatDateTime(order.created_at) }}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="props.getOrderStatusBadgeClass(order.status)">
-                  {{ order.status_display || order.status || 'Unknown' }}
-                </span>
-                <span class="text-xs text-deep-navy/70">{{ order.item_count }} item(s)</span>
-                <span class="text-sm font-bold text-deep-navy">{{ order.total_amount }}</span>
-                <button
-                  v-if="props.canCancelOrder(order.status)"
-                  type="button"
-                  class="rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50"
-                  @click="props.onCancelOrder(order.order_id)"
-                >
-                  Cancel
-                </button>
-              </div>
+        <article v-for="order in props.attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden">
+          <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
+            <div>
+              <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
+              <p class="text-xs text-deep-navy/60">{{ formatDateTime(order.created_at) }}</p>
             </div>
-
-            <div class="p-4 space-y-3" v-if="order.status !== 'draft'">
-              <div
-                v-for="item in order.order_items || []"
-                :key="item.id"
-                class="rounded-lg border border-deep-navy/10 p-3"
+            <div class="flex items-center gap-2">
+              <span class="rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide" :class="props.getOrderStatusBadgeClass(order.status)">
+                {{ order.status_display || order.status || 'Unknown' }}
+              </span>
+              <span class="text-xs text-deep-navy/70">{{ order.item_count }} item(s)</span>
+              <span class="text-sm font-bold text-deep-navy">{{ order.total_amount }}</span>
+              <button
+                v-if="props.canCancelOrder(order.status)"
+                type="button"
+                class="rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50"
+                @click="props.onCancelOrder(order.order_id)"
               >
-                <div class="flex items-start gap-3">
-                  <img
-                    v-if="props.getOrderItemImageUrl(item)"
-                    :src="resolveImageUrl(props.getOrderItemImageUrl(item) || '')"
-                    alt="Order item"
-                    class="h-14 w-14 rounded-lg object-cover border border-deep-navy/10"
-                    @error="onImageError"
-                  >
-                  <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-deep-navy truncate">{{ props.getOrderItemTitle(item) }}</p>
-                    <p class="text-xs text-deep-navy/60">{{ props.getOrderItemCode(item) }}</p>
-                    <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                      <span class="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 font-semibold">Qty {{ item.quantity }}</span>
-                      <span class="rounded-full bg-mist-blue text-deep-navy px-2 py-0.5 font-semibold">Unit {{ item.unit_price }}</span>
-                      <span class="rounded-full bg-deep-navy text-white px-2 py-0.5 font-semibold">Total {{ item.total_price }}</span>
-                      <span v-if="props.getOrderItemSize(item)" class="rounded-full border border-deep-navy/20 px-2 py-0.5">{{ props.getOrderItemSize(item) }}</span>
-                      <span v-if="props.getOrderItemColor(item)" class="inline-flex items-center gap-1 rounded-full border border-deep-navy/20 px-2 py-0.5">
-                        <span class="h-3 w-3 rounded-full border border-deep-navy/20" :style="props.getOrderItemColorStyle(item)"></span>
-                        {{ props.getOrderItemColor(item) }}
-                      </span>
-                    </div>
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-3" v-if="order.status !== 'draft'">
+            <div
+              v-for="item in order.order_items || []"
+              :key="item.id"
+              class="rounded-lg border border-deep-navy/10 p-3"
+            >
+              <div class="flex items-start gap-3">
+                <img
+                  v-if="props.getOrderItemImageUrl(item)"
+                  :src="resolveImageUrl(props.getOrderItemImageUrl(item) || '')"
+                  alt="Order item"
+                  class="h-14 w-14 rounded-lg object-cover border border-deep-navy/10"
+                  @error="onImageError"
+                >
+                <div class="min-w-0 flex-1">
+                  <p class="text-sm font-semibold text-deep-navy truncate">{{ props.getOrderItemTitle(item) }}</p>
+                  <p class="text-xs text-deep-navy/60">{{ props.getOrderItemCode(item) }}</p>
+                  <div class="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                    <span class="rounded-full bg-blue-50 text-blue-700 px-2 py-0.5 font-semibold">Qty {{ item.quantity }}</span>
+                    <span class="rounded-full bg-mist-blue text-deep-navy px-2 py-0.5 font-semibold">Unit {{ item.unit_price }}</span>
+                    <span class="rounded-full bg-deep-navy text-white px-2 py-0.5 font-semibold">Total {{ item.total_price }}</span>
+                    <span v-if="props.getOrderItemSize(item)" class="rounded-full border border-deep-navy/20 px-2 py-0.5">{{ props.getOrderItemSize(item) }}</span>
+                    <span v-if="props.getOrderItemColor(item)" class="inline-flex items-center gap-1 rounded-full border border-deep-navy/20 px-2 py-0.5">
+                      <span class="h-3 w-3 rounded-full border border-deep-navy/20" :style="props.getOrderItemColorStyle(item)"></span>
+                      {{ props.getOrderItemColor(item) }}
+                    </span>
                   </div>
                 </div>
               </div>
             </div>
-          </article>
-        </div>
+          </div>
+        </article>
       </div>
       <div v-else class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
         <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">

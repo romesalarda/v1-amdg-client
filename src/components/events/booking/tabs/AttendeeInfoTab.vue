@@ -37,14 +37,19 @@
                 </div>
                 <div v-if="props.attendeeForm.date_of_birth" class="rounded-lg border border-deep-navy/10 bg-white p-3">
                   <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Date of birth</p>
-                  <p class="mt-1 text-sm text-deep-navy">{{ props.attendeeForm.date_of_birth }}</p>
+                  <div class="mt-1 flex items-center justify-between gap-2">
+                    <p class="text-sm text-deep-navy">{{ props.attendeeForm.date_of_birth }}</p>
+                    <span v-if="attendeeAge !== null" class="shrink-0 rounded-full border border-blue-200 bg-blue-50 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">
+                      {{ attendeeAge }} years old
+                    </span>
+                  </div>
                 </div>
                 <div v-if="props.attendeeForm.gender" class="rounded-lg border border-deep-navy/10 bg-white p-3">
                   <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Gender</p>
                   <p class="mt-1 text-sm text-deep-navy">{{ props.attendeeForm.gender }}</p>
                 </div>
                 <div v-if="props.attendeeForm.area_from_name" class="rounded-lg border border-deep-navy/10 bg-white p-3 md:col-span-2">
-                  <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Area from</p>
+                  <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">Location</p>
                   <p class="mt-1 text-sm text-deep-navy">{{ props.attendeeForm.area_from_name }}</p>
                 </div>
               </div>
@@ -119,36 +124,20 @@
 
                 <div class="space-y-2 rounded-2xl border border-deep-navy/10 bg-mist-blue/35 p-4">
                   <div>
-                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy/60">Area from <span class="text-red-500">*</span></p>
-                    <p class="mt-1 text-xs text-deep-navy/65">Search for an area and select the matching result.</p>
+                    <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy/60">Location <span class="text-red-500">*</span></p>
+                    <p class="mt-1 text-xs text-deep-navy/65">Search and select a location for this attendee.</p>
                   </div>
-                  <div class="relative">
-                    <input
-                      v-model="localAreaSearch"
-                      :disabled="!props.isPersonalInfoEditing"
-                      type="text"
-                      placeholder="Search area name"
-                      class="w-full rounded-xl border border-deep-navy/15 bg-white px-3 py-2.5 text-deep-navy shadow-sm outline-none ring-0 focus:border-blue-400 disabled:bg-slate-50 disabled:text-deep-navy/65"
-                    >
-                    <div v-if="props.isPersonalInfoEditing && props.areaOptions.length && localAreaSearch.trim().length >= 2" class="absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-xl border border-deep-navy/10 bg-white shadow-xl">
-                      <button
-                        v-for="option in props.areaOptions"
-                        :key="option.value"
-                        type="button"
-                        class="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm transition hover:bg-blue-50"
-                        :class="option.value === props.attendeeForm.area_from ? 'bg-blue-50 text-blue-700' : 'text-deep-navy'"
-                        @click="props.onApplyAreaOption(option)"
-                      >
-                        <span class="min-w-0 truncate font-medium">{{ option.label }}</span>
-                        <span v-if="option.value === props.attendeeForm.area_from" class="shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-blue-700">Selected</span>
-                      </button>
-                    </div>
-                  </div>
-                  <p v-if="props.areaLookupLoading" class="text-xs font-semibold text-blue-700">Searching areas...</p>
+                  <AreaSearchSelect
+                    :model-value="props.attendeeForm.area_from || null"
+                    :selected-label="props.attendeeForm.area_from_name || null"
+                    :has-error="Boolean(props.attendeeValidationErrors.area_from)"
+                    placeholder="Search location name (min 2 chars)"
+                    @select="onLocationSelected"
+                  />
                   <div v-if="props.attendeeForm.area_from" class="flex items-center justify-between gap-3 rounded-xl border border-blue-200 bg-white px-3 py-2.5">
                     <div class="min-w-0">
-                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Selected area</p>
-                      <p class="truncate text-sm font-semibold text-blue-900">{{ props.attendeeForm.area_from_name || localAreaSearch || 'Area selected' }}</p>
+                      <p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Selected location</p>
+                      <p class="truncate text-sm font-semibold text-blue-900">{{ props.attendeeForm.area_from_name || 'Location selected' }}</p>
                     </div>
                     <button v-if="props.isPersonalInfoEditing" type="button" class="rounded-full border border-blue-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-50" @click="props.onClearAreaFrom()">
                       Clear
@@ -408,7 +397,14 @@
         <div class="flex items-center justify-between gap-3 border-b border-deep-navy/10 px-4 py-3">
           <div>
             <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Consents</p>
-            <p class="mt-1 text-xs text-deep-navy/60">Link or unlink attendee consents here to keep profile setup complete.</p>
+            <p class="mt-1 text-xs text-deep-navy/60">
+              <template v-if="props.attendeeSectionsOpen.consents">
+                Link or unlink attendee consents here to keep profile setup complete.
+              </template>
+              <template v-else>
+                {{ linkedConsents.length }} linked{{ totalConsentsCount ? ` of ${totalConsentsCount}` : '' }}.
+              </template>
+            </p>
           </div>
           <button
             type="button"
@@ -417,6 +413,43 @@
           >
             {{ props.attendeeSectionsOpen.consents ? 'Collapse' : 'Expand' }}
           </button>
+        </div>
+
+        <div v-if="!props.attendeeSectionsOpen.consents" class="space-y-3 p-4">
+          <div v-if="linkedConsents.length" class="space-y-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700">
+                {{ linkedConsents.length }} answered
+              </span>
+              <span v-if="requiredLinkedCount" class="rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-amber-700">
+                {{ requiredLinkedCount }} required
+              </span>
+            </div>
+            <div class="space-y-2">
+              <article
+                v-for="consent in linkedConsents"
+                :key="consent.id"
+                class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-3"
+              >
+                <div class="flex flex-wrap items-center gap-2">
+                  <p class="text-sm font-black text-deep-navy">{{ consent.title }}</p>
+                  <span
+                    class="rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide"
+                    :class="consent.required ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-700'"
+                  >
+                    {{ consent.required ? 'Required' : 'Optional' }}
+                  </span>
+                </div>
+                <p v-if="consent.description" class="mt-1 text-xs text-deep-navy/60">{{ consent.description }}</p>
+              </article>
+            </div>
+          </div>
+          <p
+            v-else
+            class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60"
+          >
+            No consents linked yet.
+          </p>
         </div>
 
         <div v-if="props.attendeeSectionsOpen.consents" class="space-y-4 p-4">
@@ -447,12 +480,39 @@
           <p v-else class="rounded-xl border border-dashed border-deep-navy/15 bg-mist-blue/30 p-4 text-sm text-deep-navy/60">No consents are configured for this event yet.</p>
         </div>
       </section>
+
+      <div v-if="props.isPersonalInfoEditing && hasPersonalInfoChanges" class="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 animate-soft-up">
+        <div class="rounded-2xl border border-deep-navy/15 bg-white/95 p-3 shadow-2xl backdrop-blur-xl">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Unsaved personal info changes</p>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
+                :disabled="props.attendeeSavePending"
+                @click="discardPersonalInfoChanges"
+              >
+                Discard
+              </button>
+              <button
+                type="button"
+                class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-blue-700 disabled:opacity-55"
+                :disabled="props.attendeeSavePending"
+                @click="props.onSaveAttendee()"
+              >
+                {{ props.attendeeSavePending ? 'Saving...' : 'Save changes' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
+import AreaSearchSelect from '~/components/ui/AreaSearchSelect.vue'
 
 type AreaOption = { label: string; value: number }
 
@@ -493,6 +553,7 @@ const props = defineProps<{
   onApplyAreaOption: (option: AreaOption) => void
   onClearAreaFrom: () => void
   onAreaSearchChange: (value: string) => void
+  attendeeSavePending?: boolean
   onToggleShowMedicalForm: () => void
   onToggleShowDietaryForm: () => void
   onToggleShowAccessibilityForm: () => void
@@ -506,9 +567,110 @@ const props = defineProps<{
   onRemoveAccessibilityRequirement: (requirementId: number) => void | Promise<void>
 }>()
 
-const localAreaSearch = computed({
-  get: () => props.areaSearch,
-  set: (value: string) => props.onAreaSearchChange(value),
+type PersonalInfoSnapshot = {
+  first_name: string
+  last_name: string
+  email: string
+  phone_number: string
+  date_of_birth: string
+  gender: string
+  relationship_to_user: string
+  area_from?: number
+  area_from_name: string
+}
+
+function toPersonalInfoSnapshot(): PersonalInfoSnapshot {
+  return {
+    first_name: props.attendeeForm.first_name || '',
+    last_name: props.attendeeForm.last_name || '',
+    email: props.attendeeForm.email || '',
+    phone_number: props.attendeeForm.phone_number || '',
+    date_of_birth: props.attendeeForm.date_of_birth || '',
+    gender: props.attendeeForm.gender || '',
+    relationship_to_user: props.attendeeForm.relationship_to_user || 'self',
+    area_from: props.attendeeForm.area_from,
+    area_from_name: props.attendeeForm.area_from_name || '',
+  }
+}
+
+const personalInfoBaseline = ref<PersonalInfoSnapshot>(toPersonalInfoSnapshot())
+
+watch(
+  () => [props.selectedAttendeeId, props.isPersonalInfoEditing, props.attendeeLoading] as const,
+  ([, isEditing, isLoading], [, wasEditing]) => {
+    if (isLoading) return
+    if (!isEditing || !wasEditing) {
+      personalInfoBaseline.value = toPersonalInfoSnapshot()
+    }
+  },
+)
+
+const hasPersonalInfoChanges = computed(() => {
+  const current = toPersonalInfoSnapshot()
+  const baseline = personalInfoBaseline.value
+  return (
+    current.first_name !== baseline.first_name ||
+    current.last_name !== baseline.last_name ||
+    current.email !== baseline.email ||
+    current.phone_number !== baseline.phone_number ||
+    current.date_of_birth !== baseline.date_of_birth ||
+    current.gender !== baseline.gender ||
+    current.relationship_to_user !== baseline.relationship_to_user ||
+    current.area_from !== baseline.area_from ||
+    current.area_from_name !== baseline.area_from_name
+  )
+})
+
+function discardPersonalInfoChanges() {
+  const baseline = personalInfoBaseline.value
+  props.attendeeForm.first_name = baseline.first_name
+  props.attendeeForm.last_name = baseline.last_name
+  props.attendeeForm.email = baseline.email
+  props.attendeeForm.phone_number = baseline.phone_number
+  props.attendeeForm.date_of_birth = baseline.date_of_birth
+  props.attendeeForm.gender = baseline.gender
+  props.attendeeForm.relationship_to_user = baseline.relationship_to_user
+  props.attendeeForm.area_from = baseline.area_from
+  props.attendeeForm.area_from_name = baseline.area_from_name
+  props.onAreaSearchChange(baseline.area_from_name)
+  props.onTogglePersonalInfoEdit()
+}
+
+function onLocationSelected(value: number, label: string) {
+  props.onApplyAreaOption({ value, label })
+}
+
+const attendeeAge = computed(() => {
+  const rawDob = String(props.attendeeForm.date_of_birth || '').trim()
+  if (!rawDob) return null
+
+  const dob = new Date(`${rawDob}T00:00:00`)
+  if (Number.isNaN(dob.getTime())) return null
+
+  const now = new Date()
+  let years = now.getFullYear() - dob.getFullYear()
+  const monthDelta = now.getMonth() - dob.getMonth()
+  const dayDelta = now.getDate() - dob.getDate()
+
+  if (monthDelta < 0 || (monthDelta === 0 && dayDelta < 0)) {
+    years -= 1
+  }
+
+  return years >= 0 ? years : null
+})
+
+const consentResults = computed(() => {
+  return props.eventConsents?.data?.value?.data?.results || []
+})
+
+const linkedConsents = computed(() => {
+  return consentResults.value.filter((consent: any) => props.isConsentLinked(consent.id))
+})
+
+const totalConsentsCount = computed(() => consentResults.value.length)
+
+const requiredLinkedCount = computed(() => {
+  return linkedConsents.value.filter((consent: any) => Boolean(consent.required)).length
 })
 
 const todayDate = (() => {

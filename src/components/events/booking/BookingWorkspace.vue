@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen bg-mist-blue">
-    <section class="relative h-[300px] w-full overflow-hidden bg-deep-navy">
+    <section class="relative min-h-[380px] w-full overflow-hidden bg-deep-navy sm:min-h-[420px] md:h-[300px] md:min-h-0">
       <img
         v-if="heroImage"
         :src="heroImage"
@@ -8,41 +8,41 @@
         class="h-full w-full object-cover opacity-40"
         @error="onImageError"
       >
-      <div class="absolute inset-0 bg-gradient-to-r from-deep-navy/95 via-deep-navy/85 to-deep-navy/70"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-deep-navy/92 via-deep-navy/82 to-deep-navy/88 md:bg-gradient-to-r md:from-deep-navy/95 md:via-deep-navy/85 md:to-deep-navy/70"></div>
 
-      <div class="absolute inset-0 flex items-center">
-        <div class="mx-auto flex w-full max-w-6xl flex-col gap-8 px-8 md:flex-row md:items-end md:justify-between">
-          <div class="space-y-4 md:max-w-xl md:justify-self-start">
+      <div class="absolute inset-0 flex items-start md:items-center">
+        <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 py-6 sm:px-6 sm:py-8 md:flex-row md:items-end md:justify-between md:gap-8 md:px-8 md:py-0">
+          <div class="space-y-3 md:max-w-xl md:justify-self-start md:space-y-4">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
               <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Live Event Portal</span>
             </div>
-            <h1 class="font-headline text-5xl font-extrabold tracking-tighter text-white md:text-6xl">{{ eventTitle }}</h1>
-            <p class="max-w-lg text-xl text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>.</p>
+            <h1 class="font-headline text-3xl font-extrabold tracking-tighter text-white sm:text-4xl md:text-6xl">{{ eventTitle }}</h1>
+            <p class="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg md:text-xl md:text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>.</p>
           </div>
 
-          <div class="md:ml-auto md:max-w-xl md:pl-8">
-            <p class="text-xs font-bold uppercase tracking-widest text-blue-200/60">We will see you in...</p>
+          <div class="w-full rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm sm:p-5 md:ml-auto md:w-auto md:max-w-xl md:border-0 md:bg-transparent md:p-0 md:pl-8 md:backdrop-blur-none">
+            <p class="text-[11px] font-bold uppercase tracking-[0.24em] text-blue-200/75 md:text-xs md:tracking-widest md:text-blue-200/60">We will see you in...</p>
             <div v-if="hasStarted" class="mt-4">
-              <p class="text-2xl font-black text-white">Event started</p>
-              <p class="mt-1 text-xs text-white/75">{{ formatDate(eventStart) }}</p>
+              <p class="text-xl font-black text-white sm:text-2xl">Event started</p>
+              <p class="mt-1 text-xs text-white/75 sm:text-sm">{{ formatDate(eventStart) }}</p>
             </div>
-            <div v-else class="mt-4 flex items-end gap-3 font-headline text-4xl font-bold tracking-tighter text-white">
-              <div class="flex flex-col items-center">
+            <div v-else class="mt-4 flex items-end justify-between gap-2 font-headline text-[2rem] font-bold tracking-tighter text-white sm:gap-3 sm:text-4xl md:justify-start">
+              <div class="flex min-w-0 flex-1 flex-col items-center md:flex-none">
                 <span>{{ countdown.days }}</span>
                 <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">DAYS</span>
               </div>
-              <span class="pb-12 opacity-30">:</span>
-              <div class="flex flex-col items-center">
+              <span class="shrink-0 pb-9 opacity-30 sm:pb-12">:</span>
+              <div class="flex min-w-0 flex-1 flex-col items-center md:flex-none">
                 <span>{{ countdown.hours }}</span>
                 <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">HRS</span>
               </div>
-              <span class="pb-12 opacity-30">:</span>
-              <div class="flex flex-col items-center">
+              <span class="shrink-0 pb-9 opacity-30 sm:pb-12">:</span>
+              <div class="flex min-w-0 flex-1 flex-col items-center md:flex-none">
                 <span>{{ countdown.minutes }}</span>
                 <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">MIN</span>
               </div>
-              <span class="pb-12 opacity-30">:</span>
-              <div class="flex flex-col items-center">
+              <span class="shrink-0 pb-9 opacity-30 sm:pb-12">:</span>
+              <div class="flex min-w-0 flex-1 flex-col items-center md:flex-none">
                 <span>{{ countdown.seconds }}</span>
                 <span class="mt-1 text-[10px] font-medium tracking-normal text-on-primary-container">SEC</span>
               </div>
@@ -197,7 +197,7 @@
               <TicketsTab :selected-attendee-id="selectedAttendeeId" />
             </article>
 
-            <article v-if="selectedAttendeeId && activeTab === 'payments'" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
+            <article v-if="selectedAttendeeId && activeTab === 'payments'" class="p-5 space-y-5">
               <PaymentsTab
                 :selected-attendee="selectedAttendee"
                 :selected-attendee-id="selectedAttendeeId"
@@ -297,6 +297,7 @@
                 :on-toggle-section="toggleAttendeeSection"
                 :on-toggle-personal-info-edit="togglePersonalInfoEdit"
                 :on-save-attendee="saveAttendee"
+                :attendee-save-pending="updateAttendee.isPending.value"
                 :on-apply-area-option="applyAreaOption"
                 :on-clear-area-from="clearAreaFrom"
                 :on-area-search-change="setAreaSearch"
@@ -1345,10 +1346,6 @@
                     <dt class="font-semibold text-deep-navy/60">Extra products</dt>
                     <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
                   </div>
-                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <dt class="font-semibold text-deep-navy/60">Completed payments</dt>
-                    <dd class="mt-1 text-base font-black text-deep-navy">{{ completedPaymentsCount }}</dd>
-                  </div>
                 </dl>
               </div>
             </section>
@@ -1426,32 +1423,6 @@
             </section>
           </article>
         </aside>
-      </div>
-    </div>
-
-    <div v-if="booking && activeTab === 'attendee' && isPersonalInfoEditing && hasPersonalInfoChanges" class="fixed bottom-4 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-3xl -translate-x-1/2 animate-soft-up">
-      <div class="rounded-2xl border border-deep-navy/15 bg-white/95 p-3 shadow-2xl backdrop-blur-xl">
-        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p class="text-xs font-black uppercase tracking-[0.22em] text-deep-navy">Unsaved personal info changes</p>
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              class="rounded-xl border border-deep-navy/20 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-deep-navy hover:border-blue-500 hover:text-blue-700"
-              :disabled="updateAttendee.isPending.value"
-              @click="discardPersonalInfoChanges"
-            >
-              Discard
-            </button>
-            <button
-              type="button"
-              class="rounded-xl bg-deep-navy px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-blue-700 disabled:opacity-55"
-              :disabled="updateAttendee.isPending.value"
-              @click="saveAttendee"
-            >
-              {{ updateAttendee.isPending.value ? 'Saving...' : 'Save changes' }}
-            </button>
-          </div>
-        </div>
       </div>
     </div>
 
