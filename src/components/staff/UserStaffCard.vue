@@ -55,13 +55,21 @@
       <div class="flex items-center gap-1.5 flex-shrink-0">
         <button
           v-if="canUpdateStaff && !isCreatorStaff"
+          @click="isAvailabilityExpanded = !isAvailabilityExpanded; isExpanded = false"
+          :aria-label="isAvailabilityExpanded ? 'Hide availability' : 'Manage availability'"
+          class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-white rounded-lg transition-colors"
+          :class="{ 'text-primary bg-primary/10': isAvailabilityExpanded }"
+        >
+          <span class="material-symbols-outlined text-base">calendar_month</span>
+        </button>
+        <button
+          v-if="canUpdateStaff && !isCreatorStaff"
           @click="toggleExpand"
           :aria-label="isExpanded ? 'Hide custom permissions' : 'Customize permissions'"
           class="p-1.5 text-navy-400 hover:text-navy-700 hover:bg-white rounded-lg transition-colors"
+          :class="{ 'text-primary bg-primary/10': isExpanded }"
         >
-          <span class="material-symbols-outlined text-base">
-            {{ isExpanded ? 'tune' : 'tune' }}
-          </span>
+          <span class="material-symbols-outlined text-base">tune</span>
         </button>
         <button
           v-if="canDeleteStaff && !isCreatorStaff"
@@ -120,6 +128,64 @@
         />
       </div>
     </div>
+
+    <!-- Expanded View: Availability -->
+    <div v-if="isAvailabilityExpanded && !isCreatorStaff" class="mt-4 border-t border-deep-navy/10 pt-4 space-y-3">
+      <p class="text-xs font-black text-primary uppercase tracking-wider">Availability Windows</p>
+
+      <div v-if="staff.availabilities.length" class="space-y-2">
+        <div
+          v-for="avail in staff.availabilities"
+          :key="avail.id"
+          class="flex items-center justify-between gap-2 p-2.5 bg-mist-blue/50 rounded-lg border border-deep-navy/10 text-xs"
+        >
+          <span class="text-navy-700">
+            {{ formatAvailabilityDate(avail.available_from) }}
+            <span class="text-navy-400 mx-1">→</span>
+            {{ formatAvailabilityDate(avail.available_to) }}
+          </span>
+          <button
+            v-if="canUpdateStaff"
+            @click="removeAvailability(avail.id)"
+            class="p-1 text-navy-400 hover:text-red-500 transition-colors flex-shrink-0"
+            aria-label="Remove availability window"
+          >
+            <span class="material-symbols-outlined" style="font-size:14px">delete</span>
+          </button>
+        </div>
+      </div>
+      <p v-else class="text-xs text-navy-400 italic">No availability windows set</p>
+
+      <div v-if="canUpdateStaff" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div class="space-y-1">
+          <label class="block text-[10px] font-black text-primary uppercase tracking-wider">From</label>
+          <input
+            v-model="availabilityForm.available_from"
+            type="datetime-local"
+            class="w-full px-3 py-2 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-lg text-xs font-medium text-[#071427] transition-all"
+          />
+        </div>
+        <div class="space-y-1">
+          <label class="block text-[10px] font-black text-primary uppercase tracking-wider">To</label>
+          <input
+            v-model="availabilityForm.available_to"
+            type="datetime-local"
+            class="w-full px-3 py-2 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-lg text-xs font-medium text-[#071427] transition-all"
+          />
+        </div>
+      </div>
+      <button
+        v-if="canUpdateStaff"
+        type="button"
+        @click="addAvailability"
+        :disabled="!availabilityForm.available_from || !availabilityForm.available_to || availabilityLoading"
+        class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-40"
+      >
+        <span v-if="availabilityLoading" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+        <span v-else class="material-symbols-outlined text-sm">add</span>
+        Add Window
+      </button>
+    </div>
   </div>
 </template>
 
@@ -132,6 +198,7 @@ import {
   usePartialUpdateEventRoleAssignment,
   useDeleteEventRoleAssignment 
 } from '~/composables/resources/events/eventRoleAssignments'
+import { useCreateEventStaffAvailability, useDeleteEventStaffAvailability } from '~/composables/resources/events/eventStaffAvailability'
 import PermissionBadge from './PermissionBadge.vue'
 import AuditTrailDisplay from './AuditTrailDisplay.vue'
 import InlinePermissionEditor from './InlinePermissionEditor.vue'
@@ -141,6 +208,7 @@ interface Props {
   permissions: EventPermissionAssignment[]
   rolesList: any[]
   eventCreatedBy?: number | null
+  eventUrlSafeTitle: string
   canUpdateStaff?: boolean
   canDeleteStaff?: boolean
 }
@@ -149,6 +217,7 @@ interface Emits {
   (e: 'remove'): void
   (e: 'update-permissions', permissions: Record<string, CRUDAction[]>): void
   (e: 'role-updated'): void
+  (e: 'availability-updated'): void
 }
 
 const props = defineProps<Props>()
@@ -174,7 +243,7 @@ const roleSelectDisabled = computed(() => {
 // Fetch role assignments for this user/event
 const roleAssignmentsFilter = computed(() => {
   const filter: any = {
-    event: props.staff.event,
+    event: props.eventUrlSafeTitle,
   }
   if (props.staff.user !== null) {
     filter.user = props.staff.user
@@ -307,5 +376,60 @@ const getPermissionActions = (permission: EventPermissionAssignment): CRUDAction
 const handleSavePermissions = (permissions: Record<string, CRUDAction[]>) => {
   emit('update-permissions', permissions)
   isExpanded.value = false
+}
+
+// Availability management
+const isAvailabilityExpanded = ref(false)
+const availabilityForm = reactive({ available_from: '', available_to: '' })
+const availabilityLoading = ref(false)
+
+const createAvailabilityMutation = useCreateEventStaffAvailability()
+const deleteAvailabilityMutation = useDeleteEventStaffAvailability()
+
+const addAvailability = async () => {
+  if (!availabilityForm.available_from || !availabilityForm.available_to) return
+
+  availabilityLoading.value = true
+  try {
+    await createAvailabilityMutation.mutateAsync({
+      staff: props.staff.staff_id as any,
+      available_from: new Date(availabilityForm.available_from).toISOString(),
+      available_to: new Date(availabilityForm.available_to).toISOString(),
+    })
+    availabilityForm.available_from = ''
+    availabilityForm.available_to = ''
+    toast.add({ title: 'Availability added', color: 'green' })
+    emit('availability-updated')
+  } catch (error) {
+    toast.add({
+      title: 'Failed to add availability',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  } finally {
+    availabilityLoading.value = false
+  }
+}
+
+const removeAvailability = async (availabilityId: number) => {
+  try {
+    await deleteAvailabilityMutation.mutateAsync(availabilityId)
+    toast.add({ title: 'Availability removed', color: 'green' })
+    emit('availability-updated')
+  } catch (error) {
+    toast.add({
+      title: 'Failed to remove availability',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+const formatAvailabilityDate = (dateStr: string  | undefined) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
 }
 </script>

@@ -58,7 +58,7 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'REGISTRATION_MANAGER',
     label: 'Registration Manager',
-    description: 'Full control over event registrations and attendees',
+    description: 'Full control over attendee registrations, check-ins, and booking management',
     permissions: {
       REGISTRATION: ['create', 'read', 'update', 'delete'],
     },
@@ -66,7 +66,7 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'CONTENT_MANAGER',
     label: 'Content Manager',
-    description: 'Manage event content, schedules, and resources',
+    description: 'Create, edit, and publish event pages, schedules, and announcements',
     permissions: {
       CONTENT_MANAGEMENT: ['create', 'read', 'update', 'delete'],
     },
@@ -74,7 +74,7 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'PRODUCT_MANAGER',
     label: 'Product Manager',
-    description: 'Manage products, pricing, and inventory',
+    description: 'Manage products, pricing tiers, inventory levels, and purchase configurations',
     permissions: {
       PRODUCT_MANAGEMENT: ['create', 'read', 'update', 'delete'],
     },
@@ -82,15 +82,15 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'STAFF_COORDINATOR',
     label: 'Staff Coordinator',
-    description: 'Manage staff assignments and schedules',
+    description: 'Invite staff, assign roles, manage availability, and coordinate the event team',
     permissions: {
       STAFF_MANAGEMENT: ['create', 'read', 'update', 'delete'],
     },
   },
   {
-    key: 'REPORTER',
-    label: 'Reporter',
-    description: 'View reports and analytics',
+    key: 'REPORTING_ANALYST',
+    label: 'Reporting Analyst',
+    description: 'View dashboards, attendance stats, financial summaries, and event analytics',
     permissions: {
       REPORTING: ['read'],
     },
@@ -98,7 +98,7 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'EVENT_VIEWER',
     label: 'Event Viewer',
-    description: 'Read-only access to all event information',
+    description: 'Read-only access across all event sections — no creation or editing capabilities',
     permissions: {
       GENERAL: ['read'],
       REGISTRATION: ['read'],
@@ -110,7 +110,7 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
   {
     key: 'FULL_ACCESS',
     label: 'Full Access',
-    description: 'Complete control over all event features',
+    description: 'Unrestricted access to every feature — equivalent to event administrator',
     permissions: {
       GENERAL: ['create', 'read', 'update', 'delete'],
       REGISTRATION: ['create', 'read', 'update', 'delete'],
@@ -118,6 +118,9 @@ const PERMISSION_TEMPLATES: PermissionTemplate[] = [
       CONTENT_MANAGEMENT: ['create', 'read', 'update', 'delete'],
       STAFF_MANAGEMENT: ['create', 'read', 'update', 'delete'],
       REPORTING: ['create', 'read', 'update', 'delete'],
+      RESOURCE_MANAGEMENT: ['create', 'read', 'update', 'delete'],
+      BOOKING_MANAGEMENT: ['create', 'read', 'update', 'delete'],
+      PAYMENT_MANAGEMENT: ['create', 'read', 'update', 'delete'],
     },
   },
 ]

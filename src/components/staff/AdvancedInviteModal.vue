@@ -71,7 +71,6 @@
                   />
                 </div>
 
-                <!-- Results list rendered inline (avoids overflow-hidden clipping) -->
                 <div
                   v-if="userSearch.length > 0"
                   class="rounded-xl border border-[#e6e9ed] bg-white shadow-sm overflow-hidden"
@@ -99,7 +98,7 @@
                   </template>
                   <div v-else class="px-4 py-4 text-sm text-[#607a96] text-center">
                     <span class="material-symbols-outlined text-2xl text-[#bcc8d8] block mb-1">person_search</span>
-                    No users found for "{{ userSearch }}"
+                    No eligible users found for "{{ userSearch }}"
                   </div>
                 </div>
 
@@ -108,62 +107,21 @@
             </div>
           </div>
 
-          <!-- Step 2: Role Assignment -->
+          <!-- Step 2: Permission Template -->
           <div v-if="currentStep === 2" class="space-y-4">
-            <div class="space-y-1.5">
-              <label class="block text-xs font-black text-primary uppercase tracking-wider">Assign Role (Optional)</label>
-              <p class="text-xs text-[#607a96]">Roles provide pre-configured permission sets</p>
-              <select
-                :value="selectedRole ?? ''"
-                @change="selectedRole = ($event.target as HTMLSelectElement).value ? Number(($event.target as HTMLSelectElement).value) : null"
-                class="w-full px-4 py-3 bg-white border border-[#bcc8d8] focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-[#071427] transition-all appearance-none"
-              >
-                <option value="">No role (custom permissions)</option>
-                <option v-for="role in rolesList" :key="role.id" :value="role.id">
-                  {{ role.name }}<template v-if="role.description"> — {{ role.description }}</template>
-                </option>
-              </select>
-            </div>
-
-            <div class="p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm text-[#1a2f4d] flex gap-2">
-              <span class="material-symbols-outlined text-base text-primary flex-shrink-0 mt-0.5">info</span>
-              <span>You can customize permissions in the next step, or skip role assignment to define custom permissions from scratch.</span>
-            </div>
-          </div>
-
-          <!-- Step 3: Permissions -->
-          <div v-if="currentStep === 3" class="space-y-4">
             <PermissionPresetSelector
               v-model="selectedTemplate"
               @template-selected="handleTemplateSelect"
             />
 
-            <div class="rounded-xl border border-[#e6e9ed] overflow-hidden max-h-96 overflow-y-auto">
-              <div v-for="category in categories" :key="category" class="border-b border-[#e6e9ed] last:border-0">
-                <div class="px-4 py-2.5 bg-mist-blue sticky top-0">
-                  <p class="text-xs font-black text-primary uppercase tracking-widest">{{ categoryLabels[category] }}</p>
-                </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-4 bg-white">
-                  <label
-                    v-for="action in actions"
-                    :key="`${category}-${action}`"
-                    class="flex items-center gap-2 text-sm cursor-pointer hover:bg-mist-blue p-2.5 rounded-lg border border-[#e6e9ed] bg-white transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="isActionEnabled(category, action)"
-                      @change="toggleAction(category, action, ($event.target as HTMLInputElement).checked)"
-                      class="h-4 w-4 rounded border-[#bcc8d8] text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0"
-                    />
-                    <span class="capitalize font-medium text-[#1a2f4d]">{{ action }}</span>
-                  </label>
-                </div>
-              </div>
+            <div class="p-4 bg-primary/5 border border-primary/20 rounded-xl text-sm text-[#1a2f4d] flex gap-2">
+              <span class="material-symbols-outlined text-base text-primary flex-shrink-0 mt-0.5">info</span>
+              <span>Selecting a template applies a predefined permission set when the invite is accepted. You can customise permissions further from the staff card after acceptance.</span>
             </div>
           </div>
 
-          <!-- Step 4: Review & Invite Details -->
-          <div v-if="currentStep === 4" class="space-y-4">
+          <!-- Step 3: Review & Send -->
+          <div v-if="currentStep === 3" class="space-y-4">
             <div class="space-y-1.5">
               <label class="block text-xs font-black text-primary uppercase tracking-wider">Expiry Date (Optional)</label>
               <p class="text-xs text-[#607a96]">Leave empty for no expiration</p>
@@ -185,13 +143,9 @@
                   <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">User</span>
                   <span class="text-sm font-bold text-[#071427]">{{ selectedUser?.email }}</span>
                 </div>
-                <div v-if="selectedRole" class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
-                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Role</span>
-                  <span class="text-sm font-bold text-[#071427]">{{ getRoleName(selectedRole) }}</span>
-                </div>
                 <div class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
-                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Permissions</span>
-                  <span class="text-sm font-bold text-primary">{{ permissionCount }} permission(s)</span>
+                  <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Template</span>
+                  <span class="text-sm font-bold text-primary">{{ selectedTemplate ?? 'None (no permissions)' }}</span>
                 </div>
                 <div v-if="expiryDate" class="flex justify-between items-center py-2 px-3 bg-mist-blue rounded-lg">
                   <span class="text-xs font-semibold text-[#294160] uppercase tracking-wide">Expires</span>
@@ -200,9 +154,9 @@
               </div>
             </div>
 
-            <div v-if="permissionCount === 0" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-2 text-sm text-amber-800">
+            <div v-if="!selectedTemplate" class="p-3 bg-amber-50 border border-amber-200 rounded-xl flex gap-2 text-sm text-amber-800">
               <span class="material-symbols-outlined text-base flex-shrink-0 mt-0.5">warning</span>
-              <span>No permissions selected. This user will have very limited access.</span>
+              <span>No permission template selected. This user will have very limited access until permissions are assigned manually after acceptance.</span>
             </div>
           </div>
 
@@ -261,14 +215,14 @@
 </template>
 
 <script setup lang="ts">
-import type { PermissionCategory, CRUDAction } from '~/types/permissions'
 import PermissionPresetSelector from './PermissionPresetSelector.vue'
 
 interface Props {
   modelValue: boolean
   eventId: number
   usersList: any[]
-  rolesList: any[]
+  staffList: any[]
+  existingInvites?: any[]
 }
 
 interface Emits {
@@ -278,9 +232,8 @@ interface Emits {
 
 interface InviteData {
   userId: number
-  roleId?: number | null
-  permissions: Record<string, CRUDAction[]>
-  expiryDate?: string | null
+  permissionTemplate: string | null
+  expiryDate: string | null
 }
 
 const props = defineProps<Props>()
@@ -292,13 +245,12 @@ const isOpen = computed({
 })
 
 const currentStep = ref(1)
-const totalSteps = 4
+const totalSteps = 3
 const loading = ref(false)
 
 const stepTitles = [
   'Select User',
-  'Assign Role',
-  'Set Permissions',
+  'Permission Template',
   'Review & Send',
 ]
 
@@ -306,50 +258,40 @@ const stepTitles = [
 const userSearch = ref('')
 const selectedUser = ref<any>(null)
 
+const existingStaffUserIds = computed(() =>
+  new Set((props.staffList || []).map((s: any) => s.user).filter(Boolean))
+)
+
+const pendingInviteUserIds = computed(() =>
+  new Set(
+    (props.existingInvites || [])
+      .filter((i: any) => i.is_valid)
+      .map((i: any) => i.target_user)
+      .filter(Boolean)
+  )
+)
+
 const filteredUsers = computed(() => {
   if (!userSearch.value) return []
   const q = userSearch.value.toLowerCase()
-  return props.usersList.filter(u =>
-    u.email?.toLowerCase().includes(q) ||
-    `${u.first_name ?? ''} ${u.last_name ?? ''}`.toLowerCase().includes(q)
-  )
+  return props.usersList.filter(u => {
+    if (existingStaffUserIds.value.has(u.id)) return false
+    if (pendingInviteUserIds.value.has(u.id)) return false
+    return (
+      u.email?.toLowerCase().includes(q) ||
+      `${u.first_name ?? ''} ${u.last_name ?? ''}`.toLowerCase().includes(q)
+    )
+  })
 })
 
 // Step 2 data
-const selectedRole = ref<number | null>(null)
-
-// Step 3 data
 const selectedTemplate = ref<string | null>(null)
-const permissions = ref<Record<string, Set<CRUDAction>>>({})
 
-const categories: PermissionCategory[] = [
-  'GENERAL',
-  'REGISTRATION',
-  'PRODUCT_MANAGEMENT',
-  'CONTENT_MANAGEMENT',
-  'STAFF_MANAGEMENT',
-  'REPORTING',
-  'PAYMENT_MANAGEMENT',
-  'BOOKING_MANAGEMENT',
-  'RESOURCE_MANAGEMENT',
-]
-
-const categoryLabels: Record<PermissionCategory, string> = {
-  GENERAL: 'General Permissions',
-  REGISTRATION: 'Registration Management',
-  PRODUCT_MANAGEMENT: 'Product Management',
-  CONTENT_MANAGEMENT: 'Content Management',
-  STAFF_MANAGEMENT: 'Staff Management',
-  REPORTING: 'Reporting & Analytics',
-  PAYMENT_MANAGEMENT: 'Payment Management',
-  BOOKING_MANAGEMENT: 'Booking Management',
-  RESOURCE_MANAGEMENT: 'Resource Management',
-
+const handleTemplateSelect = (_permissions: Record<string, any>) => {
+  // Template selection is stored by key via v-model; no extra handling needed
 }
 
-const actions: CRUDAction[] = ['create', 'read', 'update', 'delete']
-
-// Step 4 data
+// Step 3 data
 const expiryDate = ref('')
 const minDate = computed(() => {
   const tomorrow = new Date()
@@ -369,10 +311,6 @@ const canSendInvite = computed(() => {
   return selectedUser.value !== null
 })
 
-const permissionCount = computed(() => {
-  return Object.values(permissions.value).reduce((sum, set) => sum + set.size, 0)
-})
-
 const nextStep = () => {
   if (currentStep.value < totalSteps && canProceed.value) {
     currentStep.value++
@@ -385,62 +323,19 @@ const previousStep = () => {
   }
 }
 
-// Permission management
-const isActionEnabled = (category: PermissionCategory, action: CRUDAction): boolean => {
-  return permissions.value[category]?.has(action) || false
-}
-
-const toggleAction = (category: PermissionCategory, action: CRUDAction, enabled: boolean) => {
-  if (!permissions.value[category]) {
-    permissions.value[category] = new Set()
-  }
-  
-  if (enabled) {
-    permissions.value[category].add(action)
-    if (action !== 'read') {
-      permissions.value[category].add('read')
-    }
-  } else {
-    permissions.value[category].delete(action)
-    if (action === 'read') {
-      permissions.value[category].clear()
-    }
-  }
-  
-  selectedTemplate.value = null
-}
-
-const handleTemplateSelect = (templatePermissions: Record<string, CRUDAction[]>) => {
-  const newPerms: Record<string, Set<CRUDAction>> = {}
-  
-  Object.entries(templatePermissions).forEach(([category, actions]) => {
-    newPerms[category] = new Set(actions)
-  })
-  
-  permissions.value = newPerms
-}
-
 // Invite submission
 const sendInvite = async () => {
   if (!selectedUser.value) return
-  
+
   loading.value = true
-  
+
   try {
-    const permissionsToSend: Record<string, CRUDAction[]> = {}
-    Object.entries(permissions.value).forEach(([category, actions]) => {
-      if (actions.size > 0) {
-        permissionsToSend[category] = Array.from(actions)
-      }
-    })
-    
     const inviteData: InviteData = {
       userId: selectedUser.value.id,
-      roleId: selectedRole.value,
-      permissions: permissionsToSend,
+      permissionTemplate: selectedTemplate.value,
       expiryDate: expiryDate.value || null,
     }
-    
+
     emit('invite-sent', inviteData)
     close()
   } finally {
@@ -448,12 +343,7 @@ const sendInvite = async () => {
   }
 }
 
-// Utility functions
-const getRoleName = (roleId: number): string => {
-  const role = props.rolesList.find(r => r.id === roleId)
-  return role?.name || 'Unknown'
-}
-
+// Utility
 const formatDate = (dateString: string): string => {
   const date = new Date(dateString)
   return date.toLocaleDateString('en-US', {
@@ -471,9 +361,7 @@ const close = () => {
 const resetForm = () => {
   currentStep.value = 1
   selectedUser.value = null
-  selectedRole.value = null
   selectedTemplate.value = null
-  permissions.value = {}
   expiryDate.value = ''
   userSearch.value = ''
 }
@@ -484,3 +372,5 @@ watch(() => props.modelValue, (newValue) => {
   }
 })
 </script>
+
+

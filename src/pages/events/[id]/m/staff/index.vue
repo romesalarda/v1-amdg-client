@@ -34,11 +34,13 @@
               :permissions="getStaffPermissions(staff.user!)"
               :roles-list="rolesList"
               :event-created-by="event?.data?.created_by"
+              :event-url-safe-title="id"
               :canUpdateStaff="canUpdateStaff"
               :canDeleteStaff="canDeleteStaff"
               @remove="removeStaff(staff)"
               @update-permissions="handleUpdatePermissions(staff, $event)"
               @role-updated="refetchStaff"
+              @availability-updated="refetchStaff"
             />
           </div>
 
@@ -105,7 +107,8 @@
       v-model="showInviteModal"
       :event-id="event?.data.id"
       :users-list="usersList"
-      :roles-list="rolesList"
+      :staff-list="staffList"
+      :existing-invites="existingInvites"
       @invite-sent="handleInviteSent"
     />
   </EventsManagementLayout>
@@ -117,7 +120,7 @@ import { useEventStaff, useDeleteEventStaff } from '~/composables/resources/even
 import { useEventRoles, useCreateEventRole, useDeleteEventRole } from '~/composables/resources/events/eventRoles'
 import { useEventPermissions } from '~/composables/resources/events/eventPermissions'
 import { useEventPermissionAssignments, useCreateEventPermissionAssignment, useDeleteEventPermissionAssignment } from '~/composables/resources/events/eventPermissionAssignments'
-import { useCreateEventStaffInvite } from '~/composables/resources/events/eventStaffInvites'
+import { useCreateEventStaffInvite, useEventStaffInvites } from '~/composables/resources/events/eventStaffInvites'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { useUsers } from '~/composables/resources/user/users'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
@@ -168,7 +171,7 @@ const { data: permissionsData } = useEventPermissions()
 const permissionsList = computed(() => permissionsData.value?.data?.results || [])
 
 // Fetch permission assignments
-const permissionsFilter = computed(() => ({ event: event.value?.data?.event_id }))
+const permissionsFilter = computed(() => ({ event: id.value }))
 const { data: permissionAssignmentsData, refetch: refetchPermissions } = useEventPermissionAssignments(permissionsFilter)
 const permissionAssignments = computed(() => permissionAssignmentsData.value?.data?.results || [])
 
@@ -181,6 +184,10 @@ const usersParams = computed(() => ({
 }))
 const { data: usersData } = useUsers(usersParams)
 const usersList = computed(() => usersData.value?.data?.results || [])
+
+// Existing invites for invite modal filtering
+const { data: existingInvitesData } = useEventStaffInvites(id)
+const existingInvites = computed(() => existingInvitesData.value?.data?.results || [])
 
 // Modals
 const showInviteModal = ref(false)
@@ -206,6 +213,7 @@ const handleInviteSent = async (inviteData: any) => {
       eventId: String(route.params.id),
       body: {
         target_user: inviteData.userId,
+        permission_template: inviteData.permissionTemplate ?? undefined,
         expires_at: inviteData.expiryDate || undefined,
       }
     })

@@ -8,11 +8,36 @@
 
     <!-- Permission Categories Grid -->
     <div class="space-y-3">
-      <div v-for="category in categories" :key="category" class="rounded-xl overflow-hidden border border-deep-navy/10">
-        <div class="px-3 py-2 bg-white">
+      <div v-for="category in categories" :key="category" class="rounded-xl border border-deep-navy/10" style="overflow:visible">
+        <div class="px-3 py-2 bg-white rounded-t-xl flex items-center gap-2.5">
           <p class="text-xs font-black text-primary uppercase tracking-wider">{{ categoryLabels[category] }}</p>
+          <div class="group relative flex items-center ml-0.5">
+            <span class="material-symbols-outlined text-navy-400 group-hover:text-primary transition-colors cursor-default select-none" style="font-size:14px">info</span>
+            <div class="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 w-56 opacity-0 group-hover:opacity-100 transition-opacity duration-150" style="z-index:9999">
+              <div class="bg-[#071427] text-white text-[11px] leading-snug font-medium rounded-lg px-3 py-2 shadow-xl">
+                {{ categoryDescriptions[category] }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 p-3 bg-mist-blue/30">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 p-3 bg-mist-blue/30 rounded-b-xl">
+          <!-- Select-all cell -->
+          <label
+            class="flex items-center gap-2 text-sm cursor-pointer hover:bg-white p-2 rounded-lg border border-deep-navy/10 bg-white/60 transition-colors"
+            :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+          >
+            <input
+              type="checkbox"
+              :ref="(el) => setCategoryRef(el, category)"
+              :checked="isCategoryFullyEnabled(category)"
+              @change="toggleAllCategory(category, ($event.target as HTMLInputElement).checked)"
+              :disabled="disabled"
+              class="h-4 w-4 rounded border-navy-200 text-primary focus:ring-primary focus:ring-offset-0 flex-shrink-0 cursor-pointer disabled:cursor-not-allowed"
+              :aria-label="`Toggle all ${categoryLabels[category]} permissions`"
+            />
+            <span class="font-bold text-navy-700">All</span>
+          </label>
+          <!-- Per-action cells -->
           <label
             v-for="action in actions"
             :key="`${category}-${action}`"
@@ -112,11 +137,61 @@ const categoryLabels: Record<PermissionCategory, string> = {
   RESOURCE_MANAGEMENT: 'Resource Management',
 }
 
+const categoryDescriptions: Record<PermissionCategory, string> = {
+  GENERAL: 'Top-level event access — controls whether the user can see and interact with the event at all.',
+  REGISTRATION: 'Manage attendee registrations, check-in flows, waitlists, and registration form submissions.',
+  PRODUCT_MANAGEMENT: 'Create and configure products, ticket types, pricing tiers, and stock levels.',
+  CONTENT_MANAGEMENT: 'Edit event descriptions, schedules, speaker profiles, announcements, and media.',
+  STAFF_MANAGEMENT: 'Invite staff members, assign roles, set availability windows, and manage the event team.',
+  REPORTING: 'Access attendance reports, revenue summaries, analytics dashboards, and exported data.',
+  PAYMENT_MANAGEMENT: 'View and process payments, issue refunds, manage payment methods, and reconcile transactions.',
+  BOOKING_MANAGEMENT: 'View, edit, and cancel attendee bookings, and manage booking-level details.',
+  RESOURCE_MANAGEMENT: 'Manage shared event resources such as venues, equipment, and allocated materials.',
+}
+
 const actions: CRUDAction[] = ['create', 'read', 'update', 'delete']
 
 const selectedTemplate = ref<string | null>(null)
 const permissions = ref<Record<string, Set<CRUDAction>>>({})
 const saving = ref(false)
+
+// Category select-all — track checkbox els for indeterminate state
+const categoryCheckboxRefs: Record<string, HTMLInputElement | null> = {}
+
+function setCategoryRef(el: Element | ComponentPublicInstance | null, category: string) {
+  categoryCheckboxRefs[category] = (el as HTMLInputElement | null)
+}
+
+const isCategoryFullyEnabled = (category: PermissionCategory): boolean => {
+  const set = permissions.value[category]
+  return !!set && actions.every(a => set.has(a))
+}
+
+const isCategoryPartiallyEnabled = (category: PermissionCategory): boolean => {
+  const set = permissions.value[category]
+  return !!set && set.size > 0 && !actions.every(a => set.has(a))
+}
+
+const toggleAllCategory = (category: PermissionCategory, enabled: boolean) => {
+  if (!permissions.value[category]) {
+    permissions.value[category] = new Set()
+  }
+  if (enabled) {
+    actions.forEach(a => permissions.value[category].add(a))
+  } else {
+    permissions.value[category].clear()
+  }
+  selectedTemplate.value = null
+}
+
+watchEffect(() => {
+  categories.forEach(category => {
+    const el = categoryCheckboxRefs[category]
+    if (el) {
+      el.indeterminate = isCategoryPartiallyEnabled(category)
+    }
+  })
+})
 
 // Initialize permissions from current assignments
 onMounted(() => {
