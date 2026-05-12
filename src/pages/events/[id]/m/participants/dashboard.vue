@@ -1512,7 +1512,12 @@ const familyRelationshipOptions: Array<{ value: FamilyRelationship; label: strin
 
 definePageMeta({
   layout: false,
-  middleware: 'auth',
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'BOOKING_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()

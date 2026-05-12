@@ -431,6 +431,12 @@ import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PAYMENT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()
@@ -439,9 +445,9 @@ const toast = useToast()
 
 const { can } = useCurrentUserEventPermissions(id)
 
-const canEditPaymentMethods = computed(() => can('REGISTRATION', 'update').value.allowed)
-const canDeletePaymentMethods = computed(() => can('REGISTRATION', 'delete').value.allowed)
-const canCreatePaymentMethods = computed(() => can('REGISTRATION', 'create').value.allowed)
+const canEditPaymentMethods = computed(() => can('PAYMENT_MANAGEMENT', 'update').value.allowed)
+const canDeletePaymentMethods = computed(() => can('PAYMENT_MANAGEMENT', 'delete').value.allowed)
+const canCreatePaymentMethods = computed(() => can('PAYMENT_MANAGEMENT', 'create').value.allowed)
 
 // Fetch event data
 const { data: event } = useEvent(id)

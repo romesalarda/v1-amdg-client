@@ -152,12 +152,13 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import EventVenueWizardModal from '~/components/events/venue/EventVenueWizardModal.vue'
 
 definePageMeta({
-	layout: false,
-	middleware: ['auth', 'event-permission'],
-	eventPermission: {
-		category: 'REGISTRATION',
-		action: 'read',
-	},
+  layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'REGISTRATION',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()

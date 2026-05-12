@@ -134,7 +134,8 @@ definePageMeta({
   middleware: ['auth', 'event-permission'],
   eventPermission: {
     category: 'STAFF_MANAGEMENT',
-    action: 'read'
+    action: 'read',
+    deniedRedirect: '/403',
   }
 })
 

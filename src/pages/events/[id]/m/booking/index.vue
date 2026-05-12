@@ -246,8 +246,14 @@ import type { Ref } from 'vue'
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'BOOKING_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
-
+  
 const route = useRoute()
 const router = useRouter()
 const id = computed(() => String(route.params.id))

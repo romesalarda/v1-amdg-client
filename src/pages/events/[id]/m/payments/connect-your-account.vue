@@ -269,8 +269,13 @@ import {
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PAYMENT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
-
 const toast = useToast()
 const route = useRoute()
 const id = computed(() => String(route.params.id))

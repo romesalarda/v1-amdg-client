@@ -359,6 +359,12 @@ import { useCurrentUserEventPermissions } from '~/composables/permissions'
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'RESOURCE_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 

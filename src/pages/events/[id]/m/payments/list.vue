@@ -705,8 +705,13 @@ const StatisticsIndex = defineAsyncComponent(() => import('./statistics/index.vu
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PAYMENT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
-
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()

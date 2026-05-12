@@ -920,11 +920,10 @@ definePageMeta({
   middleware: ['auth', 'event-permission'],
   eventPermission: {
     category: 'REGISTRATION',
-    action: 'read'
+    action: 'read',
+    deniedRedirect: '/403',
   }
 })
-
-
 
 const route = useRoute()
 const toast = useToast()

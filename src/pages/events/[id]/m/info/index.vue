@@ -717,8 +717,14 @@ import { EventBaseSchema } from '~/schemas/event.schema'
 
 definePageMeta({
   layout: false,
-  middleware: 'auth',
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
+  
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()

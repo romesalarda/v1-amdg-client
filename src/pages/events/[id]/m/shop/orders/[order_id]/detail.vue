@@ -433,7 +433,12 @@ import { formatDate } from '~/utils/time'
 
 definePageMeta({
   layout: false,
-  middleware: 'auth',
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PRODUCT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()

@@ -297,6 +297,12 @@ import Swal from 'sweetalert2'
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'REGISTRATION',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()

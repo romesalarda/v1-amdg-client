@@ -74,7 +74,12 @@ import StatisticsTab from '~/components/events/shop/dashboard/StatisticsTab.vue'
 
 definePageMeta({
   layout: false,
-  middleware: 'auth',
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PRODUCT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
 
 const route = useRoute()

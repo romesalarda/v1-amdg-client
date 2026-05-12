@@ -259,8 +259,14 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 
 definePageMeta({
   layout: false,
-  middleware: 'auth',
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'CONTENT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  }
 })
+  
 
 const route = useRoute()
 const toast = useToast()
