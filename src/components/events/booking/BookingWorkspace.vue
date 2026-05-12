@@ -154,7 +154,7 @@
                     {{ selectedAttendee?.name || 'This attendee' }} is cancelled.
                   </p>
                   <p class="mt-1 text-xs text-rose-800/90">
-                    Editing and attendee-specific flows are disabled for cancelled attendees.
+                    This attendee's booking was cancelled by the event organiser.
                   </p>
                 </div>
                 <button
@@ -197,7 +197,7 @@
               <TicketsTab :selected-attendee-id="selectedAttendeeId" />
             </article>
 
-            <article v-if="selectedAttendeeId && activeTab === 'payments'" class="p-5 space-y-5">
+            <article v-if="selectedAttendeeId && activeTab === 'payments'">
               <PaymentsTab
                 :selected-attendee="selectedAttendee"
                 :selected-attendee-id="selectedAttendeeId"
@@ -1302,24 +1302,6 @@
               <p v-else class="mt-3 text-sm text-deep-navy/60">No attendees found for this booking.</p>
             </section>
 
-            <!-- <section>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Current editing scope</p>
-              <div class="mt-3 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2">
-                <p v-if="selectedAttendee" class="text-sm font-semibold text-blue-900">
-                  Editing attendee {{ selectedAttendee.name || 'Unnamed attendee' }}
-                </p>
-                <p v-if="selectedAttendee" class="mt-1 text-xs text-blue-800/80">
-                  {{ selectedAttendee.display_id || selectedAttendee.id || selectedAttendeeId }}
-                </p>
-                <p v-else class="text-sm text-blue-900/80">
-                  Editing booking overview. Select an attendee to edit attendee-specific tabs.
-                </p>
-                <p v-if="isSingleAttendeeBooking" class="mt-2 text-[11px] font-black uppercase tracking-wide text-blue-700">
-                  Single attendee is auto-selected and locked.
-                </p>
-              </div>
-            </section> -->
-
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Payment summary</p>
               <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -1353,33 +1335,6 @@
                 </dl>
               </div>
             </section>
-
-            <!-- <section>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Important alerts</p>
-              <div class="mt-3 space-y-2 text-sm">
-                <p v-if="!canManageAllAttendees" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">Limited attendee permissions for this booking.</p>
-                <p v-if="attendees.length > 1" class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-blue-800">This is a group booking with multiple attendees.</p>
-                <p v-if="!outstandingPayments.length" class="rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-green-800">No outstanding payments detected.</p>
-              </div>
-            </section> -->
-
-            <!-- <section>
-              <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Event info</p>
-              <dl class="mt-3 space-y-2 text-sm text-deep-navy/85">
-                <div class="flex justify-between gap-3">
-                  <dt>Status</dt>
-                  <dd class="font-semibold">{{ myBookingData?.event?.status || '-' }}</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                  <dt>Starts</dt>
-                  <dd class="font-semibold text-right">{{ formatDateTime(eventStart) }}</dd>
-                </div>
-                <div class="flex justify-between gap-3">
-                  <dt>Timezone</dt>
-                  <dd class="font-semibold">{{ myBookingData?.event?.timezone || '-' }}</dd>
-                </div>
-              </dl>
-            </section> -->
 
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
@@ -1417,13 +1372,6 @@
                   Clear attendee selection
                 </button>
               </div>
-            </section>
-
-            <section>
-              <!-- <OutstandingPaymentCarouselCard
-                :payments="outstandingPayments"
-                @refresh="refreshOutstandingPayments"
-              /> -->
             </section>
           </article>
         </aside>
@@ -1696,9 +1644,25 @@ const spentSoFarBooking = computed(() => {
 })
 
 const spentSoFarOrders = computed(() => {
-  return (paymentSummaryData.value?.shop_payments || [])
+  const bookingOrders = (paymentSummaryData.value?.shop_payments || [])
     .filter(payment => isCompletedPaymentStatus(payment.status))
     .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
+
+  const bookingCheckoutOrders = bookingLevelPayments.value
+    .filter(payment => (
+      (payment as any)?.related_orders as Array<Record<string, {}>>).reduce(
+        (orderSum, order) => orderSum + ((order as Record<string, {}>).total_amount_value as number), 0)
+      ).reduce((sum, payment) => {
+    const relatedOrders = (payment as any)?.related_orders as Array<Record<string, unknown>> | undefined
+    if (!relatedOrders) return sum
+    const ordersAmount = relatedOrders.reduce((orderSum, order) => {
+      const amount = parseAmountValue(order.total_amount_value)
+      return orderSum + amount
+    }, 0)
+    return sum + ordersAmount
+  }, 0)
+
+  return bookingOrders + bookingCheckoutOrders
 })
 
 const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)
@@ -1973,7 +1937,7 @@ function selectAttendee(attendeeId: string) {
   if (!attendeeId) return
   selectedAttendeeId.value = attendeeId
   const item = attendees.value.find(entry => entry.id === attendeeId) as BookingAttendee | undefined
-  activeTab.value = isAttendeeCancelled(item) ? 'overview' : 'attendee'
+  // activeTab.value = isAttendeeCancelled(item) ? 'overview' : 'attendee'
 }
 
 function clearSelectedAttendee() {

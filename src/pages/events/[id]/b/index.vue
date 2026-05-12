@@ -33,53 +33,63 @@
 				</div>
 			</div>
 		</section>
-
-		<div class="sticky top-14 z-40 border-b border-[#dbe4f0] bg-white/90 backdrop-blur-xl">
-			<div class="mx-auto flex max-w-8xl justify-between gap-4 px-12 py-4 md:px-16">
-				<div class="flex items-center gap-2">
-					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
-						<UIcon name="i-heroicons-calendar-days" class="h-5 w-5" />
-					</span>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Date</p>
-						<p class="font-black text-[#181c20]">{{ eventInfo.dateRange }}</p>
-					</div>
+		<div class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
+		<div class="max-w-6xl mx-auto px-3 py-2">
+			<div class="flex flex-wrap justify-between gap-3">
+			<div class="flex items-center gap-3 px-3 py-4 min-w-0">
+				<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 ">
+				<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+					<span class="material-symbols-outlined" style="font-size:20px">calendar_month</span>
 				</div>
-				<div class="flex items-center gap-2">
-					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
-						<UIcon name="i-heroicons-clock" class="h-5 w-5" />
-					</span>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Event Start Time</p>
-						<p class="font-black text-[#181c20]">{{ eventInfo.startTime }}</p>
-					</div>
 				</div>
-				<div class="flex items-center gap-2">
-					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
-						<UIcon name="i-heroicons-map-pin" class="h-5 w-5" />
-					</span>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Location</p>
-						<p class="font-black text-[#181c20]">{{ eventInfo.location }}</p>
-					</div>
+				<div class="min-w-0">
+				<p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Date</p>
+				<p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ eventInfo.dateRange }}</p>
 				</div>
-				<div class="flex items-center gap-2">
-					<span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#edf3fb] text-[#0b132b]">
-						<UIcon name="i-heroicons-currency-dollar" class="h-5 w-5" />
-					</span>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Cost</p>
-						<p class="font-black text-[#181c20]">{{ eventInfo.cost }}</p>
-					</div>
-				</div>
-				<!-- <div class="hidden items-center justify-between gap-3 lg:flex">
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-[#0b132b]/45">Status</p>
-						<p class="font-black text-[#181c20]">{{ eventInfo.status }}</p>
-					</div>
-					<span class="h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-				</div> -->
 			</div>
+
+			<div class="flex items-center gap-3 px-3 py-4 min-w-0">
+				<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+				<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+					<span class="material-symbols-outlined" style="font-size:20px">schedule</span>
+				</div>
+				</div>
+				<div class="min-w-0">
+				<p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Timing</p>
+				<p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ formatDateTime(eventInfo.startTime) }}</p>
+				<p class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ }}</p>
+				</div>
+			</div>
+
+			<div class="flex items-center gap-3 px-3 py-4 min-w-0">
+				<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+				<div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 bg-blue-100 text-blue-700">
+					<span class="material-symbols-outlined" style="font-size:20px">location_on</span>
+				</div>
+				</div>
+				<div class="min-w-0">
+				<p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Location</p>
+				<p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ eventInfo.location }}</p>
+				<p v-if="primaryVenue?.venue_city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.venue_city }}</p>
+				</div>
+			</div>
+
+			<div class="flex items-center gap-3 px-3 py-4 min-w-0">
+				<div
+				class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+				:class="outstandingPayments.data.value?.items.length ? 'bg-primary/10 text-primary' : 'bg-green-100 text-green-700'"
+				>
+				<span class="material-symbols-outlined" style="font-size:20px">payments</span>
+				</div>
+				<div class="min-w-0">
+				<p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Booking Status</p>
+				<p class="text-body-md font-body-md font-bold" :class="outstandingPayments.data.value?.items.length ? 'text-primary' : 'text-green-700'">
+					{{ outstandingPayments.data.value?.items.length ? `${outstandingPayments.data.value.items.length} payment(s) outstanding` : 'No outstanding payments' }}
+				</p>
+				</div>
+			</div>
+			</div>
+		</div>
 		</div>
 
 		<div class="mx-auto max-w-7xl px-6 py-12 md:px-8">

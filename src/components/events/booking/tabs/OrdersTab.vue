@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <p class="text-sm font-black uppercase tracking-wide text-deep-navy">Orders</p>
+      <p class="text-headline-sm font-headline text-deep-navy">Orders</p>
       <p class="text-xs text-deep-navy/60">{{ props.selectedAttendee?.name || 'Attendee' }}</p>
     </div>
 
@@ -125,7 +125,7 @@
         <article v-for="order in props.attendeeOrderList" :key="order.order_id || order.id" class="rounded-xl border border-deep-navy/10 overflow-hidden">
           <div class="px-4 py-3 bg-gray-50 border-b border-deep-navy/10 flex flex-wrap items-center justify-between gap-3" v-if="order.status !== 'draft'">
             <div>
-              <p class="font-black text-deep-navy text-sm">Order {{ order.order_reference_id || order.order_id }}</p>
+              <p class="mt-1 truncate text-headline-sm font-headline text-deep-navy">{{ order.order_reference_id || order.order_id }}</p>
               <p class="text-xs text-deep-navy/60">{{ formatDateTime(order.created_at) }}</p>
             </div>
             <div class="flex items-center gap-2">
