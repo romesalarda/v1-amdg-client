@@ -337,6 +337,7 @@ import {
   usePaymentRefunds,
   useProcessPaymentRefund,
 } from '~/composables/resources/payments/paymentRefunds'
+import { paymentsRefundsRetrieve } from '~/api/sdk.gen'
 import { useRefundRequests } from '~/composables/statistics/payments/payment-statistics'
 import {
   getRefundStatusLabel,
@@ -353,6 +354,8 @@ interface Props {
 const props = defineProps<Props>()
 
 const toast = useToast()
+const route = useRoute()
+const router = useRouter()
 
 // State
 const currentPage = ref(1)
@@ -371,6 +374,23 @@ const showDetailModal = ref(false)
 const selectedRefund = ref<any>(null)
 const refundForDetails = ref<any>(null)
 const isApproving = ref(true)
+const refundLookupInProgressId = ref<string | null>(null)
+
+const queryRefundId = computed(() => {
+  const rawRefundId = route.query.refund_id
+
+  if (typeof rawRefundId === 'string') {
+    const normalized = rawRefundId.trim()
+    return normalized.length > 0 ? normalized : null
+  }
+
+  if (Array.isArray(rawRefundId) && rawRefundId.length > 0) {
+    const first = String(rawRefundId[0] || '').trim()
+    return first.length > 0 ? first : null
+  }
+
+  return null
+})
 
 // Query params
 const queryParams = computed(() => {
@@ -501,11 +521,13 @@ async function processRefund(refund: any) {
 function viewRefundDetails(refund: any) {
   refundForDetails.value = refund
   showDetailModal.value = true
+  void syncRefundIdQuery(String(refund?.refund_id || ''))
 }
 
 function closeDetailModal() {
   showDetailModal.value = false
   refundForDetails.value = null
+  void syncRefundIdQuery(null)
 }
 
 function viewPayment(payment: any) {
@@ -533,8 +555,78 @@ function formatDate(dateString: string): string {
   }).format(date)
 }
 
+function getResponseData<T>(response: unknown): T | null {
+  if (response && typeof response === 'object' && 'data' in (response as Record<string, unknown>)) {
+    return ((response as Record<string, unknown>).data as T) ?? null
+  }
+  return (response as T) ?? null
+}
+
+async function syncRefundIdQuery(refundId: string | null) {
+  const normalizedRefundId = refundId ? refundId.trim() : ''
+  const nextQuery = { ...route.query }
+
+  if (normalizedRefundId) {
+    nextQuery.refund_id = normalizedRefundId
+  } else {
+    delete nextQuery.refund_id
+  }
+
+  await router.replace({ query: nextQuery })
+}
+
+async function openRefundFromQuery(refundId: string) {
+  const normalizedRefundId = refundId.trim()
+  if (!normalizedRefundId) return
+
+  if (
+    showDetailModal.value
+    && String(refundForDetails.value?.refund_id || '').trim() === normalizedRefundId
+  ) {
+    return
+  }
+
+  const existingRefund = refunds.value.find(
+    (item: any) => String(item?.refund_id || '').trim() === normalizedRefundId
+  )
+
+  if (existingRefund) {
+    refundForDetails.value = existingRefund
+    showDetailModal.value = true
+    return
+  }
+
+  if (refundLookupInProgressId.value === normalizedRefundId) return
+
+  refundLookupInProgressId.value = normalizedRefundId
+  try {
+    const response = await paymentsRefundsRetrieve({ path: { refund_id: normalizedRefundId } })
+    const payload = getResponseData<any>(response)
+    if (!payload) {
+      await syncRefundIdQuery(null)
+      return
+    }
+
+    refundForDetails.value = payload
+    showDetailModal.value = true
+  } catch {
+    await syncRefundIdQuery(null)
+  } finally {
+    refundLookupInProgressId.value = null
+  }
+}
+
 // Watch page size changes
 watch(pageSize, () => {
   currentPage.value = 1
 })
+
+watch(
+  queryRefundId,
+  (refundId) => {
+    if (!refundId) return
+    void openRefundFromQuery(refundId)
+  },
+  { immediate: true }
+)
 </script>

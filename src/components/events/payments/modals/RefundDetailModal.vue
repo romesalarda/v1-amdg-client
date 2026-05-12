@@ -189,7 +189,7 @@
                   <div
                     v-else-if="isAssociatedOrder(assoc) && relatedOrder"
                     class="rounded-xl border border-slate-200 bg-white p-4 hover:bg-blue-50 cursor-pointer transition-colors"
-                    @click="navigateTo(`/events/${eventIdFromRoute}/m/shop/orders/${relatedOrder.order_id}`)"
+                    @click="navigateTo(`/events/${eventIdFromRoute}/m/shop/orders/${relatedOrder.order_id}/detail`)"
                   >
                     <div class="flex items-center justify-between gap-3">
                       <div>
@@ -494,10 +494,8 @@ const attendeeDetails = computed(() => {
   if (!attendee) return []
 
   return [
-    { label: 'Attendee ID', value: attendee.attendee_display_id || attendee.attendee_id || 'N/A' },
     { label: 'Full Name', value: attendee.full_name || 'N/A' },
-    { label: 'Email', value: attendee.email || 'N/A' },
-    { label: 'Phone', value: attendee.phone_number || 'N/A' },
+    attendee.email ? { label: 'Email', value: attendee.email || 'N/A' } : { label: 'Phone', value: attendee.phone_number || 'N/A' },
   ]
 })
 
