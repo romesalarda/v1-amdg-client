@@ -1,92 +1,274 @@
 <template>
   <EventManagementLayout :event-id="id" :event="event?.data">
     <div class="space-y-6">
-      <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-6">
-        <div class="flex items-center gap-3 flex-wrap">
-          <NuxtLink
-            :to="`/events/${id}/m/venue`"
-            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-deep-navy/15 text-xs font-semibold text-navy-600 hover:bg-mist-blue/60"
-          >
-            <span class="material-symbols-outlined text-sm">arrow_back</span>
-            Back to Venues
-          </NuxtLink>
 
-          <div class="flex-1 min-w-0">
-            <h1 class="text-lg font-black text-deep-navy">{{ eventVenue?.data?.venue_name || 'Venue Details' }}</h1>
-            <p class="text-sm text-navy-600 mt-1">{{ eventVenue?.data?.venue_address || 'No address available' }}</p>
-            <p class="text-xs text-navy-400">{{ eventVenue?.data?.venue_city || 'No city' }}</p>
+      <!-- ── Header ──────────────────────────────────────────────────── -->
+      <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+        <div class="p-6">
+          <div class="flex items-start gap-4 flex-wrap">
+            <NuxtLink
+              :to="`/events/${id}/m/venue`"
+              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-deep-navy/15 text-xs font-semibold text-navy-600 hover:bg-mist-blue/60 shrink-0"
+            >
+              <span class="material-symbols-outlined text-sm">arrow_back</span>
+              Back to Venues
+            </NuxtLink>
+
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap mb-1">
+                <h1 class="text-xl font-black text-deep-navy">{{ eventVenue?.data?.venue_name || 'Venue Details' }}</h1>
+                <span v-if="poiType" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary">
+                  <span class="material-symbols-outlined text-xs">{{ poiType === 'SPORTS_VENUE' ? 'sports' : 'location_city' }}</span>
+                  {{ poiType === 'SPORTS_VENUE' ? 'Sports Venue' : 'Venue' }}
+                </span>
+              </div>
+              <div class="flex items-center gap-4 flex-wrap text-sm text-navy-500">
+                <span v-if="eventVenue?.data?.venue_address" class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-base text-navy-400">location_on</span>
+                  {{ eventVenue.data.venue_address }}
+                </span>
+                <span v-if="eventVenue?.data?.venue_city" class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-base text-navy-400">apartment</span>
+                  {{ eventVenue.data.venue_city }}
+                </span>
+                <span v-if="locationVenue?.data?.poi_details.postcode" class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-base text-navy-400">markunread_mailbox</span>
+                  {{ locationVenue?.data?.poi_details?.postcode }}
+                </span>
+                <span v-if="venueTotalCapacity" class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-base text-navy-400">groups</span>
+                  Capacity: {{ venueTotalCapacity }}
+                </span>
+              </div>
+            </div>
+
+            <a
+              v-if="directionsUrl"
+              :href="directionsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 shrink-0"
+            >
+              <span class="material-symbols-outlined text-sm">directions</span>
+              Get Directions
+            </a>
           </div>
         </div>
       </section>
 
-      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        <article class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-4 border-b border-navy-50 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">meeting_room</span>
-            <h2 class="text-xs font-black text-primary uppercase tracking-widest">Rooms</h2>
-          </div>
-          <div class="p-5 space-y-3">
-            <form class="space-y-2" @submit.prevent="createRoom">
-              <input v-model="roomForm.room_name" required type="text" placeholder="Room name" class="input" />
-              <input v-model="roomForm.capacity" min="0" type="number" placeholder="Capacity" class="input" />
-              <textarea v-model="roomForm.description" rows="2" placeholder="Description" class="input resize-none" />
-              <button :disabled="!canUpdate" class="btn-primary disabled:opacity-40">Add Room</button>
-            </form>
+      <!-- ── Map + Venue Info ────────────────────────────────────────── -->
+      <section class="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
+        <!-- Map -->
+        <div class="lg:col-span-3 bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-5 py-4 border-b border-navy-50 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">map</span>
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Location Map</h2>
+            </div>
+            <a
+              v-if="directionsUrl"
+              :href="directionsUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-xs text-primary font-semibold hover:underline flex items-center gap-0.5"
+            >
+              Open in Maps
+              <span class="material-symbols-outlined text-xs">open_in_new</span>
+            </a>
+          </div>
+          <div class="relative">
+            <iframe
+              v-if="mapSrc"
+              :src="mapSrc"
+              class="w-full h-72 lg:h-96 border-0"
+              allowfullscreen
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              title="Venue location map"
+            />
+            <div v-else class="h-72 lg:h-96 flex flex-col items-center justify-center bg-mist-blue/30 text-navy-400 gap-2">
+              <span class="material-symbols-outlined text-4xl text-navy-300">map</span>
+              <p class="text-sm font-medium">No location data available</p>
+              <p class="text-xs text-navy-300">Add an address or coordinates to see the map</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Venue Details -->
+        <div class="lg:col-span-2 bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden flex flex-col">
+          <div class="px-5 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">info</span>
+            <h2 class="text-xs font-black text-primary uppercase tracking-widest">Venue Info</h2>
+          </div>
+          <div class="p-5 space-y-4 flex-1">
+            <!-- Address block -->
+            <div v-if="eventVenue?.data?.venue_address" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">location_on</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Address</p>
+                <p class="text-sm text-navy-900">{{ eventVenue.data.venue_address }}</p>
+                <p v-if="eventVenue?.data?.venue_city" class="text-xs text-navy-500">{{ eventVenue.data.venue_city }}</p>
+                <p v-if="locationVenue?.data?.poi_details?.postcode" class="text-xs text-navy-500">{{ locationVenue.data.poi_details.postcode }}</p>
+              </div>
+            </div>
+
+            <!-- Coordinates -->
+            <div v-if="hasCoordinates" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">my_location</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Coordinates</p>
+                <p class="text-xs text-navy-600 font-mono">
+                  {{ locationVenue?.data?.poi_details?.latitude }}, {{ locationVenue?.data?.poi_details?.longitude }}
+                </p>
+              </div>
+            </div>
+
+            <!-- Capacity -->
+            <div v-if="venueTotalCapacity" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">groups</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Total Capacity</p>
+                <p class="text-sm text-navy-900">{{ venueTotalCapacity }} people</p>
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div v-if="locationVenue?.data?.description" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">notes</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Description</p>
+                <p class="text-sm text-navy-700 leading-relaxed">{{ locationVenue.data.description }}</p>
+              </div>
+            </div>
+
+            <!-- Instructions -->
+            <div v-if="locationVenue?.data?.instructions" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">list_alt</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Access Instructions</p>
+                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ locationVenue.data.instructions }}</p>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div v-if="locationVenue?.data?.notes" class="flex gap-3">
+              <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">sticky_note_2</span>
+              <div>
+                <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Notes</p>
+                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ locationVenue.data.notes }}</p>
+              </div>
+            </div>
+
+            <p v-if="!eventVenue?.data?.venue_address && !locationVenue?.data?.description && !locationVenue?.data?.instructions && !locationVenue?.data?.notes" class="text-sm text-navy-400 italic">
+              No additional venue details available.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Management Cards ────────────────────────────────────────── -->
+      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- Rooms -->
+        <article class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-5 py-4 border-b border-navy-50 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">meeting_room</span>
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Rooms</h2>
+            </div>
+            <span v-if="rooms.length" class="text-xs font-bold text-navy-400 bg-navy-50 rounded-full px-2 py-0.5">{{ rooms.length }}</span>
+          </div>
+          <div class="p-5 space-y-4">
+            <!-- Add room form -->
+            <details v-if="canUpdate" class="group">
+              <summary class="flex items-center gap-2 cursor-pointer text-xs font-black text-primary uppercase tracking-widest list-none select-none">
+                <span class="material-symbols-outlined text-base transition-transform group-open:rotate-45">add_circle</span>
+                Add New Room
+              </summary>
+              <form class="mt-3 space-y-2 pl-1" @submit.prevent="createRoom">
+                <input v-model="roomForm.room_name" required type="text" placeholder="Room name" class="input" />
+                <input v-model="roomForm.capacity" min="0" type="number" placeholder="Capacity (optional)" class="input" />
+                <textarea v-model="roomForm.description" rows="2" placeholder="Description (optional)" class="input resize-none" />
+                <button class="btn-primary w-full">Add Room</button>
+              </form>
+            </details>
+
+            <!-- Room list -->
             <div v-if="rooms.length" class="space-y-2">
-              <div v-for="room in rooms" :key="room.id" class="rounded-xl border border-deep-navy/10 p-3">
+              <div v-for="room in rooms" :key="room.id" class="rounded-xl border border-deep-navy/10 bg-mist-blue/20 p-3">
                 <div v-if="editingRoomId === room.id" class="space-y-2">
                   <input v-model="roomEdit.room_name" type="text" class="input" />
                   <input v-model="roomEdit.capacity" min="0" type="number" class="input" />
                   <textarea v-model="roomEdit.description" rows="2" class="input resize-none" />
                   <div class="flex gap-2">
-                    <button type="button" class="btn-primary" @click="saveRoom(room.id)">Save</button>
-                    <button type="button" class="btn-secondary" @click="editingRoomId = null">Cancel</button>
+                    <button type="button" class="btn-primary flex-1" @click="saveRoom(room.id)">Save</button>
+                    <button type="button" class="btn-secondary flex-1" @click="editingRoomId = null">Cancel</button>
                   </div>
                 </div>
                 <div v-else class="flex items-start justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-semibold text-navy-900">{{ room.room_name }}</p>
-                    <p class="text-xs text-navy-500">Capacity: {{ room.capacity ?? 'N/A' }}</p>
-                    <p class="text-xs text-navy-400">{{ room.description || 'No description' }}</p>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <p class="text-sm font-semibold text-navy-900">{{ room.room_name }}</p>
+                      <span v-if="room.capacity" class="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                        {{ room.capacity }} cap
+                      </span>
+                    </div>
+                    <p v-if="room.description" class="text-xs text-navy-500 mt-0.5 leading-snug">{{ room.description }}</p>
                   </div>
-                  <div class="flex items-center gap-1">
+                  <div class="flex items-center gap-1 shrink-0">
                     <button type="button" :disabled="!canUpdate" class="icon-btn" @click="startRoomEdit(room)">
                       <span class="material-symbols-outlined text-base">edit</span>
                     </button>
-                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-600" @click="removeRoom(room.id)">
+                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-500" @click="removeRoom(room.id)">
                       <span class="material-symbols-outlined text-base">delete</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <p v-else class="text-sm text-navy-500">No rooms yet.</p>
+            <div v-else class="flex flex-col items-center justify-center py-6 text-center text-navy-400">
+              <span class="material-symbols-outlined text-3xl mb-1 text-navy-300">meeting_room</span>
+              <p class="text-sm font-medium">No rooms defined yet</p>
+              <p class="text-xs text-navy-300">Use the form above to add rooms</p>
+            </div>
           </div>
         </article>
 
+        <!-- Contacts -->
         <article class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-4 border-b border-navy-50 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">contact_phone</span>
-            <h2 class="text-xs font-black text-primary uppercase tracking-widest">Contacts</h2>
+          <div class="px-5 py-4 border-b border-navy-50 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">contact_phone</span>
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Contacts</h2>
+            </div>
+            <span v-if="contacts.length" class="text-xs font-bold text-navy-400 bg-navy-50 rounded-full px-2 py-0.5">{{ contacts.length }}</span>
           </div>
-          <div class="p-5 space-y-3">
-            <form class="space-y-2" @submit.prevent="createContact">
-              <input v-model="contactForm.contact_name" required type="text" placeholder="Contact name" class="input" />
-              <input v-model="contactForm.phone_number" type="text" placeholder="Phone" class="input" />
-              <input v-model="contactForm.email" type="email" placeholder="Email" class="input" />
-              <select v-model="contactForm.role" class="input">
-                <option value="OWNER">Owner</option>
-                <option value="MANAGER">Manager</option>
-                <option value="COORDINATOR">Coordinator</option>
-                <option value="SUPPORT">Support</option>
-                <option value="OTHER">Other</option>
-              </select>
-              <button :disabled="!canUpdate" class="btn-primary disabled:opacity-40">Add Contact</button>
-            </form>
+          <div class="p-5 space-y-4">
+            <!-- Add contact form -->
+            <details v-if="canUpdate" class="group">
+              <summary class="flex items-center gap-2 cursor-pointer text-xs font-black text-primary uppercase tracking-widest list-none select-none">
+                <span class="material-symbols-outlined text-base transition-transform group-open:rotate-45">add_circle</span>
+                Add New Contact
+              </summary>
+              <form class="mt-3 space-y-2 pl-1" @submit.prevent="createContact">
+                <input v-model="contactForm.contact_name" required type="text" placeholder="Full name" class="input" />
+                <input v-model="contactForm.phone_number" type="text" placeholder="Phone number" class="input" />
+                <input v-model="contactForm.email" type="email" placeholder="Email address" class="input" />
+                <select v-model="contactForm.role" class="input">
+                  <option value="OWNER">Owner</option>
+                  <option value="MANAGER">Manager</option>
+                  <option value="COORDINATOR">Coordinator</option>
+                  <option value="SUPPORT">Support</option>
+                  <option value="OTHER">Other</option>
+                </select>
+                <button class="btn-primary w-full">Add Contact</button>
+              </form>
+            </details>
 
+            <!-- Contact list -->
             <div v-if="contacts.length" class="space-y-2">
-              <div v-for="contact in contacts" :key="contact.id" class="rounded-xl border border-deep-navy/10 p-3">
+              <div v-for="contact in contacts" :key="contact.id" class="rounded-xl border border-deep-navy/10 bg-mist-blue/20 p-3">
                 <div v-if="editingContactId === contact.id" class="space-y-2">
                   <input v-model="contactEdit.contact_name" type="text" class="input" />
                   <input v-model="contactEdit.phone_number" type="text" class="input" />
@@ -99,70 +281,112 @@
                     <option value="OTHER">Other</option>
                   </select>
                   <div class="flex gap-2">
-                    <button type="button" class="btn-primary" @click="saveContact(contact.id)">Save</button>
-                    <button type="button" class="btn-secondary" @click="editingContactId = null">Cancel</button>
+                    <button type="button" class="btn-primary flex-1" @click="saveContact(contact.id)">Save</button>
+                    <button type="button" class="btn-secondary flex-1" @click="editingContactId = null">Cancel</button>
                   </div>
                 </div>
                 <div v-else class="flex items-start justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-semibold text-navy-900">{{ contact.contact_name }}</p>
-                    <p class="text-xs text-navy-500">{{ contact.role || 'OWNER' }}</p>
-                    <p class="text-xs text-navy-400">{{ contact.phone_number || 'No phone' }} | {{ contact.email || 'No email' }}</p>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center gap-2 flex-wrap mb-1">
+                      <p class="text-sm font-semibold text-navy-900">{{ contact.contact_name }}</p>
+                      <span :class="roleClass(contact.role)" class="text-[10px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full">
+                        {{ contact.role || 'OWNER' }}
+                      </span>
+                    </div>
+                    <a
+                      v-if="contact.phone_number"
+                      :href="`tel:${contact.phone_number}`"
+                      class="flex items-center gap-1 text-xs text-navy-500 hover:text-primary"
+                    >
+                      <span class="material-symbols-outlined text-sm">call</span>
+                      {{ contact.phone_number }}
+                    </a>
+                    <a
+                      v-if="contact.email"
+                      :href="`mailto:${contact.email}`"
+                      class="flex items-center gap-1 text-xs text-navy-500 hover:text-primary"
+                    >
+                      <span class="material-symbols-outlined text-sm">mail</span>
+                      {{ contact.email }}
+                    </a>
                   </div>
-                  <div class="flex items-center gap-1">
+                  <div class="flex items-center gap-1 shrink-0">
                     <button type="button" :disabled="!canUpdate" class="icon-btn" @click="startContactEdit(contact)">
                       <span class="material-symbols-outlined text-base">edit</span>
                     </button>
-                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-600" @click="removeContact(contact.id)">
+                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-500" @click="removeContact(contact.id)">
                       <span class="material-symbols-outlined text-base">delete</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <p v-else class="text-sm text-navy-500">No contacts yet.</p>
+            <div v-else class="flex flex-col items-center justify-center py-6 text-center text-navy-400">
+              <span class="material-symbols-outlined text-3xl mb-1 text-navy-300">contact_phone</span>
+              <p class="text-sm font-medium">No contacts added yet</p>
+              <p class="text-xs text-navy-300">Use the form above to add contacts</p>
+            </div>
           </div>
         </article>
 
+        <!-- Metadata -->
         <article class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-5 py-4 border-b border-navy-50 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">label</span>
-            <h2 class="text-xs font-black text-primary uppercase tracking-widest">Metadata</h2>
+          <div class="px-5 py-4 border-b border-navy-50 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary">label</span>
+              <h2 class="text-xs font-black text-primary uppercase tracking-widest">Metadata</h2>
+            </div>
+            <span v-if="metadataItems.length" class="text-xs font-bold text-navy-400 bg-navy-50 rounded-full px-2 py-0.5">{{ metadataItems.length }}</span>
           </div>
-          <div class="p-5 space-y-3">
-            <form class="space-y-2" @submit.prevent="createMetadata">
-              <input v-model="metadataForm.label" required type="text" placeholder="Label" class="input" />
-              <textarea v-model="metadataForm.value" rows="2" placeholder="Value" class="input resize-none" />
-              <button :disabled="!canUpdate" class="btn-primary disabled:opacity-40">Add Metadata</button>
-            </form>
+          <div class="p-5 space-y-4">
+            <!-- Add metadata form -->
+            <details v-if="canUpdate" class="group">
+              <summary class="flex items-center gap-2 cursor-pointer text-xs font-black text-primary uppercase tracking-widest list-none select-none">
+                <span class="material-symbols-outlined text-base transition-transform group-open:rotate-45">add_circle</span>
+                Add New Entry
+              </summary>
+              <form class="mt-3 space-y-2 pl-1" @submit.prevent="createMetadata">
+                <input v-model="metadataForm.label" required type="text" placeholder="Label (e.g. WiFi Password)" class="input" />
+                <textarea v-model="metadataForm.value" rows="2" placeholder="Value" class="input resize-none" />
+                <button class="btn-primary w-full">Add Entry</button>
+              </form>
+            </details>
 
+            <!-- Metadata list -->
             <div v-if="metadataItems.length" class="space-y-2">
-              <div v-for="item in metadataItems" :key="item.id" class="rounded-xl border border-deep-navy/10 p-3">
-                <div v-if="editingMetadataId === item.id" class="space-y-2">
+              <div v-for="item in metadataItems" :key="item.id" class="rounded-xl border border-deep-navy/10 overflow-hidden">
+                <div v-if="editingMetadataId === item.id" class="p-3 space-y-2 bg-mist-blue/20">
                   <input v-model="metadataEdit.label" type="text" class="input" />
                   <textarea v-model="metadataEdit.value" rows="2" class="input resize-none" />
                   <div class="flex gap-2">
-                    <button type="button" class="btn-primary" @click="saveMetadata(item.id)">Save</button>
-                    <button type="button" class="btn-secondary" @click="editingMetadataId = null">Cancel</button>
+                    <button type="button" class="btn-primary flex-1" @click="saveMetadata(item.id)">Save</button>
+                    <button type="button" class="btn-secondary flex-1" @click="editingMetadataId = null">Cancel</button>
                   </div>
                 </div>
-                <div v-else class="flex items-start justify-between gap-2">
-                  <div>
-                    <p class="text-sm font-semibold text-navy-900">{{ item.label }}</p>
-                    <p class="text-xs text-navy-400">{{ item.value || 'No value' }}</p>
+                <div v-else class="flex items-stretch">
+                  <div class="bg-mist-blue/40 px-3 py-2.5 flex items-start justify-center min-w-[2.5rem]">
+                    <span class="material-symbols-outlined text-sm text-navy-400">label</span>
                   </div>
-                  <div class="flex items-center gap-1">
+                  <div class="flex-1 px-3 py-2 min-w-0">
+                    <p class="text-[10px] font-black text-navy-400 uppercase tracking-wider">{{ item.label }}</p>
+                    <p class="text-sm text-navy-800 mt-0.5 break-words">{{ item.value || '—' }}</p>
+                  </div>
+                  <div class="flex items-center gap-0.5 px-2">
                     <button type="button" :disabled="!canUpdate" class="icon-btn" @click="startMetadataEdit(item)">
                       <span class="material-symbols-outlined text-base">edit</span>
                     </button>
-                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-600" @click="removeMetadata(item.id)">
+                    <button type="button" :disabled="!canDelete" class="icon-btn text-red-500" @click="removeMetadata(item.id)">
                       <span class="material-symbols-outlined text-base">delete</span>
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <p v-else class="text-sm text-navy-500">No metadata yet.</p>
+            <div v-else class="flex flex-col items-center justify-center py-6 text-center text-navy-400">
+              <span class="material-symbols-outlined text-3xl mb-1 text-navy-300">label</span>
+              <p class="text-sm font-medium">No metadata entries yet</p>
+              <p class="text-xs text-navy-300">Store extra info like WiFi passwords, parking notes, etc.</p>
+            </div>
           </div>
         </article>
       </section>
@@ -215,6 +439,52 @@ const eventVenueId = computed(() => String(route.params.eventVenueId))
 const { can } = useCurrentUserEventPermissions(id)
 const canUpdate = computed(() => can('REGISTRATION', 'update').value.allowed)
 const canDelete = computed(() => can('REGISTRATION', 'delete').value.allowed)
+
+// ── Map & venue display helpers ────────────────────────────────────────────
+const poiType = computed(() => locationVenue.value?.data?.poi_type as string | undefined)
+const venueTotalCapacity = computed(() => locationVenue.value?.data?.capacity as number | undefined)
+const hasCoordinates = computed(() => {
+  const lat = (locationVenue.value?.data as any)?.poi_details?.latitude
+  const lon = (locationVenue.value?.data as any)?.poi_details?.longitude
+  return lat != null && lon != null
+})
+
+const mapSrc = computed(() => {
+  const poi = (locationVenue.value?.data as any)?.poi_details
+  const lat = poi?.latitude
+  const lon = poi?.longitude
+  const addr = eventVenue.value?.data?.venue_address || poi?.address
+  if (lat != null && lon != null) {
+    return `https://maps.google.com/maps?q=${lat},${lon}&output=embed&iwloc=&z=15`
+  }
+  if (addr) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(addr)}&output=embed&iwloc=&z=15`
+  }
+  return null
+})
+
+const directionsUrl = computed(() => {
+  const poi = (locationVenue.value?.data as any)?.poi_details
+  const lat = poi?.latitude
+  const lon = poi?.longitude
+  const addr = eventVenue.value?.data?.venue_address || poi?.address
+  if (lat != null && lon != null) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`
+  }
+  if (addr) {
+    return `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`
+  }
+  return null
+})
+
+const ROLE_CLASSES: Record<string, string> = {
+  OWNER: 'bg-purple-100 text-purple-700',
+  MANAGER: 'bg-blue-100 text-blue-700',
+  COORDINATOR: 'bg-teal-100 text-teal-700',
+  SUPPORT: 'bg-amber-100 text-amber-700',
+  OTHER: 'bg-navy-100 text-navy-600',
+}
+const roleClass = (role: string) => ROLE_CLASSES[role] || ROLE_CLASSES.OTHER
 
 const { data: event } = useEvent(id)
 const { data: eventVenue } = useEventVenue(eventVenueId)

@@ -22,6 +22,26 @@
             </button>
           </div>
 
+          <!-- Search bar -->
+          <div class="mb-4">
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base text-navy-400">search</span>
+              <input
+                v-model="staffSearch"
+                type="text"
+                placeholder="Search staff by name or email…"
+                class="w-full pl-9 pr-9 py-2.5 bg-mist-blue/40 border border-deep-navy/10 focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 placeholder:text-navy-400 transition-all"
+              />
+              <button
+                v-if="staffSearch"
+                @click="staffSearch = ''"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-navy-700 transition-colors"
+              >
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+
           <div v-if="staffLoading" class="space-y-3">
             <div v-for="i in 3" :key="i" class="h-20 bg-mist-blue/60 rounded-xl animate-pulse" />
           </div>
@@ -44,6 +64,12 @@
             />
           </div>
 
+          <!-- No search results -->
+          <div v-else-if="staffSearchDebounced && !staffList.length" class="text-center py-8 text-navy-500">
+            <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">search_off</span>
+            <p class="text-sm">No staff found for <strong>"{{ staffSearchDebounced }}"</strong></p>
+          </div>
+
           <div v-else class="text-center py-12 text-navy-500">
             <span class="material-symbols-outlined text-5xl text-navy-200 mb-4 block">groups</span>
             <p class="text-sm mb-4">No staff members yet</p>
@@ -54,6 +80,40 @@
               <span class="material-symbols-outlined text-sm">mail</span>
               Send First Invite
             </button>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="staffTotalPages > 1" class="mt-4 flex items-center justify-between gap-2">
+            <p class="text-xs text-navy-400">
+              Showing {{ (staffPage - 1) * staffPageSize + 1 }}–{{ Math.min(staffPage * staffPageSize, staffTotal) }} of {{ staffTotal }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button
+                @click="staffPage--"
+                :disabled="staffPage === 1"
+                class="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-mist-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Previous page"
+              >
+                <span class="material-symbols-outlined text-base">chevron_left</span>
+              </button>
+              <button
+                v-for="p in staffTotalPages"
+                :key="p"
+                @click="staffPage = p"
+                class="min-w-[28px] h-7 rounded-lg text-xs font-bold transition-colors"
+                :class="p === staffPage ? 'bg-primary text-white' : 'text-navy-500 hover:bg-mist-blue'"
+              >
+                {{ p }}
+              </button>
+              <button
+                @click="staffPage++"
+                :disabled="staffPage === staffTotalPages"
+                class="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-mist-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Next page"
+              >
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+              </button>
+            </div>
           </div>
         </section>
       </div>
@@ -70,7 +130,7 @@
           </div>
           <div class="p-6 grid grid-cols-2 gap-4">
             <div class="text-center">
-              <div class="text-3xl font-black text-navy-900">{{ staffList.length }}</div>
+              <div class="text-3xl font-black text-navy-900">{{ staffTotal }}</div>
               <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Total Staff</div>
             </div>
             <div class="text-center">
@@ -159,11 +219,33 @@ const canDeleteStaff = computed(() => can('STAFF_MANAGEMENT', 'delete').value.al
 const { data: event } = useEvent(id)
 
 // Fetch staff and roles
-const eventIdFilter = { event: route.params.id as string }
-const { data: staffData, isLoading: staffLoading, refetch: refetchStaff } = useEventStaff(eventIdFilter)
+const staffSearch = ref('')
+const staffSearchDebounced = ref('')
+let staffSearchTimer: ReturnType<typeof setTimeout> | null = null
+const staffPage = ref(1)
+const staffPageSize = 10
+
+watch(staffSearch, (val) => {
+  if (staffSearchTimer) clearTimeout(staffSearchTimer)
+  staffSearchTimer = setTimeout(() => {
+    staffSearchDebounced.value = val
+    staffPage.value = 1
+  }, 300)
+})
+
+const staffParams = computed(() => ({
+  event: route.params.id as string,
+  search: staffSearchDebounced.value || undefined,
+  page: staffPage.value,
+  page_size: staffPageSize,
+}))
+
+const { data: staffData, isLoading: staffLoading, refetch: refetchStaff } = useEventStaff(staffParams)
 const { data: rolesData, isLoading: rolesLoading, refetch: refetchRoles } = useEventRoles()
 
 const staffList = computed(() => staffData.value?.data?.results || [])
+const staffTotal = computed(() => staffData.value?.data?.count ?? 0)
+const staffTotalPages = computed(() => Math.ceil(staffTotal.value / staffPageSize))
 const rolesList = computed(() => rolesData.value?.data?.results || [])
 
 // Fetch permissions

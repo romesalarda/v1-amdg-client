@@ -214,10 +214,10 @@ const tabs = computed(() => [
     disabled: props.event?.external_event,
   },
   {
-    path: 'sponsors',
-    label: 'Sponsors',
-    icon: 'i-heroicons-building-office-2',
-    disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
+    path: 'participants/dashboard',
+    label: 'Participants',
+    icon: 'i-heroicons-users',
+    disabled: props.event?.external_event,
   },
   {
     path: 'registration',
@@ -232,26 +232,26 @@ const tabs = computed(() => [
     disabled: props.event?.external_event,
   },
   {
-    path: 'resources',
-    label: 'Resources',
-    icon: 'i-heroicons-document-text',
-  },
-  {
     path: 'venue',
     label: 'Venues',
     icon: 'i-heroicons-map-pin',
   },
-  {
-    path: 'participants/dashboard',
-    label: 'Participants',
-    icon: 'i-heroicons-users',
-    disabled: props.event?.external_event,
+    {
+    path: 'resources',
+    label: 'Resources',
+    icon: 'i-heroicons-document-text',
   },
   {
     label: 'Shop',
     path: 'shop/dashboard',
     icon: 'i-heroicons-shopping-bag',
     disabled: !eventSettings.value?.product_selling_enabled || props.event?.external_event,
+  },
+  {
+    path: 'sponsors',
+    label: 'Sponsors',
+    icon: 'i-heroicons-building-office-2',
+    disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
   },
 ])
 
