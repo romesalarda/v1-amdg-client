@@ -44,10 +44,10 @@
 
 								<div class="flex-1 min-w-0">
 									<div class="flex items-center gap-2 flex-wrap">
-										<h3 class="text-sm font-black text-navy-900">{{ entry.venue_name }}</h3>
+										<h3 class="text-sm font-black text-navy-900">{{ entry.name }}</h3>
 									</div>
-									<p class="text-sm text-navy-600 mt-1">{{ entry.venue_address || 'No address available' }}</p>
-									<p class="text-xs text-navy-400 mt-1">{{ entry.venue_city || 'No city' }}</p>
+									<p class="text-sm text-navy-600 mt-1">{{ entry.address || 'No address available' }}</p>
+									<p class="text-xs text-navy-400 mt-1">{{ entry.city || 'No city' }}</p>
 									
 								</div>
 
@@ -67,9 +67,9 @@
 									</button>
 								</div>
 							</div>
-							 <div v-if="entry.venue_address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10 mt-4 rounded-lg overflow-hidden flex items-center justify-center">
-								<iframe
-								:src="`https://maps.google.com/maps?q=${encodeURIComponent(entry.venue_address + ' ' + (entry.venue_city || ''))}&output=embed`"
+								 <div v-if="entry.address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10 mt-4 rounded-lg overflow-hidden flex items-center justify-center">
+									<iframe
+									:src="`https://maps.google.com/maps?q=${encodeURIComponent(entry.address + ' ' + (entry.city || ''))}&output=embed`"
 								class="w-full h-full border-0"
 								loading="lazy"
 								referrerpolicy="no-referrer-when-downgrade"
@@ -180,7 +180,7 @@ const showVenueWizard = ref(false)
 const eventVenueQuery = computed(() => ({
 	event_id: id.value,
 	search: linkedSearch.value || undefined,
-	ordering: 'venue__poi__name',
+	ordering: 'name',
 	page_size: 100,
 }))
 
@@ -197,7 +197,7 @@ const eventVenueList = computed(() => extractResults<any>(eventVenuesResponse.va
 const locationVenueList = computed(() => extractResults<any>(locationVenuesResponse.value))
 
 const linkedVenueIds = computed(() => {
-	return new Set(eventVenueList.value.map(item => item.venue))
+	return new Set(eventVenueList.value.map(item => item.source_venue_id).filter(Boolean))
 })
 
 const availableVenueOptions = computed(() => {
@@ -226,7 +226,7 @@ const handleVenueSelection = async (venueId: number) => {
 	try {
 		await createEventVenue.mutateAsync({
 			event: event.value?.data?.event_id,
-			venue: venueId,
+			source_venue_id: venueId,
 		})
 
 		showVenueWizard.value = false

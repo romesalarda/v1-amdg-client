@@ -70,7 +70,7 @@
 				<div class="min-w-0">
 				<p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Location</p>
 				<p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ eventInfo.location }}</p>
-				<p v-if="primaryVenue?.venue_city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.venue_city }}</p>
+				<p v-if="primaryVenue?.city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.city }}</p>
 				</div>
 			</div>
 
@@ -456,7 +456,7 @@ const eventInfo = computed(() => {
 	const timezone = eventRecord?.timezone
 
 	return {
-		location: primaryVenue.value?.venue_name || eventRecord?.organisation_name || 'TBA',
+		location: primaryVenue.value?.name || eventRecord?.organisation_name || 'TBA',
 		dateRange: formatEventDateRange(startDateTime, endDateTime),
 		startTime: startDateTime ? formatTime(startDateTime, timezone) : 'TBA',
 		cost: eventRecord?.general_price || 'TBA',

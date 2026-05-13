@@ -516,7 +516,7 @@ const reminderTime = computed(() => {
 	return `${start} - ${formatTime(event.value.end_datetime, event.value?.timezone)}`
 })
 const reminderLocation = computed(() => {
-	if (primaryVenue.value?.venue_name) return primaryVenue.value.venue_name
+	if (primaryVenue.value?.name) return primaryVenue.value.name
 	if (event.value?.organisation_name) return event.value.organisation_name
 	return 'Location TBA'
 })

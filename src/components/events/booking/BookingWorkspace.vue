@@ -89,7 +89,7 @@
             <div class="min-w-0">
               <p class="text-label-bold font-label-bold text-deep-navy/50 uppercase">Location</p>
               <p class="text-body-md font-body-md font-bold text-deep-navy truncate">{{ eventLocation }}</p>
-              <p v-if="primaryVenue?.venue_city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.venue_city }}</p>
+              <p v-if="primaryVenue?.city" class="text-body-sm font-body-sm text-deep-navy/60 truncate">{{ primaryVenue.city }}</p>
             </div>
           </div>
 
@@ -389,8 +389,8 @@
 
                         <template v-else-if="step.action === 'location'">
                           <p class="font-semibold text-deep-navy">{{ eventLocation }}</p>
-                          <p v-if="primaryVenue?.venue_address">{{ primaryVenue.venue_address }}</p>
-                          <p v-if="primaryVenue?.venue_city">{{ primaryVenue.venue_city }}</p>
+                          <p v-if="primaryVenue?.address">{{ primaryVenue.address }}</p>
+                          <p v-if="primaryVenue?.city">{{ primaryVenue.city }}</p>
                           <iframe
                             v-if="venueMapEmbedUrl"
                             :src="venueMapEmbedUrl"
@@ -1498,7 +1498,7 @@ const eventVenues = computed(() => venuesData.value?.data?.results || [])
 const primaryVenue = computed(() => eventVenues.value[0])
 
 const eventLocation = computed(() => {
-  return primaryVenue.value?.venue_name || 'Venue to be confirmed'
+  return primaryVenue.value?.name || 'Venue to be confirmed'
 })
 
 const eventWhatToBring = computed(() => {
@@ -1519,7 +1519,7 @@ const hasBringInfo = computed(() => {
 })
 
 const hasLocationInfo = computed(() => {
-  return Boolean(primaryVenue.value?.venue_name || primaryVenue.value?.venue_address || primaryVenue.value?.venue_city)
+  return Boolean(primaryVenue.value?.name || primaryVenue.value?.address || primaryVenue.value?.city)
 })
 
 const hasTimingInfo = computed(() => {
@@ -1527,8 +1527,8 @@ const hasTimingInfo = computed(() => {
 })
 
 const venueMapEmbedUrl = computed(() => {
-  const address = String(primaryVenue.value?.venue_address || '').trim()
-  const city = String(primaryVenue.value?.venue_city || '').trim()
+  const address = String(primaryVenue.value?.address || '').trim()
+  const city = String(primaryVenue.value?.city || '').trim()
   const query = `${address} ${city}`.trim()
   if (!query) return ''
   return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&output=embed`

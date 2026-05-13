@@ -60,28 +60,62 @@
                   </div>
                 </label>
 
-                <label class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors">
+                <label
+                  class="flex items-center gap-3 p-3 bg-gray-50 border border-gray-200 rounded-lg transition-colors"
+                  :class="canSelectPartialRefund ? 'cursor-pointer hover:bg-gray-100' : 'opacity-50 cursor-not-allowed'"
+                >
                   <input
                     v-model="refundType"
                     type="radio"
                     value="partial"
                     name="refundType"
-                    class="w-4 h-4 text-primary border-gray-300 focus:ring-primary"
+                    :disabled="!canSelectPartialRefund"
+                    class="w-4 h-4 text-primary border-gray-300 focus:ring-primary disabled:cursor-not-allowed"
                   />
                   <div class="flex-1">
                     <div class="text-sm font-semibold text-gray-900">Partial Refund</div>
-                    <div class="text-xs text-gray-600">Specify custom refund amount</div>
+                    <div class="text-xs text-gray-600">
+                      <template v-if="!canSelectPartialRefund">Not available — only one item exists with a fixed quantity</template>
+                      <template v-else>Specify custom refund amount</template>
+                    </div>
                   </div>
                 </label>
               </div>
             </div>
 
             <!-- Item Preview / Selection -->
-            <div v-if="selectableItems.length > 0" class="mb-4">
+            <div v-if="isItemsLoading || selectableItems.length > 0" class="mb-4">
               <label class="block text-sm font-semibold text-gray-700 mb-2">
                 {{ refundType === 'full' ? 'Refund Items (view only)' : 'Select Items to Refund' }}
               </label>
               <div class="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50 max-h-72 overflow-y-auto">
+                <!-- Skeleton items while data is loading -->
+                <template v-if="isItemsLoading">
+                  <div
+                    v-for="n in skeletonItemCount"
+                    :key="`skeleton-${n}`"
+                    class="rounded-lg border border-gray-200 bg-white p-3 animate-pulse"
+                  >
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="flex items-start gap-3 min-w-0 flex-1">
+                        <div class="mt-1 h-4 w-4 rounded bg-gray-200 flex-shrink-0" />
+                        <div class="h-14 w-14 rounded-md bg-gray-200 flex-shrink-0" />
+                        <div class="flex-1 space-y-2 min-w-0">
+                          <div class="h-4 w-2/3 rounded bg-gray-200" />
+                          <div class="h-3 w-1/3 rounded bg-gray-200" />
+                          <div class="h-3 w-1/4 rounded bg-gray-200" />
+                          <div class="flex gap-1.5 mt-1">
+                            <div class="h-4 w-16 rounded-full bg-gray-200" />
+                            <div class="h-4 w-20 rounded-full bg-gray-200" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+
+                <!-- Actual items once fully loaded -->
+                <template v-else>
                 <div v-for="item in selectableItems" :key="item.id" class="rounded-lg border border-gray-200 bg-white p-3 hover:border-blue-200 transition-colors" :class="{ 'opacity-60': item.type === 'attendee' && isAttendeeLoading(item.attendeeId) }">
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex items-start gap-3 min-w-0">
@@ -193,6 +227,7 @@
                     </div>
                   </div>
                 </div>
+                </template>
               </div>
               <div class="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3 text-right">
                 <span class="text-sm text-gray-600">
@@ -401,12 +436,14 @@ const orderDetailsById = ref<Record<string, any>>({})
 const orderRefundState = ref<Record<string, boolean | null>>({})
 const fetchedOrderIds = new Set<string>()
 const loadingOrderIds = new Set<string>()
+const pendingOrderCount = ref(0)
 
 const attendeeDetailsById = ref<Record<string, any>>({})
 const attendeeCancelledState = ref<Record<string, boolean | null>>({})
 const attendeeRefundState = ref<Record<string, boolean | null>>({})
 const fetchedAttendeeIds = new Set<string>()
 const loadingAttendeeIds = new Set<string>()
+const pendingAttendeeCount = ref(0)
 
 const eventSlugOrId = computed(() => {
   const eventIdentifier = props.eventDetail?.url_safe_title || props.eventDetail?.event_id
@@ -442,6 +479,7 @@ async function fetchOrderIsRefunded(orderId: string) {
   }
 
   loadingOrderIds.add(orderId)
+  pendingOrderCount.value++
 
   try {
     const response = await productsOrdersRetrieve({
@@ -457,6 +495,7 @@ async function fetchOrderIsRefunded(orderId: string) {
     orderRefundState.value[orderId] = null
   } finally {
     loadingOrderIds.delete(orderId)
+    pendingOrderCount.value--
   }
 }
 
@@ -466,6 +505,7 @@ async function fetchAttendeeIsCancelled(attendeeId: string) {
   }
 
   loadingAttendeeIds.add(attendeeId)
+  pendingAttendeeCount.value++
 
   try {
     const response = await attendeesRetrieve({
@@ -482,6 +522,7 @@ async function fetchAttendeeIsCancelled(attendeeId: string) {
     attendeeRefundState.value[attendeeId] = null
   } finally {
     loadingAttendeeIds.delete(attendeeId)
+    pendingAttendeeCount.value--
   }
 }
 
@@ -784,6 +825,48 @@ const selectedOrderRefundItems = computed(() => {
 watch(selectedItemsAmount, (total) => {
   if (refundType.value === 'partial' && selectableItems.value.length > 0) {
     refundAmount.value = Number(Math.min(total, maxRefundableAmount.value).toFixed(2))
+  }
+})
+
+const isItemsLoading = computed(() => {
+  const descriptor = payment.value?.descriptor
+  if (!descriptor || (descriptor !== 'order' && descriptor !== 'booking')) return false
+  if (pendingOrderCount.value > 0) return true
+  if (pendingAttendeeCount.value > 0) return true
+  if (Object.values(variantLookupLoading.value).some(Boolean)) return true
+  return false
+})
+
+const skeletonItemCount = computed(() => {
+  const metadata = payment.value?.metadata as any
+  if (!metadata) return 3
+  if (payment.value?.descriptor === 'order') {
+    return Math.max(1, metadata.order?.order_items?.length ?? 1)
+  }
+  if (payment.value?.descriptor === 'booking') {
+    const selections: any[] = metadata.attendee_selections ?? []
+    return Math.max(1, selections.reduce((n: number, s: any) => n + 1 + (s.product_lines?.length ?? 0), 0))
+  }
+  return 3
+})
+
+// Partial refund is only meaningful if there are multiple refundable items,
+// OR if the single refundable item is an order_item with qty > 1 (so user can refund a subset).
+const canSelectPartialRefund = computed(() => {
+  if (selectableItems.value.length === 0) return true
+
+  const refundable = selectableItems.value.filter(i => !i.is_refunded && i.quantity > 0)
+  if (refundable.length > 1) return true
+  if (refundable.length === 1) {
+    const item = refundable[0]
+    return item.type === 'order_item' && item.quantity > 1
+  }
+  return false
+})
+
+watch(canSelectPartialRefund, (allowed) => {
+  if (!allowed && refundType.value === 'partial') {
+    refundType.value = 'full'
   }
 })
 

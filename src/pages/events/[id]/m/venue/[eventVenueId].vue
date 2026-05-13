@@ -16,24 +16,24 @@
 
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 flex-wrap mb-1">
-                <h1 class="text-xl font-black text-deep-navy">{{ eventVenue?.data?.venue_name || 'Venue Details' }}</h1>
+                <h1 class="text-xl font-black text-deep-navy">{{ eventVenue?.data?.name || 'Venue Details' }}</h1>
                 <span v-if="poiType" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary">
                   <span class="material-symbols-outlined text-xs">{{ poiType === 'SPORTS_VENUE' ? 'sports' : 'location_city' }}</span>
                   {{ poiType === 'SPORTS_VENUE' ? 'Sports Venue' : 'Venue' }}
                 </span>
               </div>
               <div class="flex items-center gap-4 flex-wrap text-sm text-navy-500">
-                <span v-if="eventVenue?.data?.venue_address" class="flex items-center gap-1">
+                <span v-if="eventVenue?.data?.address" class="flex items-center gap-1">
                   <span class="material-symbols-outlined text-base text-navy-400">location_on</span>
-                  {{ eventVenue.data.venue_address }}
+                  {{ eventVenue.data.address }}
                 </span>
-                <span v-if="eventVenue?.data?.venue_city" class="flex items-center gap-1">
+                <span v-if="eventVenue?.data?.city" class="flex items-center gap-1">
                   <span class="material-symbols-outlined text-base text-navy-400">apartment</span>
-                  {{ eventVenue.data.venue_city }}
+                  {{ eventVenue.data.city }}
                 </span>
-                <span v-if="locationVenue?.data?.poi_details.postcode" class="flex items-center gap-1">
+                <span v-if="eventVenue?.data?.postcode" class="flex items-center gap-1">
                   <span class="material-symbols-outlined text-base text-navy-400">markunread_mailbox</span>
-                  {{ locationVenue?.data?.poi_details?.postcode }}
+                  {{ eventVenue.data.postcode }}
                 </span>
                 <span v-if="venueTotalCapacity" class="flex items-center gap-1">
                   <span class="material-symbols-outlined text-base text-navy-400">groups</span>
@@ -103,13 +103,13 @@
           </div>
           <div class="p-5 space-y-4 flex-1">
             <!-- Address block -->
-            <div v-if="eventVenue?.data?.venue_address" class="flex gap-3">
+            <div v-if="eventVenue?.data?.address" class="flex gap-3">
               <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">location_on</span>
               <div>
                 <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Address</p>
-                <p class="text-sm text-navy-900">{{ eventVenue.data.venue_address }}</p>
-                <p v-if="eventVenue?.data?.venue_city" class="text-xs text-navy-500">{{ eventVenue.data.venue_city }}</p>
-                <p v-if="locationVenue?.data?.poi_details?.postcode" class="text-xs text-navy-500">{{ locationVenue.data.poi_details.postcode }}</p>
+                <p class="text-sm text-navy-900">{{ eventVenue.data.address }}</p>
+                <p v-if="eventVenue?.data?.city" class="text-xs text-navy-500">{{ eventVenue.data.city }}</p>
+                <p v-if="eventVenue?.data?.postcode" class="text-xs text-navy-500">{{ eventVenue.data.postcode }}</p>
               </div>
             </div>
 
@@ -119,7 +119,7 @@
               <div>
                 <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Coordinates</p>
                 <p class="text-xs text-navy-600 font-mono">
-                  {{ locationVenue?.data?.poi_details?.latitude }}, {{ locationVenue?.data?.poi_details?.longitude }}
+                  {{ eventVenue?.data?.latitude }}, {{ eventVenue?.data?.longitude }}
                 </p>
               </div>
             </div>
@@ -134,33 +134,33 @@
             </div>
 
             <!-- Description -->
-            <div v-if="locationVenue?.data?.description" class="flex gap-3">
+            <div v-if="eventVenue?.data?.description" class="flex gap-3">
               <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">notes</span>
               <div>
                 <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Description</p>
-                <p class="text-sm text-navy-700 leading-relaxed">{{ locationVenue.data.description }}</p>
+                <p class="text-sm text-navy-700 leading-relaxed">{{ eventVenue.data.description }}</p>
               </div>
             </div>
 
             <!-- Instructions -->
-            <div v-if="locationVenue?.data?.instructions" class="flex gap-3">
+            <div v-if="eventVenue?.data?.instructions" class="flex gap-3">
               <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">list_alt</span>
               <div>
                 <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Access Instructions</p>
-                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ locationVenue.data.instructions }}</p>
+                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ eventVenue.data.instructions }}</p>
               </div>
             </div>
 
             <!-- Notes -->
-            <div v-if="locationVenue?.data?.notes" class="flex gap-3">
+            <div v-if="eventVenue?.data?.notes" class="flex gap-3">
               <span class="material-symbols-outlined text-navy-400 text-lg shrink-0 mt-0.5">sticky_note_2</span>
               <div>
                 <p class="text-xs font-black text-navy-400 uppercase tracking-wider mb-0.5">Notes</p>
-                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ locationVenue.data.notes }}</p>
+                <p class="text-sm text-navy-700 leading-relaxed whitespace-pre-line">{{ eventVenue.data.notes }}</p>
               </div>
             </div>
 
-            <p v-if="!eventVenue?.data?.venue_address && !locationVenue?.data?.description && !locationVenue?.data?.instructions && !locationVenue?.data?.notes" class="text-sm text-navy-400 italic">
+            <p v-if="!eventVenue?.data?.address && !eventVenue?.data?.description && !eventVenue?.data?.instructions && !eventVenue?.data?.notes" class="text-sm text-navy-400 italic">
               No additional venue details available.
             </p>
           </div>
@@ -402,24 +402,23 @@ import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenue } from '~/composables/resources/events/eventVenues'
 import { extractResults } from '~/composables/resources/events/eventVenueManagement'
 import {
-  useCreateLocationRoom,
-  useDeleteLocationRoom,
-  useLocationRooms,
-  useUpdateLocationRoom,
-} from '~/composables/resources/locations/locationRooms'
+  useCreateEventVenueRoom,
+  useDeleteEventVenueRoom,
+  useEventVenueRooms,
+  useUpdateEventVenueRoom,
+} from '~/composables/resources/events/eventVenueRooms'
 import {
-  useCreateLocationVenueContact,
-  useDeleteLocationVenueContact,
-  useLocationVenueContacts,
-  useUpdateLocationVenueContact,
-} from '~/composables/resources/locations/locationVenueContacts'
+  useCreateEventVenueContact,
+  useDeleteEventVenueContact,
+  useEventVenueContacts,
+  useUpdateEventVenueContact,
+} from '~/composables/resources/events/eventVenueContacts'
 import {
-  useCreateLocationVenueMetadata,
-  useDeleteLocationVenueMetadata,
-  useLocationVenueMetadata,
-  useUpdateLocationVenueMetadata,
-} from '~/composables/resources/locations/locationVenueMetadata'
-import { useLocationVenue } from '~/composables/resources/locations/locationVenues'
+  useCreateEventVenueMetadata,
+  useDeleteEventVenueMetadata,
+  useEventVenueMetadata,
+  useUpdateEventVenueMetadata,
+} from '~/composables/resources/events/eventVenueMetadata'
 
 definePageMeta({
   layout: false,
@@ -441,19 +440,19 @@ const canUpdate = computed(() => can('REGISTRATION', 'update').value.allowed)
 const canDelete = computed(() => can('REGISTRATION', 'delete').value.allowed)
 
 // ── Map & venue display helpers ────────────────────────────────────────────
-const poiType = computed(() => locationVenue.value?.data?.poi_type as string | undefined)
-const venueTotalCapacity = computed(() => locationVenue.value?.data?.capacity as number | undefined)
+const poiType = computed(() => eventVenue.value?.data?.poi_type as string | undefined)
+const venueTotalCapacity = computed(() => eventVenue.value?.data?.capacity as number | undefined)
 const hasCoordinates = computed(() => {
-  const lat = (locationVenue.value?.data as any)?.poi_details?.latitude
-  const lon = (locationVenue.value?.data as any)?.poi_details?.longitude
+  const lat = eventVenue.value?.data?.latitude
+  const lon = eventVenue.value?.data?.longitude
   return lat != null && lon != null
 })
 
 const mapSrc = computed(() => {
-  const poi = (locationVenue.value?.data as any)?.poi_details
-  const lat = poi?.latitude
-  const lon = poi?.longitude
-  const addr = eventVenue.value?.data?.venue_address || poi?.address
+  const data = eventVenue.value?.data
+  const lat = data?.latitude
+  const lon = data?.longitude
+  const addr = data?.address
   if (lat != null && lon != null) {
     return `https://maps.google.com/maps?q=${lat},${lon}&output=embed&iwloc=&z=15`
   }
@@ -464,10 +463,10 @@ const mapSrc = computed(() => {
 })
 
 const directionsUrl = computed(() => {
-  const poi = (locationVenue.value?.data as any)?.poi_details
-  const lat = poi?.latitude
-  const lon = poi?.longitude
-  const addr = eventVenue.value?.data?.venue_address || poi?.address
+  const data = eventVenue.value?.data
+  const lat = data?.latitude
+  const lon = data?.longitude
+  const addr = data?.address
   if (lat != null && lon != null) {
     return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`
   }
@@ -488,17 +487,14 @@ const roleClass = (role: string) => ROLE_CLASSES[role] || ROLE_CLASSES.OTHER
 
 const { data: event } = useEvent(id)
 const { data: eventVenue } = useEventVenue(eventVenueId)
-const venueId = computed(() => eventVenue.value?.data?.venue)
 
-const { data: locationVenue } = useLocationVenue(computed(() => venueId.value || 0))
+const roomQuery = computed(() => ({ event_venue: eventVenueId.value, page_size: 100 }))
+const contactQuery = computed(() => ({ event_venue: eventVenueId.value, page_size: 100 }))
+const metadataQuery = computed(() => ({ event_venue: eventVenueId.value, page_size: 100 }))
 
-const roomQuery = computed(() => ({ venue: venueId.value, page_size: 100 }))
-const contactQuery = computed(() => ({ venue: venueId.value, page_size: 100 }))
-const metadataQuery = computed(() => ({ venue: venueId.value, page_size: 100 }))
-
-const { data: roomsResponse } = useLocationRooms(roomQuery)
-const { data: contactsResponse } = useLocationVenueContacts(contactQuery)
-const { data: metadataResponse } = useLocationVenueMetadata(metadataQuery)
+const { data: roomsResponse } = useEventVenueRooms(roomQuery)
+const { data: contactsResponse } = useEventVenueContacts(contactQuery)
+const { data: metadataResponse } = useEventVenueMetadata(metadataQuery)
 
 const rooms = computed(() => extractResults<any>(roomsResponse.value))
 const contacts = computed(() => extractResults<any>(contactsResponse.value))
@@ -526,27 +522,24 @@ const contactEdit = reactive({
 })
 const metadataEdit = reactive({ label: '', value: '' })
 
-const createRoomMutation = useCreateLocationRoom()
-const updateRoomMutation = useUpdateLocationRoom()
-const deleteRoomMutation = useDeleteLocationRoom()
+const createRoomMutation = useCreateEventVenueRoom()
+const updateRoomMutation = useUpdateEventVenueRoom()
+const deleteRoomMutation = useDeleteEventVenueRoom()
 
-const createContactMutation = useCreateLocationVenueContact()
-const updateContactMutation = useUpdateLocationVenueContact()
-const deleteContactMutation = useDeleteLocationVenueContact()
+const createContactMutation = useCreateEventVenueContact()
+const updateContactMutation = useUpdateEventVenueContact()
+const deleteContactMutation = useDeleteEventVenueContact()
 
-const createMetadataMutation = useCreateLocationVenueMetadata()
-const updateMetadataMutation = useUpdateLocationVenueMetadata()
-const deleteMetadataMutation = useDeleteLocationVenueMetadata()
+const createMetadataMutation = useCreateEventVenueMetadata()
+const updateMetadataMutation = useUpdateEventVenueMetadata()
+const deleteMetadataMutation = useDeleteEventVenueMetadata()
 
 const createRoom = async () => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value)
-    return
-
   await createRoomMutation.mutateAsync({
-    venue: venueId.value,
+    event_venue: eventVenueId.value,
     room_name: roomForm.room_name.trim(),
     description: roomForm.description.trim() || null,
     capacity: roomForm.capacity === '' ? null : Number(roomForm.capacity),
@@ -569,13 +562,10 @@ const saveRoom = async (roomId: number) => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value)
-    return
-
   await updateRoomMutation.mutateAsync({
     roomId,
     body: {
-      venue: venueId.value,
+      event_venue: eventVenueId.value,
       room_name: roomEdit.room_name.trim(),
       description: String(roomEdit.description || '').trim() || null,
       capacity: roomEdit.capacity === '' ? null : Number(roomEdit.capacity),
@@ -601,9 +591,6 @@ const createContact = async () => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value)
-    return
-
   if (!contactForm.phone_number.trim() && !contactForm.email.trim()) {
     toast.add({
       title: 'Missing contact method',
@@ -614,7 +601,7 @@ const createContact = async () => {
   }
 
   await createContactMutation.mutateAsync({
-    venue: venueId.value,
+    event_venue: eventVenueId.value,
     contact_name: contactForm.contact_name.trim(),
     phone_number: contactForm.phone_number.trim() || null,
     email: contactForm.email.trim() || null,
@@ -640,9 +627,6 @@ const saveContact = async (contactId: number) => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value)
-    return
-
   if (!contactEdit.phone_number.trim() && !contactEdit.email.trim()) {
     toast.add({
       title: 'Missing contact method',
@@ -655,7 +639,7 @@ const saveContact = async (contactId: number) => {
   await updateContactMutation.mutateAsync({
     contactId,
     body: {
-      venue: venueId.value,
+      event_venue: eventVenueId.value,
       contact_name: contactEdit.contact_name.trim(),
       phone_number: contactEdit.phone_number.trim() || null,
       email: contactEdit.email.trim() || null,
@@ -682,12 +666,8 @@ const createMetadata = async () => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value || !locationVenue.value?.data?.poi)
-    return
-
   await createMetadataMutation.mutateAsync({
-    venue: venueId.value,
-    poi: locationVenue.value.data.poi,
+    event_venue: eventVenueId.value,
     label: metadataForm.label.trim(),
     value: metadataForm.value.trim() || null,
   })
@@ -707,14 +687,10 @@ const saveMetadata = async (metadataId: number) => {
   if (!canUpdate.value)
     return
 
-  if (!venueId.value || !locationVenue.value?.data?.poi)
-    return
-
   await updateMetadataMutation.mutateAsync({
     metadataId,
     body: {
-      venue: venueId.value,
-      poi: locationVenue.value.data.poi,
+      event_venue: eventVenueId.value,
       label: metadataEdit.label.trim(),
       value: metadataEdit.value.trim() || null,
     },

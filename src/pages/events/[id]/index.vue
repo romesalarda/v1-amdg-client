@@ -96,7 +96,7 @@
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
                 <p class="font-black text-deep-navy truncate">
-                  {{ primaryVenue?.venue_name || event.organisation_name || 'TBA' }}
+                  {{ primaryVenue?.name || event.organisation_name || 'TBA' }}
                 </p>
               </div>
             </div>
@@ -181,16 +181,16 @@
                   Venue Location
                 </h2>
                 <div class="space-y-2">
-                  <h3 class="text-xl font-black text-deep-navy">{{ primaryVenue.venue_name }}</h3>
-                  <p v-if="primaryVenue.venue_address" class="text-deep-navy/60 text-sm">{{ primaryVenue.venue_address }}</p>
-                  <p v-if="primaryVenue.venue_city" class="text-deep-navy/60 text-sm">{{ primaryVenue.venue_city }}</p>
+                  <h3 class="text-xl font-black text-deep-navy">{{ primaryVenue.name }}</h3>
+                  <p v-if="primaryVenue.address" class="text-deep-navy/60 text-sm">{{ primaryVenue.address }}</p>
+                  <p v-if="primaryVenue.city" class="text-deep-navy/60 text-sm">{{ primaryVenue.city }}</p>
                 </div>
               </div>
               
               <!-- Map Section -->
-              <div v-if="primaryVenue.venue_address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10">
+              <div v-if="primaryVenue.address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10">
                 <iframe
-                  :src="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.venue_address + ' ' + (primaryVenue.venue_city || ''))}&output=embed`"
+                  :src="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.address + ' ' + (primaryVenue.city || ''))}&output=embed`"
                   class="w-full h-full border-0"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"

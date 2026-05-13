@@ -79,8 +79,8 @@
 
                 <template v-else-if="step.action === 'location'">
                   <p class="font-bold text-deep-navy">{{ props.eventLocation }}</p>
-                  <p v-if="props.primaryVenue?.venue_address">{{ props.primaryVenue.venue_address }}</p>
-                  <p v-if="props.primaryVenue?.venue_city">{{ props.primaryVenue.venue_city }}</p>
+                  <p v-if="props.primaryVenue?.address">{{ props.primaryVenue.address }}</p>
+                  <p v-if="props.primaryVenue?.city">{{ props.primaryVenue.city }}</p>
                   <iframe
                     v-if="props.venueMapEmbedUrl"
                     :src="props.venueMapEmbedUrl"

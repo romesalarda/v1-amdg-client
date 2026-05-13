@@ -9582,42 +9582,159 @@ export type EventTypeRequest = {
 };
 
 /**
- * Serializer for EventVenue model with HATEOAS support.
+ * Serializer for EventVenue — event-scoped venue snapshot.
+ *
+ * On create, pass ``source_venue_id`` to clone all fields (including rooms,
+ * contacts and metadata) from the matching global Venue.  If omitted the
+ * caller must supply the inline venue fields directly.
+ *
+ * Reads return fully-embedded sub-resource lists so that clients can render
+ * all venue data from a single API call.
  */
 export type EventVenue = {
     readonly event_venue_id: string;
     event: string;
-    venue: number;
     readonly event_title: string;
     readonly event_display_code: string;
-    readonly venue_name: string;
-    readonly venue_address: string;
-    readonly venue_city: string;
+    source_venue_id?: number | null;
+    name?: string;
+    address?: string;
+    postcode?: string;
+    city?: string;
+    poi_type?: string;
+    latitude?: string | null;
+    longitude?: string | null;
+    description?: string;
+    instructions?: string;
+    notes?: string;
+    capacity?: number | null;
+    readonly added_at: string;
+    readonly updated_at: string;
+    readonly rooms: Array<EventVenueRoom>;
+    readonly contacts: Array<EventVenueContact>;
+    readonly metadata: Array<EventVenueMetadata>;
     /**
      *  links
      */
     readonly _links: {
         /**
-         * Link to this event venue association
+         * Link to this event venue
          */
         self: string;
         /**
          * Link to the event
          */
         event?: string;
-        /**
-         * Link to the venue
-         */
-        venue?: string;
     };
 };
 
 /**
- * Serializer for EventVenue model with HATEOAS support.
+ * Serializer for EventVenueContact — contacts scoped to an EventVenue snapshot.
+ */
+export type EventVenueContact = {
+    readonly id: number;
+    event_venue: string;
+    contact_name: string;
+    phone_number?: string | null;
+    email?: string | null;
+    /**
+     * * `MANAGER` - Manager
+     * * `OWNER` - Owner
+     * * `COORDINATOR` - Coordinator
+     * * `SUPPORT` - Support
+     * * `OTHER` - Other
+     */
+    role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+    readonly added_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Serializer for EventVenueContact — contacts scoped to an EventVenue snapshot.
+ */
+export type EventVenueContactRequest = {
+    event_venue: string;
+    contact_name: string;
+    phone_number?: string | null;
+    email?: string | null;
+    /**
+     * * `MANAGER` - Manager
+     * * `OWNER` - Owner
+     * * `COORDINATOR` - Coordinator
+     * * `SUPPORT` - Support
+     * * `OTHER` - Other
+     */
+    role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Serializer for EventVenueMetadata — metadata entries scoped to an EventVenue snapshot.
+ */
+export type EventVenueMetadata = {
+    readonly id: number;
+    event_venue: string;
+    label: string;
+    value?: string | null;
+    readonly added_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Serializer for EventVenueMetadata — metadata entries scoped to an EventVenue snapshot.
+ */
+export type EventVenueMetadataRequest = {
+    event_venue: string;
+    label: string;
+    value?: string | null;
+};
+
+/**
+ * Serializer for EventVenue — event-scoped venue snapshot.
+ *
+ * On create, pass ``source_venue_id`` to clone all fields (including rooms,
+ * contacts and metadata) from the matching global Venue.  If omitted the
+ * caller must supply the inline venue fields directly.
+ *
+ * Reads return fully-embedded sub-resource lists so that clients can render
+ * all venue data from a single API call.
  */
 export type EventVenueRequest = {
     event: string;
-    venue: number;
+    source_venue_id?: number | null;
+    name?: string;
+    address?: string;
+    postcode?: string;
+    city?: string;
+    poi_type?: string;
+    latitude?: string | null;
+    longitude?: string | null;
+    description?: string;
+    instructions?: string;
+    notes?: string;
+    capacity?: number | null;
+};
+
+/**
+ * Serializer for EventVenueRoom — rooms scoped to an EventVenue snapshot.
+ */
+export type EventVenueRoom = {
+    readonly id: number;
+    event_venue: string;
+    room_name: string;
+    description?: string | null;
+    capacity?: number | null;
+    readonly added_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Serializer for EventVenueRoom — rooms scoped to an EventVenue snapshot.
+ */
+export type EventVenueRoomRequest = {
+    event_venue: string;
+    room_name: string;
+    description?: string | null;
+    capacity?: number | null;
 };
 
 /**
@@ -11951,11 +12068,32 @@ export type PaginatedEventTypeList = {
     results: Array<EventType>;
 };
 
+export type PaginatedEventVenueContactList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueContact>;
+};
+
 export type PaginatedEventVenueList = {
     count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<EventVenue>;
+};
+
+export type PaginatedEventVenueMetadataList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueMetadata>;
+};
+
+export type PaginatedEventVenueRoomList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueRoom>;
 };
 
 export type PaginatedFamilyAttendeeList = {
@@ -14590,11 +14728,66 @@ export type PatchedEventTypeRequest = {
 };
 
 /**
- * Serializer for EventVenue model with HATEOAS support.
+ * Serializer for EventVenueContact — contacts scoped to an EventVenue snapshot.
+ */
+export type PatchedEventVenueContactRequest = {
+    event_venue?: string;
+    contact_name?: string;
+    phone_number?: string | null;
+    email?: string | null;
+    /**
+     * * `MANAGER` - Manager
+     * * `OWNER` - Owner
+     * * `COORDINATOR` - Coordinator
+     * * `SUPPORT` - Support
+     * * `OTHER` - Other
+     */
+    role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Serializer for EventVenueMetadata — metadata entries scoped to an EventVenue snapshot.
+ */
+export type PatchedEventVenueMetadataRequest = {
+    event_venue?: string;
+    label?: string;
+    value?: string | null;
+};
+
+/**
+ * Serializer for EventVenue — event-scoped venue snapshot.
+ *
+ * On create, pass ``source_venue_id`` to clone all fields (including rooms,
+ * contacts and metadata) from the matching global Venue.  If omitted the
+ * caller must supply the inline venue fields directly.
+ *
+ * Reads return fully-embedded sub-resource lists so that clients can render
+ * all venue data from a single API call.
  */
 export type PatchedEventVenueRequest = {
     event?: string;
-    venue?: number;
+    source_venue_id?: number | null;
+    name?: string;
+    address?: string;
+    postcode?: string;
+    city?: string;
+    poi_type?: string;
+    latitude?: string | null;
+    longitude?: string | null;
+    description?: string;
+    instructions?: string;
+    notes?: string;
+    capacity?: number | null;
+};
+
+/**
+ * Serializer for EventVenueRoom — rooms scoped to an EventVenue snapshot.
+ */
+export type PatchedEventVenueRoomRequest = {
+    event_venue?: string;
+    room_name?: string;
+    description?: string | null;
+    capacity?: number | null;
 };
 
 /**
@@ -22443,11 +22636,66 @@ export type EventTypeWritable = {
 };
 
 /**
- * Serializer for EventVenue model with HATEOAS support.
+ * Serializer for EventVenue — event-scoped venue snapshot.
+ *
+ * On create, pass ``source_venue_id`` to clone all fields (including rooms,
+ * contacts and metadata) from the matching global Venue.  If omitted the
+ * caller must supply the inline venue fields directly.
+ *
+ * Reads return fully-embedded sub-resource lists so that clients can render
+ * all venue data from a single API call.
  */
 export type EventVenueWritable = {
     event: string;
-    venue: number;
+    source_venue_id?: number | null;
+    name?: string;
+    address?: string;
+    postcode?: string;
+    city?: string;
+    poi_type?: string;
+    latitude?: string | null;
+    longitude?: string | null;
+    description?: string;
+    instructions?: string;
+    notes?: string;
+    capacity?: number | null;
+};
+
+/**
+ * Serializer for EventVenueContact — contacts scoped to an EventVenue snapshot.
+ */
+export type EventVenueContactWritable = {
+    event_venue: string;
+    contact_name: string;
+    phone_number?: string | null;
+    email?: string | null;
+    /**
+     * * `MANAGER` - Manager
+     * * `OWNER` - Owner
+     * * `COORDINATOR` - Coordinator
+     * * `SUPPORT` - Support
+     * * `OTHER` - Other
+     */
+    role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Serializer for EventVenueMetadata — metadata entries scoped to an EventVenue snapshot.
+ */
+export type EventVenueMetadataWritable = {
+    event_venue: string;
+    label: string;
+    value?: string | null;
+};
+
+/**
+ * Serializer for EventVenueRoom — rooms scoped to an EventVenue snapshot.
+ */
+export type EventVenueRoomWritable = {
+    event_venue: string;
+    room_name: string;
+    description?: string | null;
+    capacity?: number | null;
 };
 
 /**
@@ -23320,11 +23568,32 @@ export type PaginatedEventTypeListWritable = {
     results: Array<EventTypeWritable>;
 };
 
+export type PaginatedEventVenueContactListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueContactWritable>;
+};
+
 export type PaginatedEventVenueListWritable = {
     count: number;
     next?: string | null;
     previous?: string | null;
     results: Array<EventVenueWritable>;
+};
+
+export type PaginatedEventVenueMetadataListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueMetadataWritable>;
+};
+
+export type PaginatedEventVenueRoomListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventVenueRoomWritable>;
 };
 
 export type PaginatedFamilyAttendeeListWritable = {
@@ -35521,6 +35790,339 @@ export type EventTypesUpdateResponses = {
 
 export type EventTypesUpdateResponse = EventTypesUpdateResponses[keyof EventTypesUpdateResponses];
 
+export type EventVenueContactsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        event_venue?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/venue-contacts/';
+};
+
+export type EventVenueContactsListResponses = {
+    200: PaginatedEventVenueContactList;
+};
+
+export type EventVenueContactsListResponse = EventVenueContactsListResponses[keyof EventVenueContactsListResponses];
+
+export type EventVenueContactsCreateData = {
+    body: EventVenueContactRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/venue-contacts/';
+};
+
+export type EventVenueContactsCreateResponses = {
+    201: EventVenueContact;
+};
+
+export type EventVenueContactsCreateResponse = EventVenueContactsCreateResponses[keyof EventVenueContactsCreateResponses];
+
+export type EventVenueContactsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue contact.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-contacts/{id}/';
+};
+
+export type EventVenueContactsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventVenueContactsDestroyResponse = EventVenueContactsDestroyResponses[keyof EventVenueContactsDestroyResponses];
+
+export type EventVenueContactsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue contact.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-contacts/{id}/';
+};
+
+export type EventVenueContactsRetrieveResponses = {
+    200: EventVenueContact;
+};
+
+export type EventVenueContactsRetrieveResponse = EventVenueContactsRetrieveResponses[keyof EventVenueContactsRetrieveResponses];
+
+export type EventVenueContactsPartialUpdateData = {
+    body?: PatchedEventVenueContactRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue contact.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-contacts/{id}/';
+};
+
+export type EventVenueContactsPartialUpdateResponses = {
+    200: EventVenueContact;
+};
+
+export type EventVenueContactsPartialUpdateResponse = EventVenueContactsPartialUpdateResponses[keyof EventVenueContactsPartialUpdateResponses];
+
+export type EventVenueContactsUpdateData = {
+    body: EventVenueContactRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue contact.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-contacts/{id}/';
+};
+
+export type EventVenueContactsUpdateResponses = {
+    200: EventVenueContact;
+};
+
+export type EventVenueContactsUpdateResponse = EventVenueContactsUpdateResponses[keyof EventVenueContactsUpdateResponses];
+
+export type EventVenueMetadataListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        event_venue?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/venue-metadata/';
+};
+
+export type EventVenueMetadataListResponses = {
+    200: PaginatedEventVenueMetadataList;
+};
+
+export type EventVenueMetadataListResponse = EventVenueMetadataListResponses[keyof EventVenueMetadataListResponses];
+
+export type EventVenueMetadataCreateData = {
+    body: EventVenueMetadataRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/venue-metadata/';
+};
+
+export type EventVenueMetadataCreateResponses = {
+    201: EventVenueMetadata;
+};
+
+export type EventVenueMetadataCreateResponse = EventVenueMetadataCreateResponses[keyof EventVenueMetadataCreateResponses];
+
+export type EventVenueMetadataDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue metadata.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-metadata/{id}/';
+};
+
+export type EventVenueMetadataDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventVenueMetadataDestroyResponse = EventVenueMetadataDestroyResponses[keyof EventVenueMetadataDestroyResponses];
+
+export type EventVenueMetadataRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue metadata.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-metadata/{id}/';
+};
+
+export type EventVenueMetadataRetrieveResponses = {
+    200: EventVenueMetadata;
+};
+
+export type EventVenueMetadataRetrieveResponse = EventVenueMetadataRetrieveResponses[keyof EventVenueMetadataRetrieveResponses];
+
+export type EventVenueMetadataPartialUpdateData = {
+    body?: PatchedEventVenueMetadataRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue metadata.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-metadata/{id}/';
+};
+
+export type EventVenueMetadataPartialUpdateResponses = {
+    200: EventVenueMetadata;
+};
+
+export type EventVenueMetadataPartialUpdateResponse = EventVenueMetadataPartialUpdateResponses[keyof EventVenueMetadataPartialUpdateResponses];
+
+export type EventVenueMetadataUpdateData = {
+    body: EventVenueMetadataRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue metadata.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-metadata/{id}/';
+};
+
+export type EventVenueMetadataUpdateResponses = {
+    200: EventVenueMetadata;
+};
+
+export type EventVenueMetadataUpdateResponse = EventVenueMetadataUpdateResponses[keyof EventVenueMetadataUpdateResponses];
+
+export type EventVenueRoomsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        event_venue?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/venue-rooms/';
+};
+
+export type EventVenueRoomsListResponses = {
+    200: PaginatedEventVenueRoomList;
+};
+
+export type EventVenueRoomsListResponse = EventVenueRoomsListResponses[keyof EventVenueRoomsListResponses];
+
+export type EventVenueRoomsCreateData = {
+    body: EventVenueRoomRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/venue-rooms/';
+};
+
+export type EventVenueRoomsCreateResponses = {
+    201: EventVenueRoom;
+};
+
+export type EventVenueRoomsCreateResponse = EventVenueRoomsCreateResponses[keyof EventVenueRoomsCreateResponses];
+
+export type EventVenueRoomsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue room.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-rooms/{id}/';
+};
+
+export type EventVenueRoomsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventVenueRoomsDestroyResponse = EventVenueRoomsDestroyResponses[keyof EventVenueRoomsDestroyResponses];
+
+export type EventVenueRoomsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event venue room.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-rooms/{id}/';
+};
+
+export type EventVenueRoomsRetrieveResponses = {
+    200: EventVenueRoom;
+};
+
+export type EventVenueRoomsRetrieveResponse = EventVenueRoomsRetrieveResponses[keyof EventVenueRoomsRetrieveResponses];
+
+export type EventVenueRoomsPartialUpdateData = {
+    body?: PatchedEventVenueRoomRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue room.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-rooms/{id}/';
+};
+
+export type EventVenueRoomsPartialUpdateResponses = {
+    200: EventVenueRoom;
+};
+
+export type EventVenueRoomsPartialUpdateResponse = EventVenueRoomsPartialUpdateResponses[keyof EventVenueRoomsPartialUpdateResponses];
+
+export type EventVenueRoomsUpdateData = {
+    body: EventVenueRoomRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event venue room.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/venue-rooms/{id}/';
+};
+
+export type EventVenueRoomsUpdateResponses = {
+    200: EventVenueRoom;
+};
+
+export type EventVenueRoomsUpdateResponse = EventVenueRoomsUpdateResponses[keyof EventVenueRoomsUpdateResponses];
+
 export type EventVenuesListData = {
     body?: never;
     path?: never;
@@ -35529,6 +36131,9 @@ export type EventVenuesListData = {
          * Filter by event URL-safe title
          */
         event?: string;
+        /**
+         * Alias: filter by event URL-safe title
+         */
         event_id?: string;
         /**
          * Which field to use when ordering the results.
@@ -35543,13 +36148,13 @@ export type EventVenuesListData = {
          */
         page_size?: number;
         /**
-         * Search by event title or venue name
+         * Search by name, city, or event display code
          */
         search?: string;
         /**
-         * Filter by venue ID
+         * Filter by source global venue ID
          */
-        venue?: number;
+        source_venue_id?: number;
     };
     url: '/api/event/venues/';
 };

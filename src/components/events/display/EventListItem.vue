@@ -263,7 +263,7 @@ const getStatusBadgeClass = (status?: string) => {
 const getPrimaryVenueName = (event: any) => {
   // Try to get venue from event_venues if available
   if (event.event_venues && event.event_venues.length > 0) {
-    return event.event_venues[0].venue_name
+    return event.event_venues[0].name
   }
   // Fallback to organization name or location info
   return event.location || null
