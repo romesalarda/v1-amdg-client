@@ -67,6 +67,20 @@ export type AccessibilityRequirementsStats = {
     }>;
 };
 
+export type AddCreditRequestRequest = {
+    /**
+     * UUID of the CreditExpense to link
+     */
+    credit_id: string;
+};
+
+export type AddDebitRequestRequest = {
+    /**
+     * UUID of the DebitExpense to link
+     */
+    debit_id: string;
+};
+
 /**
  * Serializer for age distribution statistics.
  */
@@ -2336,6 +2350,180 @@ export type BookingsSummary = {
 };
 
 /**
+ * Create serializer for BudgetProposal. Sets proposed_by from request user.
+ */
+export type BudgetProposalCreate = {
+    readonly proposal_id: string;
+    /**
+     * URL safe title
+     */
+    event: string | null;
+    proposal_title: string;
+    proposal_description: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+};
+
+/**
+ * Create serializer for BudgetProposal. Sets proposed_by from request user.
+ */
+export type BudgetProposalCreateRequest = {
+    /**
+     * URL safe title
+     */
+    event: string | null;
+    proposal_title: string;
+    proposal_description: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+};
+
+/**
+ * Detailed serializer — embeds nested credit/debit lists and verification audit fields.
+ */
+export type BudgetProposalDetail = {
+    readonly proposal_id: string;
+    proposal_title: string;
+    proposal_description: string;
+    event?: number | null;
+    readonly event_name: string | null;
+    proposed_by?: number | null;
+    readonly proposed_by_name: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly total_credits: string;
+    readonly total_debits: string;
+    readonly credit_count: number;
+    readonly debit_count: number;
+    /**
+     * Budget health: real inbound payments vs total outgoing credits.
+     */
+    health_status: 'SURPLUS' | 'BREAK_EVEN' | 'DEFICIT' | 'UNKNOWN';
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+    readonly credit_expenses: Array<CreditExpenseList>;
+    readonly debit_expenses: Array<DebitExpenseList>;
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for BudgetProposal with aggregated totals and health indicator.
+ */
+export type BudgetProposalList = {
+    readonly proposal_id: string;
+    proposal_title: string;
+    proposal_description: string;
+    event?: number | null;
+    readonly event_name: string | null;
+    proposed_by?: number | null;
+    readonly proposed_by_name: string | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly total_credits: string;
+    readonly total_debits: string;
+    readonly credit_count: number;
+    readonly debit_count: number;
+    /**
+     * Budget health: real inbound payments vs total outgoing credits.
+     */
+    health_status: 'SURPLUS' | 'BREAK_EVEN' | 'DEFICIT' | 'UNKNOWN';
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+};
+
+/**
+ * Response serializer for budget proposal statistics.
+ */
+export type BudgetProposalStatistics = {
+    proposal_id: string;
+    proposal_title: string;
+    event_id: string | null;
+    event_name: string | null;
+    estimated_inbound: string;
+    estimated_inbound_currency: string;
+    real_inbound: string;
+    real_inbound_currency: string;
+    total_outgoing: string;
+    total_outgoing_currency: string;
+    net_estimated: string;
+    net_real: string;
+    variance: string;
+    /**
+     * * `SURPLUS` - SURPLUS
+     * * `BREAK_EVEN` - BREAK_EVEN
+     * * `DEFICIT` - DEFICIT
+     * * `UNKNOWN` - UNKNOWN
+     */
+    health_status: 'SURPLUS' | 'BREAK_EVEN' | 'DEFICIT' | 'UNKNOWN';
+    credit_count: number;
+    debit_count: number;
+};
+
+/**
+ * Update serializer for BudgetProposal.
+ */
+export type BudgetProposalUpdate = {
+    proposal_title: string;
+    proposal_description: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for BudgetProposal.
+ */
+export type BudgetProposalUpdateRequest = {
+    proposal_title: string;
+    proposal_description: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Serializer for capacity utilization statistics.
  */
 export type CapacityUtilization = {
@@ -4437,6 +4625,181 @@ export type CustomTokenObtainPairRequest = {
 };
 
 /**
+ * Create serializer for DebitExpense. amount is computed from quantity × unit_price.
+ */
+export type DebitExpenseCreate = {
+    readonly debit_id: string;
+    event: string;
+    quantity?: number;
+    unit_price: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Create serializer for DebitExpense. amount is computed from quantity × unit_price.
+ */
+export type DebitExpenseCreateRequest = {
+    event: string;
+    quantity?: number;
+    unit_price: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Detailed serializer for DebitExpense — adds verification audit fields.
+ */
+export type DebitExpenseDetail = {
+    readonly debit_id: string;
+    quantity?: number;
+    unit_price: string;
+    readonly unit_price_currency: string;
+    readonly amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    readonly verified_by_name: string | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    readonly processed_by_name: string | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for DebitExpense. target_* fields are intentionally excluded from the API.
+ */
+export type DebitExpenseList = {
+    readonly debit_id: string;
+    quantity?: number;
+    unit_price: string;
+    readonly unit_price_currency: string;
+    readonly amount: string;
+    readonly amount_currency: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    event?: number | null;
+    readonly event_name: string | null;
+    created_by?: number | null;
+    readonly created_by_name: string | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        event?: string;
+    };
+};
+
+/**
+ * Update serializer for DebitExpense.
+ */
+export type DebitExpenseUpdate = {
+    readonly debit_id: string;
+    description: string;
+    quantity?: number;
+    unit_price?: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for DebitExpense.
+ */
+export type DebitExpenseUpdateRequest = {
+    description: string;
+    quantity?: number;
+    unit_price?: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Serializer for combined demographics statistics.
  */
 export type Demographics = {
@@ -5344,6 +5707,29 @@ export type EventAuthorizationRequest = {
     status?: 'PENDING' | 'APPROVED' | 'REJECTED' | 'POSTPONED' | 'CANCELLED';
     reason?: string | null;
     notes?: string | null;
+};
+
+/**
+ * Response serializer for event-level budget statistics across all proposals.
+ */
+export type EventBudgetStatistics = {
+    event_id: string | null;
+    event_name: string | null;
+    proposal_count: number;
+    total_estimated_inbound: string;
+    total_real_inbound: string;
+    total_outgoing: string;
+    net_estimated: string;
+    net_real: string;
+    variance: string;
+    /**
+     * * `SURPLUS` - SURPLUS
+     * * `BREAK_EVEN` - BREAK_EVEN
+     * * `DEFICIT` - DEFICIT
+     * * `UNKNOWN` - UNKNOWN
+     */
+    health_status: 'SURPLUS' | 'BREAK_EVEN' | 'DEFICIT' | 'UNKNOWN';
+    currency: string;
 };
 
 export type EventCreateUpdate = {
@@ -11837,6 +12223,13 @@ export type PaginatedBookingStatisticsOverviewList = {
     results: Array<BookingStatisticsOverview>;
 };
 
+export type PaginatedBudgetProposalListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BudgetProposalList>;
+};
+
 export type PaginatedChapterLocationListList = {
     count: number;
     next?: string | null;
@@ -11870,6 +12263,13 @@ export type PaginatedCreditExpenseListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<CreditExpenseList>;
+};
+
+export type PaginatedDebitExpenseListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<DebitExpenseList>;
 };
 
 export type PaginatedDietaryRequirementList = {
@@ -12667,6 +13067,23 @@ export type PatchedBookingPackageCreateUpdateRequest = {
 };
 
 /**
+ * Update serializer for BudgetProposal.
+ */
+export type PatchedBudgetProposalUpdateRequest = {
+    proposal_title?: string;
+    proposal_description?: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Create/Update serializer for ChapterLocation.
  */
 export type PatchedChapterLocationCreateUpdateRequest = {
@@ -13033,6 +13450,24 @@ export type PatchedCountryLocationCreateUpdateRequest = {
  */
 export type PatchedCreditExpenseUpdateRequest = {
     description?: string;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for DebitExpense.
+ */
+export type PatchedDebitExpenseUpdateRequest = {
+    description?: string;
+    quantity?: number;
+    unit_price?: string;
     paid_date?: string | null;
     is_settled?: boolean;
     /**
@@ -17198,6 +17633,20 @@ export type RelativeAreaCreateUpdateRequest = {
     relative_area?: number | null;
 };
 
+export type RemoveCreditRequestRequest = {
+    /**
+     * UUID of the CreditExpense to unlink
+     */
+    credit_id: string;
+};
+
+export type RemoveDebitRequestRequest = {
+    /**
+     * UUID of the DebitExpense to unlink
+     */
+    debit_id: string;
+};
+
 /**
  * Serializer for Resource model.
  *
@@ -19735,6 +20184,59 @@ export type BookingPackageRuleWritable = {
 };
 
 /**
+ * Create serializer for BudgetProposal. Sets proposed_by from request user.
+ */
+export type BudgetProposalCreateWritable = {
+    /**
+     * URL safe title
+     */
+    event: string | null;
+    proposal_title: string;
+    proposal_description: string;
+    credit_expenses?: Array<string>;
+    debit_expenses?: Array<string>;
+};
+
+/**
+ * Detailed serializer — embeds nested credit/debit lists and verification audit fields.
+ */
+export type BudgetProposalDetailWritable = {
+    proposal_title: string;
+    proposal_description: string;
+    event?: number | null;
+    proposed_by?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for BudgetProposal with aggregated totals and health indicator.
+ */
+export type BudgetProposalListWritable = {
+    proposal_title: string;
+    proposal_description: string;
+    event?: number | null;
+    proposed_by?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
  * Serializer for category distribution statistics.
  */
 export type CategoryDistributionWritable = {
@@ -20560,6 +21062,108 @@ export type CreditExpenseListWritable = {
     expense_type?: 'VENUE_COST' | 'FOOD_COST' | 'CLERGY_COST' | 'CONSECRATED_RELIGIOUS_COST' | 'LOGISTICS_COST' | 'TRANSPORT_COST' | 'STAFF_COST' | 'CREATIVES_COST' | 'TECHNICAL_COST' | 'STIPEND' | 'OTHER';
     event?: number | null;
     created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Create serializer for DebitExpense. amount is computed from quantity × unit_price.
+ */
+export type DebitExpenseCreateWritable = {
+    event: string;
+    quantity?: number;
+    unit_price: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    paid_date?: string | null;
+    is_settled?: boolean;
+};
+
+/**
+ * Detailed serializer for DebitExpense — adds verification audit fields.
+ */
+export type DebitExpenseDetailWritable = {
+    quantity?: number;
+    unit_price: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+    verified_updated_at?: string | null;
+    verified_by?: number | null;
+    processed_at?: string | null;
+    processed_by?: number | null;
+    auto_processed?: boolean;
+};
+
+/**
+ * List serializer for DebitExpense. target_* fields are intentionally excluded from the API.
+ */
+export type DebitExpenseListWritable = {
+    quantity?: number;
+    unit_price: string;
+    description: string;
+    /**
+     * * `DONATION` - Donation
+     * * `TICKET_SALES` - Ticket Sales
+     * * `MERCHANDISE_SALES` - Merchandise Sales
+     * * `SPONSORSHIP` - Sponsorship
+     * * `GRANTS` - Grants
+     * * `OTHER` - Other
+     */
+    expense_type?: 'DONATION' | 'TICKET_SALES' | 'MERCHANDISE_SALES' | 'SPONSORSHIP' | 'GRANTS' | 'OTHER';
+    event?: number | null;
+    created_by?: number | null;
+    paid_date?: string | null;
+    is_settled?: boolean;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Update serializer for DebitExpense.
+ */
+export type DebitExpenseUpdateWritable = {
+    description: string;
+    quantity?: number;
+    unit_price?: string;
     paid_date?: string | null;
     is_settled?: boolean;
     /**
@@ -23337,6 +23941,13 @@ export type PaginatedBookingPackageRuleListWritable = {
     results: Array<BookingPackageRuleWritable>;
 };
 
+export type PaginatedBudgetProposalListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<BudgetProposalListWritable>;
+};
+
 export type PaginatedChapterLocationListListWritable = {
     count: number;
     next?: string | null;
@@ -23370,6 +23981,13 @@ export type PaginatedCreditExpenseListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<CreditExpenseListWritable>;
+};
+
+export type PaginatedDebitExpenseListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<DebitExpenseListWritable>;
 };
 
 export type PaginatedDietaryRequirementListWritable = {
@@ -42388,6 +43006,433 @@ export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses = {
 
 export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponse = PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses[keyof PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses];
 
+export type PaymentsBudgetProposalsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter proposals created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter proposals created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event URL safe title
+         */
+        event_url_safe_title?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by proposer user ID
+         */
+        proposed_by?: number;
+        /**
+         * Filter by proposer username
+         */
+        proposed_by_username?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/budget-proposals/';
+};
+
+export type PaymentsBudgetProposalsListResponses = {
+    200: PaginatedBudgetProposalListList;
+};
+
+export type PaymentsBudgetProposalsListResponse = PaymentsBudgetProposalsListResponses[keyof PaymentsBudgetProposalsListResponses];
+
+export type PaymentsBudgetProposalsCreateData = {
+    body: BudgetProposalCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/budget-proposals/';
+};
+
+export type PaymentsBudgetProposalsCreateResponses = {
+    201: BudgetProposalCreate;
+};
+
+export type PaymentsBudgetProposalsCreateResponse = PaymentsBudgetProposalsCreateResponses[keyof PaymentsBudgetProposalsCreateResponses];
+
+export type PaymentsBudgetProposalsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/';
+};
+
+export type PaymentsBudgetProposalsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsBudgetProposalsDestroyResponse = PaymentsBudgetProposalsDestroyResponses[keyof PaymentsBudgetProposalsDestroyResponses];
+
+export type PaymentsBudgetProposalsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/';
+};
+
+export type PaymentsBudgetProposalsRetrieveResponses = {
+    200: BudgetProposalDetail;
+};
+
+export type PaymentsBudgetProposalsRetrieveResponse = PaymentsBudgetProposalsRetrieveResponses[keyof PaymentsBudgetProposalsRetrieveResponses];
+
+export type PaymentsBudgetProposalsPartialUpdateData = {
+    body?: PatchedBudgetProposalUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/';
+};
+
+export type PaymentsBudgetProposalsPartialUpdateResponses = {
+    200: BudgetProposalUpdate;
+};
+
+export type PaymentsBudgetProposalsPartialUpdateResponse = PaymentsBudgetProposalsPartialUpdateResponses[keyof PaymentsBudgetProposalsPartialUpdateResponses];
+
+export type PaymentsBudgetProposalsUpdateData = {
+    body: BudgetProposalUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/';
+};
+
+export type PaymentsBudgetProposalsUpdateResponses = {
+    200: BudgetProposalUpdate;
+};
+
+export type PaymentsBudgetProposalsUpdateResponse = PaymentsBudgetProposalsUpdateResponses[keyof PaymentsBudgetProposalsUpdateResponses];
+
+export type PaymentsBudgetProposalsAddCreditCreateData = {
+    body: AddCreditRequestRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/add-credit/';
+};
+
+export type PaymentsBudgetProposalsAddCreditCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type PaymentsBudgetProposalsAddCreditCreateResponses = {
+    /**
+     * Credit linked successfully
+     */
+    200: unknown;
+};
+
+export type PaymentsBudgetProposalsAddDebitCreateData = {
+    body: AddDebitRequestRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/add-debit/';
+};
+
+export type PaymentsBudgetProposalsAddDebitCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type PaymentsBudgetProposalsAddDebitCreateResponses = {
+    /**
+     * Debit linked successfully
+     */
+    200: unknown;
+};
+
+export type PaymentsBudgetProposalsCreditsListData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: {
+        /**
+         * Filter proposals created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter proposals created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event URL safe title
+         */
+        event_url_safe_title?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by proposer user ID
+         */
+        proposed_by?: number;
+        /**
+         * Filter by proposer username
+         */
+        proposed_by_username?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/budget-proposals/{proposal_id}/credits/';
+};
+
+export type PaymentsBudgetProposalsCreditsListResponses = {
+    200: PaginatedCreditExpenseListList;
+};
+
+export type PaymentsBudgetProposalsCreditsListResponse = PaymentsBudgetProposalsCreditsListResponses[keyof PaymentsBudgetProposalsCreditsListResponses];
+
+export type PaymentsBudgetProposalsDebitsListData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: {
+        /**
+         * Filter proposals created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter proposals created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event URL safe title
+         */
+        event_url_safe_title?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by proposer user ID
+         */
+        proposed_by?: number;
+        /**
+         * Filter by proposer username
+         */
+        proposed_by_username?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/budget-proposals/{proposal_id}/debits/';
+};
+
+export type PaymentsBudgetProposalsDebitsListResponses = {
+    200: PaginatedDebitExpenseListList;
+};
+
+export type PaymentsBudgetProposalsDebitsListResponse = PaymentsBudgetProposalsDebitsListResponses[keyof PaymentsBudgetProposalsDebitsListResponses];
+
+export type PaymentsBudgetProposalsRemoveCreditCreateData = {
+    body: RemoveCreditRequestRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/remove-credit/';
+};
+
+export type PaymentsBudgetProposalsRemoveCreditCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type PaymentsBudgetProposalsRemoveCreditCreateResponses = {
+    /**
+     * Credit unlinked successfully
+     */
+    200: unknown;
+};
+
+export type PaymentsBudgetProposalsRemoveDebitCreateData = {
+    body: RemoveDebitRequestRequest;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/remove-debit/';
+};
+
+export type PaymentsBudgetProposalsRemoveDebitCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type PaymentsBudgetProposalsRemoveDebitCreateResponses = {
+    /**
+     * Debit unlinked successfully
+     */
+    200: unknown;
+};
+
+export type PaymentsBudgetProposalsStatisticsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Budget Proposal.
+         */
+        proposal_id: string;
+    };
+    query?: never;
+    url: '/api/payments/budget-proposals/{proposal_id}/statistics/';
+};
+
+export type PaymentsBudgetProposalsStatisticsRetrieveResponses = {
+    200: BudgetProposalStatistics;
+};
+
+export type PaymentsBudgetProposalsStatisticsRetrieveResponse = PaymentsBudgetProposalsStatisticsRetrieveResponses[keyof PaymentsBudgetProposalsStatisticsRetrieveResponses];
+
+export type PaymentsBudgetProposalsEventStatisticsRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Event UUID to aggregate budget statistics for
+         */
+        event_id: string;
+    };
+    url: '/api/payments/budget-proposals/event-statistics/';
+};
+
+export type PaymentsBudgetProposalsEventStatisticsRetrieveResponses = {
+    200: EventBudgetStatistics;
+};
+
+export type PaymentsBudgetProposalsEventStatisticsRetrieveResponse = PaymentsBudgetProposalsEventStatisticsRetrieveResponses[keyof PaymentsBudgetProposalsEventStatisticsRetrieveResponses];
+
 export type PaymentsCreditsListData = {
     body?: never;
     path?: never;
@@ -42574,6 +43619,180 @@ export type PaymentsCreditsUpdateResponses = {
 };
 
 export type PaymentsCreditsUpdateResponse = PaymentsCreditsUpdateResponses[keyof PaymentsCreditsUpdateResponses];
+
+export type PaymentsDebitsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Maximum computed amount
+         */
+        amount_max?: number;
+        /**
+         * Minimum computed amount
+         */
+        amount_min?: number;
+        /**
+         * Filter debits created after this timestamp
+         */
+        created_after?: string;
+        /**
+         * Filter debits created before this timestamp
+         */
+        created_before?: string;
+        /**
+         * Filter by creator user ID
+         */
+        created_by?: number;
+        /**
+         * Filter by creator username
+         */
+        created_by_username?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: number;
+        /**
+         * Filter by event URL safe title
+         */
+        event_url_safe_title?: string;
+        /**
+         * Filter by expense type
+         *
+         * * `DONATION` - Donation
+         * * `TICKET_SALES` - Ticket Sales
+         * * `MERCHANDISE_SALES` - Merchandise Sales
+         * * `SPONSORSHIP` - Sponsorship
+         * * `GRANTS` - Grants
+         * * `OTHER` - Other
+         */
+        expense_type?: Array<'DONATION' | 'GRANTS' | 'MERCHANDISE_SALES' | 'OTHER' | 'SPONSORSHIP' | 'TICKET_SALES'>;
+        /**
+         * Filter by settlement state
+         */
+        is_settled?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by verification status
+         *
+         * * `pending` - Pending
+         * * `verified` - Verified
+         * * `rejected` - Rejected
+         * * `processed` - Processed
+         */
+        verification_status?: Array<'pending' | 'processed' | 'rejected' | 'verified'>;
+    };
+    url: '/api/payments/debits/';
+};
+
+export type PaymentsDebitsListResponses = {
+    200: PaginatedDebitExpenseListList;
+};
+
+export type PaymentsDebitsListResponse = PaymentsDebitsListResponses[keyof PaymentsDebitsListResponses];
+
+export type PaymentsDebitsCreateData = {
+    body: DebitExpenseCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/payments/debits/';
+};
+
+export type PaymentsDebitsCreateResponses = {
+    201: DebitExpenseCreate;
+};
+
+export type PaymentsDebitsCreateResponse = PaymentsDebitsCreateResponses[keyof PaymentsDebitsCreateResponses];
+
+export type PaymentsDebitsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Debit.
+         */
+        debit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/debits/{debit_id}/';
+};
+
+export type PaymentsDebitsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type PaymentsDebitsDestroyResponse = PaymentsDebitsDestroyResponses[keyof PaymentsDebitsDestroyResponses];
+
+export type PaymentsDebitsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Debit.
+         */
+        debit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/debits/{debit_id}/';
+};
+
+export type PaymentsDebitsRetrieveResponses = {
+    200: DebitExpenseDetail;
+};
+
+export type PaymentsDebitsRetrieveResponse = PaymentsDebitsRetrieveResponses[keyof PaymentsDebitsRetrieveResponses];
+
+export type PaymentsDebitsPartialUpdateData = {
+    body?: PatchedDebitExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Debit.
+         */
+        debit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/debits/{debit_id}/';
+};
+
+export type PaymentsDebitsPartialUpdateResponses = {
+    200: DebitExpenseUpdate;
+};
+
+export type PaymentsDebitsPartialUpdateResponse = PaymentsDebitsPartialUpdateResponses[keyof PaymentsDebitsPartialUpdateResponses];
+
+export type PaymentsDebitsUpdateData = {
+    body: DebitExpenseUpdateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Debit.
+         */
+        debit_id: string;
+    };
+    query?: never;
+    url: '/api/payments/debits/{debit_id}/';
+};
+
+export type PaymentsDebitsUpdateResponses = {
+    200: DebitExpenseUpdate;
+};
+
+export type PaymentsDebitsUpdateResponse = PaymentsDebitsUpdateResponses[keyof PaymentsDebitsUpdateResponses];
 
 export type PaymentsDiscountRulesListData = {
     body?: never;

@@ -329,14 +329,23 @@
               <p class="text-xs text-navy-500">View all payment transactions and manage refunds</p>
             </div>
           </div>
-          <NuxtLink
-            :to="`/events/${id}/m/payments/list`"
-            class="flex items-center gap-2 px-6 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            <span class="material-symbols-outlined text-lg">payments</span>
-            View Payments
-            <span class="material-symbols-outlined text-lg">arrow_forward</span>
-          </NuxtLink>
+          <div class="flex items-center gap-3">
+            <NuxtLink
+              :to="`/events/${id}/m/payments/budget`"
+              class="flex items-center gap-2 px-5 py-3 bg-white border border-deep-navy/20 text-navy-700 text-sm font-bold rounded-xl hover:bg-mist-blue transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              <span class="material-symbols-outlined text-lg">account_balance</span>
+              Budget
+            </NuxtLink>
+            <NuxtLink
+              :to="`/events/${id}/m/payments/list`"
+              class="flex items-center gap-2 px-6 py-3 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <span class="material-symbols-outlined text-lg">payments</span>
+              View Payments
+              <span class="material-symbols-outlined text-lg">arrow_forward</span>
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
