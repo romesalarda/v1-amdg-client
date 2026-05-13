@@ -19,7 +19,7 @@
       <div v-for="i in 3" :key="i" class="h-48 bg-mist-blue/60 rounded-xl animate-pulse" />
     </div>
 
-    <div v-else-if="proposals.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div v-else-if="proposals.length" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-2 gap-4">
       <BudgetProposalCard
         v-for="proposal in proposals"
         :key="proposal.proposal_id"

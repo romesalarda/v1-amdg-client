@@ -71,7 +71,7 @@
             <div class="text-[10px] text-navy-400 uppercase tracking-wide font-semibold mt-1">Total Costs ({{ statistics.credit_count }})</div>
           </div>
           <div class="bg-white border border-deep-navy/10 rounded-xl p-4 text-center">
-            <div class="text-xl font-black text-mist-blue">{{ formatMoney(statistics.estimated_inbound, statistics.estimated_inbound_currency) }}</div>
+            <div class="text-xl font-black text-green-700">{{ formatMoney(statistics.estimated_inbound, statistics.estimated_inbound_currency) }}</div>
             <div class="text-[10px] text-navy-400 uppercase tracking-wide font-semibold mt-1">Est. Income ({{ statistics.debit_count }})</div>
           </div>
           <div class="bg-white border border-deep-navy/10 rounded-xl p-4 text-center">
