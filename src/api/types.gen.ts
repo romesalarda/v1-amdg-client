@@ -2028,6 +2028,19 @@ export type BookingPackageDetail = {
     readonly created_at: string;
     readonly availability_windows: Array<AvailabilityWindow>;
     /**
+     * A booking package can only be deleted if there are no active tickets of its type linked to it.
+     * This prevents data integrity issues with existing tickets that reference this package.
+     */
+    readonly can_delete: boolean;
+    /**
+     * Return count of active tickets linked to this package.
+     */
+    readonly number_of_active_tickets: number;
+    /**
+     * Return count of all tickets linked to this package.
+     */
+    readonly number_of_tickets: number;
+    /**
      *  links
      */
     readonly _links: {
@@ -2068,6 +2081,19 @@ export type BookingPackageList = {
     readonly created_by_name: string | null;
     readonly created_at: string;
     readonly availability_windows: Array<AvailabilityWindow>;
+    /**
+     * A booking package can only be deleted if there are no active tickets of its type linked to it.
+     * This prevents data integrity issues with existing tickets that reference this package.
+     */
+    readonly can_delete: boolean;
+    /**
+     * Return count of active tickets linked to this package.
+     */
+    readonly number_of_active_tickets: number;
+    /**
+     * Return count of all tickets linked to this package.
+     */
+    readonly number_of_tickets: number;
     /**
      *  links
      */
@@ -4629,7 +4655,10 @@ export type CustomTokenObtainPairRequest = {
  */
 export type DebitExpenseCreate = {
     readonly debit_id: string;
-    event: string;
+    /**
+     * URL safe title
+     */
+    event: string | null;
     quantity?: number;
     unit_price: string;
     description: string;
@@ -4650,7 +4679,10 @@ export type DebitExpenseCreate = {
  * Create serializer for DebitExpense. amount is computed from quantity × unit_price.
  */
 export type DebitExpenseCreateRequest = {
-    event: string;
+    /**
+     * URL safe title
+     */
+    event: string | null;
     quantity?: number;
     unit_price: string;
     description: string;
@@ -18658,6 +18690,13 @@ export type TicketTypeDetail = {
     is_active?: boolean;
     created_by?: number | null;
     readonly created_by_name: string | null;
+    readonly number_of_active_tickets: number;
+    readonly number_of_tickets: number;
+    /**
+     * A ticket type can only be deleted if there are no active tickets of this type.
+     * This prevents data integrity issues with existing tickets that reference this type.
+     */
+    readonly can_delete: boolean;
     readonly created_at: string;
     /**
      *  links
@@ -18726,6 +18765,13 @@ export type TicketTypeList = {
     is_active?: boolean;
     created_by?: number | null;
     readonly created_by_name: string | null;
+    readonly number_of_active_tickets: number;
+    readonly number_of_tickets: number;
+    /**
+     * A ticket type can only be deleted if there are no active tickets of this type.
+     * This prevents data integrity issues with existing tickets that reference this type.
+     */
+    readonly can_delete: boolean;
     readonly created_at: string;
     /**
      *  links
@@ -21077,7 +21123,10 @@ export type CreditExpenseListWritable = {
  * Create serializer for DebitExpense. amount is computed from quantity × unit_price.
  */
 export type DebitExpenseCreateWritable = {
-    event: string;
+    /**
+     * URL safe title
+     */
+    event: string | null;
     quantity?: number;
     unit_price: string;
     description: string;

@@ -52,7 +52,9 @@
         <div
           v-for="ticket in tickets"
           :key="ticket.ticket_id"
-          class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+          class="rounded-lg bg-gray-50 border border-gray-200 p-3 cursor-pointer hover:bg-primary/5 transition-colors"
+          @click="navigateTo(`/events/${booking?.event_url_safe_title}/m/participants/dashboard?view=tickets&ticket_id=${ticket.ticket_id}`)"
+
         >
           <div class="flex items-center justify-between gap-3">
             <div>
@@ -70,6 +72,7 @@
 </template>
 
 <script setup lang="ts">
+
 const props = defineProps<{ booking: any }>()
 
 const attendees = computed<any[]>(() => (Array.isArray(props.booking?.attendees) ? props.booking.attendees : []))

@@ -105,7 +105,7 @@
               <span class="text-sm text-navy-600">
                 Preview will show here or 
                 <a
-                  :href="`/events/${id}/preview`"
+                  :href="`/events/${id}/?view=preview`"
                   class="text-primary font-bold hover:underline"
                 >
                   open full preview

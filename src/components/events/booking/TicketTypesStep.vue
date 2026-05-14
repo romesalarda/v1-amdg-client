@@ -68,7 +68,7 @@
                 </button>
                 <button
                   @click="emit('remove', ticketType.id)"
-                  :disabled="!canDelete"
+                  :disabled="!canDelete || ticketType.can_delete === false"
                   class="p-1.5 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
                 >
                   <span class="material-symbols-outlined text-lg">delete</span>

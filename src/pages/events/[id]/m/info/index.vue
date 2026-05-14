@@ -501,7 +501,7 @@
               View Public Page
             </a>
             <a
-              :href="`/events/${id}/preview`"
+              :href="`/events/${id}/?view=preview`"
               class="w-full py-3 bg-white border border-primary text-primary text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all text-center"
             >
               Admin Preview

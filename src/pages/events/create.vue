@@ -646,7 +646,7 @@ const onSubmit = handleSubmit((formValues) => {
     maximum_attendance: formValues.maximum_attendance || undefined,
     what_to_bring: formValues.what_to_bring || undefined,
     important_information: formValues.important_information || undefined,
-    status: 'PUBLISHED',
+    status: 'DRAFTING',
   }
 
   createEvent(eventData as any, {
@@ -699,7 +699,7 @@ const saveDraft = () => {
     createEvent(eventData as any, {
       onSuccess: (response) => {
         $notyf?.success('Draft saved successfully!')
-        navigateTo(`/events/${response?.data?.event_id}`)
+        navigateTo(`/events/${response?.data?.url_safe_title}`)
       },
       onError: (error: any) => {
         $notyf?.error(error?.message || 'Failed to save draft')

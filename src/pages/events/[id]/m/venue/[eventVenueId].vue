@@ -18,8 +18,8 @@
               <div class="flex items-center gap-2 flex-wrap mb-1">
                 <h1 class="text-xl font-black text-deep-navy">{{ eventVenue?.data?.name || 'Venue Details' }}</h1>
                 <span v-if="poiType" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-primary/10 text-primary">
-                  <span class="material-symbols-outlined text-xs">{{ poiType === 'SPORTS_VENUE' ? 'sports' : 'location_city' }}</span>
-                  {{ poiType === 'SPORTS_VENUE' ? 'Sports Venue' : 'Venue' }}
+                  <span class="material-symbols-outlined text-xs">Domain</span>
+                  Location
                 </span>
               </div>
               <div class="flex items-center gap-4 flex-wrap text-sm text-navy-500">
@@ -28,7 +28,7 @@
                   {{ eventVenue.data.address }}
                 </span>
                 <span v-if="eventVenue?.data?.city" class="flex items-center gap-1">
-                  <span class="material-symbols-outlined text-base text-navy-400">apartment</span>
+                  <span class="material-symbols-outlined text-base text-navy-400">public</span>
                   {{ eventVenue.data.city }}
                 </span>
                 <span v-if="eventVenue?.data?.postcode" class="flex items-center gap-1">

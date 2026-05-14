@@ -72,7 +72,7 @@
                 </button>
                 <button
                   @click="emit('remove', pkg.id)"
-                  :disabled="!canDelete"
+                  :disabled="!canDelete || pkg.can_delete === false"
                   class="p-1.5 text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
                 >
                   <span class="material-symbols-outlined text-lg">delete</span>
