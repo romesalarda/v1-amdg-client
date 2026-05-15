@@ -1,8 +1,76 @@
 <template>
   <div class="min-h-screen bg-white">
     <!-- Loading State -->
-    <div v-if="isLoading" class="w-full">
-      <USkeleton class="h-screen w-full" />
+    <div v-if="isLoading" class="w-full animate-pulse">
+      <!-- Hero skeleton -->
+      <div class="relative h-[450px] md:h-[550px] w-full overflow-hidden bg-deep-navy/10">
+        <div class="absolute inset-0 bg-gradient-to-t from-deep-navy/30 to-transparent"></div>
+        <div class="absolute inset-0 flex items-end">
+          <div class="w-full max-container-fluid pb-16 space-y-4">
+            <USkeleton class="h-5 w-24 rounded-full" />
+            <USkeleton class="h-16 w-3/4 rounded-xl" />
+            <USkeleton class="h-6 w-1/2 rounded-lg" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Info bar skeleton -->
+      <div class="bg-white border-b border-deep-navy/10">
+        <div class="max-container-fluid">
+          <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-deep-navy/10">
+            <div v-for="i in 4" :key="i" class="flex items-center gap-4 p-6">
+              <USkeleton class="w-8 h-8 rounded-full shrink-0" />
+              <div class="space-y-2 flex-1">
+                <USkeleton class="h-3 w-16 rounded" />
+                <USkeleton class="h-4 w-32 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content grid skeleton -->
+      <div class="max-container-fluid py-12">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <!-- Main column -->
+          <div class="lg:col-span-2 space-y-6">
+            <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 space-y-4">
+              <USkeleton class="h-6 w-40 rounded" />
+              <USkeleton class="h-4 w-full rounded" />
+              <USkeleton class="h-4 w-5/6 rounded" />
+              <USkeleton class="h-4 w-4/6 rounded" />
+            </div>
+            <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 space-y-4">
+              <USkeleton class="h-6 w-48 rounded" />
+              <USkeleton class="h-4 w-full rounded" />
+              <USkeleton class="h-4 w-full rounded" />
+              <USkeleton class="h-4 w-3/4 rounded" />
+              <USkeleton class="h-4 w-5/6 rounded" />
+            </div>
+          </div>
+
+          <!-- Sidebar -->
+          <div class="space-y-6">
+            <div class="rounded-2xl bg-deep-navy/10 p-8 space-y-4">
+              <USkeleton class="h-4 w-32 rounded mx-auto" />
+              <div class="flex justify-center gap-6">
+                <div v-for="i in 4" :key="i" class="text-center space-y-2">
+                  <USkeleton class="h-10 w-12 rounded" />
+                  <USkeleton class="h-3 w-8 rounded mx-auto" />
+                </div>
+              </div>
+            </div>
+            <div class="bg-white border border-deep-navy/10 rounded-2xl p-8 space-y-4">
+              <USkeleton class="h-14 w-full rounded-xl" />
+            </div>
+            <div class="bg-white border border-deep-navy/10 rounded-2xl p-6 space-y-3">
+              <USkeleton class="h-4 w-28 rounded" />
+              <USkeleton class="h-10 w-full rounded-xl" />
+              <USkeleton class="h-10 w-full rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Event Content -->
@@ -354,7 +422,7 @@
     </div>
 
     <!-- Error State -->
-    <div v-else-if="isError" class="min-h-screen flex items-center justify-center bg-white px-4">
+    <div v-else-if="isError && !is404" class="min-h-screen flex items-center justify-center bg-white px-4">
       <div class="text-center max-w-md">
         <svg class="mx-auto w-20 h-20 text-red-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -370,7 +438,7 @@
       </div>
     </div>
 
-    <!-- Not Found -->
+    <!-- Not Found / 404 -->
     <div v-else class="min-h-screen flex items-center justify-center bg-white px-4">
       <div class="text-center max-w-md">
         <svg class="mx-auto w-20 h-20 text-deep-navy/40 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -547,7 +615,8 @@ const eventId = computed(() => String(route.params.id))
 
 
 // Fetch event details
-const { data, isLoading, isError } = useEvent(eventId)
+const { data, isLoading, isError, error: eventError } = useEvent(eventId)
+const is404 = computed(() => (eventError.value as any)?.status === 404)
 const event = computed(() => data.value?.data)
 
 // Fetch event venues
