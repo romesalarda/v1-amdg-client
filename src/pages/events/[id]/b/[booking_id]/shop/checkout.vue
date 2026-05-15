@@ -5,7 +5,7 @@
 				<div class="flex flex-wrap items-center justify-between gap-2">
 					<div>
 						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Checkout for {{ selectedAttendeeLabel }}</p>
-						<h1 class="mt-1 text-2xl font-black text-deep-navy">Checkout</h1>
+						<h1 class="mt-1 text-3xl font-black text-deep-navy">Checkout</h1>
 						<p class="mt-1 text-sm text-deep-navy/65">Choose payment method and place your order.</p>
 						<p class="mt-1 text-[11px] text-deep-navy/45">Booking ref {{ bookingReference }}</p>
 					</div>
@@ -128,12 +128,10 @@
 							</div>
 
 							<div class="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-blue-200/70 bg-white px-3 py-2">
-								<p class="text-[11px] text-blue-900/80">Transactions are encrypted and processed by Stripe.</p>
+								<p class="text-[11px] text-blue-900/80">Transactions are encrypted and processed by an external service</p>
 								<div class="inline-flex items-center gap-1 rounded-md bg-blue-600 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-white">
-									<svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-										<path d="M13.5 2 6 13h5l-1 9 8-12h-5l.5-8Z" fill="currentColor"/>
-									</svg>
-									<span>Powered by Stripe</span>
+									<UIcon name="i-heroicons-shield-check" class="h-3 w-3" />
+									<span>Secured by Stripe</span>
 								</div>
 							</div>
 							<p v-if="stripeCardError" class="mt-2 text-xs text-red-700">{{ stripeCardError }}</p>
@@ -437,11 +435,13 @@ definePageMeta({
 })
 
 const toast = useToast()
+const route = useRoute()
 
 const {
 	store,
 	eventId,
 	bookingReference,
+	bookingQuery,
 	attendees,
 	selectedAttendeeId,
 	eventUUID,
@@ -642,6 +642,7 @@ const successRedirectSeconds = 10
 const successModalCountdown = ref(successRedirectSeconds)
 const successModalTitle = ref('Payment successful')
 const successModalMessage = ref('Your purchase has been confirmed.')
+const hasRedirectedForAttendeeGuard = ref(false)
 
 const getStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value): string | null => {
 	const details = paymentMethod?.provided_details
@@ -844,8 +845,20 @@ const waitForOrderStatusAfterStripePayment = async () => {
 	return String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
 }
 
-const shopHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop`)
-const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
+const routeAttendeeId = computed(() => {
+	const attendee = route.query.attendee
+	if (Array.isArray(attendee)) return String(attendee[0] || '').trim()
+	return String(attendee || '').trim()
+})
+
+const shopHref = computed(() => ({
+	path: `/events/${eventId.value}/b/${bookingReference.value}/shop`,
+	query: selectedAttendeeId.value ? { attendee: selectedAttendeeId.value } : undefined,
+}))
+const cartHref = computed(() => ({
+	path: `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`,
+	query: selectedAttendeeId.value ? { attendee: selectedAttendeeId.value } : undefined,
+}))
 const bookingWorkspaceHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}`)
 
 const selectedAttendeeLabel = computed(() => {
@@ -853,6 +866,48 @@ const selectedAttendeeLabel = computed(() => {
 	if (!attendee) return 'selected attendee'
 	return attendee.name || attendee.display_id || 'selected attendee'
 })
+
+watch(
+	[routeAttendeeId, attendees, () => bookingQuery.isLoading.value],
+	([attendeeId, rows, isBookingLoading]) => {
+		if (isBookingLoading) return
+
+		if (!attendeeId) {
+			if (!hasRedirectedForAttendeeGuard.value) {
+				hasRedirectedForAttendeeGuard.value = true
+				toast.add({
+					title: 'Checkout attendee required',
+					description: 'Select an attendee from the shop before opening checkout.',
+					color: 'amber',
+					timeout: 3500,
+				})
+				void navigateTo(shopHref.value)
+			}
+			return
+		}
+
+		const isValidAttendee = rows.some((item) => item.id === attendeeId)
+		if (!isValidAttendee) {
+			if (!hasRedirectedForAttendeeGuard.value) {
+				hasRedirectedForAttendeeGuard.value = true
+				toast.add({
+					title: 'Invalid attendee reference',
+					description: 'This attendee is not part of the current booking.',
+					color: 'red',
+					timeout: 4000,
+				})
+				void navigateTo(shopHref.value)
+			}
+			return
+		}
+
+		hasRedirectedForAttendeeGuard.value = false
+		if (selectedAttendeeId.value !== attendeeId) {
+			store.setSelectedAttendee(attendeeId)
+		}
+	},
+	{ immediate: true }
+)
 
 watch(
 	isCheckoutLocked,

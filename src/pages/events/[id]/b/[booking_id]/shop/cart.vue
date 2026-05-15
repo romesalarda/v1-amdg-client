@@ -196,7 +196,10 @@ const selectedAttendeeLabel = computed(() => {
 })
 
 const shopHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop`)
-const checkoutHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`)
+const checkoutHref = computed(() => ({
+	path: `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`,
+	query: selectedAttendeeId.value ? { attendee: selectedAttendeeId.value } : undefined,
+}))
 
 function isUpdatingItem(orderItemId: number) {
 	return pendingUpdateItemIds.value.includes(orderItemId)

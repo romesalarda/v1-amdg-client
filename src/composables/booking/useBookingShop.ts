@@ -43,6 +43,16 @@ export function useBookingShop() {
   const attendees = computed(() => booking.value?.attendees || [])
   const eventUUID = computed(() => booking.value?.event || undefined)
   const eventUrlSafeTitle = computed(() => booking.value?.event_url_safe_title || undefined)
+  const attendeeIdFromRoute = computed(() => {
+    const attendeeFromParams = String(route.params.attendee_id || '').trim()
+    if (attendeeFromParams) return attendeeFromParams
+
+    const attendeeFromQuery = route.query.attendee
+    if (Array.isArray(attendeeFromQuery)) {
+      return String(attendeeFromQuery[0] || '').trim()
+    }
+    return String(attendeeFromQuery || '').trim()
+  })
 
   watch(
     attendees,
@@ -57,6 +67,18 @@ export function useBookingShop() {
 
       if (!exists) {
         store.setSelectedAttendee(nextAttendees[0]?.id || null)
+      }
+    },
+    { immediate: true }
+  )
+
+  watch(
+    () => [attendeeIdFromRoute.value, attendees.value] as const,
+    ([attendeeId, rows]) => {
+      if (!rows.length || !attendeeId) return
+      const exists = rows.some((item) => item.id === attendeeId)
+      if (exists && store.selectedAttendeeId !== attendeeId) {
+        store.setSelectedAttendee(attendeeId)
       }
     },
     { immediate: true }

@@ -2,6 +2,20 @@ export const extractApiErrorMessage = (error: unknown, fallback: string): string
   const apiError = error as any
   const responseData = apiError?.response?.data
 
+  // hey-api client throws parsed JSON error payloads directly when throwOnError=true
+  if (apiError && typeof apiError === 'object') {
+    const directCandidateKeys = ['detail', 'non_field_errors', 'message', 'error']
+    for (const key of directCandidateKeys) {
+      const value = apiError[key]
+      if (typeof value === 'string' && value.trim()) {
+        return value
+      }
+      if (Array.isArray(value) && value.length && typeof value[0] === 'string') {
+        return value[0]
+      }
+    }
+  }
+
   if (typeof responseData === 'string' && responseData.trim()) {
     return responseData
   }

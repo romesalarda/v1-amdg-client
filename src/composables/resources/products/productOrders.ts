@@ -15,6 +15,7 @@ import {
   productsOrdersCompleteCreate,
   productsOrdersReserveBankTransferPayment,
   productsOrdersSubmitCreate,
+  productsOrdersUpdateItemCreate,
 } from '~/api/sdk.gen'
 import type {
   OrderUpdateRequest,
@@ -30,7 +31,9 @@ import type {
   ProductsOrdersReserveBankTransferPaymentData,
   ProductsOrdersSubmitCreateData,
   ProductsOrdersRetrieveData,
+  ProductsOrdersUpdateItemCreateData,
 } from '~/api/types.gen'
+import { extractApiErrorMessage } from '~/utils/errors'
 
 const QUERY_KEY = ['productOrders'] as const
 
@@ -179,10 +182,9 @@ export function useAddProductOrderItem() {
  */
 export function useUpdateProductOrderItem() {
   const queryClient = useQueryClient()
-  const requestFetch = useRequestFetch()
 
   return useMutation({
-    mutationFn: ({
+    mutationFn: async ({
       orderId,
       orderItemId,
       quantity,
@@ -190,16 +192,32 @@ export function useUpdateProductOrderItem() {
       orderId: string | number
       orderItemId: number
       quantity: number
-    }) =>
-      requestFetch(`/api/products/orders/${String(orderId)}/update-item/`, {
-        method: 'POST',
-        body: {
+    }) => {
+      try {
+        const body: ProductsOrdersUpdateItemCreateData['body'] = {
           order_item_id: orderItemId,
           quantity,
-        },
-      }),
+        }
+
+        return await productsOrdersUpdateItemCreate({
+          path: { order_id: String(orderId) },
+          body,
+          throwOnError: true,
+        })
+      }
+      catch (error) {
+        throw new Error(
+          extractApiErrorMessage(error, 'Failed to update order item quantity.'),
+        )
+      }
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+      queryClient.invalidateQueries({
+        queryKey: [...QUERY_KEY, 'detail', variables.orderId],
+      })
+    },
+    onError: (_, variables) => {
       queryClient.invalidateQueries({
         queryKey: [...QUERY_KEY, 'detail', variables.orderId],
       })

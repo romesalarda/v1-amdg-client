@@ -633,7 +633,10 @@ const attendeeModel = computed({
 })
 
 const cartHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/cart`)
-const checkoutHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`)
+const checkoutHref = computed(() => ({
+	path: `/events/${eventId.value}/b/${bookingReference.value}/shop/checkout`,
+	query: selectedAttendeeId.value ? { attendee: selectedAttendeeId.value } : undefined,
+}))
 
 function applyProductFilters() {
 	currentPage.value = 1
