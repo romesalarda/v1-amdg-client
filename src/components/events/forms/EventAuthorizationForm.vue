@@ -79,6 +79,17 @@
         />
         <p class="mt-2 text-xs text-deep-navy/50 font-medium">Any additional comments or requirements (optional)</p>
         <p v-if="errors.notes" class="mt-2 text-xs text-red-600 font-bold">{{ errors.notes }}</p>
+
+        <!-- Compiled flagged issues preview (appended on submit) -->
+        <div v-if="prefilledNotes" class="mt-3 border-2 border-amber-200 rounded-xl bg-amber-50 overflow-hidden">
+          <div class="px-4 py-2 border-b border-amber-200 flex items-center gap-2">
+            <svg class="w-3.5 h-3.5 text-amber-600" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            <span class="text-[10px] font-black text-amber-700 uppercase tracking-wider">Flagged Issues — will be appended to notes on submit</span>
+          </div>
+          <pre class="px-4 py-3 text-xs text-amber-900 font-medium whitespace-pre-wrap">{{ prefilledNotes }}</pre>
+        </div>
       </div>
 
       <div class="flex gap-3 pt-4">
@@ -155,12 +166,7 @@ watch(() => props.existingAuthorization, (newAuth) => {
   }
 }, { immediate: true })
 
-// Watch for prefilled notes from section issues and update notes field
-watch(() => props.prefilledNotes, (newNotes) => {
-  if (newNotes !== undefined) {
-    setFieldValue('notes', newNotes)
-  }
-})
+// prefilledNotes are shown as a preview and appended on submit — do not overwrite the notes field
 
 const authStatusOptions = [
   { label: 'Pending Review', value: 'PENDING' },
@@ -175,11 +181,19 @@ const onSubmit = handleSubmit((values) => {
   const statusValue = typeof values.status === 'object' && values.status !== null 
     ? (values.status as any).value 
     : values.status
-  
+
+  // Append compiled flagged issues to notes (append-only — never overwrites user text)
+  let combinedNotes = values.notes || ''
+  if (props.prefilledNotes) {
+    combinedNotes = combinedNotes
+      ? `${combinedNotes}\n\n${props.prefilledNotes}`
+      : props.prefilledNotes
+  }
+
   emit('submit', {
     status: statusValue,
     reason: values.reason,
-    notes: values.notes
+    notes: combinedNotes || undefined,
   })
 })
 

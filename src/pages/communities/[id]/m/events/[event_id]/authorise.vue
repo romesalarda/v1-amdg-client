@@ -53,7 +53,11 @@
         </div>
       </div>
 
-      <!-- ─── REVIEW SECTIONS ────────────────────────────────── -->
+      <!-- ─── STEPPER INDICATOR ─────────────────────────────── -->
+      <UStepper v-model="currentStep" :items="steps" />
+
+      <!-- ─── STEP 1: EVENT DETAILS ─────────────────────────── -->
+      <template v-if="currentStep === 0">
 
       <!-- Basic Information -->
       <div class="bg-white border-2 border-deep-navy/10 rounded-xl overflow-hidden">
@@ -341,52 +345,120 @@
         </div>
       </div>
 
-      <!-- ─── ISSUES SUMMARY ─────────────────────────────────── -->
-      <div v-if="sectionIssues.length" class="bg-amber-50 border-2 border-amber-300 rounded-xl p-6">
-        <div class="flex items-center gap-3 mb-4">
-          <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
-          </svg>
-          <h3 class="text-sm font-black text-amber-800 uppercase tracking-wider">
-            Review Summary — {{ sectionIssues.length }} issue{{ sectionIssues.length !== 1 ? 's' : '' }}
-          </h3>
-        </div>
-        <p class="text-xs text-amber-700 font-medium mb-3">These will be appended to the Notes field as checklist items:</p>
-        <ul class="space-y-1.5">
-          <li v-for="issue in sectionIssues" :key="issue.id" class="flex items-start gap-2 text-sm text-amber-900 font-medium">
-            <span class="mt-0.5 flex-shrink-0 w-4 h-4 border-2 border-amber-500 rounded-sm bg-white inline-block" />
-            <span><strong>{{ issue.sectionLabel }}:</strong> {{ issue.comment }}</span>
-          </li>
-        </ul>
-        <p class="mt-3 text-xs text-amber-600 font-medium">Notes character count: {{ compiledNotes.length }}/1000</p>
+      <!-- ─── STEP 1 NAVIGATION ──────────────────────────────── -->
+      <div class="flex justify-end">
+        <UButton
+          icon="i-heroicons-arrow-right"
+          trailing
+          @click="currentStep = 1"
+        >
+          Next: Budget Proposal
+        </UButton>
       </div>
 
-      <!-- ─── AUTHORIZATION HISTORY ──────────────────────────── -->
-      <div v-if="existingAuthorizations?.length > 1" class="bg-white border-2 border-deep-navy/10 rounded-xl p-6">
-        <h2 class="text-sm font-black text-deep-navy/50 uppercase tracking-[0.15em] mb-4">Authorization History</h2>
-        <div class="space-y-4">
-          <div v-for="auth in existingAuthorizations.slice(1)" :key="auth.id"
-            class="border border-gray-200 rounded-lg p-4 bg-gray-50">
-            <div class="flex items-start justify-between mb-2">
-              <UBadge :color="getAuthStatusColor(auth.status)" :label="auth.status_display" />
-              <span class="text-xs font-medium text-deep-navy/60">{{ formatEventDateTime(auth.reviewed_at) }}</span>
+      </template>
+      <!-- ─── END STEP 1 ────────────────────────────────────── -->
+
+      <!-- ─── STEP 2: BUDGET PROPOSAL ──────────────────────── -->
+      <template v-if="currentStep === 1">
+
+        <BudgetReviewPanel
+          :event-id="eventId"
+          :section-issues="sectionIssues"
+          :active-flag-section="activeFlagSection"
+          :flag-draft="flagDraft"
+          @toggle-flag="toggleFlag"
+          @update-draft="(v) => { flagDraft = v }"
+          @add-issue="addIssue"
+          @remove-issue="removeIssue"
+        />
+
+        <!-- Step 2 navigation -->
+        <div class="flex justify-between items-center">
+          <UButton
+            icon="i-heroicons-arrow-left"
+            variant="ghost"
+            color="gray"
+            @click="currentStep = 0"
+          >
+            Back: Event Details
+          </UButton>
+          <UButton
+            icon="i-heroicons-arrow-right"
+            trailing
+            @click="currentStep = 2"
+          >
+            Next: Authorise
+          </UButton>
+        </div>
+
+      </template>
+      <!-- ─── END STEP 2 ────────────────────────────────────── -->
+
+      <!-- ─── STEP 3: AUTHORIZATION ────────────────────────── -->
+      <template v-if="currentStep === 2">
+
+        <!-- ─── ISSUES SUMMARY ─────────────────────────────── -->
+        <div v-if="sectionIssues.length" class="bg-amber-50 border-2 border-amber-300 rounded-xl p-6">
+          <div class="flex items-center gap-3 mb-4">
+            <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+            </svg>
+            <h3 class="text-sm font-black text-amber-800 uppercase tracking-wider">
+              Review Summary — {{ sectionIssues.length }} issue{{ sectionIssues.length !== 1 ? 's' : '' }}
+            </h3>
+          </div>
+          <p class="text-xs text-amber-700 font-medium mb-3">These will be appended to the Notes field as checklist items:</p>
+          <ul class="space-y-1.5">
+            <li v-for="issue in sectionIssues" :key="issue.id" class="flex items-start gap-2 text-sm text-amber-900 font-medium">
+              <span class="mt-0.5 flex-shrink-0 w-4 h-4 border-2 border-amber-500 rounded-sm bg-white inline-block" />
+              <span><strong>{{ issue.sectionLabel }}:</strong> {{ issue.comment }}</span>
+            </li>
+          </ul>
+          <p class="mt-3 text-xs text-amber-600 font-medium">Notes character count: {{ compiledNotes.length }}/1000</p>
+        </div>
+
+        <!-- ─── AUTHORIZATION HISTORY ────────────────────── -->
+        <div v-if="existingAuthorizations?.length > 1" class="bg-white border-2 border-deep-navy/10 rounded-xl p-6">
+          <h2 class="text-sm font-black text-deep-navy/50 uppercase tracking-[0.15em] mb-4">Authorization History</h2>
+          <div class="space-y-4">
+            <div v-for="auth in existingAuthorizations.slice(1)" :key="auth.id"
+              class="border border-gray-200 rounded-lg p-4 bg-gray-50">
+              <div class="flex items-start justify-between mb-2">
+                <UBadge :color="getAuthStatusColor(auth.status)" :label="auth.status_display" />
+                <span class="text-xs font-medium text-deep-navy/60">{{ formatEventDateTime(auth.reviewed_at) }}</span>
+              </div>
+              <p class="text-sm text-deep-navy/80 mb-1"><span class="font-semibold">Reviewed by:</span> {{ auth.reviewed_by_email }}</p>
+              <p v-if="auth.reason" class="text-sm text-deep-navy/80 mb-1"><span class="font-semibold">Reason:</span> {{ auth.reason }}</p>
+              <p v-if="auth.notes" class="text-sm text-deep-navy/70"><span class="font-semibold">Notes:</span> {{ auth.notes }}</p>
             </div>
-            <p class="text-sm text-deep-navy/80 mb-1"><span class="font-semibold">Reviewed by:</span> {{ auth.reviewed_by_email }}</p>
-            <p v-if="auth.reason" class="text-sm text-deep-navy/80 mb-1"><span class="font-semibold">Reason:</span> {{ auth.reason }}</p>
-            <p v-if="auth.notes" class="text-sm text-deep-navy/70"><span class="font-semibold">Notes:</span> {{ auth.notes }}</p>
           </div>
         </div>
-      </div>
 
-      <!-- ─── AUTHORIZATION FORM (bottom) ───────────────────── -->
-      <EventAuthorizationForm
-        :event-id="Number(event.event_id)"
-        :existing-authorization="currentAuthorization"
-        :is-submitting="isSubmitting"
-        :prefilled-notes="compiledNotes || undefined"
-        @submit="handleAuthorizationSubmit"
-        @cancel="handleCancel"
-      />
+        <!-- ─── AUTHORIZATION FORM ────────────────────────── -->
+        <EventAuthorizationForm
+          :event-id="Number(event.event_id)"
+          :existing-authorization="currentAuthorization"
+          :is-submitting="isSubmitting"
+          :prefilled-notes="compiledNotes || undefined"
+          @submit="handleAuthorizationSubmit"
+          @cancel="handleCancel"
+        />
+
+        <!-- Step 3 back navigation -->
+        <div class="flex justify-start">
+          <UButton
+            icon="i-heroicons-arrow-left"
+            variant="ghost"
+            color="gray"
+            @click="currentStep = 1"
+          >
+            Back: Budget Proposal
+          </UButton>
+        </div>
+
+      </template>
+      <!-- ─── END STEP 3 ────────────────────────────────────── -->
 
     </div>
   </ManagementLayout>
@@ -404,14 +476,8 @@ import type { EventAuthorizationRequest } from '~/api/types.gen'
 import { formatDateTime } from '~/utils/time'
 import ManagementLayout from '~/components/communities/ManagementLayout.vue'
 import EventAuthorizationForm from '~/components/events/forms/EventAuthorizationForm.vue'
-
-// ── Types ────────────────────────────────────────────────────────────────────
-interface SectionIssue {
-  id: string
-  sectionKey: string
-  sectionLabel: string
-  comment: string
-}
+import BudgetReviewPanel from '~/components/events/authorise/BudgetReviewPanel.vue'
+import { useReviewIssues } from '~/composables/useReviewIssues'
 
 // ── Page Meta ────────────────────────────────────────────────────────────────
 definePageMeta({
@@ -443,47 +509,25 @@ const createMutation = useCreateEventAuthorization()
 const updateMutation = usePartialUpdateEventAuthorization()
 const isSubmitting = computed(() => createMutation.isPending.value || updateMutation.isPending.value)
 
-// ── Section Issue State ──────────────────────────────────────────────────────
-const sectionIssues = ref<SectionIssue[]>([])
-const activeFlagSection = ref<string | null>(null)
-const flagDraft = ref('')
+// ── Section Issue State (shared across all steps) ────────────────────────────
+const {
+  sectionIssues,
+  activeFlagSection,
+  flagDraft,
+  issuesForSection,
+  toggleFlag,
+  addIssue,
+  removeIssue,
+  compiledNotes,
+} = useReviewIssues()
 
-const issuesForSection = (key: string) => sectionIssues.value.filter(i => i.sectionKey === key)
-
-const toggleFlag = (key: string) => {
-  if (activeFlagSection.value === key) {
-    activeFlagSection.value = null
-    flagDraft.value = ''
-  } else {
-    activeFlagSection.value = key
-    flagDraft.value = ''
-  }
-}
-
-const addIssue = (sectionKey: string, sectionLabel: string) => {
-  const trimmed = flagDraft.value.trim()
-  if (!trimmed) return
-  sectionIssues.value.push({
-    id: `${sectionKey}-${Date.now()}`,
-    sectionKey,
-    sectionLabel,
-    comment: trimmed,
-  })
-  flagDraft.value = ''
-  activeFlagSection.value = null
-}
-
-const removeIssue = (id: string) => {
-  sectionIssues.value = sectionIssues.value.filter(i => i.id !== id)
-}
-
-// Each flagged issue becomes a - [ ] checklist item in the Notes field
-const compiledNotes = computed(() => {
-  if (!sectionIssues.value.length) return ''
-  return sectionIssues.value
-    .map(i => `- [ ] **${i.sectionLabel}**: ${i.comment}`)
-    .join('\n')
-})
+// ── Stepper State ────────────────────────────────────────────────────────────
+const currentStep = ref(0)
+const steps = [
+  { key: 'event-details', label: 'Event Details', description: 'Review event information' },
+  { key: 'budget-proposal', label: 'Budget Proposal', description: 'Review financial information' },
+  { key: 'authorise', label: 'Authorise', description: 'Submit authorization decision' },
+]
 
 // ── Authorization Handlers ───────────────────────────────────────────────────
 const handleAuthorizationSubmit = async (values: { status: string; reason?: string; notes?: string }) => {
