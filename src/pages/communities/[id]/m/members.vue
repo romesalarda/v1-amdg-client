@@ -47,8 +47,19 @@
                 <table class="min-w-full divide-y divide-gray-100 text-left text-sm">
                   <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Member</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">
+                        <input
+                          type="checkbox"
+                          class="rounded border-gray-300 text-primary focus:ring-primary"
+                          :checked="selectAll"
+                          @change="toggleSelectAll"
+                        />
+                      </th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">User</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Username</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Email</th>
                       <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Status</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Area</th>
                       <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Added</th>
                       <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Verified</th>
                       <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Actions</th>
@@ -56,15 +67,48 @@
                   </thead>
                   <tbody class="divide-y divide-gray-100">
                     <tr v-for="member in memberships" :key="member.id" class="transition-colors hover:bg-gray-50">
-                      <td class="px-6 py-4">
-                        <p class="text-sm font-semibold text-gray-900">{{ member.user_name }}</p>
-                        <p class="mt-1 text-xs font-medium text-gray-500">{{ member.user_email }}</p>
+                      <td class="py-3 px-4">
+                        <div class="flex items-center justify-center">
+                          <input
+                            v-model="selectedAttendees"
+                            type="checkbox"
+                            :value="member.id"
+                            class="rounded border-gray-300 text-primary focus:ring-primary justify-center"
+                          />
+                        </div>
+                        
                       </td>
                       <td class="px-6 py-4">
-                        <span
+                        <img
+                          v-if="member?.profile_image"
+                          :src="member?.profile_image"
+                          alt="Profile image"
+                          class="w-10 h-10 rounded-full object-cover"
+                        />
+                        <img
+                          v-else
+                          :src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${member.id }`"
+                          alt="Default profile image"
+                          class="w-10 h-10 rounded-full object-cover"
+                        />
+                      </td>
+                      <td class="py-3 px-4">
+                        <p class="text-sm font-semibold text-gray-900">{{ member.user_name }}</p>
+                      </td>
+                      <td class="py-3 px-4">
+                        <p class="text-sm font-semibold text-gray-900">{{ member.user_email }}</p>
+                      </td>
+                      <td class="py-3 px-4">
+                        <div class="flex items-center justify-center gap-2 ">
+                          <span
                           v-if="member.is_verified"
-                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-green-700"
+                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-sm text-green-700"
                         >
+                          <UIcon
+                            name="i-heroicons-check-badge"
+                            class="h-6 w-6 text-green-700 mr-1"
+                          >
+                          </UIcon>
                           Verified
                         </span>
                         <span
@@ -79,21 +123,19 @@
                         >
                           Active
                         </span>
+                        </div>
                       </td>
-                      <td class="px-6 py-4 text-xs font-medium text-gray-500">
+                      <td class="py-3 px-4 text-xs font-medium text-gray-500">
+                        {{ member.area_from || 'N/A' }}
+                      </td>
+                      <td class="py-3 px-4 text-xs font-medium text-gray-500">
                         {{ formatDate(member.added_at) }}
                       </td>
-                      <td class="px-6 py-4 text-xs font-medium text-gray-500">
+                      <td class="py-3 px-4 text-xs font-medium text-gray-500">
                         {{ member.verified_at ? formatDate(member.verified_at) : 'Not verified' }}
                       </td>
-                      <td class="px-6 py-4">
+                      <td class="py-3 px-4">
                         <div class="flex items-center justify-end gap-2">
-                          <!-- <button
-                            class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-                            icon="i-heroicons-eye"
-                            @click="openMembershipModal(member.id)"
-                          >
-                          </button> -->
                           <UButton
                             size="xs"
                             variant="ghost"
@@ -102,15 +144,6 @@
                             @click="openMembershipModal(member.id)"
                             title="Quick view"
                           />
-                          <!-- <button
-                            v-if="member.requires_verification && !member.is_verified"
-                            :disabled="verifyingMembershipId === member.id"
-                            class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700 disabled:opacity-50"
-                            @click="verifyMember(member.id)"
-                          >
-                            <UIcon name="i-heroicons-check-badge" class="h-3.5 w-3.5" />
-                            {{ verifyingMembershipId === member.id ? 'Verifying...' : 'Verify' }}
-                          </button> -->
                           <UButton
                             v-if="member.requires_verification && !member.is_verified"
                             size="xs"
@@ -120,14 +153,6 @@
                             title="Verify member"
                             icon="i-heroicons-check-badge"
                           />
-                          <!-- <button
-                            :disabled="removingMembershipId === member.id"
-                            class="inline-flex items-center gap-1 rounded-md border border-red-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-red-600 transition hover:bg-red-50 disabled:opacity-50"
-                            @click="removeMembership(member.id, member.user_name)"
-                          >
-                            <UIcon name="i-heroicons-trash" class="h-3.5 w-3.5" />
-                            {{ removingMembershipId === member.id ? 'Removing...' : 'Remove' }}
-                          </button> -->
                           <UButton
                             size="xs"
                             color="red"
@@ -536,6 +561,7 @@ definePageMeta({
   middleware: ['auth', 'organisation-controller'],
   layout: false,
 })
+const selectedAttendees = ref<number[]>([])
 
 const route = useRoute()
 const { $notyf } = useNuxtApp()
@@ -588,7 +614,15 @@ const { data: membershipLookupData } = useOrganisationMemberships(computed(() =>
 })))
 
 const membershipLookupIds = computed(() => new Set((membershipLookupData.value?.data?.results || []).map(member => member.user)))
+const selectAll = ref(false)
 
+function toggleSelectAll() {
+  if (selectAll.value) {
+    selectedAttendees.value = memberships.value.map(member => member.id)
+  } else {
+    selectedAttendees.value = []
+  }
+}
 const invitesPage = ref(1)
 const invitesPageSize = ref(10)
 

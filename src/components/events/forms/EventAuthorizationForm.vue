@@ -41,13 +41,15 @@
         <label for="status" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
           Authorization Decision <span class="text-red-500">*</span>
         </label>
-        <USelectMenu 
-          v-model="status"
-          :options="authStatusOptions"
-          placeholder="Select authorization status"
-          class="mt-2"
-          value-attribute="value"
-        />
+        <div class="relative">
+          <USelectMenu
+            v-model="status"
+            value-attribute="value"
+            :options="authStatusOptions"
+            placeholder="Select authorization status..."
+            class="w-full"
+          />
+        </div>
         <p v-if="errors.status" class="mt-2 text-xs text-red-600 font-bold">{{ errors.status }}</p>
       </div>
 
@@ -114,10 +116,12 @@ import { useForm, useField } from 'vee-validate'
 import { EventApprovalSchema } from '~/schemas/event-approval.schema'
 import type { EventAuthorization } from '~/api/types.gen'
 
+
 const props = defineProps<{
   eventId: number
   existingAuthorization?: EventAuthorization | null
   isSubmitting?: boolean
+  prefilledNotes?: string
 }>()
 
 const emit = defineEmits<{
@@ -126,7 +130,7 @@ const emit = defineEmits<{
 }>()
 
 // Setup vee-validate form with zod schema
-const { handleSubmit, errors, setValues } = useForm({
+const { handleSubmit, errors, setValues, setFieldValue } = useForm({
   validationSchema: toTypedSchema(EventApprovalSchema),
   initialValues: {
     status: (props.existingAuthorization?.status as any) || 'PENDING',
@@ -150,6 +154,13 @@ watch(() => props.existingAuthorization, (newAuth) => {
     })
   }
 }, { immediate: true })
+
+// Watch for prefilled notes from section issues and update notes field
+watch(() => props.prefilledNotes, (newNotes) => {
+  if (newNotes !== undefined) {
+    setFieldValue('notes', newNotes)
+  }
+})
 
 const authStatusOptions = [
   { label: 'Pending Review', value: 'PENDING' },

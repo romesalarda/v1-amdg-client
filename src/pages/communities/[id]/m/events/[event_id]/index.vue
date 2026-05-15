@@ -317,7 +317,7 @@
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
-  layout: 'default',
+  layout: false, // We will use the ManagementLayout directly in the template
 })
 
 import { useEvent } from '~/composables/resources/events/events'

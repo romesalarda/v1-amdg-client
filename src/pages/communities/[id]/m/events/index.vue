@@ -105,92 +105,105 @@
         <p class="mt-1 text-xs text-gray-500">Live list of events with status, timing, and registration progress.</p>
       </div>
 
-      <div class="hidden grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] gap-4 border-b border-gray-100 bg-gray-50 px-8 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500 lg:grid">
-        <div>Event</div>
-        <div>Date</div>
-        <div>Status</div>
-        <div>Registrations</div>
-        <div class="text-right">Actions</div>
-      </div>
-
-      <div class="space-y-2 bg-slate-50 p-2.5">
-        <div
-          v-for="event in events"
-          :key="event.event_id"
-          class="grid gap-4 rounded-xl border border-gray-100 bg-white px-4 py-3.5 transition hover:-translate-y-[1px] hover:border-gray-200 hover:bg-gray-50 lg:grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] lg:items-center lg:px-8"
-        >
-          <div class="flex items-center gap-4">
-            <div class="h-12 w-12 overflow-hidden rounded-lg border border-gray-200 bg-slate-200">
-              <img
-                v-if="event.main_landing_image?.image"
-                :src="resolveImageUrl(event.main_landing_image.image)"
-                :alt="event.title"
-                class="h-full w-full object-cover"
-                @error="onImageError"
-              />
-              <div v-else class="h-full w-full bg-gradient-to-br from-slate-300 to-slate-500" />
-            </div>
-            <div class="min-w-0">
-              <NuxtLink
-                :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
-                class="line-clamp-1 text-base font-black text-deep-navy hover:text-primary"
-              >
-                {{ event.title }}
-              </NuxtLink>
-              <p class="line-clamp-1 text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
-                {{ event.event_type_name || 'General event' }}
-              </p>
-            </div>
-          </div>
-
-          <div class="space-y-1">
-            <p class="text-sm font-bold text-deep-navy">{{ formatEventDate(event.start_datetime) }}</p>
-            <p class="inline-flex items-center gap-1 text-xs font-medium text-gray-500">
-              <UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
-              {{ formatEventTime(event.start_datetime) }}
-            </p>
-          </div>
-
-          <div>
-            <span
-              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
-              :class="getStatusBadgeClass(event.status)"
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-gray-50">
+            <tr class="border-b border-gray-100">
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600 sm:px-8">Event</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Date</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Status</th>
+              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Registrations</th>
+              <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-600 sm:px-8">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100 bg-white">
+            <tr
+              v-for="event in events"
+              :key="event.event_id"
+              class="transition hover:bg-gray-50"
             >
-              <UIcon name="i-heroicons-sparkles" class="h-3.5 w-3.5" />
-              {{ event.status }}
-            </span>
-          </div>
+              <td class="px-6 py-4 sm:px-8">
+                <div class="flex items-center gap-4">
+                  <div class="h-12 w-12 overflow-hidden rounded-lg border border-gray-200 bg-slate-200">
+                    <img
+                      v-if="event.main_landing_image?.image"
+                      :src="resolveImageUrl(event.main_landing_image.image)"
+                      :alt="event.title"
+                      class="h-full w-full object-cover"
+                      @error="onImageError"
+                    />
+                    <div v-else class="h-full w-full bg-gradient-to-br from-slate-300 to-slate-500" />
+                  </div>
+                  <div class="min-w-0">
+                    <NuxtLink
+                      :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
+                      class="line-clamp-1 text-base font-semibold text-gray-900 hover:text-primary"
+                    >
+                      {{ event.title }}
+                    </NuxtLink>
+                    <p class="line-clamp-1 text-xs font-medium uppercase tracking-[0.14em] text-gray-500">
+                      {{ event.event_type_name || 'General event' }}
+                    </p>
+                  </div>
+                </div>
+              </td>
 
-          <div class="space-y-1">
-            <div class="flex items-center justify-between text-xs font-semibold text-deep-navy">
-              <span>{{ getRegistrationLabel(event) }}</span>
-              <span class="text-gray-500">{{ event.attendee_overview.percentage_full?.toFixed(1) }}%</span>
-            </div>
-            <div class="h-1.5 overflow-hidden rounded-md bg-gray-200">
-              <div
-                class="h-full rounded-md bg-primary transition-all duration-300"
-                :style="{ width: `${event.attendee_overview.percentage_full || 0}%` }"
-              />
-            </div>
-          </div>
+              <td class="px-6 py-4">
+                <div class="space-y-1">
+                  <p class="text-sm font-semibold text-gray-900">{{ formatEventDate(event.start_datetime) }}</p>
+                  <p class="inline-flex items-center gap-1 text-xs font-medium text-gray-500">
+                    <UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
+                    {{ formatEventTime(event.start_datetime) }}
+                  </p>
+                </div>
+              </td>
 
-          <div class="flex justify-end gap-2">
-            <NuxtLink
-              :to="`/events/${event.url_safe_title}`"
-              class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
-            >
-              <UIcon name="i-heroicons-eye" class="h-3.5 w-3.5" />
-              View
-            </NuxtLink>
-            <NuxtLink
-              :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
-              class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700"
-            >
-              <UIcon name="i-heroicons-cog-6-tooth" class="h-3.5 w-3.5" />
-              Manage
-            </NuxtLink>
-          </div>
-        </div>
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
+                  :class="getStatusBadgeClass(event.status)"
+                >
+                  <UIcon name="i-heroicons-sparkles" class="h-3.5 w-3.5" />
+                  {{ event.status }}
+                </span>
+              </td>
+
+              <td class="px-6 py-4">
+                <div class="space-y-1">
+                  <div class="flex items-center justify-between text-xs font-semibold text-deep-navy">
+                    <span>{{ getRegistrationLabel(event) }}</span>
+                    <span class="text-gray-500">{{ event.attendee_overview.percentage_full?.toFixed(1) }}%</span>
+                  </div>
+                  <div class="h-1.5 overflow-hidden rounded-md bg-gray-200">
+                    <div
+                      class="h-full rounded-md bg-primary transition-all duration-300"
+                      :style="{ width: `${event.attendee_overview.percentage_full || 0}%` }"
+                    />
+                  </div>
+                </div>
+              </td>
+
+              <td class="px-6 py-4 sm:px-8">
+                <div class="flex justify-end gap-2">
+                  <NuxtLink
+                    :to="`/events/${event.url_safe_title}`"
+                    class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+                  >
+                    <UIcon name="i-heroicons-eye" class="h-3.5 w-3.5" />
+                    View
+                  </NuxtLink>
+                  <NuxtLink
+                    :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
+                    class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700"
+                  >
+                    <UIcon name="i-heroicons-cog-6-tooth" class="h-3.5 w-3.5" />
+                    Manage
+                  </NuxtLink>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
       <div class="flex flex-col gap-4 border-t border-gray-100 bg-gray-50 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
