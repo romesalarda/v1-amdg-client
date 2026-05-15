@@ -1,7 +1,7 @@
 <template>
-  <div class="grid grid-cols-1 gap-6" :class="tab.showFilters.value ? 'lg:grid-cols-12' : 'lg:grid-cols-1'">
+  <div class="grid grid-cols-1 gap-6">
     <!-- Main Products Content -->
-    <div :class="tab.showFilters.value ? 'lg:col-span-9' : 'lg:col-span-12'">
+    <div>
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4 p-6 border-b border-gray-100 bg-gray-50">
         <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
@@ -68,11 +68,13 @@
             size="sm"
             variant="ghost"
             color="gray"
-            :icon="tab.showFilters.value ? 'i-heroicons-chevron-right' : 'i-heroicons-funnel'"
+            :icon="tab.showFilters.value ? 'i-heroicons-funnel' : 'i-heroicons-funnel'"
             @click="tab.showFilters.value = !tab.showFilters.value"
-            class="hidden lg:flex"
           >
             {{ tab.showFilters.value ? 'Hide' : 'Show' }} Filters
+            <UBadge v-if="tab.activeFilterCount.value > 0" color="primary" variant="soft" size="xs" class="ml-1">
+              {{ tab.activeFilterCount.value }}
+            </UBadge>
           </UButton>
           <UButton
             size="sm"
@@ -105,7 +107,7 @@
         </div>
       </div>
 
-      <!-- Search Bar -->
+      <!-- Search Bar + Inline Filters -->
       <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
         <div class="flex items-center gap-3">
           <div class="flex-1">
@@ -121,24 +123,98 @@
           </div>
 
           <div v-if="tab.activeFilterCount.value > 0" class="flex items-center gap-2">
-            <UBadge color="primary" variant="soft">
-              {{ tab.activeFilterCount.value }} filter{{ tab.activeFilterCount.value > 1 ? 's' : '' }} active
-            </UBadge>
             <UButton size="xs" variant="ghost" color="gray" @click="tab.clearAllFilters()">
               Clear all
             </UButton>
           </div>
+        </div>
 
-          <UButton
-            size="sm"
-            variant="outline"
-            color="gray"
-            icon="i-heroicons-funnel"
-            @click="tab.showFilters.value = !tab.showFilters.value"
-            class="lg:hidden"
-          >
-            Filters
-          </UButton>
+        <!-- Inline Filters Panel -->
+        <div v-if="tab.showFilters.value" class="pt-4 mt-4 border-t border-gray-100">
+          <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+            <!-- Status -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Status</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="tab.filters.verified"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="text-sm text-gray-700">Verified only</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="tab.filters.active"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="text-sm text-gray-700">Active only</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Stock Status -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Stock Status</label>
+              <div class="space-y-2">
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="tab.filters.inStock"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="text-sm text-gray-700">In Stock</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="tab.filters.lowStock"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="text-sm text-gray-700">Low Stock</span>
+                </label>
+                <label class="flex items-center gap-2">
+                  <input
+                    v-model="tab.filters.outOfStock"
+                    type="checkbox"
+                    class="rounded border-gray-300 text-primary focus:ring-primary"
+                  />
+                  <span class="text-sm text-gray-700">Out of Stock</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Price Range -->
+            <div>
+              <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Price Range</label>
+              <div class="grid grid-cols-2 gap-2">
+                <input
+                  v-model.number="tab.filters.minPrice"
+                  type="number"
+                  placeholder="Min"
+                  class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+                <input
+                  v-model.number="tab.filters.maxPrice"
+                  type="number"
+                  placeholder="Max"
+                  class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                />
+              </div>
+            </div>
+
+            <!-- Filter Actions -->
+            <div class="flex items-end justify-items-center items-center">
+              <button
+                @click="tab.clearAllFilters()"
+                class="w-full px-4 py-2 text-sm font-semibold rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -373,100 +449,6 @@
       </div>
     </div>
 
-    <!-- Filters Sidebar -->
-    <div v-if="tab.showFilters.value" class="lg:col-span-3 space-y-4">
-      <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-6 sticky top-6">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-sm font-black text-deep-navy uppercase tracking-widest">Filters</h3>
-          <UButton size="xs" variant="ghost" color="gray" @click="tab.clearAllFilters()">
-            Clear all
-          </UButton>
-        </div>
-
-        <div class="space-y-6">
-          <!-- Status Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Status</label>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="tab.filters.verified"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span class="text-sm text-gray-700">Verified only</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="tab.filters.active"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span class="text-sm text-gray-700">Active only</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Stock Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Stock Status</label>
-            <div class="space-y-2">
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="tab.filters.inStock"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span class="text-sm text-gray-700">In Stock</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="tab.filters.lowStock"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span class="text-sm text-gray-700">Low Stock</span>
-              </label>
-              <label class="flex items-center gap-2">
-                <input
-                  v-model="tab.filters.outOfStock"
-                  type="checkbox"
-                  class="rounded border-gray-300 text-primary focus:ring-primary"
-                />
-                <span class="text-sm text-gray-700">Out of Stock</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Price Range Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Price Range</label>
-            <div class="grid grid-cols-2 gap-2">
-              <input
-                v-model.number="tab.filters.minPrice"
-                type="number"
-                placeholder="Min"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-              <input
-                v-model.number="tab.filters.maxPrice"
-                type="number"
-                placeholder="Max"
-                class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-          </div>
-
-          <!-- Category Filter -->
-          <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-2 uppercase tracking-wide">Categories</label>
-            <div class="space-y-2 max-h-48 overflow-y-auto">
-              <p class="text-xs text-gray-500">No categories available</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Product Preview Modal -->

@@ -2,7 +2,7 @@
   <EventsManagementLayout :event-id="id" :event="event?.data">
     <!-- Floating Action Bar -->
     <div
-      v-if="hasUnsavedChanges || isSaving"
+      v-if="(hasUnsavedChanges || isSaving) && activeTab === 'registration'"
       class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 bg-white px-6 py-3 rounded-full shadow-lg border border-gray-200"
     >
       <UIcon
@@ -21,122 +21,169 @@
       />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Main Content (3/4) -->
-      <div class="lg:col-span-3 space-y-4">
-        <!-- Header Card with Toolbar -->
-        <UCard class="border-t-4 border-t-blue-500">
-          <div class="flex items-start justify-between gap-4">
-            <div class="flex-1 space-y-2">
-              <div class="flex items-center gap-3">
-                <h1 class="text-3xl font-bold text-gray-900">Registration Form</h1>
-                <UBadge
-                  v-if="previewMode"
-                  label="Preview Mode"
-                  color="blue"
-                  variant="soft"
-                />
-                
-                <!-- WebSocket Connection Status -->
-                <div class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-50">
-                  <div 
-                    class="w-2 h-2 rounded-full transition-colors"
-                    :class="{
-                      'bg-green-500': ws.isConnected.value,
-                      'bg-yellow-500 animate-pulse': ws.isConnecting.value || ws.connectionState.value === 'authenticating',
-                      'bg-red-500': ws.hasError.value,
-                      'bg-gray-400': ws.isDisconnected.value
-                    }"
-                  />
-                  <span class="text-xs text-gray-600 font-medium">
-                    {{ 
-                      ws.isConnected.value ? 'Live' : 
-                      ws.connectionState.value === 'authenticating' ? 'Authenticating...' :
-                      ws.isConnecting.value ? 'Connecting...' : 
-                      ws.hasError.value ? 'Connection Error' : 
-                      'Offline' 
-                    }}
-                  </span>
-                </div>
-                
-                <!-- Presence Indicator -->
-                <PresenceIndicator :active-users="[...activeUsers]" />
-              </div>
-              <p class="text-gray-600">
-                {{ previewMode ? 'This is how attendees will see the form' : 'Configure questions to collect information from attendees' }}
-              </p>
+    <!-- Page Header Card -->
+    <UCard class="border-t-4 border-t-blue-500 mb-6">
+      <div class="flex items-start justify-between gap-4">
+        <div class="flex-1 space-y-2">
+          <div class="flex items-center gap-3">
+            <h1 class="text-3xl font-bold text-gray-900">Registration</h1>
+            <UBadge
+              v-if="previewMode && activeTab === 'registration'"
+              label="Preview Mode"
+              color="blue"
+              variant="soft"
+            />
+            
+            <!-- WebSocket Connection Status -->
+            <div class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-50">
+              <div 
+                class="w-2 h-2 rounded-full transition-colors"
+                :class="{
+                  'bg-green-500': ws.isConnected.value,
+                  'bg-yellow-500 animate-pulse': ws.isConnecting.value || ws.connectionState.value === 'authenticating',
+                  'bg-red-500': ws.hasError.value,
+                  'bg-gray-400': ws.isDisconnected.value
+                }"
+              />
+              <span class="text-xs text-gray-600 font-medium">
+                {{ 
+                  ws.isConnected.value ? 'Live' : 
+                  ws.connectionState.value === 'authenticating' ? 'Authenticating...' :
+                  ws.isConnecting.value ? 'Connecting...' : 
+                  ws.hasError.value ? 'Connection Error' : 
+                  'Offline' 
+                }}
+              </span>
             </div>
             
-            <div class="flex items-center gap-2 flex-wrap">
-              <!-- Undo/Redo -->
-              <UTooltip text="Undo (Ctrl+Z)">
-                <UButton
-                  icon="i-heroicons-arrow-uturn-left"
-                  variant="ghost"
-                  size="sm"
-                  :disabled="!canUndo"
-                  @click="undo"
-                />
-              </UTooltip>
-              <UTooltip text="Redo (Ctrl+Y)">
-                <UButton
-                  icon="i-heroicons-arrow-uturn-right"
-                  variant="ghost"
-                  size="sm"
-                  :disabled="!canRedo"
-                  @click="redo"
-                />
-              </UTooltip>
-              
-              <div class="w-px h-6 bg-gray-300" />
-              
-              <!-- View Controls -->
-              <UTooltip :text="previewMode ? 'Exit Preview' : 'Preview Form'">
-                <UButton
-                  :icon="previewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
-                  :variant="previewMode ? 'solid' : 'ghost'"
-                  :disabled="readOnly"
-                  size="sm"
-                  @click="togglePreviewMode"
-                />
-              </UTooltip>
-              
-              <UTooltip text="Validate Questions">
-                <UButton
-                  icon="i-heroicons-check-circle"
-                  variant="ghost"
-                  size="sm"
-                  color="green"
-                  @click="validateAll"
-                  :disabled="readOnly"
-                />
-              </UTooltip>
-              
-              <UTooltip text="Collapse All">
-                <UButton
-                  icon="i-heroicons-chevron-up-down"
-                  variant="ghost"
-                  size="sm"
-                  @click="collapseAll"
-                  :disabled="readOnly"
-                />
-              </UTooltip>
-              
-              <div class="w-px h-6 bg-gray-300" />
-              
-              <!-- Save -->
-              <UButton
-                label="Save All"
-                icon="i-heroicons-cloud-arrow-up"
-                size="sm"
-                :loading="isSaving"
-                :disabled="!hasUnsavedChanges"
-                @click="saveAll"
-              />
-            </div>
+            <!-- Presence Indicator -->
+            <PresenceIndicator :active-users="[...activeUsers]" />
           </div>
-        </UCard>
+          <p class="text-gray-600">
+            {{
+              activeTab === 'consents'
+                ? 'Manage consent definitions that attendees agree to during registration'
+                : previewMode
+                  ? 'This is how attendees will see the form'
+                  : 'Configure questions to collect information from attendees'
+            }}
+          </p>
+        </div>
 
+        <!-- Registration Tab Toolbar -->
+        <div v-if="activeTab === 'registration'" class="flex items-center gap-2 flex-wrap">
+          <!-- Undo/Redo -->
+          <UTooltip text="Undo (Ctrl+Z)">
+            <UButton
+              icon="i-heroicons-arrow-uturn-left"
+              variant="ghost"
+              size="sm"
+              :disabled="!canUndo"
+              @click="undo"
+            />
+          </UTooltip>
+          <UTooltip text="Redo (Ctrl+Y)">
+            <UButton
+              icon="i-heroicons-arrow-uturn-right"
+              variant="ghost"
+              size="sm"
+              :disabled="!canRedo"
+              @click="redo"
+            />
+          </UTooltip>
+          
+          <div class="w-px h-6 bg-gray-300" />
+          
+          <!-- View Controls -->
+          <UTooltip :text="previewMode ? 'Exit Preview' : 'Preview Form'">
+            <UButton
+              :icon="previewMode ? 'i-heroicons-pencil-square' : 'i-heroicons-eye'"
+              :variant="previewMode ? 'solid' : 'ghost'"
+              :disabled="readOnly"
+              size="sm"
+              @click="togglePreviewMode"
+            />
+          </UTooltip>
+          
+          <UTooltip text="Validate Questions">
+            <UButton
+              icon="i-heroicons-check-circle"
+              variant="ghost"
+              size="sm"
+              color="green"
+              @click="validateAll"
+              :disabled="readOnly"
+            />
+          </UTooltip>
+          
+          <UTooltip text="Collapse All">
+            <UButton
+              icon="i-heroicons-chevron-up-down"
+              variant="ghost"
+              size="sm"
+              @click="collapseAll"
+              :disabled="readOnly"
+            />
+          </UTooltip>
+          
+          <div class="w-px h-6 bg-gray-300" />
+          
+          <!-- Save -->
+          <UButton
+            label="Save All"
+            icon="i-heroicons-cloud-arrow-up"
+            size="sm"
+            :loading="isSaving"
+            :disabled="!hasUnsavedChanges"
+            @click="saveAll"
+          />
+        </div>
+
+        <!-- Consents Tab Actions -->
+        <div v-else-if="activeTab === 'consents'" class="flex items-center gap-2">
+          <UButton
+            label="Add Consent"
+            icon="i-heroicons-plus"
+            size="sm"
+            :disabled="readOnly"
+            @click="startCreateConsent"
+          />
+        </div>
+      </div>
+
+      <!-- Tab Navigation -->
+      <div class="flex gap-1 mt-5 pt-4 border-t border-gray-100">
+        <button
+          @click="activeTab = 'registration'"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+          :class="activeTab === 'registration' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+        >
+          <UIcon name="i-heroicons-clipboard-document-list" class="w-4 h-4" />
+          Registration Form
+          <UBadge :label="String(questions.length)" color="gray" variant="soft" size="xs" />
+        </button>
+        <button
+          @click="activeTab = 'consents'"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+          :class="activeTab === 'consents' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+        >
+          <UIcon name="i-heroicons-shield-check" class="w-4 h-4" />
+          Consent Management
+          <UBadge
+            v-if="(eventConsents.data.value?.data?.results?.length ?? 0) > 0"
+            :label="String(eventConsents.data.value?.data?.results?.length ?? 0)"
+            color="gray"
+            variant="soft"
+            size="xs"
+          />
+        </button>
+      </div>
+    </UCard>
+
+    <!-- Registration Tab Content -->
+    <div v-if="activeTab === 'registration'" class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <!-- Main Content (3/4) -->
+      <div class="lg:col-span-3 space-y-4">
         <!-- Questions List - Google Forms Style with Drag & Drop -->
         <div v-if="questionsLoading" class="space-y-4">
           <USkeleton v-for="i in 3" :key="i" class="h-48" />
@@ -609,54 +656,6 @@
           </div>
         </UCard>
 
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold text-gray-900">Consent Definitions</h3>
-              <UButton
-                size="xs"
-                icon="i-heroicons-plus"
-                :disabled="readOnly"
-                @click="startCreateConsent"
-              />
-            </div>
-          </template>
-
-          <div class="space-y-3">
-            <div v-if="eventConsents.isLoading.value" class="text-xs text-gray-500">Loading consents...</div>
-            <div v-else-if="!eventConsents.data.value?.data?.results?.length" class="text-xs text-gray-500">No consents defined yet.</div>
-            <div v-else class="space-y-2 max-h-72 overflow-y-auto">
-              <div
-                v-for="consent in eventConsents.data.value?.data?.results"
-                :key="consent.id"
-                class="p-3 border border-gray-200 rounded-lg"
-              >
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <div class="text-sm font-medium text-gray-900 truncate">{{ consent.title }}</div>
-                    <div class="text-xs text-gray-600">{{ consent.code }} · v{{ consent.version || '1.0' }}</div>
-                    <div class="mt-1 flex items-center gap-1">
-                      <UBadge v-if="consent.required" size="xs" color="red" variant="soft" label="Required" />
-                      <UBadge :size="'xs'" :color="consent.active ? 'green' : 'gray'" variant="soft" :label="consent.active ? 'Active' : 'Inactive'" />
-                    </div>
-                  </div>
-                  <div class="flex items-center gap-1" v-if="!readOnly">
-                    <UButton size="2xs" variant="ghost" icon="i-heroicons-pencil-square" @click="startEditConsent(consent)" />
-                    <UButton
-                      size="2xs"
-                      variant="ghost"
-                      color="red"
-                      icon="i-heroicons-trash"
-                      :loading="deleteConsentMutation.isPending.value"
-                      @click="removeConsentDefinition(consent.id)"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </UCard>
-
         <!-- Jump to Question -->
         <UCard v-if="questions.length > 3">
           <template #header>
@@ -743,6 +742,169 @@
         </UCard>
       </div>
     </div>
+    <!-- /Registration Tab -->
+
+    <!-- Consents Tab Content -->
+    <div v-else-if="activeTab === 'consents'" class="space-y-6">
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center">
+              <UIcon name="i-heroicons-shield-check" class="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-gray-900">{{ eventConsents.data.value?.data?.count ?? 0 }}</div>
+              <div class="text-xs text-gray-600">Total Consents</div>
+            </div>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+              <UIcon name="i-heroicons-exclamation-circle" class="w-5 h-5 text-red-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-gray-900">
+                {{ eventConsents.data.value?.data?.results?.filter((c: any) => c.required).length ?? 0 }}
+              </div>
+              <div class="text-xs text-gray-600">Required</div>
+            </div>
+          </div>
+        </UCard>
+        <UCard>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center">
+              <UIcon name="i-heroicons-check-circle" class="w-5 h-5 text-green-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-gray-900">
+                {{ eventConsents.data.value?.data?.results?.filter((c: any) => c.active).length ?? 0 }}
+              </div>
+              <div class="text-xs text-gray-600">Active</div>
+            </div>
+          </div>
+        </UCard>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="flex items-center gap-3">
+        <UInput
+          v-model="consentSearch"
+          placeholder="Search by title or description..."
+          icon="i-heroicons-magnifying-glass"
+          size="sm"
+          class="flex-1"
+          :loading="eventConsents.isFetching.value"
+        />
+        <UButton
+          v-if="consentSearch"
+          icon="i-heroicons-x-mark"
+          size="sm"
+          color="gray"
+          @click="consentSearch = ''"
+        />
+        <span class="text-xs text-gray-500 whitespace-nowrap flex-shrink-0">
+          {{ eventConsents.data.value?.data?.count ?? 0 }} result{{ (eventConsents.data.value?.data?.count ?? 0) !== 1 ? 's' : '' }}
+        </span>
+      </div>
+
+      <!-- Consents List -->
+      <div v-if="eventConsents.isLoading.value" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <USkeleton v-for="i in 3" :key="i" class="h-40" />
+      </div>
+
+      <!-- Empty: no consents yet (and no active search) -->
+      <UCard v-else-if="!(eventConsents.data.value?.data?.count) && !consentSearch" class="text-center py-16">
+        <div class="space-y-4">
+          <div class="flex justify-center">
+            <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center">
+              <UIcon name="i-heroicons-shield-check" class="w-10 h-10 text-emerald-600" />
+            </div>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900 mb-2">No consent definitions yet</h3>
+            <p class="text-sm text-gray-600 mb-6">Define what attendees agree to when registering for this event</p>
+          </div>
+          <UButton
+            v-if="!readOnly"
+            label="Create First Consent"
+            icon="i-heroicons-plus"
+            size="lg"
+            @click="startCreateConsent"
+          />
+        </div>
+      </UCard>
+
+      <!-- Empty: search returned no results -->
+      <UCard v-else-if="!eventConsents.data.value?.data?.results?.length && consentSearch" class="text-center py-12">
+        <div class="space-y-3">
+          <UIcon name="i-heroicons-magnifying-glass" class="w-10 h-10 text-gray-400 mx-auto" />
+          <h3 class="font-semibold text-gray-900">No results for &ldquo;{{ consentSearch }}&rdquo;</h3>
+          <p class="text-sm text-gray-600">Try a different search term.</p>
+          <UButton label="Clear Search" variant="ghost" size="sm" @click="consentSearch = ''" />
+        </div>
+      </UCard>
+
+      <div v-else>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <UCard
+            v-for="consent in eventConsents.data.value?.data?.results"
+            :key="consent.id"
+            class="hover:shadow-md transition-shadow"
+          >
+            <div class="space-y-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex-1 min-w-0">
+                  <h4 class="font-semibold text-gray-900 truncate">{{ consent.title }}</h4>
+                  <p class="text-xs text-gray-500 mt-0.5">v{{ consent.version || '1.0' }}</p>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0" v-if="!readOnly">
+                  <UButton size="2xs" variant="ghost" icon="i-heroicons-pencil-square" @click="startEditConsent(consent)" />
+                  <UButton
+                    size="2xs"
+                    variant="ghost"
+                    color="red"
+                    icon="i-heroicons-trash"
+                    :loading="deleteConsentMutation.isPending.value"
+                    @click="removeConsentDefinition(consent.id)"
+                  />
+                </div>
+              </div>
+
+              <p class="text-sm text-gray-600 line-clamp-3">{{ consent.description }}</p>
+
+              <div v-if="consent.external_link" class="text-xs text-blue-600 truncate">
+                <UIcon name="i-heroicons-link" class="w-3 h-3 inline mr-1" />
+                <a :href="consent.external_link" target="_blank" rel="noopener noreferrer" class="hover:underline">External Policy</a>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2 border-t border-gray-100">
+                <UBadge v-if="consent.required" size="xs" color="red" variant="soft" label="Required" />
+                <UBadge size="xs" :color="consent.active ? 'green' : 'gray'" variant="soft" :label="consent.active ? 'Active' : 'Inactive'" />
+              </div>
+            </div>
+          </UCard>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          v-if="(eventConsents.data.value?.data?.count ?? 0) > consentPageSize"
+          class="flex items-center justify-between mt-6 pt-4 border-t border-gray-200"
+        >
+          <span class="text-sm text-gray-600">
+            Showing {{ consentFrom }}–{{ consentTo }} of {{ eventConsents.data.value?.data?.count }}
+          </span>
+          <UPagination
+            v-model="consentPage"
+            :page-count="consentPageSize"
+            :total="eventConsents.data.value?.data?.count ?? 0"
+            :max="7"
+          />
+        </div>
+      </div>
+    </div>
+    <!-- /Consents Tab -->
 
     <UModal v-model="showConsentForm" :ui="{ width: 'sm:max-w-3xl' }">
       <UCard class="overflow-hidden">
@@ -788,40 +950,15 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div class="md:col-span-2">
-              <label class="text-xs font-medium text-gray-700 mb-1 block">Title</label>
-              <UInput
-                v-model="consentForm.title"
-                placeholder="e.g. Photo and Video Consent"
-                size="sm"
-                :disabled="readOnly"
-                @update:model-value="onConsentTitleInput"
-              />
-            </div>
-            <div>
-              <div class="flex items-center justify-between mb-1">
-                <label class="text-xs font-medium text-gray-700 block">Code</label>
-                <UButton
-                  size="2xs"
-                  variant="ghost"
-                  color="gray"
-                  :disabled="readOnly || !consentForm.title.trim()"
-                  @click="generateCodeFromTitle"
-                >
-                  Regenerate
-                </UButton>
-              </div>
-              <UInput
-                v-model="consentForm.code"
-                placeholder="3-digit code"
-                size="sm"
-                :disabled="readOnly"
-                maxlength="3"
-                @update:model-value="onConsentCodeInput"
-              />
-              <p class="text-[11px] text-gray-500 mt-1">Auto-generated from title, editable.</p>
-            </div>
+          <div>
+            <label class="text-xs font-medium text-gray-700 mb-1 block">Title</label>
+            <UInput
+              v-model="consentForm.title"
+              placeholder="e.g. Photo and Video Consent"
+              size="sm"
+              :disabled="readOnly"
+              @update:model-value="onConsentTitleInput"
+            />
           </div>
 
           <div>
@@ -915,6 +1052,9 @@ import Swal from 'sweetalert2'
 // Track focused fields to prevent auto-save while typing
 const focusedFields = ref(new Set<string>())
 
+// Tab state
+const activeTab = ref<'registration' | 'consents'>('registration')
+
 definePageMeta({
   layout: false,
   middleware: ['auth', 'event-permission'],
@@ -951,13 +1091,27 @@ const { data: event } = useEvent(id)
 const eventIntId = computed(() => event.value?.data?.id)
 
 // Consent definitions (event-scoped)
+const consentSearch = ref('')
+const consentPage = ref(1)
+const consentPageSize = 12
+
 const consentFilters = computed(() => {
   if (!eventIntId.value) return undefined
   return {
     event: event.value?.data?.url_safe_title || event?.value?.data?.event_id,
-    page_size: 100,
+    page: consentPage.value,
+    page_size: consentPageSize,
+    search: consentSearch.value || undefined,
   }
 })
+
+// Reset to first page when search changes
+watch(consentSearch, () => { consentPage.value = 1 })
+
+const consentFrom = computed(() => (consentPage.value - 1) * consentPageSize + 1)
+const consentTo = computed(() =>
+  Math.min(consentPage.value * consentPageSize, eventConsents.data.value?.data?.count ?? 0)
+)
 
 const eventConsents = useConsents(consentFilters)
 const createConsentMutation = useCreateConsent()
@@ -966,7 +1120,6 @@ const deleteConsentMutation = useDeleteConsent()
 
 const showConsentForm = ref(false)
 const editingConsentId = ref<number | null>(null)
-const consentCodeManuallyEdited = ref(false)
 
 const consentDefinitionTemplates = [
   {
@@ -1021,20 +1174,7 @@ const inferThreeDigitConsentCode = (title: string) => {
 
 const onConsentTitleInput = (value: string | number) => {
   const title = typeof value === 'string' ? value : String(value ?? '')
-  if (!consentCodeManuallyEdited.value) {
-    consentForm.code = inferThreeDigitConsentCode(title)
-  }
-}
-
-const onConsentCodeInput = (value: string | number) => {
-  const parsed = typeof value === 'string' ? value : String(value ?? '')
-  consentCodeManuallyEdited.value = true
-  consentForm.code = parsed.replace(/\D/g, '').slice(0, 3)
-}
-
-const generateCodeFromTitle = () => {
-  consentCodeManuallyEdited.value = false
-  consentForm.code = inferThreeDigitConsentCode(consentForm.title)
+  consentForm.code = inferThreeDigitConsentCode(title)
 }
 
 const applyConsentTemplate = (template: {
@@ -1051,7 +1191,6 @@ const applyConsentTemplate = (template: {
   consentForm.required = template.required
   consentForm.active = template.active
   consentForm.version = template.version
-  consentCodeManuallyEdited.value = false
   consentForm.code = inferThreeDigitConsentCode(template.title)
 }
 
@@ -1068,7 +1207,6 @@ const consentForm = reactive({
 const resetConsentForm = () => {
   showConsentForm.value = false
   editingConsentId.value = null
-  consentCodeManuallyEdited.value = false
   consentForm.code = ''
   consentForm.title = ''
   consentForm.description = ''
@@ -1087,7 +1225,6 @@ const startEditConsent = (consent: any) => {
   editingConsentId.value = consent.id
   showConsentForm.value = true
   consentForm.code = consent.code || ''
-  consentCodeManuallyEdited.value = true
   consentForm.title = consent.title || ''
   consentForm.description = consent.description || ''
   consentForm.external_link = consent.external_link || ''
@@ -1102,9 +1239,14 @@ const saveConsentDefinition = async () => {
     return
   }
 
-  if (!consentForm.code.trim() || !consentForm.title.trim() || !consentForm.description.trim()) {
-    toast.add({ title: 'Missing Fields', description: 'Code, title, and description are required.', color: 'red', timeout: 3000 })
+  if (!consentForm.title.trim() || !consentForm.description.trim()) {
+    toast.add({ title: 'Missing Fields', description: 'Title and description are required.', color: 'red', timeout: 3000 })
     return
+  }
+
+  // Auto-generate code if empty
+  if (!consentForm.code.trim()) {
+    consentForm.code = inferThreeDigitConsentCode(consentForm.title)
   }
 
   const payload = {
