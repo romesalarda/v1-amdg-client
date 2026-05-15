@@ -130,68 +130,72 @@
         <div v-for="i in 3" :key="i" class="h-10 bg-gray-100 rounded-lg animate-pulse" />
       </div>
 
-      <div v-else class="divide-y divide-deep-navy/10">
-        <!-- Credits (Outgoing costs) -->
-        <div class="px-5 py-4">
-          <h4 class="text-[10px] font-black text-deep-navy/50 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-red-400 inline-block" />
-            Outgoing Costs ({{ credits.length }})
-          </h4>
-          <div v-if="credits.length" class="space-y-2">
-            <div
-              v-for="credit in credits"
-              :key="credit.credit_id"
-              class="flex items-center gap-3 bg-red-50/60 border border-red-100 rounded-lg px-3 py-2"
-            >
+      <!-- Receipt -->
+      <div v-else class="mx-4 mb-5 bg-[#fdfcf8] border border-dashed border-deep-navy/20 rounded-lg font-mono text-[11px] overflow-hidden">
+        <!-- Receipt header -->
+        <div class="px-4 pt-4 pb-3 text-center border-b border-dashed border-deep-navy/15">
+          <p class="text-[9px] uppercase tracking-[0.2em] text-deep-navy/40 font-sans font-black">Budget Proposal</p>
+          <p class="text-sm font-bold text-deep-navy mt-0.5 font-sans leading-tight">{{ proposal.proposal_title }}</p>
+          <p class="text-[9px] text-deep-navy/40 mt-1 font-sans">{{ formatDate(proposal.created_at) }}</p>
+        </div>
+
+        <!-- Outgoing costs section -->
+        <div class="px-4 pt-3">
+          <p class="text-[9px] uppercase tracking-[0.18em] text-deep-navy/40 font-sans font-black mb-2">Outgoing Costs</p>
+          <div v-if="credits.length">
+            <div v-for="credit in credits" :key="credit.credit_id" class="flex items-start justify-between gap-2 py-1.5">
               <div class="flex-1 min-w-0">
-                <div class="text-xs font-semibold text-navy-900 truncate">{{ credit.description }}</div>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <span class="text-[10px] text-navy-400 uppercase tracking-wide font-semibold">
-                    {{ formatExpenseType(credit.expense_type) }}
-                  </span>
-                  <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                <span class="text-deep-navy/80 leading-tight block truncate">{{ credit.description }}</span>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="text-[9px] text-deep-navy/35 uppercase font-sans">{{ formatExpenseType(credit.expense_type) }}</span>
+                  <span class="text-[9px] font-sans px-1 rounded capitalize"
                     :class="statusClasses_(credit.verification_status)">
                     {{ credit.verification_status ?? 'pending' }}
                   </span>
                 </div>
               </div>
-              <div class="text-xs font-black text-red-700 flex-shrink-0">{{ credit.amount }}</div>
+              <span class="font-bold text-red-700 flex-shrink-0 tabular-nums">- {{ credit.amount }}</span>
             </div>
           </div>
-          <p v-else class="text-xs text-navy-400 text-center py-3">No cost entries linked to this proposal.</p>
+          <p v-else class="text-deep-navy/30 text-center py-2 font-sans text-[10px]">No cost entries.</p>
         </div>
 
-        <!-- Debits (Estimated income) -->
-        <div class="px-5 py-4">
-          <h4 class="text-[10px] font-black text-deep-navy/50 uppercase tracking-[0.15em] mb-3 flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-green-400 inline-block" />
-            Estimated Income ({{ debits.length }})
-          </h4>
-          <div v-if="debits.length" class="space-y-2">
-            <div
-              v-for="debit in debits"
-              :key="debit.debit_id"
-              class="flex items-center gap-3 bg-green-50/60 border border-green-100 rounded-lg px-3 py-2"
-            >
+        <!-- Dashed divider -->
+        <div class="mx-4 my-3 border-t border-dashed border-deep-navy/15" />
+
+        <!-- Estimated income section -->
+        <div class="px-4">
+          <p class="text-[9px] uppercase tracking-[0.18em] text-deep-navy/40 font-sans font-black mb-2">Estimated Income</p>
+          <div v-if="debits.length">
+            <div v-for="debit in debits" :key="debit.debit_id" class="flex items-start justify-between gap-2 py-1.5">
               <div class="flex-1 min-w-0">
-                <div class="text-xs font-semibold text-navy-900 truncate">{{ debit.description }}</div>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <span class="text-[10px] text-navy-400 uppercase tracking-wide font-semibold">
-                    {{ formatExpenseType(debit.expense_type) }}
-                  </span>
-                  <span v-if="debit.quantity && debit.quantity > 1" class="text-[10px] text-navy-400">
-                    × {{ debit.quantity }}
-                  </span>
-                  <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                <span class="text-deep-navy/80 leading-tight block truncate">
+                  {{ debit.description }}<span v-if="debit.quantity && debit.quantity > 1" class="text-deep-navy/40"> ×{{ debit.quantity }}</span>
+                </span>
+                <div class="flex items-center gap-1.5 mt-0.5">
+                  <span class="text-[9px] text-deep-navy/35 uppercase font-sans">{{ formatExpenseType(debit.expense_type) }}</span>
+                  <span class="text-[9px] font-sans px-1 rounded capitalize"
                     :class="statusClasses_(debit.verification_status)">
                     {{ debit.verification_status ?? 'pending' }}
                   </span>
                 </div>
               </div>
-              <div class="text-xs font-black text-green-700 flex-shrink-0">{{ debit.amount }}</div>
+              <span class="font-bold text-green-700 flex-shrink-0 tabular-nums">{{ debit.amount }}</span>
             </div>
           </div>
-          <p v-else class="text-xs text-navy-400 text-center py-3">No income entries linked to this proposal.</p>
+          <p v-else class="text-deep-navy/30 text-center py-2 font-sans text-[10px]">No income entries.</p>
+        </div>
+
+        <!-- Totals footer -->
+        <div class="mx-4 mt-3 pt-3 border-t-2 border-double border-deep-navy/20 pb-4 space-y-1.5">
+          <div class="flex justify-between items-center">
+            <span class="text-[9px] uppercase tracking-[0.15em] text-deep-navy/40 font-sans font-black">Total Outgoing</span>
+            <span class="font-bold text-red-700 tabular-nums">{{ proposal.total_credits }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-[9px] uppercase tracking-[0.15em] text-deep-navy/40 font-sans font-black">Est. Income</span>
+            <span class="font-bold text-green-700 tabular-nums">{{ proposal.total_debits }}</span>
+          </div>
         </div>
       </div>
     </div>

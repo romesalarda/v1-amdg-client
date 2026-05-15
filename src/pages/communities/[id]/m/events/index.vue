@@ -38,7 +38,7 @@
         <div class="relative md:w-64">
           <select
             v-model="statusFilter"
-            class="h-11 w-full appearance-none rounded-md bg-slate-100 px-4 pr-10 text-xs font-black uppercase tracking-[0.18em] text-slate-700 focus:border-transparent focus:ring-2 focus:ring-slate-300"
+            class="h-11 w-full appearance-none rounded-md bg-slate-100 px-4 pr-10 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700 focus:border-transparent focus:ring-2 focus:ring-slate-300"
           >
             <option :value="undefined">All statuses</option>
             <option value="DRAFTING">Drafting</option>
@@ -86,11 +86,9 @@
       class="rounded-lg bg-white py-16 text-center shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200"
     >
       <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-md border border-slate-200 bg-slate-100">
-        <svg class="h-10 w-10 text-slate-400" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
-        </svg>
+        <UIcon name="i-heroicons-calendar-days" class="h-16 w-16 text-slate-400" />
       </div>
-      <h3 class="mb-2 text-lg font-black uppercase tracking-tight text-deep-navy">No events found</h3>
+      <h3 class="mb-2 text-xl font-black uppercase tracking-tight text-deep-navy">No events found</h3>
       <p class="text-sm font-medium text-deep-navy/60">
         {{ searchQuery || statusFilter ? 'Try adjusting your filters' : 'Get started by creating your first event' }}
       </p>
@@ -109,11 +107,11 @@
         <table class="min-w-full text-left text-sm">
           <thead class="bg-gray-50">
             <tr class="border-b border-gray-100">
-              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600 sm:px-8">Event</th>
-              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Date</th>
-              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Status</th>
-              <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Registrations</th>
-              <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-600 sm:px-8">Actions</th>
+              <th class="px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600 sm:px-8">Event</th>
+              <th class="px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Date</th>
+              <th class="px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Status</th>
+              <th class="px-6 py-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Registrations</th>
+              <th class="px-6 py-3 text-right text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600 sm:px-8">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-100 bg-white">
@@ -160,7 +158,7 @@
 
               <td class="px-6 py-4">
                 <span
-                  class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
+                  class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em]"
                   :class="getStatusBadgeClass(event.status)"
                 >
                   <UIcon name="i-heroicons-sparkles" class="h-3.5 w-3.5" />
@@ -411,7 +409,7 @@ const getRegistrationLabel = (event: EventList) => {
   const attendees = event.attendee_overview?.total_attendees
   const capacity = event.attendee_overview?.max_attendance
   if (!capacity || capacity <= 0) return `${attendees} attendees`
-  return `${attendees} / ${capacity} Attendees`
+  return `${attendees} / ${capacity} attendees`
 }
 
 definePageMeta({

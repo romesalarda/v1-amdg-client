@@ -1,7 +1,7 @@
 <template>
   <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
     <!-- Back Button -->
-    <UButton
+    <!-- <UButton
       :to="`/communities/${organisationId}/m/events`"
       icon="i-heroicons-arrow-left"
       variant="ghost"
@@ -9,7 +9,7 @@
       class="mb-6"
     >
       Back to Events
-    </UButton>
+    </UButton> -->
 
     <!-- Loading State -->
     <div v-if="isLoadingEvent" class="space-y-6">
@@ -27,21 +27,20 @@
     />
 
     <!-- Main Content -->
-    <div v-else-if="event" class="space-y-6">
+    <div v-else-if="event" class="space-y-6 pb-28">
 
       <!-- Page Header -->
       <div class="bg-white rounded-xl border-2 border-deep-navy/10 p-6 shadow-sm">
         <div class="flex items-start justify-between gap-6">
           <div class="flex-1">
-            <h1 class="text-3xl font-black text-deep-navy mb-2">{{ event.title }}</h1>
-            <p class="text-deep-navy/60 font-medium mb-4">{{ event.display_code }}</p>
+            <h1 class="text-3xl font-black text-deep-navy mb-2">Authorise <span class="text-deep-navy/60 font-medium">{{ event.title }}</span></h1>
+            <p class="text-deep-navy/60 font-medium mb-4">Review this event's details and flag any issues before authorisation.</p>
             <div class="flex flex-wrap gap-3">
               <UBadge :color="getStatusColor(event.status)" :label="event.status_display" size="lg" />
               <UBadge v-if="event.is_approved" color="green" label="Authorized" size="lg" />
               <UBadge v-else color="yellow" label="Pending Authorization" size="lg" />
             </div>
           </div>
-          <!-- Flagged issues tally -->
           <div v-if="sectionIssues.length" class="flex-shrink-0">
             <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 text-amber-800 rounded-full text-xs font-black uppercase tracking-wider">
               <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
@@ -53,8 +52,7 @@
         </div>
       </div>
 
-      <!-- ─── STEPPER INDICATOR ─────────────────────────────── -->
-      <UStepper v-model="currentStep" :items="steps" />
+
 
       <!-- ─── STEP 1: EVENT DETAILS ─────────────────────────── -->
       <template v-if="currentStep === 0">
@@ -345,17 +343,6 @@
         </div>
       </div>
 
-      <!-- ─── STEP 1 NAVIGATION ──────────────────────────────── -->
-      <div class="flex justify-end">
-        <UButton
-          icon="i-heroicons-arrow-right"
-          trailing
-          @click="currentStep = 1"
-        >
-          Next: Budget Proposal
-        </UButton>
-      </div>
-
       </template>
       <!-- ─── END STEP 1 ────────────────────────────────────── -->
 
@@ -372,25 +359,6 @@
           @add-issue="addIssue"
           @remove-issue="removeIssue"
         />
-
-        <!-- Step 2 navigation -->
-        <div class="flex justify-between items-center">
-          <UButton
-            icon="i-heroicons-arrow-left"
-            variant="ghost"
-            color="gray"
-            @click="currentStep = 0"
-          >
-            Back: Event Details
-          </UButton>
-          <UButton
-            icon="i-heroicons-arrow-right"
-            trailing
-            @click="currentStep = 2"
-          >
-            Next: Authorise
-          </UButton>
-        </div>
 
       </template>
       <!-- ─── END STEP 2 ────────────────────────────────────── -->
@@ -445,21 +413,44 @@
           @cancel="handleCancel"
         />
 
-        <!-- Step 3 back navigation -->
-        <div class="flex justify-start">
-          <UButton
-            icon="i-heroicons-arrow-left"
-            variant="ghost"
-            color="gray"
-            @click="currentStep = 1"
-          >
-            Back: Budget Proposal
-          </UButton>
-        </div>
-
       </template>
       <!-- ─── END STEP 3 ────────────────────────────────────── -->
 
+    </div>
+
+    <!-- ─── STICKY BOTTOM NAV ──────────────────────────────────── -->
+    <div v-if="event" class="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-white border-t-2 border-deep-navy/10 shadow-[0_-4px_24px_rgba(0,0,0,0.07)]">
+      <div class="px-8 py-4 flex items-center gap-6">
+        <!-- Back button -->
+        <!-- <UButton
+          v-if="currentStep > 0"
+          icon="i-heroicons-arrow-left"
+          variant="ghost"
+          color="gray"
+          class="flex-shrink-0"
+          @click="currentStep--"
+        >
+          {{ steps[currentStep - 1].label }}
+        </UButton>
+        <div v-else class="flex-shrink-0 w-32" /> -->
+
+        <!-- Stepper -->
+        <div class="flex-1">
+          <UStepper v-model="currentStep" :items="steps" :connector-width="400" :linear="false" />
+        </div>
+
+        <!-- Next button -->
+        <!-- <UButton
+          v-if="currentStep < steps.length - 1"
+          icon="i-heroicons-arrow-right"
+          trailing
+          class="flex-shrink-0"
+          @click="currentStep++"
+        >
+          {{ steps[currentStep + 1].label }}
+        </UButton>
+        <div v-else class="flex-shrink-0 w-32" /> -->
+      </div>
     </div>
   </ManagementLayout>
 </template>

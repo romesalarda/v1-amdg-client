@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
     <!-- Overview section with flag button -->
-    <div class="bg-white border-2 border-deep-navy/10 rounded-xl overflow-hidden">
-      <div class="px-6 py-4 border-b border-deep-navy/10 flex items-center justify-between">
+    <div class="bg-white border-deep-navy/10 rounded-xl overflow-hidden">
+      <!-- <div class="px-6 py-4 border-b border-deep-navy/10 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <h2 class="text-sm font-black text-deep-navy/70 uppercase tracking-[0.15em]">Budget Overview</h2>
           <span v-if="issuesForSection('budget-overview').length"
@@ -26,7 +26,7 @@
 
       <div class="p-6">
         <EventBudgetStatisticsPanel :event-id="eventId" />
-      </div>
+      </div> -->
 
       <!-- Flag form for overview -->
       <div v-if="activeFlagSection === 'budget-overview'" class="px-6 pb-5 pt-3 border-t border-amber-200 bg-amber-50">
