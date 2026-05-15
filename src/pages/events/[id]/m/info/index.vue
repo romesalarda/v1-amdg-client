@@ -210,14 +210,13 @@
               <!-- Long Description -->
               <div class="space-y-2">
                 <label class="block text-xs font-black text-primary uppercase tracking-wider">Long Description</label>
-                <textarea
+                <EventMarkdownEditor
                   v-if="isEditMode"
                   v-model="long_description"
-                  rows="6"
-                  placeholder="Detailed description of your event"
-                  class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm text-navy-700 leading-relaxed resize-none"
-                ></textarea>
-                <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm text-navy-700 leading-relaxed min-h-[120px] whitespace-pre-wrap">{{ long_description || '-' }}</p>
+                />
+                <div v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl min-h-[120px]">
+                  <MarkdownPreview :content="long_description || undefined" />
+                </div>
                 <span v-if="errors.long_description" class="text-xs text-red-500 font-medium">{{ errors.long_description }}</span>
               </div>
 
@@ -713,6 +712,8 @@ import { formatCompactDateTime } from '~/utils/time'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import ConfirmActionModal from '~/components/events/ConfirmActionModal.vue'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
+import EventMarkdownEditor from '~/components/events/EventMarkdownEditor.vue'
+import MarkdownPreview from '~/components/events/MarkdownPreview.vue'
 import { EventBaseSchema } from '~/schemas/event.schema'
 
 definePageMeta({

@@ -139,9 +139,7 @@
                 <div class="w-1.5 h-8 bg-blue-500 rounded-full"></div>
                 About the Event
               </h2>
-              <div class="text-deep-navy/80 text-base leading-relaxed whitespace-pre-line">
-                {{ event.long_description || event.short_description || 'No description available.' }}
-              </div>
+                <MarkdownPreview :content="event.long_description || event.short_description || 'No description available.'" />
             </div>
 
             
@@ -528,6 +526,7 @@ import { useEventMyBooking } from '~/composables/resources/events'
 import { useRegistrationStore } from '~/stores/registration'
 import { formatDate, useCountdown, formatTime } from '~/utils/time'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import MarkdownPreview from '~/components/events/MarkdownPreview.vue'
 
 definePageMeta({
   middleware: ['auth'],
