@@ -31,24 +31,37 @@
 
 				<div class="mt-4">
 					<label class="mb-1 block text-sm font-medium text-gray-700">Alternative sign-in type</label>
-					<USelectMenu
-						:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId || undefined"
-						:options="buildAlternativeSigninSelectOptions(alternativeSigninOptions)"
-						value-attribute="value"
-						option-attribute="label"
-						placeholder="Select sign-in type"
-						:loading="alternativeSigninsLoading"
-						@update:model-value="(value) => {
-							if (!value) {
-								currentAttendee.personalInfo.alternativeSigninIdentifier = null
-								return
-							}
-							if (!currentAttendee.personalInfo.alternativeSigninIdentifier) {
-								currentAttendee.personalInfo.alternativeSigninIdentifier = { eventAlternativeSigninId: '', identifier: '' }
-							}
-							currentAttendee.personalInfo.alternativeSigninIdentifier.eventAlternativeSigninId = String(value)
-						}"
-					/>
+						<USelectMenu
+							:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId || undefined"
+							:options="buildAlternativeSigninSelectOptions(alternativeSigninOptions)"
+							value-attribute="value"
+							option-attribute="label"
+							placeholder="Select sign-in type"
+							:loading="alternativeSigninsLoading"
+							@update:model-value="(value) => {
+								if (!value) {
+									currentAttendee.personalInfo.alternativeSigninIdentifier = null
+									return
+								}
+								if (!currentAttendee.personalInfo.alternativeSigninIdentifier) {
+									currentAttendee.personalInfo.alternativeSigninIdentifier = { eventAlternativeSigninId: '', identifier: '' }
+								}
+								currentAttendee.personalInfo.alternativeSigninIdentifier.eventAlternativeSigninId = String(value)
+							}"
+						/>
+						<UButton
+							class="mt-4"
+							v-if="currentAttendee.personalInfo.alternativeSigninIdentifier"
+							icon="i-heroicons-x-mark"
+							size="xs"
+							color="gray"
+							variant="ghost"
+							title="Clear selection"
+							@click="currentAttendee.personalInfo.alternativeSigninIdentifier = null"
+						
+						>
+						Clear selection
+						</UButton>	
 					<p
 						v-if="!alternativeSigninsLoading && !alternativeSigninOptions.length"
 						class="mt-2 text-xs text-slate-500"
