@@ -23,6 +23,13 @@
 		:checkout-processing-stage-label="checkoutProcessingStageLabel"
 	/>
 
+	<div v-if="isPreviewMode" class="border-b border-amber-300 bg-amber-50 px-6 py-3">
+		<div class="mx-auto flex max-w-[1200px] items-center gap-3">
+			<span class="inline-flex items-center rounded-full bg-amber-200 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-amber-900">Preview</span>
+			<p class="text-sm text-amber-800">You are viewing the registration flow in preview mode. All steps are accessible but checkout is disabled.</p>
+		</div>
+	</div>
+
 		<div class="mx-auto flex w-full max-w-[1200px] flex-col gap-8 px-6 py-8 lg:flex-row lg:py-10">
 			<div v-if="eventLoading" class="w-full rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
 				Loading event details...
@@ -472,6 +479,8 @@ const registrationMode = computed(() => {
 	if (mode === 'self') return 'self'
 	return Number(route.query.tickets || 1) > 1 ? 'multiple' : 'self'
 })
+const isPreviewMode = computed(() => String(route.query.preview || '').toLowerCase() === 'true')
+
 const registrarAttending = computed(() => {
 	if (route.query.uia !== undefined) {
 		const attending = String(route.query.uia).toLowerCase()
@@ -541,6 +550,7 @@ const {
 	onIntentExpired: () => {
 		showCheckoutSuccessModal.value = false
 	},
+	isPreview: isPreviewMode,
 })
 
 const {
@@ -983,9 +993,10 @@ const {
 })
 
 const isCheckoutUiBusy = computed(() => isSaving.value || isPollingPaymentStatus.value)
-const shouldDisableCheckoutButton = computed(() => checkoutCompleted.value || isCheckoutUiBusy.value)
+const shouldDisableCheckoutButton = computed(() => checkoutCompleted.value || isCheckoutUiBusy.value || isPreviewMode.value)
 
 const checkoutPrimaryButtonLabel = computed(() => {
+	if (isPreviewMode.value) return 'Preview mode — checkout disabled'
 	if (isPollingPaymentStatus.value) return 'Finalizing payment...'
 	if (isSaving.value && isStripeMethod.value) return 'Processing card payment...'
 	if (isSaving.value && isBankTransferMethod.value) return 'Submitting transfer checkout...'
@@ -1260,9 +1271,11 @@ const canContinue = computed(() => {
 	}
 	if (activeStepIndex.value === reviewStepIndex) {
 		const allAttendeesReady = store.attendees.every((attendee) => isAttendeeReady(attendee))
-		if (checkoutCompleted.value || !store.bookingIntentId || !allAttendeesReady || isPollingPaymentStatus.value) {
+		if (checkoutCompleted.value || (!isPreviewMode.value && !store.bookingIntentId) || !allAttendeesReady || isPollingPaymentStatus.value) {
 			return false
 		}
+		// Preview mode: all attendees ready is enough
+		if (isPreviewMode.value) return true
 		// For free bookings, skip payment method requirement
 		if (isBookingFree.value) {
 			return true
@@ -1548,8 +1561,10 @@ const handleNext = async () => {
 	}
 
 	if (activeStepIndex.value === 0 || activeStepIndex.value === 1 || activeStepIndex.value === 2) {
-		const passedPrecheck = await runStepPrecheck()
-		if (!passedPrecheck) return
+		if (!isPreviewMode.value) {
+			const passedPrecheck = await runStepPrecheck()
+			if (!passedPrecheck) return
+		}
 	}
 
 	if (!(await pingBookingIntent(true))) return
@@ -1601,6 +1616,10 @@ const jumpToReview = async () => {
 }
 
 const handleCheckout = async () => {
+	if (isPreviewMode.value) {
+		toast.add({ title: 'Preview mode', description: 'Checkout is disabled in preview mode.', color: 'amber' })
+		return
+	}
 	if (checkoutCompleted.value) return
 	if (!agreedToTerms.value) {
 		toast.add({

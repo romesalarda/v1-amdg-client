@@ -19,6 +19,12 @@ export default defineNuxtRouteMiddleware((to, from) => {
   const eventId = String(to.params.id || '')
   const ticketsParam = Number(to.query.tickets || 1)
 
+  // Preview mode bypasses booking intent requirement entirely
+  const isPreview = String(to.query.preview || '').toLowerCase() === 'true'
+  if (isPreview) {
+    return
+  }
+
   // Check if registration store has been initialized with an intent
   if (!registrationStore.bookingIntentId) {
     // No booking intent found - redirect to event index page

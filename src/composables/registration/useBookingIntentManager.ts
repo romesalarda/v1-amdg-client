@@ -12,6 +12,7 @@ type BookingIntentManagerOptions = {
   setBookingIntentId: (intentId: string) => void
   resetRegistrationStore: () => void
   onIntentExpired?: () => void
+  isPreview?: Ref<boolean>
 }
 
 export const useBookingIntentManager = (options: BookingIntentManagerOptions) => {
@@ -95,6 +96,10 @@ export const useBookingIntentManager = (options: BookingIntentManagerOptions) =>
   }
 
   const pingBookingIntent = async (silent: boolean = true) => {
+    if (options.isPreview?.value) {
+      return true
+    }
+
     if (isCreatingIntent.value) {
       return true
     }
@@ -165,6 +170,7 @@ export const useBookingIntentManager = (options: BookingIntentManagerOptions) =>
   }
 
   watchEffect(() => {
+    if (options.isPreview?.value) return
     if (!options.event.value || options.bookingIntentId.value || isCreatingIntent.value) return
     isCreatingIntent.value = true
     bookingIntentMutation
@@ -194,6 +200,7 @@ export const useBookingIntentManager = (options: BookingIntentManagerOptions) =>
   watch(
     () => options.bookingIntentId.value,
     (intentId) => {
+      if (options.isPreview?.value) return
       if (!intentId) {
         stopIntentPing()
         stopIntentCountdown()

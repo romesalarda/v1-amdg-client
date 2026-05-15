@@ -273,6 +273,7 @@
 
                 <!-- Registration Button -->
                 <button
+                  v-if="!isPreview"
                   :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview || (event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0)"
                   class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                   @click="openRegistrationModal"
@@ -284,6 +285,14 @@
                   <span v-else-if="event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0">Unavailable</span>
                   <span v-else>Register Now</span>
                 </button>
+                <NuxtLink
+                  v-if="isPreview"
+                  :href="`/events/${event.url_safe_title}/register?tickets=1&mode=multiple&uia=false&preview=true`"
+                  class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                >
+                  Preview
+                </NuxtLink>
+
 
                 <NuxtLink
                   v-if="bookingData?.bookings && bookingData.bookings.length > 0 && !isPreview"

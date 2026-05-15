@@ -500,7 +500,7 @@
               View Public Page
             </a>
             <a
-              :href="`/events/${id}/?view=preview`"
+              :href="`/events/${id}/register?tickets=1&mode=multiple&uia=false&preview=true`"
               class="w-full py-3 bg-white border border-primary text-primary text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all text-center"
             >
               Admin Preview
