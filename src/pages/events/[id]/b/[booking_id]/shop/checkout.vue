@@ -64,9 +64,9 @@
 						v-if="isCheckoutLocked"
 						class="rounded-2xl border border-amber-200 bg-amber-50 p-4"
 					>
-						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-900">Checkout unavailable</p>
+						<h2 class="mt-1 text-3xl font-black text-amber-900">Checkout unavailable</h2>
 						<p class="mt-2 text-sm text-amber-900">
-							This order is {{ order?.status }}. Checkout is only available for draft orders.
+							This status for this order is {{ order?.status }}. 
 						</p>
 					</article>
 
@@ -278,10 +278,9 @@
 					</article>
 
 					<article v-if="checkoutResult" class="rounded-2xl border border-deep-navy/10 bg-white p-4">
-						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Checkout response</p>
-						<p class="mt-2 text-sm text-deep-navy/80">Order {{ checkoutResult.order_reference || checkoutResult.order_id }}</p>
-						<p class="mt-1 text-sm text-deep-navy/80">Status {{ checkoutResult.status || 'pending' }}</p>
-
+						<p class="font-semibold uppercase text-deep-navy/55">Checkout details</p>
+						<p class="mt-2 text-sm text-deep-navy/80">Your order number is: <b>{{ checkoutResult.order_reference || checkoutResult.order_id }}</b></p>
+						<p class="mt-1 text-sm text-deep-navy/80">No need to save this number, we will send you a confirmation email.</p>
 
 						<div v-if="checkoutResult.bank_transfer_reference" class="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-3 text-xs text-amber-900">
 							<p class="font-black">Reference: {{ checkoutResult.bank_transfer_reference }}</p>
@@ -366,6 +365,26 @@
 				</aside>
 			</section>
 		</div>
+
+		<Transition
+			enter-active-class="transition duration-200 ease-out"
+			enter-from-class="opacity-0"
+			enter-to-class="opacity-100"
+			leave-active-class="transition duration-150 ease-in"
+			leave-from-class="opacity-100"
+			leave-to-class="opacity-0"
+		>
+			<div
+				v-if="isProcessingCheckout"
+				class="fixed inset-0 z-40 flex items-center justify-center bg-deep-navy/60 backdrop-blur-sm"
+			>
+				<div class="w-full max-w-sm rounded-3xl border border-deep-navy/10 bg-white p-8 shadow-2xl text-center">
+					<div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-deep-navy/20 border-t-deep-navy" />
+					<p class="mt-5 text-sm font-black uppercase tracking-[0.15em] text-deep-navy">Processing payment</p>
+					<p class="mt-1 text-xs text-deep-navy/60">Please do not close or refresh this page.</p>
+				</div>
+			</div>
+		</Transition>
 
 		<Transition
 			enter-active-class="transition duration-500 ease-out"
@@ -643,6 +662,7 @@ const successModalCountdown = ref(successRedirectSeconds)
 const successModalTitle = ref('Payment successful')
 const successModalMessage = ref('Your purchase has been confirmed.')
 const hasRedirectedForAttendeeGuard = ref(false)
+const isProcessingCheckout = ref(false)
 
 const getStripeAccountIdFromPaymentMethod = (paymentMethod: typeof selectedPaymentMethod.value): string | null => {
 	const details = paymentMethod?.provided_details
@@ -919,6 +939,15 @@ watch(
 )
 
 watch(
+	[() => activeOrderQuery.isLoading.value, order],
+	([isLoading, currentOrder]) => {
+		if (isLoading || currentOrder) return
+		void navigateTo(shopHref.value)
+	},
+	{ immediate: true }
+)
+
+watch(
 	showSuccessModal,
 	(visible) => {
 		if (visible) {
@@ -1065,6 +1094,7 @@ async function submitCheckout() {
 			: 'Payment has been initialized for this order.'
 		let checkoutToastColor: 'green' | 'amber' = 'green'
 		shouldPreventLockedRedirect.value = true
+		isProcessingCheckout.value = true
 
 		const response = await checkoutMutation.mutateAsync({
 			orderId: activeOrderId.value,
@@ -1092,6 +1122,7 @@ async function submitCheckout() {
 			if (!clientSecret) {
 				const backendStatus = String(checkoutResult.value?.status || 'unknown')
 				const selectedTitle = selectedPaymentMethod.value?.title || 'Selected method'
+				isProcessingCheckout.value = false
 				toast.add({
 					title: 'Unable to start card payment',
 					description: `${selectedTitle} returned status "${backendStatus}" without Stripe client secret. Verify this method is configured as STRIPE and try again.`,
@@ -1103,6 +1134,7 @@ async function submitCheckout() {
 
 			await ensureStripeCardMounted()
 			if (!stripeInstance.value || !stripeCardElement.value) {
+				isProcessingCheckout.value = false
 				toast.add({
 					title: 'Card form unavailable',
 					description: stripeCardError.value || 'Unable to initialize the Stripe card form. Please refresh and try again.',
@@ -1141,6 +1173,7 @@ async function submitCheckout() {
 					type: (result.error as any)?.type || null,
 				})
 				stripeCardError.value = result.error.message || 'Card payment could not be confirmed.'
+				isProcessingCheckout.value = false
 				toast.add({
 					title: 'Card payment failed',
 					description: stripeCardError.value,
@@ -1163,6 +1196,7 @@ async function submitCheckout() {
 				checkoutToastTitle = 'Order payment recorded'
 				checkoutToastDescription = 'Your order moved to processing after Stripe confirmation.'
 				checkoutToastColor = 'green'
+				isProcessingCheckout.value = false
 				openSuccessModal(
 					'Payment received',
 					'Thank you. Your card payment has been confirmed and your order is now being processed.'
@@ -1171,12 +1205,14 @@ async function submitCheckout() {
 				checkoutToastTitle = 'Payment confirmed, awaiting sync'
 				checkoutToastDescription = 'Stripe confirmed your payment. Order status update may take a few seconds.'
 				checkoutToastColor = 'amber'
+				isProcessingCheckout.value = false
 			}
 		} else {
 			// For bank transfer, give server a moment to process then refetch
 			await sleep(500)
 			await activeOrderQuery.refetch()
 			const orderStatus = String(activeOrderQuery.data.value?.data?.status || '').toLowerCase()
+			isProcessingCheckout.value = false
 			if (isPurchaseSuccessfulStatus(orderStatus)) {
 				openSuccessModal(
 					'Order confirmed',
@@ -1202,6 +1238,7 @@ async function submitCheckout() {
 	} catch (error: unknown) {
 		isConfirmingStripePayment.value = false
 		shouldPreventLockedRedirect.value = false
+		isProcessingCheckout.value = false
 		const payload = (error as any)?.data || (error as any)?.response?._data || (error as any)?.response?.data
 		let description = error instanceof Error ? error.message : 'Unable to complete checkout.'
 		if (typeof payload === 'string' && payload) {

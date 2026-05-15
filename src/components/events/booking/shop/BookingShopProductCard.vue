@@ -1,144 +1,287 @@
 <template>
   <article
-    class="rounded-3xl border border-deep-navy/10 bg-white p-5 shadow-sm"
-    :class="{ 'opacity-70': addDisabled }"
+    class="overflow-hidden rounded-2xl border bg-white shadow-sm transition-all duration-200"
+    :class="[
+      step !== 'initial' ? 'border-deep-navy/25 shadow-md' : 'border-deep-navy/10',
+      addDisabled && step === 'initial' ? 'opacity-60' : '',
+    ]"
   >
-    <div class="grid grid-cols-1 gap-5 lg:grid-cols-2">
-      <div>
-        <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-mist-blue">
-          <img
-            :src="activeImageUrl"
-            :alt="product.title"
-            class="h-64 w-full object-cover md:h-80"
-          >
+    <!-- Product image -->
+    <div class="relative h-44 overflow-hidden bg-mist-blue">
+      <img
+        :src="activeImageUrl"
+        :alt="product.title"
+        class="h-full w-full object-cover transition-opacity duration-300"
+      >
+      <!-- Step progress strip -->
+      <div v-if="step !== 'initial'" class="absolute bottom-0 left-0 right-0 flex gap-0.5 px-3 pb-2">
+        <div
+          class="h-0.5 flex-1 rounded-full transition-colors duration-300"
+          :class="['size', 'color', 'quantity'].includes(step) ? 'bg-white' : 'bg-white/30'"
+        />
+        <div
+          class="h-0.5 flex-1 rounded-full transition-colors duration-300"
+          :class="['color', 'quantity'].includes(step) ? 'bg-white' : 'bg-white/30'"
+        />
+        <div
+          class="h-0.5 flex-1 rounded-full transition-colors duration-300"
+          :class="step === 'quantity' ? 'bg-white' : 'bg-white/30'"
+        />
+      </div>
+    </div>
+
+    <!-- Card body -->
+    <div class="p-4">
+      <!-- Always-visible header -->
+      <div class="flex items-start gap-3 justify-between justify-items-center items-center">
+        <div class="min-w-0 flex-1">
+          <h3 class="line-clamp-2 text-sm font-black leading-snug text-deep-navy">
+            {{ product.title }}
+          </h3>
+          <div class="mt-1 flex flex-wrap items-center gap-1.5">
+            <span class="text-base font-black text-deep-navy">{{ activePrice }}</span>
+            <span
+              v-if="step !== 'initial' && activeVariant.context_has_discount"
+              class="rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-emerald-700"
+            >
+              Discount
+            </span>
+            <span
+              v-if="step !== 'initial' && selectedSize"
+              class="rounded-full bg-deep-navy/[0.07] px-2 py-0.5 text-[10px] font-semibold text-deep-navy"
+            >
+              {{ selectedSize }}
+            </span>
+            <span
+              v-if="step === 'quantity' && selectedColor && selectedColor !== 'no-color'"
+              class="rounded-full bg-deep-navy/[0.07] px-2 py-0.5 text-[10px] font-semibold capitalize text-deep-navy"
+            >
+              {{ colorLabel(activeVariant.color) }}
+            </span>
+          </div>
         </div>
-        <div v-if="galleryImages.length > 1" class="mt-3 grid grid-cols-5 gap-2">
+
+        <!-- Buy / Close -->
+        <div class="shrink-0">
           <button
-            v-for="image in galleryImages"
-            :key="image"
+            v-if="step === 'initial'"
             type="button"
-            class="overflow-hidden rounded-lg border disabled:cursor-not-allowed disabled:opacity-60"
-            :class="activeImageUrl === image ? 'border-deep-navy' : 'border-deep-navy/15'"
             :disabled="addDisabled"
-            @click="activeImageUrl = image"
+            class="inline-flex items-center gap-1 rounded-xl bg-deep-navy px-3.5 py-2 text-[11px] font-black uppercase tracking-wide text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            @click="startBuy"
           >
-            <img :src="image" alt="Variant preview" class="h-14 w-full object-cover">
+            Buy
+            <span class="material-symbols-outlined text-sm leading-none">add_shopping_cart</span>
+          </button>
+          <button
+            v-else
+            type="button"
+            class="rounded-lg p-1.5 text-deep-navy/40 transition-colors hover:bg-deep-navy/[0.06] hover:text-deep-navy"
+            @click="closeSteps"
+          >
+            <span class="material-symbols-outlined text-base leading-none">close</span>
           </button>
         </div>
       </div>
 
-      <div>
-        <h3 class="mt-2 text-2xl font-black text-deep-navy">{{ product.title }}</h3>
+      <!-- Blocked reason -->
+      <p v-if="addDisabled && addDisabledReason" class="mt-2 text-[11px] text-amber-700">
+        {{ addDisabledReason }}
+      </p>
 
-        <div class="mt-4 flex items-center gap-2">
-          <p class="text-xl font-black text-deep-navy">
-            {{ activePrice}}
-          </p>
-          <span
-            v-if="activeVariant.context_has_discount"
-            class="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-emerald-700"
-          >
-            Discount active
-          </span>
-          <span class="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide" :class="stockBadgeClass(activeVariant)">
-            {{ stockLabel(activeVariant) }}
-          </span>
-          <span class="rounded-full px-2 py-1 text-[10px] font-black uppercase tracking-wide" :class="availabilityStatusClass(activeVariant.variant_id)">
-            {{ availabilityStatusLabel(activeVariant.variant_id) }}
-          </span>
-        </div>
-
-        <p v-if="typeof activeVariant.context_remaining_quantity === 'number'" class="mt-2 text-xs font-semibold text-deep-navy/75">
-          Remaining for attendee: {{ Math.max(0, activeVariant.context_remaining_quantity) }}
-        </p>
-
-        <ul v-if="discountNames(activeVariant).length" class="mt-2 space-y-1 text-[11px] text-emerald-800">
-          <li
-            v-for="(discountName, index) in discountNames(activeVariant)"
-            :key="`${activeVariant.variant_id}-discount-${index}`"
-          >
-            {{ discountName }}
-          </li>
-        </ul>
-
-        <p class="mt-2 text-xs text-deep-navy/65">{{ availabilityDescription(activeVariant.variant_id) }}</p>
-
-        <div
-          v-if="availabilityBanner(activeVariant.variant_id)"
-          class="mt-3 rounded-xl border p-3"
-          :class="availabilityBanner(activeVariant.variant_id)?.classes"
-        >
-          <div class="flex items-start gap-2">
-            <span class="material-symbols-outlined text-base leading-none">{{ availabilityBanner(activeVariant.variant_id)?.icon }}</span>
-            <div>
-              <p class="text-xs font-black uppercase tracking-wide">{{ availabilityBanner(activeVariant.variant_id)?.title }}</p>
-              <p class="mt-1 text-xs">{{ availabilityBanner(activeVariant.variant_id)?.message }}</p>
-            </div>
+      <!-- Animated step content -->
+      <Transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 translate-y-2"
+        enter-to-class="opacity-100 translate-y-0"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100 translate-y-0"
+        leave-to-class="opacity-0 -translate-y-1"
+        mode="out-in"
+      >
+        <!-- Loading skeleton (variants loading while step is open) -->
+        <div v-if="step !== 'initial' && isLoading" key="skeleton" class="mt-4 animate-pulse space-y-2">
+          <div class="h-3 w-20 rounded bg-deep-navy/[0.06]" />
+          <div class="flex gap-2">
+            <div class="h-9 w-14 rounded-xl bg-deep-navy/[0.06]" />
+            <div class="h-9 w-14 rounded-xl bg-deep-navy/[0.06]" />
+            <div class="h-9 w-14 rounded-xl bg-deep-navy/[0.06]" />
           </div>
         </div>
 
-        <div class="mt-5">
-          <p class="text-[11px] font-black uppercase tracking-[0.18em] text-deep-navy/55">Choose colour</p>
-          <div class="mt-2 flex flex-wrap gap-2">
+        <!-- Size step -->
+        <div v-else-if="step === 'size'" key="size" class="mt-4">
+          <p class="mb-2.5 text-[10px] font-black uppercase tracking-[0.18em] text-deep-navy/55">
+            Choose size
+          </p>
+          <div class="flex flex-wrap gap-2">
             <button
-              v-for="option in colorOptions"
+              v-for="option in allSizeOptions"
+              :key="option.size"
+              type="button"
+              class="rounded-xl border px-3.5 py-2 text-xs font-semibold transition-colors"
+              :class="
+                option.hasStock
+                  ? 'border-deep-navy/20 text-deep-navy hover:border-deep-navy hover:bg-deep-navy/[0.04]'
+                  : 'cursor-not-allowed border-deep-navy/8 text-deep-navy/30'
+              "
+              :disabled="!option.hasStock"
+              @click="pickSize(option.size)"
+            >
+              {{ option.size }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Colour step -->
+        <div v-else-if="step === 'color'" key="color" class="mt-4">
+          <div class="mb-2.5 flex items-center justify-between">
+            <p class="text-[10px] font-black uppercase tracking-[0.18em] text-deep-navy/55">
+              Choose colour
+            </p>
+            <button
+              type="button"
+              class="flex items-center gap-0.5 text-[10px] font-semibold text-deep-navy/45 transition-colors hover:text-deep-navy"
+              @click="stepBack"
+            >
+              <span class="material-symbols-outlined text-xs leading-none">arrow_back</span>
+              Back
+            </button>
+          </div>
+          <div class="space-y-1.5">
+            <button
+              v-for="option in colorsForSelectedSize"
               :key="option.value"
               type="button"
-              class="inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
-              :class="selectedColor === option.value ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
-              :disabled="addDisabled"
-              @click="selectColor(option.value)"
+              class="flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-xs transition-colors"
+              :class="
+                canAddVariant(option.variant)
+                  ? 'border-deep-navy/15 hover:border-deep-navy hover:bg-deep-navy/[0.03]'
+                  : 'cursor-not-allowed border-deep-navy/8 opacity-45'
+              "
+              :disabled="!canAddVariant(option.variant)"
+              @click="pickColor(option)"
             >
               <span
-                v-if="option.hex"
-                class="inline-block h-3 w-3 rounded-full border"
-                :class="selectedColor === option.value ? 'border-white/70' : 'border-deep-navy/25'"
-                :style="{ backgroundColor: option.hex }"
+                class="h-4 w-4 shrink-0 rounded-full border"
+                :class="option.hex ? 'border-deep-navy/15' : 'border-dashed border-deep-navy/20'"
+                :style="option.hex ? { backgroundColor: option.hex } : {}"
               />
-              {{ option.label }}
+              <span class="flex-1 font-semibold text-deep-navy">{{ option.label }}</span>
+              <span class="text-[10px] text-deep-navy/50">
+                <template v-if="!option.variant.is_active">Inactive</template>
+                <template v-else-if="!option.variant.is_in_stock">Out of stock</template>
+                <template v-else>
+                  {{ option.variant.stock_quantity }} in stock
+                  <template v-if="typeof option.variant.context_remaining_quantity === 'number'">
+                    &middot; {{ Math.max(0, option.variant.context_remaining_quantity) }} for you
+                  </template>
+                </template>
+              </span>
             </button>
           </div>
         </div>
 
-        <div class="mt-4">
-          <p class="text-[11px] font-black uppercase tracking-[0.18em] text-deep-navy/55">Choose size</p>
-          <div class="mt-2 flex flex-wrap gap-2">
+        <!-- Quantity step -->
+        <div v-else-if="step === 'quantity'" key="quantity" class="mt-4">
+          <!-- Discount names + back -->
+          <div class="mb-3 flex items-start justify-between gap-2">
+            <ul v-if="discountNames(activeVariant).length" class="space-y-0.5">
+              <li
+                v-for="(name, i) in discountNames(activeVariant)"
+                :key="i"
+                class="flex items-center gap-1 text-[11px] text-emerald-800"
+              >
+                <span class="material-symbols-outlined text-xs leading-none">local_offer</span>
+                {{ name }}
+              </li>
+            </ul>
+            <div v-else />
             <button
-              v-for="option in sizeOptions"
-              :key="option.variant.variant_id"
               type="button"
-              class="rounded-full border px-3 py-1.5 text-xs font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
-              :class="selectedVariantId === option.variant.variant_id ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/45'"
-              :disabled="addDisabled"
-              @click="selectSize(option.variant)"
+              class="flex shrink-0 items-center gap-0.5 text-[10px] font-semibold text-deep-navy/45 transition-colors hover:text-deep-navy"
+              @click="stepBack"
             >
-              {{ option.variant.size_display || 'Standard' }}
-              <span v-if="option.modifierText" class="ml-1 opacity-85">{{ option.modifierText }}</span>
+              <span class="material-symbols-outlined text-xs leading-none">arrow_back</span>
+              Back
             </button>
           </div>
-        </div>
 
-        <div class="mt-5 flex items-center gap-3">
-          <input
-            v-model.number="activeQuantity"
-            type="number"
-            min="1"
-            :max="maxQuantity(activeVariant)"
-            class="w-24 rounded-xl border border-deep-navy/20 px-3 py-2 text-sm"
-            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id || addDisabled"
+          <!-- Availability banner -->
+          <div
+            v-if="availabilityBanner(activeVariant.variant_id)"
+            class="mb-3 rounded-xl border p-3"
+            :class="availabilityBanner(activeVariant.variant_id)?.classes"
           >
-          <button
-            type="button"
-            class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-            :disabled="!canAddVariant(activeVariant) || addingVariantId === activeVariant.variant_id || addDisabled"
-            @click="handleAdd(activeVariant)"
-          >
-            {{ addingVariantId === activeVariant.variant_id ? 'Adding...' : 'Add to Cart' }}
-          </button>
-        </div>
+            <div class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-sm leading-none">
+                {{ availabilityBanner(activeVariant.variant_id)?.icon }}
+              </span>
+              <div>
+                <p class="text-[11px] font-black uppercase tracking-wide">
+                  {{ availabilityBanner(activeVariant.variant_id)?.title }}
+                </p>
+                <p class="mt-0.5 text-[11px]">
+                  {{ availabilityBanner(activeVariant.variant_id)?.message }}
+                </p>
+              </div>
+            </div>
+          </div>
 
-        <p v-if="addDisabled && addDisabledReason" class="mt-3 text-[11px] text-amber-700">{{ addDisabledReason }}</p>
-      </div>
+          <!-- Remaining for attendee -->
+          <p
+            v-if="typeof activeVariant.context_remaining_quantity === 'number'"
+            class="mb-3 text-xs font-semibold text-deep-navy/65"
+          >
+            {{ Math.max(0, activeVariant.context_remaining_quantity) }} remaining for this attendee
+          </p>
+
+          <!-- Qty stepper + Add to Cart -->
+          <div class="flex items-center gap-2">
+            <div class="flex items-center overflow-hidden rounded-xl border border-deep-navy/20">
+              <button
+                type="button"
+                class="px-3 py-2.5 text-sm font-bold text-deep-navy transition-colors hover:bg-deep-navy/[0.05] disabled:cursor-not-allowed disabled:opacity-35"
+                :disabled="activeQuantity <= 1 || !canAddVariant(activeVariant) || !!addingVariantId"
+                @click="decrementQty"
+              >
+                &minus;
+              </button>
+              <span class="min-w-[2.25rem] py-2 text-center text-sm font-black text-deep-navy">
+                {{ activeQuantity }}
+              </span>
+              <button
+                type="button"
+                class="px-3 py-2.5 text-sm font-bold text-deep-navy transition-colors hover:bg-deep-navy/[0.05] disabled:cursor-not-allowed disabled:opacity-35"
+                :disabled="activeQuantity >= maxQuantity(activeVariant) || !canAddVariant(activeVariant) || !!addingVariantId"
+                @click="incrementQty"
+              >
+                +
+              </button>
+            </div>
+            <button
+              type="button"
+              class="flex-1 rounded-xl bg-deep-navy px-4 py-2.5 text-[11px] font-black uppercase tracking-wide text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+              :disabled="!canAddVariant(activeVariant) || !!addingVariantId || addDisabled"
+              @click="handleAdd(activeVariant)"
+            >
+              {{ addingVariantId === activeVariant.variant_id ? 'Adding…' : 'Add to Cart' }}
+            </button>
+          </div>
+
+          <!-- Context blocker message -->
+          <p
+            v-if="
+              isPreviewOnly(activeVariant.variant_id) ||
+              isWindowBlocked(activeVariant.variant_id) ||
+              activeVariant.context_can_purchase === false
+            "
+            class="mt-2 text-[11px] text-deep-navy/55"
+          >
+            {{ availabilityDescription(activeVariant.variant_id) }}
+          </p>
+        </div>
+      </Transition>
     </div>
   </article>
 </template>
@@ -187,6 +330,137 @@ const selectedColor = ref<string>('')
 const selectedSize = ref<string>('')
 const activeImageUrl = ref<string>('https://placehold.co/800x600?text=Product')
 const addingVariantId = ref<string | null>(null)
+
+// ── Progressive disclosure step management ──────────────────────────────────
+type Step = 'initial' | 'size' | 'color' | 'quantity'
+const stepHistory = ref<Step[]>(['initial'])
+const step = computed<Step>(() => stepHistory.value[stepHistory.value.length - 1] ?? 'initial')
+
+type ColorPickerOption = {
+  variant: ProductVariantList
+  value: string
+  label: string
+  hex: string
+}
+
+const allSizeOptions = computed(() => {
+  const sizeMap = new Map<string, ProductVariantList[]>()
+  variantRows.value.forEach((variant) => {
+    const size = variant.size_display || 'Standard'
+    if (!sizeMap.has(size)) sizeMap.set(size, [])
+    sizeMap.get(size)!.push(variant)
+  })
+  return Array.from(sizeMap.entries()).map(([size, variants]) => ({
+    size,
+    variants,
+    hasStock: variants.some((v) => !!v.is_in_stock && !!v.is_active),
+  }))
+})
+
+const colorsForSelectedSize = computed<ColorPickerOption[]>(() => {
+  const size = selectedSize.value
+  const inSize = variantRows.value.filter((v) => (v.size_display || 'Standard') === size)
+  const seen = new Set<string>()
+  return inSize
+    .filter((v) => {
+      const key = colorKey(v.color)
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+    .map((v) => ({
+      variant: v,
+      value: colorKey(v.color),
+      label: colorLabel(v.color),
+      hex: normalizeHexColor(v.color),
+    }))
+})
+
+function startBuy() {
+  if (addDisabled.value) return
+  if (isLoading.value || !variantRows.value.length) {
+    stepHistory.value = ['initial', 'size']
+    return
+  }
+
+  const sizes = allSizeOptions.value
+  if (sizes.length > 1) {
+    stepHistory.value = ['initial', 'size']
+    return
+  }
+
+  if (sizes[0]) selectedSize.value = sizes[0].size
+
+  const colors = colorsForSelectedSize.value
+  if (colors.length > 1) {
+    stepHistory.value = ['initial', 'color']
+    return
+  }
+
+  if (colors[0]) {
+    selectedColor.value = colors[0].value
+    selectedVariantId.value = colors[0].variant.variant_id
+  }
+
+  stepHistory.value = ['initial', 'quantity']
+}
+
+function pickSize(size: string) {
+  selectedSize.value = size
+  const colors = colorsForSelectedSize.value
+  if (colors.length > 1) {
+    stepHistory.value = [...stepHistory.value, 'color']
+    return
+  }
+
+  if (colors[0]) {
+    selectedColor.value = colors[0].value
+    selectedVariantId.value = colors[0].variant.variant_id
+  }
+  stepHistory.value = [...stepHistory.value, 'quantity']
+}
+
+function pickColor(option: ColorPickerOption) {
+  selectedColor.value = option.value
+  selectedVariantId.value = option.variant.variant_id
+  selectedSize.value = option.variant.size_display || ''
+  stepHistory.value = [...stepHistory.value, 'quantity']
+}
+
+function stepBack() {
+  if (stepHistory.value.length > 1) {
+    stepHistory.value = stepHistory.value.slice(0, -1)
+  }
+}
+
+function closeSteps() {
+  stepHistory.value = ['initial']
+}
+
+function decrementQty() {
+  activeQuantity.value = Math.max(1, activeQuantity.value - 1)
+}
+
+function incrementQty() {
+  activeQuantity.value = Math.min(maxQuantity(activeVariant.value), activeQuantity.value + 1)
+}
+
+// Auto-advance when variants finish loading while user is waiting in the size step
+watch([variantRows, step], ([rows, currentStep]) => {
+  if (currentStep === 'size' && rows.length > 0 && allSizeOptions.value.length === 1) {
+    closeSteps()
+    startBuy()
+  }
+})
+
+// Reset step when attendee switches
+watch(
+  () => props.attendeeId,
+  () => {
+    stepHistory.value = ['initial']
+  }
+)
+// ────────────────────────────────────────────────────────────────────────────
 
 type ColorOption = {
   value: string
@@ -473,8 +747,8 @@ function availabilityBanner(variantId: string): {
 } | null {
   const state = effectiveAvailabilityState(variantId)
   const productState = productWindowState()
-  const variantRows = windowsByVariant.value[variantId] || []
-  const governingRows = productState === 'always' ? variantRows : productWindows.value
+  const variantWindowRows = windowsByVariant.value[variantId] || []
+  const governingRows = productState === 'always' ? variantWindowRows : productWindows.value
 
   if (state === 'blocked') {
     const nextWindow = nextPurchaseWindow(governingRows)
@@ -502,7 +776,7 @@ function availabilityBanner(variantId: string): {
 
   const purchaseWindow = productState !== 'always'
     ? activePurchaseWindow(productWindows.value)
-    : activePurchaseWindow(variantRows)
+    : activePurchaseWindow(variantWindowRows)
 
   const remaining = daysRemaining(purchaseWindow?.available_to)
   if (remaining !== null && remaining <= 7) {
@@ -704,6 +978,7 @@ function handleAdd(variant: ProductVariantList) {
   window.setTimeout(() => {
     if (addingVariantId.value === variant.variant_id) {
       addingVariantId.value = null
+      stepHistory.value = ['initial']
     }
   }, 1200)
 }

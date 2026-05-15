@@ -722,6 +722,12 @@ export type AttendeeDetail = {
     readonly updated_at: string;
     readonly deleted_at: string | null;
     deleted_by?: number | null;
+    readonly alternative_signins: Array<{
+        sign_id?: string;
+        identifier?: string;
+        uses?: number;
+        ticket?: string | null;
+    }>;
 };
 
 /**
@@ -35676,6 +35682,8 @@ export type EventStaffInvitesGlobalListData = {
          * Filter by target user ID
          */
         target_user?: number;
+        user_email?: string;
+        username?: string;
     };
     url: '/api/event/staff-invites/';
 };

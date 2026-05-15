@@ -213,7 +213,7 @@
                   Timezone <span class="text-red-500">*</span>
                 </label>
                 <div class="relative max-w-md">
-                  <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
+                  <!-- <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
                     public
                   </span>
                   <select
@@ -228,7 +228,12 @@
                   </select>
                   <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none">
                     expand_more
-                  </span>
+                  </span> -->
+                  <TimezoneSelect
+                    :model-value="timezone || 'UTC'"
+                    :has-error="!!errors.timezone"
+                    @update:model-value="timezone = $event"
+                  />
                 </div>
                 <p v-if="errors.timezone" class="text-xs text-red-500">{{ errors.timezone }}</p>
               </div>
@@ -431,6 +436,7 @@ import { useCreateEvent } from '~/composables/resources/events/events'
 import { useEventTypes } from '~/composables/resources/events/eventTypes'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
 import { useAuthStore } from '~/stores/auth'
+import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -502,28 +508,6 @@ const eventTypeOptions = computed(() => {
 const route = useRoute()
 
 // Common timezones
-const timezoneOptions = [
-  'UTC',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'America/Phoenix',
-  'America/Anchorage',
-  'America/Honolulu',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Europe/Rome',
-  'Asia/Dubai',
-  'Asia/Kolkata',
-  'Asia/Shanghai',
-  'Asia/Tokyo',
-  'Asia/Seoul',
-  'Asia/Singapore',
-  'Australia/Sydney',
-  'Pacific/Auckland',
-]
 
 // Form setup
 const { handleSubmit, errors, defineField, setFieldValue, resetForm } = useForm({

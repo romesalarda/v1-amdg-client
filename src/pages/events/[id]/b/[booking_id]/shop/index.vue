@@ -84,7 +84,7 @@
 
 						<div
 							v-else
-							class="grid grid-cols-1 gap-5 2xl:grid-cols-1"
+						class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
 							:class="{ 'opacity-60': isOrderCreationBlocked }"
 						>
 							<BookingShopProductCard
@@ -133,7 +133,7 @@
 					</template>
 				</div>
 
-				<aside class="space-y-4 xl:col-span-4">
+				<aside class="space-y-4 xl:col-span-4 min-h-[200px]">
 					<div class="xl:sticky xl:top-5 space-y-4">
 						<article class="rounded-2xl border border-deep-navy/10 bg-white p-4 shadow-sm">
 							<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/55">Attendee</p>
@@ -182,8 +182,12 @@
 							>
 								<div v-if="sidebarPanel === 'cart'" key="cart-panel">
 
-									<div v-if="!cartOrder" class="mt-3 rounded-xl border border-dashed border-deep-navy/20 bg-mist-blue p-3 text-xs text-deep-navy/70">
-										Your cart is empty. Add products to continue.
+									<div v-if="!cartOrder" class="mt-3 rounded-xl border border-dashed border-deep-navy/20 bg-mist-blue p-3 text-xs text-deep-navy/70 min-h-[130px] flex items-center justify-center text-center">
+										<div class="flex flex-col items-center gap-2">
+											<UIcon name="i-heroicons-shopping-cart" class="text-3xl text-deep-navy/30" />
+											<h3 class="font-semibold text-deep-navy">Your cart is empty</h3>
+											<p class="text-[11px] text-deep-navy/70">Browse products and add them to your cart to see them here. Your cart will be saved as you shop, so you can take your time.</p>
+										</div>
 									</div>
 
 									<div v-else class="mt-3 space-y-3">
@@ -348,6 +352,7 @@
 
 <script setup lang="ts">
 import type { ProductList, ProductVariantList } from '~/api/types.gen'
+import { useQueryClient } from '@tanstack/vue-query'
 import { productsListVariantsList } from '~/api/sdk.gen'
 import BookingShopProductCard from '~/components/events/booking/shop/BookingShopProductCard.vue'
 import { useBookingShop } from '~/composables/booking/useBookingShop'
@@ -481,6 +486,7 @@ const selectedAttendeeLabel = computed(() => {
 
 const updateItemMutation = useUpdateProductOrderItem()
 const removeItemMutation = useRemoveProductOrderItem()
+const queryClient = useQueryClient()
 const pendingUpdateItemIds = ref<number[]>([])
 const pendingRemoveItemIds = ref<number[]>([])
 
@@ -681,6 +687,7 @@ async function updateCartItemQuantity(orderItemId: number, quantity: number) {
 			quantity,
 		})
 		await activeOrderQuery.refetch()
+		await queryClient.invalidateQueries({ queryKey: ['product-variants'] })
 	} catch (error: unknown) {
 		const description = error instanceof Error ? error.message : 'Unable to update quantity right now.'
 		toast.add({
@@ -704,6 +711,7 @@ async function removeCartItem(orderItemId: number) {
 			orderItemId,
 		})
 		await activeOrderQuery.refetch()
+		await queryClient.invalidateQueries({ queryKey: ['product-variants'] })
 	} catch (error: unknown) {
 		const description = error instanceof Error ? error.message : 'Unable to remove item right now.'
 		toast.add({
@@ -721,6 +729,7 @@ async function onAddItem(variantId: string, quantity: number) {
 	try {
 		await addVariantToCart(variantId, quantity)
 		await activeOrderQuery.refetch()
+		await queryClient.invalidateQueries({ queryKey: ['product-variants'] })
 
 		toast.add({
 			title: 'Added to cart',

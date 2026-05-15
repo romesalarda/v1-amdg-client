@@ -4,8 +4,37 @@
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
 
+        <!-- Tabs -->
+        <div class="flex gap-1 p-1 bg-mist-blue/60 rounded-xl border border-deep-navy/10">
+          <button
+            @click="activeTab = 'staff'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors"
+            :class="activeTab === 'staff' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-800'"
+          >
+            <span class="material-symbols-outlined text-sm">group</span>
+            Staff Members
+            <span
+              class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black"
+              :class="activeTab === 'staff' ? 'bg-primary/10 text-primary' : 'bg-navy-100 text-navy-500'"
+            >{{ staffTotal }}</span>
+          </button>
+          <button
+            @click="activeTab = 'invites'"
+            class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors"
+            :class="activeTab === 'invites' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-800'"
+          >
+            <span class="material-symbols-outlined text-sm">mail</span>
+            Invites
+            <span
+              v-if="inviteTotal > 0"
+              class="ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-black"
+              :class="activeTab === 'invites' ? 'bg-primary/10 text-primary' : 'bg-navy-100 text-navy-500'"
+            >{{ inviteTotal }}</span>
+          </button>
+        </div>
+
         <!-- Staff List -->
-        <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+        <section v-if="activeTab === 'staff'" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">group</span>
             <div class="flex-1">
@@ -116,6 +145,112 @@
             </div>
           </div>
         </section>
+
+        <!-- Invites List -->
+        <section v-if="activeTab === 'invites'" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
+          <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
+            <span class="material-symbols-outlined text-primary">mail</span>
+            <div class="flex-1">
+              <h2 class="text-sm font-black text-primary uppercase tracking-widest">Staff Invites</h2>
+              <p class="text-xs text-navy-400 mt-0.5">All invitations sent out for this event</p>
+            </div>
+            <button
+              v-if="canUpdateStaff"
+              @click="showInviteModal = true"
+              class="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              <span class="material-symbols-outlined text-sm">mail</span>
+              Send Invite
+            </button>
+          </div>
+
+          <!-- Search bar -->
+          <div class="mb-4">
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-base text-navy-400">search</span>
+              <input
+                v-model="inviteSearch"
+                type="text"
+                placeholder="Search by name, email or username…"
+                class="w-full pl-9 pr-9 py-2.5 bg-mist-blue/40 border border-deep-navy/10 focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 placeholder:text-navy-400 transition-all"
+              />
+              <button
+                v-if="inviteSearch"
+                @click="inviteSearch = ''"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-navy-400 hover:text-navy-700 transition-colors"
+              >
+                <span class="material-symbols-outlined text-base">close</span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="inviteLoading" class="space-y-3">
+            <div v-for="i in 3" :key="i" class="h-20 bg-mist-blue/60 rounded-xl animate-pulse" />
+          </div>
+
+          <div v-else-if="inviteList.length" class="space-y-3">
+            <StaffInviteCard
+              v-for="invite in inviteList"
+              :key="invite.id"
+              :invite="invite"
+              :can-revoke="canUpdateStaff"
+              @revoke="revokeInvite(invite)"
+            />
+          </div>
+
+          <!-- No search results -->
+          <div v-else-if="inviteSearchDebounced && !inviteList.length" class="text-center py-8 text-navy-500">
+            <span class="material-symbols-outlined text-4xl text-navy-200 mb-3 block">search_off</span>
+            <p class="text-sm">No invites found for <strong>"{{ inviteSearchDebounced }}"</strong></p>
+          </div>
+
+          <div v-else class="text-center py-12 text-navy-500">
+            <span class="material-symbols-outlined text-5xl text-navy-200 mb-4 block">mark_email_unread</span>
+            <p class="text-sm mb-4">No invites sent yet</p>
+            <button
+              v-if="canUpdateStaff"
+              @click="showInviteModal = true"
+              class="inline-flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-colors"
+            >
+              <span class="material-symbols-outlined text-sm">mail</span>
+              Send First Invite
+            </button>
+          </div>
+
+          <!-- Pagination -->
+          <div v-if="inviteTotalPages > 1" class="mt-4 flex items-center justify-between gap-2">
+            <p class="text-xs text-navy-400">
+              Showing {{ (invitePage - 1) * invitePageSize + 1 }}–{{ Math.min(invitePage * invitePageSize, inviteTotal) }} of {{ inviteTotal }}
+            </p>
+            <div class="flex items-center gap-1">
+              <button
+                @click="invitePage--"
+                :disabled="invitePage === 1"
+                class="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-mist-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Previous page"
+              >
+                <span class="material-symbols-outlined text-base">chevron_left</span>
+              </button>
+              <button
+                v-for="p in inviteTotalPages"
+                :key="p"
+                @click="invitePage = p"
+                class="min-w-[28px] h-7 rounded-lg text-xs font-bold transition-colors"
+                :class="p === invitePage ? 'bg-primary text-white' : 'text-navy-500 hover:bg-mist-blue'"
+              >
+                {{ p }}
+              </button>
+              <button
+                @click="invitePage++"
+                :disabled="invitePage === inviteTotalPages"
+                class="p-1.5 rounded-lg text-navy-400 hover:text-navy-700 hover:bg-mist-blue transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Next page"
+              >
+                <span class="material-symbols-outlined text-base">chevron_right</span>
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
 
       <!-- Sidebar (4/12) -->
@@ -128,7 +263,7 @@
               Staff Overview
             </h3>
           </div>
-          <div class="p-6 grid grid-cols-2 gap-4">
+          <div class="p-6 grid grid-cols-3 gap-4">
             <div class="text-center">
               <div class="text-3xl font-black text-navy-900">{{ staffTotal }}</div>
               <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Total Staff</div>
@@ -136,6 +271,10 @@
             <div class="text-center">
               <div class="text-3xl font-black text-primary">{{ rolesList.length }}</div>
               <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Roles</div>
+            </div>
+            <div class="text-center">
+              <div class="text-3xl font-black text-amber-600">{{ inviteTotal }}</div>
+              <div class="text-xs text-navy-400 mt-1 uppercase tracking-wide font-semibold">Invites</div>
             </div>
           </div>
         </section>
@@ -180,13 +319,14 @@ import { useEventStaff, useDeleteEventStaff } from '~/composables/resources/even
 import { useEventRoles, useCreateEventRole, useDeleteEventRole } from '~/composables/resources/events/eventRoles'
 import { useEventPermissions } from '~/composables/resources/events/eventPermissions'
 import { useEventPermissionAssignments, useCreateEventPermissionAssignment, useDeleteEventPermissionAssignment } from '~/composables/resources/events/eventPermissionAssignments'
-import { useCreateEventStaffInvite, useEventStaffInvites } from '~/composables/resources/events/eventStaffInvites'
+import { useCreateEventStaffInvite, useEventStaffInvites, useDeleteEventStaffInvite } from '~/composables/resources/events/eventStaffInvites'
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
 import { useUsers } from '~/composables/resources/user/users'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
 
 import EventsManagementLayout from "~/components/events/EventManagementLayout.vue"
 import UserStaffCard from '~/components/staff/UserStaffCard.vue'
+import StaffInviteCard from '~/components/staff/StaffInviteCard.vue'
 import AdvancedInviteModal from '~/components/staff/AdvancedInviteModal.vue'
 import type { EventPermissionAssignment } from '~/api/types.gen'
 import type { CRUDAction } from '~/types/permissions'
@@ -205,6 +345,9 @@ definePageMeta({
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
+
+// Active tab
+const activeTab = ref<'staff' | 'invites'>('staff')
 
 const { can } = useCurrentUserEventPermissions(id, {
   refetchInterval: 30000,
@@ -248,6 +391,32 @@ const staffTotal = computed(() => staffData.value?.data?.count ?? 0)
 const staffTotalPages = computed(() => Math.ceil(staffTotal.value / staffPageSize))
 const rolesList = computed(() => rolesData.value?.data?.results || [])
 
+// Invites tab state
+const inviteSearch = ref('')
+const inviteSearchDebounced = ref('')
+let inviteSearchTimer: ReturnType<typeof setTimeout> | null = null
+const invitePage = ref(1)
+const invitePageSize = 10
+
+watch(inviteSearch, (val) => {
+  if (inviteSearchTimer) clearTimeout(inviteSearchTimer)
+  inviteSearchTimer = setTimeout(() => {
+    inviteSearchDebounced.value = val
+    invitePage.value = 1
+  }, 300)
+})
+
+const inviteParams = computed(() => ({
+  search: inviteSearchDebounced.value || undefined,
+  page: invitePage.value,
+  page_size: invitePageSize,
+}))
+
+const { data: inviteData, isLoading: inviteLoading, refetch: refetchInvites } = useEventStaffInvites(id, inviteParams)
+const inviteList = computed(() => inviteData.value?.data?.results || [])
+const inviteTotal = computed(() => inviteData.value?.data?.count ?? 0)
+const inviteTotalPages = computed(() => Math.ceil(inviteTotal.value / invitePageSize))
+
 // Fetch permissions
 const { data: permissionsData } = useEventPermissions()
 const permissionsList = computed(() => permissionsData.value?.data?.results || [])
@@ -267,9 +436,8 @@ const usersParams = computed(() => ({
 const { data: usersData } = useUsers(usersParams)
 const usersList = computed(() => usersData.value?.data?.results || [])
 
-// Existing invites for invite modal filtering
-const { data: existingInvitesData } = useEventStaffInvites(id)
-const existingInvites = computed(() => existingInvitesData.value?.data?.results || [])
+// Existing invites for invite modal filtering (reuse the invite tab data)
+const existingInvites = computed(() => inviteList.value)
 
 // Modals
 const showInviteModal = ref(false)
@@ -308,9 +476,34 @@ const handleInviteSent = async (inviteData: any) => {
 
     showInviteModal.value = false
     refetchStaff()
+    refetchInvites()
   } catch (error) {
     toast.add({
       title: 'Failed to send invite',
+      description: error instanceof Error ? error.message : 'An error occurred',
+      color: 'red',
+    })
+  }
+}
+
+// Revoke invite
+const deleteInviteMutation = useDeleteEventStaffInvite()
+
+const revokeInvite = async (invite: { id: string }) => {
+  if (!confirm('Revoke this invite? The user will no longer be able to accept it.')) return
+
+  try {
+    await deleteInviteMutation.mutateAsync({ eventId: id.value, inviteId: invite.id })
+
+    toast.add({
+      title: 'Invite revoked',
+      color: 'green',
+    })
+
+    refetchInvites()
+  } catch (error) {
+    toast.add({
+      title: 'Failed to revoke invite',
       description: error instanceof Error ? error.message : 'An error occurred',
       color: 'red',
     })

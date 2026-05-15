@@ -47,7 +47,7 @@
                 <table class="min-w-full divide-y divide-gray-100 text-left text-sm">
                   <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">
+                      <th class="px-6 py-4 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">
                         <input
                           type="checkbox"
                           class="rounded border-gray-300 text-primary focus:ring-primary"
@@ -55,14 +55,14 @@
                           @change="toggleSelectAll"
                         />
                       </th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">User</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Username</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Email</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Status</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Area</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Added</th>
-                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Verified</th>
-                      <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Actions</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">User</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Username</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Email</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Status</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Area</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Added</th>
+                      <th class="px-6 py-4 text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Verified</th>
+                      <th class="px-6 py-4 text-right text-[10px] font-semibold uppercase tracking-[0.18em] text-gray-600">Actions</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-100">
@@ -96,13 +96,13 @@
                         <p class="text-sm font-semibold text-gray-900">{{ member.user_name }}</p>
                       </td>
                       <td class="py-3 px-4">
-                        <p class="text-sm font-semibold text-gray-900">{{ member.user_email }}</p>
+                        <p class="text-sm text-gray-900">{{ member.user_email }}</p>
                       </td>
                       <td class="py-3 px-4">
                         <div class="flex items-center justify-center gap-2 ">
                           <span
                           v-if="member.is_verified"
-                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-sm text-green-700"
+                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 font-semibold text-sm text-green-700"
                         >
                           <UIcon
                             name="i-heroicons-check-badge"
@@ -113,13 +113,13 @@
                         </span>
                         <span
                           v-else-if="member.requires_verification"
-                          class="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700"
+                          class="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-[10px] uppercase tracking-[0.12em] text-amber-700"
                         >
                           Needs Verification
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-gray-600"
+                          class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 font-semibold text-[10px] uppercase tracking-[0.12em] text-gray-600"
                         >
                           Active
                         </span>
