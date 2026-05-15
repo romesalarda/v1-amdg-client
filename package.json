@@ -11,6 +11,7 @@
     "generate-api": "openapi-ts"
   },
   "dependencies": {
+    "@comark/vue": "^0.3.1",
     "@hebilicious/vue-query-nuxt": "^0.3.0",
     "@nuxt/ui": "^2.22.3",
     "@pinia/nuxt": "^0.5.5",

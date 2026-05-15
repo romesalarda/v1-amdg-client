@@ -69,7 +69,7 @@
 
       <div>
         <label for="notes" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
-          Additional Notes
+          Techical Notes
         </label>
         <UTextarea 
           v-model="notes"
@@ -77,6 +77,11 @@
           :rows="4"
           class="mt-2"
         />
+
+        <p class="mt-2 text-xs text-deep-navy/50 font-medium mt-5">Markdown Preview</p>
+        <Comark :options="{ autoUnwrap: true, autoClose: true }">
+          {{ notes }}
+        </Comark>
         <p class="mt-2 text-xs text-deep-navy/50 font-medium">Any additional comments or requirements (optional)</p>
         <p v-if="errors.notes" class="mt-2 text-xs text-red-600 font-bold">{{ errors.notes }}</p>
 
@@ -88,7 +93,8 @@
             </svg>
             <span class="text-[10px] font-black text-amber-700 uppercase tracking-wider">Flagged Issues — will be appended to notes on submit</span>
           </div>
-          <pre class="px-4 py-3 text-xs text-amber-900 font-medium whitespace-pre-wrap">{{ prefilledNotes }}</pre>
+          <!-- <pre class="px-4 py-3 text-xs text-amber-900 font-medium whitespace-pre-wrap">{{ prefilledNotes }}</pre> -->
+          
         </div>
       </div>
 
@@ -126,6 +132,7 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm, useField } from 'vee-validate'
 import { EventApprovalSchema } from '~/schemas/event-approval.schema'
 import type { EventAuthorization } from '~/api/types.gen'
+import { Comark } from '@comark/vue'
 
 
 const props = defineProps<{

@@ -9,7 +9,7 @@
             {{ proposal.proposal_description }}
           </p>
         </div>
-        <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
+        <!-- <div class="flex flex-col items-end gap-1.5 flex-shrink-0">
           <BudgetHealthBadge :health-status="proposal.health_status" />
           <span
             class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
@@ -17,7 +17,7 @@
           >
             {{ proposal.verification_status ?? 'pending' }}
           </span>
-        </div>
+        </div> -->
       </div>
 
       <div class="grid grid-cols-2 gap-3 mb-3">
@@ -131,7 +131,7 @@
       </div>
 
       <!-- Receipt -->
-      <div v-else class="mx-4 mb-5 bg-[#fdfcf8] border border-dashed border-deep-navy/20 rounded-lg font-mono text-[11px] overflow-hidden">
+      <div v-else class="mx-4 mb-5 bg-[#fdfcf8] border border-dashed border-deep-navy/20 rounded-lg font-mono text-[15px] overflow-hidden mt-4">
         <!-- Receipt header -->
         <div class="px-4 pt-4 pb-3 text-center border-b border-dashed border-deep-navy/15">
           <p class="text-[9px] uppercase tracking-[0.2em] text-deep-navy/40 font-sans font-black">Budget Proposal</p>

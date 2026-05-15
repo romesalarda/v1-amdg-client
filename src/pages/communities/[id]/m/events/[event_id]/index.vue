@@ -1,6 +1,6 @@
 <template>
   <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
-    <!-- Back Button -->
+    <!-- Back Button
     <NuxtLink
       :to="`/communities/${organisationId}/m/events`"
       class="inline-flex items-center gap-2 px-5 py-3 mb-6 border-2 border-deep-navy/20 text-deep-navy hover:bg-deep-navy/5 rounded-xl font-black text-sm uppercase tracking-wider transition-all"
@@ -9,7 +9,7 @@
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
       </svg>
       Back to Events
-    </NuxtLink>
+    </NuxtLink> -->
 
     <!-- Loading State -->
     <div v-if="isLoading" class="space-y-6">
@@ -42,19 +42,19 @@
     <!-- Main Content -->
     <div v-else-if="event" class="space-y-6">
       <!-- Page Header with Actions -->
-      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-8">
+      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-5">
         <div class="flex items-start justify-between gap-6">
           <div class="flex-1">
             <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight mb-3">{{ event.title }}</h1>
-            <p class="text-deep-navy/70 mb-4 font-bold text-sm uppercase tracking-wider">{{ event.display_code }}</p>
-            <div class="flex flex-wrap gap-2">
+            <p class="text-deep-navy/70 mb-4 font-bold text-sm uppercase tracking-wider">View and manage this event</p>
+            <!-- <div class="flex flex-wrap gap-2">
               <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="getStatusClasses(event.status)">
                 {{ event.status_display }}
               </span>
               <span v-if="event.is_approved" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500 text-white">
-                Authorized
+                Authorised
               </span>
-            </div>
+            </div> -->
           </div>
 
           <!-- Action Buttons -->
@@ -63,10 +63,8 @@
               :to="`/communities/${organisationId}/m/events/${eventId}/authorise`"
               class="inline-flex items-center gap-2 px-6 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
             >
-              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-              </svg>
-              Authorize Event
+              <UIcon name="i-heroicons-shield-check" class="w-6 h-6" />
+              Manage Authorisation
             </NuxtLink>
           </div>
         </div>
