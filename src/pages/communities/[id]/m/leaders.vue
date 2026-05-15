@@ -247,7 +247,7 @@ import InviteLeaderModal from '~/components/communities/InviteLeaderModal.vue'
 
 definePageMeta({
     middleware: ['auth', 'organisation-controller'],
-    layout: 'default',
+    layout: false,
 })
 
 useHead({

@@ -188,7 +188,7 @@ import {
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
-  layout: 'default',
+  layout: false,
 })
 
 const route = useRoute()

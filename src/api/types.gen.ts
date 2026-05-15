@@ -19118,10 +19118,12 @@ export type UserOrganisationMembershipDetail = {
     user: number;
     readonly user_name: string;
     readonly user_email: string;
+    readonly profile_image: string | null;
     added_by?: number | null;
     readonly added_by_name: string | null;
     readonly verified_at: string | null;
     readonly requires_verification: boolean;
+    readonly area_from: string | null;
     readonly is_verified: boolean;
     readonly added_at: string;
     /**
@@ -19146,10 +19148,12 @@ export type UserOrganisationMembershipList = {
     user: number;
     readonly user_name: string;
     readonly user_email: string;
+    readonly profile_image: string | null;
     added_by?: number | null;
     readonly added_by_name: string | null;
     readonly verified_at: string | null;
     readonly requires_verification: boolean;
+    readonly area_from: string | null;
     readonly is_verified: boolean;
     readonly added_at: string;
     /**

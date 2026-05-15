@@ -1,124 +1,131 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header with Organization Info -->
-    <div class="bg-white border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-4">
-            <div v-if="organisation?.logo" class="w-12 h-12 bg-gray-100 rounded-lg p-2">
-              <img 
-                :src="resolveImageUrl(organisation.logo)" 
-                :alt="organisation.title"
-                @error="onImageError"
-                class="w-full h-full object-contain"
-              />
-            </div>
-            <div>
-              <h1 class="text-2xl font-bold text-gray-900">{{ organisation?.title || 'Community' }}</h1>
-              <p class="text-sm text-gray-600">Management Dashboard</p>
-            </div>
-          </div>
-          
-          <UButton 
-            :to="`/communities/${organisationId}`" 
-            variant="outline"
-            icon="i-heroicons-arrow-left"
-          >
-            View Community
-          </UButton>
+    <Navbar />
+
+  <!-- Mobile menu button -->
+  <!-- <button
+    v-if="!sidebarOpen"
+    @click="sidebarOpen = true"
+    class="lg:hidden fixed top-20 left-4 z-50 p-2 bg-deep-navy text-white rounded-lg shadow-lg hover:bg-deep-navy/90 transition-colors"
+  >
+    <UIcon name="i-heroicons-bars-3" class="w-6 h-6" />
+  </button> -->
+
+  <!-- Overlay for mobile -->
+  <div
+    v-if="sidebarOpen"
+    @click="sidebarOpen = false"
+    class="lg:hidden fixed inset-0 bg-black/50 z-40 transition-opacity"
+  />
+
+  <!-- Sidebar -->
+  <aside
+    :class="[
+      'fixed inset-y-0 left-0 z-50 w-64 bg-deep-navy text-white flex flex-col transition-transform duration-300',
+      'lg:translate-x-0',
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    ]"
+  >
+    <!-- Logo/Brand -->
+    <div class="p-6 flex items-center gap-3 border-b border-white/10">
+      <span class="font-bold tracking-tight text-lg">Community Control</span>
+    </div>
+
+    <!-- Organisation Info -->
+    <div class="p-4 border-b border-white/10">
+      <div class="flex items-start gap-3">
+        <!-- Organisation Image -->
+        <div
+          v-if="organisation?.logo"
+          class="w-12 h-12 rounded overflow-hidden flex-shrink-0 bg-deep-navy/50 border border-white/10"
+        >
+          <img
+            :src="resolveImageUrl(organisation.logo)"
+            :alt="organisation.title"
+            class="w-full h-full object-contain"
+            @error="onImageError"
+          />
+        </div>
+        <div
+          v-else
+          class="w-12 h-12 rounded bg-deep-navy/50 border border-blue-500/40 flex items-center justify-center flex-shrink-0"
+        >
+          <UIcon name="i-heroicons-building-office" class="w-6 h-6 text-blue-500" />
         </div>
 
-        <!-- Navigation Tabs -->
-        <nav class="flex gap-6 mt-6" aria-label="Management navigation">
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/dashboard`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('dashboard') 
-              ? 'border-blue-600 text-blue-600' 
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-home" class="w-4 h-4 inline mr-1" />
-            Dashboard
-          </NuxtLink>
-          
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/landing/editor`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('landing') 
-              ? 'border-blue-600 text-blue-600' 
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-photo" class="w-4 h-4 inline mr-1" />
-            Landing Page
-          </NuxtLink>
-          
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/members`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('members') 
-              ? 'border-blue-600 text-blue-600' 
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-users" class="w-4 h-4 inline mr-1" />
-            Members
-          </NuxtLink>
-          
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/events`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('events') 
-              ? 'border-blue-600 text-blue-600' 
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 inline mr-1" />
-            Events
-          </NuxtLink>
-
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/sponsors`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('sponsors')
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-banknotes" class="w-4 h-4 inline mr-1" />
-            Sponsors
-          </NuxtLink>
-
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/leaders`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('leaders')
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-shield-check" class="w-4 h-4 inline mr-1" />
-            Leaders
-          </NuxtLink>
-
-          <NuxtLink
-            :to="`/communities/${organisationId}/m/statistics`"
-            class="px-1 pb-3 border-b-2 text-sm font-medium transition-colors"
-            :class="isActive('statistics')
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
-          >
-            <UIcon name="i-heroicons-chart-pie" class="w-4 h-4 inline mr-1" />
-            Statistics
-          </NuxtLink>
-        </nav>
+        <!-- Organisation Details -->
+        <div class="flex-1 min-w-0">
+          <h2 class="text-sm font-bold text-white truncate">
+            {{ organisation?.title || 'Community' }}
+          </h2>
+          <p class="text-xs text-white/60 mt-1">Management Dashboard</p>
+        </div>
       </div>
     </div>
 
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-hide">
+      <NuxtLink
+        v-for="tab in tabs"
+        :key="tab.path"
+        :to="`/communities/${organisationId}/m/${tab.path}`"
+        @click="onTabClick"
+        :class="[
+          'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all',
+          isActive(tab.path)
+            ? 'bg-white/10 text-white'
+            : 'text-white/60 hover:text-white hover:bg-white/5',
+        ]"
+      >
+        <UIcon :name="tab.icon" class="w-5 h-5" />
+        <span>{{ tab.label }}</span>
+      </NuxtLink>
+    </nav>
+
+    <!-- Bottom Actions -->
+    <div class="p-4 border-t border-white/10 space-y-2">
+      <UButton
+        :to="`/communities/${organisationId}`"
+        variant="ghost"
+        color="white"
+        block
+        size="sm"
+        icon="i-heroicons-eye"
+        class="justify-start text-white/70 hover:text-white hover:bg-white/5"
+      >
+        View Community
+      </UButton>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <div class="min-h-screen bg-mist-blue lg:ml-64 transition-all duration-300">
+    <!-- Top Header Bar -->
+    <header class="h-16 bg-white border-b border-gray-200 sticky top-0 z-30 px-8 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <button
+          @click="sidebarOpen = !sidebarOpen"
+          class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <UIcon name="i-heroicons-bars-3" class="w-5 h-5 text-gray-600" />
+        </button>
+        <div>
+          <h3 class="font-bold text-deep-navy">{{ currentPageTitle }}</h3>
+          <p class="text-xs text-gray-500">{{ organisation?.title || 'Community' }}</p>
+        </div>
+      </div>
+    </header>
+
     <!-- Content Area -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="p-8">
       <slot />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import Navbar from '~/components/common/Navbar.vue'
 
 const props = defineProps<{
   organisationId: string | number
@@ -126,8 +133,67 @@ const props = defineProps<{
 }>()
 
 const route = useRoute()
+const sidebarOpen = ref(false)
+
+const tabs = computed(() => [
+  {
+    path: 'dashboard',
+    label: 'Dashboard',
+    icon: 'i-heroicons-chart-bar',
+  },
+  {
+    path: 'landing/editor',
+    label: 'Landing Page',
+    icon: 'i-heroicons-photo',
+  },
+  {
+    path: 'members',
+    label: 'Members',
+    icon: 'i-heroicons-users',
+  },
+  {
+    path: 'events',
+    label: 'Events',
+    icon: 'i-heroicons-calendar-days',
+  },
+  {
+    path: 'sponsors',
+    label: 'Sponsors',
+    icon: 'i-heroicons-banknotes',
+  },
+  {
+    path: 'leaders',
+    label: 'Leaders',
+    icon: 'i-heroicons-shield-check',
+  },
+  {
+    path: 'statistics',
+    label: 'Statistics',
+    icon: 'i-heroicons-chart-pie',
+  },
+])
+
+const onTabClick = () => {
+  sidebarOpen.value = false
+}
 
 const isActive = (section: string) => {
   return route.path.includes(`/m/${section}`)
 }
+
+const currentPageTitle = computed(() => {
+  const activeTab = tabs.value.find(tab => isActive(tab.path))
+  return activeTab?.label || 'Community Management'
+})
 </script>
+
+<style scoped>
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+</style>

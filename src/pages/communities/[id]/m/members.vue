@@ -9,18 +9,21 @@
       <UTabs :items="tabItems" class="w-full">
         <template #item="{ item }">
           <div v-if="item.key === 'members'" class="mt-6">
-            <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-              <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Members</h2>
-                <p class="text-sm text-deep-navy/60 mt-2 font-medium">View active members and manage verification.</p>
+            <section class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+              <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-primary" />
+                  <h2 class="text-sm font-black uppercase tracking-widest text-primary">Members</h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">View active members and manage verification.</p>
 
-                <div class="mt-5">
-                  <label for="member-search" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+                <div class="mt-4">
+                  <label for="member-search" class="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Search Members
                   </label>
                   <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -29,7 +32,7 @@
                       v-model="membersSearchInput"
                       type="text"
                       placeholder="Search by username, name, or email..."
-                      class="w-full pl-12 pr-4 py-4 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                      class="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm font-medium text-gray-700 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                   </div>
                 </div>
@@ -41,71 +44,98 @@
               </div>
 
               <div v-else-if="memberships.length > 0" class="overflow-x-auto">
-                <table class="min-w-full divide-y-2 divide-deep-navy/10">
-                  <thead class="bg-deep-navy/5">
+                <table class="min-w-full divide-y divide-gray-100 text-left text-sm">
+                  <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Member</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Status</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Added</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Verified</th>
-                      <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Actions</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Member</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Status</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Added</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Verified</th>
+                      <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-600">Actions</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-deep-navy/5">
-                    <tr v-for="member in memberships" :key="member.id" class="hover:bg-deep-navy/5">
+                  <tbody class="divide-y divide-gray-100">
+                    <tr v-for="member in memberships" :key="member.id" class="transition-colors hover:bg-gray-50">
                       <td class="px-6 py-4">
-                        <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ member.user_name }}</p>
-                        <p class="text-xs text-deep-navy/60 font-medium mt-1">{{ member.user_email }}</p>
+                        <p class="text-sm font-semibold text-gray-900">{{ member.user_name }}</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500">{{ member.user_email }}</p>
                       </td>
                       <td class="px-6 py-4">
                         <span
                           v-if="member.is_verified"
-                          class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500 text-white"
+                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-green-700"
                         >
                           Verified
                         </span>
                         <span
                           v-else-if="member.requires_verification"
-                          class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500 text-white"
+                          class="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-amber-700"
                         >
                           Needs Verification
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-gray-500 text-white"
+                          class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-gray-600"
                         >
                           Active
                         </span>
                       </td>
-                      <td class="px-6 py-4 text-xs text-deep-navy/60 font-medium">
+                      <td class="px-6 py-4 text-xs font-medium text-gray-500">
                         {{ formatDate(member.added_at) }}
                       </td>
-                      <td class="px-6 py-4 text-xs text-deep-navy/60 font-medium">
+                      <td class="px-6 py-4 text-xs font-medium text-gray-500">
                         {{ member.verified_at ? formatDate(member.verified_at) : 'Not verified' }}
                       </td>
                       <td class="px-6 py-4">
                         <div class="flex items-center justify-end gap-2">
-                          <button
-                            class="px-4 py-2 border-2 border-deep-navy/20 rounded-xl text-deep-navy font-black text-xs uppercase tracking-wider hover:bg-deep-navy/5"
+                          <!-- <button
+                            class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+                            icon="i-heroicons-eye"
                             @click="openMembershipModal(member.id)"
                           >
-                            View
-                          </button>
-                          <button
+                          </button> -->
+                          <UButton
+                            size="xs"
+                            variant="ghost"
+                            color="gray"
+                            icon="i-heroicons-eye"
+                            @click="openMembershipModal(member.id)"
+                            title="Quick view"
+                          />
+                          <!-- <button
                             v-if="member.requires_verification && !member.is_verified"
                             :disabled="verifyingMembershipId === member.id"
-                            class="px-4 py-2 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                            class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700 disabled:opacity-50"
                             @click="verifyMember(member.id)"
                           >
+                            <UIcon name="i-heroicons-check-badge" class="h-3.5 w-3.5" />
                             {{ verifyingMembershipId === member.id ? 'Verifying...' : 'Verify' }}
-                          </button>
-                          <button
+                          </button> -->
+                          <UButton
+                            v-if="member.requires_verification && !member.is_verified"
+                            size="xs"
+                            color="green"
+                            :disabled="verifyingMembershipId === member.id"
+                            @click="verifyMember(member.id)"
+                            title="Verify member"
+                            icon="i-heroicons-check-badge"
+                          />
+                          <!-- <button
                             :disabled="removingMembershipId === member.id"
-                            class="px-4 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                            class="inline-flex items-center gap-1 rounded-md border border-red-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                             @click="removeMembership(member.id, member.user_name)"
                           >
+                            <UIcon name="i-heroicons-trash" class="h-3.5 w-3.5" />
                             {{ removingMembershipId === member.id ? 'Removing...' : 'Remove' }}
-                          </button>
+                          </button> -->
+                          <UButton
+                            size="xs"
+                            color="red"
+                            :disabled="removingMembershipId === member.id"
+                            @click="removeMembership(member.id, member.user_name)"
+                            title="Remove member"
+                            icon="i-heroicons-trash"
+                            />
                         </div>
                       </td>
                     </tr>
@@ -114,49 +144,52 @@
               </div>
 
               <div v-else class="px-8 py-16 text-center">
-                <p class="text-sm font-bold text-deep-navy/60">
+                <p class="text-sm font-semibold text-gray-600">
                   {{ membersSearchQuery ? 'No members matched your search' : 'No members found' }}
                 </p>
-                <p class="text-xs text-deep-navy/40 mt-2 font-medium">
+                <p class="mt-2 text-xs font-medium text-gray-500">
                   {{ membersSearchQuery ? 'Try a different name or email.' : 'Invite users to start building your community.' }}
                 </p>
               </div>
 
-              <div v-if="!isLoadingMembers && memberships.length > 0" class="px-6 py-4 border-t border-deep-navy/10 flex items-center justify-between">
+              <div v-if="!isLoadingMembers && memberships.length > 0" class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
                 <div class="flex items-center gap-3">
                   <select
                     v-model="membersPageSize"
-                    class="px-3 py-1.5 border-2 border-deep-navy/20 rounded-lg text-xs font-black uppercase tracking-wider text-deep-navy"
+                    class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700"
                   >
                     <option :value="10">10 per page</option>
                     <option :value="25">25 per page</option>
                     <option :value="50">50 per page</option>
                     <option :value="100">100 per page</option>
                   </select>
-                  <span class="text-xs text-deep-navy/60 font-medium">
+                  <span class="text-xs font-medium text-gray-500">
                     Showing {{ membersFrom }} to {{ membersTo }} of {{ membersTotalCount }}
                   </span>
                 </div>
                 <UPagination v-model="membersPage" :page-count="membersPageSize" :total="membersTotalCount" :max="7" />
               </div>
-            </div>
+            </section>
           </div>
 
           <div v-if="item.key === 'invites'" class="mt-6 space-y-8">
-            <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-              <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Send Invitation</h2>
-                <p class="text-sm text-deep-navy/60 mt-2 font-medium">Invite users to join your community.</p>
+            <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+              <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-heroicons-user-plus" class="h-5 w-5 text-primary" />
+                  <h2 class="text-sm font-black uppercase tracking-widest text-primary">Send Invitation</h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Invite users to join your community.</p>
               </div>
 
-              <div class="p-8">
+              <div class="p-6 sm:p-8">
                 <div class="mb-6">
-                  <label for="search" class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">
+                  <label for="search" class="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
                     Search Users
                   </label>
                   <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                      <svg class="h-5 w-5 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                      <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -165,54 +198,53 @@
                       v-model="searchQuery"
                       type="text"
                       placeholder="Search by name or email..."
-                      class="w-full pl-12 pr-4 py-4 border-2 bg-white border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+                      class="h-11 w-full rounded-lg border border-gray-300 bg-white pl-10 pr-4 text-sm font-medium text-gray-700 placeholder:text-gray-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                       @input="debouncedSearch"
                     />
                   </div>
                 </div>
 
-                <div v-if="searchQuery && filteredUsers.length > 0" class="space-y-3">
-                  <p class="text-[10px] font-black text-deep-navy/50 mb-4 uppercase tracking-[0.2em]">Search Results</p>
+                <div v-if="searchQuery && filteredUsers.length > 0" class="space-y-2">
+                  <p class="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Search Results</p>
                   <div
                     v-for="user in filteredUsers"
                     :key="user.id"
-                    class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-5 bg-white border-2 border-deep-navy/10 rounded-xl hover:border-deep-navy/30 transition-all"
+                    class="flex flex-col gap-4 rounded-xl border border-gray-100 bg-white p-5 transition hover:border-gray-200 hover:bg-gray-50 md:flex-row md:items-center md:justify-between"
                   >
                     <div class="flex items-center gap-4">
-                      <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center border-2 border-blue-500/20">
-                        <svg class="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                        </svg>
+                      <div class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-100">
+                        <UIcon name="i-heroicons-user" class="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p class="text-sm font-black text-deep-navy uppercase tracking-tight">
+                        <p class="text-sm font-semibold text-gray-900">
                           {{ user.first_name }} {{ user.last_name }}
                         </p>
-                        <p class="text-xs text-deep-navy/60 font-medium">{{ user.email }}</p>
+                        <p class="text-xs font-medium text-gray-500">{{ user.email }}</p>
                       </div>
                     </div>
 
                     <div class="flex items-center gap-2">
-                      <span v-if="hasInvite(user.id)" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-blue-500 text-white">
+                      <span v-if="hasInvite(user.id)" class="inline-flex items-center rounded-md bg-blue-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-blue-700">
                         Invited
                       </span>
-                      <span v-else-if="isMember(user.id)" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-green-500 text-white">
+                      <span v-else-if="isMember(user.id)" class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-green-700">
                         Member
                       </span>
                       <button
                         v-else
                         :disabled="sendingInviteToUserId === user.id"
                         @click="sendInvite(user.id)"
-                        class="px-5 py-2 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                        class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700 disabled:opacity-50"
                       >
+                        <UIcon name="i-heroicons-paper-airplane" class="h-3.5 w-3.5" />
                         {{ sendingInviteToUserId === user.id ? 'Sending...' : 'Send Invite' }}
                       </button>
                     </div>
                   </div>
                 </div>
 
-                <div v-else-if="searchQuery && filteredUsers.length === 0 && !isLoadingUsers" class="text-center py-10 bg-deep-navy/5 border-2 border-dashed border-deep-navy/20 rounded-xl">
-                  <p class="text-sm font-bold text-deep-navy/60">No users found</p>
+                <div v-else-if="searchQuery && filteredUsers.length === 0 && !isLoadingUsers" class="rounded-xl border border-dashed border-gray-300 bg-gray-50 py-10 text-center">
+                  <p class="text-sm font-semibold text-gray-600">No users found</p>
                 </div>
 
                 <div v-else-if="isLoadingUsers" class="text-center py-8">
@@ -221,10 +253,13 @@
               </div>
             </div>
 
-            <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-              <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Pending Invitations</h2>
-                <p class="text-sm text-deep-navy/60 mt-2 font-medium">Invitations awaiting acceptance.</p>
+            <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+              <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-heroicons-envelope" class="h-5 w-5 text-primary" />
+                  <h2 class="text-sm font-black uppercase tracking-widest text-primary">Pending Invitations</h2>
+                </div>
+                <p class="mt-1 text-xs text-gray-500">Invitations awaiting acceptance.</p>
               </div>
 
               <div v-if="isLoadingInvites" class="p-8 space-y-3">
@@ -233,30 +268,30 @@
               </div>
 
               <div v-else-if="pendingInvites.length > 0" class="overflow-x-auto">
-                <table class="min-w-full divide-y-2 divide-deep-navy/10">
-                  <thead class="bg-deep-navy/5">
+                <table class="min-w-full divide-y divide-gray-100 text-left text-sm">
+                  <thead class="bg-gray-50">
                     <tr>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">User</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Sent</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Expires</th>
-                      <th class="px-6 py-4 text-left text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Status</th>
-                      <th class="px-6 py-4 text-right text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Actions</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">User</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Sent</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Expires</th>
+                      <th class="px-6 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Status</th>
+                      <th class="px-6 py-3 text-right text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">Actions</th>
                     </tr>
                   </thead>
-                  <tbody class="divide-y divide-deep-navy/5">
-                    <tr v-for="invite in pendingInvites" :key="invite.id" class="hover:bg-deep-navy/5">
+                  <tbody class="divide-y divide-gray-100">
+                    <tr v-for="invite in pendingInvites" :key="invite.id" class="transition-colors hover:bg-gray-50">
                       <td class="px-6 py-4">
-                        <p class="text-sm font-black text-deep-navy uppercase tracking-tight">
+                        <p class="text-sm font-semibold text-gray-900">
                           {{ invite.target_user_name || 'Invited User' }}
                         </p>
-                        <p class="text-xs text-deep-navy/60 font-medium mt-1">{{ invite.target_user_email }}</p>
+                        <p class="mt-1 text-xs font-medium text-gray-500">{{ invite.target_user_email }}</p>
                       </td>
-                      <td class="px-6 py-4 text-xs text-deep-navy/60 font-medium">{{ formatDate(invite.added_at) }}</td>
-                      <td class="px-6 py-4 text-xs font-medium" :class="invite.expires_at && isExpiringSoon(invite.expires_at) ? 'text-red-600' : 'text-deep-navy/60'">
+                      <td class="px-6 py-4 text-xs font-medium text-gray-500">{{ formatDate(invite.added_at) }}</td>
+                      <td class="px-6 py-4 text-xs font-medium" :class="invite.expires_at && isExpiringSoon(invite.expires_at) ? 'text-red-600' : 'text-gray-500'">
                         {{ invite.expires_at ? formatDate(invite.expires_at) : 'No expiry' }}
                       </td>
                       <td class="px-6 py-4">
-                        <span :class="inviteStatusClass(invite)" class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+                        <span :class="inviteStatusClass(invite)" class="inline-flex items-center rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]">
                           {{ inviteStatusLabel(invite) }}
                         </span>
                       </td>
@@ -265,8 +300,9 @@
                           <button
                             :disabled="removingInviteId === invite.id"
                             @click="removeInvite(invite.id)"
-                            class="px-4 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                            class="inline-flex items-center gap-1 rounded-md border border-red-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-red-600 transition hover:bg-red-50 disabled:opacity-50"
                           >
+                            <UIcon name="i-heroicons-x-mark" class="h-3.5 w-3.5" />
                             {{ removingInviteId === invite.id ? 'Cancelling...' : 'Cancel' }}
                           </button>
                         </div>
@@ -277,22 +313,22 @@
               </div>
 
               <div v-else class="px-8 py-16 text-center">
-                <p class="text-sm font-bold text-deep-navy/60">No pending invitations</p>
-                <p class="text-xs text-deep-navy/40 mt-2 font-medium">Search for users above to send invitations.</p>
+                <p class="text-sm font-semibold text-gray-600">No pending invitations</p>
+                <p class="mt-2 text-xs font-medium text-gray-500">Search for users above to send invitations.</p>
               </div>
 
-              <div v-if="!isLoadingInvites && pendingInvites.length > 0" class="px-6 py-4 border-t border-deep-navy/10 flex items-center justify-between">
+              <div v-if="!isLoadingInvites && pendingInvites.length > 0" class="flex items-center justify-between border-t border-gray-100 bg-gray-50 px-6 py-4">
                 <div class="flex items-center gap-3">
                   <select
                     v-model="invitesPageSize"
-                    class="px-3 py-1.5 border-2 border-deep-navy/20 rounded-lg text-xs font-black uppercase tracking-wider text-deep-navy"
+                    class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700"
                   >
                     <option :value="10">10 per page</option>
                     <option :value="25">25 per page</option>
                     <option :value="50">50 per page</option>
                     <option :value="100">100 per page</option>
                   </select>
-                  <span class="text-xs text-deep-navy/60 font-medium">
+                  <span class="text-xs font-medium text-gray-500">
                     Showing {{ invitesFrom }} to {{ invitesTo }} of {{ invitesTotalCount }}
                   </span>
                 </div>
@@ -498,7 +534,7 @@ import Swal from 'sweetalert2'
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
-  layout: 'default',
+  layout: false,
 })
 
 const route = useRoute()

@@ -712,7 +712,7 @@ import Swal from 'sweetalert2'
 
 definePageMeta({
 	middleware: ['auth', 'organisation-controller'],
-	layout: 'default',
+	layout: false,
 })
 
 useHead({

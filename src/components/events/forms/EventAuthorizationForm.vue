@@ -45,7 +45,6 @@
           v-model="status"
           :options="authStatusOptions"
           placeholder="Select authorization status"
-          size="lg"
           class="mt-2"
           value-attribute="value"
         />

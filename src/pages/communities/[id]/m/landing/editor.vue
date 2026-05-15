@@ -223,7 +223,7 @@ import { useForm, useField } from 'vee-validate'
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
-  layout: 'default',
+  layout: false,
 })
 
 const route = useRoute()

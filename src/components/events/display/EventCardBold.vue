@@ -1,6 +1,6 @@
 <template>
   <div 
-    @click="navigateTo(`/events/${event.event_id}`)"
+    @click="navigateTo(`/events/${event.url_safe_title}`)"
     class="group bg-white border-2 border-deep-navy rounded-xl overflow-hidden shadow-drawn flex flex-col cursor-pointer hover:translate-y-[-4px] transition-all duration-200"
   >
     <!-- Event Image -->

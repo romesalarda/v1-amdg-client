@@ -96,8 +96,16 @@
       </p>
     </div>
 
-    <div v-else class="overflow-hidden rounded-lg bg-slate-100 shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
-      <div class="hidden grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] gap-4 border-b border-slate-200 bg-white px-8 py-4 text-[11px] font-black uppercase tracking-[0.18em] text-slate-500 lg:grid">
+    <section v-else class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+      <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
+        <div class="flex items-center gap-3">
+          <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-primary" />
+          <h2 class="text-sm font-black uppercase tracking-widest text-primary">Events</h2>
+        </div>
+        <p class="mt-1 text-xs text-gray-500">Live list of events with status, timing, and registration progress.</p>
+      </div>
+
+      <div class="hidden grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] gap-4 border-b border-gray-100 bg-gray-50 px-8 py-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500 lg:grid">
         <div>Event</div>
         <div>Date</div>
         <div>Status</div>
@@ -105,14 +113,14 @@
         <div class="text-right">Actions</div>
       </div>
 
-      <div class="space-y-2 p-2">
+      <div class="space-y-2 bg-slate-50 p-2.5">
         <div
           v-for="event in events"
           :key="event.event_id"
-          class="grid gap-4 rounded-md bg-white px-4 py-3 transition hover:-translate-y-[1px] hover:bg-slate-50 lg:grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] lg:items-center lg:px-8"
+          class="grid gap-4 rounded-xl border border-gray-100 bg-white px-4 py-3.5 transition hover:-translate-y-[1px] hover:border-gray-200 hover:bg-gray-50 lg:grid-cols-[minmax(0,2.6fr)_1.2fr_1fr_1.4fr_1.2fr] lg:items-center lg:px-8"
         >
           <div class="flex items-center gap-4">
-            <div class="h-12 w-12 overflow-hidden rounded-md bg-slate-200">
+            <div class="h-12 w-12 overflow-hidden rounded-lg border border-gray-200 bg-slate-200">
               <img
                 v-if="event.main_landing_image?.image"
                 :src="resolveImageUrl(event.main_landing_image.image)"
@@ -125,26 +133,30 @@
             <div class="min-w-0">
               <NuxtLink
                 :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
-                class="line-clamp-1 text-base font-black text-deep-navy hover:text-deep-navy/80"
+                class="line-clamp-1 text-base font-black text-deep-navy hover:text-primary"
               >
                 {{ event.title }}
               </NuxtLink>
-              <p class="line-clamp-1 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+              <p class="line-clamp-1 text-xs font-semibold uppercase tracking-[0.14em] text-gray-500">
                 {{ event.event_type_name || 'General event' }}
               </p>
             </div>
           </div>
 
-          <div>
+          <div class="space-y-1">
             <p class="text-sm font-bold text-deep-navy">{{ formatEventDate(event.start_datetime) }}</p>
-            <p class="text-xs font-medium text-slate-500">{{ formatEventTime(event.start_datetime) }}</p>
+            <p class="inline-flex items-center gap-1 text-xs font-medium text-gray-500">
+              <UIcon name="i-heroicons-clock" class="h-3.5 w-3.5" />
+              {{ formatEventTime(event.start_datetime) }}
+            </p>
           </div>
 
           <div>
             <span
-              class="inline-flex rounded-md px-2.5 py-1 text-[11px] font-black uppercase tracking-[0.12em]"
+              class="inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.12em]"
               :class="getStatusBadgeClass(event.status)"
             >
+              <UIcon name="i-heroicons-sparkles" class="h-3.5 w-3.5" />
               {{ event.status }}
             </span>
           </div>
@@ -152,11 +164,11 @@
           <div class="space-y-1">
             <div class="flex items-center justify-between text-xs font-semibold text-deep-navy">
               <span>{{ getRegistrationLabel(event) }}</span>
-              <span class="text-slate-500">{{ event.attendee_overview.percentage_full?.toFixed(1) }}%</span>
+              <span class="text-gray-500">{{ event.attendee_overview.percentage_full?.toFixed(1) }}%</span>
             </div>
-            <div class="h-1.5 overflow-hidden rounded-md bg-slate-200">
+            <div class="h-1.5 overflow-hidden rounded-md bg-gray-200">
               <div
-                class="h-full rounded-md bg-blue-600 transition-all duration-300"
+                class="h-full rounded-md bg-primary transition-all duration-300"
                 :style="{ width: `${event.attendee_overview.percentage_full || 0}%` }"
               />
             </div>
@@ -165,28 +177,30 @@
           <div class="flex justify-end gap-2">
             <NuxtLink
               :to="`/events/${event.url_safe_title}`"
-              class="rounded-md border border-slate-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
+              class="inline-flex items-center gap-1 rounded-md border border-gray-300 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-slate-700 transition hover:border-slate-400 hover:text-slate-900"
             >
+              <UIcon name="i-heroicons-eye" class="h-3.5 w-3.5" />
               View
             </NuxtLink>
             <NuxtLink
               :to="`/communities/${organisationId}/m/events/${event.url_safe_title}`"
-              class="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700"
+              class="inline-flex items-center gap-1 rounded-md bg-slate-900 px-3 py-1.5 text-xs font-black uppercase tracking-[0.12em] text-white transition hover:bg-slate-700"
             >
+              <UIcon name="i-heroicons-cog-6-tooth" class="h-3.5 w-3.5" />
               Manage
             </NuxtLink>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-col gap-4 border-t border-slate-200 bg-white px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
-        <p class="text-sm font-medium text-slate-600">
+      <div class="flex flex-col gap-4 border-t border-gray-100 bg-gray-50 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+        <p class="text-sm font-medium text-gray-600">
           Showing {{ showingStart }}-{{ showingEnd }} of {{ totalCount }} events
         </p>
 
         <div class="flex items-center gap-2">
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             :disabled="currentPage <= 1"
             @click="setPage(currentPage - 1)"
           >
@@ -199,14 +213,14 @@
             v-for="page in visiblePages"
             :key="page"
             class="flex h-9 min-w-9 items-center justify-center rounded-md px-3 text-sm font-black transition"
-            :class="page === currentPage ? 'bg-slate-900 text-white' : 'border border-slate-300 text-slate-700 hover:bg-slate-100'"
+            :class="page === currentPage ? 'bg-slate-900 text-white' : 'border border-gray-300 text-slate-700 hover:bg-gray-100'"
             @click="setPage(page)"
           >
             {{ page }}
           </button>
 
           <button
-            class="flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
+            class="flex h-9 w-9 items-center justify-center rounded-md border border-gray-300 text-gray-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
             :disabled="currentPage >= totalPages"
             @click="setPage(currentPage + 1)"
           >
@@ -216,7 +230,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </section>
   </ManagementLayout>
 </template>
 
@@ -389,7 +403,7 @@ const getRegistrationLabel = (event: EventList) => {
 
 definePageMeta({
   middleware: ['auth', 'organisation-controller'],
-  layout: 'default',
+  layout: false,
 })
 
 </script>
