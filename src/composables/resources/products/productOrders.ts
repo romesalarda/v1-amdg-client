@@ -16,6 +16,8 @@ import {
   productsOrdersReserveBankTransferPayment,
   productsOrdersSubmitCreate,
   productsOrdersUpdateItemCreate,
+  productsOrdersValidateCodeCreate,
+  productsOrdersPreviewPricingCreate,
 } from '~/api/sdk.gen'
 import type {
   OrderUpdateRequest,
@@ -32,6 +34,8 @@ import type {
   ProductsOrdersSubmitCreateData,
   ProductsOrdersRetrieveData,
   ProductsOrdersUpdateItemCreateData,
+  ProductsOrdersValidateCodeCreateData,
+  ProductsOrdersPreviewPricingCreateData,
 } from '~/api/types.gen'
 import { extractApiErrorMessage } from '~/utils/errors'
 
@@ -338,6 +342,26 @@ export function useCompleteProductOrder() {
         queryKey: [...QUERY_KEY, 'detail', orderId],
       })
     },
+  })
+}
+
+/**
+ * Validate a discount code against an order's items
+ */
+export function useValidateOrderDiscountCode() {
+  return useMutation({
+    mutationFn: (body: ProductsOrdersValidateCodeCreateData['body']) =>
+      productsOrdersValidateCodeCreate({ body }),
+  })
+}
+
+/**
+ * Preview pricing for an order with an optional discount code
+ */
+export function usePreviewOrderPricing() {
+  return useMutation({
+    mutationFn: (body: ProductsOrdersPreviewPricingCreateData['body']) =>
+      productsOrdersPreviewPricingCreate({ body }),
   })
 }
 

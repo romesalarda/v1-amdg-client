@@ -326,7 +326,13 @@
 							</div>
 							<div class="flex items-center justify-between text-sm">
 								<dt class="text-[11px] font-semibold text-deep-navy/70">Discounts</dt>
-								<dd class="font-semibold text-deep-navy/70">£0.00</dd>
+								<dd
+									class="font-semibold"
+									:class="discount.discountAmount.value ? 'text-green-700' : 'text-deep-navy/70'"
+								>
+									<template v-if="discount.discountAmount.value">−£{{ discount.discountAmount.value.raw }}</template>
+									<template v-else>£0.00</template>
+								</dd>
 							</div>
 							<div class="flex items-center justify-between text-sm">
 								<dt class="text-[11px] font-semibold text-deep-navy/70">Tax</dt>
@@ -334,9 +340,27 @@
 							</div>
 							<div class="border-t border-deep-navy/10 pt-3 flex items-center justify-between">
 								<dt class="text-[11px] font-black uppercase tracking-wide text-deep-navy">Total</dt>
-								<dd class="text-lg font-black text-deep-navy">{{ order.total_amount }}</dd>
+								<dd class="text-lg font-black text-deep-navy">
+									<template v-if="discount.discountedTotal.value">£{{ discount.discountedTotal.value }}</template>
+									<template v-else>{{ order.total_amount }}</template>
+								</dd>
 							</div>
 						</div>
+
+						<ShopOrderDiscountCodeInput
+							v-if="!isCheckoutLocked"
+							v-model="discount.codeInput.value"
+							:applied-code="discount.appliedCode.value"
+							:validation-state="discount.validationState.value"
+							:validation-error="discount.validationError.value"
+							:is-validating="discount.isValidating.value"
+							:is-preview-loading="discount.isPreviewLoading.value"
+							:discount-amount="discount.discountAmount.value"
+							currency-symbol="£"
+							class="mt-4"
+							@apply="onApplyDiscountCode"
+							@clear="discount.clearCode()"
+						/>
 
 						<button
 							type="button"
@@ -448,6 +472,7 @@ import { useStripeConfig } from '~/composables/resources/common/stripe'
 import { useCheckoutProductOrder, useReserveProductOrderBankTransferPayment } from '~/composables/resources/products/productOrders'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { toMultipartFormData } from '~/composables/registration/checkout'
+import { useOrderDiscountCode } from '~/composables/shop/useOrderDiscountCode'
 
 definePageMeta({
 	layout: 'booking',
@@ -636,6 +661,8 @@ watch(
 )
 
 
+
+const discount = useOrderDiscountCode()
 
 const checkoutMutation = useCheckoutProductOrder()
 const reserveBankTransferMutation = useReserveProductOrderBankTransferPayment()
@@ -1051,6 +1078,14 @@ onBeforeUnmount(() => {
 	teardownStripeElements()
 })
 
+async function onApplyDiscountCode(code: string) {
+	const attendeeId = selectedAttendeeId.value
+	const items = order.value?.order_items ?? []
+	if (!activeOrderId.value || !attendeeId) return
+	discount.codeInput.value = code
+	await discount.applyCode(activeOrderId.value, attendeeId, items as any)
+}
+
 async function submitCheckout() {
 	if (!canSubmitCheckout.value || !activeOrderId.value || !selectedPaymentMethodId.value) return
 	if (isStripeMethod.value) {
@@ -1102,6 +1137,7 @@ async function submitCheckout() {
 				? toMultipartFormData({
 					payment_method_id: selectedPaymentMethodId.value,
 					payment_id: isBankTransferMethod.value ? reservedBankTransferPaymentId.value : undefined,
+					discount_code: discount.appliedCode.value ?? undefined,
 					bank_transfer_evidence: {
 						evidence_file: bankTransferEvidence.evidence_file as File,
 						payer_name: asTrimmedString(bankTransferEvidence.payer_name),
@@ -1112,6 +1148,7 @@ async function submitCheckout() {
 				: {
 					payment_method_id: selectedPaymentMethodId.value,
 					payment_id: isBankTransferMethod.value ? reservedBankTransferPaymentId.value : undefined,
+					discount_code: discount.appliedCode.value ?? undefined,
 				},
 		})
 

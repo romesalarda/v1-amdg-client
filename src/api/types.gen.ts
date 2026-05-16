@@ -2020,6 +2020,7 @@ export type BookingPackageDetail = {
     readonly event_name: string;
     ticket_type: number;
     readonly ticket_type_title: string;
+    readonly scope: string;
     description?: string | null;
     readonly base_amount: string;
     readonly base_amount_currency: string;
@@ -2074,6 +2075,7 @@ export type BookingPackageList = {
     readonly event_name: string;
     ticket_type: number;
     readonly ticket_type_title: string;
+    readonly scope: string;
     description?: string | null;
     readonly base_amount: string;
     readonly base_amount_currency: string;
@@ -10925,6 +10927,10 @@ export type OrderCheckoutRequestRequest = {
      * Optional reserved bank transfer payment UUID to reuse during checkout.
      */
     payment_id?: string | null;
+    /**
+     * Optional discount code. When valid, the payment amount will reflect the discounted total.
+     */
+    discount_code?: string | null;
 };
 
 /**
@@ -11105,6 +11111,10 @@ export type OrderPricingPreviewRequestRequest = {
      * Attendee UUID used for pricing context
      */
     attendee_id: string;
+    /**
+     * Optional discount code to apply when previewing pricing.
+     */
+    discount_code?: string | null;
     items: Array<OrderPricingPreviewItemRequest>;
 };
 
@@ -11230,6 +11240,17 @@ export type OrderUpdateRequest = {
      * * `refunded` - Refunded
      */
     status?: 'draft' | 'pending' | 'processing' | 'completed' | 'cancelled' | 'pending_refund' | 'partially_refunded' | 'refunded';
+};
+
+export type OrderValidateCodeRequestRequest = {
+    /**
+     * Discount code to validate
+     */
+    code: string;
+    /**
+     * UUID of the order to validate the code against
+     */
+    order_id: string;
 };
 
 /**
@@ -48343,6 +48364,31 @@ export type ProductsOrdersPreviewPricingCreateErrors = {
 export type ProductsOrdersPreviewPricingCreateResponses = {
     /**
      * Pricing preview result
+     */
+    200: unknown;
+};
+
+export type ProductsOrdersValidateCodeCreateData = {
+    body: OrderValidateCodeRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/products/orders/validate-code/';
+};
+
+export type ProductsOrdersValidateCodeCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+    /**
+     * Rate limit exceeded
+     */
+    429: unknown;
+};
+
+export type ProductsOrdersValidateCodeCreateResponses = {
+    /**
+     * Validation result
      */
     200: unknown;
 };
