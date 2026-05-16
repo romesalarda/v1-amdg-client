@@ -1,77 +1,108 @@
 <template>
 	<CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-		<div class="bg-gradient-to-br from-white via-slate-50 to-sky-50 border-2 border-deep-navy rounded-2xl shadow-drawn p-8 space-y-8">
-			<div class="flex flex-col gap-4">
-				<!-- Page header -->
+		<div class="space-y-6">
+			<!-- Page header -->
+			<div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-6">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
-						<p class="text-[10px] font-black text-deep-navy/60 uppercase tracking-[0.3em]">Community Sponsorships</p>
-						<h1 class="text-3xl md:text-4xl font-black text-deep-navy uppercase tracking-tight">Inbound + Outbound Momentum</h1>
-						<p class="mt-2 text-sm text-deep-navy/60 font-medium max-w-2xl">
+						<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Community Sponsorships</p>
+						<h1 class="mt-1 text-2xl font-black text-deep-navy">Inbound + Outbound Momentum</h1>
+						<p class="mt-1 text-sm text-gray-500 max-w-2xl">
 							Track who sponsors your events, what you sponsor elsewhere, and move from selection to checkout in three clear steps.
 						</p>
 					</div>
-					<div class="flex items-center gap-3">
-						<div class="px-4 py-3 rounded-xl border-2 border-deep-navy/20 bg-white/80">
-							<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Net Revenue Delta</p>
-							<p class="mt-1 text-lg font-black text-deep-navy">{{ formatMoney(String(netCompletedRevenueDelta), 'GBP') }}</p>
+					<div class="flex items-center gap-3 shrink-0">
+						<div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-4">
+							<div class="flex items-center gap-3">
+								<div class="w-9 h-9 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
+									<span class="material-symbols-outlined text-green-600 text-lg">trending_up</span>
+								</div>
+								<div>
+									<div class="text-xl font-black text-deep-navy">{{ formatMoney(String(netCompletedRevenueDelta), 'GBP') }}</div>
+									<div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Net Revenue Delta</div>
+								</div>
+							</div>
 						</div>
-						<div class="px-4 py-3 rounded-xl border-2 border-deep-navy/20 bg-white/80">
-							<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Net Sponsors</p>
-							<p class="mt-1 text-lg font-black text-deep-navy">{{ netSponsorDelta }}</p>
+						<div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-4">
+							<div class="flex items-center gap-3">
+								<div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+									<span class="material-symbols-outlined text-blue-600 text-lg">handshake</span>
+								</div>
+								<div>
+									<div class="text-xl font-black text-deep-navy">{{ netSponsorDelta }}</div>
+									<div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Net Sponsors</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
+			</div>
 
-				<!-- Tab navigation -->
-				<div class="grid grid-cols-3 gap-2 bg-deep-navy/5 rounded-xl p-2 border-2 border-deep-navy/10">
+			<!-- Tab navigation -->
+			<div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-1.5">
+				<div class="flex gap-1">
 					<button
 						type="button"
 						@click="transitionTab('overview')"
-						:class="activeTab === 'overview' ? 'bg-deep-navy text-white' : 'text-deep-navy hover:bg-deep-navy/10'"
-						class="px-4 py-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all"
+						:class="[
+							'flex-1 px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200',
+							activeTab === 'overview' ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'
+						]"
 					>
-						Overview
+						<div class="flex items-center justify-center gap-2">
+							<span class="material-symbols-outlined text-lg">bar_chart</span>
+							<span>Overview</span>
+						</div>
 					</button>
 					<button
 						type="button"
 						@click="transitionTab('flow')"
-						:class="activeTab === 'flow' ? 'bg-deep-navy text-white' : 'text-deep-navy hover:bg-deep-navy/10'"
-						class="px-4 py-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all"
+						:class="[
+							'flex-1 px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200',
+							activeTab === 'flow' ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'
+						]"
 					>
-						Sponsor Flow
+						<div class="flex items-center justify-center gap-2">
+							<span class="material-symbols-outlined text-lg">swap_horiz</span>
+							<span>Sponsor Flow</span>
+						</div>
 					</button>
 					<button
 						type="button"
 						@click="transitionTab('invites')"
-						:class="activeTab === 'invites' ? 'bg-deep-navy text-white' : 'text-deep-navy hover:bg-deep-navy/10'"
-						class="px-4 py-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all"
+						:class="[
+							'flex-1 px-6 py-3 text-sm font-semibold rounded-lg transition-all duration-200',
+							activeTab === 'invites' ? 'bg-primary text-white shadow-md' : 'text-gray-600 hover:bg-gray-50'
+						]"
 					>
-						Invite Responses
+						<div class="flex items-center justify-center gap-2">
+							<span class="material-symbols-outlined text-lg">mail</span>
+							<span>Invite Responses</span>
+						</div>
 					</button>
 				</div>
-
-				<!-- Tab content -->
-				<SponsorOverviewTab
-					v-if="activeTab === 'overview'"
-					:organisation-id="organisationId"
-					:selected-event-id="selectedEventId"
-				/>
-
-				<SponsorFlowTab
-					v-else-if="activeTab === 'flow'"
-					:organisation-id="organisationId"
-					:organisation-numeric-id="organisationNumericId"
-					:selected-event-id="selectedEventId"
-					@update:selected-event-id="selectedEventId = $event"
-					ref="sponsorFlowRef"
-				/>
-
-				<SponsorInvitesTab
-					v-else-if="activeTab === 'invites'"
-					:selected-event-id="selectedEventId"
-				/>
 			</div>
+
+			<!-- Tab content -->
+			<SponsorOverviewTab
+				v-if="activeTab === 'overview'"
+				:organisation-id="organisationId"
+				:selected-event-id="selectedEventId"
+			/>
+
+			<SponsorFlowTab
+				v-else-if="activeTab === 'flow'"
+				:organisation-id="organisationId"
+				:organisation-numeric-id="organisationNumericId"
+				:selected-event-id="selectedEventId"
+				@update:selected-event-id="selectedEventId = $event"
+				ref="sponsorFlowRef"
+			/>
+
+			<SponsorInvitesTab
+				v-else-if="activeTab === 'invites'"
+				:selected-event-id="selectedEventId"
+			/>
 		</div>
 	</CommunitiesManagementLayout>
 </template>

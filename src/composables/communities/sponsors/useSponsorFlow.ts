@@ -77,7 +77,7 @@ export function useSponsorFlow(
     sponsorableEvents,
     (value) => {
       if (!selectedEventId.value && value.length > 0) {
-        selectedEventId.value = value[0].event_id
+        selectedEventId.value = value[0].url_safe_title || value[0].event_id
         selectedEventSnapshot.value = value[0]
         return
       }
@@ -204,7 +204,7 @@ export function useSponsorFlow(
 
   // Event selection helpers
   function selectEvent(event: SponsorableEventList) {
-    selectedEventId.value = event.event_id
+    selectedEventId.value = event.url_safe_title || event.event_id
     selectedEventSnapshot.value = event
     checkoutResult.value = null
     checkoutForm.packageId = ''
