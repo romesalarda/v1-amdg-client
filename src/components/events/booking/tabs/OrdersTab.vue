@@ -1,7 +1,10 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <p class="text-headline-sm font-headline text-deep-navy">Orders</p>
+      <div>
+        <h2 class="text-headline-sm font-headline text-deep-navy">Orders</h2>
+        <p class="mt-1 text-body-sm font-body-sm text-deep-navy/60">View your order details and status</p>
+      </div>
       <p class="text-xs text-deep-navy/60">{{ props.selectedAttendee?.name || 'Attendee' }}</p>
     </div>
 

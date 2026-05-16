@@ -1,10 +1,11 @@
 <template>
   <div class="space-y-4 rounded-xl border border-deep-navy/10 bg-white/95 p-4">
-    <div class="flex items-center justify-between gap-3">
+    <div class="flex items-center justify-between">
       <div>
         <h2 class="text-headline-sm font-headline text-deep-navy">Payments</h2>
-        <p class="mt-1 text-body-sm font-body-sm text-deep-navy/60">{{ props.selectedAttendee?.name || 'Attendee' }}</p>
+        <p class="mt-1 text-body-sm font-body-sm text-deep-navy/60">View your payment details and status</p>
       </div>
+      <p class="text-xs text-deep-navy/60">{{ props.selectedAttendee?.name || 'Attendee' }}</p>
     </div>
 
     <div v-if="props.paymentSummary?.isLoading?.value" class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-sm text-deep-navy/70">

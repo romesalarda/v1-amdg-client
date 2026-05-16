@@ -1,8 +1,13 @@
 <template>
   <div class="space-y-4">
-    <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-4">
+    <div class="rounded-xl border border-deep-navy/10 bg-white/95 p-4 ">
       <div class="flex items-center justify-between gap-3">
-        <h2 class="text-headline-sm font-headline text-deep-navy">Booking Steps</h2>
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-headline-sm font-headline text-deep-navy">Booking Overview</h2>
+            <p class="mt-1 text-body-sm font-body-sm text-deep-navy/60">Your booking checklist</p>
+          </div>
+        </div>
         <button
           type="button"
           class="rounded-lg border border-deep-navy/20 px-3 py-1 text-label-bold font-label-bold uppercase text-deep-navy hover:border-primary hover:text-primary transition-colors"
@@ -16,7 +21,7 @@
           <li
             v-for="(step, index) in props.journeySteps"
             :key="step.id"
-            class="relative pl-12"
+            class="relative pl-12 ml-4"
           >
             <!-- vertical connector line drawn from circle bottom to next item -->
             <div
