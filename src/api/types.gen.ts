@@ -7306,6 +7306,54 @@ export type EventDetailRequest = {
     external_event?: boolean;
 };
 
+/**
+ * Full inventory breakdown for an event.
+ *
+ * Returned by GET /api/products/inventory?event=<url_safe_title>.
+ */
+export type EventInventoryBreakdown = {
+    /**
+     * Unique identifier of the event.
+     */
+    event_id: string;
+    /**
+     * Display title of the event.
+     */
+    event_title: string;
+    /**
+     * ISO 4217 currency code used for all monetary values in this response.
+     */
+    currency: string;
+    /**
+     * True when at least one variant has a max_stock_quantity cap set, enabling reorder quantity and restock cost calculations.
+     */
+    has_restock_data: boolean;
+    /**
+     * Number of products in this event.
+     */
+    total_products: number;
+    /**
+     * Total number of variants across all products.
+     */
+    total_variants: number;
+    /**
+     * Total units currently in stock across all variants.
+     */
+    total_stock_units: number;
+    /**
+     * Total monetary value of all stock currently on hand.
+     */
+    readonly grand_total_stock_value: string;
+    /**
+     * Total cost to restock all variants that have a max_stock_quantity cap. Null when no variants have a cap set.
+     */
+    readonly grand_total_restock_cost: string | null;
+    /**
+     * Per-product inventory breakdown.
+     */
+    products: Array<InventoryProductLine>;
+};
+
 export type EventList = {
     readonly id: number;
     readonly event_id: string;
@@ -10439,6 +10487,158 @@ export type IntentsSummary = {
 };
 
 /**
+ * Read-only attendee record enriched with order context for a specific variant.
+ *
+ * Returned by GET /api/products/inventory/attendees.
+ */
+export type InventoryAttendeeOrderLine = {
+    /**
+     * Unique identifier of the attendee.
+     */
+    attendee_id: string;
+    /**
+     * Human-readable attendee identifier (e.g. ATT-CONF-ABCD12).
+     */
+    attendee_display_id: string;
+    /**
+     * Attendee first name.
+     */
+    first_name: string;
+    /**
+     * Attendee last name.
+     */
+    last_name: string;
+    /**
+     * Attendee email address.
+     */
+    email: string | null;
+    /**
+     * Current attendee registration status.
+     */
+    attendee_status: string;
+    /**
+     * UUID of the order containing this item.
+     */
+    order_id: string;
+    /**
+     * Human-readable order reference (e.g. ORD-ABCD1234).
+     */
+    order_reference: string;
+    /**
+     * Current status of the order.
+     */
+    order_status: string;
+    /**
+     * Status of this specific order item.
+     */
+    item_status: string;
+    /**
+     * Number of units of this variant in the order.
+     */
+    quantity: number;
+    /**
+     * Unit price paid at time of order.
+     */
+    readonly unit_price: string;
+    /**
+     * Total price for this order item (quantity × unit_price).
+     */
+    readonly total_price: string;
+};
+
+/**
+ * Read-only inventory figures for a product and all its variants.
+ */
+export type InventoryProductLine = {
+    /**
+     * Unique identifier of the product.
+     */
+    product_id: string;
+    /**
+     * Human-readable public identifier for the product.
+     */
+    display_code: string;
+    /**
+     * Product title.
+     */
+    title: string;
+    /**
+     * Whether this product is currently active.
+     */
+    is_active: boolean;
+    /**
+     * Whether this product has been verified by an administrator.
+     */
+    verified: boolean;
+    /**
+     * Inventory breakdown per variant.
+     */
+    variants: Array<InventoryVariantLine>;
+    /**
+     * Sum of current_stock across all variants.
+     */
+    total_current_stock: number;
+    /**
+     * Total cost to fully restock all variants. Only present when every variant has a max_stock_quantity cap set; null otherwise.
+     */
+    readonly total_restock_cost: string | null;
+    /**
+     * Combined inventory value across all variants.
+     */
+    readonly total_current_stock_value: string;
+};
+
+/**
+ * Read-only inventory figures for a single product variant.
+ */
+export type InventoryVariantLine = {
+    /**
+     * Unique identifier of the variant.
+     */
+    variant_id: string;
+    /**
+     * Size code for this variant (e.g. SM, LG, OS).
+     */
+    size: string;
+    /**
+     * Hex colour code for this variant (e.g. #FFFFFF).
+     */
+    color: string;
+    /**
+     * Whether this variant is currently active/purchasable.
+     */
+    is_active: boolean;
+    /**
+     * Units currently in stock.
+     */
+    current_stock: number;
+    /**
+     * Units committed in confirmed in-flight orders (pending/processing). Stock was already decremented for these, but they will physically leave the warehouse when fulfilled.
+     */
+    live_order_units: number;
+    /**
+     * Maximum stock cap. Null means no cap has been set.
+     */
+    max_stock_quantity: number | null;
+    /**
+     * Units that need to be ordered to reach max_stock_quantity. Null when no max_stock_quantity cap is set.
+     */
+    quantity_to_order: number | null;
+    /**
+     * Final unit price after percentage modifier, formatted as a money string.
+     */
+    readonly unit_price: string;
+    /**
+     * Total cost to restock this variant to its max cap (quantity_to_order × unit_price). Null when no cap is set.
+     */
+    readonly restock_cost: string | null;
+    /**
+     * Current inventory value for this variant (current_stock × unit_price).
+     */
+    readonly current_stock_value: string;
+};
+
+/**
  * Serializer for InvolvedEventOrganisation.
  */
 export type InvolvedEventOrganisation = {
@@ -12567,6 +12767,13 @@ export type PaginatedFamilyGroupListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<FamilyGroupList>;
+};
+
+export type PaginatedInventoryAttendeeOrderLineList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<InventoryAttendeeOrderLine>;
 };
 
 export type PaginatedInvolvedEventOrganisationList = {
@@ -22295,6 +22502,46 @@ export type EventDetailWritable = {
     external_event?: boolean;
 };
 
+/**
+ * Full inventory breakdown for an event.
+ *
+ * Returned by GET /api/products/inventory?event=<url_safe_title>.
+ */
+export type EventInventoryBreakdownWritable = {
+    /**
+     * Unique identifier of the event.
+     */
+    event_id: string;
+    /**
+     * Display title of the event.
+     */
+    event_title: string;
+    /**
+     * ISO 4217 currency code used for all monetary values in this response.
+     */
+    currency: string;
+    /**
+     * True when at least one variant has a max_stock_quantity cap set, enabling reorder quantity and restock cost calculations.
+     */
+    has_restock_data: boolean;
+    /**
+     * Number of products in this event.
+     */
+    total_products: number;
+    /**
+     * Total number of variants across all products.
+     */
+    total_variants: number;
+    /**
+     * Total units currently in stock across all variants.
+     */
+    total_stock_units: number;
+    /**
+     * Per-product inventory breakdown.
+     */
+    products: Array<InventoryProductLineWritable>;
+};
+
 export type EventListWritable = {
     display_code: string;
     display_identifier?: string;
@@ -23431,6 +23678,130 @@ export type GenderDistributionWritable = {
 };
 
 /**
+ * Read-only attendee record enriched with order context for a specific variant.
+ *
+ * Returned by GET /api/products/inventory/attendees.
+ */
+export type InventoryAttendeeOrderLineWritable = {
+    /**
+     * Unique identifier of the attendee.
+     */
+    attendee_id: string;
+    /**
+     * Human-readable attendee identifier (e.g. ATT-CONF-ABCD12).
+     */
+    attendee_display_id: string;
+    /**
+     * Attendee first name.
+     */
+    first_name: string;
+    /**
+     * Attendee last name.
+     */
+    last_name: string;
+    /**
+     * Attendee email address.
+     */
+    email: string | null;
+    /**
+     * Current attendee registration status.
+     */
+    attendee_status: string;
+    /**
+     * UUID of the order containing this item.
+     */
+    order_id: string;
+    /**
+     * Human-readable order reference (e.g. ORD-ABCD1234).
+     */
+    order_reference: string;
+    /**
+     * Current status of the order.
+     */
+    order_status: string;
+    /**
+     * Status of this specific order item.
+     */
+    item_status: string;
+    /**
+     * Number of units of this variant in the order.
+     */
+    quantity: number;
+};
+
+/**
+ * Read-only inventory figures for a product and all its variants.
+ */
+export type InventoryProductLineWritable = {
+    /**
+     * Unique identifier of the product.
+     */
+    product_id: string;
+    /**
+     * Human-readable public identifier for the product.
+     */
+    display_code: string;
+    /**
+     * Product title.
+     */
+    title: string;
+    /**
+     * Whether this product is currently active.
+     */
+    is_active: boolean;
+    /**
+     * Whether this product has been verified by an administrator.
+     */
+    verified: boolean;
+    /**
+     * Inventory breakdown per variant.
+     */
+    variants: Array<InventoryVariantLineWritable>;
+    /**
+     * Sum of current_stock across all variants.
+     */
+    total_current_stock: number;
+};
+
+/**
+ * Read-only inventory figures for a single product variant.
+ */
+export type InventoryVariantLineWritable = {
+    /**
+     * Unique identifier of the variant.
+     */
+    variant_id: string;
+    /**
+     * Size code for this variant (e.g. SM, LG, OS).
+     */
+    size: string;
+    /**
+     * Hex colour code for this variant (e.g. #FFFFFF).
+     */
+    color: string;
+    /**
+     * Whether this variant is currently active/purchasable.
+     */
+    is_active: boolean;
+    /**
+     * Units currently in stock.
+     */
+    current_stock: number;
+    /**
+     * Units committed in confirmed in-flight orders (pending/processing). Stock was already decremented for these, but they will physically leave the warehouse when fulfilled.
+     */
+    live_order_units: number;
+    /**
+     * Maximum stock cap. Null means no cap has been set.
+     */
+    max_stock_quantity: number | null;
+    /**
+     * Units that need to be ordered to reach max_stock_quantity. Null when no max_stock_quantity cap is set.
+     */
+    quantity_to_order: number | null;
+};
+
+/**
  * Serializer for InvolvedEventOrganisation.
  */
 export type InvolvedEventOrganisationWritable = {
@@ -24306,6 +24677,13 @@ export type PaginatedFamilyGroupListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<FamilyGroupListWritable>;
+};
+
+export type PaginatedInventoryAttendeeOrderLineListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<InventoryAttendeeOrderLineWritable>;
 };
 
 export type PaginatedInvolvedEventOrganisationListWritable = {
@@ -46304,6 +46682,204 @@ export type ProductsEventCategoriesRetrieveResponses = {
 
 export type ProductsEventCategoriesRetrieveResponse = ProductsEventCategoriesRetrieveResponses[keyof ProductsEventCategoriesRetrieveResponses];
 
+export type ProductsInventoryBreakdownData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter products by category ID.
+         */
+        category?: number;
+        /**
+         * Filter variants by hex colour (e.g. #FF0000). Case-insensitive.
+         */
+        color?: string;
+        /**
+         * URL-safe title of the event (`url_safe_title` field). Required.
+         */
+        event: string;
+        /**
+         * If true, only return variants where current_stock > 0.
+         */
+        has_stock?: boolean;
+        /**
+         * Filter products by active status (true or false).
+         */
+        is_active?: boolean;
+        /**
+         * If true, only return variants where quantity_to_order > 0.
+         */
+        needs_reorder?: boolean;
+        /**
+         * Narrow results to a single product by its UUID.
+         */
+        product?: string;
+        /**
+         * Filter variants by size code (e.g. SM, LG, OS). Case-insensitive.
+         */
+        size?: string;
+    };
+    url: '/api/products/inventory/';
+};
+
+export type ProductsInventoryBreakdownErrors = {
+    /**
+     * Missing or invalid `event` query parameter.
+     */
+    400: unknown;
+    /**
+     * Permission denied – administrative access required.
+     */
+    403: unknown;
+    /**
+     * No event found matching the supplied slug.
+     */
+    404: unknown;
+};
+
+export type ProductsInventoryBreakdownResponses = {
+    200: EventInventoryBreakdown;
+};
+
+export type ProductsInventoryBreakdownResponse = ProductsInventoryBreakdownResponses[keyof ProductsInventoryBreakdownResponses];
+
+export type ProductsInventoryAttendeesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter products added after this date
+         */
+        added_after?: string;
+        /**
+         * Filter products added before this date
+         */
+        added_before?: string;
+        /**
+         * Filter by user ID who added the product
+         */
+        added_by?: number;
+        /**
+         * Filter products added on specific date (YYYY-MM-DD)
+         */
+        added_date?: string;
+        /**
+         * Filter by attendee registration status (e.g. registered, checked_in).
+         */
+        attendee_status?: string;
+        /**
+         * Filter by category ID (can specify multiple, comma-separated)
+         */
+        category?: Array<number>;
+        /**
+         * Filter by category name
+         */
+        category__name?: string;
+        /**
+         * Filter by display code (case-insensitive)
+         */
+        display_code?: string;
+        /**
+         * Display code contains
+         */
+        display_code__contains?: string;
+        /**
+         * URL-safe title of the event (`url_safe_title` field). Required.
+         */
+        event: string;
+        /**
+         * Filter products that have variants
+         */
+        has_variants?: boolean;
+        /**
+         * Filter products with available stock (in any variant)
+         */
+        in_stock?: boolean;
+        /**
+         * Filter by active status
+         */
+        is_active?: boolean;
+        /**
+         * Filter by order item status. One of: pending, completed, cancelled, pending_refund, refunded.
+         */
+        item_status?: string;
+        /**
+         * Maximum product price
+         */
+        max_price?: number;
+        /**
+         * Minimum product price
+         */
+        min_price?: number;
+        /**
+         * Filter by order status. One of: draft, pending, processing, completed, cancelled, pending_refund, partially_refunded, refunded.
+         */
+        order_status?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Exact product price
+         */
+        price?: number;
+        /**
+         * UUID of the product variant to query. Required.
+         */
+        product_variant: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Exact product title (case-insensitive)
+         */
+        title?: string;
+        /**
+         * Product title contains (case-insensitive)
+         */
+        title__contains?: string;
+        /**
+         * Product title starts with (case-insensitive)
+         */
+        title__startswith?: string;
+        /**
+         * Filter by verification status
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/inventory/attendees/';
+};
+
+export type ProductsInventoryAttendeesErrors = {
+    /**
+     * Missing required query parameters.
+     */
+    400: unknown;
+    /**
+     * Permission denied – administrative access required.
+     */
+    403: unknown;
+    /**
+     * Event or variant not found.
+     */
+    404: unknown;
+};
+
+export type ProductsInventoryAttendeesResponses = {
+    200: PaginatedInventoryAttendeeOrderLineList;
+};
+
+export type ProductsInventoryAttendeesResponse = ProductsInventoryAttendeesResponses[keyof ProductsInventoryAttendeesResponses];
+
 export type ProductsListListData = {
     body?: never;
     path?: never;
@@ -47829,6 +48405,204 @@ export type ProductsListVariantsUpdateDiscountPartialUpdateResponses = {
      */
     200: unknown;
 };
+
+export type ProductsInventoryBreakdown2Data = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter products by category ID.
+         */
+        category?: number;
+        /**
+         * Filter variants by hex colour (e.g. #FF0000). Case-insensitive.
+         */
+        color?: string;
+        /**
+         * URL-safe title of the event (`url_safe_title` field). Required.
+         */
+        event: string;
+        /**
+         * If true, only return variants where current_stock > 0.
+         */
+        has_stock?: boolean;
+        /**
+         * Filter products by active status (true or false).
+         */
+        is_active?: boolean;
+        /**
+         * If true, only return variants where quantity_to_order > 0.
+         */
+        needs_reorder?: boolean;
+        /**
+         * Narrow results to a single product by its UUID.
+         */
+        product?: string;
+        /**
+         * Filter variants by size code (e.g. SM, LG, OS). Case-insensitive.
+         */
+        size?: string;
+    };
+    url: '/api/products/list/inventory/';
+};
+
+export type ProductsInventoryBreakdown2Errors = {
+    /**
+     * Missing or invalid `event` query parameter.
+     */
+    400: unknown;
+    /**
+     * Permission denied – administrative access required.
+     */
+    403: unknown;
+    /**
+     * No event found matching the supplied slug.
+     */
+    404: unknown;
+};
+
+export type ProductsInventoryBreakdown2Responses = {
+    200: EventInventoryBreakdown;
+};
+
+export type ProductsInventoryBreakdown2Response = ProductsInventoryBreakdown2Responses[keyof ProductsInventoryBreakdown2Responses];
+
+export type ProductsInventoryAttendees2Data = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Filter products added after this date
+         */
+        added_after?: string;
+        /**
+         * Filter products added before this date
+         */
+        added_before?: string;
+        /**
+         * Filter by user ID who added the product
+         */
+        added_by?: number;
+        /**
+         * Filter products added on specific date (YYYY-MM-DD)
+         */
+        added_date?: string;
+        /**
+         * Filter by attendee registration status (e.g. registered, checked_in).
+         */
+        attendee_status?: string;
+        /**
+         * Filter by category ID (can specify multiple, comma-separated)
+         */
+        category?: Array<number>;
+        /**
+         * Filter by category name
+         */
+        category__name?: string;
+        /**
+         * Filter by display code (case-insensitive)
+         */
+        display_code?: string;
+        /**
+         * Display code contains
+         */
+        display_code__contains?: string;
+        /**
+         * URL-safe title of the event (`url_safe_title` field). Required.
+         */
+        event: string;
+        /**
+         * Filter products that have variants
+         */
+        has_variants?: boolean;
+        /**
+         * Filter products with available stock (in any variant)
+         */
+        in_stock?: boolean;
+        /**
+         * Filter by active status
+         */
+        is_active?: boolean;
+        /**
+         * Filter by order item status. One of: pending, completed, cancelled, pending_refund, refunded.
+         */
+        item_status?: string;
+        /**
+         * Maximum product price
+         */
+        max_price?: number;
+        /**
+         * Minimum product price
+         */
+        min_price?: number;
+        /**
+         * Filter by order status. One of: draft, pending, processing, completed, cancelled, pending_refund, partially_refunded, refunded.
+         */
+        order_status?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Exact product price
+         */
+        price?: number;
+        /**
+         * UUID of the product variant to query. Required.
+         */
+        product_variant: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Exact product title (case-insensitive)
+         */
+        title?: string;
+        /**
+         * Product title contains (case-insensitive)
+         */
+        title__contains?: string;
+        /**
+         * Product title starts with (case-insensitive)
+         */
+        title__startswith?: string;
+        /**
+         * Filter by verification status
+         */
+        verified?: boolean;
+    };
+    url: '/api/products/list/inventory/attendees/';
+};
+
+export type ProductsInventoryAttendees2Errors = {
+    /**
+     * Missing required query parameters.
+     */
+    400: unknown;
+    /**
+     * Permission denied – administrative access required.
+     */
+    403: unknown;
+    /**
+     * Event or variant not found.
+     */
+    404: unknown;
+};
+
+export type ProductsInventoryAttendees2Responses = {
+    200: PaginatedInventoryAttendeeOrderLineList;
+};
+
+export type ProductsInventoryAttendees2Response = ProductsInventoryAttendees2Responses[keyof ProductsInventoryAttendees2Responses];
 
 export type ProductsOrderItemsListData = {
     body?: never;

@@ -202,7 +202,7 @@
 								</div>
 							</div>
 
-							<div class="flex items-center gap-10 text-right">
+							<div class="flex items-center justify-items-center gap-10 text-right">
 								<div>
 									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Attendees</p>
 									<div class="flex justify-end -space-x-2">
