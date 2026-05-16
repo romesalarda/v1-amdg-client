@@ -12,6 +12,7 @@
             Restock Cost
           </th>
           <th class="py-3 px-4 font-semibold text-gray-700 text-right">Variants</th>
+          <th class="py-3 px-4 font-semibold text-gray-700 text-right">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -78,6 +79,17 @@
               <UBadge color="gray" variant="soft" size="xs">
                 {{ product.variants.length }} variant{{ product.variants.length !== 1 ? 's' : '' }}
               </UBadge>
+            </td>
+            <td class="py-3 px-4 text-right">
+              <UButton
+                size="xs"
+                variant="soft"
+                color="primary"
+                icon="i-heroicons-receipt-percent"
+                @click.stop="$emit('view-product-receipt', product)"
+              >
+                Receipt
+              </UButton>
             </td>
           </tr>
 
@@ -171,6 +183,8 @@
                   Attendees
                 </UButton>
               </td>
+              <!-- empty cell to align with product-row Actions column -->
+              <td class="py-3 px-4" />
             </tr>
           </template>
         </template>
@@ -192,6 +206,7 @@ defineProps<{
 
 defineEmits<{
   'view-variant-attendees': [variantId: string, label: string]
+  'view-product-receipt': [product: InventoryProductLine]
 }>()
 
 const expandedProducts = ref(new Set<string>())

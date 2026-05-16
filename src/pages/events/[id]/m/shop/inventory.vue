@@ -117,6 +117,14 @@
               size="sm"
               variant="ghost"
               color="gray"
+              icon="i-heroicons-arrow-down-tray"
+              :disabled="products.length === 0"
+              @click="handleExportCsv()"
+            />
+            <UButton
+              size="sm"
+              variant="ghost"
+              color="gray"
               icon="i-heroicons-arrow-path"
               :loading="isFetching"
               @click="refetch()"
@@ -199,6 +207,7 @@
           :has-restock-data="inventoryData?.data?.has_restock_data ?? false"
           :currency="inventoryData?.data?.currency ?? ''"
           @view-variant-attendees="openVariantPanel"
+          @view-product-receipt="openReceipt"
         />
       </div>
     </div>
@@ -210,6 +219,13 @@
       :variant-label="selectedVariantLabel"
       :event-slug="id"
       @close="closeVariantPanel"
+    />
+
+    <!-- Product Receipt Modal -->
+    <ProductReceiptModal
+      :open="isReceiptOpen"
+      :product="selectedReceiptProduct"
+      @close="closeReceipt"
     />
 
     <!-- Floating Action Bar -->
@@ -251,9 +267,12 @@
 import { computed, ref } from 'vue'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import InventoryProductTable from '~/components/events/shop/inventory/InventoryProductTable.vue'
+import ProductReceiptModal from '~/components/events/shop/inventory/ProductReceiptModal.vue'
 import VariantAttendeesPanel from '~/components/events/shop/inventory/VariantAttendeesPanel.vue'
 import { useEvent } from '~/composables/resources/events/events'
 import { useInventoryBreakdown } from '~/composables/resources/products/productInventory'
+import { useProductReceiptModal } from '~/composables/shop/useProductReceiptModal'
+import { useCsvExport } from '~/composables/ui/useCsvExport'
 import { formatMoney } from '~/utils/money'
 import type { InventoryProductLine } from '~/api/types.gen'
 
@@ -312,6 +331,22 @@ function closeVariantPanel() {
   selectedVariantId.value = null
   selectedVariantLabel.value = ''
 }
+
+// CSV export
+const { exportInventoryToCSV } = useCsvExport()
+
+function handleExportCsv() {
+  const eventSlug = id.value
+  exportInventoryToCSV(products.value, `inventory-${eventSlug}.csv`)
+}
+
+// Product receipt modal
+const {
+  selectedProduct: selectedReceiptProduct,
+  isOpen: isReceiptOpen,
+  openReceipt,
+  closeReceipt,
+} = useProductReceiptModal()
 
 function formatMoneyStr(moneyStr: string | null | undefined): string {
   if (!moneyStr) return '—'
