@@ -38,65 +38,85 @@
     <div v-if="currentView === 'management'" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
       <!-- Main Content with Stepper (2/3) -->
       <div class="lg:col-span-2">
-        <div class="flex gap-6">
-          <!-- Stepper -->
-          <div class="hidden md:flex flex-col items-center pt-12 relative" style="width: 48px;">
-            <div class="absolute top-0 bottom-0 left-1/2 w-[1px] -translate-x-1/2 stepper-line"></div>
-            <div class="relative z-10 mb-[380px]">
-              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">1</div>
+        <!-- Step rows: stepper circle + line are inline with each section -->
+        <div class="flex flex-col">
+
+          <!-- Step 1 -->
+          <div class="flex gap-6">
+            <div class="hidden md:flex flex-col items-center flex-shrink-0" style="width: 48px;">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg flex-shrink-0">1</div>
+              <div class="flex-1 w-[1px] mt-1 stepper-line"></div>
             </div>
-            <div class="relative z-10 mb-[480px]">
-              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">2</div>
-            </div>
-            <div class="relative z-10">
-              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg">3</div>
+            <div class="flex-1 pb-12">
+              <TicketTypesStep
+                :event-id="id"
+                :can-create="canCreateRegistration"
+                :can-update="canUpdateRegistration"
+                :can-delete="canDeleteRegistration"
+                @open-modal="openTicketTypeModal"
+                @toggle-status="toggleTicketTypeStatus"
+                @remove="removeTicketType"
+              />
             </div>
           </div>
 
-          <!-- Sections -->
-          <div class="flex-1 space-y-12">
-            <TicketTypesStep
-              :ticket-types="ticketTypes"
-              :is-loading="ticketTypesLoading"
-              :can-create="canCreateRegistration"
-              :can-update="canUpdateRegistration"
-              :can-delete="canDeleteRegistration"
-              @open-modal="openTicketTypeModal"
-              @toggle-status="toggleTicketTypeStatus"
-              @remove="removeTicketType"
-            />
-
-            <BookingPackagesStep
-              :packages="packages"
-              :is-loading="packagesLoading"
-              :ticket-types="ticketTypes"
-              :can-create="canCreateRegistration"
-              :can-update="canUpdateRegistration"
-              :can-delete="canDeleteRegistration"
-              @open-modal="openPackageModal"
-              @open-availability="openPackageAvailabilityModal"
-              @toggle-status="togglePackageStatus"
-              @remove="removePackage"
-            />
-
-            <DiscountsStep
-              :discounts="discounts"
-              :is-loading="discountsLoading"
-              :can-create="canCreateRegistration"
-              :packages-exist="packages.length > 0"
-              @open-modal="openDiscountModal"
-              @toggle-status="toggleDiscountStatus"
-              @remove="removeDiscount"
-            />
-
-            <AlternativeSignInsSection
-              :sign-ins="signIns"
-              :is-loading="signInsLoading"
-              :can-create="canCreateRegistration"
-              @open-modal="openSignInModal"
-              @remove="removeSignIn"
-            />
+          <!-- Step 2 -->
+          <div class="flex gap-6">
+            <div class="hidden md:flex flex-col items-center flex-shrink-0" style="width: 48px;">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg flex-shrink-0">2</div>
+              <div class="flex-1 w-[1px] mt-1 stepper-line"></div>
+            </div>
+            <div class="flex-1 pb-12">
+              <BookingPackagesStep
+                :event-id="id"
+                :ticket-types="ticketTypes"
+                :can-create="canCreateRegistration"
+                :can-update="canUpdateRegistration"
+                :can-delete="canDeleteRegistration"
+                @open-modal="openPackageModal"
+                @open-availability="openPackageAvailabilityModal"
+                @toggle-status="togglePackageStatus"
+                @remove="removePackage"
+              />
+            </div>
           </div>
+
+          <!-- Step 3 -->
+          <div class="flex gap-6">
+            <div class="hidden md:flex flex-col items-center flex-shrink-0" style="width: 48px;">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg flex-shrink-0">3</div>
+              <div class="flex-1 w-[1px] mt-1 stepper-line"></div>
+            </div>
+            <div class="flex-1 pb-12">
+              <DiscountsStep
+                :discounts="discounts"
+                :is-loading="discountsLoading"
+                :can-create="canCreateRegistration"
+                :packages-exist="packages.length > 0"
+                @open-modal="openDiscountModal"
+                @toggle-status="toggleDiscountStatus"
+                @remove="removeDiscount"
+              />
+            </div>
+          </div>
+
+          <!-- Step 4 (no connector line after last) -->
+          <div class="flex gap-6">
+            <div class="hidden md:flex flex-col items-center flex-shrink-0" style="width: 48px;">
+              <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white text-sm font-bold shadow-lg flex-shrink-0">4</div>
+              <div class="flex-1 w-[1px] mt-1 stepper-line"></div>
+            </div>
+            <div class="flex-1 pb-12">
+              <AlternativeSignInsSection
+                :sign-ins="signIns"
+                :is-loading="signInsLoading"
+                :can-create="canCreateRegistration"
+                @open-modal="openSignInModal"
+                @remove="removeSignIn"
+              />
+            </div>
+          </div>
+
         </div>
       </div>
 

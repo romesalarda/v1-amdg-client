@@ -868,23 +868,23 @@ export const useRegistrationFormBuilder = (
   })
   
   // Show warning if disconnected
-  watch(() => ws.isConnected.value, (connected, wasConnected) => {
-    if (wasConnected && !connected) {
-      toast.add({
-        title: 'Connection Lost',
-        description: 'Real-time updates paused. Waiting for reconnection...',
-        color: 'amber',
-        timeout: 5000,
-      })
-    } else if (!wasConnected && connected) {
-      toast.add({
-        title: 'Reconnected',
-        description: 'Real-time updates restored',
-        color: 'green',
-        timeout: 3000,
-      })
-    }
-  })
+  // watch(() => ws.isConnected.value, (connected, wasConnected) => {
+  //   if (wasConnected && !connected) {
+  //     toast.add({
+  //       title: 'Connection Lost',
+  //       description: 'Real-time updates paused. Waiting for reconnection...',
+  //       color: 'amber',
+  //       timeout: 5000,
+  //     })
+  //   } else if (!wasConnected && connected) {
+  //     toast.add({
+  //       title: 'Reconnected',
+  //       description: 'Real-time updates restored',
+  //       color: 'green',
+  //       timeout: 3000,
+  //     })
+  //   }
+  // })
   
   return {
     // State

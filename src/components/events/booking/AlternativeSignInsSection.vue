@@ -1,5 +1,6 @@
 <template>
-  <section class="mt-8">
+  <section>
+    <span class="text-[10px] font-bold text-navy-400 uppercase tracking-widest block mb-2">Step 4 - Optional</span>
     <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
       <div class="flex items-center gap-2 p-6 pb-4 border-b border-navy-50">
         <span class="material-symbols-outlined text-primary">login</span>
