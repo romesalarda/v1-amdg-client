@@ -6,36 +6,67 @@
         v-if="!isLoading && inventoryData?.data"
         class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4"
       >
-        <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5">
-          <p class="text-xs font-black text-primary uppercase tracking-widest mb-1">Products</p>
-          <p class="text-3xl font-black text-deep-navy">{{ inventoryData.data.total_products }}</p>
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UIcon name="i-heroicons-cube" class="w-5 h-5 text-blue-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-black text-deep-navy">{{ inventoryData.data.total_products }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Products</div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5">
-          <p class="text-xs font-black text-primary uppercase tracking-widest mb-1">Variants</p>
-          <p class="text-3xl font-black text-deep-navy">{{ inventoryData.data.total_variants }}</p>
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UIcon name="i-heroicons-squares-2x2" class="w-5 h-5 text-indigo-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-black text-deep-navy">{{ inventoryData.data.total_variants }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Variants</div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5">
-          <p class="text-xs font-black text-primary uppercase tracking-widest mb-1">Stock Units</p>
-          <p class="text-3xl font-black text-deep-navy">
-            {{ inventoryData.data.total_stock_units }}
-          </p>
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UIcon name="i-heroicons-archive-box" class="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <div class="text-2xl font-black text-deep-navy">{{ inventoryData.data.total_stock_units }}</div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Stock Units</div>
+            </div>
+          </div>
         </div>
-        <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5">
-          <p class="text-xs font-black text-primary uppercase tracking-widest mb-1">Stock Value</p>
-          <p class="text-2xl font-black text-deep-navy">
-            {{ formatMoneyStr(inventoryData.data.grand_total_stock_value) }}
-          </p>
+        <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UIcon name="i-heroicons-banknotes" class="w-5 h-5 text-emerald-600" />
+            </div>
+            <div>
+              <div class="text-xl font-black text-deep-navy leading-tight">
+                {{ formatMoneyStr(inventoryData.data.grand_total_stock_value) }}
+              </div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Stock Value</div>
+            </div>
+          </div>
         </div>
         <div
           v-if="inventoryData.data.has_restock_data && inventoryData.data.grand_total_restock_cost"
-          class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5"
+          class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5"
         >
-          <p class="text-xs font-black text-primary uppercase tracking-widest mb-1">
-            Restock Cost
-          </p>
-          <p class="text-2xl font-black text-deep-navy">
-            {{ formatMoneyStr(inventoryData.data.grand_total_restock_cost) }}
-          </p>
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-rose-100 rounded-lg flex items-center justify-center flex-shrink-0">
+              <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 text-rose-600" />
+            </div>
+            <div>
+              <div class="text-xl font-black text-deep-navy leading-tight">
+                {{ formatMoneyStr(inventoryData.data.grand_total_restock_cost) }}
+              </div>
+              <div class="text-xs text-gray-500 uppercase tracking-wide font-semibold">Restock Cost</div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -44,41 +75,44 @@
         <div
           v-for="i in 5"
           :key="i"
-          class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn p-5"
+          class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5"
         >
-          <div class="h-3 w-16 bg-gray-200 rounded animate-pulse mb-3" />
-          <div class="h-8 w-20 bg-gray-100 rounded animate-pulse" />
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gray-100 rounded-lg animate-pulse flex-shrink-0" />
+            <div class="space-y-2">
+              <div class="h-6 w-14 bg-gray-200 rounded animate-pulse" />
+              <div class="h-3 w-20 bg-gray-100 rounded animate-pulse" />
+            </div>
+          </div>
         </div>
       </div>
 
       <!-- Inventory Table Card -->
       <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-        <!-- Card header with filters -->
-        <div class="px-6 py-4 border-b border-gray-200 flex flex-wrap items-center gap-4">
-          <div class="flex items-center gap-2">
+        <!-- Card header -->
+        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+          <div class="flex items-center gap-3">
             <UIcon name="i-heroicons-archive-box" class="w-5 h-5 text-primary" />
-            <span class="text-sm font-black text-primary uppercase tracking-widest">Inventory</span>
+            <div>
+              <h2 class="text-sm font-black text-primary uppercase tracking-widest">Inventory</h2>
+              <p class="text-xs text-gray-500">
+                Showing {{ products.length }} product{{ products.length !== 1 ? 's' : '' }}
+              </p>
+            </div>
           </div>
-
-          <div class="flex flex-wrap items-center gap-4 ml-auto">
-            <!-- is_active filter -->
-            <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-              <UToggle v-model="filterActiveOnly" size="sm" />
-              Active only
-            </label>
-
-            <!-- needs_reorder filter -->
-            <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-              <UToggle v-model="filterNeedsReorder" size="sm" />
-              Needs reorder
-            </label>
-
-            <!-- has_stock filter -->
-            <label class="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
-              <UToggle v-model="filterHasStock" size="sm" />
-              Has stock
-            </label>
-
+          <div class="flex items-center gap-2">
+            <UButton
+              size="sm"
+              variant="ghost"
+              color="gray"
+              :icon="showFilters ? 'i-heroicons-funnel' : 'i-heroicons-funnel'"
+              @click="showFilters = !showFilters"
+            >
+              {{ showFilters ? 'Hide' : 'Show' }} Filters
+              <UBadge v-if="activeFilterCount > 0" color="primary" variant="soft" size="xs" class="ml-1">
+                {{ activeFilterCount }}
+              </UBadge>
+            </UButton>
             <UButton
               size="sm"
               variant="ghost"
@@ -86,8 +120,45 @@
               icon="i-heroicons-arrow-path"
               :loading="isFetching"
               @click="refetch()"
+            />
+          </div>
+        </div>
+
+        <!-- Filter panel -->
+        <div v-if="showFilters" class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <div class="flex flex-wrap items-center gap-6">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                v-model="filterActiveOnly"
+                type="checkbox"
+                class="rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span class="text-sm text-gray-700">Active only</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                v-model="filterNeedsReorder"
+                type="checkbox"
+                class="rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span class="text-sm text-gray-700">Needs reorder</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input
+                v-model="filterHasStock"
+                type="checkbox"
+                class="rounded border-gray-300 text-primary focus:ring-primary"
+              />
+              <span class="text-sm text-gray-700">Has stock</span>
+            </label>
+            <UButton
+              v-if="activeFilterCount > 0"
+              size="xs"
+              variant="ghost"
+              color="gray"
+              @click="clearFilters"
             >
-              Refresh
+              Clear all
             </UButton>
           </div>
         </div>
@@ -97,18 +168,26 @@
           <div
             v-for="i in 6"
             :key="i"
-            class="h-14 bg-gray-100 rounded-lg animate-pulse"
+            class="h-16 bg-gray-100 rounded-lg animate-pulse"
           />
         </div>
 
         <!-- Empty state -->
         <div
           v-else-if="!isLoading && products.length === 0"
-          class="p-12 flex flex-col items-center gap-3"
+          class="p-12 text-center"
         >
-          <UIcon name="i-heroicons-archive-box" class="w-12 h-12 text-gray-200" />
-          <p class="text-sm text-gray-500">No products found matching your filters</p>
-          <UButton size="sm" variant="ghost" color="gray" @click="clearFilters">
+          <UIcon name="i-heroicons-archive-box" class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+          <h3 class="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
+          <p class="text-sm text-gray-500 mb-4">
+            {{ activeFilterCount > 0 ? 'Try adjusting your filters' : 'No products have been added to this event yet' }}
+          </p>
+          <UButton
+            v-if="activeFilterCount > 0"
+            variant="soft"
+            color="gray"
+            @click="clearFilters"
+          >
             Clear filters
           </UButton>
         </div>
@@ -197,6 +276,11 @@ const { data: event } = useEvent(id)
 const filterActiveOnly = ref(false)
 const filterNeedsReorder = ref(false)
 const filterHasStock = ref(false)
+const showFilters = ref(false)
+
+const activeFilterCount = computed(
+  () => [filterActiveOnly.value, filterNeedsReorder.value, filterHasStock.value].filter(Boolean).length,
+)
 
 const breakdownParams = computed(() => ({
   event: id.value,

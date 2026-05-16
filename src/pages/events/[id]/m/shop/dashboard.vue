@@ -49,6 +49,15 @@
               size="sm"
               variant="outline"
               color="gray"
+              icon="i-heroicons-clipboard-document-list"
+              @click="navigateTo(`/events/${id}/m/shop/inventory`)"
+            >
+              Inventory
+            </UButton>
+            <UButton
+              size="sm"
+              variant="outline"
+              color="gray"
               icon="i-heroicons-shopping-cart"
               @click="navigateTo(`/events/${id}/m/shop/orders`)"
             >
