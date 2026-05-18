@@ -564,8 +564,9 @@
 											<button
 												class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-mist-blue text-navy-700 hover:bg-mist-blue/70 transition-colors"
 												@click="copyInviteToken(invite.token)"
+												v-if="canManage && inviteStatusLabel(invite) === 'Pending'"
 											>
-												Copy Token
+												Copy Invite Link
 											</button>
 											<button
 												class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
@@ -1460,7 +1461,7 @@ async function deleteInvite(inviteId: string) {
 
 async function copyInviteToken(token: string) {
 	try {
-		await navigator.clipboard.writeText(token)
+		await navigator.clipboard.writeText(`${window.location.origin}/events/${id.value}/sponsor/?token=${token}`)
 		toast.add({ title: 'Invite token copied', color: 'green' })
 	}
 	catch {

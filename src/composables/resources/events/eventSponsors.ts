@@ -227,7 +227,7 @@ export function useEventSponsorInvites(eventId: MaybeRefOrGetter<string>) {
     queryKey: [...INVITES_QUERY_KEY, 'list', eventId] as const,
     queryFn: () => {
       const id = toValue(eventId)
-      return organisationsSponsorInvitesList({ query: { event_id: id, page_size: 200 } })
+      return organisationsSponsorInvitesList({ query: { event: id, page_size: 200 } })
     },
     enabled: () => !!toValue(eventId),
   })

@@ -9467,10 +9467,11 @@ export type EventSettingsRequest = {
  * Payload serializer for sponsor checkout action.
  */
 export type EventSponsorCheckoutRequest = {
-    event_id: string;
+    event_id?: string;
     package_id: string;
     payment_method_id: number;
     organisation_id?: number;
+    organisation_name?: string;
     invite_token?: string;
     chapter_location?: number;
     name?: string;
@@ -42439,6 +42440,24 @@ export type OrganisationsSponsorInvitesDeclineByTokenCreateResponses = {
 };
 
 export type OrganisationsSponsorInvitesDeclineByTokenCreateResponse = OrganisationsSponsorInvitesDeclineByTokenCreateResponses[keyof OrganisationsSponsorInvitesDeclineByTokenCreateResponses];
+
+export type OrganisationsSponsorInvitesRetrieveByTokenRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Invite token UUID.
+         */
+        token: string;
+    };
+    url: '/api/organisations/sponsor-invites/retrieve-by-token/';
+};
+
+export type OrganisationsSponsorInvitesRetrieveByTokenRetrieveResponses = {
+    200: EventSponsorInviteDetail;
+};
+
+export type OrganisationsSponsorInvitesRetrieveByTokenRetrieveResponse = OrganisationsSponsorInvitesRetrieveByTokenRetrieveResponses[keyof OrganisationsSponsorInvitesRetrieveByTokenRetrieveResponses];
 
 export type OrganisationsSponsorPackagesListData = {
     body?: never;

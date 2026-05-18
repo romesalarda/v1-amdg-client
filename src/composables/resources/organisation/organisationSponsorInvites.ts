@@ -8,6 +8,7 @@ import {
   organisationsSponsorInvitesDestroy,
   organisationsSponsorInvitesAcceptByTokenCreate,
   organisationsSponsorInvitesDeclineByTokenCreate,
+  organisationsSponsorInvitesRetrieveByTokenRetrieve,
   organisationsSponsorsCheckoutCreate,
   organisationsSponsorsInboundList,
   organisationsSponsorsOutboundList,
@@ -15,6 +16,7 @@ import {
   organisationsStatisticsSponsorsFlowRetrieve,
 } from '~/api/sdk.gen'
 import type {
+  EventSponsorInviteDetail,
   EventSponsorLedger,
   EventListSponsorableListData,
   EventSponsorCheckoutRequest,
@@ -32,6 +34,7 @@ import type {
 } from '~/api/types.gen'
 
 const INVITES_QUERY_KEY = ['organisationSponsorInvites'] as const
+const INVITE_BY_TOKEN_QUERY_KEY = ['sponsorInviteByToken'] as const
 const SPONSORABLE_EVENTS_QUERY_KEY = ['sponsorableEvents'] as const
 const SPONSORSHIP_PAYMENT_HISTORY_QUERY_KEY = ['sponsorshipPaymentHistory'] as const
 const SPONSOR_LEDGER_QUERY_KEY = ['organisationSponsorLedger'] as const
@@ -278,9 +281,33 @@ export function useOrganisationSponsorCheckout() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organisationSponsors'] })
       queryClient.invalidateQueries({ queryKey: INVITES_QUERY_KEY })
+      queryClient.invalidateQueries({ queryKey: INVITE_BY_TOKEN_QUERY_KEY })
       queryClient.invalidateQueries({ queryKey: ['events'] })
       queryClient.invalidateQueries({ queryKey: ['paymentMethods'] })
       queryClient.invalidateQueries({ queryKey: SPONSORSHIP_PAYMENT_HISTORY_QUERY_KEY })
     },
+  })
+}
+
+// Extended type that includes the extra event fields the backend embeds on the
+// retrieve-by-token response (on top of the standard EventSponsorInviteDetail shape).
+export type SponsorInviteByTokenData = EventSponsorInviteDetail & {
+  event_title?: string
+  event_url_safe_title?: string
+  event_start_datetime?: string | null
+  event_end_datetime?: string | null
+  event_id?: string
+}
+
+export function useRetrieveSponsorInviteByToken(token: MaybeRefOrGetter<string>) {
+  return useQuery({
+    queryKey: [...INVITE_BY_TOKEN_QUERY_KEY, token] as const,
+    queryFn: async () => {
+      const t = toValue(token)
+      const response = await organisationsSponsorInvitesRetrieveByTokenRetrieve({ query: { token: t } })
+      return (response?.data ?? null) as SponsorInviteByTokenData | null
+    },
+    enabled: computed(() => !!toValue(token)),
+    retry: false,
   })
 }
