@@ -5,12 +5,16 @@ import {
   authRefreshCreate,
   authGoogleAuthorizeCreate,
   authGoogleCallbackCreate,
+  usersForgotPasswordCreate,
+  usersResetPasswordCreate,
 } from '~/api/sdk.gen'
 import type {
   AuthLoginCreateData,
   AuthRefreshCreateData,
   AuthGoogleAuthorizeCreateData,
   AuthGoogleCallbackCreateData,
+  UsersForgotPasswordCreateData,
+  UsersResetPasswordCreateData,
 } from '~/api/types.gen'
 
 /**
@@ -72,5 +76,25 @@ export function useGoogleCallback() {
       queryClient.invalidateQueries({ queryKey: ['users', 'me'] })
       queryClient.invalidateQueries({ queryKey: ['profiles', 'me'] })
     },
+  })
+}
+
+/**
+ * Request a password reset email
+ */
+export function useForgotPassword() {
+  return useMutation({
+    mutationFn: (body: UsersForgotPasswordCreateData['body']) =>
+      usersForgotPasswordCreate({ body }),
+  })
+}
+
+/**
+ * Complete a password reset with uid + token from the email link
+ */
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: (body: UsersResetPasswordCreateData['body']) =>
+      usersResetPasswordCreate({ body }),
   })
 }

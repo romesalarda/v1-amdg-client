@@ -13071,6 +13071,39 @@ export type PaginatedVenueMetadataList = {
 };
 
 /**
+ * Serializer for confirming a password reset.
+ *
+ * Validates the uid/token pair produced by Django's built-in
+ * PasswordResetTokenGenerator and ensures the two password fields match
+ * and satisfy Django's password validators.
+ */
+export type PasswordResetConfirmRequest = {
+    /**
+     * Base-64 encoded user ID
+     */
+    uid: string;
+    /**
+     * Password reset token
+     */
+    token: string;
+};
+
+/**
+ * Serializer for initiating a password reset.
+ *
+ * Accepts an email address and returns it normalised.  The view is
+ * responsible for looking up the user and queuing the reset email.
+ * The response is always 200 regardless of whether the email is found
+ * (anti-enumeration).
+ */
+export type PasswordResetRequestRequest = {
+    /**
+     * Email address associated with the account
+     */
+    email: string;
+};
+
+/**
  * Serializer for AccessibilityRequirement.
  */
 export type PatchedAccessibilityRequirementRequest = {
@@ -24979,6 +25012,32 @@ export type PaginatedVenueMetadataListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<VenueMetadataWritable>;
+};
+
+/**
+ * Serializer for confirming a password reset.
+ *
+ * Validates the uid/token pair produced by Django's built-in
+ * PasswordResetTokenGenerator and ensures the two password fields match
+ * and satisfy Django's password validators.
+ */
+export type PasswordResetConfirmRequestWritable = {
+    /**
+     * Base-64 encoded user ID
+     */
+    uid: string;
+    /**
+     * Password reset token
+     */
+    token: string;
+    /**
+     * New password
+     */
+    new_password: string;
+    /**
+     * New password confirmation
+     */
+    new_password_confirm: string;
 };
 
 /**
@@ -50688,6 +50747,20 @@ export type UsersEventAttendeesListResponses = {
 
 export type UsersEventAttendeesListResponse = UsersEventAttendeesListResponses[keyof UsersEventAttendeesListResponses];
 
+export type UsersForgotPasswordCreateData = {
+    body: PasswordResetRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users/forgot-password/';
+};
+
+export type UsersForgotPasswordCreateResponses = {
+    /**
+     * Reset link sent if account exists
+     */
+    200: unknown;
+};
+
 export type UsersMeRetrieveData = {
     body?: never;
     path?: never;
@@ -50727,6 +50800,27 @@ export type UsersMeUpdatePartialUpdateResponses = {
 };
 
 export type UsersMeUpdatePartialUpdateResponse = UsersMeUpdatePartialUpdateResponses[keyof UsersMeUpdatePartialUpdateResponses];
+
+export type UsersResetPasswordCreateData = {
+    body: PasswordResetConfirmRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/users/reset-password/';
+};
+
+export type UsersResetPasswordCreateErrors = {
+    /**
+     * Invalid or expired reset link
+     */
+    400: unknown;
+};
+
+export type UsersResetPasswordCreateResponses = {
+    /**
+     * Password reset successfully
+     */
+    200: unknown;
+};
 
 export type UsersVerifyEmailCreateData = {
     body: EmailVerificationRequest;

@@ -52,9 +52,9 @@
 
             <div class="flex items-center justify-between">
               <div class="text-sm">
-                <a href="#" class="font-medium text-slate-100 transition-colors hover:text-white">
+                <NuxtLink to="/forgot-password" class="font-medium text-slate-100 transition-colors hover:text-white">
                   Forgot your password?
-                </a>
+                </NuxtLink>
               </div>
             </div>
 

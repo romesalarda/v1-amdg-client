@@ -9,7 +9,7 @@ export default defineNuxtRouteMiddleware(async (to, from) => {
     }
 
     // Public routes that don't require authentication
-    const publicRoutes = ['/login', '/auth/callback']
+    const publicRoutes = ['/login', '/register', '/forgot-password', '/reset-password', '/auth/callback']
 
     // Check if user is authenticated
     if (!auth.isAuthenticated) {
