@@ -122,3 +122,34 @@ export function imageToFormData(file: File, fieldName: string = 'image'): FormDa
   formData.append(fieldName, file);
   return formData;
 }
+
+/**
+ * Picks the best available URL from a Resource object's image_urls variants.
+ * Falls back to resolveImageUrl(resource.image) for records that predate variant
+ * generation, so every existing usage in the codebase remains safe.
+ *
+ * @param resource - A Resource API object (must have at least an image field)
+ * @param size - Which variant to prefer ('thumbnail' | 'medium' | 'large' | 'original')
+ * @returns A valid absolute image URL, or the placeholder fallback
+ */
+export function getImageUrl(
+  resource: { image?: string | null; image_urls?: { thumbnail?: string | null; medium?: string | null; large?: string | null; original?: string | null } | null },
+  size: 'thumbnail' | 'medium' | 'large' | 'original' = 'medium',
+  fallback = '/images/placeholder.png'
+): string {
+  const variant = resource.image_urls?.[size]
+  if (variant) return variant
+
+  // Fall back through variant sizes before giving up
+  if (resource.image_urls) {
+    const fallbackOrder: Array<'original' | 'large' | 'medium' | 'thumbnail'> = [
+      'original', 'large', 'medium', 'thumbnail',
+    ]
+    for (const key of fallbackOrder) {
+      if (resource.image_urls[key]) return resource.image_urls[key]!
+    }
+  }
+
+  // Final fallback: raw image field (pre-variant records or no image_urls yet)
+  return resolveImageUrl(resource.image, fallback)
+}

@@ -10212,6 +10212,11 @@ export type EventVenueRoomRequest = {
     capacity?: number | null;
 };
 
+export type EventsOnMapGeoJson = {
+    type: string;
+    features: Array<GeoJsonFeature>;
+};
+
 /**
  * Serializer for FamilyAttendee.
  */
@@ -10344,6 +10349,16 @@ export type GenderDistribution = {
     distribution: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type GeoJsonFeature = {
+    type: string;
+    geometry: {
+        [key: string]: unknown;
+    };
+    properties: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -10821,6 +10836,11 @@ export type LeaderList = {
         organisation?: string;
         location?: string;
     };
+};
+
+export type LeadersOnMapGeoJson = {
+    type: string;
+    features: Array<GeoJsonFeature>;
 };
 
 /**
@@ -17973,6 +17993,14 @@ export type Resource = {
     readonly added_by_email: string;
     readonly created_at: string;
     readonly updated_at: string;
+    readonly image_urls: {
+        thumbnail?: string | null;
+        medium?: string | null;
+        large?: string | null;
+        original?: string | null;
+    } | null;
+    readonly image_width: number | null;
+    readonly image_height: number | null;
 };
 
 /**
@@ -43091,7 +43119,7 @@ export type OrganisationsStatisticsEventsOnMapRetrieveData = {
 };
 
 export type OrganisationsStatisticsEventsOnMapRetrieveResponses = {
-    200: OrganisationOverviewStatistics;
+    200: EventsOnMapGeoJson;
 };
 
 export type OrganisationsStatisticsEventsOnMapRetrieveResponse = OrganisationsStatisticsEventsOnMapRetrieveResponses[keyof OrganisationsStatisticsEventsOnMapRetrieveResponses];
@@ -43131,7 +43159,7 @@ export type OrganisationsStatisticsLeadersOnMapRetrieveData = {
 };
 
 export type OrganisationsStatisticsLeadersOnMapRetrieveResponses = {
-    200: OrganisationOverviewStatistics;
+    200: LeadersOnMapGeoJson;
 };
 
 export type OrganisationsStatisticsLeadersOnMapRetrieveResponse = OrganisationsStatisticsLeadersOnMapRetrieveResponses[keyof OrganisationsStatisticsLeadersOnMapRetrieveResponses];

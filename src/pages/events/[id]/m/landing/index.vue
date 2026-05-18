@@ -31,11 +31,12 @@
                 :key="image.id"
                 class="group relative aspect-video rounded-xl overflow-hidden border-2 border-deep-navy/10 hover:border-primary transition-colors"
               >
-                <img
-                  :src="resolveImageUrl(image.image)"
+                <AppImage
+                  :resource="image"
                   :alt="image.name"
-                  class="w-full h-full object-cover"
-                  @error="onImageError"
+                  size="medium"
+                  fit="cover"
+                  class="w-full h-full"
                 />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4">
                   <div class="flex flex-col gap-2">
@@ -50,6 +51,13 @@
                     </button>
                   </div>
                   <div class="flex gap-2">
+                    <button
+                      @click="openCropModal(image)"
+                      class="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
+                      title="Crop / resize"
+                    >
+                      <span class="material-symbols-outlined text-white text-lg">crop</span>
+                    </button>
                     <button
                       @click="previewImage(image)"
                       class="p-2 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-colors"
@@ -160,6 +168,15 @@
       </div>
     </div>
 
+    <!-- Crop Modal -->
+    <ImageCropModal
+      v-if="cropTarget"
+      v-model="showCropModal"
+      :resource="cropTarget"
+      :event-id="id"
+      @saved="cropTarget = null"
+    />
+
     <!-- Upload Modal -->
     <div v-if="showUploadModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" @click.self="closeModal">
       <div class="bg-white  border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden max-w-md w-full">
@@ -256,6 +273,8 @@ import { useEventLandingImages, useAddEventLandingImage } from '~/composables/re
 import { useRemoveEventResource, usePromoteLandingImage, useDemoteLandingImage } from '~/composables/resources/events/eventResources'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import AppImage from '~/components/common/AppImage.vue'
+import ImageCropModal from '~/components/common/ImageCropModal.vue'
 
 definePageMeta({
   layout: false,
@@ -281,6 +300,15 @@ const landingImagesList = computed(() => landingImages.data.value?.data?.results
 
 // Upload form
 const showUploadModal = ref(false)
+
+// Crop modal
+const showCropModal = ref(false)
+const cropTarget = ref<any>(null)
+
+const openCropModal = (image: any) => {
+  cropTarget.value = image
+  showCropModal.value = true
+}
 const fileInput = ref<HTMLInputElement>()
 const uploadForm = ref({
   name: '',
