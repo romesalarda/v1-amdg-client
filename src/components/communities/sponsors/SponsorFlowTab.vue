@@ -322,13 +322,24 @@
 				</div>
 			</div>
 
+			<!-- Stripe card form: shown when STRIPE method selected and no result yet -->
+			<div v-if="isStripeMethod && !checkoutResult" class="space-y-2">
+				<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Card Details</label>
+				<div
+					ref="stripeCardMountRef"
+					class="px-4 py-4 bg-white border-2 border-deep-navy rounded-xl"
+				/>
+				<p v-if="stripeCardError" class="text-xs font-bold text-red-600">{{ stripeCardError }}</p>
+				<p v-if="stripePaymentAttemptError" class="text-xs font-bold text-red-600">{{ stripePaymentAttemptError }}</p>
+			</div>
+
 			<div class="flex justify-end">
 				<button
-					:disabled="!canCheckout || isCheckingOut"
+					:disabled="!canCheckout || isCheckingOut || isConfirmingStripePayment || (isStripeMethod && !checkoutResult && !stripeCardReady)"
 					@click="submitCheckout"
 					class="px-8 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
 				>
-					{{ isCheckingOut ? 'Initializing...' : 'Confirm Sponsor Checkout' }}
+					{{ isConfirmingStripePayment ? 'Confirming card...' : isCheckingOut ? 'Initializing...' : isStripeMethod ? 'Pay Now' : 'Confirm Sponsor Checkout' }}
 				</button>
 			</div>
 
@@ -348,6 +359,16 @@
 					<p class="text-xs font-black uppercase tracking-wider text-deep-navy">Bank Transfer Instructions</p>
 					<p class="mt-1 text-xs font-medium text-deep-navy/70">Reference: {{ checkoutResult.bank_transfer_reference || 'Use payment reference above' }}</p>
 					<pre class="mt-2 text-xs text-deep-navy/70 whitespace-pre-wrap">{{ stringifyDetails(checkoutResult.payment_instructions) }}</pre>
+				</div>
+
+				<div class="pt-3 flex justify-end">
+					<button
+						type="button"
+						class="px-6 py-2 rounded-xl border-2 border-deep-navy text-deep-navy text-xs font-black uppercase tracking-wider hover:bg-deep-navy hover:text-white transition-all"
+						@click="handleStartNewSponsorship"
+					>
+						Start New Sponsorship
+					</button>
 				</div>
 			</div>
 		</div>
@@ -417,6 +438,13 @@ const {
 	selectEvent,
 	selectFirstEvent,
 	submitCheckout,
+	resetFlow,
+	stripeCardMountRef,
+	stripeCardReady,
+	stripeCardError,
+	stripePaymentAttemptError,
+	isConfirmingStripePayment,
+	isStripeMethod,
 } = useSponsorFlow(
 	computed(() => props.organisationId),
 	computed(() => props.organisationNumericId),
@@ -427,6 +455,11 @@ const {
 const acceptedInvitesCount = computed(() =>
 	(selectedEvent.value as any)?.accepted_invites_count ?? 0,
 )
+
+function handleStartNewSponsorship() {
+	resetFlow()
+	activeStep.value = 1
+}
 
 function handleSelectEvent(event: SponsorableEventList) {
 	selectEvent(event)

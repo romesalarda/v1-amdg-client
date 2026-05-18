@@ -9467,7 +9467,7 @@ export type EventSettingsRequest = {
  * Payload serializer for sponsor checkout action.
  */
 export type EventSponsorCheckoutRequest = {
-    event_id?: string;
+    event_id: string;
     package_id: string;
     payment_method_id: number;
     organisation_id?: number;
@@ -42291,6 +42291,10 @@ export type OrganisationsSponsorInvitesListData = {
         /**
          * Filter by event URL-safe title
          */
+        event?: string;
+        /**
+         * Filter by event UUID
+         */
         event_id?: string;
         /**
          * Which field to use when ordering the results.
@@ -42597,6 +42601,10 @@ export type OrganisationsSponsorsListData = {
         /**
          * Filter by event URL-safe title
          */
+        event?: string;
+        /**
+         * Filter by event UUID
+         */
         event_id?: string;
         /**
          * Which field to use when ordering the results.
@@ -42746,6 +42754,10 @@ export type OrganisationsSponsorsPackagesListData = {
         /**
          * Filter by event URL-safe title
          */
+        event?: string;
+        /**
+         * Filter by event UUID
+         */
         event_id?: string;
         /**
          * Which field to use when ordering the results.
@@ -42828,6 +42840,10 @@ export type OrganisationsSponsorsInboundListData = {
          */
         chapter_location_id?: number;
         /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
+        /**
          * Event public UUID.
          */
         event_id?: string;
@@ -42902,6 +42918,10 @@ export type OrganisationsSponsorsOutboundListData = {
          * Filter by chapter location ID
          */
         chapter_location_id?: number;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
         /**
          * Event public UUID.
          */

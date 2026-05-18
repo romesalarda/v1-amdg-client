@@ -1,5 +1,8 @@
+import { nextTick } from 'vue'
 import type { ComputedRef, Ref } from 'vue'
 import { computed, reactive, ref, watch } from 'vue'
+import { loadStripe } from '@stripe/stripe-js'
+import type { Stripe, StripeCardElement, StripeElements } from '@stripe/stripe-js'
 import {
   useSponsorableEvents,
   useOrganisationSponsorCheckout,
@@ -9,6 +12,7 @@ import {
 } from '~/composables/resources/organisation/organisationSponsorInvites'
 import { extractCollection, useEventSponsorshipPackages } from '~/composables/resources/events/eventSponsors'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
+import { useStripeConfig } from '~/composables/resources/common/stripe'
 import type { SponsorableEventList, SponsorshipPaymentTimelineItem } from '~/api/types.gen'
 import { extractApiErrorMessage } from '~/utils/errors'
 import { formatMoney } from '~/utils/money'
@@ -77,7 +81,7 @@ export function useSponsorFlow(
     sponsorableEvents,
     (value) => {
       if (!selectedEventId.value && value.length > 0) {
-        selectedEventId.value = value[0].url_safe_title || value[0].event_id
+        selectedEventId.value = value[0].event_id
         selectedEventSnapshot.value = value[0]
         return
       }
@@ -105,14 +109,15 @@ export function useSponsorFlow(
     return invites?.filter(i => i.accepted) || []
   })
 
-  // Packages
-  const { data: packagesResponse, isLoading: isLoadingPackages } = useEventSponsorshipPackages(selectedEventId)
+  // Packages — requires url_safe_title path param (NOT UUID)
+  const packagesEventUrlSafeTitle = computed(() => selectedEventSnapshot.value?.url_safe_title || '')
+  const { data: packagesResponse, isLoading: isLoadingPackages } = useEventSponsorshipPackages(packagesEventUrlSafeTitle)
   const sponsorshipPackages = computed<PackageItem[]>(() => extractCollection<PackageItem>(packagesResponse.value?.data))
 
-  // Payment methods
+  // Payment methods — filter by event UUID
   const { data: paymentMethodsResponse, isLoading: isLoadingPaymentMethods } = usePaymentMethods(computed(() => {
     if (!selectedEventId.value) return undefined
-    return { event: selectedEventId.value, is_active: true, page_size: 100 }
+    return { event_id: selectedEventId.value, is_active: true, page_size: 100 }
   }))
   const paymentMethods = computed<any[]>(() => extractCollection<any>(paymentMethodsResponse.value?.data))
 
@@ -179,6 +184,87 @@ export function useSponsorFlow(
     return !!selectedEventId.value
   })
 
+  // Stripe config (for publishable key)
+  const { data: stripeConfigData } = useStripeConfig()
+  const stripePublishableKey = computed(() => String(stripeConfigData.value?.data?.publishable_key || '').trim())
+
+  // Stripe state
+  const stripeCardMountRef = ref<HTMLElement | null>(null)
+  const stripeInstance = ref<Stripe | null>(null)
+  const stripeElements = ref<StripeElements | null>(null)
+  const stripeCardElement = ref<StripeCardElement | null>(null)
+  const stripeCardReady = ref(false)
+  const stripeCardError = ref('')
+  const stripePaymentAttemptError = ref('')
+  const isConfirmingStripePayment = ref(false)
+
+  const isStripeMethod = computed(() => selectedPaymentMethod.value?.method_type === 'STRIPE')
+
+  const getStripeAccountId = (): string | null => {
+    const details = selectedPaymentMethod.value?.provided_details
+    if (!details || typeof details !== 'object' || Array.isArray(details)) return null
+    const id = (details as Record<string, unknown>).stripe_account_id
+    return typeof id === 'string' && id.trim() ? id.trim() : null
+  }
+
+  const teardownStripeElements = () => {
+    if (stripeCardElement.value) {
+      stripeCardElement.value.unmount()
+      stripeCardElement.value = null
+    }
+    stripeElements.value = null
+    stripeInstance.value = null
+    stripeCardReady.value = false
+    stripeCardError.value = ''
+    stripePaymentAttemptError.value = ''
+  }
+
+  const ensureStripeCardMounted = async () => {
+    if (!isStripeMethod.value || activeStep.value !== 3) return
+    if (stripeCardElement.value) return
+
+    const key = stripePublishableKey.value
+    if (!key) {
+      stripeCardError.value = 'Stripe is not configured yet.'
+      return
+    }
+
+    await nextTick()
+    if (!stripeCardMountRef.value) return
+
+    const accountId = getStripeAccountId()
+    const stripe = await loadStripe(key, accountId ? ({ stripeAccount: accountId } as any) : {})
+    if (!stripe) {
+      stripeCardError.value = 'Could not initialize Stripe card form.'
+      return
+    }
+
+    stripeInstance.value = stripe
+    stripeElements.value = stripe.elements()
+    stripeCardElement.value = stripeElements.value.create('card', { hidePostalCode: true })
+    stripeCardElement.value.mount(stripeCardMountRef.value)
+    stripeCardElement.value.on('change', (event) => {
+      stripeCardError.value = event.error?.message || ''
+      stripeCardReady.value = !!event.complete && !event.error
+      if (stripePaymentAttemptError.value) stripePaymentAttemptError.value = ''
+    })
+  }
+
+  watch(
+    [isStripeMethod, activeStep, stripePublishableKey],
+    ([stripeSelected, step, key], [, , prevKey]) => {
+      if (!stripeSelected || step !== 3) {
+        teardownStripeElements()
+        return
+      }
+      if (key !== prevKey) teardownStripeElements()
+      void ensureStripeCardMounted().catch((err) => {
+        console.error('[sponsor stripe init] mount failed', err)
+      })
+    },
+    { immediate: true },
+  )
+
   // Checkout mutation
   const checkoutMutation = useOrganisationSponsorCheckout()
   const isCheckingOut = computed(() => checkoutMutation.isPending.value)
@@ -204,7 +290,7 @@ export function useSponsorFlow(
 
   // Event selection helpers
   function selectEvent(event: SponsorableEventList) {
-    selectedEventId.value = event.url_safe_title || event.event_id
+    selectedEventId.value = event.event_id
     selectedEventSnapshot.value = event
     checkoutResult.value = null
     checkoutForm.packageId = ''
@@ -249,14 +335,52 @@ export function useSponsorFlow(
 
     try {
       const response = await checkoutMutation.mutateAsync(payload)
-      checkoutResult.value = (response?.data || null) as SponsorCheckoutResponse | null
       if (response.error) {
         $notyf.error(extractApiErrorMessage(response.error, 'Checkout failed.'))
         return
       }
-      $notyf.success('Checkout initialized successfully.')
-      activeStep.value = 1
+      // Hold the response data locally — do NOT set checkoutResult yet for Stripe.
+      // Setting checkoutResult causes v-if="!checkoutResult" to unmount the card element,
+      // which would break confirmCardPayment if called after.
+      const responseData = (response?.data || null) as SponsorCheckoutResponse | null
+
+      if (isStripeMethod.value) {
+        const clientSecret = responseData?.client_secret
+        if (!clientSecret) {
+          $notyf.error('Stripe checkout initialized but no client secret was returned. Contact support.')
+          checkoutResult.value = responseData
+          return
+        }
+        // Card element should already be mounted (watcher fires on step 3 entry).
+        // ensureStripeCardMounted() is idempotent — safe to call as a guard.
+        await ensureStripeCardMounted()
+        if (!stripeInstance.value || !stripeCardElement.value) {
+          $notyf.error(stripeCardError.value || 'Card form could not be initialized. Please refresh and try again.')
+          return
+        }
+        isConfirmingStripePayment.value = true
+        stripePaymentAttemptError.value = ''
+        const accountId = getStripeAccountId()
+        const result = await stripeInstance.value.confirmCardPayment(
+          clientSecret,
+          { payment_method: { card: stripeCardElement.value } },
+          accountId ? ({ stripeAccount: accountId } as any) : undefined,
+        )
+        isConfirmingStripePayment.value = false
+        if (result.error) {
+          stripePaymentAttemptError.value = result.error.message || 'Card payment failed.'
+          $notyf.error(stripePaymentAttemptError.value)
+          return
+        }
+        // Only set checkoutResult AFTER confirmation — this unmounts the card element
+        checkoutResult.value = responseData
+        $notyf.success('Card payment confirmed!')
+      } else {
+        checkoutResult.value = responseData
+        $notyf.success('Checkout initialized successfully.')
+      }
     } catch (error) {
+      isConfirmingStripePayment.value = false
       $notyf.error(extractApiErrorMessage(error, 'Checkout failed.'))
     }
   }
@@ -324,5 +448,12 @@ export function useSponsorFlow(
     selectFirstEvent,
     submitCheckout,
     resetFlow,
+    // stripe
+    stripeCardMountRef,
+    stripeCardReady,
+    stripeCardError,
+    stripePaymentAttemptError,
+    isConfirmingStripePayment,
+    isStripeMethod,
   }
 }
