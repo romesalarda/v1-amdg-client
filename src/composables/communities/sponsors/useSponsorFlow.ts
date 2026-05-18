@@ -20,9 +20,12 @@ import { formatMoney } from '~/utils/money'
 export type PackageItem = {
   package_id: string
   package_name: string
+  package_description?: string | null
   tier: number
   modified_amount: string
   base_amount_currency: string
+  active?: boolean
+  sponsors_count?: number
 }
 
 export const SPONSOR_FLOW_STEPS = [

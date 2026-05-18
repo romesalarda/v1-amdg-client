@@ -237,28 +237,21 @@
 
 			<div>
 				<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Sponsorship Package</label>
-				<div v-if="isLoadingPackages" class="space-y-2">
-					<USkeleton class="h-16 w-full" />
-					<USkeleton class="h-16 w-full" />
+				<div v-if="isLoadingPackages" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+					<div v-for="i in 3" :key="i" class="h-64 rounded-xl bg-deep-navy/5 animate-pulse" />
 				</div>
 				<div v-else-if="sponsorshipPackages.length === 0" class="text-sm font-bold text-deep-navy/60">
 					No active packages available for this event.
 				</div>
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-					<button
-						v-for="pkg in sponsorshipPackages"
+				<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+					<SponsorPackageCard
+						v-for="pkg in styledPackages"
 						:key="pkg.package_id"
-						type="button"
-						class="text-left p-4 border-2 rounded-xl transition-all"
-						:class="checkoutForm.packageId === pkg.package_id
-							? 'border-deep-navy bg-deep-navy text-white'
-							: 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/40'"
-						@click="checkoutForm.packageId = pkg.package_id"
-					>
-						<p class="text-sm font-black uppercase tracking-tight">{{ pkg.package_name }}</p>
-						<p class="mt-1 text-xs font-bold uppercase tracking-wider opacity-80">Tier {{ pkg.tier }}</p>
-						<p class="mt-2 text-sm font-black">{{ formatMoney(pkg.modified_amount, pkg.base_amount_currency) }}</p>
-					</button>
+						:pkg="pkg"
+						:selected="checkoutForm.packageId === pkg.package_id"
+						:selectable="true"
+						@select="checkoutForm.packageId = pkg.package_id"
+					/>
 				</div>
 			</div>
 
@@ -342,42 +335,119 @@
 					{{ isConfirmingStripePayment ? 'Confirming card...' : isCheckingOut ? 'Initializing...' : isStripeMethod ? 'Pay Now' : 'Confirm Sponsor Checkout' }}
 				</button>
 			</div>
-
-			<div v-if="checkoutResult" class="p-5 rounded-xl border-2 border-green-600/30 bg-green-500/10 space-y-2">
-				<p class="text-sm font-black text-deep-navy uppercase tracking-tight">Checkout Initialized</p>
-				<p class="text-xs font-bold text-deep-navy/70 uppercase tracking-wider">Sponsor ID: {{ checkoutResult.sponsor_id }}</p>
-				<p class="text-xs font-bold text-deep-navy/70 uppercase tracking-wider">Payment Reference: {{ checkoutResult.payment_reference }}</p>
-				<p class="text-xs font-bold text-deep-navy/70 uppercase tracking-wider">Status: {{ checkoutResult.payment_status }}</p>
-
-				<div v-if="checkoutResult.payment_method_type === 'STRIPE'" class="mt-3 p-4 rounded-lg bg-white border border-green-700/20">
-					<p class="text-xs font-black uppercase tracking-wider text-deep-navy">Stripe Payment Ready</p>
-					<p class="mt-1 text-xs font-medium text-deep-navy/70">Client Secret: {{ checkoutResult.client_secret || 'Unavailable in response' }}</p>
-					<p class="text-xs font-medium text-deep-navy/70">Payment Intent: {{ checkoutResult.payment_intent_id || 'Unavailable in response' }}</p>
-				</div>
-
-				<div v-if="checkoutResult.payment_method_type === 'BANK_TRANSFER'" class="mt-3 p-4 rounded-lg bg-white border border-green-700/20">
-					<p class="text-xs font-black uppercase tracking-wider text-deep-navy">Bank Transfer Instructions</p>
-					<p class="mt-1 text-xs font-medium text-deep-navy/70">Reference: {{ checkoutResult.bank_transfer_reference || 'Use payment reference above' }}</p>
-					<pre class="mt-2 text-xs text-deep-navy/70 whitespace-pre-wrap">{{ stringifyDetails(checkoutResult.payment_instructions) }}</pre>
-				</div>
-
-				<div class="pt-3 flex justify-end">
-					<button
-						type="button"
-						class="px-6 py-2 rounded-xl border-2 border-deep-navy text-deep-navy text-xs font-black uppercase tracking-wider hover:bg-deep-navy hover:text-white transition-all"
-						@click="handleStartNewSponsorship"
-					>
-						Start New Sponsorship
-					</button>
-				</div>
-			</div>
 		</div>
 	</div>
+
+	<!-- Processing overlay -->
+	<Teleport to="body">
+		<Transition
+			enter-active-class="transition duration-200 ease-out"
+			enter-from-class="opacity-0"
+			enter-to-class="opacity-100"
+			leave-active-class="transition duration-150 ease-in"
+			leave-from-class="opacity-100"
+			leave-to-class="opacity-0"
+		>
+			<div
+				v-if="isProcessingCheckout"
+				class="fixed inset-0 z-40 flex items-center justify-center bg-deep-navy/60 backdrop-blur-sm"
+			>
+				<div class="w-full max-w-sm rounded-3xl border border-deep-navy/10 bg-white p-8 shadow-2xl text-center">
+					<div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-deep-navy/20 border-t-deep-navy" />
+					<p class="mt-5 text-sm font-black uppercase tracking-[0.15em] text-deep-navy">Processing sponsorship</p>
+					<p class="mt-1 text-xs text-deep-navy/60">Please do not close or refresh this page.</p>
+				</div>
+			</div>
+		</Transition>
+	</Teleport>
+
+	<!-- Success modal -->
+	<Teleport to="body">
+		<Transition
+			enter-active-class="transition duration-500 ease-out"
+			enter-from-class="opacity-0 scale-95"
+			enter-to-class="opacity-100 scale-100"
+			leave-active-class="transition duration-250 ease-in"
+			leave-from-class="opacity-100 scale-100"
+			leave-to-class="opacity-0 scale-95"
+		>
+			<div
+				v-if="checkoutResult"
+				class="fixed inset-0 z-50 flex items-center justify-center bg-deep-navy/55 px-4 backdrop-blur-sm"
+			>
+				<div class="relative w-full max-w-2xl overflow-hidden rounded-3xl border border-green-200 bg-white p-6 shadow-2xl">
+					<div class="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-green-100/70 to-transparent" />
+					<div class="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-center gap-2 pt-4">
+						<span class="h-2 w-2 rounded-full bg-green-400 animate-bounce" />
+						<span class="h-2 w-2 rounded-full bg-blue-400 animate-pulse" />
+						<span class="h-2 w-2 rounded-full bg-amber-400 animate-bounce" />
+					</div>
+
+					<div class="mt-6 text-center">
+						<p class="text-[10px] font-black uppercase tracking-[0.22em] text-green-700">Sponsorship Confirmed</p>
+						<h3 class="mt-2 text-3xl font-black text-deep-navy">
+							{{ checkoutResult.payment_method_type === 'STRIPE' ? 'Payment Successful!' : 'Checkout Initiated!' }}
+						</h3>
+						<p class="mx-auto mt-2 max-w-xl text-sm text-deep-navy/75">
+							{{ checkoutResult.payment_method_type === 'STRIPE'
+								? 'Your card payment has been confirmed. Thank you for sponsoring this event.'
+								: 'Your sponsorship has been initiated. Please complete the bank transfer using the details below.'
+							}}
+						</p>
+					</div>
+
+					<div class="mt-5 rounded-2xl border border-green-200 bg-green-50 p-4 space-y-2">
+						<div class="grid grid-cols-2 gap-x-6 gap-y-2">
+							<div>
+								<p class="text-[9px] font-black uppercase tracking-[0.15em] text-green-800">Sponsor ID</p>
+								<p class="text-xs font-semibold text-green-900 font-mono">{{ checkoutResult.sponsor_id }}</p>
+							</div>
+							<div>
+								<p class="text-[9px] font-black uppercase tracking-[0.15em] text-green-800">Payment Reference</p>
+								<p class="text-xs font-semibold text-green-900 font-mono">{{ checkoutResult.payment_reference }}</p>
+							</div>
+							<div>
+								<p class="text-[9px] font-black uppercase tracking-[0.15em] text-green-800">Status</p>
+								<p class="text-xs font-semibold text-green-900 uppercase">{{ checkoutResult.payment_status }}</p>
+							</div>
+							<div v-if="checkoutResult.payment_method_type === 'STRIPE' && checkoutResult.payment_intent_id">
+								<p class="text-[9px] font-black uppercase tracking-[0.15em] text-green-800">Payment Intent</p>
+								<p class="text-xs font-semibold text-green-900 font-mono truncate">{{ checkoutResult.payment_intent_id }}</p>
+							</div>
+						</div>
+					</div>
+
+					<div
+						v-if="checkoutResult.payment_method_type === 'BANK_TRANSFER'"
+						class="mt-4 rounded-2xl border border-deep-navy/10 bg-white p-4"
+					>
+						<p class="text-[10px] font-black uppercase tracking-[0.15em] text-deep-navy mb-2">Bank Transfer Instructions</p>
+						<p class="text-xs font-semibold text-deep-navy/70 mb-1">
+							Reference: <span class="font-mono">{{ checkoutResult.bank_transfer_reference || checkoutResult.payment_reference }}</span>
+						</p>
+						<pre class="text-xs text-deep-navy/60 whitespace-pre-wrap">{{ stringifyDetails(checkoutResult.payment_instructions) }}</pre>
+					</div>
+
+					<div class="mt-5 flex flex-wrap justify-center gap-2">
+						<button
+							type="button"
+							class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-deep-navy/80 transition-all"
+							@click="handleStartNewSponsorship"
+						>
+							Start New Sponsorship
+						</button>
+					</div>
+				</div>
+			</div>
+		</Transition>
+	</Teleport>
 </template>
 
 <script lang="ts" setup>
 import { computed } from 'vue'
 import { useSponsorFlow } from '~/composables/communities/sponsors/useSponsorFlow'
+import { useSponsorPackageStyling } from '~/composables/communities/sponsors/useSponsorPackageStyling'
+import SponsorPackageCard from '~/components/communities/sponsors/SponsorPackageCard.vue'
 import { formatMoney } from '~/utils/money'
 import { formatDate } from '~/utils/time'
 import type { SponsorableEventList } from '~/api/types.gen'
@@ -455,6 +525,9 @@ const {
 const acceptedInvitesCount = computed(() =>
 	(selectedEvent.value as any)?.accepted_invites_count ?? 0,
 )
+
+const { styledPackages } = useSponsorPackageStyling(computed(() => sponsorshipPackages.value))
+const isProcessingCheckout = computed(() => isCheckingOut.value || isConfirmingStripePayment.value)
 
 function handleStartNewSponsorship() {
 	resetFlow()
