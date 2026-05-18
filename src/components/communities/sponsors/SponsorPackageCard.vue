@@ -51,7 +51,7 @@
 		<div class="mb-6">
 			<div class="text-sm text-deep-navy/50 mb-1 font-medium">Investment</div>
 			<div class="text-4xl font-black tracking-tighter text-deep-navy">
-				{{ formatMoney(pkg.modified_amount ?? pkg.base_amount ?? '0', pkg.base_amount_currency ?? 'GBP') }}
+				{{ pkg.modified_amount }}
 			</div>
 		</div>
 

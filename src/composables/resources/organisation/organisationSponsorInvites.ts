@@ -305,6 +305,7 @@ export function useRetrieveSponsorInviteByToken(token: MaybeRefOrGetter<string>)
     queryFn: async () => {
       const t = toValue(token)
       const response = await organisationsSponsorInvitesRetrieveByTokenRetrieve({ query: { token: t } })
+      if (response.error) throw response.error
       return (response?.data ?? null) as SponsorInviteByTokenData | null
     },
     enabled: computed(() => !!toValue(token)),

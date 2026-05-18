@@ -2,51 +2,73 @@
 	<div class="min-h-screen bg-white font-display text-deep-navy">
 		<div class="relative z-10 flex min-h-screen flex-col">
 			<Navbar />
-			<main class="flex-1 py-10 px-4">
-				<div class="mx-auto w-full max-w-2xl">
-
-					<!-- No token provided -->
-					<div v-if="!token" class="mt-12 text-center space-y-4">
-						<span class="material-symbols-outlined text-5xl text-deep-navy/30">link_off</span>
-						<h1 class="text-2xl font-black uppercase tracking-tight">Invalid Link</h1>
-						<p class="text-sm font-medium text-deep-navy/60">
-							This sponsorship link is missing a token. Please use the original invite link.
-						</p>
+			<main class="flex-1 flex flex-col">
+				<!-- Full-height error: no token -->
+				<div v-if="!token" class="flex flex-1 items-center justify-center px-4 py-16">
+					<div class="text-center space-y-6 max-w-sm">
+						<div class="mx-auto w-20 h-20 rounded-full bg-deep-navy/5 flex items-center justify-center">
+							<span class="material-symbols-outlined text-4xl text-deep-navy/30">link_off</span>
+						</div>
+						<div class="space-y-2">
+							<h1 class="text-2xl font-black uppercase tracking-tight">Invalid Link</h1>
+							<p class="text-sm font-medium text-deep-navy/60">This sponsorship link is missing a token. Please use the original invite link sent to your email.</p>
+						</div>
+						<NuxtLink to="/" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-deep-navy/20 text-sm font-black uppercase tracking-wider text-deep-navy hover:border-deep-navy/40 transition-colors">
+							<span class="material-symbols-outlined text-base">home</span>
+							Go Home
+						</NuxtLink>
 					</div>
+				</div>
 
-					<!-- Invite loading -->
-					<div v-else-if="isLoadingInvite" class="mt-12 flex justify-center">
-						<div class="h-10 w-10 animate-spin rounded-full border-4 border-deep-navy/20 border-t-deep-navy" />
+				<!-- Full-height loading -->
+				<div v-else-if="isLoadingInvite" class="flex flex-1 items-center justify-center">
+					<div class="text-center space-y-4">
+						<div class="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-deep-navy/20 border-t-deep-navy" />
+						<p class="text-[11px] font-black uppercase tracking-[0.2em] text-deep-navy/40">Loading invite…</p>
 					</div>
+				</div>
 
-					<!-- Success state -->
+				<!-- Full-height success -->
+				<div v-else-if="checkoutResult" class="flex flex-1 items-center justify-center px-4 py-16">
 					<ExternalSponsorSuccess
-						v-else-if="checkoutResult"
 						:result="checkoutResult"
 						@done="navigateTo('/')"
 					/>
+				</div>
 
-					<!-- Invite fetch error -->
-					<div v-else-if="isInviteError || (invite && !invite.is_valid && !checkoutResult)" class="mt-12 text-center space-y-4">
-						<span class="material-symbols-outlined text-5xl text-red-400">error</span>
-						<h1 class="text-2xl font-black uppercase tracking-tight">Invite Not Valid</h1>
-						<p class="text-sm font-medium text-deep-navy/60">
-							{{ isInviteError
-								? 'This invite could not be found or has expired.'
-								: invite?.accepted
-									? 'This invite has already been accepted.'
-									: 'This invite has expired or been declined.' }}
-						</p>
-					</div>
-
-					<!-- Stepper -->
-					<template v-else-if="invite">
-						<div class="mb-8 text-center space-y-1">
-							<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/40">Sponsorship Checkout</p>
-							<h1 class="text-3xl font-black uppercase tracking-tight leading-tight">
-								{{ invite.event_title || invite.event_name || 'Event' }}
-							</h1>
+				<!-- Full-height invite error -->
+				<div v-else-if="isInviteError || (invite && !invite.is_valid && !checkoutResult)" class="flex flex-1 items-center justify-center px-4 py-16">
+					<div class="text-center space-y-6 max-w-sm">
+						<div class="mx-auto w-20 h-20 rounded-full bg-red-50 flex items-center justify-center">
+							<span class="material-symbols-outlined text-4xl text-red-400">error</span>
 						</div>
+						<div class="space-y-2">
+							<h1 class="text-2xl font-black uppercase tracking-tight">Invite Not Valid</h1>
+							<p class="text-sm font-medium text-deep-navy/60">{{ inviteErrorMessage }}</p>
+						</div>
+						<div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+							<NuxtLink to="/" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-navy text-white text-sm font-black uppercase tracking-wider hover:bg-deep-navy/80 transition-colors">
+								<span class="material-symbols-outlined text-base">home</span>
+								Go Home
+							</NuxtLink>
+							<NuxtLink :to="`/events/${id}/`" class="inline-flex items-center gap-2 px-6 py-3 rounded-xl border-2 border-deep-navy/20 text-sm font-black uppercase tracking-wider text-deep-navy hover:border-deep-navy/40 transition-colors">
+								<span class="material-symbols-outlined text-base">event</span>
+								View Event
+							</NuxtLink>
+						</div>
+					</div>
+				</div>
+
+				<!-- Stepper content -->
+				<div v-else-if="invite" class="flex-1 py-10 px-4">
+				<div class="mx-auto w-full max-w-2xl">
+
+					<div class="mb-8 text-center space-y-1">
+						<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/40">Sponsorship Checkout</p>
+						<h1 class="text-3xl font-black uppercase tracking-tight leading-tight">
+							{{ invite.event_title || invite.event_name || 'Event' }}
+						</h1>
+					</div>
 
 						<UStepper
 							:model-value="activeStep"
@@ -135,7 +157,7 @@
 								</template>
 							</button>
 						</div>
-					</template>
+				</div>
 				</div>
 			</main>
 			<Footer />
@@ -171,6 +193,7 @@ const {
 	invite,
 	isLoadingInvite,
 	isInviteError,
+	inviteError,
 	inviteHasOrg,
 	styledPackages,
 	paymentMethods,
@@ -191,4 +214,17 @@ const {
 	isConfirmingStripePayment,
 	isStripeMethod,
 } = useTokenSponsorFlow(token, id)
+
+const inviteErrorMessage = computed(() => {
+	if (!isInviteError.value) {
+		// invite loaded but is no longer valid
+		if (invite.value?.accepted) return 'This invite has already been accepted.'
+		return 'This invite has expired or been declined.'
+	}
+	// determine message from HTTP status embedded in thrown error object
+	const status = (inviteError.value as any)?.status ?? (inviteError.value as any)?.statusCode
+	if (status === 400) return 'This invite link is invalid. Please check the URL and try again.'
+	if (status === 404) return 'This invite could not be found. It may have been removed.'
+	return 'There was a problem loading this invite. Please check the link and try again.'
+})
 </script>

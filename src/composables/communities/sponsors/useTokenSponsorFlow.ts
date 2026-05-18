@@ -104,8 +104,8 @@ export function useTokenSponsorFlow(
   )
   const selectedPackageAmount = computed(() => {
     if (!selectedPackage.value) return 'N/A'
-    const amount = selectedPackage.value.modified_amount ?? selectedPackage.value.base_amount ?? '0'
-    return formatMoney(amount, selectedPackage.value.base_amount_currency ?? 'GBP')
+    const amount = selectedPackage.value.modified_amount || 'ERROR'
+    return amount
   })
 
   // ── Step navigation ────────────────────────────────────────────────────────

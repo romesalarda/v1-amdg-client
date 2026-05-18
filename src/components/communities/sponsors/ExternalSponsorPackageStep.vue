@@ -13,7 +13,7 @@
 				<p class="mt-2 text-sm font-bold text-deep-navy/50">No active packages available for this event.</p>
 			</div>
 
-			<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+			<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-6">
 				<SponsorPackageCard
 					v-for="pkg in styledPackages"
 					:key="pkg.package_id"
