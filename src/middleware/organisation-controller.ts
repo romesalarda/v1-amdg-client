@@ -1,5 +1,5 @@
 import { organisationsControlsList } from '~/api/sdk.gen'
-
+import { organisationsListMyPermissionsRetrieve } from '~/api/sdk.gen'
 export default defineNuxtRouteMiddleware(async (to) => {
   const authStore = useAuthStore()
   
@@ -24,9 +24,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
       }
     })
 
-    const controls = response.data?.results || []
+    const permissionsResponse = await organisationsListMyPermissionsRetrieve({
+      path: {
+        url_safe_title: String(orgId),
+      }
+    })
+
+
+
+    const canRead = permissionsResponse.data?.can_view
     
-    if (controls.length === 0) {
+    if (!canRead) {
       // User is not a controller
     //   useNuxtApp().$notyf?.error('You do not have permission to access this page')
       return navigateTo(`/403`)

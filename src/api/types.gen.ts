@@ -19422,6 +19422,7 @@ export type UserOrganisationMembershipDetail = {
     readonly area_from: string | null;
     readonly is_verified: boolean;
     readonly added_at: string;
+    readonly is_organisation_controller: boolean;
     /**
      *  links
      */
@@ -19452,6 +19453,7 @@ export type UserOrganisationMembershipList = {
     readonly area_from: string | null;
     readonly is_verified: boolean;
     readonly added_at: string;
+    readonly is_organisation_controller: boolean;
     /**
      *  links
      */
@@ -42202,6 +42204,28 @@ export type OrganisationsListMembershipsListResponses = {
 };
 
 export type OrganisationsListMembershipsListResponse = OrganisationsListMembershipsListResponses[keyof OrganisationsListMembershipsListResponses];
+
+export type OrganisationsListMyPermissionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * URL-safe version of the title, auto-generated if not provided.
+         */
+        url_safe_title: string;
+    };
+    query?: never;
+    url: '/api/organisations/list/{url_safe_title}/my-permissions/';
+};
+
+export type OrganisationsListMyPermissionsRetrieveResponses = {
+    200: {
+        organisation?: string;
+        organisation_url_safe_title?: string;
+        can_view?: boolean;
+    };
+};
+
+export type OrganisationsListMyPermissionsRetrieveResponse = OrganisationsListMyPermissionsRetrieveResponses[keyof OrganisationsListMyPermissionsRetrieveResponses];
 
 export type OrganisationsMembershipsListData = {
     body?: never;
