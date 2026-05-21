@@ -102,7 +102,7 @@ const tabs = [
   },
 ]
 
-const currentTab = ref('demographics')
+const currentTab = ref('attendance')
 
 // Get current tab component
 const currentTabComponent = computed(() => {

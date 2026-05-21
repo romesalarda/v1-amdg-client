@@ -17,7 +17,15 @@
         @click="activeTab = 'roster'"
       >
         <UIcon name="i-heroicons-users" class="w-3.5 h-3.5 inline -mt-0.5 mr-1" />
-        Roster
+        Attendees
+      </button>
+      <button
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        :class="activeTab === 'statistics' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+        @click="activeTab = 'statistics'"
+      >
+        <UIcon name="i-heroicons-chart-bar" class="w-3.5 h-3.5 inline -mt-0.5 mr-1" />
+        Statistics
       </button>
     </div>
 
@@ -27,6 +35,11 @@
       :event-identifier="eventIdentifier"
       class="flex-1 min-h-0"
     />
+
+    <!-- ── Statistics view ───────────────────────────────────────────── -->
+    <div v-if="activeTab === 'statistics' && eventId" class="flex-1 overflow-auto p-4">
+      <AttendanceStatsView :query-params="{ event_id: eventId }" />
+    </div>
 
     <!-- ── Log view (original content) ──────────────────────────────── -->
     <template v-if="activeTab === 'log'">
@@ -230,6 +243,7 @@
 import type { CheckInResponse } from '~/api/types.gen'
 import { checkinsList } from '~/api/sdk.gen'
 import AttendeeRosterTable from '~/components/attendees/AttendeeRosterTable.vue'
+import AttendanceStatsView from '~/pages/events/[id]/m/participants/statistics/attendance.vue'
 
 interface Props {
   /** Filter by event UUID */
@@ -248,7 +262,7 @@ const emit = defineEmits<{
 
 // ── Tab state ─────────────────────────────────────────────────────────────
 
-const activeTab = ref<'log' | 'roster'>('log')
+const activeTab = ref<'log' | 'roster' | 'statistics'>('log')
 
 // ── State ─────────────────────────────────────────────────────────────────
 

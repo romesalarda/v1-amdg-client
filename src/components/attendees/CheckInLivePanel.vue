@@ -76,17 +76,28 @@
 
         <!-- Enriched attendee details row -->
         <div v-if="attendeeDetails && !attendeeLoading" class="grid grid-cols-2 gap-2 text-xs">
-          <div v-if="attendeeDetails.email" class="flex items-center gap-1.5 text-gray-500 min-w-0">
+          <div v-if="attendeeDetails.email" class="flex items-center gap-1.5 text-gray-500 min-w-0 col-span-2">
             <UIcon name="i-heroicons-envelope" class="w-3.5 h-3.5 flex-shrink-0" />
             <span class="truncate">{{ attendeeDetails.email }}</span>
           </div>
-          <div v-if="attendeeDetails.age" class="flex items-center gap-1.5 text-gray-500">
-            <UIcon name="i-heroicons-cake" class="w-3.5 h-3.5 flex-shrink-0" />
-            <span>Age {{ attendeeDetails.age }}{{ attendeeDetails.is_minor ? ' · Minor' : '' }}</span>
+          <!-- Age + minor highlight -->
+          <div v-if="attendeeDetails.age" class="flex items-center gap-1.5">
+            <UIcon name="i-heroicons-cake" class="w-3.5 h-3.5 flex-shrink-0 text-gray-500" />
+            <span
+              class="font-semibold text-sm"
+              :class="attendeeDetails.is_minor ? 'text-amber-700' : 'text-gray-700'"
+            >
+              Age {{ attendeeDetails.age }}
+            </span>
+            <UBadge v-if="attendeeDetails.is_minor" color="amber" variant="solid" size="xs" class="ml-0.5">
+              <UIcon name="i-heroicons-exclamation-triangle" class="w-3 h-3 mr-0.5" />
+              Minor
+            </UBadge>
           </div>
-          <div v-if="attendeeDetails.area_from_name ?? currentItem.area_from" class="flex items-center gap-1.5 text-gray-500 col-span-2">
+          <!-- Area from -->
+          <div v-if="attendeeDetails.area_from_name ?? currentItem.area_from" class="flex items-center gap-1.5 text-gray-500">
             <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 flex-shrink-0" />
-            <span>{{ attendeeDetails.area_from_name ?? currentItem.area_from }}</span>
+            <span class="text-sm font-medium text-gray-700 truncate">{{ attendeeDetails.area_from_name ?? currentItem.area_from }}</span>
           </div>
         </div>
 
@@ -96,13 +107,83 @@
           {{ currentItem.area_from }}
         </p>
 
-        <!-- Ticket -->
-        <div v-if="currentItem.ticket_code" class="flex items-center gap-2">
-          <UIcon name="i-heroicons-ticket" class="w-4 h-4 text-gray-400 flex-shrink-0" />
-          <div>
-            <span class="text-xs text-gray-400 uppercase tracking-widest font-semibold block">Ticket</span>
-            <span class="text-sm font-mono font-semibold text-deep-navy">{{ currentItem.ticket_code }}</span>
-            <span v-if="currentItem.ticket_type_code" class="ml-2 text-xs text-gray-500">{{ currentItem.ticket_type_code }}</span>
+        <!-- Medical / Dietary / Accessibility highlights -->
+        <template v-if="attendeeDetails && !attendeeLoading">
+          <div
+            v-if="medicalConditions.length"
+            class="flex items-start gap-2 bg-red-50 border border-red-300 rounded-lg p-3"
+          >
+            <UIcon name="i-heroicons-heart" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+            <div class="min-w-0">
+              <p class="text-xs font-black text-red-700 uppercase tracking-wide mb-1">Medical Conditions</p>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="mc in medicalConditions"
+                  :key="mc.id"
+                  class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                >
+                  {{ mc.condition_details?.label ?? mc.id }}
+                </span>
+              </div>
+              <p v-if="medicalConditions.some(m => m.details || m.notes)" class="text-xs text-red-600 mt-1 italic">
+                {{ medicalConditions.map(m => m.details || m.notes).filter(Boolean).join(' · ') }}
+              </p>
+            </div>
+          </div>
+
+          <div
+            v-if="dietaryRequirements.length"
+            class="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg p-3"
+          >
+            <UIcon name="i-heroicons-fire" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div class="min-w-0">
+              <p class="text-xs font-black text-amber-700 uppercase tracking-wide mb-1">Dietary Requirements</p>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="dr in dietaryRequirements"
+                  :key="dr.id"
+                  class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                >
+                  {{ dr.requirement_details?.label ?? dr.id }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div
+            v-if="accessibilityRequirements.length"
+            class="flex items-start gap-2 bg-blue-50 border border-blue-300 rounded-lg p-3"
+          >
+            <UIcon name="i-heroicons-adjustments-horizontal" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+            <div class="min-w-0">
+              <p class="text-xs font-black text-blue-700 uppercase tracking-wide mb-1">Accessibility</p>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="ar in accessibilityRequirements"
+                  :key="ar.id"
+                  class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                >
+                  {{ ar.requirement_details?.label ?? ar.id }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Ticket as QR code -->
+        <div v-if="currentItem.ticket_code" class="flex items-start gap-3">
+          <div class="flex h-24 w-24 items-center justify-center rounded-lg border border-gray-200 bg-white flex-shrink-0">
+            <Qrcode
+              :value="currentItem.ticket_code"
+              :width="96"
+              :height="96"
+              class="h-30 w-30"
+            />
+          </div>
+          <div class="flex-1 min-w-0">
+            <span class="text-xs text-gray-400 uppercase tracking-widest font-semibold block mb-1">Ticket</span>
+            <span v-if="currentItem.ticket_type_code" class="text-xs text-gray-600 font-medium block mb-1">{{ currentItem.ticket_type_code }}</span>
+            <span class="font-mono text-xs text-gray-500 break-all">{{ currentItem.ticket_code.slice(-16) }}</span>
           </div>
         </div>
 
@@ -175,8 +256,8 @@
 <script setup lang="ts">
 import type { CheckInBroadcastPayload } from '~/composables/websockets/events/useCheckInSocket'
 import type { CheckInDisplayMode } from '~/composables/useCheckInModes'
-import type { AttendeeDetail } from '~/api/types.gen'
-import { attendeesRetrieve } from '~/api/sdk.gen'
+import type { AttendeeDetail, AttendeeDietaryRequirement, AttendeeAccessibilityRequirement, AttendeeMedicalCondition } from '~/api/types.gen'
+import { attendeesRetrieve, attendeesDietaryRequirementsList, attendeesMedicalConditionsList, attendeesAccessibilityRequirementsList } from '~/api/sdk.gen'
 
 interface Props {
   currentItem: CheckInBroadcastPayload | null
@@ -199,14 +280,28 @@ defineEmits<{
 const attendeeDetails = ref<AttendeeDetail | null>(null)
 const attendeeLoading = ref(false)
 
+// Medical / Dietary / Accessibility
+const dietaryRequirements = ref<AttendeeDietaryRequirement[]>([])
+const medicalConditions = ref<AttendeeMedicalCondition[]>([])
+const accessibilityRequirements = ref<AttendeeAccessibilityRequirement[]>([])
+
 async function fetchAttendeeDetails(attendeeId: string) {
   attendeeLoading.value = true
   attendeeDetails.value = null
+  dietaryRequirements.value = []
+  medicalConditions.value = []
+  accessibilityRequirements.value = []
   try {
-    const res = await attendeesRetrieve({ path: { attendee_id: attendeeId } })
-    if (res.data) {
-      attendeeDetails.value = res.data
-    }
+    const [detailRes, dietaryRes, medicalRes, accessibilityRes] = await Promise.all([
+      attendeesRetrieve({ path: { attendee_id: attendeeId } }),
+      attendeesDietaryRequirementsList({ path: { attendee_id: attendeeId } }),
+      attendeesMedicalConditionsList({ path: { attendee_id: attendeeId } }),
+      attendeesAccessibilityRequirementsList({ path: { attendee_id: attendeeId } }),
+    ])
+    if (detailRes.data) attendeeDetails.value = detailRes.data
+    if (dietaryRes.data) dietaryRequirements.value = (dietaryRes.data as any).results ?? []
+    if (medicalRes.data) medicalConditions.value = (medicalRes.data as any).results ?? []
+    if (accessibilityRes.data) accessibilityRequirements.value = (accessibilityRes.data as any).results ?? []
   } catch {
     // Non-critical: fall back to displaying attendee_display_id
   } finally {
