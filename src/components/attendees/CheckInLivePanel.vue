@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-4">
     <!-- Connection indicator -->
-    <div class="flex items-center gap-2">
+    <!-- <div class="flex items-center gap-2">
       <span
         class="inline-block w-2.5 h-2.5 rounded-full"
         :class="isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-300'"
@@ -9,7 +9,7 @@
       <span class="text-xs text-gray-500 font-medium uppercase tracking-wide">
         {{ isConnected ? 'Live' : 'Disconnected' }}
       </span>
-    </div>
+    </div> -->
 
     <!-- No item state -->
     <div

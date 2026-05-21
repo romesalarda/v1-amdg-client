@@ -1,5 +1,5 @@
 <template>
-  <EventManagementLayout :event-id="eventUUID" :event="event?.data">
+  <EventManagementLayout :event-id="eventIdentifier" :event="event?.data">
     <div class="max-w-7xl mx-auto space-y-4">
       <!-- Page header -->
       <div class="flex items-center justify-between">
@@ -8,55 +8,49 @@
           <p class="text-sm text-gray-500 mt-0.5">Real-time scan monitoring</p>
         </div>
         <div class="flex items-center gap-2">
-          <span
-            class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
-            :class="
-              isConnected
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-gray-100 text-gray-500 border border-gray-200'
-            "
-          >
-            <span
-              class="inline-block w-1.5 h-1.5 rounded-full"
-              :class="isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"
-            />
-            {{ isConnected ? 'Connected' : 'Disconnected' }}
-          </span>
+          
         </div>
       </div>
 
-      <!-- Main layout: left controls (1/3) + right list (2/3) -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <!-- Left column: live panel + mode controls -->
-        <div class="space-y-4">
-          <!-- Mode controls -->
-          <CheckInModeControls
-            :current-mode="mode"
-            :active-filters="activeFilters"
-            @set-mode="setMode"
-            @apply-filters="applyFilters"
-          />
+      <!-- Collapsible controls top-bar -->
+      <CheckInControlsBar
+        :current-mode="mode"
+        :active-filters="activeFilters"
+        :is-live="isConnected"
+        @set-mode="setMode"
+        @apply-filters="applyFilters"
+      />
 
-          <!-- Live scan card -->
-          <CheckInLivePanel
-            :current-item="currentItem"
-            :is-connected="isConnected"
-            :mode="mode"
-            :remaining-count="remainingCount"
-            @advance="advance"
-            @go-back="goBack"
-          />
-        </div>
+      <!-- Main layout: left live panel (1/3) + right log (2/3) -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <!-- Left column: live scan card only -->
+        <CheckInLivePanel
+          :current-item="currentItem"
+          :is-connected="isConnected"
+          :mode="mode"
+          :remaining-count="remainingCount"
+          @advance="advance"
+          @go-back="goBack"
+        />
 
         <!-- Right column: paginated log -->
         <div class="lg:col-span-2 bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5 min-h-[500px] flex flex-col">
           <CheckInListView
-            :event-id="eventUUID"
+            :event-id="eventIdentifier"
             :refresh-trigger="refreshTrigger"
+            @select-attendee="openAttendeePanel"
           />
         </div>
       </div>
     </div>
+
+    <!-- Attendee side panel -->
+    <CheckInAttendeePanel
+      :open="!!selectedAttendeeId"
+      :attendee-id="selectedAttendeeId"
+      :event-id="eventIdentifier"
+      @close="selectedAttendeeId = null"
+    />
   </EventManagementLayout>
 </template>
 
@@ -68,8 +62,9 @@ import { useCheckInModes } from '~/composables/useCheckInModes'
 import type { CheckInFilters } from '~/composables/websockets/events/useCheckInSocket'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import CheckInLivePanel from '~/components/attendees/CheckInLivePanel.vue'
-import CheckInModeControls from '~/components/attendees/CheckInModeControls.vue'
+import CheckInControlsBar from '~/components/attendees/CheckInControlsBar.vue'
 import CheckInListView from '~/components/attendees/CheckInListView.vue'
+import CheckInAttendeePanel from '~/components/attendees/CheckInAttendeePanel.vue'
 
 definePageMeta({
   layout: false,
@@ -115,5 +110,13 @@ function applyFilters(filters: CheckInFilters) {
   if (mode.value !== 'priority') {
     setMode('priority')
   }
+}
+
+// ── Attendee side panel ────────────────────────────────────────────────────
+
+const selectedAttendeeId = ref<string | null>(null)
+
+function openAttendeePanel(payload: { attendee_id: string; attendee_full_name: string }) {
+  selectedAttendeeId.value = payload.attendee_id
 }
 </script>

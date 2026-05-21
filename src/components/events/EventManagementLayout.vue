@@ -21,8 +21,7 @@
   <aside
     :class="[
       'fixed inset-y-0 left-0 z-50 w-64 bg-deep-navy text-white flex flex-col transition-transform duration-300',
-      'lg:translate-x-0',
-      sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      sidebarOpen ? 'translate-x-0' : '-translate-x-full'
     ]"
   >
     <!-- Logo/Brand -->
@@ -127,7 +126,7 @@
   </aside>
 
   <!-- Main Content -->
-  <div class="min-h-screen bg-mist-blue lg:ml-64 transition-all duration-300">
+  <div :class="['min-h-screen bg-mist-blue transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'ml-0']">
     <!-- Top Header Bar -->
     <header :class="[
       'h-16 bg-white border-b border-gray-200 sticky z-30 px-8 flex items-center justify-between',
@@ -136,7 +135,7 @@
       <div class="flex items-center gap-4">
         <button
           @click="sidebarOpen = !sidebarOpen"
-          class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <UIcon name="i-heroicons-bars-3" class="w-5 h-5 text-gray-600" />
         </button>
@@ -178,7 +177,7 @@ const { data: settingsData } = useEventSettings(props.eventId)
 const eventSettings = computed(() => settingsData.value?.data)
 
 const route = useRoute()
-const sidebarOpen = ref(false)
+const sidebarOpen = ref(true)
 
 const tabs = computed(() => [
   {
@@ -262,7 +261,10 @@ const onTabClick = (event: MouseEvent, disabled?: boolean) => {
     return
   }
 
-  sidebarOpen.value = false
+  // Close sidebar on mobile only
+  if (window.innerWidth < 1024) {
+    sidebarOpen.value = false
+  }
 }
 
 const isActive = (section: string) => {
