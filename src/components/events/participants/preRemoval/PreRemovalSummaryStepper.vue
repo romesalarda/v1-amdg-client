@@ -19,6 +19,7 @@
       <UStepper
         v-model="activeStepIndex"
         :items="steps"
+        :linear="false"
       />
     </div>
 
