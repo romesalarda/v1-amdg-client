@@ -1,5 +1,5 @@
 <template>
-  <EventManagementLayout :event-id="eventUUID" :event="event?.data">
+  <EventManagementLayout :event-id="eventIdentifier" :event="event?.data">
     <div class="max-w-7xl mx-auto space-y-4">
       <!-- Header -->
       <div class="flex items-center justify-between flex-wrap gap-3">

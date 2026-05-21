@@ -29,8 +29,7 @@
       />
     </div>
 
-    <!-- Check-in Rate Gauge -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <StatSection 
         title="Check-in Rate"
         description="Overall attendance rate for the event"
@@ -51,7 +50,6 @@
         </div>
       </StatSection>
 
-      <!-- Check-in Trends -->
       <StatSection 
         title="Check-in Trends"
         description="Pattern of check-ins over time"
@@ -73,7 +71,7 @@
           No check-in trends available
         </div>
       </StatSection>
-    </div>
+    </div> -->
 
     <!-- Attendance Status Breakdown -->
     <StatSection 

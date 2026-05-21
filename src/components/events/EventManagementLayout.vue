@@ -128,7 +128,7 @@
         color="white"
         block
         size="sm"
-        icon="i-heroicons-bolt"
+        icon="i-heroicons-computer-desktop"
         class="justify-start text-white/70 hover:text-white hover:bg-white/5"
       >
         Live

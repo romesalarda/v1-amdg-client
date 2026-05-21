@@ -101,6 +101,57 @@
       <span class="text-xs text-amber-700">Live updates paused — reconnecting…</span>
     </div>
 
+    <!-- Selection action bar -->
+    <Transition
+      enter-active-class="transition-all duration-200"
+      enter-from-class="opacity-0 -translate-y-1"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-1"
+    >
+      <div
+        v-if="selectedIds.length > 0"
+        class="px-5 py-2.5 bg-primary/5 border-b border-primary/20 flex items-center justify-between gap-3 flex-wrap"
+      >
+        <span class="text-xs font-semibold text-primary">
+          {{ selectedIds.length }} attendee{{ selectedIds.length !== 1 ? 's' : '' }} selected
+        </span>
+        <div class="flex items-center gap-2">
+          <UButton
+            size="xs"
+            color="green"
+            variant="soft"
+            :loading="selectionActionLoading"
+            :disabled="selectionActionLoading"
+            @click="executeSelectionAction('CHECK_IN')"
+          >
+            Check In Selected
+          </UButton>
+          <UButton
+            size="xs"
+            color="amber"
+            variant="soft"
+            :loading="selectionActionLoading"
+            :disabled="selectionActionLoading"
+            @click="executeSelectionAction('CHECK_OUT')"
+          >
+            Check Out Selected
+          </UButton>
+          <UButton
+            size="xs"
+            color="gray"
+            variant="ghost"
+            icon="i-heroicons-x-mark"
+            :disabled="selectionActionLoading"
+            @click="clearSelection"
+          >
+            Clear
+          </UButton>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Table -->
     <div class="flex-1 overflow-auto">
       <UTable
@@ -111,10 +162,34 @@
         class="text-sm"
         :ui="{ tr: { base: 'hover:bg-primary/5 transition-colors' } }"
       >
+        <!-- Select-all header checkbox -->
+        <template #select-header>
+          <input
+            type="checkbox"
+            class="rounded border-gray-300 text-primary focus:ring-primary/30 cursor-pointer"
+            :checked="allPageSelected"
+            :indeterminate="somePageSelected"
+            @change="toggleSelectAll"
+          />
+        </template>
+
+        <!-- Per-row checkbox -->
+        <template #select-data="{ row }">
+          <input
+            type="checkbox"
+            class="rounded border-gray-300 text-primary focus:ring-primary/30 cursor-pointer"
+            :checked="selectedIds.includes(row.attendee_id)"
+            @change="toggleSelect(row.attendee_id)"
+          />
+        </template>
+
         <!-- Attendee -->
         <template #attendee_display_id-data="{ row }">
-          <div>
-            <p class="font-semibold text-deep-navy">{{ row.full_name }}</p>
+          <div
+            class="cursor-pointer group"
+            @click="emit('select-attendee', { attendee_id: row.attendee_id, attendee_full_name: row.full_name })"
+          >
+            <p class="font-semibold text-deep-navy group-hover:text-primary transition-colors">{{ row.full_name }}</p>
             <p class="text-xs text-gray-400 font-mono">{{ row.attendee_display_id }}</p>
           </div>
         </template>
@@ -125,10 +200,10 @@
         </template>
 
         <!-- Ticket type -->
-        <template #ticket_type_code-data="{ row }">
+        <!-- <template #ticket_type_code-data="{ row }">
           <span v-if="row.ticket_type_code" class="font-mono text-xs text-gray-600">{{ row.ticket_type_code }}</span>
           <span v-else class="text-gray-300">—</span>
-        </template>
+        </template> -->
 
         <!-- Check-in status badge -->
         <template #is_checked_in-data="{ row }">
@@ -204,6 +279,8 @@ import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vu
 import { useAttendeeRosterSocket } from '~/composables/websockets/events/useAttendeeRosterSocket'
 import type { AttendeeRosterItem, AttendeeRosterListResponse, AttendeeUpdatedPayload } from '~/composables/websockets/events/useAttendeeRosterSocket'
 
+const toast = useToast()
+
 // ── Props ─────────────────────────────────────────────────────────────────
 
 interface Props {
@@ -214,6 +291,10 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+
+const emit = defineEmits<{
+  'select-attendee': [payload: { attendee_id: string; attendee_full_name: string }]
+}>()
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
@@ -229,6 +310,18 @@ const isLoading = ref(true)
 const activeDay = ref<number | null>(null)
 const checkedInFilter = ref<boolean | null>(null)
 const searchInput = ref('')
+
+// ── Selection ─────────────────────────────────────────────────────────────
+
+const selectedIds = ref<string[]>([])
+const selectionActionLoading = ref(false)
+
+const allPageSelected = computed(
+  () => attendees.value.length > 0 && attendees.value.every((a) => selectedIds.value.includes(a.attendee_id)),
+)
+const somePageSelected = computed(
+  () => selectedIds.value.length > 0 && !allPageSelected.value,
+)
 
 /** Advanced filter state (camelCase keys matching AttendeeFiltersModal expectations) */
 const showFiltersModal = ref(false)
@@ -271,9 +364,10 @@ const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE))
 // ── Columns ───────────────────────────────────────────────────────────────
 
 const columns = [
+  { key: 'select', label: '' },
   { key: 'attendee_display_id', label: 'Attendee' },
   { key: 'area_from_name', label: 'Area' },
-  { key: 'ticket_type_code', label: 'Ticket' },
+  // { key: 'ticket_type_code', label: 'Ticket' },
   { key: 'is_checked_in', label: 'Status' },
   { key: 'last_check_in_at', label: 'Last Check-in' },
   { key: 'event_day_last_seen', label: 'Day' },
@@ -331,6 +425,65 @@ watch(isConnected, (connected) => {
 watch(currentPage, (page) => {
   loadPage(page)
 })
+
+// ── Selection helpers ─────────────────────────────────────────────────────
+
+function toggleSelect(attendeeId: string) {
+  const idx = selectedIds.value.indexOf(attendeeId)
+  if (idx === -1) {
+    selectedIds.value = [...selectedIds.value, attendeeId]
+  } else {
+    selectedIds.value = selectedIds.value.filter((id) => id !== attendeeId)
+  }
+}
+
+function toggleSelectAll() {
+  if (allPageSelected.value) {
+    // Deselect all on this page
+    const pageIds = new Set(attendees.value.map((a) => a.attendee_id))
+    selectedIds.value = selectedIds.value.filter((id) => !pageIds.has(id))
+  } else {
+    // Add all on this page that aren't already selected
+    const toAdd = attendees.value
+      .map((a) => a.attendee_id)
+      .filter((id) => !selectedIds.value.includes(id))
+    selectedIds.value = [...selectedIds.value, ...toAdd]
+  }
+}
+
+function clearSelection() {
+  selectedIds.value = []
+}
+
+async function executeSelectionAction(selectedAction: 'CHECK_IN' | 'CHECK_OUT') {
+  if (selectedIds.value.length === 0) return
+  selectionActionLoading.value = true
+  const count = selectedIds.value.length
+  try {
+    await $fetch('/api/checkins/attendee-status/', {
+      method: 'POST',
+      body: {
+        action: selectedAction,
+        attendee_ids: selectedIds.value,
+      },
+    })
+    toast.add({
+      title: selectedAction === 'CHECK_IN' ? 'Checked in' : 'Checked out',
+      description: `${count} attendee${count !== 1 ? 's' : ''} updated.`,
+      color: 'green',
+    })
+    clearSelection()
+    loadPage(currentPage.value)
+  } catch (err: any) {
+    toast.add({
+      title: 'Action failed',
+      description: err?.data?.detail ?? 'An unexpected error occurred.',
+      color: 'red',
+    })
+  } finally {
+    selectionActionLoading.value = false
+  }
+}
 
 // ── Filter helpers ────────────────────────────────────────────────────────
 

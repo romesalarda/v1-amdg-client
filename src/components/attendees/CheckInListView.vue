@@ -52,6 +52,7 @@
       <AttendeeRosterTable
         :event-identifier="eventIdentifier"
         class="flex-1 min-h-0"
+        @select-attendee="(p) => emit('select-attendee', p)"
       />
     </div>
 

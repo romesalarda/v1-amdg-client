@@ -96,7 +96,7 @@
                 placeholder="Any status"
                 size="sm"
                 @update:model-value="update('attendee_status', $event)"
-                class="w-full"
+                class="z-10"
               />
             </div>
 
