@@ -2,7 +2,7 @@
   <EventManagementLayout :event-id="eventIdentifier" :event="event?.data">
     <div class="max-w-7xl mx-auto space-y-4">
       <!-- Page header -->
-      <div class="flex items-center justify-between">
+      <!-- <div class="flex items-center justify-between">
         <div>
           <h1 class="text-2xl font-black text-deep-navy">Live Check-in</h1>
           <p class="text-sm text-gray-500 mt-0.5">Real-time scan monitoring</p>
@@ -10,7 +10,7 @@
         <div class="flex items-center gap-2">
           
         </div>
-      </div>
+      </div> -->
 
       <!-- Collapsible controls top-bar -->
       <CheckInControlsBar
@@ -34,7 +34,7 @@
         />
 
         <!-- Right column: paginated log -->
-        <div class="lg:col-span-2 bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5 min-h-[500px] flex flex-col">
+        <div class="lg:col-span-2 bg-white border border-deep-navy/10 rounded-xl shadow-sm min-h-[500px] flex flex-col">
           <CheckInListView
             :event-id="eventIdentifier"
             :refresh-trigger="refreshTrigger"

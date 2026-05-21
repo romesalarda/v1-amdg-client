@@ -122,6 +122,17 @@
       >
         Preview
       </UButton>
+      <UButton
+        :to="`/events/${eventId}/live/dashboard`"
+        variant="ghost"
+        color="white"
+        block
+        size="sm"
+        icon="i-heroicons-bolt"
+        class="justify-start text-white/70 hover:text-white hover:bg-white/5"
+      >
+        Live
+      </UButton>
     </div>
   </aside>
 

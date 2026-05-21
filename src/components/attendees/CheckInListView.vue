@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col h-full">
     <!-- Toolbar header (payment-table style) -->
-    <div class="pb-4 border-b border-gray-100 mb-0">
+    <div class="p-5 border-b border-gray-100 mb-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2.5">
           <UIcon name="i-heroicons-clipboard-document-list" class="w-5 h-5 text-primary" />
@@ -110,7 +110,7 @@
     </div>
 
     <!-- Table -->
-    <div class="flex-1 overflow-auto mt-3">
+    <div class="flex-1 overflow-auto">
       <UTable
         :rows="rows"
         :columns="columns"

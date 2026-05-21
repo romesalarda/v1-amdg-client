@@ -14,10 +14,26 @@
     <!-- No item state -->
     <div
       v-if="!currentItem"
-      class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-8 flex flex-col items-center gap-3 text-center"
+      class="bg-white border border-deep-navy/10 rounded-xl shadow-sm flex flex-col items-center justify-center gap-5 text-center py-16 px-8 min-h-[320px]"
     >
-      <UIcon name="i-heroicons-qr-code" class="w-12 h-12 text-gray-300" />
-      <p class="text-sm text-gray-400 font-medium">Waiting for scan…</p>
+      <div class="relative flex items-center justify-center">
+        <span class="absolute inline-block w-20 h-20 rounded-full bg-deep-navy/5 animate-ping" style="animation-duration:2s" />
+        <div class="relative z-10 bg-deep-navy/5 rounded-full p-5">
+          <UIcon name="i-heroicons-qr-code" class="w-10 h-10 text-deep-navy/30" />
+        </div>
+      </div>
+      <div class="space-y-1">
+        <p class="text-base font-bold text-deep-navy/40">Waiting for scan…</p>
+        <p class="text-xs text-gray-400">Scans will appear here in real time</p>
+      </div>
+      <div v-if="isConnected" class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        <span class="text-xs text-gray-400 font-medium">Live</span>
+      </div>
+      <div v-else class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-gray-300" />
+        <span class="text-xs text-gray-400 font-medium">Disconnected</span>
+      </div>
     </div>
 
     <!-- Check-in card -->
@@ -37,14 +53,48 @@
       <!-- Body -->
       <div class="p-5 space-y-4">
         <!-- Attendee -->
-        <div>
-          <p class="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-0.5">Attendee</p>
-          <p class="text-lg font-black text-deep-navy">{{ currentItem.attendee_display_id }}</p>
-          <p v-if="currentItem.area_from" class="text-sm text-gray-500 mt-0.5">
-            <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 inline-block mr-1" />
-            {{ currentItem.area_from }}
-          </p>
+        <div class="flex items-start gap-3">
+          <!-- Avatar placeholder -->
+          <div class="w-12 h-12 rounded-full bg-deep-navy/10 flex items-center justify-center flex-shrink-0 text-deep-navy font-black text-lg uppercase">
+            <span v-if="attendeeDetails">{{ attendeeInitials }}</span>
+            <UIcon v-else name="i-heroicons-user" class="w-6 h-6 text-deep-navy/40" />
+          </div>
+          <div class="min-w-0 flex-1">
+            <!-- Loading skeleton -->
+            <template v-if="attendeeLoading">
+              <div class="h-5 w-32 bg-gray-100 rounded animate-pulse mb-1" />
+              <div class="h-3.5 w-20 bg-gray-100 rounded animate-pulse" />
+            </template>
+            <template v-else>
+              <p class="text-lg font-black text-deep-navy leading-tight truncate">
+                {{ attendeeDetails?.full_name ?? currentItem.attendee_display_id }}
+              </p>
+              <p class="text-xs text-gray-500 font-mono mt-0.5">{{ currentItem.attendee_display_id }}</p>
+            </template>
+          </div>
         </div>
+
+        <!-- Enriched attendee details row -->
+        <div v-if="attendeeDetails && !attendeeLoading" class="grid grid-cols-2 gap-2 text-xs">
+          <div v-if="attendeeDetails.email" class="flex items-center gap-1.5 text-gray-500 min-w-0">
+            <UIcon name="i-heroicons-envelope" class="w-3.5 h-3.5 flex-shrink-0" />
+            <span class="truncate">{{ attendeeDetails.email }}</span>
+          </div>
+          <div v-if="attendeeDetails.age" class="flex items-center gap-1.5 text-gray-500">
+            <UIcon name="i-heroicons-cake" class="w-3.5 h-3.5 flex-shrink-0" />
+            <span>Age {{ attendeeDetails.age }}{{ attendeeDetails.is_minor ? ' · Minor' : '' }}</span>
+          </div>
+          <div v-if="attendeeDetails.area_from_name ?? currentItem.area_from" class="flex items-center gap-1.5 text-gray-500 col-span-2">
+            <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 flex-shrink-0" />
+            <span>{{ attendeeDetails.area_from_name ?? currentItem.area_from }}</span>
+          </div>
+        </div>
+
+        <!-- Area from (fallback when no attendee details) -->
+        <p v-else-if="!attendeeDetails && currentItem.area_from && !attendeeLoading" class="text-sm text-gray-500">
+          <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 inline-block mr-1" />
+          {{ currentItem.area_from }}
+        </p>
 
         <!-- Ticket -->
         <div v-if="currentItem.ticket_code" class="flex items-center gap-2">
@@ -71,6 +121,10 @@
           <UBadge v-if="currentItem.matches_priority_filter" color="purple" variant="subtle" size="sm">
             <UIcon name="i-heroicons-star" class="w-3 h-3 mr-1" />
             Priority
+          </UBadge>
+          <UBadge v-if="attendeeDetails?.is_event_staff" color="blue" variant="subtle" size="sm">
+            <UIcon name="i-heroicons-shield-check" class="w-3 h-3 mr-1" />
+            Staff
           </UBadge>
         </div>
 
@@ -121,6 +175,8 @@
 <script setup lang="ts">
 import type { CheckInBroadcastPayload } from '~/composables/websockets/events/useCheckInSocket'
 import type { CheckInDisplayMode } from '~/composables/useCheckInModes'
+import type { AttendeeDetail } from '~/api/types.gen'
+import { attendeesRetrieve } from '~/api/sdk.gen'
 
 interface Props {
   currentItem: CheckInBroadcastPayload | null
@@ -137,6 +193,41 @@ defineEmits<{
   advance: []
   'go-back': []
 }>()
+
+// ── Attendee detail fetch ─────────────────────────────────────────────────
+
+const attendeeDetails = ref<AttendeeDetail | null>(null)
+const attendeeLoading = ref(false)
+
+async function fetchAttendeeDetails(attendeeId: string) {
+  attendeeLoading.value = true
+  attendeeDetails.value = null
+  try {
+    const res = await attendeesRetrieve({ path: { attendee_id: attendeeId } })
+    if (res.data) {
+      attendeeDetails.value = res.data
+    }
+  } catch {
+    // Non-critical: fall back to displaying attendee_display_id
+  } finally {
+    attendeeLoading.value = false
+  }
+}
+
+watch(
+  () => props.currentItem?.attendee_id,
+  (id) => {
+    if (id) fetchAttendeeDetails(id)
+    else attendeeDetails.value = null
+  },
+  { immediate: true },
+)
+
+const attendeeInitials = computed(() => {
+  const name = attendeeDetails.value?.full_name
+  if (!name) return ''
+  return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
+})
 
 // ── Computed ──────────────────────────────────────────────────────────────
 
