@@ -2766,6 +2766,79 @@ export type ChapterLocationList = {
 };
 
 /**
+ * Validates the POST /api/attendee/checkins/ request body.
+ */
+export type CheckInCreateRequest = {
+    ticket_code?: string;
+    attendee_display_id?: string;
+    alternative_identifier?: string;
+    /**
+     * * `CHECK_IN` - Check In
+     * * `CHECK_OUT` - Check Out
+     */
+    action?: 'CHECK_IN' | 'CHECK_OUT';
+    /**
+     * * `QR_CODE` - QR Code
+     * * `MANUAL` - Manual
+     * * `ADMIN` - Admin
+     */
+    method?: 'QR_CODE' | 'MANUAL' | 'ADMIN';
+    venue_id?: string | null;
+    venue_room_id?: string | null;
+    notes?: string;
+    device_info?: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * Full detail response for a created AttendeeCheckIn record.
+ */
+export type CheckInResponse = {
+    readonly check_in_id: string;
+    readonly attendee_id: number;
+    readonly attendee_display_id: string;
+    readonly attendee_full_name: string;
+    readonly ticket_id: string | null;
+    readonly ticket_code: string | null;
+    readonly ticket_type_code: string | null;
+    /**
+     * * `CHECK_IN` - Check In
+     * * `CHECK_OUT` - Check Out
+     */
+    action: 'CHECK_IN' | 'CHECK_OUT';
+    /**
+     * * `QR_CODE` - QR Code
+     * * `MANUAL` - Manual
+     * * `ADMIN` - Admin
+     */
+    method: 'QR_CODE' | 'MANUAL' | 'ADMIN';
+    /**
+     * * `SUCCESS` - Success
+     * * `ALREADY_CHECKED_IN` - Already Checked In
+     * * `ALREADY_CHECKED_OUT` - Already Checked Out
+     * * `INVALID_TICKET` - Invalid Ticket
+     * * `CANCELLED_ATTENDEE` - Cancelled Attendee
+     * * `CANCELLED_TICKET` - Cancelled Ticket
+     * * `NOT_FOUND` - Not Found
+     * * `OUTSTANDING_PAYMENTS` - Outstanding Payments
+     * * `ERROR` - Error
+     */
+    scan_result: 'SUCCESS' | 'ALREADY_CHECKED_IN' | 'ALREADY_CHECKED_OUT' | 'INVALID_TICKET' | 'CANCELLED_ATTENDEE' | 'CANCELLED_TICKET' | 'NOT_FOUND' | 'OUTSTANDING_PAYMENTS' | 'ERROR';
+    readonly venue_id: string | null;
+    readonly venue_name: string | null;
+    readonly venue_room_id: number | null;
+    readonly venue_room_name: string | null;
+    readonly has_outstanding_payments: boolean;
+    readonly attendee_status_snapshot: string;
+    readonly area_from: string | null;
+    readonly performed_by_id: number | null;
+    readonly performed_by_name: string | null;
+    readonly performed_at: string;
+    readonly notes: string;
+};
+
+/**
  * Read-only checkout preview serializer (safe for calculations without persistence).
  *
  * Similar to CheckoutSerializer but:
@@ -12515,6 +12588,13 @@ export type PaginatedChapterLocationListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<ChapterLocationList>;
+};
+
+export type PaginatedCheckInResponseList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<CheckInResponse>;
 };
 
 export type PaginatedClusterLocationListList = {
@@ -24470,6 +24550,13 @@ export type PaginatedChapterLocationListListWritable = {
     results: Array<ChapterLocationListWritable>;
 };
 
+export type PaginatedCheckInResponseListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<unknown>;
+};
+
 export type PaginatedClusterLocationListListWritable = {
     count: number;
     next?: string | null;
@@ -31413,6 +31500,80 @@ export type BookingsTicketsRetrieveResponses = {
 };
 
 export type BookingsTicketsRetrieveResponse = BookingsTicketsRetrieveResponses[keyof BookingsTicketsRetrieveResponses];
+
+export type CheckinsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by action (CHECK_IN, CHECK_OUT)
+         */
+        action?: string;
+        /**
+         * Filter by attendee UUID
+         */
+        attendee?: string;
+        /**
+         * Filter by event ID
+         */
+        event?: string;
+        /**
+         * Filter by method (QR_CODE, MANUAL, ADMIN)
+         */
+        method?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by scan result
+         */
+        scan_result?: string;
+    };
+    url: '/api/checkins/';
+};
+
+export type CheckinsListResponses = {
+    200: PaginatedCheckInResponseList;
+};
+
+export type CheckinsListResponse = CheckinsListResponses[keyof CheckinsListResponses];
+
+export type CheckinsCreateData = {
+    body?: CheckInCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/checkins/';
+};
+
+export type CheckinsCreateResponses = {
+    201: CheckInResponse;
+};
+
+export type CheckinsCreateResponse = CheckinsCreateResponses[keyof CheckinsCreateResponses];
+
+export type CheckinsRetrieveData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/checkins/{id}/';
+};
+
+export type CheckinsRetrieveResponses = {
+    200: CheckInResponse;
+};
+
+export type CheckinsRetrieveResponse = CheckinsRetrieveResponses[keyof CheckinsRetrieveResponses];
 
 export type ConsentsListData = {
     body?: never;
