@@ -30,11 +30,30 @@
     </div>
 
     <!-- ── Roster view ────────────────────────────────────────────────── -->
-    <AttendeeRosterTable
-      v-if="activeTab === 'roster' && eventIdentifier"
-      :event-identifier="eventIdentifier"
-      class="flex-1 min-h-0"
-    />
+    <div v-if="activeTab === 'roster' && eventIdentifier" class="flex flex-col flex-1 min-h-0">
+      <!-- Bulk action toolbar for roster -->
+      <div v-if="eventId" class="px-5 py-2 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+        <span class="text-xs font-semibold text-gray-500 mr-1">Bulk Actions:</span>
+        <button
+          class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-green-100 text-green-700 hover:bg-green-200 transition-colors flex items-center gap-1.5"
+          @click="openBulkAction('check_in')"
+        >
+          <UIcon name="i-heroicons-arrow-right-circle" class="w-3.5 h-3.5" />
+          Check In All
+        </button>
+        <button
+          class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-amber-100 text-amber-700 hover:bg-amber-200 transition-colors flex items-center gap-1.5"
+          @click="openBulkAction('check_out')"
+        >
+          <UIcon name="i-heroicons-arrow-left-circle" class="w-3.5 h-3.5" />
+          Check Out All
+        </button>
+      </div>
+      <AttendeeRosterTable
+        :event-identifier="eventIdentifier"
+        class="flex-1 min-h-0"
+      />
+    </div>
 
     <!-- ── Statistics view ───────────────────────────────────────────── -->
     <div v-if="activeTab === 'statistics' && eventId" class="flex-1 overflow-auto p-4">
@@ -83,6 +102,14 @@
           >
             <UIcon name="i-heroicons-arrow-path" class="w-3.5 h-3.5" :class="{ 'animate-spin': pending }" />
             Refresh
+          </button>
+          <button
+            v-if="eventId"
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors flex items-center gap-1.5"
+            @click="openBulkAction('delete_logs')"
+          >
+            <UIcon name="i-heroicons-trash" class="w-3.5 h-3.5" />
+            Delete Logs
           </button>
         </div>
       </div>
@@ -237,6 +264,97 @@
 
     </template><!-- end log tab -->
   </div>
+
+  <!-- Bulk action confirmation modal -->
+  <UModal v-model="showBulkConfirmModal">
+    <div class="p-6 space-y-4">
+      <div class="flex items-start gap-3">
+        <div
+          class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+          :class="{
+            'bg-green-100': pendingBulkAction === 'check_in',
+            'bg-amber-100': pendingBulkAction === 'check_out',
+            'bg-red-100': pendingBulkAction === 'delete_logs',
+          }"
+        >
+          <UIcon
+            :name="
+              pendingBulkAction === 'check_in'
+                ? 'i-heroicons-arrow-right-circle'
+                : pendingBulkAction === 'check_out'
+                  ? 'i-heroicons-arrow-left-circle'
+                  : 'i-heroicons-trash'
+            "
+            class="w-5 h-5"
+            :class="{
+              'text-green-600': pendingBulkAction === 'check_in',
+              'text-amber-600': pendingBulkAction === 'check_out',
+              'text-red-600': pendingBulkAction === 'delete_logs',
+            }"
+          />
+        </div>
+        <div>
+          <h3 class="text-sm font-bold text-gray-900">
+            <template v-if="pendingBulkAction === 'check_in'">Bulk Check In All Attendees</template>
+            <template v-else-if="pendingBulkAction === 'check_out'">Bulk Check Out All Attendees</template>
+            <template v-else>Delete Check-in Logs</template>
+          </h3>
+          <p class="text-xs text-gray-500 mt-1">
+            <template v-if="pendingBulkAction === 'check_in'">
+              This will mark all non-cancelled attendees as checked in. An audit record will be created for each.
+            </template>
+            <template v-else-if="pendingBulkAction === 'check_out'">
+              This will mark all non-cancelled attendees as checked out. An audit record will be created for each.
+            </template>
+            <template v-else>
+              Permanently delete check-in log records for this event. This cannot be undone.
+            </template>
+          </p>
+        </div>
+      </div>
+
+      <!-- Date filter for delete logs -->
+      <div v-if="pendingBulkAction === 'delete_logs'" class="space-y-2">
+        <label class="text-xs font-semibold text-gray-700 block">
+          Scope to a specific date (optional)
+        </label>
+        <input
+          v-model="deleteLogsDate"
+          type="date"
+          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+        />
+        <p class="text-xs text-gray-400">
+          Leave blank to delete all check-in logs for this event.
+        </p>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button
+          class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+          :disabled="bulkActionLoading"
+          @click="showBulkConfirmModal = false"
+        >
+          Cancel
+        </button>
+        <button
+          class="px-4 py-2 text-sm font-semibold text-white rounded-lg transition-colors flex items-center gap-2"
+          :class="{
+            'bg-green-600 hover:bg-green-700': pendingBulkAction === 'check_in',
+            'bg-amber-600 hover:bg-amber-700': pendingBulkAction === 'check_out',
+            'bg-red-600 hover:bg-red-700': pendingBulkAction === 'delete_logs',
+            'opacity-60 cursor-not-allowed': bulkActionLoading,
+          }"
+          :disabled="bulkActionLoading"
+          @click="executeBulkAction"
+        >
+          <UIcon v-if="bulkActionLoading" name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
+          <template v-if="pendingBulkAction === 'check_in'">Check In All</template>
+          <template v-else-if="pendingBulkAction === 'check_out'">Check Out All</template>
+          <template v-else>Delete Logs</template>
+        </button>
+      </div>
+    </div>
+  </UModal>
 </template>
 
 <script setup lang="ts">
@@ -395,5 +513,67 @@ function methodLabel(method: string) {
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
+// ── Bulk actions ──────────────────────────────────────────────────────────
+
+const pendingBulkAction = ref<'check_in' | 'check_out' | 'delete_logs' | null>(null)
+const showBulkConfirmModal = ref(false)
+const deleteLogsDate = ref('')
+const bulkActionLoading = ref(false)
+
+const toast = useToast()
+
+function openBulkAction(action: 'check_in' | 'check_out' | 'delete_logs') {
+  pendingBulkAction.value = action
+  deleteLogsDate.value = ''
+  showBulkConfirmModal.value = true
+}
+
+async function executeBulkAction() {
+  if (!pendingBulkAction.value || !props.eventId) return
+  bulkActionLoading.value = true
+  try {
+    if (pendingBulkAction.value === 'check_in' || pendingBulkAction.value === 'check_out') {
+      await $fetch('/api/checkins/bulk-status/', {
+        method: 'POST',
+        body: {
+          event: props.eventId,
+          action: pendingBulkAction.value === 'check_in' ? 'CHECK_IN' : 'CHECK_OUT',
+        },
+      })
+      toast.add({
+        title: pendingBulkAction.value === 'check_in' ? 'Bulk check-in complete' : 'Bulk check-out complete',
+        description: 'Attendee statuses have been updated.',
+        color: 'green',
+      })
+    } else {
+      const body: Record<string, string> = { event: props.eventId }
+      if (deleteLogsDate.value) {
+        body.date = deleteLogsDate.value
+      }
+      const result = await $fetch<{ deleted: number }>('/api/checkins/bulk-delete-logs/', {
+        method: 'DELETE',
+        body,
+      })
+      toast.add({
+        title: 'Logs deleted',
+        description: `${result.deleted} check-in log${result.deleted === 1 ? '' : 's'} removed.`,
+        color: 'green',
+      })
+      // Refresh the log tab
+      page.value = 1
+      refresh()
+    }
+    showBulkConfirmModal.value = false
+  } catch (err: any) {
+    toast.add({
+      title: 'Action failed',
+      description: err?.data?.detail ?? 'An error occurred. Please try again.',
+      color: 'red',
+    })
+  } finally {
+    bulkActionLoading.value = false
+  }
 }
 </script>

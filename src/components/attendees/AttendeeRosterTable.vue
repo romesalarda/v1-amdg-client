@@ -43,6 +43,23 @@
             <option :value="true">Checked in</option>
             <option :value="false">Not checked in</option>
           </select>
+
+          <!-- More filters button -->
+          <button
+            class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+            :class="
+              showFiltersModal || activeModalFilterCount > 0
+                ? 'bg-primary text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            "
+            @click="showFiltersModal = true"
+          >
+            <UIcon name="i-heroicons-adjustments-horizontal" class="w-3.5 h-3.5" />
+            Filters
+            <UBadge v-if="activeModalFilterCount > 0" color="white" variant="solid" size="xs">
+              {{ activeModalFilterCount }}
+            </UBadge>
+          </button>
         </div>
       </div>
 
@@ -164,10 +181,26 @@
         size="xs"
       />
     </div>
+
+    <!-- Advanced filters modal -->
+    <AttendeeFiltersModal
+      v-model="showFiltersModal"
+      :filters="modalFilters"
+      :organisations="[]"
+      :areas="[]"
+      :dietary-requirements="[]"
+      :medical-conditions="[]"
+      :accessibility-requirements="[]"
+      :event-questions="[]"
+      @apply="applyRosterFilters"
+      @clear="clearRosterFilters"
+      @question-search-input="() => {}"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import { useAttendeeRosterSocket } from '~/composables/websockets/events/useAttendeeRosterSocket'
 import type { AttendeeRosterItem, AttendeeRosterListResponse, AttendeeUpdatedPayload } from '~/composables/websockets/events/useAttendeeRosterSocket'
 
@@ -196,6 +229,30 @@ const isLoading = ref(true)
 const activeDay = ref<number | null>(null)
 const checkedInFilter = ref<boolean | null>(null)
 const searchInput = ref('')
+
+/** Advanced filter state (camelCase keys matching AttendeeFiltersModal expectations) */
+const showFiltersModal = ref(false)
+const modalFilters = ref<Record<string, any>>({
+  organisation: undefined,
+  areaFrom: undefined,
+  gender: undefined,
+  ageMin: undefined,
+  ageMax: undefined,
+  isMinor: undefined,
+  isCheckedIn: undefined,
+  isRegistered: undefined,
+  isCancelled: undefined,
+  isStaff: undefined,
+  hasDietaryRequirements: undefined,
+  hasMedicalConditions: undefined,
+  hasAccessibilityRequirements: undefined,
+  hasEmergencyContacts: undefined,
+  relationshipToUser: undefined,
+})
+
+const activeModalFilterCount = computed(() =>
+  Object.values(modalFilters.value).filter((v) => v !== undefined && v !== null && v !== '').length,
+)
 
 /** Days discovered from returned data (filled on first response) */
 const discoveredDays = ref<number[]>([])
@@ -257,6 +314,11 @@ ws.onAttendeeUpdated((payload: AttendeeUpdatedPayload) => {
   }
 })
 
+// Reload after bulk check-in/out operations
+ws.onBulkUpdated(() => {
+  loadPage(currentPage.value)
+})
+
 // Load page when WS connects
 watch(isConnected, (connected) => {
   if (connected) {
@@ -290,13 +352,63 @@ function debouncedSearch() {
 
 // ── Load ──────────────────────────────────────────────────────────────────
 
+/** Map camelCase modal filters → snake_case WS filter keys */
+function buildWsFilters() {
+  const f = modalFilters.value
+  return {
+    day: activeDay.value ?? undefined,
+    search: searchInput.value || undefined,
+    is_checked_in: checkedInFilter.value ?? f.isCheckedIn,
+    is_cancelled: f.isCancelled,
+    is_registered: f.isRegistered,
+    is_event_staff: f.isStaff,
+    is_minor: f.isMinor,
+    gender: f.gender || undefined,
+    age_min: f.ageMin,
+    age_max: f.ageMax,
+    area_from: f.areaFrom,
+    organisation: f.organisation,
+    has_dietary_requirements: f.hasDietaryRequirements,
+    has_medical_conditions: f.hasMedicalConditions,
+    has_accessibility_requirements: f.hasAccessibilityRequirements,
+    has_emergency_contacts: f.hasEmergencyContacts,
+    relationship_to_user: f.relationshipToUser || undefined,
+  }
+}
+
 function loadPage(page: number) {
   isLoading.value = true
-  ws.requestPage(page, PAGE_SIZE, {
-    day: activeDay.value ?? undefined,
-    is_checked_in: checkedInFilter.value ?? undefined,
-    search: searchInput.value || undefined,
-  })
+  ws.requestPage(page, PAGE_SIZE, buildWsFilters())
+}
+
+function applyRosterFilters(updatedFilters: Record<string, any>) {
+  modalFilters.value = { ...updatedFilters }
+  showFiltersModal.value = false
+  currentPage.value = 1
+  loadPage(1)
+}
+
+function clearRosterFilters() {
+  modalFilters.value = {
+    organisation: undefined,
+    areaFrom: undefined,
+    gender: undefined,
+    ageMin: undefined,
+    ageMax: undefined,
+    isMinor: undefined,
+    isCheckedIn: undefined,
+    isRegistered: undefined,
+    isCancelled: undefined,
+    isStaff: undefined,
+    hasDietaryRequirements: undefined,
+    hasMedicalConditions: undefined,
+    hasAccessibilityRequirements: undefined,
+    hasEmergencyContacts: undefined,
+    relationshipToUser: undefined,
+  }
+  showFiltersModal.value = false
+  currentPage.value = 1
+  loadPage(1)
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────

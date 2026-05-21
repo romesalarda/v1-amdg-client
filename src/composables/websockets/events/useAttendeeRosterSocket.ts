@@ -6,9 +6,42 @@ import { useRealtimeConnection } from '../../useRealtimeConnection'
 // ── Types ─────────────────────────────────────────────────────────────────────
 
 export interface AttendeeRosterFilters {
+  // Roster-specific day filter
   day?: number | null
-  is_checked_in?: boolean | null
+
+  // Text search
   search?: string | null
+  first_name?: string | null
+  last_name?: string | null
+
+  // Demographics
+  gender?: string | null
+  age_min?: number | null
+  age_max?: number | null
+  is_minor?: boolean | null
+
+  // Location
+  area_from?: number | null
+  area_from_name?: string | null
+
+  // Status
+  is_checked_in?: boolean | null
+  is_cancelled?: boolean | null
+  is_registered?: boolean | null
+  is_event_staff?: boolean | null
+
+  // Organisation
+  organisation?: number | null
+  organisation_name?: string | null
+
+  // Personal needs
+  has_dietary_requirements?: boolean | null
+  has_medical_conditions?: boolean | null
+  has_accessibility_requirements?: boolean | null
+  has_emergency_contacts?: boolean | null
+
+  // Relationship
+  relationship_to_user?: string | null
 }
 
 /**
@@ -44,6 +77,13 @@ export interface AttendeeRosterListResponse {
 export interface AttendeeUpdatedPayload {
   type: 'attendee.updated'
   attendee: AttendeeRosterItem
+  timestamp: string
+}
+
+export interface BulkStatusUpdatedPayload {
+  type: 'bulk.status.updated'
+  action: 'CHECK_IN' | 'CHECK_OUT'
+  count: number
   timestamp: string
 }
 
@@ -83,6 +123,7 @@ export function useAttendeeRosterSocket(eventIdentifier: MaybeRef<string>) {
   // Custom handlers
   const pageHandlers = ref<Set<(resp: AttendeeRosterListResponse) => void>>(new Set())
   const updatedHandlers = ref<Set<(payload: AttendeeUpdatedPayload) => void>>(new Set())
+  const bulkUpdatedHandlers = ref<Set<(payload: BulkStatusUpdatedPayload) => void>>(new Set())
 
   async function fetchToken(): Promise<string> {
     const data = await getWebSocketToken(unref(eventIdentifier))
@@ -134,6 +175,16 @@ export function useAttendeeRosterSocket(eventIdentifier: MaybeRef<string>) {
         }
       })
     })
+
+    connection.on<BulkStatusUpdatedPayload>('bulk.status.updated', (data) => {
+      bulkUpdatedHandlers.value.forEach((h) => {
+        try {
+          h(data)
+        } catch (e) {
+          console.error('[AttendeeRosterSocket] Bulk updated handler error:', e)
+        }
+      })
+    })
   }
 
   // ── Public API ─────────────────────────────────────────────────────────
@@ -152,6 +203,15 @@ export function useAttendeeRosterSocket(eventIdentifier: MaybeRef<string>) {
   function onAttendeeUpdated(handler: (payload: AttendeeUpdatedPayload) => void): WSUnsubscribe {
     updatedHandlers.value.add(handler)
     return () => updatedHandlers.value.delete(handler)
+  }
+
+  /**
+   * Subscribe to bulk status update notifications.
+   * Fired after a mass check-in/out completes — caller should refresh the page.
+   */
+  function onBulkUpdated(handler: (payload: BulkStatusUpdatedPayload) => void): WSUnsubscribe {
+    bulkUpdatedHandlers.value.add(handler)
+    return () => bulkUpdatedHandlers.value.delete(handler)
   }
 
   /**
@@ -223,6 +283,7 @@ export function useAttendeeRosterSocket(eventIdentifier: MaybeRef<string>) {
     // Methods
     onPageReceived,
     onAttendeeUpdated,
+    onBulkUpdated,
     requestPage,
     setFilters,
     disconnect: connection.disconnect,
