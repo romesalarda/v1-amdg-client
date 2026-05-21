@@ -135,12 +135,93 @@
         No attendance status data available
       </div>
     </StatSection>
+    <!-- Per-Day Breakdown -->
+    <StatSection
+      title="Check-in by Event Day"
+      description="Breakdown of check-in rate for each day of the event"
+    >
+      <div v-if="checkinStatsLoading" class="flex items-center justify-center h-32">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+
+      <div v-else-if="checkinStatsData?.data?.days?.length">
+        <!-- Day filter pills -->
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          <button
+            class="px-2.5 py-1 text-xs font-semibold rounded-full transition-colors"
+            :class="selectedDay === null ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            @click="selectedDay = null"
+          >
+            All Days
+          </button>
+          <button
+            v-for="day in checkinStatsData.data.days"
+            :key="day.checked_in"
+            class="px-2.5 py-1 text-xs font-semibold rounded-full transition-colors"
+            :class="selectedDay === day.event_day ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+            @click="selectedDay = day.event_day"
+          >
+            Day {{ day.event_day }}
+            <span v-if="day.date" class="font-normal opacity-75">({{ formatDate(day.date) }})</span>
+          </button>
+        </div>
+
+        <!-- Per-day table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="border-b border-gray-200 text-left text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                <th class="pb-2 pr-4">Day</th>
+                <th class="pb-2 pr-4">Date</th>
+                <th class="pb-2 pr-4 text-right">Checked In</th>
+                <th class="pb-2 pr-4 text-right">Remaining</th>
+                <th class="pb-2 pr-4 text-right">Total</th>
+                <th class="pb-2 text-right">Rate</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              <tr
+                v-for="day in visibleDays"
+                :key="day.checked_in"
+                class="hover:bg-gray-50 transition-colors"
+              >
+                <td class="py-3 pr-4 font-semibold text-gray-800">Day {{ day.event_day }}</td>
+                <td class="py-3 pr-4 text-gray-500 text-xs">{{ day.date ? formatDate(day.date) : '—' }}</td>
+                <td class="py-3 pr-4 text-right text-green-700 font-semibold">{{ day.checked_in }}</td>
+                <td class="py-3 pr-4 text-right text-amber-700 font-semibold">{{ day.not_checked_in }}</td>
+                <td class="py-3 pr-4 text-right text-gray-600">{{ day.total_attendees }}</td>
+                <td class="py-3 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <div class="w-20 bg-gray-200 rounded-full h-1.5 hidden sm:block">
+                      <div
+                        class="bg-green-500 h-1.5 rounded-full"
+                        :style="{ width: `${Math.min(day.check_in_rate, 100)}%` }"
+                      />
+                    </div>
+                    <span
+                      class="text-xs font-semibold"
+                      :class="day.check_in_rate >= 80 ? 'text-green-700' : day.check_in_rate >= 50 ? 'text-amber-700' : 'text-red-700'"
+                    >
+                      {{ day.check_in_rate.toFixed(1) }}%
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div v-else class="text-center text-gray-500 py-8">
+        No per-day check-in data available for this event.
+      </div>
+    </StatSection>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useAttendance } from '~/composables/statistics/attendee/attendee-statistics'
+import { useAttendance, useCheckInStats } from '~/composables/statistics/attendee/attendee-statistics'
 import { formatDate } from '~/composables/statistics/attendee/filters'
 import StatCard from '~/components/statistics/StatCard.vue'
 import StatSection from '~/components/statistics/StatSection.vue'
@@ -155,6 +236,19 @@ const props = defineProps<Props>()
 
 // Fetch attendance data
 const { data: attendanceData, isLoading: attendanceLoading, error: attendanceError } = useAttendance(() => props.queryParams)
+
+// Fetch per-day check-in stats
+const { data: checkinStatsData, isLoading: checkinStatsLoading } = useCheckInStats(() => props.queryParams)
+
+// Day filter state
+const selectedDay = ref<number | null>(null)
+
+// Visible rows based on selected day pill
+const visibleDays = computed(() => {
+  const days = checkinStatsData.value?.data?.days ?? []
+  if (selectedDay.value === null) return days
+  return days.filter((d: any) => d.event_day === selectedDay.value)
+})
 
 // Calculate check-in rate
 const checkInRate = computed(() => {

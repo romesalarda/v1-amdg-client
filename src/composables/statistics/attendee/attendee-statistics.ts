@@ -17,6 +17,7 @@ import {
   attendeesStatisticsRegistrationTrendsRetrieve,
   attendeesStatisticsAttendanceRetrieve,
   attendeesStatisticsOverviewRetrieve,
+  attendeesStatisticsCheckinStatsRetrieve,
 } from '~/api/sdk.gen'
 import type {
   AttendeesStatisticsAgeDistributionRetrieveData,
@@ -34,6 +35,7 @@ import type {
   AttendeesStatisticsRegistrationTrendsRetrieveData,
   AttendeesStatisticsAttendanceRetrieveData,
   AttendeesStatisticsOverviewRetrieveData,
+  AttendeesStatisticsCheckinStatsRetrieveData,
 } from '~/api/types.gen'
 
 const QUERY_KEY = ['attendees', 'statistics'] as const
@@ -292,6 +294,23 @@ export function useOverview(
     queryFn: () => {
       const queryParams = toValue(params)
       return attendeesStatisticsOverviewRetrieve(
+        queryParams ? { query: queryParams } : undefined
+      )
+    },
+  })
+}
+
+/**
+ * Get per-event-day check-in statistics (check-in rate, not-checked-in count, hourly timeline)
+ */
+export function useCheckInStats(
+  params?: MaybeRefOrGetter<AttendeesStatisticsCheckinStatsRetrieveData['query'] | undefined>
+) {
+  return useQuery({
+    queryKey: [...QUERY_KEY, 'checkin-stats', params] as const,
+    queryFn: () => {
+      const queryParams = toValue(params)
+      return attendeesStatisticsCheckinStatsRetrieve(
         queryParams ? { query: queryParams } : undefined
       )
     },

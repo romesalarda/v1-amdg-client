@@ -1,5 +1,36 @@
 <template>
   <div class="flex flex-col h-full">
+
+    <!-- ── Tab Switcher ──────────────────────────────────────────────── -->
+    <div v-if="eventIdentifier" class="px-5 pt-4 pb-0 flex items-center gap-1">
+      <button
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        :class="activeTab === 'log' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+        @click="activeTab = 'log'"
+      >
+        <UIcon name="i-heroicons-clipboard-document-list" class="w-3.5 h-3.5 inline -mt-0.5 mr-1" />
+        Log
+      </button>
+      <button
+        class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        :class="activeTab === 'roster' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+        @click="activeTab = 'roster'"
+      >
+        <UIcon name="i-heroicons-users" class="w-3.5 h-3.5 inline -mt-0.5 mr-1" />
+        Roster
+      </button>
+    </div>
+
+    <!-- ── Roster view ────────────────────────────────────────────────── -->
+    <AttendeeRosterTable
+      v-if="activeTab === 'roster' && eventIdentifier"
+      :event-identifier="eventIdentifier"
+      class="flex-1 min-h-0"
+    />
+
+    <!-- ── Log view (original content) ──────────────────────────────── -->
+    <template v-if="activeTab === 'log'">
+
     <!-- Toolbar header (payment-table style) -->
     <div class="p-5 border-b border-gray-100 mb-0">
       <div class="flex items-center justify-between">
@@ -179,7 +210,7 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between">
+    <div v-if="totalPages > 1" class="mt-4 flex items-center justify-between p-5">
       <p class="text-xs text-gray-400">
         Page {{ page }} of {{ totalPages }} &middot; {{ totalCount }} records
       </p>
@@ -190,16 +221,21 @@
         size="xs"
       />
     </div>
+
+    </template><!-- end log tab -->
   </div>
 </template>
 
 <script setup lang="ts">
 import type { CheckInResponse } from '~/api/types.gen'
 import { checkinsList } from '~/api/sdk.gen'
+import AttendeeRosterTable from '~/components/attendees/AttendeeRosterTable.vue'
 
 interface Props {
   /** Filter by event UUID */
   eventId?: string
+  /** URL-safe event identifier (slug) for the attendee roster WebSocket */
+  eventIdentifier?: string
   /** Auto-refresh when new WS broadcasts arrive */
   refreshTrigger?: number
 }
@@ -210,10 +246,14 @@ const emit = defineEmits<{
   'select-attendee': [payload: { attendee_id: string; attendee_full_name: string }]
 }>()
 
+// ── Tab state ─────────────────────────────────────────────────────────────
+
+const activeTab = ref<'log' | 'roster'>('log')
+
 // ── State ─────────────────────────────────────────────────────────────────
 
 const page = ref(1)
-const pageSize = 25
+const pageSize = 5
 const totalCount = ref(0)
 const rows = ref<CheckInResponse[]>([])
 const pending = ref(false)

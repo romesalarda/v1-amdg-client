@@ -2792,11 +2792,43 @@ export type CheckInCreateRequest = {
 };
 
 /**
+ * Serializer for a single event day's check-in statistics.
+ */
+export type CheckInDayBreakdown = {
+    event_day: number | null;
+    date: string | null;
+    checked_in: number;
+    not_checked_in: number;
+    total_attendees: number;
+    check_in_rate: number;
+    hourly_timeline: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * Serializer for per-event-day check-in statistics.
+ */
+export type CheckInDayStats = {
+    readonly generated_at: string;
+    readonly filters_applied: {
+        [key: string]: unknown;
+    };
+    days: Array<CheckInDayBreakdown>;
+    total_attendees: number;
+    event_days_count: number | null;
+    event_metadata: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Full detail response for a created AttendeeCheckIn record.
  */
 export type CheckInResponse = {
     readonly check_in_id: string;
     readonly attendee_id: number;
+    readonly attendee_uuid: string;
     readonly attendee_display_id: string;
     readonly attendee_full_name: string;
     readonly ticket_id: string | null;
@@ -2836,6 +2868,10 @@ export type CheckInResponse = {
     readonly performed_by_name: string | null;
     readonly performed_at: string;
     readonly notes: string;
+    /**
+     * Calendar day relative to event start (Day 1 = event start date in event timezone). Negative values indicate check-ins before the event window; values beyond the event duration indicate check-ins after the event.
+     */
+    readonly event_day: number | null;
 };
 
 /**
@@ -20731,6 +20767,18 @@ export type ChapterLocationListWritable = {
 };
 
 /**
+ * Serializer for per-event-day check-in statistics.
+ */
+export type CheckInDayStatsWritable = {
+    days: Array<CheckInDayBreakdown>;
+    total_attendees: number;
+    event_days_count: number | null;
+    event_metadata: {
+        [key: string]: unknown;
+    };
+};
+
+/**
  * Detailed serializer for ClusterLocation.
  */
 export type ClusterLocationDetailWritable = {
@@ -28223,6 +28271,36 @@ export type AttendeesStatisticsAttendanceRetrieveResponses = {
 };
 
 export type AttendeesStatisticsAttendanceRetrieveResponse = AttendeesStatisticsAttendanceRetrieveResponses[keyof AttendeesStatisticsAttendanceRetrieveResponses];
+
+export type AttendeesStatisticsCheckinStatsRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter to a specific event day number (e.g. 1, 2, -1).
+         */
+        event_day?: number;
+        /**
+         * Filter statistics to a specific event. If omitted, returns global statistics across all events.
+         */
+        event_id?: string;
+        /**
+         * Response format. "raw" returns plain JSON data. "echarts" returns ECharts-ready configuration.
+         */
+        format?: 'echarts' | 'raw';
+        /**
+         * Include soft-deleted attendees in statistics.
+         */
+        include_deleted?: boolean;
+    };
+    url: '/api/attendees/statistics/checkin-stats/';
+};
+
+export type AttendeesStatisticsCheckinStatsRetrieveResponses = {
+    200: CheckInDayStats;
+};
+
+export type AttendeesStatisticsCheckinStatsRetrieveResponse = AttendeesStatisticsCheckinStatsRetrieveResponses[keyof AttendeesStatisticsCheckinStatsRetrieveResponses];
 
 export type AttendeesStatisticsConsentsRetrieveData = {
     body?: never;

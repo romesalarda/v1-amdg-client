@@ -37,6 +37,7 @@
         <div class="lg:col-span-2 bg-white border border-deep-navy/10 rounded-xl shadow-sm min-h-[500px] flex flex-col">
           <CheckInListView
             :event-id="eventIdentifier"
+            :event-identifier="eventIdentifier"
             :refresh-trigger="refreshTrigger"
             @select-attendee="openAttendeePanel"
           />
