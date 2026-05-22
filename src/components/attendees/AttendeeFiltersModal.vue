@@ -129,28 +129,16 @@
               <!-- Organisation -->
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Organisation</label>
-                <USelectMenu
-                  v-model="localFilters.organisation"
-                  :options="organisations"
-                  placeholder="All organisations"
-                  value-attribute="id"
-                  option-attribute="title"
-                  :searchable="true"
-                  class="w-full"
-                />
+                <OrganisationSelect v-model="localFilters.organisation" />
               </div>
 
               <!-- Area From -->
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Area From</label>
-                <USelectMenu
-                  v-model="localFilters.areaFrom"
-                  :options="areas"
-                  placeholder="All areas"
-                  value-attribute="id"
-                  option-attribute="area_name"
-                  :searchable="true"
-                  class="w-full"
+                <AreaSearchSelect
+                  :model-value="localFilters.areaFrom ?? null"
+                  :selected-label="selectedAreaLabel"
+                  @select="(id, label) => { localFilters.areaFrom = id; selectedAreaLabel = label }"
                 />
               </div>
             </div>
@@ -160,68 +148,45 @@
           <div class="space-y-4">
             <h4 class="text-xs font-black text-primary uppercase tracking-widest">Personal Needs</h4>
             
-            <div class="space-y-3">
+            <div class="space-y-4">
               <!-- Dietary Requirements -->
-              <div>
-                <UCheckbox
-                  v-model="localFilters.hasDietaryRequirements"
-                  label="Has Dietary Requirements"
-                  class="mb-2"
-                />
-                <USelectMenu
-                  v-if="localFilters.hasDietaryRequirements"
-                  v-model="localFilters.dietaryRequirement"
-                  :options="dietaryRequirements"
-                  placeholder="Specific dietary requirement"
-                  value-attribute="id"
-                  option-attribute="label"
-                  :searchable="true"
-                  class="w-full"
-                />
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <UCheckbox v-model="localFilters.hasDietaryRequirements" />
+                  <span class="text-sm font-medium text-gray-700">Has Dietary Requirements</span>
+                </div>
+                <div v-if="localFilters.hasDietaryRequirements" class="pl-6">
+                  <DietaryRequirementSelect v-model="localFilters.dietaryRequirement" />
+                </div>
               </div>
 
               <!-- Medical Conditions -->
-              <div>
-                <UCheckbox
-                  v-model="localFilters.hasMedicalConditions"
-                  label="Has Medical Conditions"
-                  class="mb-2"
-                />
-                <USelectMenu
-                  v-if="localFilters.hasMedicalConditions"
-                  v-model="localFilters.medicalCondition"
-                  :options="medicalConditions"
-                  placeholder="Specific medical condition"
-                  value-attribute="id"
-                  option-attribute="label"
-                  :searchable="true"
-                  class="w-full"
-                />
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <UCheckbox v-model="localFilters.hasMedicalConditions" />
+                  <span class="text-sm font-medium text-gray-700">Has Medical Conditions</span>
+                </div>
+                <div v-if="localFilters.hasMedicalConditions" class="pl-6">
+                  <MedicalConditionSelect v-model="localFilters.medicalCondition" />
+                </div>
               </div>
 
               <!-- Accessibility Requirements -->
-              <div>
-                <UCheckbox
-                  v-model="localFilters.hasAccessibilityRequirements"
-                  label="Has Accessibility Requirements"
-                  class="mb-2"
-                />
-                <USelectMenu
-                  v-if="localFilters.hasAccessibilityRequirements"
-                  v-model="localFilters.accessibilityRequirement"
-                  :options="accessibilityRequirements"
-                  placeholder="Specific accessibility requirement"
-                  value-attribute="id"
-                  option-attribute="label"
-                  :searchable="true"
-                  class="w-full"
-                />
+              <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                  <UCheckbox v-model="localFilters.hasAccessibilityRequirements" />
+                  <span class="text-sm font-medium text-gray-700">Has Accessibility Requirements</span>
+                </div>
+                <div v-if="localFilters.hasAccessibilityRequirements" class="pl-6">
+                  <AccessibilityRequirementSelect v-model="localFilters.accessibilityRequirement" />
+                </div>
               </div>
 
-              <UCheckbox
-                v-model="localFilters.hasEmergencyContacts"
-                label="Has Emergency Contacts"
-              />
+              <!-- Emergency Contacts -->
+              <div class="flex items-center gap-2">
+                <UCheckbox v-model="localFilters.hasEmergencyContacts" />
+                <span class="text-sm font-medium text-gray-700">Has Emergency Contacts</span>
+              </div>
             </div>
           </div>
         </div>
@@ -253,14 +218,9 @@
             <div class="space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Filter by Specific Question</label>
-                <USelectMenu
+                <EventQuestionSelect
                   v-model="localFilters.question"
-                  :options="eventQuestions"
-                  placeholder="Select a question"
-                  value-attribute="id"
-                  option-attribute="question_title"
-                  :searchable="true"
-                  class="w-full"
+                  :event-slug="eventSlug"
                 />
               </div>
 
@@ -374,11 +334,11 @@
             <h4 class="text-xs font-black text-primary uppercase tracking-widest">Products</h4>
             
             <div>
-              <label class="block text-xs font-semibold text-gray-700 mb-2">Search by Product Title</label>
-              <UInput
-                v-model="localFilters.purchasedProductTitle"
-                placeholder="Product name..."
-                icon="i-heroicons-magnifying-glass"
+              <label class="block text-xs font-semibold text-gray-700 mb-2">Search by Product</label>
+              <ProductSelect
+                v-model="localFilters.purchasedProduct"
+                :event-slug="eventSlug"
+                placeholder="Search for a product…"
               />
             </div>
           </div>
@@ -586,21 +546,10 @@
             </div>
 
             <div class="grid grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Discount ID</label>
-                <UInput
+              <div class="col-span-2">
+                <ProductDiscountSelect
                   v-model="localFilters.discountId"
-                  placeholder="Discount UUID"
-                  icon="i-heroicons-hashtag"
-                />
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Discount Name</label>
-                <UInput
-                  v-model="localFilters.discountName"
-                  placeholder="Search discount name"
-                  icon="i-heroicons-magnifying-glass"
+                  :event-slug="eventSlug"
                 />
               </div>
             </div>
@@ -729,16 +678,32 @@
 
 <script setup lang="ts">
 import type { EventQuestion } from '~/api/types.gen'
+import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
+import AreaSearchSelect from '~/components/ui/AreaSearchSelect.vue'
+import DietaryRequirementSelect from '~/components/ui/DietaryRequirementSelect.vue'
+import MedicalConditionSelect from '~/components/ui/MedicalConditionSelect.vue'
+import AccessibilityRequirementSelect from '~/components/ui/AccessibilityRequirementSelect.vue'
+import EventQuestionSelect from '~/components/ui/EventQuestionSelect.vue'
+import ProductSelect from '~/components/ui/ProductSelect.vue'
+import ProductDiscountSelect from '~/components/ui/ProductDiscountSelect.vue'
+import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 
 interface Props {
   modelValue: boolean
   filters: any
-  organisations: any[]
-  areas: any[]
-  dietaryRequirements: any[]
-  medicalConditions: any[]
-  accessibilityRequirements: any[]
-  eventQuestions: EventQuestion[]
+  eventSlug?: string
+  /** @deprecated data now fetched internally via composables */
+  organisations?: any[]
+  /** @deprecated data now fetched internally via composables */
+  areas?: any[]
+  /** @deprecated data now fetched internally via composables */
+  dietaryRequirements?: any[]
+  /** @deprecated data now fetched internally via composables */
+  medicalConditions?: any[]
+  /** @deprecated data now fetched internally via composables */
+  accessibilityRequirements?: any[]
+  /** @deprecated questions are now fetched by EventQuestionSelect using eventSlug */
+  eventQuestions?: EventQuestion[]
 }
 
 interface Emits {
@@ -759,6 +724,7 @@ const isOpen = computed({
 const currentTab = ref<'basic' | 'questions' | 'orders' | 'payments' | 'advanced'>('basic')
 const localFilters = ref({ ...props.filters })
 const debouncedQuestionSearch = ref(props.filters.questionAnswerSearch || '')
+const selectedAreaLabel = ref<string | null>(null)
 
 // Watch for external filter changes
 watch(() => props.filters, (newFilters) => {
@@ -829,10 +795,20 @@ const verificationStatusOptions = [
   { value: 'processed', label: 'Processed' },
 ]
 
-// Get selected question details
+// Fetch event questions for the selected-question type-specific UI
+const eventQuestionsQuery = useEventQuestions(
+  computed(() => ({
+    event: props.eventSlug || undefined,
+    page_size: 100,
+  })),
+  { enabled: computed(() => !!props.eventSlug) },
+)
+
+// Get selected question details (for type-specific answer filter UI)
 const selectedQuestion = computed(() => {
   if (!localFilters.value.question) return null
-  return props.eventQuestions.find(q => q.id === localFilters.value.question)
+  const results = eventQuestionsQuery.data.value?.data?.results || []
+  return results.find((q: any) => q.id === localFilters.value.question) ?? null
 })
 
 // Count active filters per tab

@@ -852,6 +852,7 @@
     <AttendeeFiltersModal
       v-model="showFiltersModal"
       :filters="filters"
+      :event-slug="id"
       :organisations="organisations"
       :areas="areas"
       :dietary-requirements="dietaryRequirements"

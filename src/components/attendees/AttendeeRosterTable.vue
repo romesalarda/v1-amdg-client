@@ -261,12 +261,7 @@
     <AttendeeFiltersModal
       v-model="showFiltersModal"
       :filters="modalFilters"
-      :organisations="[]"
-      :areas="[]"
-      :dietary-requirements="[]"
-      :medical-conditions="[]"
-      :accessibility-requirements="[]"
-      :event-questions="[]"
+      :event-slug="eventIdentifier"
       @apply="applyRosterFilters"
       @clear="clearRosterFilters"
       @question-search-input="() => {}"
