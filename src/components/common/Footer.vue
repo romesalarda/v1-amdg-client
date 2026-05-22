@@ -18,7 +18,7 @@
           <ul class="space-y-4 text-[10px] font-bold tracking-widest uppercase text-white/60">
             <li><NuxtLink to="/events" class="hover:text-blue-300 transition-colors no-underline">Events</NuxtLink></li>
             <li><NuxtLink to="/communities" class="hover:text-blue-300 transition-colors no-underline">Communities</NuxtLink></li>
-            <li><a href="#" class="hover:text-blue-300 transition-colors">About</a></li>
+            <li><NuxtLink to="/about" class="hover:text-blue-300 transition-colors no-underline">About</NuxtLink></li>
           </ul>
         </div>
 
@@ -26,8 +26,7 @@
         <div>
           <h4 class="font-black mb-6 uppercase tracking-[0.3em] text-[9px] text-white/30">Legal</h4>
           <ul class="space-y-4 text-[10px] font-bold tracking-widest uppercase text-white/60">
-            <li><a href="#" class="hover:text-blue-300 transition-colors">Privacy Policy</a></li>
-            <li><a href="#" class="hover:text-blue-300 transition-colors">Terms of Use</a></li>
+            <li><NuxtLink to="/tos" class="hover:text-blue-300 transition-colors no-underline">Terms of Use & Privacy Policy</NuxtLink></li>
           </ul>
         </div>
       </div>

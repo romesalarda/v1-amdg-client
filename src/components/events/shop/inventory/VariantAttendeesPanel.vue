@@ -113,16 +113,16 @@
             <tr
               v-for="line in attendees"
               :key="`${line.attendee_id}-${line.order_id}`"
-              class="hover:bg-gray-50"
+              class="hover:bg-gray-50 cursor-pointer"
             >
-              <td class="py-2 px-4">
+              <td class="py-2 px-4" @click="redirectToAttendee(line.attendee_id)">
                 <div class="font-medium text-gray-900">
                   {{ line.first_name }} {{ line.last_name }}
                 </div>
                 <div class="text-xs text-gray-400 font-mono">{{ line.attendee_display_id }}</div>
                 <div v-if="line.email" class="text-xs text-gray-400">{{ line.email }}</div>
               </td>
-              <td class="py-2 px-4">
+              <td class="py-2 px-4" @click="redirectToOrder(line.order_id)">
                 <span class="font-mono text-xs text-gray-700">{{ line.order_reference }}</span>
               </td>
               <td class="py-2 px-4 text-right font-mono text-gray-900">{{ line.quantity }}</td>
@@ -179,6 +179,10 @@ import { ref, computed, watch } from 'vue'
 import type { InventoryAttendeeOrderLine } from '~/api/types.gen'
 import { useInventoryAttendees } from '~/composables/resources/products/productInventory'
 import { formatMoney } from '~/utils/money'
+import { useRouter } from 'vue-router'
+
+
+const router = useRouter()
 
 const PAGE_SIZE = 20
 
@@ -192,6 +196,14 @@ const props = defineProps<{
 defineEmits<{
   close: []
 }>()
+
+const redirectToAttendee = (attendeeId: string) => {
+  router.push(`/events/${props.eventSlug}/m/participants/editor/${attendeeId}`)
+}
+
+const redirectToOrder = (orderId: string) => {
+  router.push(`/events/${props.eventSlug}/m/shop/orders/${orderId}/detail`)
+}
 
 const currentPage = ref(1)
 const orderStatusFilter = ref('')
