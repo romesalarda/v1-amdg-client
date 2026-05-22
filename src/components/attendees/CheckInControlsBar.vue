@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm overflow-hidden">
+  <div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm">
     <!-- Always-visible collapsed bar -->
     <div class="flex items-center justify-between px-4 py-2.5">
       <!-- Left: active mode pill + filter summary -->
@@ -24,7 +24,7 @@
               class="inline-block w-1.5 h-1.5 rounded-full"
               :class="isLive ? 'bg-green-500 animate-pulse' : 'bg-gray-400'"
             />
-            {{ isLive ? 'Connected' : 'Disconnected' }}
+            {{ isLive ? 'Live Updates' : 'Offline' }}
           </span>
       </div>
 
@@ -88,9 +88,10 @@
               </div>
 
               <!-- Attendee status -->
-              <div class="w-44">
+              <div class="flex items-center gap-2.5 z-10">
                 <label class="text-xs font-semibold text-gray-600 mb-1 block">Attendee status</label>
-                <USelectMenu
+                <UFormGroup size="sm">
+                  <USelectMenu
                   :model-value="localFilters.attendee_status ?? undefined"
                   :options="attendeeStatusOptions"
                   value-attribute="value"
@@ -98,12 +99,22 @@
                   placeholder="Any status"
                   size="sm"
                   @update:model-value="update('attendee_status', $event)"
-                  class="z-10"
                 />
+                </UFormGroup>
               </div>
 
-              <!-- Apply button (inline with compact row) -->
-              <div class="flex items-end ml-auto">
+              <!-- Actions (inline with compact row) -->
+              <div class="flex items-end gap-2 ml-auto">
+                <UButton
+                  v-if="activeFilterCount > 0"
+                  color="gray"
+                  variant="ghost"
+                  size="sm"
+                  icon="i-heroicons-x-circle"
+                  @click="clearAllFilters"
+                >
+                  Clear all
+                </UButton>
                 <UButton
                   color="primary"
                   variant="soft"
@@ -236,6 +247,16 @@ function clearTicketType() {
 function clearArea() {
   selectedAreaId.value = null
   localFilters.area_from = null
+}
+
+function clearAllFilters() {
+  selectedTicketTypeId.value = null
+  selectedAreaId.value = null
+  localFilters.has_outstanding_payments = null
+  localFilters.attendee_status = null
+  localFilters.ticket_type = null
+  localFilters.area_from = null
+  emit('apply-filters', { ...localFilters })
 }
 
 function handleApply() {
