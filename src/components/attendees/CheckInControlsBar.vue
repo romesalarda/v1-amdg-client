@@ -75,65 +75,94 @@
           <div class="hidden lg:block w-px bg-gray-100 self-stretch" />
 
           <!-- Filters -->
-          <div class="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-3">
-            <!-- Outstanding payments -->
-            <div class="flex items-center justify-between gap-3 col-span-2 lg:col-span-1">
-              <label class="text-xs font-semibold text-gray-600">Outstanding payments</label>
-              <UToggle
-                :model-value="localFilters.has_outstanding_payments ?? false"
-                @update:model-value="update('has_outstanding_payments', $event || null)"
-              />
+          <div class="flex-1 flex flex-col gap-3">
+            <!-- Row 1: compact controls -->
+            <div class="flex flex-wrap items-center gap-x-6 gap-y-3">
+              <!-- Outstanding payments -->
+              <div class="flex items-center gap-2.5">
+                <label class="text-xs font-semibold text-gray-600 whitespace-nowrap">Outstanding payments</label>
+                <UToggle
+                  :model-value="localFilters.has_outstanding_payments ?? false"
+                  @update:model-value="update('has_outstanding_payments', $event || null)"
+                />
+              </div>
+
+              <!-- Attendee status -->
+              <div class="w-44">
+                <label class="text-xs font-semibold text-gray-600 mb-1 block">Attendee status</label>
+                <USelectMenu
+                  :model-value="localFilters.attendee_status ?? undefined"
+                  :options="attendeeStatusOptions"
+                  value-attribute="value"
+                  option-attribute="label"
+                  placeholder="Any status"
+                  size="sm"
+                  @update:model-value="update('attendee_status', $event)"
+                  class="z-10"
+                />
+              </div>
+
+              <!-- Apply button (inline with compact row) -->
+              <div class="flex items-end ml-auto">
+                <UButton
+                  color="primary"
+                  variant="soft"
+                  size="sm"
+                  icon="i-heroicons-funnel"
+                  @click="handleApply"
+                >
+                  Apply
+                </UButton>
+              </div>
             </div>
 
-            <!-- Attendee status -->
-            <div>
-              <label class="text-xs font-semibold text-gray-600 mb-1 block">Attendee status</label>
-              <USelectMenu
-                :model-value="localFilters.attendee_status ?? undefined"
-                :options="attendeeStatusOptions"
-                value-attribute="value"
-                option-attribute="label"
-                placeholder="Any status"
-                size="sm"
-                @update:model-value="update('attendee_status', $event)"
-                class="z-10"
-              />
-            </div>
+            <!-- Row 2: wide search selects -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <!-- Ticket type -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-xs font-semibold text-gray-600">Ticket type</label>
+                  <button
+                    v-if="selectedTicketTypeId"
+                    class="flex items-center gap-0.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    @click="clearTicketType"
+                  >
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                    Clear
+                  </button>
+                </div>
+                <TicketTypeSearchSelect
+                  :model-value="selectedTicketTypeId"
+                  :selected-label="localFilters.ticket_type ?? null"
+                  :event-id="eventId ?? null"
+                  placeholder="Search ticket type…"
+                  :min-search-length="1"
+                  @select="onSelectTicketType"
+                />
+              </div>
 
-            <!-- Ticket type -->
-            <div>
-              <label class="text-xs font-semibold text-gray-600 mb-1 block">Ticket type code</label>
-              <UInput
-                :model-value="localFilters.ticket_type ?? ''"
-                placeholder="e.g. FULL_EVENT"
-                size="sm"
-                @update:model-value="update('ticket_type', $event || null)"
-              />
+              <!-- Area from -->
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-xs font-semibold text-gray-600">Area from</label>
+                  <button
+                    v-if="selectedAreaId"
+                    class="flex items-center gap-0.5 text-xs text-gray-400 hover:text-gray-600 transition-colors"
+                    @click="clearArea"
+                  >
+                    <UIcon name="i-heroicons-x-mark" class="w-3 h-3" />
+                    Clear
+                  </button>
+                </div>
+                <AreaSearchSelect
+                  :model-value="selectedAreaId"
+                  :selected-label="localFilters.area_from ?? null"
+                  placeholder="Search area name…"
+                  :min-search-length="2"
+                  @select="onSelectArea"
+                />
+              </div>
             </div>
-
-            <!-- Area from -->
-            <div>
-              <label class="text-xs font-semibold text-gray-600 mb-1 block">Area from</label>
-              <UInput
-                :model-value="localFilters.area_from ?? ''"
-                placeholder="e.g. London"
-                size="sm"
-                @update:model-value="update('area_from', $event || null)"
-              />
-            </div>
-          </div>
-
-          <!-- Apply button -->
-          <div class="flex items-end flex-shrink-0">
-            <UButton
-              color="primary"
-              variant="soft"
-              size="sm"
-              icon="i-heroicons-funnel"
-              @click="handleApply"
-            >
-              Apply
-            </UButton>
           </div>
         </div>
       </div>
@@ -144,11 +173,14 @@
 <script setup lang="ts">
 import type { CheckInDisplayMode } from '~/composables/useCheckInModes'
 import type { CheckInFilters } from '~/composables/websockets/events/useCheckInSocket'
+import TicketTypeSearchSelect from '~/components/ui/TicketTypeSearchSelect.vue'
+import AreaSearchSelect from '~/components/ui/AreaSearchSelect.vue'
 
 interface Props {
   currentMode: CheckInDisplayMode
   activeFilters: CheckInFilters
   isLive: boolean
+  eventId?: string | null
 }
 
 const props = defineProps<Props>()
@@ -166,14 +198,44 @@ const expanded = ref(false)
 
 const localFilters = reactive<CheckInFilters>({ ...props.activeFilters })
 
+// ── Selected IDs for search-select components ──────────────────────────────
+
+const selectedTicketTypeId = ref<number | null>(null)
+const selectedAreaId = ref<number | null>(null)
+
 watch(
   () => props.activeFilters,
-  (f) => Object.assign(localFilters, f),
+  (f) => {
+    Object.assign(localFilters, f)
+    // Clear selection state when filters are reset externally
+    if (!f.ticket_type) selectedTicketTypeId.value = null
+    if (!f.area_from) selectedAreaId.value = null
+  },
   { deep: true },
 )
 
 function update<K extends keyof CheckInFilters>(key: K, value: CheckInFilters[K]) {
   localFilters[key] = value
+}
+
+function onSelectTicketType(id: number, code: string, _title: string) {
+  selectedTicketTypeId.value = id
+  localFilters.ticket_type = code
+}
+
+function onSelectArea(id: number, label: string) {
+  selectedAreaId.value = id
+  localFilters.area_from = label
+}
+
+function clearTicketType() {
+  selectedTicketTypeId.value = null
+  localFilters.ticket_type = null
+}
+
+function clearArea() {
+  selectedAreaId.value = null
+  localFilters.area_from = null
 }
 
 function handleApply() {

@@ -17,6 +17,7 @@
         :current-mode="mode"
         :active-filters="activeFilters"
         :is-live="isConnected"
+        :event-id="eventIdentifier"
         @set-mode="setMode"
         @apply-filters="applyFilters"
       />
