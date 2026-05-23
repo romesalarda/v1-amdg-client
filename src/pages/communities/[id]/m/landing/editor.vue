@@ -285,7 +285,7 @@ const handleImageChange = (event: Event) => {
     try {
       validateImageFile(file, {
         allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-        maxSizeBytes: 5 * 1024 * 1024, // 5MB
+        maxSizeBytes: 15 * 1024 * 1024, // 15MB
       })
       
       if (imagePreview.value) {

@@ -256,7 +256,7 @@
         <div class="flex gap-4">
           <NuxtLink
             :to="`/events/${featuredEvent.url_safe_title}`"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-sm transition-all transform hover:scale-105 active:scale-95 no-underline"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-md transition-all transform hover:scale-105 active:scale-95 no-underline"
           >
             View Details
           </NuxtLink>
@@ -377,12 +377,12 @@
 
     <!-- Explore by Region Section -->
     <section class="w-full bg-deep-navy py-20">
-      <div class="max-w-[1100px] mx-auto px-6">
+      <div class="max-w-[1500px] mx-auto px-6">
         <div class="mb-10">
           <h2 class="text-2xl font-bold text-white mb-1">Explore by Region</h2>
           <p class="text-white/60 text-sm">Find events happening near you.</p>
         </div>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           <!-- London -->
           <button
             type="button"
@@ -393,7 +393,7 @@
             <img
               alt="London"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=800&h=600&fit=crop"
+              src="/assets/images/locations/london.jpg"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
@@ -403,21 +403,20 @@
               </span>
             </div>
           </button>
-          <!-- Birmingham -->
           <button
             type="button"
             class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
             style="animation-delay: 100ms;"
-            @click="applyRegionFilter('Birmingham')"
+            @click="applyRegionFilter('Manchester')"
           >
             <img
-              alt="Birmingham"
+              alt="Manchester"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&h=600&fit=crop"
+              src="/assets/images/locations/manchester.jpg"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
-              <span class="text-xl font-bold text-white uppercase tracking-tight">Birmingham</span>
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Manchester</span>
               <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
                 {{ getEventCountByLocation('Birmingham') }} Active Events
               </span>
@@ -431,15 +430,15 @@
             @click="applyRegionFilter('Southeast')"
           >
             <img
-              alt="Southeast"
+              alt="Birmingham"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://images.unsplash.com/photo-1486299267070-83823f5448dd?w=800&h=600&fit=crop"
+              src="/assets/images/locations/birmingham.jpg"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
-              <span class="text-xl font-bold text-white uppercase tracking-tight">Southeast</span>
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Birmingham</span>
               <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
-                {{ getEventCountByLocation('Southeast') }} Active Events
+                {{ getEventCountByLocation('Birmingham') }} Active Events
               </span>
             </div>
           </button>
@@ -448,18 +447,38 @@
             type="button"
             class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
             style="animation-delay: 300ms;"
-            @click="applyRegionFilter('Wales')"
+            @click="applyRegionFilter('Cardiff')"
           >
             <img
-              alt="Wales"
+              alt="Cardiff"
               class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-              src="https://images.unsplash.com/photo-1589454073828-a4c0e29ba5eb?w=800&h=600&fit=crop"
+              src="/assets/images/locations/cardiff.jpg"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
-              <span class="text-xl font-bold text-white uppercase tracking-tight">Wales</span>
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Cardiff</span>
               <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
-                {{ getEventCountByLocation('Wales') }} Active Events
+                {{ getEventCountByLocation('Cardiff') }} Active Events
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 300ms;"
+            @click="applyRegionFilter('Edinburgh')"
+          >
+            <img
+              alt="Edinburgh"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/edinburgh.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Edinburgh</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('Edinburgh') }} Active Events
               </span>
             </div>
           </button>

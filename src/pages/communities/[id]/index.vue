@@ -54,7 +54,7 @@
         <div class="absolute top-6 left-0 right-0 w-full max-w-7xl mx-auto px-6 flex items-start justify-between">
           <button
             @click="navigateTo('/communities')"
-            class="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-4 rounded-lg font-bold text-md transition-all transform hover:scale-105 active:scale-95 no-underline flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -66,7 +66,7 @@
             <button 
               v-if="isController"
               @click="navigateTo(`/communities/${organisationId}/m/dashboard`)"
-              class="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-md transition-all transform hover:scale-105 active:scale-95 no-underline flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -77,7 +77,7 @@
             
             <button 
               @click="navigateTo('/communities/inbox')"
-              class="relative flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/30 rounded-xl text-white hover:bg-white/20 transition-all font-black text-[10px] uppercase tracking-widest"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-md transition-all transform hover:scale-105 active:scale-95 no-underline flex items-center gap-2"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -144,7 +144,7 @@
                 </h2>
                 
                 <!-- View Toggle (Optional future feature) -->
-                <div class="hidden sm:flex gap-2">
+                <!-- <div class="hidden sm:flex gap-2">
                   <button class="p-2 border-2 border-deep-navy rounded hover:bg-deep-navy hover:text-white transition-all">
                     <svg class="w-5 h-5"  viewBox="0 0 24 24">
                       <path d="M4 11h6a1 1 0 001-1V4a1 1 0 00-1-1H4a1 1 0 00-1 1v6a1 1 0 001 1zm10 0h6a1 1 0 001-1V4a1 1 0 00-1-1h-6a1 1 0 00-1 1v6a1 1 0 001 1zM4 21h6a1 1 0 001-1v-6a1 1 0 00-1-1H4a1 1 0 00-1 1v6a1 1 0 001 1zm10 0h6a1 1 0 001-1v-6a1 1 0 00-1-1h-6a1 1 0 00-1 1v6a1 1 0 001 1z"/>
@@ -155,7 +155,7 @@
                       <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
                     </svg>
                   </button>
-                </div>
+                </div> -->
               </div>
 
               <!-- Loading Events -->

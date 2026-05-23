@@ -26,7 +26,7 @@
         <div>
           <h4 class="font-black mb-6 uppercase tracking-[0.3em] text-[9px] text-white/30">Legal</h4>
           <ul class="space-y-4 text-[10px] font-bold tracking-widest uppercase text-white/60">
-            <li><NuxtLink to="/tos" class="hover:text-blue-300 transition-colors no-underline">Terms of Use & Privacy Policy</NuxtLink></li>
+            <li><NuxtLink to="/privacy-policy" class="hover:text-blue-300 transition-colors no-underline">Privacy Policy</NuxtLink></li>
           </ul>
         </div>
       </div>
