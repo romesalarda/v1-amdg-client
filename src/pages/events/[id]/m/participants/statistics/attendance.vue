@@ -187,9 +187,12 @@
     </template>
 
     <div v-else-if="!attendanceLoading" class="text-center text-gray-500 py-12">
-      No attendance data available.
-
-      {{ attendanceData }}
+      <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+            <UIcon name="i-heroicons-user" class="h-7 w-7" />
+          </div>
+          <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Attendance Data Available</p>
+        </div>
     </div>
   </div>
 </template>

@@ -140,11 +140,9 @@
             <!-- Timezone -->
             <div>
               <label class="block text-sm font-semibold text-navy-700 mb-2">Timezone</label>
-              <input
-                v-model="form.timezone"
-                type="text"
-                placeholder="UTC"
-                class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              <TimezoneSelect
+                :model-value="form.timezone || 'UTC'"
+                @update:model-value="form.timezone = $event"
               />
               <p class="text-xs text-navy-500 mt-1">Defaults to event timezone: {{ eventTimezone || 'UTC' }}</p>
             </div>
@@ -249,6 +247,7 @@
 
 <script setup lang="ts">
 import type { AvailabilityWindow } from '~/api/types.gen'
+import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 import {
   useBookingPackageAvailabilityWindows,
   useAddBookingPackageAvailabilityWindow,

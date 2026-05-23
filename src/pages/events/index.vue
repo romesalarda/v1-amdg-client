@@ -32,26 +32,27 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
-          <!-- Sort/Dates -->
-          <div class="flex-1 flex items-center px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 group">
-            <svg class="w-5 h-5 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            <div class="flex flex-col flex-1 min-w-0">
-              <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Sort By</span>
-              <select
-                v-model="selectedSort"
-                class="w-full border-none p-0 focus:ring-0 text-deep-navy font-semibold text-sm bg-transparent appearance-none cursor-pointer"
-              >
-                <option value="date">Date (Earliest)</option>
-                <option value="date_desc">Date (Latest)</option>
-                <option value="name">Name (A-Z)</option>
-              </select>
-            </div>
-            <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          <!-- Date Range Picker -->
+          <DateRangePicker
+            v-model:model-value-start="advancedStartAfter"
+            v-model:model-value-end="advancedStartBefore"
+            class="flex-1"
+          >
+            <template #default="{ label, active }">
+              <div class="flex items-center px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 group h-full">
+                <svg class="w-5 h-5 mr-3 shrink-0 transition-colors" :class="active ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Dates</span>
+                  <span class="text-deep-navy font-semibold text-sm truncate" :class="active ? 'text-blue-600' : ''">{{ label }}</span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </template>
+          </DateRangePicker>
           <!-- Search Input -->
           <div class="flex-[2] flex items-center px-4 py-3">
             <svg class="w-5 h-5 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -128,78 +129,6 @@
           </button>
         </div>
 
-        <!-- Advanced Filters Panel -->
-        <div
-          v-if="showAdvancedFilters"
-          class="mb-4 p-4 md:p-5 bg-white/10 border border-white/20 rounded-xl backdrop-blur-sm"
-        >
-          <div class="flex items-center justify-between mb-4">
-            <h4 class="text-[10px] font-black uppercase tracking-[0.2em] text-white/80">Advanced Filters</h4>
-            <button
-              type="button"
-              @click="clearAdvancedFilters"
-              class="text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white"
-            >
-              Clear All
-            </button>
-          </div>
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-            <div class="bg-white/10 border border-white/15 rounded-lg p-3 space-y-3">
-              <p class="text-[10px] font-black uppercase tracking-widest text-white/50">Event Details</p>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Organisation</label>
-                <input v-model="advancedOrganisationName" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="e.g. AMDG London" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Event Type</label>
-                <input v-model="advancedEventTypeTitle" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="e.g. Retreat, Workshop" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Theme</label>
-                <input v-model="advancedTheme" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="Theme keyword" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Anchor Verse</label>
-                <input v-model="advancedAnchorVerse" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="e.g. John 3:16" />
-              </div>
-            </div>
-            <div class="bg-white/10 border border-white/15 rounded-lg p-3 space-y-3">
-              <p class="text-[10px] font-black uppercase tracking-widest text-white/50">Location Details</p>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Chapter</label>
-                <input v-model="advancedChapterName" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="Chapter name" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Venue Name</label>
-                <input v-model="advancedVenueName" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="Venue name" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Venue City</label>
-                <input v-model="advancedVenueCity" type="text" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white placeholder:text-white/30 focus:outline-none focus:border-white/50" placeholder="City" />
-              </div>
-            </div>
-            <div class="bg-white/10 border border-white/15 rounded-lg p-3 space-y-3">
-              <p class="text-[10px] font-black uppercase tracking-widest text-white/50">Date Range</p>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Starts After</label>
-                <input v-model="advancedStartAfter" type="datetime-local" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white focus:outline-none focus:border-white/50" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Starts Before</label>
-                <input v-model="advancedStartBefore" type="datetime-local" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white focus:outline-none focus:border-white/50" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Ends After</label>
-                <input v-model="advancedEndAfter" type="datetime-local" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white focus:outline-none focus:border-white/50" />
-              </div>
-              <div class="space-y-1">
-                <label class="block text-[10px] font-bold uppercase tracking-widest text-white/60">Ends Before</label>
-                <input v-model="advancedEndBefore" type="datetime-local" class="w-full h-9 px-3 rounded-lg border border-white/20 bg-white/10 text-xs font-semibold text-white focus:outline-none focus:border-white/50" />
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- Status Filter Pills -->
         <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
           <button
@@ -238,7 +167,7 @@
     <!-- Featured Event Hero -->
     <section v-if="featuredEvent" class="relative h-[500px] overflow-hidden bg-deep-navy">
       <div
-        class="absolute inset-0 bg-cover bg-center"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
         :style="featuredEvent.main_landing_image?.image ? `background-image: url('${resolveImageUrl(featuredEvent.main_landing_image.image)}')` : ''"
       ></div>
       <div class="hero-gradient absolute inset-0"></div>
@@ -303,7 +232,7 @@
             <img
               v-if="event.main_landing_image?.image"
               :alt="event.title"
-              :src="resolveImageUrl(event.main_landing_image.image)"
+              :src="resolveImageUrl(event.main_landing_image.image_urls?.original)"
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
               @error="onImageError"
             />
@@ -526,6 +455,7 @@ import { useLocationAreas } from '~/composables/resources/locations/locationArea
 import type { EventListListData } from '~/api/types.gen'
 import { useAuthStore } from '~/stores/auth'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 definePageMeta({
   layout: 'default',

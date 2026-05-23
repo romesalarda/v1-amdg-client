@@ -53,7 +53,7 @@
           </div>
 
           <!-- Availability Type & Description in 2 columns on larger screens -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
             <div class="space-y-1.5">
               <label class="block text-xs font-bold text-navy-900" for="window-type">
                 Type <span class="text-red-500">*</span>
@@ -77,13 +77,10 @@
               <label class="block text-xs font-bold text-navy-900" for="window-timezone">
                 Timezone
               </label>
-              <input
-                id="window-timezone"
-                v-model="timezone"
-                type="text"
-                placeholder="e.g., Europe/London"
-                :disabled="isSubmitting"
-                class="w-full rounded-xl border border-primary-500/20 bg-white px-3 py-2 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:bg-gray-100"
+              <TimezoneSelect
+                :model-value="timezone || 'UTC'"
+                :has-error="!!errors.timezone"
+                @update:model-value="timezone = $event"
               />
               <span v-if="errors.timezone" class="text-xs text-red-500">{{ errors.timezone }}</span>
             </div>
@@ -243,6 +240,7 @@ import { AvailabilityWindowSchema, AVAILABILITY_TYPES, REDUCED_AVAILABILITY_TYPE
 import type { AvailabilityWindow } from '~/api/types.gen'
 import { useCreateAvailabilityWindow, useUpdateAvailabilityWindow } from '~/composables/resources/events/availability-windows'
 import { getTypeLabel } from '~/utils/format/availability-windows'
+import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 
 interface Props {
   isOpen: boolean

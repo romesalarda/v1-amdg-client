@@ -111,14 +111,15 @@
                   <div class="flex items-center gap-1">
                     <UIcon name="i-heroicons-arrow-right-circle" class="w-3 h-3 flex-shrink-0" />
                     <span class="truncate flex-1 font-medium">{{ windowInfo.window.name }}</span>
-                    <UBadge
+                    <!-- <UBadge
                       v-if="windowInfo.window.is_active"
                       size="xs"
                       color="white"
                       variant="solid"
                     >
                       ●
-                    </UBadge>
+                    </UBadge> -->
+                    <UIcon name="i-heroicons-arrow-right-start-on-rectangle"/>
                   </div>
                   <div class="text-[10px] opacity-80 truncate mt-0.5">
                     {{ getTypeLabel(windowInfo.window.availability_type) }}
