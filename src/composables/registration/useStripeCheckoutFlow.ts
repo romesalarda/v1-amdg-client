@@ -194,11 +194,6 @@ export function useStripeCheckoutFlow(options: UseStripeCheckoutFlowOptions) {
 						booking_reference: paymentData?.metadata?.booking_reference || checkoutResult.value?.booking_reference,
 					}
 					showCheckoutSuccessModal.value = true
-					onToast({
-						title: 'Payment confirmed',
-						description: 'Your card payment was confirmed and registration is complete.',
-						color: 'green',
-					})
 				}
 			} catch (error) {
 				console.error('Payment status polling failed', error)
@@ -208,11 +203,6 @@ export function useStripeCheckoutFlow(options: UseStripeCheckoutFlowOptions) {
 				stopPaymentStatusPolling()
 				paymentProcessingMessage.value = 'Payment is still processing. You can safely refresh this page later.'
 				showCheckoutSuccessModal.value = true
-				onToast({
-					title: 'Payment processing',
-					description: 'Stripe confirmation completed. Ticket issuance may take a little longer.',
-					color: 'amber',
-				})
 			}
 		}, 3000)
 	}

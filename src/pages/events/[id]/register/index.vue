@@ -334,11 +334,10 @@
 		@return-to-event="redirectToEventHome"
 	/>
 
-	<RegisterSuccessModal
-		v-model="showCheckoutSuccessModal"
-		:event-title="event?.title || 'this event'"
-		:bank-transfer-reference="checkoutBankTransferReference"
-		:bank-transfer-instructions="checkoutBankTransferInstructions"
+	<RegisterBookingConfirmed
+		:is-visible="showCheckoutSuccessModal"
+		:event="event"
+		:checkout-result="checkoutResult"
 		@view-dashboard="closeSuccessModalAndRedirect"
 	/>
 </template>
@@ -357,6 +356,7 @@ import RegisterEventBar from '~/components/registration/RegisterEventBar.vue'
 import RegisterCheckoutOverlay from '~/components/registration/RegisterCheckoutOverlay.vue'
 import RegisterSessionExpiredModal from '~/components/registration/RegisterSessionExpiredModal.vue'
 import RegisterSuccessModal from '~/components/registration/RegisterSuccessModal.vue'
+import RegisterBookingConfirmed from '~/components/registration/RegisterBookingConfirmed.vue'
 import RegisterStepperHeader from '~/components/registration/RegisterStepperHeader.vue'
 import RegisterStepNavBar from '~/components/registration/RegisterStepNavBar.vue'
 import RegisterAttendeeSidebar from '~/components/registration/RegisterAttendeeSidebar.vue'
