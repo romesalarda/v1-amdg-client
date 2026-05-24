@@ -31653,6 +31653,61 @@ export type CheckinsRetrieveResponses = {
 
 export type CheckinsRetrieveResponse = CheckinsRetrieveResponses[keyof CheckinsRetrieveResponses];
 
+export type CheckinsAttendeeStatusCreateData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/checkins/attendee-status/';
+};
+
+export type CheckinsAttendeeStatusCreateResponses = {
+    200: CheckInResponse;
+};
+
+export type CheckinsAttendeeStatusCreateResponse = CheckinsAttendeeStatusCreateResponses[keyof CheckinsAttendeeStatusCreateResponses];
+
+export type CheckinsBulkDeleteLogsDestroyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/checkins/bulk-delete-logs/';
+};
+
+export type CheckinsBulkDeleteLogsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type CheckinsBulkDeleteLogsDestroyResponse = CheckinsBulkDeleteLogsDestroyResponses[keyof CheckinsBulkDeleteLogsDestroyResponses];
+
+export type CheckinsBulkStatusCreateData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/checkins/bulk-status/';
+};
+
+export type CheckinsBulkStatusCreateResponses = {
+    200: CheckInResponse;
+};
+
+export type CheckinsBulkStatusCreateResponse = CheckinsBulkStatusCreateResponses[keyof CheckinsBulkStatusCreateResponses];
+
+export type CheckinsLogDatesRetrieveData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/checkins/log-dates/';
+};
+
+export type CheckinsLogDatesRetrieveResponses = {
+    200: CheckInResponse;
+};
+
+export type CheckinsLogDatesRetrieveResponse = CheckinsLogDatesRetrieveResponses[keyof CheckinsLogDatesRetrieveResponses];
+
 export type ConsentsListData = {
     body?: never;
     path?: never;

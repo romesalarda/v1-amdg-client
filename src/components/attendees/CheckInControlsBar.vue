@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between px-4 py-2.5">
       <!-- Left: active mode pill + filter summary -->
       <div class="flex items-center gap-2">
-        <span class="text-xs font-black text-deep-navy uppercase tracking-widest">Check-in Controls</span>
+        <span class="text-xs font-black text-deep-navy uppercase">Check-in Controls</span>
         <UBadge color="primary" variant="soft" size="xs" class="capitalize">
           <UIcon :name="activeMode.icon" class="w-3 h-3 mr-1" />
           {{ activeMode.label }}

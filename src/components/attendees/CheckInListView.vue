@@ -314,18 +314,84 @@
         </div>
       </div>
 
-      <!-- Date filter for delete logs -->
-      <div v-if="pendingBulkAction === 'delete_logs'" class="space-y-2">
-        <label class="text-xs font-semibold text-gray-700 block">
-          Scope to a specific date (optional)
-        </label>
-        <input
-          v-model="deleteLogsDate"
-          type="date"
-          class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        />
-        <p class="text-xs text-gray-400">
-          Leave blank to delete all check-in logs for this event.
+      <div v-if="pendingBulkAction === 'delete_logs'" class="space-y-3">
+        <div>
+          <label class="text-xs font-semibold text-gray-700 block mb-2">Deletion scope</label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors"
+              :class="deleteLogsMode === 'specific' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
+              @click="deleteLogsMode = 'specific'"
+            >
+              Specific Date
+            </button>
+            <button
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors"
+              :class="deleteLogsMode === 'range' ? 'bg-primary text-white border-primary' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'"
+              @click="deleteLogsMode = 'range'"
+            >
+              Date Range
+            </button>
+            <button
+              class="px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors"
+              :class="deleteLogsMode === 'all' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-red-600 border-red-200 hover:bg-red-50'"
+              @click="deleteLogsMode = 'all'"
+            >
+              Delete All
+            </button>
+          </div>
+        </div>
+
+        <div v-if="deleteLogsMode === 'specific'" class="space-y-2">
+          <label class="text-xs font-semibold text-gray-700 block">Choose a date with logs</label>
+          <select
+            v-model="deleteSpecificDate"
+            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          >
+            <option value="">Select date...</option>
+            <option v-for="date in logDates" :key="date" :value="date">
+              {{ formatDateLabel(date) }}
+            </option>
+          </select>
+          <div class="flex items-center justify-between">
+            <p class="text-xs text-gray-400">
+              Loaded {{ logDates.length }} of {{ logDatesTotal }} distinct log dates.
+            </p>
+            <button
+              v-if="canLoadMoreLogDates"
+              class="px-2 py-1 text-[11px] font-semibold rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              :disabled="isLogDatesLoading"
+              @click="loadMoreLogDates"
+            >
+              <template v-if="isLogDatesLoading">Loading...</template>
+              <template v-else>Load more</template>
+            </button>
+          </div>
+        </div>
+
+        <div v-else-if="deleteLogsMode === 'range'" class="space-y-2">
+          <label class="text-xs font-semibold text-gray-700 block">Choose date range</label>
+          <DateRangePicker
+            v-model:model-value-start="deleteRangeStart"
+            v-model:model-value-end="deleteRangeEnd"
+          >
+            <template #default="{ label, active }">
+              <button
+                type="button"
+                class="w-full px-3 py-2 text-sm border rounded-lg text-left transition-colors"
+                :class="active ? 'border-primary text-primary bg-primary/5' : 'border-gray-300 text-gray-700 bg-white hover:bg-gray-50'"
+              >
+                {{ label }}
+              </button>
+            </template>
+          </DateRangePicker>
+          <p class="text-xs text-gray-400">
+            Tip: set only an end date to delete all past logs up to that date.
+          </p>
+        </div>
+
+        <p v-else class="text-xs text-gray-500">
+          This will permanently remove all check-in logs for the current event.
         </p>
       </div>
 
@@ -345,7 +411,7 @@
             'bg-red-600 hover:bg-red-700': pendingBulkAction === 'delete_logs',
             'opacity-60 cursor-not-allowed': bulkActionLoading,
           }"
-          :disabled="bulkActionLoading"
+          :disabled="bulkActionLoading || isDeleteActionInvalid"
           @click="executeBulkAction"
         >
           <UIcon v-if="bulkActionLoading" name="i-heroicons-arrow-path" class="w-4 h-4 animate-spin" />
@@ -362,6 +428,9 @@
 import type { CheckInResponse } from '~/api/types.gen'
 import { checkinsList } from '~/api/sdk.gen'
 import AttendeeRosterTable from '~/components/attendees/AttendeeRosterTable.vue'
+import DateRangePicker from '~/components/ui/DateRangePicker.vue'
+import { useBulkDeleteCheckInLogs, type BulkDeleteMode } from '~/composables/attendee/useBulkDeleteCheckInLogs'
+import { useCheckInLogDates } from '~/composables/attendee/useCheckInLogDates'
 import AttendanceStatsView from '~/pages/events/[id]/m/participants/statistics/attendance.vue'
 
 interface Props {
@@ -520,14 +589,49 @@ function formatTime(iso: string) {
 
 const pendingBulkAction = ref<'check_in' | 'check_out' | 'delete_logs' | null>(null)
 const showBulkConfirmModal = ref(false)
-const deleteLogsDate = ref('')
+const deleteLogsMode = ref<BulkDeleteMode>('specific')
+const deleteSpecificDate = ref('')
+const deleteRangeStart = ref('')
+const deleteRangeEnd = ref('')
 const bulkActionLoading = ref(false)
 
 const toast = useToast()
+const bulkDeleteLogs = useBulkDeleteCheckInLogs()
+const {
+  dates: logDates,
+  total: logDatesTotal,
+  isLoading: isLogDatesLoading,
+  canLoadMore: canLoadMoreLogDates,
+  refresh: refreshLogDates,
+  loadMore: loadMoreLogDates,
+} = useCheckInLogDates(() => props.eventId)
+
+const isDeleteActionInvalid = computed(() => {
+  if (pendingBulkAction.value !== 'delete_logs') return false
+  if (deleteLogsMode.value === 'specific') return !deleteSpecificDate.value
+  if (deleteLogsMode.value === 'range') return !deleteRangeStart.value && !deleteRangeEnd.value
+  return false
+})
+
+function formatDateLabel(iso: string) {
+  return new Date(`${iso}T00:00:00`).toLocaleDateString([], {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
 
 function openBulkAction(action: 'check_in' | 'check_out' | 'delete_logs') {
   pendingBulkAction.value = action
-  deleteLogsDate.value = ''
+  deleteLogsMode.value = 'specific'
+  deleteSpecificDate.value = ''
+  deleteRangeStart.value = ''
+  deleteRangeEnd.value = ''
+
+  if (action === 'delete_logs') {
+    refreshLogDates()
+  }
+
   showBulkConfirmModal.value = true
 }
 
@@ -549,19 +653,22 @@ async function executeBulkAction() {
         color: 'green',
       })
     } else {
-      const body: Record<string, string> = { event: props.eventId }
-      if (deleteLogsDate.value) {
-        body.date = deleteLogsDate.value
-      }
-      const result = await $fetch<{ deleted: number }>('/api/checkins/bulk-delete-logs/', {
-        method: 'DELETE',
-        body,
+      if (isDeleteActionInvalid.value) return
+
+      const result = await bulkDeleteLogs.execute(props.eventId, {
+        mode: deleteLogsMode.value,
+        date: deleteSpecificDate.value || undefined,
+        date_from: deleteRangeStart.value || undefined,
+        date_to: deleteRangeEnd.value || undefined,
       })
+
       toast.add({
         title: 'Logs deleted',
         description: `${result.deleted} check-in log${result.deleted === 1 ? '' : 's'} removed.`,
         color: 'green',
       })
+
+      await refreshLogDates()
       // Refresh the log tab
       page.value = 1
       refresh()

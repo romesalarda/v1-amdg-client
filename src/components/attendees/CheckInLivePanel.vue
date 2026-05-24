@@ -14,7 +14,7 @@
     <!-- No item state -->
     <div
       v-if="!currentItem"
-      class="bg-white border border-deep-navy/10 rounded-xl shadow-sm flex flex-col items-center justify-center gap-5 text-center py-16 px-8 min-h-[320px]"
+      class="bg-white border border-deep-navy/10 rounded-xl shadow-sm flex flex-col items-center justify-center gap-5 text-center py-16 px-8 min-h-[500px]"
     >
       <div class="relative flex items-center justify-center">
         <span class="absolute inline-block w-20 h-20 rounded-full bg-deep-navy/5 animate-ping" style="animation-duration:2s" />
