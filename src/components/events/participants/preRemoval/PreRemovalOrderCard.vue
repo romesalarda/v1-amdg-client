@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-xl border border-gray-200 bg-white p-4">
+  <div class="rounded-xl border border-gray-200 bg-white p-4 cursor-pointer hover:bg-gray-50 transition" @click="router.push(`/events/${eventQueryValue}/m/shop/orders/${item.order_id}/detail`)">
     <div class="flex items-start justify-between gap-3">
       <div>
         <div class="flex items-center gap-2">
@@ -60,6 +60,9 @@ import { computed } from 'vue'
 import { useProductOrder } from '~/composables/resources/products/productOrders'
 import type { AttendeePreRemovalBlockerItem } from '~/composables/resources/attendee/attendees'
 import { onImageError, resolveImageUrl } from '~/utils/image'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const props = defineProps<{
   item: AttendeePreRemovalBlockerItem

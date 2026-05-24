@@ -609,7 +609,7 @@
                       variant="soft"
                       size="xs"
                     >
-                      {{ (attendee as any).is_checked_in ? 'Checked In' : 'Not Checked In' }}
+                      {{ (attendee as any).status }}
                     </UBadge>
                   </td>
                   <td class="py-3 px-4">
@@ -1423,6 +1423,7 @@
         :cancelling="cancelAttendeeMutation.isPending.value"
         :attendee-name="selectedDeleteAttendee?.full_name"
         :attendee-display-id="selectedDeleteAttendee?.attendee_display_id"
+        :is-cancelled="selectedDeleteAttendee?.is_cancelled"
         :event-query-value="orderEventQueryValue"
         @close="showPreRemovalModal = false"
         @confirm-delete="confirmDeleteAttendee"

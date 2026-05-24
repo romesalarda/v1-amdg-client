@@ -85,7 +85,7 @@
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0 space-y-1">
                     <div class="flex items-center gap-2">
-                      <span class="truncate text-sm font-semibold text-gray-900">{{ payment.item.payment_reference || payment.item.payment_id || 'Payment' }}</span>
+                      <span class="truncate text-sm font-mono text-gray-900">{{ payment.item.payment_reference || payment.item.payment_id || 'Payment' }}</span>
                       <UBadge v-if="payment.item.payment_status" color="gray" variant="soft" size="xs">{{ payment.item.payment_status }}</UBadge>
                     </div>
                     <p class="text-xs text-gray-600">
@@ -150,14 +150,19 @@
       </div>
 
       <div v-else-if="activeStep === 'packages'" class="space-y-3">
-        <div v-if="!dedupedPaymentItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          No package-linked payments on this page.
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600" v-if="!dedupedPaymentItems.length && !activeRefundEntries.length">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+            <UIcon name="i-heroicons-currency-pound" class="h-7 w-7" />
+          </div>
+          <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Payments</p>
+          <p class="mt-2 text-sm text-slate-500">This attendee has no payments blocking deletion</p>
         </div>
 
         <div
           v-for="payment in dedupedPaymentItems"
           :key="payment.key"
-          class="rounded-lg border border-gray-200 bg-white p-3"
+          class="rounded-lg border border-gray-200 bg-white p-3 cursor-pointer hover:bg-gray-50 transition"
+          @click="router.push(`/events/${eventQueryValue}/m/payments/list?search=${payment.item.payment_reference}`)"
         >
           <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div class="space-y-1">
@@ -239,8 +244,12 @@
       </div>
 
       <div v-else-if="activeStep === 'tickets'" class="space-y-3">
-        <div v-if="!activeTicketItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
-          No active ticket blockers on this page.
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600" v-if="!activeTicketItems.length">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+            <UIcon name="i-heroicons-ticket" class="h-7 w-7" />
+          </div>
+          <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Tickets</p>
+          <p class="mt-2 text-sm text-slate-500">This attendee has no tickets blocking deletion</p>
         </div>
 
         <PreRemovalTicketCard
@@ -279,8 +288,15 @@
       </div>
 
       <div v-else-if="activeStep === 'orders'" class="space-y-3">
-        <div v-if="!orderItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
+        <!-- <div v-if="!orderItems.length" class="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-600">
           No unresolved order blockers on this page.
+        </div> -->
+        <div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600" v-if="!orderItems.length">
+          <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+            <UIcon name="i-heroicons-shopping-bag" class="h-7 w-7" />
+          </div>
+          <p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">No Orders</p>
+          <p class="mt-2 text-sm text-slate-500">This attendee has no orders blocking deletion</p>
         </div>
 
         <PreRemovalOrderCard
@@ -320,22 +336,34 @@
 
       </div>
 
-      <div v-else-if="activeStep === 'final'" class="space-y-3">
+      <div v-else-if="activeStep === 'final'" class="space-y-4 max-w-lg mx-auto">
+        <!-- Cancel action -->
         <div class="rounded-xl border border-blue-200 bg-blue-50 p-4">
           <div class="flex items-start gap-3">
-            <div class="rounded-full bg-blue-100 p-2">
+            <div class="rounded-full bg-blue-100 p-2 flex-shrink-0">
               <UIcon name="i-heroicons-x-circle" class="h-5 w-5 text-blue-700" />
             </div>
-            <div class="min-w-0 flex-1 space-y-2">
+            <div class="min-w-0 flex-1 space-y-3">
               <div>
-                <h4 class="text-sm font-bold uppercase tracking-wide text-blue-800">Alternative action: cancel attendee</h4>
-                <p class="mt-1 text-sm text-blue-800">
-                  Mark this attendee as cancelled to preserve historical records while removing them from active participation.
+                <h4 class="text-sm font-bold uppercase tracking-wide text-blue-800">Alternative: cancel attendee</h4>
+                <p class="mt-1 text-sm text-blue-700">
+                  Mark this attendee as cancelled to preserve historical records while removing them from active participation. This can be reversed.
                 </p>
+              </div>
+              <div v-if="attendeeName && summary?.can_delete && !isCancelled" class="space-y-1.5">
+                <label class="text-xs font-semibold text-blue-800">
+                  Type <span class="font-mono font-bold">{{ attendeeName }}</span> to confirm cancellation
+                </label>
+                <UInput
+                  v-model="cancelConfirmInput"
+                  size="sm"
+                  placeholder="Type attendee name to confirm"
+                  :ui="{ base: 'w-full' }"
+                />
               </div>
               <UButton
                 color="blue"
-                :disabled="cancelling"
+                :disabled="cancelling || isCancelled || !summary?.can_delete || (!!attendeeName && !cancelNameConfirmed)"
                 :loading="cancelling"
                 @click="$emit('confirmCancel')"
               >
@@ -345,30 +373,55 @@
           </div>
         </div>
 
-        <div class="rounded-xl border-2 border-red-200 bg-red-50 p-4">
+        <!-- Danger zone: permanent delete -->
+        <div class="rounded-xl border-2 border-red-400 bg-red-50 p-4 shadow-sm">
+          <div class="mb-3 flex items-center gap-2">
+            <span class="rounded bg-red-600 px-2 py-0.5 text-xs font-bold uppercase tracking-widest text-white">Danger zone</span>
+            <span class="text-xs text-red-600 font-medium">Irreversible action</span>
+          </div>
           <div class="flex items-start gap-3">
-            <div class="rounded-full bg-red-100 p-2">
+            <div class="rounded-full bg-red-200 p-2 flex-shrink-0">
               <UIcon name="i-heroicons-exclamation-triangle-solid" class="h-5 w-5 text-red-700" />
             </div>
-            <div class="min-w-0 flex-1 space-y-2">
+            <div class="min-w-0 flex-1 space-y-3">
               <div>
-                <h4 class="text-sm font-bold uppercase tracking-wide text-red-800">Final deletion step</h4>
-                <p class="mt-1 text-sm text-red-800">
-                  Deleting this attendee is irreversible. This permanently removes the attendee record and should only be done after every blocker above has been reviewed.
+                <h4 class="text-sm font-bold uppercase tracking-wide text-red-800">Permanently delete attendee</h4>
+                <p class="mt-1 text-sm text-red-700">
+                  This will permanently remove the attendee record. This action <strong>cannot be undone</strong> and should only be done after every blocker above has been fully reviewed.
                 </p>
               </div>
-              <div class="rounded-lg border border-red-200 bg-white/70 p-3 text-xs text-red-700">
+              <div class="rounded-lg border border-red-300 bg-white/80 p-3 text-xs text-red-700 space-y-1">
                 <div class="flex items-start gap-2">
                   <UIcon name="i-heroicons-no-symbol" class="mt-0.5 h-4 w-4 flex-shrink-0" />
-                  <span>This action cannot be undone or restored from this screen.</span>
+                  <span>All attendee data, ticket assignments, and linked records will be permanently deleted.</span>
                 </div>
+                <div class="flex items-start gap-2">
+                  <UIcon name="i-heroicons-no-symbol" class="mt-0.5 h-4 w-4 flex-shrink-0" />
+                  <span>This cannot be restored from this screen.</span>
+                </div>
+              </div>
+              <div v-if="summary?.can_delete" class="space-y-1.5">
+                <label class="text-xs font-semibold text-red-800">
+                  Type <span class="font-mono font-bold">{{ attendeeName || 'attendee name' }}</span> to confirm permanent deletion
+                </label>
+                <UInput
+                  v-model="deleteConfirmInput"
+                  size="sm"
+                  :placeholder="`Type &quot;${attendeeName || 'attendee name'}&quot; to confirm`"
+                  :ui="{ base: 'w-full border-red-300 focus:border-red-500 focus:ring-red-500' }"
+                />
+                <p v-if="deleteConfirmInput && !deleteNameConfirmed" class="text-xs text-red-600">
+                  Name does not match. Please type exactly: <span class="font-mono font-semibold">{{ attendeeName }}</span>
+                </p>
               </div>
               <UButton
                 color="red"
-                :disabled="!summary.can_delete || deleting"
+                variant="solid"
+                :disabled="!summary?.can_delete || deleting || !deleteNameConfirmed"
                 :loading="deleting"
                 @click="$emit('confirmDelete')"
               >
+                <UIcon name="i-heroicons-trash" class="mr-1 h-4 w-4" />
                 Delete attendee permanently
               </UButton>
             </div>
@@ -388,6 +441,9 @@ import type {
 } from '~/composables/resources/attendee/attendees'
 import PreRemovalTicketCard from './PreRemovalTicketCard.vue'
 import PreRemovalOrderCard from './PreRemovalOrderCard.vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 type StepKey = 'overview' | 'packages' | 'tickets' | 'orders' | 'final'
 
@@ -400,6 +456,7 @@ const props = defineProps<{
   attendeeName?: string
   attendeeDisplayId?: string
   eventQueryValue?: string
+  isCancelled?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -413,6 +470,16 @@ const emit = defineEmits<{
 const activeStepIndex = ref(0)
 const stepOrder: StepKey[] = ['overview', 'packages', 'tickets', 'orders', 'final']
 const activeStep = computed<StepKey>(() => stepOrder[activeStepIndex.value] || 'overview')
+
+const deleteConfirmInput = ref('')
+const cancelConfirmInput = ref('')
+
+const deleteNameConfirmed = computed(() =>
+  !!props.attendeeName && deleteConfirmInput.value.trim() === props.attendeeName.trim(),
+)
+const cancelNameConfirmed = computed(() =>
+  !!props.attendeeName && cancelConfirmInput.value.trim() === props.attendeeName.trim(),
+)
 
 const blockers = computed(() => props.summary?.blockers || [])
 const blockingCodes = ['active_tickets', 'unresolved_orders']
