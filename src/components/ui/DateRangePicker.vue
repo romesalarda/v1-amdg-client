@@ -53,6 +53,7 @@
                 :month="leftMonth"
                 :draft="draft"
                 :hover-date="hoverDate"
+                :conflict-windows="conflictWindows"
                 @select="onSelect"
                 @hover="hoverDate = $event"
                 @prev="prevMonth"
@@ -62,6 +63,7 @@
                 :month="rightMonth"
                 :draft="draft"
                 :hover-date="hoverDate"
+                :conflict-windows="conflictWindows"
                 @select="onSelect"
                 @hover="hoverDate = $event"
                 @next="nextMonth"
@@ -102,9 +104,11 @@
 </template>
 
 <script setup lang="ts">
+
 const props = defineProps<{
   modelValueStart?: string
   modelValueEnd?: string
+  conflictWindows?: AvailabilityWindow[]
 }>()
 
 const emit = defineEmits<{
@@ -199,6 +203,7 @@ const onEndInput = (e: Event) => {
   if (iso) draft.end = iso
 }
 
+
 const hasRange = computed(() => !!(props.modelValueStart || props.modelValueEnd))
 
 const triggerLabel = computed(() => {
@@ -234,6 +239,7 @@ const apply = () => {
 <script lang="ts">
 // Inner CalendarMonth component defined locally
 import { defineComponent, computed, h } from 'vue'
+import type { AvailabilityWindow } from '~/api/types.gen'
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -245,6 +251,7 @@ export const CalendarMonth = defineComponent({
     month: { type: Number, required: true },
     draft: { type: Object as () => { start: string; end: string }, required: true },
     hoverDate: { type: String, default: '' },
+    conflictWindows: { type: Array as () => AvailabilityWindow[], default: () => [] },
     prev: { type: Boolean, default: false },
     next: { type: Boolean, default: false },
   },
@@ -302,6 +309,21 @@ export const CalendarMonth = defineComponent({
     const isEnd = (dateStr: string) => !!effectiveEnd.value && effectiveEnd.value === dateStr
     const isToday = (dateStr: string) => dateStr === todayStr
 
+    const getConflictWindowsForDate = (dateStr: string): AvailabilityWindow[] => {
+      const dayStart = new Date(`${dateStr}T00:00:00`)
+      const dayEnd = new Date(`${dateStr}T23:59:59.999`)
+      return props.conflictWindows.filter((w: AvailabilityWindow) => {
+        if (!w.available_from || !w.available_to) return false
+        return new Date(w.available_from) <= dayEnd && new Date(w.available_to) >= dayStart
+      })
+    }
+
+    const getConflictTooltip = (dateStr: string): string => {
+      const wins = getConflictWindowsForDate(dateStr)
+      if (!wins.length) return ''
+      return wins.map((w: AvailabilityWindow) => `${w.name}${w.availability_type ? ` (${w.availability_type})` : ''}`).join(' • ')
+    }
+
     return () => {
       const monthLabel = `${MONTHS[props.month]} ${props.year}`
 
@@ -343,11 +365,14 @@ export const CalendarMonth = defineComponent({
             const end = isEnd(cell.dateStr)
             const inRange = isInRange(cell.dateStr)
             const today = isToday(cell.dateStr)
+            const conflictWindows = getConflictWindowsForDate(cell.dateStr)
+            const conflictTooltip = getConflictTooltip(cell.dateStr)
 
             const cellClass = [
-              'relative h-9 flex items-center justify-center text-sm font-semibold cursor-pointer transition-colors',
+              'relative h-12 flex items-center justify-center text-sm font-semibold cursor-pointer transition-colors',
               !cell.currentMonth ? 'text-gray-300' : (start || end) ? 'text-white' : inRange ? 'text-blue-700' : today ? 'text-blue-600' : 'text-gray-800',
               inRange ? 'bg-blue-50' : '',
+              conflictWindows.length && cell.currentMonth ? 'bg-amber-50/80' : '',
             ].join(' ')
 
             const innerClass = [
@@ -355,13 +380,36 @@ export const CalendarMonth = defineComponent({
               (start || end) ? 'bg-blue-600 text-white' : today && !inRange ? 'border-b-2 border-blue-500' : cell.currentMonth ? 'hover:bg-gray-100' : 'cursor-default',
             ].join(' ')
 
+            const conflictIndicatorClass = (window: AvailabilityWindow) => {
+              if (window.availability_type === 'PRODUCT_WINDOW' || window.availability_type === 'PAYMENT_PACKAGE_WINDOW') return 'bg-emerald-500'
+              if (window.availability_type === 'PRODUCT_PREVIEW_WINDOW' || window.availability_type === 'PAYMENT_PACKAGE_PREVIEW_WINDOW') return 'bg-sky-500'
+              if (window.availability_type === 'REFUND_WINDOW') return 'bg-rose-500'
+              if (window.availability_type === 'REGISTRATION_WINDOW') return 'bg-violet-500'
+              return 'bg-amber-500'
+            }
+
             return h('div', {
               class: cellClass,
               onClick: () => cell.currentMonth && emit('select', cell.dateStr),
               onMouseenter: () => cell.currentMonth && emit('hover', cell.dateStr),
               onMouseleave: () => emit('hover', ''),
+              title: conflictTooltip || undefined,
             }, [
-              h('span', { class: innerClass }, cell.day)
+              h('span', { class: innerClass }, cell.day),
+              conflictWindows.length && cell.currentMonth
+                ? h('div', { class: 'absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5' }, [
+                  ...conflictWindows.slice(0, 3).map((window: AvailabilityWindow) => h('span', {
+                    class: `h-1.5 w-1.5 rounded-full ${conflictIndicatorClass(window)}`,
+                    title: window.name,
+                  })),
+                  conflictWindows.length > 3
+                    ? h('span', {
+                      class: 'ml-0.5 text-[8px] font-black text-amber-700',
+                      title: conflictTooltip,
+                    }, `+${conflictWindows.length - 3}`)
+                    : null,
+                ])
+                : null,
             ])
           })
         ),

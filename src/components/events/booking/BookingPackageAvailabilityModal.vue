@@ -47,105 +47,20 @@
           </div>
 
           <form @submit.prevent="submitForm" class="space-y-4">
-            <!-- Window Name -->
-            <div>
-              <label class="block text-sm font-semibold text-navy-700 mb-2">Window Name *</label>
-              <input
-                v-model="form.name"
-                type="text"
-                placeholder="e.g., Early Bird Sales"
-                required
-                class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-
-            <!-- Description -->
-            <div>
-              <label class="block text-sm font-semibold text-navy-700 mb-2">Description</label>
-              <textarea
-                v-model="form.description"
-                rows="2"
-                placeholder="Optional description..."
-                class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-              ></textarea>
-            </div>
-
-            <!-- Window Type -->
-            <div>
-              <label class="block text-sm font-semibold text-navy-700 mb-2">Window Type *</label>
-              <div class="grid grid-cols-2 gap-3">
-                <label
-                  v-for="option in BOOKING_AVAILABILITY_TYPE_OPTIONS"
-                  :key="option.value"
-                  class="flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all"
-                  :class="form.availability_type === option.value ? 'border-primary bg-primary/10' : 'border-navy-200 hover:border-navy-300'"
-                >
-                  <input
-                    v-model="form.availability_type"
-                    type="radio"
-                    :value="option.value"
-                    class="text-primary focus:ring-primary mt-1"
-                  />
-                  <div class="flex-1">
-                    <div class="font-semibold text-navy-900 text-sm">{{ option.label }}</div>
-                    <div class="text-xs text-navy-500 mt-0.5">{{ option.description }}</div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <!-- Date Range -->
-            <div class="space-y-4">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-semibold text-navy-700 mb-2">Available From *</label>
-                  <input
-                    v-model="form.available_from"
-                    type="datetime-local"
-                    required
-                    class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-                <div>
-                  <label class="block text-sm font-semibold text-navy-700 mb-2">Available To *</label>
-                  <input
-                    v-model="form.available_to"
-                    type="datetime-local"
-                    required
-                    class="w-full rounded-lg border border-navy-300 bg-white px-4 py-2 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                </div>
-              </div>
-
-              <!-- Quick Date Presets -->
-              <div class="border border-gray-200 rounded-lg p-4 space-y-3">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="material-symbols-outlined text-sm text-navy-500">bolt</span>
-                  <label class="text-sm font-semibold text-navy-700">Quick Date Presets</label>
-                </div>
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                  <button type="button" @click="setDates('today', 7)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">1 week from today</button>
-                  <button type="button" @click="setDates('today', 14)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">2 weeks from today</button>
-                  <button type="button" @click="setDates('today', 30)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">1 month from today</button>
-                  <button type="button" @click="setDates('event', -7)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">1 week before event</button>
-                  <button type="button" @click="setDates('event', -14)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">2 weeks before event</button>
-                  <button type="button" @click="setDates('event', -30)" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">1 month before event</button>
-                  <button type="button" @click="setDates('during-event')" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">During event</button>
-                  <button type="button" @click="setDates('full-period')" class="px-3 py-2 text-xs font-medium text-navy-700 bg-white border border-navy-300 rounded-lg hover:bg-navy-50 hover:border-primary transition-colors">Now until event</button>
-                </div>
-                <p class="text-xs text-navy-500 mt-2">Click to quickly set common date ranges</p>
-              </div>
-            </div>
-
-            <!-- Timezone -->
-            <div>
-              <label class="block text-sm font-semibold text-navy-700 mb-2">Timezone</label>
-              <TimezoneSelect
-                :model-value="form.timezone || 'UTC'"
-                @update:model-value="form.timezone = $event"
-              />
-              <p class="text-xs text-navy-500 mt-1">Defaults to event timezone: {{ eventTimezone || 'UTC' }}</p>
-            </div>
+            <AvailabilityWindowEditorFields
+              v-model:name="form.name"
+              v-model:description="form.description"
+              v-model:availability-type="form.availability_type"
+              v-model:available-from="form.available_from"
+              v-model:available-to="form.available_to"
+              v-model:timezone="form.timezone"
+              :type-options="BOOKING_AVAILABILITY_TYPE_OPTIONS"
+              :event-timezone="eventTimezone"
+              :event-start="eventStartDatetime"
+              :event-end="eventEndDatetime"
+              :conflict-windows="windows"
+              :show-quick-presets="true"
+            />
 
             <!-- Actions -->
             <div class="flex items-center gap-3 pt-4 border-t border-navy-200">
@@ -247,7 +162,7 @@
 
 <script setup lang="ts">
 import type { AvailabilityWindow } from '~/api/types.gen'
-import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
+import AvailabilityWindowEditorFields from '~/components/events/AvailabilityWindowEditorFields.vue'
 import {
   useBookingPackageAvailabilityWindows,
   useAddBookingPackageAvailabilityWindow,

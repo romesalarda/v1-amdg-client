@@ -2114,172 +2114,20 @@
         </h3>
 
         <div class="space-y-5">
-          <!-- Window Name -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Name *</label>
-            <input
-              v-model="availabilityForm.name"
-              type="text"
-              placeholder="e.g., Early Bird Sales"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              required
-            />
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="availabilityForm.description"
-              rows="2"
-              placeholder="Optional description..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-            ></textarea>
-          </div>
-
-          <!-- Window Type -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Type *</label>
-            <div class="grid grid-cols-2 gap-3">
-              <label
-                v-for="option in AVAILABILITY_TYPE_OPTIONS"
-                :key="option.value"
-                class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
-                :class="availabilityForm.availability_type === option.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-              >
-                <input
-                  v-model="availabilityForm.availability_type"
-                  type="radio"
-                  :value="option.value"
-                  class="text-primary focus:ring-primary mt-1"
-                />
-                <div class="flex-1">
-                  <div class="font-semibold text-gray-900 text-sm">{{ option.label }}</div>
-                  <div class="text-xs text-gray-500 mt-0.5">{{ option.description }}</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Date Range -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Start Date -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Available From *</label>
-              <input
-                v-model="availabilityForm.available_from"
-                type="datetime-local"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                required
-              />
-            </div>
-
-            <!-- End Date -->
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Available To *</label>
-              <input
-                v-model="availabilityForm.available_to"
-                type="datetime-local"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                required
-              />
-            </div>
-          </div>
-
-          <!-- Quick Date Presets -->
-          <div class="border border-gray-200 rounded-lg p-4 space-y-3">
-            <div class="flex items-center gap-2 mb-2">
-              <UIcon name="i-heroicons-bolt" class="w-4 h-4 text-gray-500" />
-              <label class="text-sm font-semibold text-gray-700">Quick Date Presets</label>
-            </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-              <button
-                type="button"
-                @click="setAvailabilityDates('today', 7)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                1 week from today
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('today', 14)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                2 weeks from today
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('today', 30)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                1 month from today
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('event', -7)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                1 week before event
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('event', -14)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                2 weeks before event
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('event', -30)"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                1 month before event
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('during-event')"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                During event
-              </button>
-              <button
-                type="button"
-                @click="setAvailabilityDates('full-period')"
-                class="px-3 py-2 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-primary transition-colors"
-              >
-                Now until event
-              </button>
-            </div>
-            <p class="text-xs text-gray-500 mt-2">Click to quickly set common date ranges</p>
-          </div>
-
-          <!-- Timezone -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
-            <input
-              v-model="availabilityForm.timezone"
-              type="text"
-              placeholder="UTC"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-            <p class="text-xs text-gray-500 mt-1">
-              Defaults to event timezone: {{ event?.data?.timezone || 'UTC' }}
-            </p>
-          </div>
-
-          <!-- Info Box -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-              <UIcon name="i-heroicons-information-circle" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div class="flex-1">
-                <p class="text-sm font-medium text-blue-900 mb-1">About Availability Windows</p>
-                <p class="text-xs text-blue-700 leading-relaxed">
-                  <strong>Purchase Windows</strong> allow customers to buy the product during the specified time period. 
-                  <strong>Preview Windows</strong> make the product visible but not purchasable.
-                </p>
-              </div>
-            </div>
-          </div>
+          <AvailabilityWindowEditorFields
+            v-model:name="availabilityForm.name"
+            v-model:description="availabilityForm.description"
+            v-model:availability-type="availabilityForm.availability_type"
+            v-model:available-from="availabilityForm.available_from"
+            v-model:available-to="availabilityForm.available_to"
+            v-model:timezone="availabilityForm.timezone"
+            :type-options="AVAILABILITY_TYPE_OPTIONS"
+            :event-timezone="event?.data?.timezone || 'UTC'"
+            :event-start="event?.data?.start_datetime"
+            :event-end="event?.data?.end_datetime"
+            :conflict-windows="availabilityWindows"
+            :show-quick-presets="true"
+          />
         </div>
 
         <!-- Actions -->
@@ -2317,77 +2165,20 @@
         </p>
 
         <div class="space-y-5">
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Name *</label>
-            <input
-              v-model="variantAvailabilityForm.name"
-              type="text"
-              placeholder="e.g., XL Early Access"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea
-              v-model="variantAvailabilityForm.description"
-              rows="2"
-              placeholder="Optional description..."
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
-            ></textarea>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Window Type *</label>
-            <div class="grid grid-cols-2 gap-3">
-              <label
-                v-for="option in PRODUCT_VARIANT_AVAILABILITY_TYPES"
-                :key="option.value"
-                class="flex items-start gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all"
-                :class="variantAvailabilityForm.availability_type === option.value ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'"
-              >
-                <input
-                  v-model="variantAvailabilityForm.availability_type"
-                  type="radio"
-                  :value="option.value"
-                  class="text-primary focus:ring-primary mt-1"
-                />
-                <div class="flex-1">
-                  <div class="font-semibold text-gray-900 text-sm">{{ option.label }}</div>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Available From *</label>
-              <input
-                v-model="variantAvailabilityForm.available_from"
-                type="datetime-local"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-semibold text-gray-700 mb-2">Available To *</label>
-              <input
-                v-model="variantAvailabilityForm.available_to"
-                type="datetime-local"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">Timezone</label>
-            <input
-              v-model="variantAvailabilityForm.timezone"
-              type="text"
-              placeholder="UTC"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
+          <AvailabilityWindowEditorFields
+            v-model:name="variantAvailabilityForm.name"
+            v-model:description="variantAvailabilityForm.description"
+            v-model:availability-type="variantAvailabilityForm.availability_type"
+            v-model:available-from="variantAvailabilityForm.available_from"
+            v-model:available-to="variantAvailabilityForm.available_to"
+            v-model:timezone="variantAvailabilityForm.timezone"
+            :type-options="PRODUCT_VARIANT_AVAILABILITY_TYPES"
+            :event-timezone="event?.data?.timezone || 'UTC'"
+            :event-start="event?.data?.start_datetime"
+            :event-end="event?.data?.end_datetime"
+            :conflict-windows="selectedVariantForAvailability ? getVariantAvailabilityWindows(selectedVariantForAvailability) : []"
+            :show-quick-presets="true"
+          />
 
           <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
             <p class="text-xs text-blue-700">
@@ -2437,6 +2228,7 @@ import {
   useUpdateProductVariantAvailabilityWindow,
   useRemoveProductVariantAvailabilityWindow,
 } from '~/composables/resources/products/productVariantAvailabilityWindows'
+import AvailabilityWindowEditorFields from '~/components/events/AvailabilityWindowEditorFields.vue'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import type { ProductVariantDetail, AvailabilityWindow } from '~/api/types.gen'
 import { resolveImageUrl, onImageError } from '~/utils/image'

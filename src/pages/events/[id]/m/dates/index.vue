@@ -263,6 +263,7 @@
       :event-timezone="eventTimezone"
       :event-start="event?.data?.start_datetime"
       :event-end="event?.data?.end_datetime"
+      :conflict-windows="windows"
       :preset-start-date="presetStartDate"
       :preset-end-date="presetEndDate"
       @close="closeModal"

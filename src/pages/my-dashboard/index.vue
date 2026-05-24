@@ -376,6 +376,13 @@
                 <span class="text-[10px] font-bold uppercase tracking-wider text-deep-navy/60">Scheduled Events</span>
               </div>
             </div>
+            <NuxtLink
+              :to="`/events/create`"
+              class="inline-flex justify-center items-center gap-2 px-6 py-3 mt-4 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
+                >
+                <UIcon name="i-heroicons-calendar-days" class="w-5 h-5" />
+                Create Event
+            </NuxtLink>
           </div>
         </aside>
       </div>
