@@ -362,6 +362,7 @@
                 />
               </div>
               <UButton
+                v-if="!isCancelled"
                 color="blue"
                 :disabled="cancelling || isCancelled || !summary?.can_delete || (!!attendeeName && !cancelNameConfirmed)"
                 :loading="cancelling"
@@ -369,6 +370,10 @@
               >
                 Set attendee status to CANCELLED
               </UButton>
+              <div v-else class="flex items-center gap-2 text-sm text-green-700">
+                <UIcon name="i-heroicons-check-circle" class="h-4 w-4 flex-shrink-0" />
+                Attendee is cancelled
+              </div>
             </div>
           </div>
         </div>
