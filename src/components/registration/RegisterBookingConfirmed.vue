@@ -165,7 +165,7 @@
 								</div>
                                 
 							</div>
-                            <div>
+                            <div class="mb-4">
                                 <span class="text-[11px] font-semibold uppercase tracking-widest text-slate-400 block mb-1">Booking Ref</span>
                                 <p class="text-sm font-bold font-mono text-slate-900">{{ checkoutResult?.booking_reference }}</p>
                             </div>
