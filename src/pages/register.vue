@@ -263,7 +263,7 @@ const handleRegister = handleSubmit(async (values) => {
       })
       
       if (auth.isAuthenticated) {
-        navigateTo('/dashboard')
+        navigateTo('/my-dashboard')
       }
     } catch (loginError) {
       // If auto-login fails, redirect to login page

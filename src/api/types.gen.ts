@@ -5470,32 +5470,31 @@ export type DonationVerificationRequestRequest = {
 /**
  * Serializer for email verification process.
  *
- * Handles email verification token validation and user account activation.
+ * Accepts the ``uid`` (base-64 encoded user pk) and ``token`` produced by
+ * ``EmailVerificationTokenGenerator``, matching the shape of the password-
+ * reset confirm flow so the frontend can use a consistent pattern.
  *
  * Fields:
- * - token: Verification token sent via email
- * - email: User's email address
+ * - uid:   Base-64 encoded user primary key.
+ * - token: Single-use verification token.
  *
  * Example:
  * ```python
- * data = {'token': 'abc123...', 'email': 'user@example.com'}
+ * data = {'uid': 'Mw', 'token': 'abc-xyz123'}
  * serializer = EmailVerificationSerializer(data=data)
  * if serializer.is_valid():
- * # Mark user as verified
- * user.email_verified = True
- * user.email_verified_at = timezone.now()
- * user.save()
+ * # Decode uid, validate token, mark user verified
  * ```
  */
 export type EmailVerificationRequest = {
     /**
-     * Email verification token
+     * Base-64 encoded user primary key
+     */
+    uid: string;
+    /**
+     * Single-use email verification token
      */
     token: string;
-    /**
-     * Email address to verify
-     */
-    email: string;
 };
 
 /**
@@ -19624,6 +19623,76 @@ export type UserRegistrationRequest = {
      * Valid email address (used for login)
      */
     email: string;
+    /**
+     * Display username (auto-generated from email if not provided)
+     */
+    username?: string;
+    /**
+     * User's first name
+     */
+    first_name?: string;
+    /**
+     * User's last name
+     */
+    last_name?: string;
+};
+
+/**
+ * Production-grade serializer for CommunityUser model with HATEOAS support.
+ *
+ * Provides comprehensive user representation with hypermedia links, nested profile data,
+ * and computed fields. Follows REST best practices and includes extensive documentation.
+ *
+ * Features:
+ * - HATEOAS links for API discoverability
+ * - Nested profile data
+ * - OAuth provider information
+ * - Email verification status
+ * - Computed display name
+ * - ISO 8601 timestamps
+ *
+ * Fields:
+ * - url: HATEOAS link to user detail endpoint
+ * - id: Unique user identifier (UUID or int)
+ * - email: User's email address (unique, used for authentication)
+ * - username: Display username (auto-generated from email if not provided)
+ * - first_name: User's first name
+ * - last_name: User's last name
+ * - display_name: Best available display name (computed)
+ * - profile: Nested profile data (read-only)
+ * - profile_url: HATEOAS link to profile endpoint
+ * - email_verified: Email verification status
+ * - email_verified_at: Timestamp of email verification
+ * - oauth_provider: OAuth provider used (google, github, or none)
+ * - is_active: Account active status
+ * - is_staff: Staff status (admin access)
+ * - date_joined: Account creation timestamp
+ * - last_login: Last login timestamp
+ * - created_at: User creation timestamp
+ * - updated_at: Last update timestamp
+ *
+ * Related Endpoints:
+ * - GET /api/users/{id}/: Retrieve user details
+ * - GET /api/users/{id}/profile/: Retrieve user profile
+ * - PATCH /api/users/{id}/: Update user details
+ *
+ * Example:
+ * ```python
+ * # Serialize a user with HATEOAS links
+ * serializer = UserSerializer(user, context={'request': request})
+ * data = serializer.data
+ *
+ * # Response includes:
+ * # {
+ * #     "url": "http://api.example.com/api/users/1/",
+ * #     "id": 1,
+ * #     "email": "user@example.com",
+ * #     "profile_url": "http://api.example.com/api/users/1/profile/",
+ * #     ...
+ * # }
+ * ```
+ */
+export type UserRequest = {
     /**
      * Display username (auto-generated from email if not provided)
      */
@@ -51118,6 +51187,27 @@ export type UsersMeUpdatePartialUpdateResponses = {
 };
 
 export type UsersMeUpdatePartialUpdateResponse = UsersMeUpdatePartialUpdateResponses[keyof UsersMeUpdatePartialUpdateResponses];
+
+export type UsersResendVerificationCreateData = {
+    body?: UserRequest;
+    path?: never;
+    query?: never;
+    url: '/api/users/resend-verification/';
+};
+
+export type UsersResendVerificationCreateErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+};
+
+export type UsersResendVerificationCreateResponses = {
+    /**
+     * Verification email queued if not already verified
+     */
+    200: unknown;
+};
 
 export type UsersResetPasswordCreateData = {
     body: PasswordResetConfirmRequestWritable;

@@ -236,6 +236,32 @@
                   Active
                 </span>
               </div>
+              <div class="space-y-1">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Email Verification</p>
+                <button
+                  type="button"
+                  :class="[
+                    'inline-flex items-center gap-1 px-3 py-1 rounded-lg text-[11px] font-black border transition-all w-full justify-center',
+                    userData.data?.email_verified
+                      ? 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
+                      : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100',
+                  ]"
+                  @click="showEmailVerificationModal = true"
+                >
+                  <span class="material-symbols-outlined text-sm">{{ userData.data?.email_verified ? 'verified' : 'mark_email_unread' }}</span>
+                  {{ userData.data?.email_verified ? 'Verified' : 'Not Verified' }}
+                </button>
+              </div>
+              <div class="pt-2 border-t border-navy-100/50">
+                <button
+                  type="button"
+                  class="w-full py-2.5 bg-white border border-primary text-primary text-[11px] font-black uppercase tracking-widest rounded-xl hover:bg-primary hover:text-white transition-all flex items-center justify-center gap-1.5"
+                  @click="showChangePasswordModal = true"
+                >
+                  <span class="material-symbols-outlined text-base">lock_reset</span>
+                  Change Password
+                </button>
+              </div>
             </div>
           </section>
 
@@ -355,15 +381,26 @@
         </div>
       </Transition>
     </div>
+
+    <!-- Modals -->
+    <ChangePasswordModal v-model="showChangePasswordModal" />
+    <EmailVerificationModal
+      v-model="showEmailVerificationModal"
+      :email-verified="!!userData?.data?.email_verified"
+      :verified-at="userData?.data?.email_verified_at"
+      :user-email="userData?.data?.email"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
-import { onBeforeRouteLeave } from 'vue-router'
+import { onBeforeRouteLeave, useRoute } from 'vue-router'
 import { useMe, useUpdateMe } from '~/composables/resources/user/users'
 import { useMyProfile, usePartialUpdateProfile } from '~/composables/resources/user/profiles'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
+import ChangePasswordModal from '~/components/profile/ChangePasswordModal.vue'
+import EmailVerificationModal from '~/components/profile/EmailVerificationModal.vue'
 import type { ProfileRequest } from '~/api/types.gen'
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
@@ -371,6 +408,11 @@ import { ProfileSchema } from '~/schemas/profile.schema'
 import { validateImageFile, createImagePreview, resolveImageUrl } from '~/utils/image'
 
 const { $notyf } = useNuxtApp()
+const route = useRoute()
+
+// Modal state
+const showChangePasswordModal = ref(false)
+const showEmailVerificationModal = ref(false)
 
 // Fetch user and profile data
 const { data: userData, isLoading: isUserLoading, error: userError } = useMe()

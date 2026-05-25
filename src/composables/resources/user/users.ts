@@ -14,6 +14,7 @@ import {
   usersProfileRetrieve,
   usersChangePasswordCreate,
   usersVerifyEmailCreate,
+  usersResendVerificationCreate,
 } from '~/api/sdk.gen'
 import type {
   UsersListData,
@@ -26,6 +27,7 @@ import type {
   UsersChangePasswordCreateData,
   UsersVerifyEmailCreateData,
 } from '~/api/types.gen'
+
 
 const QUERY_KEY = ['users'] as const
 
@@ -191,5 +193,14 @@ export function useVerifyEmail() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, 'me'] })
     },
+  })
+}
+
+/**
+ * Resend email verification link to the current authenticated user.
+ */
+export function useResendVerification() {
+  return useMutation({
+    mutationFn: () => usersResendVerificationCreate(),
   })
 }
