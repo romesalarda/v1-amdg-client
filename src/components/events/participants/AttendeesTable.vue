@@ -101,11 +101,11 @@
           </td>
           <td class="py-3 px-4">
             <UBadge
-              :color="(attendee as any).is_checked_in ? 'green' : 'gray'"
+              :color="(statusColor(attendee.status) as any)"
               variant="soft"
               size="xs"
             >
-              {{ (attendee as any).status }}
+              {{ statusLabel(attendee.status) }}
             </UBadge>
           </td>
           <td class="py-3 px-4">
@@ -171,5 +171,31 @@ function onCheckboxChange(attendeeId: string) {
     current.splice(idx, 1)
   }
   emit('update:selectedAttendees', current)
+}
+
+type AttendeeStatus = 'pending_payment' | 'registered' | 'checked_in' | 'checked_out' | 'cancelled' | 'whitelisted'
+
+function statusColor(status?: string): string {
+  const map: Record<AttendeeStatus, string> = {
+    pending_payment: 'amber',
+    registered: 'blue',
+    checked_in: 'green',
+    checked_out: 'indigo',
+    cancelled: 'red',
+    whitelisted: 'purple',
+  }
+  return map[status as AttendeeStatus] ?? 'gray'
+}
+
+function statusLabel(status?: string): string {
+  const map: Record<AttendeeStatus, string> = {
+    pending_payment: 'Pending Payment',
+    registered: 'Registered',
+    checked_in: 'Checked In',
+    checked_out: 'Checked Out',
+    cancelled: 'Cancelled',
+    whitelisted: 'Whitelisted',
+  }
+  return map[status as AttendeeStatus] ?? status ?? '—'
 }
 </script>
