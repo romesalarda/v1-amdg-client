@@ -38,6 +38,14 @@
                   class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
                 <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>
+                <p v-else-if="titleExists && !isCheckingTitle" class="text-xs text-amber-500 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">warning</span>
+                  An event with this title already exists
+                </p>
+                <p v-else-if="isCheckingTitle && (title?.length ?? 0) >= 3" class="text-xs text-navy-400 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                  Checking title…
+                </p>
               </div>
 
               <div class="space-y-2">
@@ -170,6 +178,14 @@
                   </button>
                 </div>
                 <p v-if="errors.display_code" class="text-xs text-red-500">{{ errors.display_code }}</p>
+                <p v-else-if="codeExists && !isCheckingCode" class="text-xs text-amber-500 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">warning</span>
+                  This display code is already in use
+                </p>
+                <p v-else-if="isCheckingCode && (display_code?.length ?? 0) >= 1" class="text-xs text-navy-400 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                  Checking code…
+                </p>
               </div>
             </div>
           </div>
@@ -182,30 +198,59 @@
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-navy-900" for="start-datetime">
-                  Start Date & Time <span class="text-red-500">*</span>
+              <div class="md:col-span-2 space-y-3">
+                <label class="block text-sm font-semibold text-navy-900">
+                  Event Dates <span class="text-red-500">*</span>
                 </label>
-                <input
-                  id="start-datetime"
-                  v-model="start_datetime"
-                  type="datetime-local"
-                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <p v-if="errors.start_datetime" class="text-xs text-red-500">{{ errors.start_datetime }}</p>
-              </div>
+                <DateRangePicker
+                  :model-value-start="startDate"
+                  :model-value-end="endDate"
+                  @update:model-value-start="startDate = $event"
+                  @update:model-value-end="endDate = $event"
+                >
+                  <template #default="{ label, active }">
+                    <div
+                      class="w-full rounded-xl border px-4 py-2.5 text-sm flex items-center gap-2 cursor-pointer transition-all"
+                      :class="[
+                        active ? 'border-primary text-navy-900' : 'border-primary/20 text-navy-400',
+                        (errors.start_datetime || errors.end_datetime) ? 'border-red-400' : ''
+                      ]"
+                    >
+                      <span class="material-symbols-outlined text-primary text-base shrink-0">date_range</span>
+                      <span :class="active ? 'text-navy-900 font-medium' : 'text-navy-400'">
+                        {{ active ? label : 'Select date range' }}
+                      </span>
+                    </div>
+                  </template>
+                </DateRangePicker>
 
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-navy-900" for="end-datetime">
-                  End Date & Time <span class="text-red-500">*</span>
-                </label>
-                <input
-                  id="end-datetime"
-                  v-model="end_datetime"
-                  type="datetime-local"
-                  class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                <p v-if="errors.end_datetime" class="text-xs text-red-500">{{ errors.end_datetime }}</p>
+                <!-- Time inputs -->
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-navy-600" for="start-time">Start Time</label>
+                    <input
+                      id="start-time"
+                      v-model="startTime"
+                      type="time"
+                      :disabled="!startDate"
+                      class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                  <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-navy-600" for="end-time">End Time</label>
+                    <input
+                      id="end-time"
+                      v-model="endTime"
+                      type="time"
+                      :disabled="!endDate"
+                      class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    />
+                  </div>
+                </div>
+
+                <p v-if="errors.start_datetime || errors.end_datetime" class="text-xs text-red-500">
+                  {{ errors.start_datetime || errors.end_datetime }}
+                </p>
               </div>
 
               <div class="md:col-span-2 space-y-2">
@@ -432,11 +477,12 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { useCreateEvent } from '~/composables/resources/events/events'
+import { useCreateEvent, useEvents } from '~/composables/resources/events/events'
 import { useEventTypes } from '~/composables/resources/events/eventTypes'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
 import { useAuthStore } from '~/stores/auth'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
+import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 definePageMeta({
   middleware: 'auth'
@@ -558,6 +604,62 @@ onMounted(() => {
   }
 })
 
+// --- Title collision check ---
+const titleCheckRef = ref('')
+let titleCheckTimer: ReturnType<typeof setTimeout> | null = null
+watch(title, (val) => {
+  if (titleCheckTimer) clearTimeout(titleCheckTimer)
+  titleCheckTimer = setTimeout(() => { titleCheckRef.value = val || '' }, 600)
+})
+const { data: titleCheckData, isFetching: isCheckingTitle } = useEvents(
+  computed(() => titleCheckRef.value ? { title: titleCheckRef.value } : undefined)
+)
+const titleExists = computed(() => (titleCheckData.value?.data?.count || 0) > 0 &&  titleCheckRef.value.length > 0)
+
+// --- Display code collision check ---
+const codeCheckRef = ref('')
+let codeCheckTimer: ReturnType<typeof setTimeout> | null = null
+watch(display_code, (val) => {
+  if (codeCheckTimer) clearTimeout(codeCheckTimer)
+  codeCheckTimer = setTimeout(() => { codeCheckRef.value = val || '' }, 600)
+})
+const { data: codeCheckData, isFetching: isCheckingCode } = useEvents(
+  computed(() => codeCheckRef.value ? { display_code: codeCheckRef.value } : undefined)
+)
+const codeExists = computed(() => (codeCheckData.value?.data?.count || 0) > 0 && codeCheckRef.value.length > 0)
+
+// --- DateRangePicker state ---
+const startDate = ref('')
+const startTime = ref('09:00')
+const endDate = ref('')
+const endTime = ref('17:00')
+
+// Sync date+time parts → form fields
+watch([startDate, startTime], ([date, time]) => {
+  start_datetime.value = date ? `${date}T${time}` : ''
+})
+watch([endDate, endTime], ([date, time]) => {
+  end_datetime.value = date ? `${date}T${time}` : ''
+})
+
+// Sync form fields → date/time parts (for sdt query param initialisation)
+watch(start_datetime, (val) => {
+  if (val && val.includes('T')) {
+    const [d, t] = val.split('T')
+    if (d !== startDate.value) startDate.value = d
+    const hhmm = t.slice(0, 5)
+    if (hhmm !== startTime.value) startTime.value = hhmm
+  }
+}, { immediate: true })
+watch(end_datetime, (val) => {
+  if (val && val.includes('T')) {
+    const [d, t] = val.split('T')
+    if (d !== endDate.value) endDate.value = d
+    const hhmm = t.slice(0, 5)
+    if (hhmm !== endTime.value) endTime.value = hhmm
+  }
+}, { immediate: true })
+
 // Create event mutation
 const { mutate: createEvent, isPending: isSubmitting } = useCreateEvent()
 
@@ -576,9 +678,25 @@ const nextStep = () => {
       $notyf?.error('Please enter an event title')
       return
     }
+    if (isCheckingTitle.value) {
+      $notyf?.error('Please wait while we check title availability')
+      return
+    }
+    if (titleExists.value) {
+      $notyf?.error('An event with this title already exists — please choose a different title')
+      return
+    }
   } else if (currentStep.value === 1) {
     if (!organisation.value || !event_type.value || !display_code.value) {
       $notyf?.error('Please complete all required fields')
+      return
+    }
+    if (isCheckingCode.value) {
+      $notyf?.error('Please wait while we check display code availability')
+      return
+    }
+    if (codeExists.value) {
+      $notyf?.error('This display code is already in use — please choose a different code')
       return
     }
   } else if (currentStep.value === 2) {
@@ -636,7 +754,8 @@ const onSubmit = handleSubmit((formValues) => {
   createEvent(eventData as any, {
     onSuccess: (response) => {
       $notyf?.success('Event created successfully!')
-      navigateTo(`/events/${response?.data?.event_id}`)
+      console.log('Created event:', response?.data)
+      navigateTo(`/events/${response?.data?.url_safe_title}/m/dashboard`)
     },
     onError: (error: any) => {
       $notyf?.error(error?.message || 'Failed to create event')
