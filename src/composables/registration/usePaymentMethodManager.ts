@@ -176,9 +176,8 @@ export function usePaymentMethodManager(options: UsePaymentMethodManagerOptions)
 		clearBankTransferEvidenceErrors()
 	}
 
-	const onBankTransferEvidenceFileChange = (event: Event) => {
-		const input = event.target as HTMLInputElement
-		bankTransferEvidence.evidence_file = input.files?.[0] || null
+	const onBankTransferEvidenceFileChange = (file: File | null) => {
+		bankTransferEvidence.evidence_file = file
 		bankTransferEvidence.bank_transfer_evidence_id = ''
 		bankTransferEvidenceErrors.evidence_file = ''
 	}

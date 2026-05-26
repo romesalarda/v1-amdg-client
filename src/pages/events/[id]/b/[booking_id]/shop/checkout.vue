@@ -139,141 +139,29 @@
 
 						<div
 							v-if="isBankTransferMethod"
-							class="mt-4 rounded-xl border border-teal-200 bg-gradient-to-br from-teal-50 to-cyan-50 p-4"
+							class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4"
 						>
-							<div class="flex items-start justify-between gap-3">
-								<div>
-									<p class="text-xs font-black uppercase tracking-wide text-teal-900">Bank transfer payment</p>
-									<p class="mt-1 text-xs text-teal-900/75">Complete your payment by following the steps below.</p>
-								</div>
-								<span class="rounded-full border px-2 py-1 text-[10px] font-black uppercase tracking-wide"
-									:class="hasCompleteBankDetails ? 'border-teal-300 bg-teal-100 text-teal-700' : 'border-teal-300 bg-teal-50 text-teal-700'"
-								>
-									{{ hasCompleteBankDetails ? 'Ready' : 'Pending' }}
-								</span>
+							<div class="flex items-center justify-between gap-3">
+								<p class="text-sm font-semibold text-slate-900">{{ selectedPaymentMethod?.title }}</p>
+								<span class="rounded-full bg-slate-200 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-700">Bank Transfer</span>
 							</div>
-
-							<div class="relative mt-4">
-								<div class="pointer-events-none absolute left-3 top-8 bottom-8 w-px bg-teal-200" />
-								<ol class="space-y-3">
-									<li class="relative pl-10">
-										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-teal-300 bg-teal-100 text-[11px] font-black text-teal-700">1</div>
-										<div class="rounded-lg border border-teal-200 bg-white p-3">
-											<p class="text-[10px] font-black uppercase tracking-wide text-teal-700">Use these account details</p>
-											<div v-if="!hasCompleteBankDetails" class="mt-2 rounded-md border border-teal-300 bg-teal-50 px-2 py-2 text-xs text-teal-800">
-												Bank details are loading. Please wait or try another method.
-											</div>
-											<div class="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
-												<div class="rounded-lg border border-teal-200 bg-teal-50/50 p-3">
-													<p class="text-[9px] font-black uppercase tracking-widest text-teal-700">Account name</p>
-													<p class="mt-2 break-words text-sm font-bold text-deep-navy">{{ bankDetails.account_name || '—' }}</p>
-												</div>
-												<div class="rounded-lg border border-teal-200 bg-teal-50/50 p-3">
-													<p class="text-[9px] font-black uppercase tracking-widest text-teal-700">Sort code</p>
-													<p class="mt-2 text-sm font-bold text-deep-navy">{{ bankDetails.sort_code || '—' }}</p>
-												</div>
-												<div class="rounded-lg border border-teal-200 bg-teal-50/50 p-3">
-													<p class="text-[9px] font-black uppercase tracking-widest text-teal-700">Account number</p>
-													<p class="mt-2 text-sm font-bold text-deep-navy">{{ bankDetails.account_number || '—' }}</p>
-												</div>
-											</div>
-										</div>
-									</li>
-
-									<li class="relative pl-10">
-										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-teal-300 bg-teal-100 text-[11px] font-black text-teal-700">2</div>
-										<div class="rounded-lg border border-teal-200 bg-white p-3">
-											<p class="text-[10px] font-black uppercase tracking-wide text-teal-700">Amount to pay</p>
-											<p class="mt-2 text-2xl font-black text-deep-navy">{{ order?.total_amount || 'N/A' }}</p>
-										</div>
-									</li>
-
-									<li class="relative pl-10">
-										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-black"
-											:class="effectiveBankTransferReference ? 'border-teal-300 bg-teal-100 text-teal-700' : 'border-teal-300 bg-teal-100 text-teal-700'"
-										>
-											3
-										</div>
-										<div class="rounded-lg border border-teal-200 bg-white p-3">
-											<p class="text-[10px] font-black uppercase tracking-wide text-teal-700">Your transfer reference</p>
-											<p v-if="reservedBankTransferLoading" class="mt-3 text-xs text-teal-800">🔄 Reserving reference...</p>
-											<div v-else-if="reservedBankTransferError" class="mt-3 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-xs text-red-800">
-												<p class="font-semibold">⚠️ Unable to reserve reference</p>
-												<p class="mt-1">{{ reservedBankTransferError }}</p>
-												<button
-													type="button"
-													class="mt-2 rounded border border-red-300 px-3 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-100"
-													@click="reserveBankTransferPayment(true)"
-												>
-													Retry
-												</button>
-											</div>
-											<p v-else-if="effectiveBankTransferReference" class="mt-3 rounded-lg border-2 border-teal-400 bg-teal-50 px-3 py-3 text-sm font-bold text-teal-900 pulse-reference">
-												{{ effectiveBankTransferReference }}
-											</p>
-											<p v-else class="mt-3 text-xs text-teal-700">Your unique reference will appear here once reserved.</p>
-											<p v-if="checkoutResult?.bank_transfer_instructions" class="mt-3 rounded-md bg-teal-50 px-2 py-2 text-xs text-teal-800 font-medium">{{ checkoutResult.bank_transfer_instructions }}</p>
-										</div>
-									</li>
-									<li v-if="isBankTransferEvidenceRequiredImmediately" class="relative pl-10">
-										<div class="absolute left-0 top-1 flex h-6 w-6 items-center justify-center rounded-full border text-[11px] font-black"
-											:class="isBankTransferEvidenceFormReady ? 'border-teal-300 bg-teal-100 text-teal-700' : 'border-teal-300 bg-teal-100 text-teal-700'"
-										>
-											4
-										</div>
-										<div class="rounded-lg border border-teal-200 bg-white p-3">
-											<p class="text-[10px] font-black uppercase tracking-wide text-teal-700">Upload payment proof (required)</p>
-											<p class="mt-1 text-xs text-teal-800">📄 PDF, JPG, JPEG or PNG (max 10MB)</p>
-											<div class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-												<div class="sm:col-span-2">
-													<label class="mb-2 block text-[11px] font-bold uppercase tracking-wide text-teal-700">Payment proof file <span class="text-red-600">*</span></label>
-													<div class="relative">
-														<input type="file" accept=".pdf,.jpg,.jpeg,.png" class="absolute inset-0 opacity-0 cursor-pointer" @change="onBankTransferEvidenceFileChange">
-														<div class="rounded-lg border-2 border-dashed border-teal-300 bg-teal-50 px-4 py-4 text-center hover:bg-teal-100 transition">
-															<p class="text-sm font-semibold text-teal-900">{{ bankTransferEvidence.evidence_file?.name || '📎 Choose file or drag & drop' }}</p>
-															<p class="mt-1 text-xs text-teal-700">Click to browse or drop file here</p>
-														</div>
-													</div>
-													<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-2 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
-												</div>
-												<div>
-													<label class="mb-2 block text-[11px] font-bold uppercase tracking-wide text-teal-700">Payer name <span class="text-red-600">*</span></label>
-													<input v-model="bankTransferEvidence.payer_name" type="text" class="w-full rounded-lg border border-teal-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500" placeholder="Full name">
-													<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
-												</div>
-												<div>
-													<label class="mb-2 block text-[11px] font-bold uppercase tracking-wide text-teal-700">Last 4 digits <span class="text-red-600">*</span></label>
-													<input v-model="bankTransferEvidence.payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-teal-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500" placeholder="1234">
-													<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
-												</div>
-												<div class="sm:col-span-2">
-													<label class="mb-2 block text-[11px] font-bold uppercase tracking-wide text-teal-700">Amount transferred <span class="text-red-600">*</span></label>
-													<input v-model.number="bankTransferEvidence.amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-teal-300 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500" placeholder="0.00">
-													<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
-												</div>
-											</div>
-										</div>
-
-										<div class="mt-3 rounded-lg border border-teal-200 bg-teal-50/50 px-3 py-3 text-xs text-teal-800">
-											<p class="font-bold uppercase tracking-wide">📋 Evidence requirement</p>
-											<p class="mt-1">
-												{{ isBankTransferEvidenceRequiredImmediately
-													? 'Please provide proof of payment now to complete your checkout.'
-													: 'You can upload payment proof later before order completion.' }}
-											</p>
-										</div>
-									</li>
-								</ol>
-							</div>
-
-							<div class="mt-3 rounded-lg border border-teal-200 bg-white px-3 py-3 text-xs text-teal-800">
-								<p class="font-black uppercase tracking-wide">Evidence policy</p>
-								<p class="mt-1">
-									{{ isBankTransferEvidenceRequiredImmediately
-										? 'This method requires evidence upload during checkout.'
-										: 'Evidence can be uploaded later before payment completion.' }}
-								</p>
-							</div>
+							<BankTransferPaymentDetails
+								class="mt-4"
+								:bank-details="bankDetails"
+								:amount-to-pay="bankTransferAmountDisplay"
+								:reserved-bank-transfer-loading="reservedBankTransferLoading"
+								:reserved-bank-transfer-reference="effectiveBankTransferReference"
+								:reserved-bank-transfer-error="reservedBankTransferError"
+								:reserved-bank-transfer-payment-reference="reservedBankTransferPaymentId"
+								:is-bank-transfer-evidence-required-immediately="isBankTransferEvidenceRequiredImmediately"
+								:bank-transfer-evidence="bankTransferEvidence"
+								:bank-transfer-evidence-errors="bankTransferEvidenceErrors"
+								:bank-transfer-instructions="checkoutResult?.bank_transfer_instructions"
+								:amount-locked="bankTransferAmountLocked"
+								:amount-currency="currencyCode"
+								@file-change="onBankTransferEvidenceFileChange"
+								@retry="reserveBankTransferPayment(true)"
+							/>
 						</div>
 					</article>
 
@@ -473,6 +361,7 @@ import { useCheckoutProductOrder, useReserveProductOrderBankTransferPayment } fr
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
 import { toMultipartFormData } from '~/composables/registration/checkout'
 import { useOrderDiscountCode } from '~/composables/shop/useOrderDiscountCode'
+import BankTransferPaymentDetails from '~/components/common/BankTransferPaymentDetails.vue'
 
 definePageMeta({
 	layout: 'booking',
@@ -592,9 +481,8 @@ const clearBankTransferEvidenceForm = () => {
 	clearBankTransferEvidenceErrors()
 }
 
-const onBankTransferEvidenceFileChange = (event: Event) => {
-	const input = event.target as HTMLInputElement
-	bankTransferEvidence.evidence_file = input.files?.[0] || null
+const onBankTransferEvidenceFileChange = (file: File | null) => {
+	bankTransferEvidence.evidence_file = file
 	bankTransferEvidenceErrors.evidence_file = ''
 }
 
@@ -790,6 +678,24 @@ const effectiveBankTransferReference = computed(() => {
 	const checkoutRef = asTrimmedString(checkoutResult.value?.bank_transfer_reference)
 	if (checkoutRef) return checkoutRef
 	return asTrimmedString(reservedBankTransferReference.value)
+})
+
+const bankTransferAmountLocked = computed(() => {
+	if (discount.discountedTotal.value) return Number(discount.discountedTotal.value)
+	const raw = String(order.value?.total_amount || '').replace(/[^0-9.]/g, '')
+	return raw ? Number(raw) : null
+})
+
+const bankTransferAmountDisplay = computed(() => {
+	if (discount.discountedTotal.value) return `£${discount.discountedTotal.value}`
+	return order.value?.total_amount || null
+})
+
+watchEffect(() => {
+	if (!isBankTransferEvidenceRequiredImmediately.value) return
+	if (bankTransferAmountLocked.value !== null) {
+		bankTransferEvidence.amount_on_evidence = bankTransferAmountLocked.value
+	}
 })
 
 

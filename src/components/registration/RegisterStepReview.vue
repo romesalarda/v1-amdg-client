@@ -102,95 +102,22 @@
 			</div>
 
 			<!-- Bank Transfer Details -->
-			<div v-if="isBankTransferMethod" class="mt-4 grid gap-3 sm:grid-cols-2">
-				<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account name</p>
-					<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_name || 'TBA' }}</p>
-				</div>
-				<div class="rounded-lg border border-blue-200 bg-blue-50 p-3">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Sort code</p>
-					<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.sort_code || 'TBA' }}</p>
-				</div>
-				<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Account number</p>
-					<p class="mt-1 text-sm font-semibold text-blue-900">{{ bankDetails.account_number || 'TBA' }}</p>
-				</div>
-
-				<div class="rounded-lg border border-blue-200 bg-blue-50 p-3 sm:col-span-2">
-					<p class="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">Pay to the account with this reference</p>
-					<p v-if="reservedBankTransferLoading" class="mt-1 text-sm font-semibold text-blue-900">Reserving your reference...</p>
-					<p v-else-if="reservedBankTransferReference" class="mt-1 text-lg font-black tracking-[0.16em] text-blue-900 items-center gap-2 flex">
-						<UIcon name="i-heroicons-banknotes" class="h-5 w-5" />
-						{{ reservedBankTransferReference }}
-					</p>
-					<p v-else class="mt-1 text-sm text-blue-900">Select bank transfer to reserve your reference before checkout.</p>
-					<p v-if="reservedBankTransferError" class="mt-2 text-xs font-semibold text-red-600">{{ reservedBankTransferError }}</p>
-					<p v-else-if="reservedBankTransferPaymentReference" class="mt-2 text-[13px] text-blue-700 flex items-center gap-1">
-						<UIcon name="i-heroicons-exclamation-triangle" class="h-5 w-5" />
-						Failure to use the reserved reference or uploading evidence may result in payment delays or issues.
-					</p>
-				</div>
-
-				<div v-if="isBankTransferEvidenceRequiredImmediately" class="rounded-lg border border-amber-200 bg-white p-3 sm:col-span-2 space-y-3">
-					<p class="text-xs font-semibold text-slate-800">Upload transfer evidence</p>
-					<p class="text-[11px] text-slate-500">Upload an image of the money you have sent to our account. Ensure the photo quality is clear and the reference is visible.</p>
-					<div class="grid gap-3 sm:grid-cols-2">
-						<div class="sm:col-span-2">
-							<label class="mb-1 block text-[11px] font-semibold text-slate-700">Evidence file <span class="text-red-600">*</span></label>
-							<div
-								class="relative overflow-hidden rounded-xl border-2 border-dashed p-4 text-center transition-colors"
-								:class="bankTransferEvidenceDragActive ? 'border-blue-400 bg-blue-50' : 'border-slate-300 bg-slate-50 hover:border-slate-400 hover:bg-slate-100'"
-								@dragenter.prevent="bankTransferEvidenceDragActive = true"
-								@dragover.prevent="bankTransferEvidenceDragActive = true"
-								@dragleave.prevent="bankTransferEvidenceDragActive = false"
-								@drop.prevent="onBankTransferEvidenceDrop"
-							>
-								<input
-									ref="bankTransferEvidenceFileInput"
-									type="file"
-									accept=".pdf,.jpg,.jpeg,.png"
-									class="absolute inset-0 cursor-pointer opacity-0"
-									@change="onBankTransferEvidenceFileChange"
-								>
-								<div class="pointer-events-none flex flex-col items-center justify-center gap-2">
-									<div class="flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
-										<UIcon name="i-heroicons-cloud-arrow-up" class="h-5 w-5" />
-									</div>
-									<p class="text-xs font-semibold text-slate-800">Drag and drop evidence here, or click to upload</p>
-									<p class="text-[11px] text-slate-500">Accepted: PDF/JPG/JPEG/PNG up to 10MB.</p>
-									<p v-if="bankTransferEvidenceFileName" class="text-[11px] font-semibold text-emerald-700">
-										Attached: {{ bankTransferEvidenceFileName }}
-									</p>
-								</div>
-							</div>
-							<p v-if="bankTransferEvidenceErrors.evidence_file" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.evidence_file }}</p>
-						</div>
-						<div>
-							<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer name <span class="text-red-600">*</span></label>
-							<UInput v-model="bankTransferEvidence.payer_name" placeholder="Full name on the transfer" />
-							<p v-if="bankTransferEvidenceErrors.payer_name" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_name }}</p>
-						</div>
-						<div>
-							<label class="mb-1 block text-[11px] font-semibold text-slate-700">Payer account last 4 <span class="text-red-600">*</span></label>
-							<UInput v-model="bankTransferEvidence.payer_account_last4" placeholder="1234" maxlength="4" />
-							<p v-if="bankTransferEvidenceErrors.payer_account_last4" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.payer_account_last4 }}</p>
-						</div>
-						<div class="sm:col-span-2">
-							<label class="mb-1 block text-[11px] font-semibold text-slate-700">Amount on evidence <span class="text-red-600">*</span></label>
-							<UInput
-								:model-value="bankTransferEvidenceAmountLocked"
-								type="number"
-								min="0"
-								step="0.01"
-								readonly
-								disabled
-							/>
-							<p class="mt-1 text-[11px] text-slate-500">Locked to checkout total: {{ formatMoney(bankTransferEvidenceAmountLocked, bankTransferEvidenceAmountCurrency) }}</p>
-							<p v-if="bankTransferEvidenceErrors.amount_on_evidence" class="mt-1 text-xs font-semibold text-red-600">{{ bankTransferEvidenceErrors.amount_on_evidence }}</p>
-						</div>
-					</div>
-				</div>
-			</div>
+			<BankTransferPaymentDetails
+				v-if="isBankTransferMethod"
+				class="mt-4"
+				:bank-details="bankDetails"
+				:reserved-bank-transfer-loading="reservedBankTransferLoading"
+				:reserved-bank-transfer-reference="reservedBankTransferReference"
+				:reserved-bank-transfer-error="reservedBankTransferError"
+				:reserved-bank-transfer-payment-reference="reservedBankTransferPaymentReference"
+				:is-bank-transfer-evidence-required-immediately="isBankTransferEvidenceRequiredImmediately"
+				:bank-transfer-evidence="bankTransferEvidence"
+				:bank-transfer-evidence-errors="bankTransferEvidenceErrors"
+				:amount-locked="bankTransferEvidenceAmountLocked"
+				:amount-currency="bankTransferEvidenceAmountCurrency"
+				@file-change="(file) => props.onBankTransferEvidenceFileChange(file)"
+				@retry="emit('retry')"
+			/>
 
 			<!-- Stripe Card Details -->
 			<div v-else-if="isStripeMethod" class="mt-4 space-y-3">
@@ -257,6 +184,7 @@ import { formatMoney } from '~/utils/money'
 import type { AttendeeDraft } from '~/stores/registration'
 import type { PaymentMethod } from '~/api/types.gen'
 import DiscountCodeInput from '~/components/registration/DiscountCodeInput.vue'
+import BankTransferPaymentDetails from '~/components/common/BankTransferPaymentDetails.vue'
 
 const props = defineProps<{
 	attendees: AttendeeDraft[]
@@ -280,7 +208,7 @@ const props = defineProps<{
 	isBankTransferEvidenceRequiredImmediately: boolean
 	bankTransferEvidence: { payer_name: string; payer_account_last4: string; amount_on_evidence: number | null; [key: string]: any }
 	bankTransferEvidenceErrors: { evidence_file?: string; payer_name?: string; payer_account_last4?: string; amount_on_evidence?: string }
-	onBankTransferEvidenceFileChange: (event: Event) => void
+	onBankTransferEvidenceFileChange: (file: File | null) => void
 	isStripeTestMode: boolean
 	effectiveStripePublishableKey: string
 	manualStripePublicKey: string
@@ -328,9 +256,6 @@ const {
 	eventId,
 } = toRefs(props)
 
-const bankTransferEvidenceFileInput = ref<HTMLInputElement | null>(null)
-const bankTransferEvidenceDragActive = ref(false)
-
 const bankTransferEvidenceAmountLocked = computed(() => {
 	const amount = props.attendees.reduce((sum, attendee, index) => {
 		return sum + Number(props.attendeeReviewAmount(attendee, index).amount || 0)
@@ -346,36 +271,6 @@ const bankTransferEvidenceAmountCurrency = computed(() => {
 	return 'GBP'
 })
 
-const bankTransferEvidenceFileName = computed(() => {
-	const evidenceFile = props.bankTransferEvidence?.evidence_file
-	if (!evidenceFile) return ''
-	if (typeof evidenceFile === 'string') return evidenceFile
-	if (typeof evidenceFile === 'object' && 'name' in evidenceFile) {
-		return String(evidenceFile.name || '')
-	}
-	return ''
-})
-
-const onBankTransferEvidenceDrop = (event: DragEvent) => {
-	bankTransferEvidenceDragActive.value = false
-	const file = event.dataTransfer?.files?.[0]
-	if (!file) return
-
-	if (bankTransferEvidenceFileInput.value) {
-		const dataTransfer = new DataTransfer()
-		dataTransfer.items.add(file)
-		bankTransferEvidenceFileInput.value.files = dataTransfer.files
-		props.onBankTransferEvidenceFileChange({ target: bankTransferEvidenceFileInput.value } as unknown as Event)
-		return
-	}
-
-	props.onBankTransferEvidenceFileChange({
-		target: {
-			files: event.dataTransfer?.files,
-		},
-	} as unknown as Event)
-}
-
 watchEffect(() => {
 	if (!props.isBankTransferEvidenceRequiredImmediately) return
 	props.bankTransferEvidence.amount_on_evidence = bankTransferEvidenceAmountLocked.value
@@ -387,5 +282,6 @@ const emit = defineEmits<{
 	'update:manualStripePublicKey': [value: string]
 	'update:agreedToTerms': [value: boolean]
 	'update:discountCode': [value: string | null]
+	'retry': []
 }>()
 </script>
