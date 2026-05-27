@@ -272,11 +272,26 @@ const tabs = computed(() => [
     icon: 'i-heroicons-building-office-2',
     disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
   },
-  // {
-  //   path: 'notifications',
-  //   label: 'Notifications',
-  //   icon: 'i-heroicons-bell',
-  // },
+  {
+    path: 'workshops',
+    label: 'Workshops',
+    icon: 'i-heroicons-academic-cap',
+  },
+  {
+    path: 'transport',
+    label: 'Transport',
+    icon: 'i-heroicons-truck',
+  },
+  {
+    path: 'reviews',
+    label: 'Reviews',
+    icon: 'i-heroicons-star',
+  },
+  {
+    path: 'data-handling',
+    label: 'Data Handling',
+    icon: 'i-heroicons-shield-exclamation',
+  }
 ])
 
 const onTabClick = (event: MouseEvent, disabled?: boolean) => {

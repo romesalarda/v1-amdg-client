@@ -2,7 +2,7 @@
 	<div class="space-y-5">
 
 		<!-- Header -->
-		<div>
+		<div class="border-b-2 pb-4 mb-3">
 			<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Sponsor Flow</p>
 			<h2 class="text-2xl font-black text-deep-navy uppercase tracking-tight">Sponsor An Event</h2>
 			<p class="text-sm text-deep-navy/60 font-medium mt-1">Select the event, pick a package and payment method, then confirm checkout.</p>
@@ -12,7 +12,7 @@
 		<UStepper
 			:model-value="activeStep - 1"
 			:items="stepperItems"
-			:connector-width="72"
+			:connector-width="200"
 			@update:model-value="val => activeStep = val + 1"
 		/>
 
@@ -555,7 +555,7 @@ import { resolveImageUrl, onImageError } from '~/utils/image'
 import type { SponsorableEventList } from '~/api/types.gen'
 
 const stepperItems: StepperItem[] = [
-	{ key: 'event', label: 'Event', description: 'Choose a target' },
+	{ key: 'event', label: 'Event', description: 'Choose an event to sponsor' },
 	{ key: 'package', label: 'Package', description: 'Set package & payment' },
 	{ key: 'review', label: 'Review', description: 'Confirm checkout' },
 ]

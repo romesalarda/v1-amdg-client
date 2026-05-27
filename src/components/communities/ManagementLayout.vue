@@ -171,6 +171,21 @@ const tabs = computed(() => [
     label: 'Statistics',
     icon: 'i-heroicons-chart-pie',
   },
+  {
+    path: 'policies',
+    label: 'Policies',
+    icon: 'i-heroicons-document-text',
+  },
+  {
+    path: 'data-handling',
+    label: 'Data Handling',
+    icon: 'i-heroicons-shield-exclamation',
+  },
+  {
+    path: 'reviews',
+    label: 'Reviews',
+    icon: 'i-heroicons-star',
+  }
 ])
 
 const onTabClick = () => {
