@@ -161,12 +161,12 @@
         <div
           v-for="payment in dedupedPaymentItems"
           :key="payment.key"
-          class="rounded-lg border border-gray-200 bg-white p-3 cursor-pointer hover:bg-gray-50 transition"
-          @click="router.push(`/events/${eventQueryValue}/m/payments/list?search=${payment.item.payment_reference}`)"
+          class="rounded-lg border border-gray-200 bg-white p-3"
         >
           <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div class="space-y-1">
-              <div class="flex flex-wrap items-center gap-2">
+            <div class="space-y-1 hover:cursor-pointer hover:bg-gray-50 transition" @click="router.push(`/events/${eventQueryValue}/m/payments/list?search=${payment.item.payment_reference}`)">
+              <div class="flex flex-wrap items-center gap-2" 
+>
                 <UIcon name="i-heroicons-cube-transparent" class="h-4 w-4 text-indigo-600" />
                 <span class="text-sm font-semibold text-gray-900">{{ payment.item.payment_reference || payment.item.payment_id || 'Payment' }}</span>
                 <UBadge v-if="payment.item.payment_descriptor" color="blue" variant="soft" size="xs">{{ payment.item.payment_descriptor }}</UBadge>

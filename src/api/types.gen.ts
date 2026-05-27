@@ -7630,6 +7630,85 @@ export type EventMyPaymentSummaryTotals = {
     readonly total_outstanding_amount: string;
 };
 
+/**
+ * Read-only serializer for EventNotification. Mutations are internal-only.
+ */
+export type EventNotification = {
+    readonly id: number;
+    /**
+     * Event this notification belongs to
+     */
+    readonly event: number;
+    readonly event_title: string;
+    readonly event_display_code: string;
+    /**
+     * * `ORDER_FULFILLMENT` - Order Fulfillment Required
+     * * `BOOKING_CONFIRMATION` - Booking Confirmed
+     * * `REFUND_REQUEST` - Refund Requested
+     * * `PAYMENT_FAILED` - Payment Failed
+     * * `CAPACITY_WARNING` - Capacity Warning
+     * * `AUTHORIZATION_REQUEST` - Authorization Request
+     * * `GENERAL` - General Notification
+     */
+    notification_type: 'ORDER_FULFILLMENT' | 'BOOKING_CONFIRMATION' | 'REFUND_REQUEST' | 'PAYMENT_FAILED' | 'CAPACITY_WARNING' | 'AUTHORIZATION_REQUEST' | 'GENERAL';
+    readonly notification_type_display: string;
+    /**
+     * * `LOW` - Low
+     * * `NORMAL` - Normal
+     * * `HIGH` - High
+     * * `URGENT` - Urgent
+     */
+    priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
+    readonly priority_display: string;
+    /**
+     * Payment associated with this notification
+     */
+    readonly related_payment: number | null;
+    /**
+     * Order associated with this notification
+     */
+    readonly related_order: number | null;
+    /**
+     * Booking associated with this notification
+     */
+    readonly related_booking: number | null;
+    /**
+     * Whether this notification has been read/acknowledged
+     */
+    readonly is_read: boolean;
+    /**
+     * Additional metadata for rendering notification content
+     */
+    readonly metadata: unknown;
+    /**
+     * User who triggered this notification (null for system-generated)
+     */
+    readonly created_by: number | null;
+    readonly created_by_email: string | null;
+    readonly created_at: string;
+    /**
+     * When the notification was marked as read
+     */
+    readonly read_at: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        /**
+         * Link to this notification
+         */
+        self: string;
+        /**
+         * Link to the event
+         */
+        event?: string;
+        /**
+         * Action URL to mark notification as read
+         */
+        mark_read?: string;
+    };
+};
+
 export type EventOutstandingTask = {
     readonly title: string;
     readonly description: string;
@@ -10197,6 +10276,10 @@ export type EventVenue = {
     readonly contacts: Array<EventVenueContact>;
     readonly metadata: Array<EventVenueMetadata>;
     /**
+     * Designates the primary venue for the event when multiple venues are present.
+     */
+    is_primary?: boolean;
+    /**
      *  links
      */
     readonly _links: {
@@ -10295,6 +10378,10 @@ export type EventVenueRequest = {
     instructions?: string;
     notes?: string;
     capacity?: number | null;
+    /**
+     * Designates the primary venue for the event when multiple venues are present.
+     */
+    is_primary?: boolean;
 };
 
 /**
@@ -12728,6 +12815,13 @@ export type PaginatedEventListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventList>;
+};
+
+export type PaginatedEventNotificationList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventNotification>;
 };
 
 export type PaginatedEventPermissionAssignmentList = {
@@ -15648,6 +15742,10 @@ export type PatchedEventVenueRequest = {
     instructions?: string;
     notes?: string;
     capacity?: number | null;
+    /**
+     * Designates the primary venue for the event when multiple venues are present.
+     */
+    is_primary?: boolean;
 };
 
 /**
@@ -15884,6 +15982,11 @@ export type PatchedPaymentMethodCreateUpdateRequest = {
 
 /**
  * Update serializer for Payment with status transition validation.
+ *
+ * Only administrative staff may reach this serializer (enforced at the viewset
+ * via get_permissions). Fields that must never be externally mutated — Stripe
+ * identifiers, payment method, and raw metadata — are excluded from the
+ * writable surface to prevent forgery and audit-trail tampering.
  */
 export type PatchedPaymentUpdateRequest = {
     /**
@@ -15897,11 +16000,7 @@ export type PatchedPaymentUpdateRequest = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
-    method?: number | null;
     description?: string | null;
-    metadata?: unknown;
-    stripe_payment_intent?: string | null;
-    stripe_charge_id?: string | null;
 };
 
 /**
@@ -16779,6 +16878,11 @@ export type PaymentTrends = {
 
 /**
  * Update serializer for Payment with status transition validation.
+ *
+ * Only administrative staff may reach this serializer (enforced at the viewset
+ * via get_permissions). Fields that must never be externally mutated — Stripe
+ * identifiers, payment method, and raw metadata — are excluded from the
+ * writable surface to prevent forgery and audit-trail tampering.
  */
 export type PaymentUpdate = {
     /**
@@ -16792,15 +16896,16 @@ export type PaymentUpdate = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
-    method?: number | null;
     description?: string | null;
-    metadata?: unknown;
-    stripe_payment_intent?: string | null;
-    stripe_charge_id?: string | null;
 };
 
 /**
  * Update serializer for Payment with status transition validation.
+ *
+ * Only administrative staff may reach this serializer (enforced at the viewset
+ * via get_permissions). Fields that must never be externally mutated — Stripe
+ * identifiers, payment method, and raw metadata — are excluded from the
+ * writable surface to prevent forgery and audit-trail tampering.
  */
 export type PaymentUpdateRequest = {
     /**
@@ -16814,11 +16919,7 @@ export type PaymentUpdateRequest = {
      * * `PARTIALLY_REFUNDED` - Partially Refunded
      */
     status?: 'DRAFTING' | 'PENDING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'PENDING_REFUND' | 'REFUNDED' | 'PARTIALLY_REFUNDED';
-    method?: number | null;
     description?: string | null;
-    metadata?: unknown;
-    stripe_payment_intent?: string | null;
-    stripe_charge_id?: string | null;
 };
 
 /**
@@ -22851,6 +22952,13 @@ export type EventListWritable = {
     created_by?: number | null;
 };
 
+/**
+ * Read-only serializer for EventNotification. Mutations are internal-only.
+ */
+export type EventNotificationWritable = {
+    [key: string]: unknown;
+};
+
 export type EventPermissionWritable = {
     name: string;
     code: string;
@@ -23851,6 +23959,10 @@ export type EventVenueWritable = {
     instructions?: string;
     notes?: string;
     capacity?: number | null;
+    /**
+     * Designates the primary venue for the event when multiple venues are present.
+     */
+    is_primary?: boolean;
 };
 
 /**
@@ -24770,6 +24882,13 @@ export type PaginatedEventListListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<EventListWritable>;
+};
+
+export type PaginatedEventNotificationListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventNotificationWritable>;
 };
 
 export type PaginatedEventPermissionAssignmentListWritable = {
@@ -31710,6 +31829,9 @@ export type CheckinsCreateResponse = CheckinsCreateResponses[keyof CheckinsCreat
 export type CheckinsRetrieveData = {
     body?: never;
     path: {
+        /**
+         * Check-in record UUID
+         */
         id: string;
     };
     query?: never;
@@ -35020,6 +35142,144 @@ export type EventListUpcomingListResponses = {
 };
 
 export type EventListUpcomingListResponse = EventListUpcomingListResponses[keyof EventListUpcomingListResponses];
+
+export type EventNotificationsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter notifications created after this datetime
+         */
+        created_after?: string;
+        /**
+         * Filter notifications created before this datetime
+         */
+        created_before?: string;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
+        /**
+         * Filter by event ID
+         */
+        event_id?: number;
+        /**
+         * Filter by read status
+         */
+        is_read?: boolean;
+        /**
+         * Filter by notification type (multi-value)
+         */
+        notification_type?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by priority (multi-value)
+         */
+        priority?: string;
+        /**
+         * Filter by related booking ID
+         */
+        related_booking?: number;
+        /**
+         * Filter by related order ID
+         */
+        related_order?: number;
+        /**
+         * Filter by related payment ID
+         */
+        related_payment?: number;
+    };
+    url: '/api/event/notifications/';
+};
+
+export type EventNotificationsListResponses = {
+    200: PaginatedEventNotificationList;
+};
+
+export type EventNotificationsListResponse = EventNotificationsListResponses[keyof EventNotificationsListResponses];
+
+export type EventNotificationsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Event Notification.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/notifications/{id}/';
+};
+
+export type EventNotificationsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventNotificationsDestroyResponse = EventNotificationsDestroyResponses[keyof EventNotificationsDestroyResponses];
+
+export type EventNotificationsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Event Notification.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/notifications/{id}/';
+};
+
+export type EventNotificationsRetrieveResponses = {
+    200: EventNotification;
+};
+
+export type EventNotificationsRetrieveResponse = EventNotificationsRetrieveResponses[keyof EventNotificationsRetrieveResponses];
+
+export type EventNotificationsMarkReadCreateData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Event Notification.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/notifications/{id}/mark-read/';
+};
+
+export type EventNotificationsMarkReadCreateResponses = {
+    200: EventNotification;
+};
+
+export type EventNotificationsMarkReadCreateResponse = EventNotificationsMarkReadCreateResponses[keyof EventNotificationsMarkReadCreateResponses];
+
+export type EventNotificationsMarkAllReadCreateData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/event/notifications/mark-all-read/';
+};
+
+export type EventNotificationsMarkAllReadCreateResponses = {
+    200: {
+        marked_read?: number;
+    };
+};
+
+export type EventNotificationsMarkAllReadCreateResponse = EventNotificationsMarkAllReadCreateResponses[keyof EventNotificationsMarkAllReadCreateResponses];
 
 export type EventPermissionAssignmentsListData = {
     body?: never;
@@ -48918,204 +49178,6 @@ export type ProductsListVariantsUpdateDiscountPartialUpdateResponses = {
      */
     200: unknown;
 };
-
-export type ProductsInventoryBreakdown2Data = {
-    body?: never;
-    path?: never;
-    query: {
-        /**
-         * Filter products by category ID.
-         */
-        category?: number;
-        /**
-         * Filter variants by hex colour (e.g. #FF0000). Case-insensitive.
-         */
-        color?: string;
-        /**
-         * URL-safe title of the event (`url_safe_title` field). Required.
-         */
-        event: string;
-        /**
-         * If true, only return variants where current_stock > 0.
-         */
-        has_stock?: boolean;
-        /**
-         * Filter products by active status (true or false).
-         */
-        is_active?: boolean;
-        /**
-         * If true, only return variants where quantity_to_order > 0.
-         */
-        needs_reorder?: boolean;
-        /**
-         * Narrow results to a single product by its UUID.
-         */
-        product?: string;
-        /**
-         * Filter variants by size code (e.g. SM, LG, OS). Case-insensitive.
-         */
-        size?: string;
-    };
-    url: '/api/products/list/inventory/';
-};
-
-export type ProductsInventoryBreakdown2Errors = {
-    /**
-     * Missing or invalid `event` query parameter.
-     */
-    400: unknown;
-    /**
-     * Permission denied – administrative access required.
-     */
-    403: unknown;
-    /**
-     * No event found matching the supplied slug.
-     */
-    404: unknown;
-};
-
-export type ProductsInventoryBreakdown2Responses = {
-    200: EventInventoryBreakdown;
-};
-
-export type ProductsInventoryBreakdown2Response = ProductsInventoryBreakdown2Responses[keyof ProductsInventoryBreakdown2Responses];
-
-export type ProductsInventoryAttendees2Data = {
-    body?: never;
-    path?: never;
-    query: {
-        /**
-         * Filter products added after this date
-         */
-        added_after?: string;
-        /**
-         * Filter products added before this date
-         */
-        added_before?: string;
-        /**
-         * Filter by user ID who added the product
-         */
-        added_by?: number;
-        /**
-         * Filter products added on specific date (YYYY-MM-DD)
-         */
-        added_date?: string;
-        /**
-         * Filter by attendee registration status (e.g. registered, checked_in).
-         */
-        attendee_status?: string;
-        /**
-         * Filter by category ID (can specify multiple, comma-separated)
-         */
-        category?: Array<number>;
-        /**
-         * Filter by category name
-         */
-        category__name?: string;
-        /**
-         * Filter by display code (case-insensitive)
-         */
-        display_code?: string;
-        /**
-         * Display code contains
-         */
-        display_code__contains?: string;
-        /**
-         * URL-safe title of the event (`url_safe_title` field). Required.
-         */
-        event: string;
-        /**
-         * Filter products that have variants
-         */
-        has_variants?: boolean;
-        /**
-         * Filter products with available stock (in any variant)
-         */
-        in_stock?: boolean;
-        /**
-         * Filter by active status
-         */
-        is_active?: boolean;
-        /**
-         * Filter by order item status. One of: pending, completed, cancelled, pending_refund, refunded.
-         */
-        item_status?: string;
-        /**
-         * Maximum product price
-         */
-        max_price?: number;
-        /**
-         * Minimum product price
-         */
-        min_price?: number;
-        /**
-         * Filter by order status. One of: draft, pending, processing, completed, cancelled, pending_refund, partially_refunded, refunded.
-         */
-        order_status?: string;
-        /**
-         * Which field to use when ordering the results.
-         */
-        ordering?: string;
-        /**
-         * A page number within the paginated result set.
-         */
-        page?: number;
-        /**
-         * Number of results to return per page.
-         */
-        page_size?: number;
-        /**
-         * Exact product price
-         */
-        price?: number;
-        /**
-         * UUID of the product variant to query. Required.
-         */
-        product_variant: string;
-        /**
-         * A search term.
-         */
-        search?: string;
-        /**
-         * Exact product title (case-insensitive)
-         */
-        title?: string;
-        /**
-         * Product title contains (case-insensitive)
-         */
-        title__contains?: string;
-        /**
-         * Product title starts with (case-insensitive)
-         */
-        title__startswith?: string;
-        /**
-         * Filter by verification status
-         */
-        verified?: boolean;
-    };
-    url: '/api/products/list/inventory/attendees/';
-};
-
-export type ProductsInventoryAttendees2Errors = {
-    /**
-     * Missing required query parameters.
-     */
-    400: unknown;
-    /**
-     * Permission denied – administrative access required.
-     */
-    403: unknown;
-    /**
-     * Event or variant not found.
-     */
-    404: unknown;
-};
-
-export type ProductsInventoryAttendees2Responses = {
-    200: PaginatedInventoryAttendeeOrderLineList;
-};
-
-export type ProductsInventoryAttendees2Response = ProductsInventoryAttendees2Responses[keyof ProductsInventoryAttendees2Responses];
 
 export type ProductsOrderItemsListData = {
     body?: never;

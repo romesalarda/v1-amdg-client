@@ -159,6 +159,15 @@
         <span v-if="event?.organisation_name" class="text-xs text-gray-500">
           {{ event.organisation_name }}
         </span>
+
+        <NuxtLink
+          :to="`/events/${eventId}/m/notifications`"
+          class="text-xs text-blue-500 hover:underline flex items-center gap-1"
+        >
+          <UIcon name="i-heroicons-bell" class="w-4 h-4" />
+          Notifications 
+        </NuxtLink>
+
       </div>
     </header>
 
@@ -263,6 +272,11 @@ const tabs = computed(() => [
     icon: 'i-heroicons-building-office-2',
     disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
   },
+  // {
+  //   path: 'notifications',
+  //   label: 'Notifications',
+  //   icon: 'i-heroicons-bell',
+  // },
 ])
 
 const onTabClick = (event: MouseEvent, disabled?: boolean) => {

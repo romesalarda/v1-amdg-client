@@ -16,6 +16,7 @@
           </div>
           <div class="flex items-center gap-1">
             <button
+              v-if="payments.length > 1"
               type="button"
               class="rounded border border-outline-variant px-3 py-1 text-label-bold font-label-bold uppercase text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="payments.length <= 1"
@@ -24,6 +25,7 @@
               PREV
             </button>
             <button
+              v-if="payments.length > 1"
               type="button"
               class="rounded border border-outline-variant px-3 py-1 text-label-bold font-label-bold uppercase text-on-surface-variant hover:bg-surface-container-low disabled:opacity-50 disabled:cursor-not-allowed"
               :disabled="payments.length <= 1"
