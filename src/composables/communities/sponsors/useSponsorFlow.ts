@@ -163,7 +163,7 @@ export function useSponsorFlow(
   )
   const selectedPackageAmount = computed(() => {
     if (!selectedPackage.value) return 'N/A'
-    return formatMoney(selectedPackage.value.modified_amount, selectedPackage.value.base_amount_currency)
+    return selectedPackage.value.modified_amount
   })
 
   // Checkout validation

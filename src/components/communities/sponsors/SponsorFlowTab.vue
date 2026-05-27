@@ -1,340 +1,439 @@
 <template>
-	<div class="border-2 border-deep-navy/10 rounded-2xl p-8 space-y-6 bg-white">
-		<!-- Header + step navigation -->
-		<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-			<div>
-				<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Sponsor Flow</p>
-				<h2 class="text-2xl font-black text-deep-navy uppercase tracking-tight">Sponsor An Event</h2>
-				<p class="text-sm text-deep-navy/60 font-medium">Select the event, pick a package and payment method, then confirm checkout.</p>
-			</div>
-			<div class="flex items-center gap-2">
-				<button
-					type="button"
-					class="px-4 py-2 rounded-xl border-2 border-deep-navy text-deep-navy text-xs font-black uppercase tracking-wider"
-					@click="activeStep = Math.max(1, activeStep - 1)"
-					:disabled="activeStep === 1"
-				>
-					Back
-				</button>
-				<button
-					type="button"
-					:class="canGoNextStep() ? 'px-4 py-2 rounded-xl bg-green-500 text-white text-xs font-black uppercase tracking-wider' : 'px-4 py-2 rounded-xl bg-gray-300 text-gray-500 text-xs font-black uppercase tracking-wider'"
-					@click="goNextStep"
-					:disabled="!canGoNextStep()"
-				>
-					Next
-				</button>
-			</div>
+	<div class="space-y-5">
+
+		<!-- Header -->
+		<div>
+			<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Sponsor Flow</p>
+			<h2 class="text-2xl font-black text-deep-navy uppercase tracking-tight">Sponsor An Event</h2>
+			<p class="text-sm text-deep-navy/60 font-medium mt-1">Select the event, pick a package and payment method, then confirm checkout.</p>
 		</div>
 
 		<!-- Step indicator -->
-		<div class="grid grid-cols-3 gap-3">
-			<div
-				v-for="step in steps"
-				:key="step.id"
-				class="flex items-center gap-3 p-3 rounded-xl border-2"
-				:class="activeStep >= step.id ? 'border-deep-navy bg-deep-navy text-white' : 'border-deep-navy/20 text-deep-navy'"
-			>
-				<div
-					class="h-8 w-8 rounded-full flex items-center justify-center text-xs font-black uppercase tracking-wider"
-					:class="activeStep >= step.id ? 'bg-white/20 text-white' : 'bg-deep-navy/5 text-deep-navy'"
-				>
-					{{ step.id }}
-				</div>
-				<div>
-					<p class="text-xs font-black uppercase tracking-wider">{{ step.label }}</p>
-					<p class="text-[10px] uppercase tracking-wider opacity-80">{{ step.hint }}</p>
-				</div>
-			</div>
-		</div>
+		<UStepper
+			:model-value="activeStep - 1"
+			:items="stepperItems"
+			:connector-width="72"
+			@update:model-value="val => activeStep = val + 1"
+		/>
 
-		<!-- Step 1: Event selection -->
-		<div v-if="activeStep === 1" class="space-y-4">
-			<div class="flex flex-col md:flex-row gap-3">
-				<div class="flex-1">
-					<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Search Events</label>
-					<input
-						v-model="eventSearch"
-						type="text"
-						placeholder="Search by title, code, or description"
-						class="w-full px-4 py-3 bg-white border-2 border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-					/>
-				</div>
-				<div class="flex flex-col justify-end">
-					<button
-						type="button"
-						class="px-4 py-3 rounded-xl border-2 border-deep-navy/30 text-deep-navy text-xs font-black uppercase tracking-wider"
-						@click="selectFirstEvent"
-					>
-						Auto Select
-					</button>
-				</div>
-			</div>
+		<!-- Step panels -->
+		<div class="min-h-[300px] max-w-4xl mx-auto">
 
-			<div v-if="isLoadingSponsorableEvents" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-				<USkeleton class="h-20 w-full" />
-				<USkeleton class="h-20 w-full" />
-			</div>
-			<div v-else-if="sponsorableEvents.length === 0" class="text-center py-8 bg-deep-navy/5 border-2 border-dashed border-deep-navy/20 rounded-xl">
-				<p class="text-sm font-bold text-deep-navy/60">No sponsorable events found for your current filters.</p>
-			</div>
-			<div v-else class="space-y-3">
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-					<button
-						v-for="event in sponsorableEvents"
-						:key="event.event_id"
-						type="button"
-						@click="handleSelectEvent(event)"
-						class="text-left p-4 border-2 rounded-xl transition-all"
-						:class="selectedEventId === event.event_id
-							? 'border-deep-navy bg-deep-navy text-white'
-							: 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/40'"
-					>
-						<p class="text-sm font-black uppercase tracking-tight">{{ event.title }}</p>
-						<p class="mt-1 text-xs font-bold uppercase tracking-wider opacity-80">{{ formatDateSafe(event.start_datetime) }}</p>
-						<p class="mt-1 text-xs font-bold uppercase tracking-wider opacity-80">{{ event.active_sponsorship_packages_count }} active packages</p>
-					</button>
-				</div>
+			<!-- Step 1: Event selection -->
+			<div v-if="activeStep === 1" class="space-y-4">
 
-				<div class="flex items-center justify-between pt-2">
-					<p class="text-xs font-bold text-deep-navy/55 uppercase tracking-wider">
-						Page {{ eventPage }} • {{ sponsorableEventsCount }} results
-					</p>
-					<div class="flex items-center gap-2">
+				<!-- Search bar -->
+				<div class="flex flex-col md:flex-row gap-3">
+					<div class="flex-1">
+						<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Search Events</label>
+						<input
+							v-model="eventSearch"
+							type="text"
+							placeholder="Search by title, code, or description"
+							class="w-full px-4 py-3 bg-white border-2 border-deep-navy/20 rounded-xl focus:border-deep-navy focus:outline-none font-medium text-sm text-deep-navy placeholder:text-deep-navy/30 transition-colors"
+						/>
+					</div>
+					<div class="flex flex-col justify-end">
 						<button
 							type="button"
-							@click="eventPage = Math.max(1, eventPage - 1)"
-							:disabled="!hasPrevEventsPage"
-							class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black text-primary uppercase tracking-wider disabled:opacity-40"
+							class="px-4 py-3 rounded-xl border-2 border-deep-navy/20 text-deep-navy text-xs font-black uppercase tracking-wider hover:border-deep-navy/40 transition-colors"
+							@click="selectFirstEvent"
 						>
-							Prev
-						</button>
-						<button
-							type="button"
-							@click="eventPage = eventPage + 1"
-							:disabled="!hasNextEventsPage"
-							class="px-3 py-2 border-2 border-deep-navy/30 rounded-lg text-[10px] font-black text-primary uppercase tracking-wider disabled:opacity-40"
-						>
-							Next
+							Auto Select
 						</button>
 					</div>
 				</div>
-			</div>
 
-			<!-- Payment history panel (shown on step 1 when event is selected) -->
-			<div class="border-2 border-deep-navy/10 rounded-2xl p-6 space-y-4 bg-deep-navy/5">
-				<h3 class="text-lg font-black text-deep-navy uppercase tracking-tight">Sponsorship Payments</h3>
-				<div v-if="!selectedEvent" class="text-center py-6 bg-white border-2 border-dashed border-deep-navy/20 rounded-xl">
-					<p class="text-sm font-bold text-deep-navy/60">Select an event to see payment history.</p>
+				<!-- Event list -->
+				<div v-if="isLoadingSponsorableEvents" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+					<div v-for="i in 4" :key="i" class="aspect-[16/9] rounded-xl bg-deep-navy/5 animate-pulse" />
 				</div>
-				<div v-else-if="isLoadingPaymentHistory" class="space-y-3">
-					<USkeleton class="h-16 w-full" />
-					<USkeleton class="h-16 w-full" />
+				<div v-else-if="sponsorableEvents.length === 0" class="text-center py-10 border-2 border-dashed border-deep-navy/15 rounded-2xl">
+					<p class="text-sm font-black uppercase tracking-wider text-deep-navy/40">No sponsorable events found.</p>
 				</div>
-				<div v-else-if="!paymentHistoryData" class="text-center py-6 bg-white border-2 border-dashed border-deep-navy/20 rounded-xl">
-					<p class="text-sm font-bold text-deep-navy/60">No sponsorship payment data available yet.</p>
-				</div>
-				<div v-else class="space-y-4">
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-						<div class="p-4 rounded-xl border-2 border-deep-navy/10 bg-white">
-							<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Total Payments</p>
-							<p class="mt-2 text-xl font-black text-deep-navy">{{ paymentSummaryCount }}</p>
-						</div>
-						<div class="p-4 rounded-xl border-2 border-deep-navy/10 bg-white">
-							<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Completed Amount</p>
-							<p class="mt-2 text-xl font-black text-deep-navy">{{ paymentSummaryAmount }}</p>
-						</div>
-						<div class="p-4 rounded-xl border-2 border-deep-navy/10 bg-white">
-							<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Pending</p>
-							<p class="mt-2 text-xl font-black text-deep-navy">{{ paymentSummaryPending }}</p>
-						</div>
+				<div v-else class="space-y-3">
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+						<button
+							v-for="event in sponsorableEvents"
+							:key="event.event_id"
+							type="button"
+							@click="handleSelectEvent(event)"
+							class="group text-left border-2 rounded-xl overflow-hidden transition-all"
+							:class="selectedEventId === event.event_id
+								? 'border-deep-navy ring-2 ring-deep-navy'
+								: 'border-deep-navy/15 hover:border-deep-navy/40'"
+						>
+							<!-- Image -->
+							<div class="relative aspect-[16/9] overflow-hidden bg-deep-navy/5">
+								<img
+									v-if="event.main_landing_image?.image"
+									:src="resolveImageUrl(event.main_landing_image.image_urls?.medium || event.main_landing_image.image_urls?.original)"
+									:alt="event.title"
+									class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+									@error="onImageError"
+								/>
+								<div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-deep-navy/10 to-deep-navy/20">
+									<svg class="w-10 h-10 text-deep-navy/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+									</svg>
+								</div>
+								<!-- Selected tick -->
+								<div v-if="selectedEventId === event.event_id" class="absolute top-2 right-2 h-6 w-6 rounded-full bg-deep-navy flex items-center justify-center">
+									<svg class="h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+									</svg>
+								</div>
+							</div>
+							<!-- Info -->
+							<div class="p-3">
+								<p class="text-sm font-black text-deep-navy uppercase tracking-tight leading-snug line-clamp-1">{{ event.title }}</p>
+								<p class="mt-0.5 text-[10px] font-black uppercase tracking-wider text-deep-navy/50">{{ formatDateSafe(event.start_datetime) }} &bull; {{ event.active_sponsorship_packages_count }} packages</p>
+							</div>
+						</button>
 					</div>
 
-					<div v-if="paymentTimeline.length === 0" class="text-center py-6 bg-white border-2 border-dashed border-deep-navy/20 rounded-xl">
-						<p class="text-sm font-bold text-deep-navy/60">No payment timeline entries yet.</p>
+					<div class="flex items-center justify-between pt-1">
+						<p class="text-[10px] font-black text-deep-navy/40 uppercase tracking-wider">
+							Page {{ eventPage }} of {{ Math.ceil(sponsorableEventsCount / 8) || 1 }} &bull; {{ sponsorableEventsCount }} results
+						</p>
+						<div class="flex items-center gap-2">
+							<button
+								type="button"
+								@click="eventPage = Math.max(1, eventPage - 1)"
+								:disabled="!hasPrevEventsPage"
+								class="px-3 py-2 border-2 border-deep-navy/20 rounded-lg text-[10px] font-black text-deep-navy uppercase tracking-wider disabled:opacity-30 hover:border-deep-navy/40 transition-colors"
+							>
+								Prev
+							</button>
+							<button
+								type="button"
+								@click="eventPage = eventPage + 1"
+								:disabled="!hasNextEventsPage"
+								class="px-3 py-2 border-2 border-deep-navy/20 rounded-lg text-[10px] font-black text-deep-navy uppercase tracking-wider disabled:opacity-30 hover:border-deep-navy/40 transition-colors"
+							>
+								Next
+							</button>
+						</div>
 					</div>
-					<div v-else class="space-y-3">
-						<div v-for="item in paymentTimeline" :key="item.payment_id" class="p-4 border-2 border-deep-navy/10 rounded-xl bg-white">
-							<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+				</div>
+
+				<!-- Payment history panel -->
+				<section class="rounded-xl border border-deep-navy/10 bg-white/95 p-4 space-y-4 shadow-sm">
+					<p class="text-[10px] font-black uppercase tracking-[0.22em] text-deep-navy">Sponsorship Payments</p>
+
+					<div v-if="!selectedEvent" class="rounded-xl border border-deep-navy/10 bg-slate-50 p-4 text-sm font-medium text-deep-navy/50">
+						Select an event above to view its payment history.
+					</div>
+					<div v-else-if="isLoadingPaymentHistory" class="space-y-3">
+						<USkeleton class="h-24 w-full rounded-xl" />
+						<USkeleton class="h-24 w-full rounded-xl" />
+					</div>
+					<div v-else-if="!paymentHistoryData" class="rounded-xl border border-deep-navy/10 bg-slate-50 p-4 text-sm font-medium text-deep-navy/50">
+						No payment data available for this event yet.
+					</div>
+					<template v-else>
+						<!-- Summary totals -->
+						<div class="grid grid-cols-3 gap-2">
+							<div class="rounded-xl border border-deep-navy/10 bg-slate-50 p-3 flex items-start gap-2.5">
+								<span class="material-symbols-outlined rounded-lg bg-white p-1.5 text-deep-navy shadow-sm" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">receipt_long</span>
 								<div>
-									<p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ item.payment_reference }}</p>
-									<p class="text-[10px] text-deep-navy/55 font-bold uppercase tracking-wider mt-1">
-										{{ formatMethodType(item.method_type || 'UNKNOWN') }} • {{ formatDateSafe(item.created_at) }}
-									</p>
-								</div>
-								<div class="flex items-center gap-2">
-									<span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-700 text-[10px] font-black uppercase tracking-wider">{{ item.status }}</span>
-									<span class="text-xs font-black text-deep-navy uppercase tracking-wider">{{ formatMoney(item.amount, item.currency) }}</span>
+									<p class="text-[9px] font-black uppercase tracking-wider text-deep-navy/45">Total</p>
+									<p class="mt-1 text-lg font-black text-deep-navy leading-none">{{ paymentSummaryCount }}</p>
 								</div>
 							</div>
-							<div v-if="item.status === 'PENDING'">
-								<p class="text-xs font-bold uppercase tracking-wider text-deep-navy/70 mt-2">Payment Instructions:</p>
-								<div v-if="item.method_type === 'STRIPE'">
-									<p class="text-xs font-medium text-deep-navy/70">As this is via stripe, no payment actions are required</p>
+							<div class="rounded-xl border border-deep-navy/10 bg-slate-50 p-3 flex items-start gap-2.5">
+								<span class="material-symbols-outlined rounded-lg bg-white p-1.5 text-emerald-600 shadow-sm" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">check_circle</span>
+								<div>
+									<p class="text-[9px] font-black uppercase tracking-wider text-deep-navy/45">Completed</p>
+									<p class="mt-1 text-lg font-black text-deep-navy leading-none">{{ paymentSummaryAmount }}</p>
 								</div>
-								<div v-else>
-									<pre class="mt-1 text-xs text-deep-navy/70 whitespace-pre-wrap">{{ item.method_provided_details }}</pre>
-									<p class="text-deep-navy/80">Ensure you use this bank transfer reference in your transfer reference otherwise your payment may not be processed.</p>
-									<p class="text-deep-navy">Bank transfer reference: <b>{{ item.bank_transfer_reference }}</b></p>
+							</div>
+							<div class="rounded-xl border border-deep-navy/10 bg-slate-50 p-3 flex items-start gap-2.5">
+								<span class="material-symbols-outlined rounded-lg bg-white p-1.5 text-amber-500 shadow-sm" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">pending</span>
+								<div>
+									<p class="text-[9px] font-black uppercase tracking-wider text-deep-navy/45">Pending</p>
+									<p class="mt-1 text-lg font-black text-deep-navy leading-none">{{ paymentSummaryPending }}</p>
 								</div>
 							</div>
 						</div>
+
+						<!-- Timeline -->
+						<div v-if="paymentTimeline.length === 0" class="rounded-xl border border-deep-navy/10 bg-slate-50 p-4 text-sm font-medium text-deep-navy/50">
+							No payment entries yet.
+						</div>
+						<div v-else class="space-y-3">
+							<article v-for="item in paymentTimeline" :key="item.payment_id" class="rounded-xl border border-deep-navy/10 bg-white p-4 shadow-sm">
+								<!-- Header row -->
+								<div class="flex items-start justify-between gap-3">
+									<div class="min-w-0">
+										<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/40">Sponsorship Payment</p>
+										<p class="mt-0.5 truncate text-sm font-mono text-deep-navy">{{ item.payment_reference }}</p>
+										<p class="mt-0.5 text-[10px] font-medium text-deep-navy/55">{{ formatMethodType(item.method_type || 'UNKNOWN') }} &bull; {{ formatDateSafe(item.created_at) }}</p>
+									</div>
+									<span class="shrink-0 rounded px-2 py-0.5 text-[10px] font-black uppercase tracking-wider" :class="sponsorPaymentStatusClass(item.status)">
+										{{ item.status }}
+									</span>
+								</div>
+
+								<!-- Amount + method tiles -->
+								<div class="mt-3 grid grid-cols-2 gap-2">
+									<div class="rounded-xl border border-deep-navy/10 bg-slate-50 p-3">
+										<div class="flex items-start gap-2.5">
+											<span class="material-symbols-outlined rounded-lg bg-white p-1.5 text-deep-navy shadow-sm" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">payments</span>
+											<div>
+												<p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Amount</p>
+												<p class="mt-1 text-lg font-black text-deep-navy leading-none">{{ formatMoney(item.amount, item.currency) }}</p>
+											</div>
+										</div>
+									</div>
+									<div class="rounded-xl border border-deep-navy/10 bg-slate-50 p-3">
+										<div class="flex items-start gap-2.5">
+											<span class="material-symbols-outlined rounded-lg bg-white p-1.5 text-primary shadow-sm" style="font-size:16px;line-height:1;font-variation-settings:'FILL' 1,'wght' 700">{{ sponsorPaymentMethodIcon(item.method_type) }}</span>
+											<div class="min-w-0">
+												<p class="text-[9px] font-black uppercase tracking-wider text-slate-500">Method</p>
+												<p class="mt-1 text-xs font-black text-deep-navy leading-none">{{ item.method_title || formatMethodType(item.method_type || 'UNKNOWN') }}</p>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<!-- Bank transfer instructions (PENDING non-stripe) -->
+								<div v-if="item.status === 'PENDING' && item.method_type !== 'STRIPE'" class="mt-3 space-y-2 rounded-xl border border-blue-200 bg-blue-50 p-3">
+									<p class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-700">Bank Transfer Instructions</p>
+									<div class="rounded-xl border border-white bg-white/90 p-2.5">
+										<p class="text-[10px] font-black uppercase tracking-wider text-blue-700/70">Transfer Reference</p>
+										<p class="mt-1 break-all text-xs font-black text-blue-900">{{ item.bank_transfer_reference || '—' }}</p>
+									</div>
+									<p class="text-xs font-medium text-blue-800/80">Use this reference in your bank transfer so the payment can be matched.</p>
+								</div>
+
+								<!-- Stripe pending note -->
+								<div v-else-if="item.status === 'PENDING' && item.method_type === 'STRIPE'" class="mt-3 rounded-xl border border-deep-navy/10 bg-slate-50 p-3">
+									<p class="text-xs font-medium text-deep-navy/60">No action required — this payment is handled via Stripe.</p>
+								</div>
+							</article>
+						</div>
+					</template>
+				</section>
+
+			</div>
+
+			<!-- Step 2: Package + payment method -->
+			<div v-else-if="activeStep === 2" class="space-y-5">
+				<div v-if="checkoutBlockMessage" class="p-4 rounded-xl border-2 border-amber-400/40 bg-amber-50">
+					<p class="text-xs font-black text-deep-navy uppercase tracking-wider">{{ checkoutBlockMessage }}</p>
+				</div>
+
+				<!-- Checkout mode + sponsor name -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div>
+						<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Checkout Mode</label>
+						<div class="flex gap-2 bg-deep-navy/5 rounded-xl p-1.5 border-2 border-deep-navy/10">
+							<button
+								type="button"
+								:disabled="selectedEvent?.requires_invite_acceptance_for_checkout && acceptedInvitesCount === 0"
+								:class="checkoutForm.mode === 'direct' ? 'bg-deep-navy text-white shadow' : 'text-deep-navy hover:bg-deep-navy/5'"
+								class="flex-1 px-3 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all disabled:opacity-40"
+								@click="checkoutForm.mode = 'direct'"
+							>
+								Direct
+							</button>
+							<button
+								type="button"
+								:class="checkoutForm.mode === 'token' ? 'bg-deep-navy text-white shadow' : 'text-deep-navy hover:bg-deep-navy/5'"
+								class="flex-1 px-3 py-2.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all"
+								@click="checkoutForm.mode = 'token'"
+							>
+								Invite Token
+							</button>
+						</div>
+					</div>
+					<div>
+						<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Sponsor Name (Optional)</label>
+						<input
+							v-model="checkoutForm.name"
+							type="text"
+							placeholder="Defaults to organisation title"
+							class="w-full px-4 py-3 bg-white border-2 border-deep-navy/20 rounded-xl focus:border-deep-navy focus:outline-none font-medium text-sm text-deep-navy placeholder:text-deep-navy/30 transition-colors"
+						/>
 					</div>
 				</div>
-			</div>
-		</div>
 
-		<!-- Step 2: Package + payment method -->
-		<div v-else-if="activeStep === 2" class="space-y-4">
-			<div v-if="checkoutBlockMessage" class="p-4 rounded-xl border-2 border-amber-500/40 bg-amber-500/10">
-				<p class="text-xs font-bold text-deep-navy uppercase tracking-wider">{{ checkoutBlockMessage }}</p>
-			</div>
-
-			<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-				<div>
-					<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Checkout Mode</label>
-					<div class="grid grid-cols-2 gap-2 bg-deep-navy/5 rounded-xl p-2 border-2 border-deep-navy/10">
-						<button
-							type="button"
-							:disabled="selectedEvent?.requires_invite_acceptance_for_checkout && acceptedInvitesCount === 0"
-							:class="checkoutForm.mode === 'direct' ? 'bg-deep-navy text-white' : 'text-deep-navy hover:bg-deep-navy/10'"
-							class="px-3 py-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all disabled:opacity-50"
-							@click="checkoutForm.mode = 'direct'"
-						>
-							Direct
-						</button>
-						<button
-							type="button"
-							:class="checkoutForm.mode === 'token' ? 'bg-deep-navy text-white' : 'text-deep-navy hover:bg-deep-navy/10'"
-							class="px-3 py-3 rounded-lg text-xs font-black uppercase tracking-wider transition-all"
-							@click="checkoutForm.mode = 'token'"
-						>
-							Invite Token
-						</button>
-					</div>
-				</div>
-
-				<div>
-					<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Sponsor Name (Optional)</label>
+				<!-- Invite token field -->
+				<div v-if="checkoutForm.mode === 'token'">
+					<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Invite Token</label>
 					<input
-						v-model="checkoutForm.name"
+						v-model="checkoutForm.inviteToken"
 						type="text"
-						placeholder="Defaults to organisation title"
-						class="w-full px-4 py-4 bg-white border-2 border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
+						placeholder="Paste your invite token here"
+						class="w-full px-4 py-3 bg-white border-2 border-deep-navy/20 rounded-xl focus:border-deep-navy focus:outline-none font-medium text-sm text-deep-navy placeholder:text-deep-navy/30 transition-colors"
+					/>
+				</div>
+
+				<!-- Package selection -->
+				<div>
+					<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Sponsorship Package</label>
+					<div v-if="isLoadingPackages" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+						<div v-for="i in 3" :key="i" class="h-56 rounded-xl bg-deep-navy/5 animate-pulse" />
+					</div>
+					<div v-else-if="sponsorshipPackages.length === 0" class="py-8 text-center border-2 border-dashed border-deep-navy/15 rounded-2xl">
+						<p class="text-sm font-black uppercase tracking-wider text-deep-navy/40">No active packages available for this event.</p>
+					</div>
+					<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+						<SponsorPackageCard
+							v-for="pkg in styledPackages"
+							:key="pkg.package_id"
+							:pkg="pkg"
+							:selected="checkoutForm.packageId === pkg.package_id"
+							:selectable="true"
+							@select="checkoutForm.packageId = pkg.package_id"
+						/>
+					</div>
+				</div>
+
+				<!-- Payment method -->
+				<div>
+					<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Payment Method</label>
+					<div v-if="isLoadingPaymentMethods">
+						<USkeleton class="h-16 w-full" />
+					</div>
+					<div v-else-if="paymentMethods.length === 0" class="py-8 text-center border-2 border-dashed border-deep-navy/15 rounded-2xl">
+						<p class="text-sm font-black uppercase tracking-wider text-deep-navy/40">No active payment methods found for this event.</p>
+					</div>
+					<div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
+						<button
+							v-for="method in paymentMethods"
+							:key="method.id"
+							type="button"
+							class="text-left p-4 border-2 rounded-xl transition-all flex items-start gap-3"
+							:class="checkoutForm.paymentMethodId === method.id
+								? 'border-deep-navy bg-deep-navy text-white'
+								: 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/40'"
+							@click="checkoutForm.paymentMethodId = method.id"
+						>
+							<!-- Method type icon indicator -->
+							<div
+								class="mt-0.5 h-8 w-8 flex-shrink-0 rounded-lg flex items-center justify-center text-base"
+								:class="checkoutForm.paymentMethodId === method.id ? 'bg-white/15' : 'bg-deep-navy/5'"
+							>
+								<span v-if="method.method_type === 'STRIPE'"><UIcon name="i-heroicons-credit-card"/></span>
+								<span v-else-if="method.method_type === 'BANK_TRANSFER'"><UIcon name="i-heroicons-banknotes"/></span>
+								<span v-else-if="method.method_type === 'CASH'"><UIcon name="i-heroicons-cash"/></span>
+								<span v-else><UIcon name="i-heroicons-currency-dollar"/></span>
+							</div>
+							<div class="flex-1 min-w-0">
+								<p class="text-sm font-black uppercase tracking-tight">{{ method.title }}</p>
+								<p class="mt-0.5 text-[10px] font-black uppercase tracking-wider opacity-60">{{ formatMethodType(method.method_type) }}</p>
+								<p v-if="method.method_type === 'STRIPE'" class="mt-1 text-[10px] font-medium opacity-60 normal-case tracking-normal">Pay securely by card — processed instantly.</p>
+								<p v-else-if="method.method_type === 'BANK_TRANSFER'" class="mt-1 text-[10px] font-medium opacity-60 normal-case tracking-normal">Transfer funds directly — reference provided after checkout.</p>
+								<p v-else-if="method.method_type === 'CASH'" class="mt-1 text-[10px] font-medium opacity-60 normal-case tracking-normal">Pay in person — arrange with the organiser.</p>
+							</div>
+							<!-- Check indicator -->
+							<svg v-if="checkoutForm.paymentMethodId === method.id" class="mt-0.5 h-4 w-4 flex-shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+							</svg>
+						</button>
+					</div>
+				</div>
+
+				<!-- Description -->
+				<div>
+					<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Description (Optional)</label>
+					<textarea
+						v-model="checkoutForm.description"
+						rows="3"
+						placeholder="Optional note for this sponsorship"
+						class="w-full px-4 py-3 bg-white border-2 border-deep-navy/20 rounded-xl focus:border-deep-navy focus:outline-none font-medium text-sm text-deep-navy placeholder:text-deep-navy/30 transition-colors resize-none"
 					/>
 				</div>
 			</div>
 
-			<div v-if="checkoutForm.mode === 'token'">
-				<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Invite Token</label>
-				<input
-					v-model="checkoutForm.inviteToken"
-					type="text"
-					placeholder="Paste invite token"
-					class="w-full px-4 py-4 bg-white border-2 border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-				/>
-			</div>
+			<!-- Step 3: Review + confirm -->
+			<div v-else-if="activeStep === 3" class="space-y-4">
 
-			<div>
-				<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Sponsorship Package</label>
-				<div v-if="isLoadingPackages" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-					<div v-for="i in 3" :key="i" class="h-64 rounded-xl bg-deep-navy/5 animate-pulse" />
+				<!-- Review summary -->
+				<div class="rounded-2xl border-2 border-deep-navy/10 bg-deep-navy/[0.02] p-6">
+					<p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50 mb-4">Review Sponsorship</p>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+						<div>
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Event</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ selectedEvent?.title || '—' }}</p>
+						</div>
+						<div>
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Package</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ selectedPackage?.package_name || '—' }}</p>
+						</div>
+						<div>
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Payment Method</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ selectedPaymentMethod?.title || '—' }}</p>
+						</div>
+						<div>
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Amount</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ selectedPackageAmount }}</p>
+						</div>
+						<div v-if="checkoutForm.name">
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Sponsor Name</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ checkoutForm.name }}</p>
+						</div>
+						<div v-if="checkoutForm.description">
+							<p class="text-[9px] font-black uppercase tracking-[0.15em] text-deep-navy/40">Description</p>
+							<p class="mt-1 text-sm font-black text-deep-navy">{{ checkoutForm.description }}</p>
+						</div>
+					</div>
 				</div>
-				<div v-else-if="sponsorshipPackages.length === 0" class="text-sm font-bold text-deep-navy/60">
-					No active packages available for this event.
-				</div>
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-					<SponsorPackageCard
-						v-for="pkg in styledPackages"
-						:key="pkg.package_id"
-						:pkg="pkg"
-						:selected="checkoutForm.packageId === pkg.package_id"
-						:selectable="true"
-						@select="checkoutForm.packageId = pkg.package_id"
+
+				<!-- Stripe card form -->
+				<div v-if="isStripeMethod && !checkoutResult" class="space-y-2">
+					<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Card Details</label>
+					<div
+						ref="stripeCardMountRef"
+						class="px-4 py-4 bg-white border-2 border-deep-navy/20 rounded-xl"
 					/>
+					<p v-if="stripeCardError" class="text-xs font-black text-red-600 uppercase tracking-wider">{{ stripeCardError }}</p>
+					<p v-if="stripePaymentAttemptError" class="text-xs font-black text-red-600 uppercase tracking-wider">{{ stripePaymentAttemptError }}</p>
 				</div>
-			</div>
-
-			<div>
-				<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Payment Method</label>
-				<div v-if="isLoadingPaymentMethods" class="space-y-2">
-					<USkeleton class="h-16 w-full" />
-				</div>
-				<div v-else-if="paymentMethods.length === 0" class="text-sm font-bold text-deep-navy/60">
-					No active payment methods found for this event.
-				</div>
-				<div v-else class="grid grid-cols-1 md:grid-cols-2 gap-3">
-					<button
-						v-for="method in paymentMethods"
-						:key="method.id"
-						type="button"
-						class="text-left p-4 border-2 rounded-xl transition-all"
-						:class="checkoutForm.paymentMethodId === method.id
-							? 'border-deep-navy bg-deep-navy text-white'
-							: 'border-deep-navy/20 bg-white text-deep-navy hover:border-deep-navy/40'"
-						@click="checkoutForm.paymentMethodId = method.id"
-					>
-						<p class="text-sm font-black uppercase tracking-tight">{{ method.title }}</p>
-						<p class="mt-1 text-xs font-bold uppercase tracking-wider opacity-80">{{ formatMethodType(method.method_type) }}</p>
-					</button>
-				</div>
-			</div>
-
-			<div>
-				<label class="block text-[10px] font-black text-deep-navy/50 mb-3 uppercase tracking-[0.2em]">Description (Optional)</label>
-				<textarea
-					v-model="checkoutForm.description"
-					rows="3"
-					placeholder="Optional note for this sponsorship"
-					class="w-full px-4 py-4 bg-white border-2 border-deep-navy rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium"
-				/>
 			</div>
 		</div>
 
-		<!-- Step 3: Review + confirm -->
-		<div v-else-if="activeStep === 3" class="space-y-4">
-			<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-deep-navy/5">
-				<p class="text-xs font-black uppercase tracking-wider text-deep-navy/60">Review Sponsorship</p>
-				<div class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Event</p>
-						<p class="text-sm font-black text-deep-navy">{{ selectedEvent?.title || 'None selected' }}</p>
-					</div>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Package</p>
-						<p class="text-sm font-black text-deep-navy">{{ selectedPackage?.package_name || 'None selected' }}</p>
-					</div>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Payment Method</p>
-						<p class="text-sm font-black text-deep-navy">{{ selectedPaymentMethod?.title || 'None selected' }}</p>
-					</div>
-					<div>
-						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Amount</p>
-						<p class="text-sm font-black text-deep-navy">{{ selectedPackageAmount }}</p>
-					</div>
-				</div>
-			</div>
+		<!-- Navigation -->
+		<div class="flex items-center justify-between pt-2 border-t-2 border-deep-navy/10">
+			<button
+				v-if="activeStep > 1"
+				type="button"
+				class="flex items-center gap-2 px-5 py-3 rounded-xl border-2 border-deep-navy/20 text-sm font-black uppercase tracking-wider text-deep-navy hover:border-deep-navy/40 transition-colors"
+				@click="activeStep = activeStep - 1"
+			>
+				<span class="material-symbols-outlined text-base">chevron_left</span>
+				Back
+			</button>
+			<div v-else />
 
-			<!-- Stripe card form: shown when STRIPE method selected and no result yet -->
-			<div v-if="isStripeMethod && !checkoutResult" class="space-y-2">
-				<label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">Card Details</label>
-				<div
-					ref="stripeCardMountRef"
-					class="px-4 py-4 bg-white border-2 border-deep-navy rounded-xl"
+			<button
+				v-if="activeStep < 3"
+				type="button"
+				:disabled="!canGoNextStep()"
+				class="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-navy text-white text-sm font-black uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-deep-navy/80 transition-colors"
+				@click="goNextStep"
+			>
+				Next
+				<span class="material-symbols-outlined text-base">chevron_right</span>
+			</button>
+			<button
+				v-else
+				type="button"
+				:disabled="!canCheckout || isCheckingOut || isConfirmingStripePayment || (isStripeMethod && !checkoutResult && !stripeCardReady)"
+				class="flex items-center gap-2 px-6 py-3 rounded-xl bg-deep-navy text-white text-sm font-black uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed hover:bg-deep-navy/80 transition-colors"
+				@click="submitCheckout"
+			>
+				<span
+					v-if="isCheckingOut || isConfirmingStripePayment"
+					class="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white"
 				/>
-				<p v-if="stripeCardError" class="text-xs font-bold text-red-600">{{ stripeCardError }}</p>
-				<p v-if="stripePaymentAttemptError" class="text-xs font-bold text-red-600">{{ stripePaymentAttemptError }}</p>
-			</div>
-
-			<div class="flex justify-end">
-				<button
-					:disabled="!canCheckout || isCheckingOut || isConfirmingStripePayment || (isStripeMethod && !checkoutResult && !stripeCardReady)"
-					@click="submitCheckout"
-					class="px-8 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
-				>
-					{{ isConfirmingStripePayment ? 'Confirming card...' : isCheckingOut ? 'Initializing...' : isStripeMethod ? 'Pay Now' : 'Confirm Sponsor Checkout' }}
-				</button>
-			</div>
+				<template v-else>
+					{{ isStripeMethod ? 'Pay Now' : 'Confirm Sponsorship' }}
+					<span class="material-symbols-outlined text-base">check</span>
+				</template>
+			</button>
 		</div>
 	</div>
 
@@ -431,7 +530,7 @@
 					<div class="mt-5 flex flex-wrap justify-center gap-2">
 						<button
 							type="button"
-							class="rounded-xl bg-deep-navy px-5 py-2 text-xs font-black uppercase tracking-wide text-white hover:bg-deep-navy/80 transition-all"
+							class="rounded-xl bg-deep-navy px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white hover:bg-deep-navy/80 transition-colors"
 							@click="handleStartNewSponsorship"
 						>
 							Start New Sponsorship
@@ -448,9 +547,18 @@ import { computed } from 'vue'
 import { useSponsorFlow } from '~/composables/communities/sponsors/useSponsorFlow'
 import { useSponsorPackageStyling } from '~/composables/communities/sponsors/useSponsorPackageStyling'
 import SponsorPackageCard from '~/components/communities/sponsors/SponsorPackageCard.vue'
+import UStepper from '~/components/UStepper.vue'
+import type { StepperItem } from '~/components/UStepper.vue'
 import { formatMoney } from '~/utils/money'
 import { formatDate } from '~/utils/time'
+import { resolveImageUrl, onImageError } from '~/utils/image'
 import type { SponsorableEventList } from '~/api/types.gen'
+
+const stepperItems: StepperItem[] = [
+	{ key: 'event', label: 'Event', description: 'Choose a target' },
+	{ key: 'package', label: 'Package', description: 'Set package & payment' },
+	{ key: 'review', label: 'Review', description: 'Confirm checkout' },
+]
 
 const props = defineProps<{
 	organisationId: string
@@ -480,7 +588,6 @@ const {
 	activeStep,
 	checkoutForm,
 	checkoutResult,
-	steps,
 	isLoadingSponsorableEvents,
 	isLoadingPackages,
 	isLoadingPaymentMethods,
@@ -548,6 +655,21 @@ function formatMethodType(methodType: string) {
 	if (methodType === 'STRIPE') return 'Stripe'
 	if (methodType === 'CASH') return 'Cash'
 	return methodType
+}
+
+function sponsorPaymentStatusClass(status: string) {
+	if (status === 'COMPLETED') return 'bg-emerald-100 text-emerald-800'
+	if (status === 'PENDING') return 'bg-amber-100 text-amber-800'
+	if (status === 'FAILED') return 'bg-red-100 text-red-800'
+	if (status === 'REFUNDED') return 'bg-blue-100 text-blue-800'
+	return 'bg-slate-100 text-slate-700'
+}
+
+function sponsorPaymentMethodIcon(methodType: string | null) {
+	if (methodType === 'STRIPE') return 'credit_card'
+	if (methodType === 'BANK_TRANSFER') return 'account_balance'
+	if (methodType === 'CASH') return 'payments'
+	return 'money'
 }
 
 function stringifyDetails(value: unknown) {
