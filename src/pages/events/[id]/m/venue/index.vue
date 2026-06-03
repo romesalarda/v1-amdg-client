@@ -51,12 +51,20 @@
 									
 								</div>
 
-								<div class="flex items-center gap-1">
+								<div class="flex items-center gap-1 flex-wrap">
 									<NuxtLink
 										:to="`/events/${id}/m/venue/${entry.event_venue_id}`"
 										class="px-3 py-1.5 text-xs font-bold rounded-lg border border-deep-navy/15 text-navy-700 hover:bg-mist-blue/70"
 									>
 										Manage Details
+									</NuxtLink>
+									<NuxtLink
+										v-if="entry.source_venue_id"
+										:to="`/venues/${entry.source_venue_id}/floor-plans`"
+										class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-bold rounded-lg border border-primary/30 text-primary hover:bg-primary/5"
+									>
+										<span class="material-symbols-outlined text-sm">map</span>
+										Floor Plans
 									</NuxtLink>
 									<button
 										v-if="canDeleteVenueLinks"

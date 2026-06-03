@@ -395,7 +395,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from 'vue'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
 import { useEvent } from '~/composables/resources/events/events'

@@ -10533,6 +10533,187 @@ export type FamilyGroupList = {
 };
 
 /**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type FloorPlanAnnotation = {
+    readonly id: number;
+    readonly floor_plan: number;
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    readonly room_venue_name: string | null;
+    label: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices: unknown;
+    readonly metadata: Array<FloorPlanAnnotationMetadata>;
+    readonly added_by: string;
+    readonly added_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Full CRUD serializer for FloorPlanAnnotationMetadata.
+ */
+export type FloorPlanAnnotationMetadata = {
+    readonly id: number;
+    label: string;
+    value?: string;
+    readonly added_by: string;
+    readonly added_at: string;
+};
+
+/**
+ * Full CRUD serializer for FloorPlanAnnotationMetadata.
+ */
+export type FloorPlanAnnotationMetadataRequest = {
+    label: string;
+    value?: string;
+};
+
+/**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type FloorPlanAnnotationRequest = {
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    label: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices: unknown;
+};
+
+/**
+ * Create/Update serializer for FloorPlan.
+ *
+ * Accepts image uploads via multipart/form-data. The original_width and
+ * original_height fields are populated automatically by opening the uploaded
+ * image with Pillow — client-supplied dimension values are ignored.
+ */
+export type FloorPlanCreateUpdate = {
+    readonly id: number;
+    venue: number;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: string;
+    readonly image_url: string | null;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    readonly original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    readonly original_height: number;
+};
+
+/**
+ * Create/Update serializer for FloorPlan.
+ *
+ * Accepts image uploads via multipart/form-data. The original_width and
+ * original_height fields are populated automatically by opening the uploaded
+ * image with Pillow — client-supplied dimension values are ignored.
+ */
+export type FloorPlanCreateUpdateRequest = {
+    venue: number;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: Blob | File;
+};
+
+/**
+ * Detail serializer for FloorPlan with nested annotations.
+ */
+export type FloorPlanDetail = {
+    readonly id: number;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    readonly image_url: string | null;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    original_height: number;
+    readonly venue_name: string;
+    readonly added_at: string;
+    readonly updated_at: string;
+    readonly annotations: Array<FloorPlanAnnotation>;
+};
+
+/**
+ * Summary serializer for FloorPlan used in list views.
+ */
+export type FloorPlanList = {
+    readonly id: number;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    readonly image_url: string | null;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    original_height: number;
+    readonly venue_name: string;
+    readonly added_at: string;
+    readonly updated_at: string;
+};
+
+/**
  * Serializer for gender distribution statistics.
  */
 export type GenderDistribution = {
@@ -12997,6 +13178,27 @@ export type PaginatedFamilyGroupListList = {
     next?: string | null;
     previous?: string | null;
     results: Array<FamilyGroupList>;
+};
+
+export type PaginatedFloorPlanAnnotationList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanAnnotation>;
+};
+
+export type PaginatedFloorPlanAnnotationMetadataList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanAnnotationMetadata>;
+};
+
+export type PaginatedFloorPlanListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanList>;
 };
 
 export type PaginatedInventoryAttendeeOrderLineList = {
@@ -15783,6 +15985,58 @@ export type PatchedFamilyGroupCreateUpdateRequest = {
     family_name?: string;
     organisation?: number | null;
     event?: number | null;
+};
+
+/**
+ * Full CRUD serializer for FloorPlanAnnotationMetadata.
+ */
+export type PatchedFloorPlanAnnotationMetadataRequest = {
+    label?: string;
+    value?: string;
+};
+
+/**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type PatchedFloorPlanAnnotationRequest = {
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    label?: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices?: unknown;
+};
+
+/**
+ * Create/Update serializer for FloorPlan.
+ *
+ * Accepts image uploads via multipart/form-data. The original_width and
+ * original_height fields are populated automatically by opening the uploaded
+ * image with Pillow — client-supplied dimension values are ignored.
+ */
+export type PatchedFloorPlanCreateUpdateRequest = {
+    venue?: number;
+    name?: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image?: Blob | File;
 };
 
 /**
@@ -24041,6 +24295,128 @@ export type FamilyGroupListWritable = {
 };
 
 /**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type FloorPlanAnnotationWritable = {
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    label: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices: unknown;
+};
+
+/**
+ * Full CRUD serializer for FloorPlanAnnotationMetadata.
+ */
+export type FloorPlanAnnotationMetadataWritable = {
+    label: string;
+    value?: string;
+};
+
+/**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type FloorPlanAnnotationRequestWritable = {
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    label: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices: unknown;
+    metadata_write?: Array<FloorPlanAnnotationMetadataRequest>;
+};
+
+/**
+ * Create/Update serializer for FloorPlan.
+ *
+ * Accepts image uploads via multipart/form-data. The original_width and
+ * original_height fields are populated automatically by opening the uploaded
+ * image with Pillow — client-supplied dimension values are ignored.
+ */
+export type FloorPlanCreateUpdateWritable = {
+    venue: number;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: string;
+};
+
+/**
+ * Detail serializer for FloorPlan with nested annotations.
+ */
+export type FloorPlanDetailWritable = {
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    original_height: number;
+};
+
+/**
+ * Summary serializer for FloorPlan used in list views.
+ */
+export type FloorPlanListWritable = {
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    original_height: number;
+};
+
+/**
  * Serializer for gender distribution statistics.
  */
 export type GenderDistributionWritable = {
@@ -25066,6 +25442,27 @@ export type PaginatedFamilyGroupListListWritable = {
     results: Array<FamilyGroupListWritable>;
 };
 
+export type PaginatedFloorPlanAnnotationListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanAnnotationWritable>;
+};
+
+export type PaginatedFloorPlanAnnotationMetadataListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanAnnotationMetadataWritable>;
+};
+
+export type PaginatedFloorPlanListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<FloorPlanListWritable>;
+};
+
 export type PaginatedInventoryAttendeeOrderLineListWritable = {
     count: number;
     next?: string | null;
@@ -25479,6 +25876,30 @@ export type PatchedEventQuestionAnswerRequestWritable = {
      * Direct URL/path to uploaded file (alternative to upload_resource_id)
      */
     upload_url?: string;
+};
+
+/**
+ * Serializer for FloorPlanAnnotation.
+ *
+ * On read, includes nested metadata and the linked room name.
+ * On write, accepts a list of metadata objects that are created/replaced atomically.
+ * Vertices are validated as a list of normalised {x, y} coordinate objects.
+ */
+export type PatchedFloorPlanAnnotationRequestWritable = {
+    /**
+     * Optional link to an existing room in this venue
+     */
+    room_venue?: number | null;
+    label?: string;
+    /**
+     * Hex colour string used for rendering the polygon on the canvas
+     */
+    colour?: string;
+    /**
+     * List of {x: float, y: float} normalised coordinate objects (min 3 points)
+     */
+    vertices?: unknown;
+    metadata_write?: Array<FloorPlanAnnotationMetadataRequest>;
 };
 
 /**
@@ -41240,6 +41661,354 @@ export type LocationsVenuesRoomsListResponses = {
 };
 
 export type LocationsVenuesRoomsListResponse = LocationsVenuesRoomsListResponses[keyof LocationsVenuesRoomsListResponses];
+
+export type LocationsVenuesFloorPlansListData = {
+    body?: never;
+    path: {
+        venue_pk: number;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/locations/venues/{venue_pk}/floor-plans/';
+};
+
+export type LocationsVenuesFloorPlansListResponses = {
+    200: PaginatedFloorPlanListList;
+};
+
+export type LocationsVenuesFloorPlansListResponse = LocationsVenuesFloorPlansListResponses[keyof LocationsVenuesFloorPlansListResponses];
+
+export type LocationsVenuesFloorPlansCreateData = {
+    body: FloorPlanCreateUpdateRequest;
+    path: {
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/';
+};
+
+export type LocationsVenuesFloorPlansCreateResponses = {
+    201: FloorPlanCreateUpdate;
+};
+
+export type LocationsVenuesFloorPlansCreateResponse = LocationsVenuesFloorPlansCreateResponses[keyof LocationsVenuesFloorPlansCreateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsListData = {
+    body?: never;
+    path: {
+        floor_plan_pk: number;
+        venue_pk: number;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsListResponses = {
+    200: PaginatedFloorPlanAnnotationList;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsListResponse = LocationsVenuesFloorPlansAnnotationsListResponses[keyof LocationsVenuesFloorPlansAnnotationsListResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsCreateData = {
+    body: FloorPlanAnnotationRequestWritable;
+    path: {
+        floor_plan_pk: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsCreateResponses = {
+    201: FloorPlanAnnotation;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsCreateResponse = LocationsVenuesFloorPlansAnnotationsCreateResponses[keyof LocationsVenuesFloorPlansAnnotationsCreateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataListData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        venue_pk: number;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataListResponses = {
+    200: PaginatedFloorPlanAnnotationMetadataList;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataListResponse = LocationsVenuesFloorPlansAnnotationsMetadataListResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataListResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataCreateData = {
+    body: FloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataCreateResponses = {
+    201: FloorPlanAnnotationMetadata;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataCreateResponse = LocationsVenuesFloorPlansAnnotationsMetadataCreateResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataCreateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataDestroyData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataDestroyResponse = LocationsVenuesFloorPlansAnnotationsMetadataDestroyResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataDestroyResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataRetrieveData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataRetrieveResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataRetrieveResponse = LocationsVenuesFloorPlansAnnotationsMetadataRetrieveResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataRetrieveResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataPartialUpdateData = {
+    body?: PatchedFloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataPartialUpdateResponse = LocationsVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataUpdateData = {
+    body: FloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataUpdateResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsMetadataUpdateResponse = LocationsVenuesFloorPlansAnnotationsMetadataUpdateResponses[keyof LocationsVenuesFloorPlansAnnotationsMetadataUpdateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsDestroyData = {
+    body?: never;
+    path: {
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsDestroyResponse = LocationsVenuesFloorPlansAnnotationsDestroyResponses[keyof LocationsVenuesFloorPlansAnnotationsDestroyResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsRetrieveData = {
+    body?: never;
+    path: {
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsRetrieveResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsRetrieveResponse = LocationsVenuesFloorPlansAnnotationsRetrieveResponses[keyof LocationsVenuesFloorPlansAnnotationsRetrieveResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsPartialUpdateData = {
+    body?: PatchedFloorPlanAnnotationRequestWritable;
+    path: {
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsPartialUpdateResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsPartialUpdateResponse = LocationsVenuesFloorPlansAnnotationsPartialUpdateResponses[keyof LocationsVenuesFloorPlansAnnotationsPartialUpdateResponses];
+
+export type LocationsVenuesFloorPlansAnnotationsUpdateData = {
+    body: FloorPlanAnnotationRequestWritable;
+    path: {
+        floor_plan_pk: number;
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type LocationsVenuesFloorPlansAnnotationsUpdateResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type LocationsVenuesFloorPlansAnnotationsUpdateResponse = LocationsVenuesFloorPlansAnnotationsUpdateResponses[keyof LocationsVenuesFloorPlansAnnotationsUpdateResponses];
+
+export type LocationsVenuesFloorPlansDestroyData = {
+    body?: never;
+    path: {
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{id}/';
+};
+
+export type LocationsVenuesFloorPlansDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type LocationsVenuesFloorPlansDestroyResponse = LocationsVenuesFloorPlansDestroyResponses[keyof LocationsVenuesFloorPlansDestroyResponses];
+
+export type LocationsVenuesFloorPlansRetrieveData = {
+    body?: never;
+    path: {
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{id}/';
+};
+
+export type LocationsVenuesFloorPlansRetrieveResponses = {
+    200: FloorPlanDetail;
+};
+
+export type LocationsVenuesFloorPlansRetrieveResponse = LocationsVenuesFloorPlansRetrieveResponses[keyof LocationsVenuesFloorPlansRetrieveResponses];
+
+export type LocationsVenuesFloorPlansPartialUpdateData = {
+    body?: PatchedFloorPlanCreateUpdateRequest;
+    path: {
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{id}/';
+};
+
+export type LocationsVenuesFloorPlansPartialUpdateResponses = {
+    200: FloorPlanCreateUpdate;
+};
+
+export type LocationsVenuesFloorPlansPartialUpdateResponse = LocationsVenuesFloorPlansPartialUpdateResponses[keyof LocationsVenuesFloorPlansPartialUpdateResponses];
+
+export type LocationsVenuesFloorPlansUpdateData = {
+    body: FloorPlanCreateUpdateRequest;
+    path: {
+        id: number;
+        venue_pk: number;
+    };
+    query?: never;
+    url: '/api/locations/venues/{venue_pk}/floor-plans/{id}/';
+};
+
+export type LocationsVenuesFloorPlansUpdateResponses = {
+    200: FloorPlanCreateUpdate;
+};
+
+export type LocationsVenuesFloorPlansUpdateResponse = LocationsVenuesFloorPlansUpdateResponses[keyof LocationsVenuesFloorPlansUpdateResponses];
 
 export type MedicalConditionsListData = {
     body?: never;
