@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-mist-blue/20">
+  <div class="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-50">
 
     <!-- Header -->
     <header class="bg-white border-b border-deep-navy/10 shadow-sm">
@@ -35,13 +35,15 @@
       </div>
 
       <!-- Empty state -->
-      <div v-else-if="!floorPlans.length" class="flex flex-col items-center justify-center py-20 text-center text-navy-400">
-        <span class="material-symbols-outlined text-5xl mb-3 text-navy-300">map</span>
-        <h2 class="text-base font-black text-navy-600 mb-1">No floor plans yet</h2>
-        <p class="text-sm text-navy-400 mb-5">Upload an image to start annotating rooms and areas.</p>
+      <div v-else-if="!floorPlans.length" class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="w-24 h-24 rounded-3xl bg-white shadow-md border border-deep-navy/10 flex items-center justify-center mb-6">
+          <UIcon name="i-heroicons-map" class="text-4xl text-navy-300" />
+        </div>
+        <h2 class="text-xl font-black text-deep-navy mb-2">No floor plans yet</h2>
+        <p class="text-sm text-navy-400 mb-8 max-w-xs">Upload an image of your venue to start annotating rooms and areas for attendees.</p>
         <button
           type="button"
-          class="inline-flex items-center gap-1.5 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white text-sm font-bold rounded-2xl shadow-md hover:bg-primary/90 transition-colors"
           @click="showUploadForm = true"
         >
           <span class="material-symbols-outlined text-base">upload</span>
@@ -140,12 +142,23 @@
               </div>
               <div>
                 <label class="block text-xs font-black text-navy-400 uppercase tracking-wider mb-1">Level Label</label>
-                <input
+                <select
                   v-model="uploadForm.level_label"
-                  type="text"
-                  placeholder="Ground, Mezzanine…"
                   class="input w-full"
-                />
+                >
+                  <option value="">— None —</option>
+                  <option>Lower Basement</option>
+                  <option>Basement</option>
+                  <option>Lower Ground</option>
+                  <option>Ground Floor</option>
+                  <option>Mezzanine</option>
+                  <option>Level 1</option>
+                  <option>Level 2</option>
+                  <option>Level 3</option>
+                  <option>Level 4</option>
+                  <option>Level 5</option>
+                  <option>Rooftop</option>
+                </select>
               </div>
             </div>
             <div>

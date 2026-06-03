@@ -4,11 +4,11 @@
     <!-- ── Header ──────────────────────────────────────────────────── -->
     <header class="flex items-center gap-3 px-6 py-3 bg-white border-b border-deep-navy/10 shadow-sm shrink-0">
       <NuxtLink
-        :to="`/venues/${venueId}`"
+        :to="`/venues/${venueId}/floor-plans`"
         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-deep-navy/15 text-xs font-semibold text-navy-600 hover:bg-mist-blue/60 shrink-0"
       >
-        <span class="material-symbols-outlined text-sm">arrow_back</span>
-        Back
+        <span class="material-symbols-outlined text-sm">apartment</span>
+        Floor Plans
       </NuxtLink>
       <div class="min-w-0 flex-1">
         <h1 class="text-base font-black text-deep-navy truncate">Floor Plan Annotator</h1>
@@ -42,34 +42,46 @@
       <div class="flex flex-col flex-1 overflow-hidden p-4 gap-3">
 
         <!-- Toolbar -->
-        <div class="flex items-center gap-2 shrink-0">
-          <div class="flex rounded-xl border border-deep-navy/15 overflow-hidden">
+        <div class="flex items-center gap-3 shrink-0 bg-white rounded-2xl border border-deep-navy/10 shadow-sm px-3 py-2">
+          <!-- Mode toggle -->
+          <div class="flex items-center rounded-xl bg-mist-blue/60 p-0.5 gap-0.5">
             <button
               type="button"
-              :class="['px-4 py-1.5 text-xs font-black uppercase tracking-wider', mode === 'VIEW' ? 'bg-primary text-white' : 'text-navy-600 hover:bg-mist-blue/40']"
+              :class="[
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                mode === 'VIEW' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-700',
+              ]"
               @click="setMode('VIEW')"
             >
-              <span class="material-symbols-outlined text-sm align-middle mr-1">visibility</span>
+              <span class="material-symbols-outlined text-sm leading-none">visibility</span>
               View
             </button>
             <button
               type="button"
-              :class="['px-4 py-1.5 text-xs font-black uppercase tracking-wider border-l border-deep-navy/15', mode === 'DRAW' ? 'bg-primary text-white' : 'text-navy-600 hover:bg-mist-blue/40']"
+              :class="[
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                mode === 'DRAW' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-700',
+              ]"
               @click="setMode('DRAW')"
             >
-              <span class="material-symbols-outlined text-sm align-middle mr-1">draw</span>
+              <span class="material-symbols-outlined text-sm leading-none">draw</span>
               Draw
             </button>
           </div>
-          <span v-if="mode === 'DRAW'" class="text-xs text-navy-400">
-            Click to place vertices · Click first vertex to close polygon
+
+          <!-- Hint -->
+          <span v-if="mode === 'DRAW'" class="text-xs text-navy-400 hidden sm:block">
+            Click to place vertices · Click first vertex to close
           </span>
+
+          <!-- Cancel in-progress draw -->
           <button
             v-if="mode === 'DRAW' && drawVertices.length > 0"
             type="button"
-            class="ml-auto text-xs text-red-500 font-semibold hover:underline"
+            class="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
             @click="cancelDraw"
           >
+            <span class="material-symbols-outlined text-sm leading-none">cancel</span>
             Cancel
           </button>
         </div>
