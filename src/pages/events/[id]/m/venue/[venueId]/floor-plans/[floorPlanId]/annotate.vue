@@ -74,23 +74,54 @@
             Click to place vertices · Click first vertex to close
           </span>
 
-          <!-- Cancel in-progress draw -->
-          <button
-            v-if="mode === 'DRAW' && drawVertices.length > 0"
-            type="button"
-            class="ml-auto inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
-            @click="cancelDraw"
-          >
-            <span class="material-symbols-outlined text-sm leading-none">cancel</span>
-            Cancel
-          </button>
+          <!-- Zoom controls (pushed to right; cancel sits just before them when visible) -->
+          <div class="ml-auto flex items-center gap-2">
+            <!-- Cancel in-progress draw -->
+            <button
+              v-if="mode === 'DRAW' && drawVertices.length > 0"
+              type="button"
+              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 transition-colors"
+              @click="cancelDraw"
+            >
+              <span class="material-symbols-outlined text-sm leading-none">cancel</span>
+              Cancel
+            </button>
+
+          <div class="flex items-center gap-1">
+            <span class="text-xs text-navy-400 font-semibold mr-1">{{ Math.round(stageScale * 100) }}%</span>
+            <button
+              type="button"
+              class="icon-btn border border-deep-navy/10"
+              title="Zoom in"
+              @click="zoomStep(1)"
+            >
+              <span class="material-symbols-outlined text-sm">zoom_in</span>
+            </button>
+            <button
+              type="button"
+              class="icon-btn border border-deep-navy/10"
+              title="Zoom out"
+              @click="zoomStep(-1)"
+            >
+              <span class="material-symbols-outlined text-sm">zoom_out</span>
+            </button>
+            <button
+              type="button"
+              class="icon-btn border border-deep-navy/10"
+              title="Reset view"
+              @click="resetView"
+            >
+              <span class="material-symbols-outlined text-sm">fit_screen</span>
+            </button>
+          </div>
+          </div>
         </div>
 
         <!-- Canvas container -->
         <div
           ref="canvasContainerRef"
           class="flex-1 bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden relative"
-          :class="mode === 'DRAW' ? 'cursor-crosshair' : 'cursor-default'"
+          :class="mode === 'DRAW' ? 'cursor-crosshair' : 'cursor-grab active:cursor-grabbing'"
         >
           <div v-if="!currentFloorPlan?.image_url" class="absolute inset-0 flex flex-col items-center justify-center text-navy-400 gap-2">
             <span class="material-symbols-outlined text-4xl text-navy-300">image</span>
@@ -104,6 +135,8 @@
               :config="stageConfig"
               @click="handleStageClick"
               @mousemove="handleMouseMove"
+              @wheel="handleWheel"
+              @dragend="handleStageDragEnd"
             >
               <!-- Layer 1: Background image -->
               <v-layer>
@@ -451,6 +484,14 @@ const stageRef = ref<any>(null)
 const stageSize = reactive({ width: 0, height: 0 })
 const bgImage = ref<HTMLImageElement | null>(null)
 
+// Zoom & pan state
+const stageScale = ref(1)
+const stagePos = reactive({ x: 0, y: 0 })
+
+const ZOOM_MIN = 0.3
+const ZOOM_MAX = 10
+const ZOOM_STEP = 1.2
+
 let resizeObserver: ResizeObserver | null = null
 
 function updateStageSize() {
@@ -484,7 +525,54 @@ watch(
   { immediate: true },
 )
 
-const stageConfig = computed(() => ({ width: stageSize.width, height: stageSize.height }))
+const stageConfig = computed(() => ({
+  width: stageSize.width,
+  height: stageSize.height,
+  x: stagePos.x,
+  y: stagePos.y,
+  scaleX: stageScale.value,
+  scaleY: stageScale.value,
+  draggable: mode.value === 'VIEW',
+}))
+
+function resetView() {
+  stageScale.value = 1
+  stagePos.x = 0
+  stagePos.y = 0
+}
+
+function zoomStep(direction: 1 | -1) {
+  const factor = direction > 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+  const cx = stageSize.width / 2
+  const cy = stageSize.height / 2
+  const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, stageScale.value * factor))
+  const ratio = newScale / stageScale.value
+  stagePos.x = cx - ratio * (cx - stagePos.x)
+  stagePos.y = cy - ratio * (cy - stagePos.y)
+  stageScale.value = newScale
+}
+
+function handleWheel(e: any) {
+  e.evt.preventDefault()
+  const stage = stageRef.value?.getStage?.()
+  if (!stage) return
+  const pointer = stage.getPointerPosition()
+  if (!pointer) return
+  const direction = e.evt.deltaY < 0 ? 1 : -1
+  const factor = direction > 0 ? ZOOM_STEP : 1 / ZOOM_STEP
+  const newScale = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, stageScale.value * factor))
+  const ratio = newScale / stageScale.value
+  stagePos.x = pointer.x - ratio * (pointer.x - stagePos.x)
+  stagePos.y = pointer.y - ratio * (pointer.y - stagePos.y)
+  stageScale.value = newScale
+}
+
+function handleStageDragEnd(e: any) {
+  const stage = stageRef.value?.getStage?.()
+  if (!stage) return
+  stagePos.x = stage.x()
+  stagePos.y = stage.y()
+}
 
 const bgImageConfig = computed(() => {
   if (!bgImage.value || !stageSize.width) return {}
@@ -743,7 +831,13 @@ function getEventPosition(e: any): { x: number; y: number } | null {
   const stage = stageRef.value?.getStage?.()
   if (!stage) return null
   const pos = stage.getPointerPosition()
-  return pos ?? null
+  if (!pos) return null
+  // Transform from container (viewport) coords into stage coordinate space,
+  // accounting for the current zoom scale and pan offset.
+  return {
+    x: (pos.x - stagePos.x) / stageScale.value,
+    y: (pos.y - stagePos.y) / stageScale.value,
+  }
 }
 
 function handleMouseMove(e: any) {
@@ -941,8 +1035,9 @@ async function saveAll() {
   }
 }
 
-// Reset pending state when floor plan switches
+// Reset view & pending state when floor plan switches
 watch(currentFloorPlanId, () => {
+  resetView()
   pendingCreates.value = []
   pendingUpdates.clear()
   pendingDeletes.clear()
