@@ -124,9 +124,9 @@
                     Current status
                   </p>
                 </div>
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <!-- <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
                   <UIcon :name="eventStateAppearance.icon" class="h-7 w-7 text-white/80" />
-                </div>
+                </div> -->
               </div>
             </div>
         </section>
@@ -205,32 +205,68 @@
                 </div>
               </div>
               <div class="p-4">
-                <ul v-if="outstandingTasksView.length" class="space-y-3">
-                  <li
-                    v-for="(task, index) in outstandingTasksView"
-                    :key="`${task.code}-${index}`"
+                <div v-if="sortedOutstandingTasksView.length">
+                  <div
+                    :key="currentTask.code"
                     class="rounded-xl border p-4 transition-colors"
-                    :class="task.cardClass"
+                    :class="currentTask.cardClass"
                   >
                     <div class="flex items-start gap-3">
-                      <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" :class="task.iconContainerClass">
-                        <UIcon :name="task.icon" class="h-4 w-4" :class="task.iconClass" />
+                      <div class="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg" :class="currentTask.iconContainerClass">
+                        <UIcon :name="currentTask.icon" class="h-4 w-4" :class="currentTask.iconClass" />
                       </div>
                       <div class="min-w-0 flex-1">
                         <div class="flex flex-wrap items-center gap-2">
-                          <p class="text-sm font-bold text-deep-navy">{{ task.title }}</p>
-                          <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]" :class="task.badgeClass">
-                            {{ task.levelLabel }}
+                          <p class="text-sm font-bold text-deep-navy">{{ currentTask.title }}</p>
+                          <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]" :class="currentTask.badgeClass">
+                            {{ currentTask.levelLabel }}
                           </span>
                         </div>
-                        <p class="mt-1 text-xs leading-relaxed text-gray-600">{{ task.description }}</p>
-                        <p v-if="task.hint" class="mt-2 text-[11px] font-medium text-gray-500">{{ task.hint }}</p>
-                        <p class="mt-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-gray-400">{{ task.code }}</p>
+                        <p class="mt-1 text-xs leading-relaxed text-gray-600">{{ currentTask.description }}</p>
+                        <p v-if="currentTask.hint" class="mt-2 text-[11px] font-medium text-gray-500">{{ currentTask.hint }}</p>
+                        <p class="mt-2 text-[10px] font-extrabold uppercase tracking-[0.2em] text-gray-400">{{ currentTask.code.replace(/_/g, " ") }}</p>
                       </div>
                     </div>
-                  </li>
-                </ul>
-                <!-- class="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-emerald-700 -->
+                  </div>
+
+                  <div class="mt-4 flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
+                      :disabled="currentTaskIndex === 0"
+                      @click="currentTaskIndex--"
+                    >
+                      <UIcon name="i-heroicons-chevron-left" class="h-3.5 w-3.5" />
+                    </button>
+
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        v-for="(task, i) in sortedOutstandingTasksView"
+                        :key="task.code"
+                        type="button"
+                        class="h-1.5 rounded-full transition-all"
+                        :class="[
+                          i === currentTaskIndex ? 'w-4 bg-deep-navy' : 'w-1.5 bg-slate-300 hover:bg-slate-400',
+                        ]"
+                        @click="currentTaskIndex = i"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      class="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-30"
+                      :disabled="currentTaskIndex === sortedOutstandingTasksView.length - 1"
+                      @click="currentTaskIndex++"
+                    >
+                      <UIcon name="i-heroicons-chevron-right" class="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+
+                  <p class="mt-2 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    {{ currentTaskIndex + 1 }} of {{ sortedOutstandingTasksView.length }}
+                  </p>
+                </div>
+
                 <div v-else class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
                     <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
                       <UIcon name="i-heroicons-inbox" class="h-7 w-7" />
@@ -298,7 +334,7 @@
                 <ul v-else class="space-y-4">
                   <li v-for="(item, index) in attendeesByLocation" :key="index" class="flex items-center justify-between gap-4">
                     <div class="flex-1">
-                      <p class="truncate text-sm font-bold text-deep-navy">{{ item.label }}</p>
+                      <p class="text-sm font-bold text-deep-navy">{{ item.label }}</p>
                       <p class="text-xs text-gray-500">{{ item.value }} attendees</p>
                     </div>
                     <div class="text-sm font-black text-deep-navy">{{ item.percentage.toFixed(1) }}%</div>
@@ -353,6 +389,7 @@
                   </div>
                   <div>
                     <p class="text-sm font-medium text-deep-navy">{{ activity.title }}</p>
+                    <p class="text-xs text-gray-500">{{ activity.time }}</p>
                   </div>
                 </li>
               </ul>
@@ -1177,6 +1214,30 @@ const outstandingTaskAppearanceByCode: Record<string, Omit<OutstandingTaskView, 
     iconContainerClass: 'bg-fuchsia-100',
     levelLabel: 'Required',
   },
+  MAXIMUM_ATTENDANCE_REQUIRED: {
+    icon: 'i-heroicons-users',
+    badgeClass: 'bg-red-100 text-red-800',
+    cardClass: 'border-red-200 bg-red-50/60',
+    iconClass: 'text-red-700',
+    iconContainerClass: 'bg-red-100',
+    levelLabel: 'Required', 
+  },
+  NO_CONSENTS_CONFIRMED: {
+    icon: 'i-heroicons-shield-check',
+    badgeClass: 'bg-green-100 text-green-800',
+    cardClass: 'border-green-200 bg-green-50/60',
+    iconClass: 'text-green-700',
+    iconContainerClass: 'bg-green-100',
+    levelLabel: 'Required',
+  },
+  LANDING_IMAGE_REQUIRED: {
+    icon: 'i-heroicons-photo',
+    badgeClass: 'bg-sky-100 text-sky-800',
+    cardClass: 'border-sky-200 bg-sky-50/60',
+    iconClass: 'text-sky-700',
+    iconContainerClass: 'bg-sky-100',
+    levelLabel: 'Required',
+  }
 }
 
 const defaultOutstandingTaskAppearance: Omit<OutstandingTaskView, keyof OutstandingTask> = {
@@ -1198,10 +1259,26 @@ const outstandingTasksView = computed<OutstandingTaskView[]>(() => {
   })
 })
 
+const taskPriorityOrder: Record<string, number> = { Required: 0, Attention: 1, Recommended: 2 }
+
+const sortedOutstandingTasksView = computed<OutstandingTaskView[]>(() => {
+  return [...outstandingTasksView.value].sort(
+    (a, b) => (taskPriorityOrder[a.levelLabel] ?? 3) - (taskPriorityOrder[b.levelLabel] ?? 3),
+  )
+})
+
+const currentTaskIndex = ref(0)
+
+watch(sortedOutstandingTasksView, () => {
+  currentTaskIndex.value = 0
+})
+
+const currentTask = computed(() => sortedOutstandingTasksView.value[currentTaskIndex.value])
+
 const recentActivities = computed(() => {
   const activities: Array<{ id: string, icon: string; color: string; title: string; time: string }> = []
 
-  attendeesResults.value.slice(0, 3).forEach((attendee) => {
+  attendeesResults.value.slice(0, 8).forEach((attendee) => {
     activities.push({
       id: `attendee-${attendee.attendee_id}`,
       icon: 'i-heroicons-user-plus',
@@ -1210,27 +1287,7 @@ const recentActivities = computed(() => {
       time: formatCompactDateTime(attendee.created_at),
     })
   })
-
-  if (activities.length < 3) {
-    activities.push(
-      {
-        id: 'staff-add',
-        icon: 'i-heroicons-identification',
-        color: 'bg-violet-500',
-        title: 'Staff member added',
-        time: 'Team update',
-      },
-      {
-        id: 'product-purchase',
-        icon: 'i-heroicons-shopping-cart',
-        color: 'bg-emerald-500',
-        title: 'Product purchase completed',
-        time: 'Order activity',
-      }
-    )
-  }
-
-  return activities.slice(0, 3)
+  return activities.slice(0, 8)
 })
 
 const attendancePercentage = computed(() => {

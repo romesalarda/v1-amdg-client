@@ -10,7 +10,7 @@
 					<div class="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 md:block">
 						Registration flow
 					</div>
-					<UButton color="white" variant="soft" @click="emit('go-back')">Back to event</UButton>
+					<UButton color="white" variant="soft" @click="emit('go-back')" class="bg-white">Back to event</UButton>
 				</div>
 			</div>
 		</div>
