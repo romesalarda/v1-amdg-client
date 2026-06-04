@@ -7660,18 +7660,9 @@ export type EventNotification = {
      */
     priority: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT';
     readonly priority_display: string;
-    /**
-     * Payment associated with this notification
-     */
-    readonly related_payment: number | null;
-    /**
-     * Order associated with this notification
-     */
-    readonly related_order: number | null;
-    /**
-     * Booking associated with this notification
-     */
-    readonly related_booking: number | null;
+    readonly related_payment: string;
+    readonly related_order: string;
+    readonly related_booking: string;
     /**
      * Whether this notification has been read/acknowledged
      */
@@ -10331,6 +10322,58 @@ export type EventVenueContactRequest = {
      * * `OTHER` - Other
      */
     role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Like FloorPlanCreateUpdateSerializer but ``venue`` is optional.
+ *
+ * When the EventVenue has a source_venue_id the endpoint automatically
+ * resolves the global Venue; callers only need to supply ``venue`` when no
+ * source venue is linked to the event venue.
+ */
+export type EventVenueFloorPlanCreate = {
+    readonly id: number;
+    venue?: number | null;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: string;
+    readonly image_url: string | null;
+    /**
+     * Pixel width of the uploaded image, extracted server-side
+     */
+    readonly original_width: number;
+    /**
+     * Pixel height of the uploaded image, extracted server-side
+     */
+    readonly original_height: number;
+};
+
+/**
+ * Like FloorPlanCreateUpdateSerializer but ``venue`` is optional.
+ *
+ * When the EventVenue has a source_venue_id the endpoint automatically
+ * resolves the global Venue; callers only need to supply ``venue`` when no
+ * source venue is linked to the event venue.
+ */
+export type EventVenueFloorPlanCreateRequest = {
+    venue?: number | null;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: Blob | File;
 };
 
 /**
@@ -15909,6 +15952,27 @@ export type PatchedEventVenueContactRequest = {
      * * `OTHER` - Other
      */
     role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Like FloorPlanCreateUpdateSerializer but ``venue`` is optional.
+ *
+ * When the EventVenue has a source_venue_id the endpoint automatically
+ * resolves the global Venue; callers only need to supply ``venue`` when no
+ * source venue is linked to the event venue.
+ */
+export type PatchedEventVenueFloorPlanCreateRequest = {
+    venue?: number | null;
+    name?: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image?: Blob | File;
 };
 
 /**
@@ -24235,6 +24299,27 @@ export type EventVenueContactWritable = {
      * * `OTHER` - Other
      */
     role?: 'MANAGER' | 'OWNER' | 'COORDINATOR' | 'SUPPORT' | 'OTHER' | '';
+};
+
+/**
+ * Like FloorPlanCreateUpdateSerializer but ``venue`` is optional.
+ *
+ * When the EventVenue has a source_venue_id the endpoint automatically
+ * resolves the global Venue; callers only need to supply ``venue`` when no
+ * source venue is linked to the event venue.
+ */
+export type EventVenueFloorPlanCreateWritable = {
+    venue?: number | null;
+    name: string;
+    /**
+     * 0 = ground floor, increment upward
+     */
+    level?: number;
+    /**
+     * Optional human-readable label, e.g. "Mezzanine"
+     */
+    level_label?: string;
+    image: string;
 };
 
 /**
@@ -32924,6 +33009,354 @@ export type EventAuthorizationsUpdateResponses = {
 };
 
 export type EventAuthorizationsUpdateResponse = EventAuthorizationsUpdateResponses[keyof EventAuthorizationsUpdateResponses];
+
+export type EventEventVenuesFloorPlansListData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/';
+};
+
+export type EventEventVenuesFloorPlansListResponses = {
+    200: PaginatedFloorPlanListList;
+};
+
+export type EventEventVenuesFloorPlansListResponse = EventEventVenuesFloorPlansListResponses[keyof EventEventVenuesFloorPlansListResponses];
+
+export type EventEventVenuesFloorPlansCreateData = {
+    body: EventVenueFloorPlanCreateRequest;
+    path: {
+        event_venue_pk: string;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/';
+};
+
+export type EventEventVenuesFloorPlansCreateResponses = {
+    201: EventVenueFloorPlanCreate;
+};
+
+export type EventEventVenuesFloorPlansCreateResponse = EventEventVenuesFloorPlansCreateResponses[keyof EventEventVenuesFloorPlansCreateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsListData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsListResponses = {
+    200: PaginatedFloorPlanAnnotationList;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsListResponse = EventEventVenuesFloorPlansAnnotationsListResponses[keyof EventEventVenuesFloorPlansAnnotationsListResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsCreateData = {
+    body: FloorPlanAnnotationRequestWritable;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsCreateResponses = {
+    201: FloorPlanAnnotation;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsCreateResponse = EventEventVenuesFloorPlansAnnotationsCreateResponses[keyof EventEventVenuesFloorPlansAnnotationsCreateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataListData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+    };
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataListResponses = {
+    200: PaginatedFloorPlanAnnotationMetadataList;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataListResponse = EventEventVenuesFloorPlansAnnotationsMetadataListResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataListResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataCreateData = {
+    body: FloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataCreateResponses = {
+    201: FloorPlanAnnotationMetadata;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataCreateResponse = EventEventVenuesFloorPlansAnnotationsMetadataCreateResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataCreateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataDestroyData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataDestroyResponse = EventEventVenuesFloorPlansAnnotationsMetadataDestroyResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataDestroyResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataRetrieveData = {
+    body?: never;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataRetrieveResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataRetrieveResponse = EventEventVenuesFloorPlansAnnotationsMetadataRetrieveResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataRetrieveResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataPartialUpdateData = {
+    body?: PatchedFloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataPartialUpdateResponse = EventEventVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataPartialUpdateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataUpdateData = {
+    body: FloorPlanAnnotationMetadataRequest;
+    path: {
+        annotation_pk: number;
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{annotation_pk}/metadata/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataUpdateResponses = {
+    200: FloorPlanAnnotationMetadata;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsMetadataUpdateResponse = EventEventVenuesFloorPlansAnnotationsMetadataUpdateResponses[keyof EventEventVenuesFloorPlansAnnotationsMetadataUpdateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsDestroyData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsDestroyResponse = EventEventVenuesFloorPlansAnnotationsDestroyResponses[keyof EventEventVenuesFloorPlansAnnotationsDestroyResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsRetrieveData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsRetrieveResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsRetrieveResponse = EventEventVenuesFloorPlansAnnotationsRetrieveResponses[keyof EventEventVenuesFloorPlansAnnotationsRetrieveResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsPartialUpdateData = {
+    body?: PatchedFloorPlanAnnotationRequestWritable;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsPartialUpdateResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsPartialUpdateResponse = EventEventVenuesFloorPlansAnnotationsPartialUpdateResponses[keyof EventEventVenuesFloorPlansAnnotationsPartialUpdateResponses];
+
+export type EventEventVenuesFloorPlansAnnotationsUpdateData = {
+    body: FloorPlanAnnotationRequestWritable;
+    path: {
+        event_venue_pk: string;
+        floor_plan_pk: number;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{floor_plan_pk}/annotations/{id}/';
+};
+
+export type EventEventVenuesFloorPlansAnnotationsUpdateResponses = {
+    200: FloorPlanAnnotation;
+};
+
+export type EventEventVenuesFloorPlansAnnotationsUpdateResponse = EventEventVenuesFloorPlansAnnotationsUpdateResponses[keyof EventEventVenuesFloorPlansAnnotationsUpdateResponses];
+
+export type EventEventVenuesFloorPlansDestroyData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{id}/';
+};
+
+export type EventEventVenuesFloorPlansDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventEventVenuesFloorPlansDestroyResponse = EventEventVenuesFloorPlansDestroyResponses[keyof EventEventVenuesFloorPlansDestroyResponses];
+
+export type EventEventVenuesFloorPlansRetrieveData = {
+    body?: never;
+    path: {
+        event_venue_pk: string;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{id}/';
+};
+
+export type EventEventVenuesFloorPlansRetrieveResponses = {
+    200: FloorPlanDetail;
+};
+
+export type EventEventVenuesFloorPlansRetrieveResponse = EventEventVenuesFloorPlansRetrieveResponses[keyof EventEventVenuesFloorPlansRetrieveResponses];
+
+export type EventEventVenuesFloorPlansPartialUpdateData = {
+    body?: PatchedEventVenueFloorPlanCreateRequest;
+    path: {
+        event_venue_pk: string;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{id}/';
+};
+
+export type EventEventVenuesFloorPlansPartialUpdateResponses = {
+    200: EventVenueFloorPlanCreate;
+};
+
+export type EventEventVenuesFloorPlansPartialUpdateResponse = EventEventVenuesFloorPlansPartialUpdateResponses[keyof EventEventVenuesFloorPlansPartialUpdateResponses];
+
+export type EventEventVenuesFloorPlansUpdateData = {
+    body: EventVenueFloorPlanCreateRequest;
+    path: {
+        event_venue_pk: string;
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/event-venues/{event_venue_pk}/floor-plans/{id}/';
+};
+
+export type EventEventVenuesFloorPlansUpdateResponses = {
+    200: EventVenueFloorPlanCreate;
+};
+
+export type EventEventVenuesFloorPlansUpdateResponse = EventEventVenuesFloorPlansUpdateResponses[keyof EventEventVenuesFloorPlansUpdateResponses];
 
 export type EventListListData = {
     body?: never;

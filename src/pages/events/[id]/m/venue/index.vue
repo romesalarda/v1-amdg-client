@@ -59,8 +59,7 @@
 										Manage Details
 									</NuxtLink>
 									<NuxtLink
-										v-if="entry.source_venue_id"
-										:to="`/venues/${entry.source_venue_id}/floor-plans`"
+										:to="`/events/${id}/m/venue/${entry.event_venue_id}/floor-plans`"
 										class="px-3 py-1.5 text-xs font-bold rounded-lg border border-deep-navy/15 text-navy-700 hover:bg-mist-blue/70"
 									>
 										<!-- <span class="material-symbols-outlined text-sm">map</span> -->

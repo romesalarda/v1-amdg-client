@@ -4,6 +4,7 @@
       'px-6 py-4 flex items-start gap-4 transition-colors',
       !notification.is_read ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'bg-white hover:bg-gray-50/60',
     ]"
+    @click="handleSpecificRedirect"
   >
     <!-- Priority indicator + icon -->
     <div class="flex flex-col items-center gap-1.5 flex-shrink-0 pt-0.5">
@@ -92,9 +93,14 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { EventNotification } from '~/api/types.gen'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const props = defineProps<{ notification: EventNotification }>()
 defineEmits<{ 'mark-read': []; 'delete': [] }>()
+
+const eventId = router.currentRoute.value.params.id as string
 
 const typeIconMap: Record<string, string> = {
   ORDER_FULFILLMENT: 'i-heroicons-shopping-bag',
@@ -104,6 +110,22 @@ const typeIconMap: Record<string, string> = {
   CAPACITY_WARNING: 'i-heroicons-chart-bar',
   AUTHORIZATION_REQUEST: 'i-heroicons-shield-check',
   GENERAL: 'i-heroicons-bell',
+}
+
+const handleSpecificRedirect = () => {
+  if (props.notification.related_booking) {
+    // Redirect to booking details
+    router.push(`/events/${eventId}/m/participants/dashboard?search=${props.notification.related_booking}&view=bookings`)
+  } else if (props.notification.related_order) {
+    // Redirect to order details
+    router.push(`/events/${eventId}/m/shop/orders/${props.notification.related_order}/detail`)
+  } else if (props.notification.related_payment) {
+    // Redirect to payment details
+    router.push(`/events/${eventId}/payments/${props.notification.related_payment}`)
+  } else {
+    // Fallback to event dashboard
+    router.push(`/events/${eventId}/dashboard`)
+  }
 }
 
 const typeIcon = computed(() => typeIconMap[props.notification.notification_type] ?? 'i-heroicons-bell')

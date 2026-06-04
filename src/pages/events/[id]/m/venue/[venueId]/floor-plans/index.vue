@@ -86,7 +86,7 @@
 
             <div class="flex gap-2">
               <NuxtLink
-                :to="`/venues/${venueId}/floor-plans/${fp.id}/annotate`"
+                :to="`/events/${id}/m/venue/${venueId}/floor-plans/${fp.id}/annotate`"
                 class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 bg-primary text-white text-xs font-bold rounded-lg hover:bg-primary/90"
               >
                 <span class="material-symbols-outlined text-sm">draw</span>
@@ -209,17 +209,23 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { useFloorPlans, useCreateFloorPlan, useDeleteFloorPlan } from '~/composables/resources/venues/floorPlans'
-import type { FloorPlanListItem, FloorPlanCreateBody } from '~/composables/resources/venues/floorPlans'
+import {
+  useEventVenueFloorPlans,
+  useCreateEventVenueFloorPlan,
+  useDeleteEventVenueFloorPlan,
+} from '~/composables/resources/venues/eventVenueFloorPlans'
+import type { FloorPlanListItem } from '~/composables/resources/venues/eventVenueFloorPlans'
 
 definePageMeta({ layout: 'default', middleware: ['auth'] })
 
 const route = useRoute()
 const toast = useToast()
 
+// id = event display_code, venueId = event_venue_id UUID
+const id = computed(() => String(route.params.id))
 const venueId = computed(() => String(route.params.venueId))
 
-const { data: floorPlansResponse, isLoading } = useFloorPlans(venueId)
+const { data: floorPlansResponse, isLoading } = useEventVenueFloorPlans(venueId)
 const floorPlans = computed<FloorPlanListItem[]>(() => {
   const d = floorPlansResponse.value?.data as any
   if (!d) return []
@@ -244,7 +250,7 @@ const uploadForm = ref({
   file: null as File | null,
 })
 
-const createFloorPlan = useCreateFloorPlan(venueId)
+const createFloorPlan = useCreateEventVenueFloorPlan(venueId)
 
 function closeUploadForm() {
   showUploadForm.value = false
@@ -267,13 +273,12 @@ async function submitUpload() {
   isUploading.value = true
   uploadError.value = ''
   try {
-    const body: FloorPlanCreateBody = {
-      venue: Number(venueId.value),
+    const body = {
       name: uploadForm.value.name.trim(),
       level: uploadForm.value.level,
       image: uploadForm.value.file,
+      ...(uploadForm.value.level_label.trim() ? { level_label: uploadForm.value.level_label.trim() } : {}),
     }
-    if (uploadForm.value.level_label.trim()) body.level_label = uploadForm.value.level_label.trim()
     await createFloorPlan.mutateAsync(body)
     toast.add({ title: 'Floor plan uploaded', color: 'green' })
     closeUploadForm()
@@ -285,7 +290,7 @@ async function submitUpload() {
 }
 
 // ── Delete ────────────────────────────────────────────────────────────────
-const deleteFloorPlan = useDeleteFloorPlan(venueId)
+const deleteFloorPlan = useDeleteEventVenueFloorPlan(venueId)
 
 async function confirmDelete(fp: FloorPlanListItem) {
   if (!window.confirm(`Delete "${fp.name}"? This will also remove all its annotations.`)) return

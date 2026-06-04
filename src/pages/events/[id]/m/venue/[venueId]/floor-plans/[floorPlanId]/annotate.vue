@@ -4,7 +4,7 @@
     <!-- ── Header ──────────────────────────────────────────────────── -->
     <header class="flex items-center gap-3 px-6 py-3 bg-white border-b border-deep-navy/10 shadow-sm shrink-0">
       <NuxtLink
-        :to="`/venues/${venueId}/floor-plans`"
+        :to="`/events/${id}/m/venue/${venueId}/floor-plans`"
         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-deep-navy/15 text-xs font-semibold text-navy-600 hover:bg-mist-blue/60 shrink-0"
       >
         <span class="material-symbols-outlined text-sm">apartment</span>
@@ -381,14 +381,14 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { useFloorPlans, useFloorPlan } from '~/composables/resources/venues/floorPlans'
+import { useEventVenueFloorPlans, useEventVenueFloorPlan } from '~/composables/resources/venues/eventVenueFloorPlans'
 import {
-  useCreateFloorPlanAnnotation,
-  useUpdateFloorPlanAnnotation,
-  useDeleteFloorPlanAnnotation,
-} from '~/composables/resources/venues/floorPlanAnnotations'
+  useCreateEventVenueFloorPlanAnnotation,
+  useUpdateEventVenueFloorPlanAnnotation,
+  useDeleteEventVenueFloorPlanAnnotation,
+} from '~/composables/resources/venues/eventVenueFloorPlanAnnotations'
 import type { FloorPlanAnnotationItem } from '~/composables/resources/venues/floorPlans'
-import { locationsRoomsList } from '~/api/sdk.gen'
+import { eventVenueRoomsList } from '~/api/sdk.gen'
 import { useQueryClient } from '@tanstack/vue-query'
 
 definePageMeta({
@@ -401,6 +401,8 @@ const route = useRoute()
 const toast = useToast()
 const queryClient = useQueryClient()
 
+// id = event display_code, venueId = event_venue_id UUID
+const id = computed(() => String(route.params.id))
 const venueId = computed(() => String(route.params.venueId))
 const initialFloorPlanId = computed(() => String(route.params.floorPlanId))
 
@@ -408,7 +410,7 @@ const initialFloorPlanId = computed(() => String(route.params.floorPlanId))
 const currentFloorPlanId = ref(initialFloorPlanId.value)
 
 // ── Data fetching ─────────────────────────────────────────────────────────
-const { data: floorPlansResponse } = useFloorPlans(venueId)
+const { data: floorPlansResponse } = useEventVenueFloorPlans(venueId)
 const allFloorPlans = computed(() => {
   const data = floorPlansResponse.value?.data
   if (!data) return []
@@ -418,7 +420,7 @@ const allFloorPlans = computed(() => {
   )
 })
 
-const { data: floorPlanResponse } = useFloorPlan(venueId, currentFloorPlanId)
+const { data: floorPlanResponse } = useEventVenueFloorPlan(venueId, currentFloorPlanId)
 const currentFloorPlan = computed(() => {
   const data = floorPlanResponse.value?.data
   return data ?? null
@@ -427,7 +429,7 @@ const savedAnnotations = computed<FloorPlanAnnotationItem[]>(() => {
   return (currentFloorPlan.value as any)?.annotations ?? []
 })
 
-// Rooms for RoomVenue dropdown
+// Rooms for EventVenueRoom dropdown (scoped to this event venue)
 const venueRoomsResponse = ref<any>(null)
 const venueRooms = computed(() => {
   const d = venueRoomsResponse.value?.data
@@ -437,7 +439,7 @@ const venueRooms = computed(() => {
 
 onMounted(async () => {
   try {
-    venueRoomsResponse.value = await locationsRoomsList({ query: { venue: venueId.value, page_size: 200 } as any })
+    venueRoomsResponse.value = await eventVenueRoomsList({ query: { event_venue: venueId.value, page_size: 200 } })
   } catch (_) {
     // Non-critical, dropdown will be empty
   }
@@ -887,9 +889,9 @@ function switchFloorPlan(id: number) {
 }
 
 // ── Mutations ─────────────────────────────────────────────────────────────
-const createMutation = useCreateFloorPlanAnnotation(venueId, currentFloorPlanId)
-const updateMutation = useUpdateFloorPlanAnnotation(venueId, currentFloorPlanId)
-const deleteMutation = useDeleteFloorPlanAnnotation(venueId, currentFloorPlanId)
+const createMutation = useCreateEventVenueFloorPlanAnnotation(venueId, currentFloorPlanId)
+const updateMutation = useUpdateEventVenueFloorPlanAnnotation(venueId, currentFloorPlanId)
+const deleteMutation = useDeleteEventVenueFloorPlanAnnotation(venueId, currentFloorPlanId)
 
 const isSaving = ref(false)
 
@@ -924,7 +926,7 @@ async function saveAll() {
 
     // Refetch floor plan (annotations are embedded in the detail view)
     await queryClient.invalidateQueries({
-      queryKey: ['floorPlans', 'detail', venueId.value, currentFloorPlanId.value],
+      queryKey: ['eventVenueFloorPlans', 'detail', venueId.value, currentFloorPlanId.value],
     })
 
     toast.add({ title: 'Saved successfully', color: 'green' })

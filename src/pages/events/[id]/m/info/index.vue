@@ -119,7 +119,7 @@
               <!-- Current Status Display -->
               <div class="space-y-2">
                 <label class="block text-xs font-black text-primary uppercase tracking-wider">Current Status</label>
-                <div class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl flex items-center gap-3">
+                <div class="w-full py-3 rounded-xl flex items-center gap-3">
                   <span class="px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider" :class="getStatusBadgeClass(event?.status)">
                     {{ statusOptions.find(o => o.value === event?.status)?.label || '-' }}
                   </span>
@@ -886,8 +886,8 @@ const availableActions = computed(() => {
   
   return {
     canMoveToDraft: ['PUBLISHED', 'OPEN', 'CLOSED', 'POSTPONED', 'CANCELLED'].includes(statusValue),
-    canPublish: ['DRAFTING', 'POSTPONED', 'CANCELLED'].includes(statusValue),
-    canOpen: ['PUBLISHED', 'POSTPONED'].includes(statusValue),
+    canPublish: ['DRAFTING', 'CANCELLED'].includes(statusValue),
+    canOpen: ['PUBLISHED', 'POSTPONED', 'CLOSED'].includes(statusValue),
     canClose: status === 'OPEN' || status === 'IN_PROGRESS',
     canArchive: status === 'CLOSED' || status === 'COMPLETED',
     canPostpone: status !== 'ARCHIVED' && status !== 'DELETED' && status !== 'CANCELLED' && status !== 'POSTPONED',
