@@ -1,8 +1,11 @@
 <template>
+  <EventManagementLayout :event-id="id" :event="event?.data">
+
+  
   <div class="flex flex-col h-screen bg-mist-blue/20 overflow-hidden">
 
     <!-- ── Header ──────────────────────────────────────────────────── -->
-    <header class="flex items-center gap-3 px-6 py-3 bg-white border-b border-deep-navy/10 shadow-sm shrink-0">
+    <header class="flex items-center gap-3 px-6 py-3 bg-white border-b border-deep-navy/10 shadow-sm shrink-0 rounded-tl-2xl rounded-tr-2xl">
       <NuxtLink
         :to="`/events/${id}/m/venue/${venueId}/floor-plans`"
         class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-deep-navy/15 text-xs font-semibold text-navy-600 hover:bg-mist-blue/60 shrink-0"
@@ -17,7 +20,7 @@
     </header>
 
     <!-- ── Floor switcher ──────────────────────────────────────────── -->
-    <div v-if="allFloorPlans.length > 1" class="flex items-center gap-1 px-5 py-2 bg-white border-b border-deep-navy/10 shrink-0 overflow-x-auto">
+    <div v-if="allFloorPlans.length > 1" class="flex items-center gap-1 px-5 py-2 bg-white border-b border-deep-navy/10 shrink-0 overflow-x-auto rounded-bl-2xl">
       <button
         v-for="fp in allFloorPlans"
         :key="fp.id"
@@ -39,10 +42,10 @@
     <div class="flex flex-1 overflow-hidden">
 
       <!-- Left panel: canvas ───────────────────────────────────────── -->
-      <div class="flex flex-col flex-1 overflow-hidden p-4 gap-3">
+      <div class="flex flex-col flex-1 overflow-hidden gap-3 bg-mist-blue mr-4">
 
         <!-- Toolbar -->
-        <div class="flex items-center gap-3 shrink-0 bg-white rounded-2xl border border-deep-navy/10 shadow-sm px-3 py-2">
+        <div class="flex items-center gap-3 mt-2 shrink-0 bg-white rounded-2xl border border-deep-navy/10 shadow-sm px-3 py-2">
           <!-- Mode toggle -->
           <div class="flex items-center rounded-xl bg-mist-blue/60 p-0.5 gap-0.5">
             <button
@@ -365,7 +368,61 @@
 
             <!-- Link to Room -->
             <div>
-              <label class="block text-xs font-black text-navy-400 uppercase tracking-wider mb-1">Link to Room</label>
+              <div class="flex items-center justify-between mb-1">
+                <label class="text-xs font-black text-navy-400 uppercase tracking-wider">Link to Room</label>
+                <button
+                  type="button"
+                  class="text-xs text-primary font-semibold hover:underline flex items-center gap-0.5"
+                  @click="showCreateRoom = !showCreateRoom"
+                >
+                  <span class="material-symbols-outlined text-sm leading-none">{{ showCreateRoom ? 'close' : 'add' }}</span>
+                  {{ showCreateRoom ? 'Cancel' : 'New Room' }}
+                </button>
+              </div>
+
+              <!-- Inline create-room form -->
+              <Transition name="drawer">
+                <div v-if="showCreateRoom" class="mb-3 rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-2">
+                  <p class="text-[10px] font-black text-primary uppercase tracking-wider">Quick Create Room</p>
+                  <input
+                    v-model="newRoomForm.room_name"
+                    type="text"
+                    placeholder="Room name *"
+                    class="input"
+                  />
+                  <div class="flex gap-2">
+                    <input
+                      v-model.number="newRoomForm.capacity"
+                      type="number"
+                      min="1"
+                      placeholder="Capacity (optional)"
+                      class="input flex-1"
+                    />
+                  </div>
+                  <input
+                    v-model="newRoomForm.description"
+                    type="text"
+                    placeholder="Description (optional)"
+                    class="input"
+                  />
+                  <button
+                    type="button"
+                    :disabled="!newRoomForm.room_name.trim() || isCreatingRoom"
+                    :class="[
+                      'w-full flex items-center justify-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-colors',
+                      newRoomForm.room_name.trim() && !isCreatingRoom
+                        ? 'bg-primary text-white hover:bg-primary/90'
+                        : 'bg-navy-100 text-navy-400 cursor-not-allowed',
+                    ]"
+                    @click="createRoomInline"
+                  >
+                    <span v-if="isCreatingRoom" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
+                    <span v-else class="material-symbols-outlined text-sm">add_circle</span>
+                    {{ isCreatingRoom ? 'Creating…' : 'Create & Select' }}
+                  </button>
+                </div>
+              </Transition>
+
               <select v-model="drawerForm.room_venue" class="input">
                 <option :value="null">— None —</option>
                 <option v-for="room in venueRooms" :key="room.id" :value="room.id">
@@ -383,12 +440,36 @@
                 </button>
               </div>
               <div class="space-y-2">
-                <div v-for="(meta, idx) in drawerForm.metadata" :key="idx" class="flex gap-2 items-start">
-                  <input v-model="meta.label" type="text" placeholder="Label" class="input flex-1" />
-                  <input v-model="meta.value" type="text" placeholder="Value" class="input flex-1" />
-                  <button type="button" class="icon-btn text-red-400 shrink-0 mt-0.5" @click="removeMetaRow(idx)">
-                    <span class="material-symbols-outlined text-sm">remove_circle</span>
+                <div
+                  v-for="(meta, idx) in drawerForm.metadata"
+                  :key="idx"
+                  class="relative rounded-xl border border-slate-200 bg-slate-50 p-3"
+                >
+                  <button
+                    type="button"
+                    class="absolute top-2 right-2 text-red-400 hover:text-red-500"
+                    @click="removeMetaRow(idx)"
+                  >
+                    <span class="material-symbols-outlined text-sm">
+                      close
+                    </span>
                   </button>
+
+                  <div class="space-y-2 pr-8">
+                    <input
+                      v-model="meta.label"
+                      type="text"
+                      placeholder="Names (e.g. 'Projector', 'Notes')"
+                      class="input w-full"
+                    />
+
+                    <input
+                      v-model="meta.value"
+                      type="text"
+                      placeholder="Notes (e.g. 'Ceiling-mounted, supports HDMI')"
+                      class="input w-full h-20 resize-none"
+                    />
+                  </div>
                 </div>
               </div>
               <p v-if="!drawerForm.metadata.length" class="text-xs text-navy-400 italic">No metadata entries</p>
@@ -410,22 +491,26 @@
       </div>
     </Transition>
   </div>
+  </EventManagementLayout>
 </template>
 
 <script setup lang="ts">
 import { ref, reactive, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { useEventVenueFloorPlans, useEventVenueFloorPlan } from '~/composables/resources/venues/eventVenueFloorPlans'
+import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+
 import {
   useCreateEventVenueFloorPlanAnnotation,
   useUpdateEventVenueFloorPlanAnnotation,
   useDeleteEventVenueFloorPlanAnnotation,
 } from '~/composables/resources/venues/eventVenueFloorPlanAnnotations'
 import type { FloorPlanAnnotationItem } from '~/composables/resources/venues/floorPlans'
-import { eventVenueRoomsList } from '~/api/sdk.gen'
+import { eventVenueRoomsList, eventVenueRoomsCreate } from '~/api/sdk.gen'
 import { useQueryClient } from '@tanstack/vue-query'
+import { useEvent } from '~/composables/resources/events/events'
 
 definePageMeta({
-  layout: 'default',
+  layout: false,
   middleware: ['auth'],
 })
 
@@ -436,6 +521,8 @@ const queryClient = useQueryClient()
 
 // id = event display_code, venueId = event_venue_id UUID
 const id = computed(() => String(route.params.id))
+const { data: event } = useEvent(id)
+
 const venueId = computed(() => String(route.params.venueId))
 const initialFloorPlanId = computed(() => String(route.params.floorPlanId))
 
@@ -477,6 +564,49 @@ onMounted(async () => {
     // Non-critical, dropdown will be empty
   }
 })
+
+// ── Inline room creation ──────────────────────────────────────────────────
+const showCreateRoom = ref(false)
+const isCreatingRoom = ref(false)
+const newRoomForm = reactive({ room_name: '', capacity: null as number | null, description: '' })
+
+async function createRoomInline() {
+  if (!newRoomForm.room_name.trim() || isCreatingRoom.value) return
+  isCreatingRoom.value = true
+  try {
+    const res = await eventVenueRoomsCreate({
+      body: {
+        event_venue: venueId.value,
+        room_name: newRoomForm.room_name.trim(),
+        capacity: newRoomForm.capacity ?? null,
+        description: newRoomForm.description.trim() || null,
+      },
+    })
+    const newRoom = (res as any).data as { id: number; room_name: string; capacity: number | null }
+    // Append to local rooms list
+    const d = venueRoomsResponse.value?.data
+    if (d) {
+      const list: any[] = d.results ?? d
+      list.push(newRoom)
+    }
+    // Auto-select the new room
+    drawerForm.room_venue = newRoom.id
+    // Reset & close
+    newRoomForm.room_name = ''
+    newRoomForm.capacity = null
+    newRoomForm.description = ''
+    showCreateRoom.value = false
+    toast.add({ title: 'Room created', color: 'green' })
+  } catch (err: any) {
+    toast.add({
+      title: 'Failed to create room',
+      description: err?.response?.data?.detail ?? err?.message ?? 'Unknown error',
+      color: 'red',
+    })
+  } finally {
+    isCreatingRoom.value = false
+  }
+}
 
 // ── Canvas / Konva setup ──────────────────────────────────────────────────
 const canvasContainerRef = ref<HTMLElement | null>(null)
@@ -896,6 +1026,10 @@ function closeDrawer() {
   pendingPolygonVertices.value = []
   editingPendingTempId.value = null
   editingSavedId.value = null
+  showCreateRoom.value = false
+  newRoomForm.room_name = ''
+  newRoomForm.capacity = null
+  newRoomForm.description = ''
 }
 
 function addMetaRow() {
