@@ -1097,8 +1097,18 @@ import { useEventForms } from '~/composables/resources/events/eventForms'
 // Track focused fields to prevent auto-save while typing
 const focusedFields = ref(new Set<string>())
 
-// Tab state
-const activeTab = ref<'registration' | 'consents' | 'forms'>('registration')
+// Tab state — initialised from URL query param ?tab= (forced to 'forms' when ?form= is present)
+const VALID_TABS = ['registration', 'consents', 'forms'] as const
+type TabKey = typeof VALID_TABS[number]
+
+const _initQuery = useRoute().query
+const activeTab = ref<TabKey>(
+  _initQuery.form
+    ? 'forms'
+    : VALID_TABS.includes(_initQuery.tab as TabKey)
+      ? (_initQuery.tab as TabKey)
+      : 'registration',
+)
 
 definePageMeta({
   layout: false,
@@ -1111,6 +1121,7 @@ definePageMeta({
 })
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const id = computed(() => String(route.params.id))
@@ -1125,8 +1136,10 @@ const canDeleteQuestions = computed(() => can('REGISTRATION', 'delete').value.al
 const canCreatedQuestions = computed(() => can('REGISTRATION', 'create').value.allowed)
 const readOnly = computed(() => !canEditQuestions.value && !canDeleteQuestions.value && !canCreatedQuestions.value)
 
-// Forms tab state
-const selectedFormId = ref<string | null>(null)
+// Forms tab state — initialise selectedFormId from ?form= query param
+const selectedFormId = ref<string | null>(
+  typeof route.query.form === 'string' && route.query.form ? route.query.form : null,
+)
 const showPageHeader = computed(() => !(activeTab.value === 'forms' && selectedFormId.value))
 
 const formsFilters = computed(() => {
@@ -1135,6 +1148,39 @@ const formsFilters = computed(() => {
 })
 const { data: formsData, isLoading: formsLoading, refetch: refetchForms } = useEventForms(formsFilters)
 const formsList = computed(() => (formsData.value?.data as any)?.results ?? [])
+
+// --- URL helpers ---
+
+// Sync activeTab → ?tab= (replace so back-button still works naturally)
+watch(activeTab, (tab) => {
+  router.replace({ query: { ...route.query, tab, form: undefined } })
+  // Clear form selection when switching away from forms tab
+  if (tab !== 'forms') selectedFormId.value = null
+})
+
+// Sync selectedFormId → ?form=
+watch(selectedFormId, (formId) => {
+  if (activeTab.value !== 'forms') return
+  if (formId) {
+    router.replace({ query: { ...route.query, tab: 'forms', form: formId } })
+  } else {
+    router.replace({ query: { ...route.query, tab: 'forms', form: undefined } })
+  }
+})
+
+// When forms list loads, validate ?form= — throw 404 if not found
+watch(formsData, (data) => {
+  if (!data) return
+  const list: any[] = (data.data as any)?.results ?? []
+  if (selectedFormId.value && list.length > 0) {
+    const exists = list.some((f: any) => f.id === selectedFormId.value)
+    if (!exists) {
+      throw createError({ statusCode: 404, statusMessage: 'Form not found' })
+    }
+    // Ensure the tab is set to forms when a form ID is present
+    activeTab.value = 'forms'
+  }
+}, { immediate: false })
 
 // Reordering state
 const isReordering = ref(false)

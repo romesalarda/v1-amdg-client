@@ -203,6 +203,46 @@
               :disabled="isSubmitting"
             />
           </div>
+
+          <!-- Scheduling -->
+          <div class="space-y-3 pt-2 border-t border-gray-200">
+            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide">Scheduling</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <UFormGroup label="Opens At"> 
+                <UInput
+                  label="Opens At"
+                  v-model="formFields.opens_at"
+                  type="datetime-local"
+                  :disabled="isSubmitting"
+                />
+              </UFormGroup>
+              <UFormGroup label="Deadline"> 
+                <UInput
+                  label="Deadline"
+                  v-model="formFields.deadline"
+                  type="datetime-local"
+                  :disabled="isSubmitting"
+                />
+              </UFormGroup>
+            </div>
+
+            <UFormGroup label="Pre-opens Message" hint="Shown to attendees before the form opens">
+              <UInput
+                v-model="formFields.pre_opens_message"
+                placeholder="e.g. This form will open on June 15th."
+                :disabled="isSubmitting"
+              />
+            </UFormGroup>
+
+            <UFormGroup label="Deadline Message" hint="Shown to attendees after the deadline has passed">
+              <UInput
+                v-model="formFields.deadline_message"
+                placeholder="e.g. Submissions are now closed."
+                :disabled="isSubmitting"
+              />
+            </UFormGroup>
+          </div>
         </div>
 
         <template #footer>
@@ -269,7 +309,31 @@ const formFields = reactive({
   description: '',
   required: false,
   allow_response_editing: true,
+  deadline: '',
+  deadline_message: '',
+  opens_at: '',
+  pre_opens_message: '',
 })
+
+// Convert ISO datetime string to datetime-local input value (YYYY-MM-DDTHH:mm)
+const toDatetimeLocal = (iso: string | null | undefined): string => {
+  if (!iso) return ''
+  try {
+    console.log('Converting ISO to local:', iso)
+    const d = new Date(iso)
+    // Offset to local time
+    const offset = d.getTimezoneOffset() * 60000
+    return new Date(d.getTime() - offset).toISOString().slice(0, 16)
+  } catch {
+    return ''
+  }
+}
+
+// Convert datetime-local input value to ISO string (or null if empty)
+const fromDatetimeLocal = (local: string): string | null => {
+  if (!local) return null
+  return new Date(local).toISOString()
+}
 
 const forms = computed(() => {
   const query = searchQuery.value.toLowerCase().trim()
@@ -302,6 +366,10 @@ const openCreateModal = () => {
   formFields.description = ''
   formFields.required = false
   formFields.allow_response_editing = true
+  formFields.deadline = ''
+  formFields.deadline_message = ''
+  formFields.opens_at = ''
+  formFields.pre_opens_message = ''
   showCreateModal.value = true
 }
 
@@ -311,6 +379,10 @@ const openEditModal = (form: any) => {
   formFields.description = form.description || ''
   formFields.required = !!form.required
   formFields.allow_response_editing = !!form.allow_response_editing
+  formFields.deadline = toDatetimeLocal(form.deadline)
+  formFields.deadline_message = form.deadline_message || ''
+  formFields.opens_at = toDatetimeLocal(form.opens_at)
+  formFields.pre_opens_message = form.pre_opens_message || ''
   showCreateModal.value = true
 }
 
@@ -345,6 +417,10 @@ const submitForm = async () => {
       description: formFields.description.trim() || null,
       required: formFields.required,
       allow_response_editing: formFields.allow_response_editing,
+      deadline: fromDatetimeLocal(formFields.deadline),
+      deadline_message: formFields.deadline_message.trim(),
+      opens_at: fromDatetimeLocal(formFields.opens_at),
+      pre_opens_message: formFields.pre_opens_message.trim(),
     }
 
     

@@ -7419,6 +7419,22 @@ export type EventForm = {
     readonly questions: Array<EventFormQuestion>;
     readonly created_at: string;
     readonly updated_at: string;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
 };
 
 export type EventFormDelegateToken = {
@@ -7610,6 +7626,22 @@ export type EventFormRequest = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
 };
 
 /**
@@ -15504,6 +15536,22 @@ export type PatchedEventFormRequest = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
 };
 
 /**
@@ -24465,6 +24513,22 @@ export type EventFormWritable = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
 };
 
 export type EventFormDelegateTokenWritable = {
