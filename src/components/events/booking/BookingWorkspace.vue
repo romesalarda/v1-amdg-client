@@ -266,6 +266,10 @@
               <ResourcesTab :resources="event.data.value?.data?.resources" />
             </article>
 
+            <article v-if="selectedAttendeeId && activeTab === 'forms'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+              <FormsTab :event-id="eventId" :selected-attendee-id="selectedAttendeeId" />
+            </article>
+
             <article v-if="selectedAttendeeId && activeTab === 'attendee' && !selectedAttendeeIsCancelled" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
               <AttendeeInfoTab
                 :selected-attendee-id="selectedAttendeeId"
@@ -1394,6 +1398,7 @@ import TicketsTab from '~/components/events/booking/tabs/TicketsTab.vue'
 import OrdersTab from '~/components/events/booking/tabs/OrdersTab.vue'
 import PaymentsTab from '~/components/events/booking/tabs/PaymentsTab.vue'
 import ResourcesTab from '~/components/events/booking/tabs/ResourcesTab.vue'
+import FormsTab from '~/components/events/booking/tabs/FormsTab.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { uploadMultipart } from '~/utils/upload'
 import { locationsAreasList } from '~/api/sdk.gen'
@@ -1436,7 +1441,7 @@ import { useBookingOrderDisplay } from '~/composables/booking/useBookingOrderDis
 import { useBookingJourneySteps, type JourneyStepAction } from '~/composables/booking/useBookingJourneySteps'
 import { formatDate, formatDateTime } from '~/utils/time'
 
-type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments' | 'resources'
+type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments' | 'resources' | 'forms'
 type AreaOption = { label: string; value: number }
 type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 type BookingAttendee = { id?: string; name?: string; is_cancelled?: boolean }
@@ -1784,6 +1789,7 @@ const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhen
   { id: 'payments', label: 'Payments', needsAttendee: false },
   { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true },
   { id: 'resources', label: 'Resources', needsAttendee: false },
+  { id: 'forms', label: 'Forms', needsAttendee: true },
 ]
 
 const selectedAttendee = computed(() => {
@@ -1886,6 +1892,13 @@ const tabComponentMap = computed(() => ({
     component: ResourcesTab,
     props: {
       resources: event.data.value?.data?.resources,
+    },
+  },
+  forms: {
+    component: FormsTab,
+    props: {
+      eventId: eventId.value,
+      selectedAttendeeId: selectedAttendeeId.value,
     },
   },
 }))

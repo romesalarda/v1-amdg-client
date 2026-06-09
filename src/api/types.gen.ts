@@ -7489,6 +7489,22 @@ export type EventFormList = {
      */
     allow_response_editing?: boolean;
     readonly question_count: number;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
     readonly created_at: string;
     readonly updated_at: string;
 };
@@ -7650,7 +7666,7 @@ export type EventFormRequest = {
 export type EventFormResponse = {
     readonly id: string;
     form: string;
-    attendee: number;
+    attendee: string;
     readonly attendee_display: string | null;
     is_complete?: boolean;
     readonly answers: Array<EventFormResponseAnswer>;
@@ -7706,7 +7722,7 @@ export type EventFormResponseAnswerRequest = {
  */
 export type EventFormResponseRequest = {
     form: string;
-    attendee: number;
+    attendee: string;
     is_complete?: boolean;
 };
 
@@ -15571,7 +15587,7 @@ export type PatchedEventFormResponseAnswerRequest = {
  */
 export type PatchedEventFormResponseRequest = {
     form?: string;
-    attendee?: number;
+    attendee?: string;
     is_complete?: boolean;
 };
 
@@ -24556,6 +24572,22 @@ export type EventFormListWritable = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional deadline for form submission. Ignored if the form is closed.
+     */
+    deadline?: string | null;
+    /**
+     * Optional opening time for the form. Ignored if the form is published.
+     */
+    opens_at?: string | null;
+    /**
+     * Optional message to display before the form opens.
+     */
+    pre_opens_message?: string;
+    /**
+     * Optional message to display when the deadline has passed.
+     */
+    deadline_message?: string;
 };
 
 /**
@@ -24603,7 +24635,7 @@ export type EventFormQuestionOptionWritable = {
  */
 export type EventFormResponseWritable = {
     form: string;
-    attendee: number;
+    attendee: string;
     is_complete?: boolean;
 };
 
