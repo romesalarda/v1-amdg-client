@@ -240,7 +240,7 @@ const tabs = computed(() => [
   },
   {
     path: 'registration',
-    label: 'Registration Form',
+    label: 'Forms',
     icon: 'i-heroicons-clipboard-document-list',
     disabled: props.event?.external_event,
   },

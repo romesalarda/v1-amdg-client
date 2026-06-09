@@ -1610,29 +1610,6 @@ export type BankTransferEvidenceDetail = {
 };
 
 /**
- * Detailed serializer for bank transfer evidence.
- */
-export type BankTransferEvidenceDetailRequest = {
-    transfer_id: string;
-    evidence_file: Blob | File;
-    payment?: number | null;
-    amount_on_evidence?: string | null;
-    /**
-     * * `pending` - Pending
-     * * `verified` - Verified
-     * * `rejected` - Rejected
-     * * `processed` - Processed
-     */
-    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
-    metadata?: unknown;
-    verified_updated_at?: string | null;
-    verified_by?: number | null;
-    processed_at?: string | null;
-    processed_by?: number | null;
-    auto_processed?: boolean;
-};
-
-/**
  * List serializer for bank transfer evidence.
  */
 export type BankTransferEvidenceList = {
@@ -7415,6 +7392,293 @@ export type EventDetailRequest = {
 };
 
 /**
+ * Full serializer with nested questions (read) for detail/create/update.
+ */
+export type EventForm = {
+    readonly id: string;
+    event: string;
+    readonly event_title: string;
+    title: string;
+    description?: string | null;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    readonly status_display: string;
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+    readonly question_count: number;
+    readonly questions: Array<EventFormQuestion>;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+export type EventFormDelegateToken = {
+    readonly id: string;
+    readonly token: string;
+    response: string;
+    expires_at: string;
+    readonly is_used: boolean;
+    readonly is_valid: boolean;
+    readonly created_by: number | null;
+    readonly created_at: string;
+};
+
+export type EventFormDelegateTokenRequest = {
+    response: string;
+    expires_at: string;
+};
+
+/**
+ * Read-only serializer returned by the public validate_token endpoint.
+ */
+export type EventFormDelegateTokenValidate = {
+    token: string;
+    is_valid: boolean;
+    form_id: string;
+    form_title: string;
+    attendee_id: string;
+    expires_at: string;
+};
+
+/**
+ * Lightweight serializer for list endpoints.
+ */
+export type EventFormList = {
+    readonly id: string;
+    event: number;
+    readonly event_title: string;
+    title: string;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    readonly status_display: string;
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+    readonly question_count: number;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Serializer for EventFormQuestion with writable nested options.
+ *
+ * Supports creating and updating questions with options in a single request.
+ * For updates:
+ * - Options with 'id': update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
+export type EventFormQuestion = {
+    readonly id: number;
+    form: string;
+    question_title: string;
+    question_body: string;
+    /**
+     * * `short_answer` - Short Answer
+     * * `long_answer` - Long Answer
+     * * `upload` - Upload
+     * * `multiple_choice` - Multiple Choice
+     * * `single_choice` - Single Choice
+     * * `slider` - Slider
+     * * `date` - Date
+     * * `time` - Time
+     * * `email` - Email
+     * * `phone` - Phone
+     * * `rating` - Rating
+     */
+    question_type?: 'short_answer' | 'long_answer' | 'upload' | 'multiple_choice' | 'single_choice' | 'slider' | 'date' | 'time' | 'email' | 'phone' | 'rating';
+    readonly question_type_display: string;
+    required?: boolean;
+    order?: number;
+    max_value?: number | null;
+    min_value?: number | null;
+    options?: Array<EventFormQuestionNestedOption>;
+    readonly created_at: string;
+    readonly updated_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        form?: string;
+    };
+};
+
+/**
+ * Lightweight option serializer for nesting inside question serializer.
+ */
+export type EventFormQuestionNestedOption = {
+    id?: number;
+    option_text: string;
+    order?: number;
+};
+
+/**
+ * Lightweight option serializer for nesting inside question serializer.
+ */
+export type EventFormQuestionNestedOptionRequest = {
+    id?: number;
+    option_text: string;
+    order?: number;
+};
+
+export type EventFormQuestionOption = {
+    readonly id: number;
+    question: number;
+    option_text: string;
+    order?: number;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+export type EventFormQuestionOptionRequest = {
+    question: number;
+    option_text: string;
+    order?: number;
+};
+
+/**
+ * Serializer for EventFormQuestion with writable nested options.
+ *
+ * Supports creating and updating questions with options in a single request.
+ * For updates:
+ * - Options with 'id': update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
+export type EventFormQuestionRequest = {
+    form: string;
+    question_title: string;
+    question_body: string;
+    /**
+     * * `short_answer` - Short Answer
+     * * `long_answer` - Long Answer
+     * * `upload` - Upload
+     * * `multiple_choice` - Multiple Choice
+     * * `single_choice` - Single Choice
+     * * `slider` - Slider
+     * * `date` - Date
+     * * `time` - Time
+     * * `email` - Email
+     * * `phone` - Phone
+     * * `rating` - Rating
+     */
+    question_type?: 'short_answer' | 'long_answer' | 'upload' | 'multiple_choice' | 'single_choice' | 'slider' | 'date' | 'time' | 'email' | 'phone' | 'rating';
+    required?: boolean;
+    order?: number;
+    max_value?: number | null;
+    min_value?: number | null;
+    options?: Array<EventFormQuestionNestedOptionRequest>;
+};
+
+/**
+ * Full serializer with nested questions (read) for detail/create/update.
+ */
+export type EventFormRequest = {
+    event: string;
+    title: string;
+    description?: string | null;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+};
+
+/**
+ * Serializer for EventFormResponse with nested read-only answers.
+ */
+export type EventFormResponse = {
+    readonly id: string;
+    form: string;
+    attendee: number;
+    readonly attendee_display: string | null;
+    is_complete?: boolean;
+    readonly answers: Array<EventFormResponseAnswer>;
+    readonly submitted_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type EventFormResponseAnswer = {
+    readonly id: string;
+    response: string;
+    question: number;
+    readonly question_type: string;
+    answer_text?: string;
+    readonly answer_file_url: string | null;
+    readonly selected_options: Array<EventFormResponseAnswerChoice>;
+    readonly submitted_at: string;
+    readonly updated_at: string;
+};
+
+export type EventFormResponseAnswerChoice = {
+    readonly id: number;
+    answer: string;
+    option: number;
+    readonly option_text: string;
+    readonly selected_at: string;
+};
+
+export type EventFormResponseAnswerChoiceRequest = {
+    answer: string;
+    option: number;
+};
+
+/**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type EventFormResponseAnswerRequest = {
+    response: string;
+    question: number;
+    answer_text?: string;
+};
+
+/**
+ * Serializer for EventFormResponse with nested read-only answers.
+ */
+export type EventFormResponseRequest = {
+    form: string;
+    attendee: number;
+    is_complete?: boolean;
+};
+
+/**
  * Full inventory breakdown for an event.
  *
  * Returned by GET /api/products/inventory?event=<url_safe_title>.
@@ -8203,11 +8467,20 @@ export type EventReview = {
     readonly id: number;
     event: string;
     readonly event_title: string;
-    readonly user: number;
+    readonly user: number | null;
     readonly user_email: string;
     readonly user_full_name: string;
+    /**
+     * Rating for the event, on a scale of 1 to 5.
+     */
     rating: number;
+    /**
+     * Optional comment about the event.
+     */
     comment?: string | null;
+    /**
+     * Whether the review has been approved by an organiser or admin.
+     */
     readonly approved: boolean;
     readonly created_at: string;
     readonly updated_at: string;
@@ -8232,7 +8505,13 @@ export type EventReview = {
 
 export type EventReviewRequest = {
     event: string;
+    /**
+     * Rating for the event, on a scale of 1 to 5.
+     */
     rating: number;
+    /**
+     * Optional comment about the event.
+     */
     comment?: string | null;
 };
 
@@ -10585,9 +10864,6 @@ export type FamilyGroupList = {
 export type FloorPlanAnnotation = {
     readonly id: number;
     readonly floor_plan: number;
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     readonly room_venue_name: string | null;
     label: string;
@@ -10632,9 +10908,6 @@ export type FloorPlanAnnotationMetadataRequest = {
  * Vertices are validated as a list of normalised {x, y} coordinate objects.
  */
 export type FloorPlanAnnotationRequest = {
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     label: string;
     /**
@@ -13034,6 +13307,48 @@ export type PaginatedEventAuthorizationList = {
     results: Array<EventAuthorization>;
 };
 
+export type PaginatedEventFormDelegateTokenList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormDelegateToken>;
+};
+
+export type PaginatedEventFormListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormList>;
+};
+
+export type PaginatedEventFormQuestionList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormQuestion>;
+};
+
+export type PaginatedEventFormQuestionOptionList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormQuestionOption>;
+};
+
+export type PaginatedEventFormResponseAnswerList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormResponseAnswer>;
+};
+
+export type PaginatedEventFormResponseList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormResponse>;
+};
+
 export type PaginatedEventListList = {
     count: number;
     next?: string | null;
@@ -13522,6 +13837,34 @@ export type PaginatedVenueMetadataList = {
     next?: string | null;
     previous?: string | null;
     results: Array<VenueMetadata>;
+};
+
+export type PaginatedWorkshopInterestSubmissionList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopInterestSubmission>;
+};
+
+export type PaginatedWorkshopListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopList>;
+};
+
+export type PaginatedWorkshopRegistrationListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopRegistrationList>;
+};
+
+export type PaginatedWorkshopStaffList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopStaff>;
 };
 
 /**
@@ -15100,6 +15443,90 @@ export type PatchedEventDetailRequest = {
     external_event?: boolean;
 };
 
+export type PatchedEventFormQuestionOptionRequest = {
+    question?: number;
+    option_text?: string;
+    order?: number;
+};
+
+/**
+ * Serializer for EventFormQuestion with writable nested options.
+ *
+ * Supports creating and updating questions with options in a single request.
+ * For updates:
+ * - Options with 'id': update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
+export type PatchedEventFormQuestionRequest = {
+    form?: string;
+    question_title?: string;
+    question_body?: string;
+    /**
+     * * `short_answer` - Short Answer
+     * * `long_answer` - Long Answer
+     * * `upload` - Upload
+     * * `multiple_choice` - Multiple Choice
+     * * `single_choice` - Single Choice
+     * * `slider` - Slider
+     * * `date` - Date
+     * * `time` - Time
+     * * `email` - Email
+     * * `phone` - Phone
+     * * `rating` - Rating
+     */
+    question_type?: 'short_answer' | 'long_answer' | 'upload' | 'multiple_choice' | 'single_choice' | 'slider' | 'date' | 'time' | 'email' | 'phone' | 'rating';
+    required?: boolean;
+    order?: number;
+    max_value?: number | null;
+    min_value?: number | null;
+    options?: Array<EventFormQuestionNestedOptionRequest>;
+};
+
+/**
+ * Full serializer with nested questions (read) for detail/create/update.
+ */
+export type PatchedEventFormRequest = {
+    event?: string;
+    title?: string;
+    description?: string | null;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+};
+
+/**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type PatchedEventFormResponseAnswerRequest = {
+    response?: string;
+    question?: number;
+    answer_text?: string;
+};
+
+/**
+ * Serializer for EventFormResponse with nested read-only answers.
+ */
+export type PatchedEventFormResponseRequest = {
+    form?: string;
+    attendee?: number;
+    is_complete?: boolean;
+};
+
 export type PatchedEventPermissionAssignmentRequest = {
     event?: string;
     user?: number;
@@ -15185,7 +15612,13 @@ export type PatchedEventQuestionRequest = {
 
 export type PatchedEventReviewRequest = {
     event?: string;
+    /**
+     * Rating for the event, on a scale of 1 to 5.
+     */
     rating?: number;
+    /**
+     * Optional comment about the event.
+     */
     comment?: string | null;
 };
 
@@ -16067,9 +16500,6 @@ export type PatchedFloorPlanAnnotationMetadataRequest = {
  * Vertices are validated as a list of normalised {x, y} coordinate objects.
  */
 export type PatchedFloorPlanAnnotationRequest = {
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     label?: string;
     /**
@@ -16407,6 +16837,48 @@ export type PatchedProfileRequest = {
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
      */
     timezone?: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
 };
 
 /**
@@ -16592,6 +17064,116 @@ export type PatchedVenueMetadataCreateUpdateRequest = {
      * Enter the metadata value here. E.g. 300M away from venue
      */
     value?: string | null;
+};
+
+/**
+ * Serializer for creating and updating workshops.
+ */
+export type PatchedWorkshopCreateUpdateRequest = {
+    title?: string;
+    /**
+     * Detailed description of the workshop
+     */
+    description?: string;
+    event?: number;
+    date?: string;
+    venue?: string | null;
+    room?: number | null;
+    /**
+     * Additional notes or instructions for the workshop
+     */
+    notes?: string | null;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+};
+
+/**
+ * Write serializer for creating or updating an interest submission.
+ * Accepts nested ranks and validates:
+ * - each workshop belongs to the submission's event
+ * - ranks are unique within the submission
+ */
+export type PatchedWorkshopInterestSubmissionCreateRequest = {
+    event?: number;
+    attendee?: number;
+    ranks?: Array<WorkshopInterestRankRequest>;
+};
+
+/**
+ * Lightweight serializer for listing workshop registrations.
+ */
+export type PatchedWorkshopRegistrationListRequest = {
+    workshop?: number;
+    attendee?: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+};
+
+/**
+ * Write serializer for assigning staff to a workshop.
+ */
+export type PatchedWorkshopStaffCreateRequest = {
+    workshop?: number;
+    event_staff?: string;
+    /**
+     * * `INSTRUCTOR` - Instructor
+     * * `ASSISTANT` - Assistant
+     * * `LEADER` - Leader
+     * * `OTHER` - Other
+     */
+    role?: 'INSTRUCTOR' | 'ASSISTANT' | 'LEADER' | 'OTHER';
+    /**
+     * Additional notes about the staff member's role or responsibilities for the workshop
+     */
+    notes?: string | null;
 };
 
 /**
@@ -18077,6 +18659,48 @@ export type Profile = {
     readonly full_name: string;
     readonly created_at: string;
     readonly updated_at: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
 };
 
 /**
@@ -18127,6 +18751,48 @@ export type ProfileRequest = {
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
      */
     timezone: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
 };
 
 /**
@@ -20428,6 +21094,602 @@ export type VenueMetadataCreateUpdateRequest = {
      * Enter the metadata value here. E.g. 300M away from venue
      */
     value?: string | null;
+};
+
+/**
+ * Serializer for creating and updating workshops.
+ */
+export type WorkshopCreateUpdate = {
+    title: string;
+    /**
+     * Detailed description of the workshop
+     */
+    description: string;
+    event: number;
+    date: string;
+    venue?: string | null;
+    room?: number | null;
+    /**
+     * Additional notes or instructions for the workshop
+     */
+    notes?: string | null;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+};
+
+/**
+ * Serializer for creating and updating workshops.
+ */
+export type WorkshopCreateUpdateRequest = {
+    title: string;
+    /**
+     * Detailed description of the workshop
+     */
+    description: string;
+    event: number;
+    date: string;
+    venue?: string | null;
+    room?: number | null;
+    /**
+     * Additional notes or instructions for the workshop
+     */
+    notes?: string | null;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+};
+
+/**
+ * Full detail serializer for a single workshop.
+ */
+export type WorkshopDetail = {
+    readonly id: number;
+    title: string;
+    event: number;
+    date: string;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    readonly status_display: string;
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    readonly allocation_mode_display: string;
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    readonly registration_count: number;
+    readonly is_full: boolean;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        registrations?: string;
+    };
+    /**
+     * Detailed description of the workshop
+     */
+    description: string;
+    /**
+     * Additional notes or instructions for the workshop
+     */
+    notes?: string | null;
+    venue?: string | null;
+    readonly venue_name: string;
+    room?: number | null;
+    readonly room_name: string;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Serializer for a single ranked entry within an interest submission.
+ */
+export type WorkshopInterestRank = {
+    readonly id: number;
+    workshop: number;
+    readonly workshop_title: string;
+    /**
+     * Preference rank for this workshop (1 = most preferred).
+     */
+    rank: number;
+};
+
+/**
+ * Serializer for a single ranked entry within an interest submission.
+ */
+export type WorkshopInterestRankRequest = {
+    workshop: number;
+    /**
+     * Preference rank for this workshop (1 = most preferred).
+     */
+    rank: number;
+};
+
+/**
+ * Read serializer for an interest submission including nested ranks.
+ */
+export type WorkshopInterestSubmission = {
+    readonly submission_id: string;
+    event: number;
+    attendee: number;
+    readonly attendee_name: string;
+    readonly submitted_at: string;
+    readonly updated_at: string;
+    /**
+     * When True the submission is locked and ready for allocation.
+     */
+    is_finalised?: boolean;
+    readonly ranks: Array<WorkshopInterestRank>;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+    };
+};
+
+/**
+ * Write serializer for creating or updating an interest submission.
+ * Accepts nested ranks and validates:
+ * - each workshop belongs to the submission's event
+ * - ranks are unique within the submission
+ */
+export type WorkshopInterestSubmissionCreate = {
+    event: number;
+    attendee: number;
+    ranks: Array<WorkshopInterestRank>;
+};
+
+/**
+ * Write serializer for creating or updating an interest submission.
+ * Accepts nested ranks and validates:
+ * - each workshop belongs to the submission's event
+ * - ranks are unique within the submission
+ */
+export type WorkshopInterestSubmissionCreateRequest = {
+    event: number;
+    attendee: number;
+    ranks: Array<WorkshopInterestRankRequest>;
+};
+
+/**
+ * Read serializer for an interest submission including nested ranks.
+ */
+export type WorkshopInterestSubmissionRequest = {
+    event: number;
+    attendee: number;
+    /**
+     * When True the submission is locked and ready for allocation.
+     */
+    is_finalised?: boolean;
+};
+
+/**
+ * Lightweight serializer for listing workshops.
+ */
+export type WorkshopList = {
+    readonly id: number;
+    title: string;
+    event: number;
+    date: string;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    readonly status_display: string;
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    readonly allocation_mode_display: string;
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    readonly registration_count: number;
+    readonly is_full: boolean;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        registrations?: string;
+    };
+};
+
+/**
+ * Lightweight serializer for listing workshops.
+ */
+export type WorkshopListRequest = {
+    title: string;
+    event: number;
+    date: string;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+};
+
+/**
+ * Serializer for creating a new workshop registration.
+ */
+export type WorkshopRegistrationCreate = {
+    workshop: number;
+    attendee: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Optional internal notes about this registration.
+     */
+    notes?: string | null;
+};
+
+/**
+ * Serializer for creating a new workshop registration.
+ */
+export type WorkshopRegistrationCreateRequest = {
+    workshop: number;
+    attendee: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Optional internal notes about this registration.
+     */
+    notes?: string | null;
+};
+
+/**
+ * Full detail serializer for a single workshop registration.
+ */
+export type WorkshopRegistrationDetail = {
+    readonly registration_id: string;
+    /**
+     * Unique reference code for the workshop registration. Auto-generated if not provided.
+     */
+    readonly booking_reference: string | null;
+    workshop: number;
+    attendee: number;
+    readonly attendee_name: string;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    readonly status_display: string;
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+    readonly registered_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        workshop?: string;
+    };
+    /**
+     * Optional internal notes about this registration.
+     */
+    notes?: string | null;
+    /**
+     * Staff member who manually confirmed this registration (if applicable).
+     */
+    allocated_by?: number | null;
+    readonly allocated_by_name: string;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Lightweight serializer for listing workshop registrations.
+ */
+export type WorkshopRegistrationList = {
+    readonly registration_id: string;
+    /**
+     * Unique reference code for the workshop registration. Auto-generated if not provided.
+     */
+    readonly booking_reference: string | null;
+    workshop: number;
+    attendee: number;
+    readonly attendee_name: string;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    readonly status_display: string;
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+    readonly registered_at: string;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        workshop?: string;
+    };
+};
+
+/**
+ * Lightweight serializer for listing workshop registrations.
+ */
+export type WorkshopRegistrationListRequest = {
+    workshop: number;
+    attendee: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+};
+
+/**
+ * Full serializer for a workshop staff assignment.
+ */
+export type WorkshopStaff = {
+    readonly id: number;
+    workshop: number;
+    event_staff: string;
+    readonly staff_name: string;
+    /**
+     * * `INSTRUCTOR` - Instructor
+     * * `ASSISTANT` - Assistant
+     * * `LEADER` - Leader
+     * * `OTHER` - Other
+     */
+    role?: 'INSTRUCTOR' | 'ASSISTANT' | 'LEADER' | 'OTHER';
+    readonly role_display: string;
+    /**
+     * Additional notes about the staff member's role or responsibilities for the workshop
+     */
+    notes?: string | null;
+    readonly added_at: string;
+    added_by?: number | null;
+    /**
+     *  links
+     */
+    readonly _links: {
+        self?: string;
+        workshop?: string;
+    };
+};
+
+/**
+ * Write serializer for assigning staff to a workshop.
+ */
+export type WorkshopStaffCreate = {
+    workshop: number;
+    event_staff: string;
+    /**
+     * * `INSTRUCTOR` - Instructor
+     * * `ASSISTANT` - Assistant
+     * * `LEADER` - Leader
+     * * `OTHER` - Other
+     */
+    role?: 'INSTRUCTOR' | 'ASSISTANT' | 'LEADER' | 'OTHER';
+    /**
+     * Additional notes about the staff member's role or responsibilities for the workshop
+     */
+    notes?: string | null;
+};
+
+/**
+ * Write serializer for assigning staff to a workshop.
+ */
+export type WorkshopStaffCreateRequest = {
+    workshop: number;
+    event_staff: string;
+    /**
+     * * `INSTRUCTOR` - Instructor
+     * * `ASSISTANT` - Assistant
+     * * `LEADER` - Leader
+     * * `OTHER` - Other
+     */
+    role?: 'INSTRUCTOR' | 'ASSISTANT' | 'LEADER' | 'OTHER';
+    /**
+     * Additional notes about the staff member's role or responsibilities for the workshop
+     */
+    notes?: string | null;
 };
 
 /**
@@ -23183,6 +24445,136 @@ export type EventDetailWritable = {
 };
 
 /**
+ * Full serializer with nested questions (read) for detail/create/update.
+ */
+export type EventFormWritable = {
+    event: string;
+    title: string;
+    description?: string | null;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+};
+
+export type EventFormDelegateTokenWritable = {
+    response: string;
+    expires_at: string;
+};
+
+/**
+ * Lightweight serializer for list endpoints.
+ */
+export type EventFormListWritable = {
+    event: number;
+    title: string;
+    /**
+     * * `draft` - Draft
+     * * `published` - Published
+     * * `closed` - Closed
+     */
+    status?: 'draft' | 'published' | 'closed';
+    /**
+     * Whether all attendees are required to complete this form.
+     */
+    required?: boolean;
+    /**
+     * Allow attendees to edit their responses until the form is closed.
+     */
+    allow_response_editing?: boolean;
+};
+
+/**
+ * Serializer for EventFormQuestion with writable nested options.
+ *
+ * Supports creating and updating questions with options in a single request.
+ * For updates:
+ * - Options with 'id': update existing
+ * - Options without 'id': create new
+ * - Existing options not in payload: deleted
+ */
+export type EventFormQuestionWritable = {
+    form: string;
+    question_title: string;
+    question_body: string;
+    /**
+     * * `short_answer` - Short Answer
+     * * `long_answer` - Long Answer
+     * * `upload` - Upload
+     * * `multiple_choice` - Multiple Choice
+     * * `single_choice` - Single Choice
+     * * `slider` - Slider
+     * * `date` - Date
+     * * `time` - Time
+     * * `email` - Email
+     * * `phone` - Phone
+     * * `rating` - Rating
+     */
+    question_type?: 'short_answer' | 'long_answer' | 'upload' | 'multiple_choice' | 'single_choice' | 'slider' | 'date' | 'time' | 'email' | 'phone' | 'rating';
+    required?: boolean;
+    order?: number;
+    max_value?: number | null;
+    min_value?: number | null;
+    options?: Array<EventFormQuestionNestedOption>;
+};
+
+export type EventFormQuestionOptionWritable = {
+    question: number;
+    option_text: string;
+    order?: number;
+};
+
+/**
+ * Serializer for EventFormResponse with nested read-only answers.
+ */
+export type EventFormResponseWritable = {
+    form: string;
+    attendee: number;
+    is_complete?: boolean;
+};
+
+/**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type EventFormResponseAnswerWritable = {
+    response: string;
+    question: number;
+    answer_text?: string;
+};
+
+export type EventFormResponseAnswerChoiceWritable = {
+    answer: string;
+    option: number;
+};
+
+/**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type EventFormResponseAnswerRequestWritable = {
+    response: string;
+    question: number;
+    answer_text?: string;
+    answer_file?: Blob | File | null;
+    selected_option_ids?: Array<number>;
+};
+
+/**
  * Full inventory breakdown for an event.
  *
  * Returned by GET /api/products/inventory?event=<url_safe_title>.
@@ -23406,7 +24798,13 @@ export type EventQuestionOptionWritable = {
 
 export type EventReviewWritable = {
     event: string;
+    /**
+     * Rating for the event, on a scale of 1 to 5.
+     */
     rating: number;
+    /**
+     * Optional comment about the event.
+     */
     comment?: string | null;
 };
 
@@ -24387,9 +25785,6 @@ export type FamilyGroupListWritable = {
  * Vertices are validated as a list of normalised {x, y} coordinate objects.
  */
 export type FloorPlanAnnotationWritable = {
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     label: string;
     /**
@@ -24418,9 +25813,6 @@ export type FloorPlanAnnotationMetadataWritable = {
  * Vertices are validated as a list of normalised {x, y} coordinate objects.
  */
 export type FloorPlanAnnotationRequestWritable = {
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     label: string;
     /**
@@ -25338,6 +26730,48 @@ export type PaginatedEventAuthorizationListWritable = {
     results: Array<EventAuthorizationWritable>;
 };
 
+export type PaginatedEventFormDelegateTokenListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormDelegateTokenWritable>;
+};
+
+export type PaginatedEventFormListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormListWritable>;
+};
+
+export type PaginatedEventFormQuestionListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormQuestionWritable>;
+};
+
+export type PaginatedEventFormQuestionOptionListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormQuestionOptionWritable>;
+};
+
+export type PaginatedEventFormResponseAnswerListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormResponseAnswerWritable>;
+};
+
+export type PaginatedEventFormResponseListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<EventFormResponseWritable>;
+};
+
 export type PaginatedEventListListWritable = {
     count: number;
     next?: string | null;
@@ -25821,6 +27255,34 @@ export type PaginatedVenueMetadataListWritable = {
     results: Array<VenueMetadataWritable>;
 };
 
+export type PaginatedWorkshopInterestSubmissionListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopInterestSubmissionWritable>;
+};
+
+export type PaginatedWorkshopListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopListWritable>;
+};
+
+export type PaginatedWorkshopRegistrationListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopRegistrationListWritable>;
+};
+
+export type PaginatedWorkshopStaffListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<WorkshopStaffWritable>;
+};
+
 /**
  * Serializer for confirming a password reset.
  *
@@ -25940,6 +27402,20 @@ export type PatchedDiscountCreateUpdateRequestWritable = {
 };
 
 /**
+ * Serializer for EventFormResponseAnswer with choice and file upload support.
+ *
+ * For choice questions: provide selected_option_ids (write-only list of option PKs).
+ * For upload questions: submit multipart/form-data with answer_file.
+ */
+export type PatchedEventFormResponseAnswerRequestWritable = {
+    response?: string;
+    question?: number;
+    answer_text?: string;
+    answer_file?: Blob | File | null;
+    selected_option_ids?: Array<number>;
+};
+
+/**
  * Serializer for EventQuestionAnswer with nested writable selected options.
  *
  * Supports creating and updating answers with option selections.
@@ -25971,9 +27447,6 @@ export type PatchedEventQuestionAnswerRequestWritable = {
  * Vertices are validated as a list of normalised {x, y} coordinate objects.
  */
 export type PatchedFloorPlanAnnotationRequestWritable = {
-    /**
-     * Optional link to an existing room in this venue
-     */
     room_venue?: number | null;
     label?: string;
     /**
@@ -26682,6 +28155,48 @@ export type ProfileWritable = {
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
      */
     timezone: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
 };
 
 /**
@@ -27504,6 +29019,231 @@ export type VenueMetadataWritable = {
      * Enter the metadata value here. E.g. 300M away from venue
      */
     value?: string | null;
+    added_by?: number | null;
+};
+
+/**
+ * Full detail serializer for a single workshop.
+ */
+export type WorkshopDetailWritable = {
+    title: string;
+    event: number;
+    date: string;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+    /**
+     * Detailed description of the workshop
+     */
+    description: string;
+    /**
+     * Additional notes or instructions for the workshop
+     */
+    notes?: string | null;
+    venue?: string | null;
+    room?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Serializer for a single ranked entry within an interest submission.
+ */
+export type WorkshopInterestRankWritable = {
+    workshop: number;
+    /**
+     * Preference rank for this workshop (1 = most preferred).
+     */
+    rank: number;
+};
+
+/**
+ * Read serializer for an interest submission including nested ranks.
+ */
+export type WorkshopInterestSubmissionWritable = {
+    event: number;
+    attendee: number;
+    /**
+     * When True the submission is locked and ready for allocation.
+     */
+    is_finalised?: boolean;
+};
+
+/**
+ * Write serializer for creating or updating an interest submission.
+ * Accepts nested ranks and validates:
+ * - each workshop belongs to the submission's event
+ * - ranks are unique within the submission
+ */
+export type WorkshopInterestSubmissionCreateWritable = {
+    event: number;
+    attendee: number;
+    ranks: Array<WorkshopInterestRankWritable>;
+};
+
+/**
+ * Lightweight serializer for listing workshops.
+ */
+export type WorkshopListWritable = {
+    title: string;
+    event: number;
+    date: string;
+    /**
+     * Current lifecycle status of the workshop.
+     *
+     * * `DRAFT` - Draft
+     * * `OPEN` - Open
+     * * `CLOSED` - Closed
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'DRAFT' | 'OPEN' | 'CLOSED' | 'CANCELLED';
+    /**
+     * How attendee spots are allocated for this workshop.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL';
+    /**
+     * Maximum number of confirmed registrations. Leave blank for unlimited.
+     */
+    capacity?: number | null;
+    /**
+     * Duration of the workshop in minutes.
+     */
+    duration_minutes?: number | null;
+    /**
+     * When registration opens. Informational — does not enforce access automatically.
+     */
+    registration_opens_at?: string | null;
+    /**
+     * When registration closes. Informational — does not enforce access automatically.
+     */
+    registration_closes_at?: string | null;
+};
+
+/**
+ * Full detail serializer for a single workshop registration.
+ */
+export type WorkshopRegistrationDetailWritable = {
+    workshop: number;
+    attendee: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+    /**
+     * Optional internal notes about this registration.
+     */
+    notes?: string | null;
+    /**
+     * Staff member who manually confirmed this registration (if applicable).
+     */
+    allocated_by?: number | null;
+    /**
+     * * `pending` - Pending
+     * * `verified` - Verified
+     * * `rejected` - Rejected
+     * * `processed` - Processed
+     */
+    verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Lightweight serializer for listing workshop registrations.
+ */
+export type WorkshopRegistrationListWritable = {
+    workshop: number;
+    attendee: number;
+    /**
+     * Allocation status for this registration.
+     *
+     * * `PENDING_ALLOCATION` - Pending Allocation
+     * * `CONFIRMED` - Confirmed
+     * * `WAITLISTED` - Waitlisted
+     * * `CANCELLED` - Cancelled
+     */
+    status?: 'PENDING_ALLOCATION' | 'CONFIRMED' | 'WAITLISTED' | 'CANCELLED';
+    /**
+     * Which allocation method produced this registration.
+     *
+     * * `FCFS` - First Come First Served
+     * * `INTEREST_RANKING` - Interest Ranking
+     * * `RANDOM` - Random
+     * * `MANUAL` - Manual
+     */
+    allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'RANDOM' | 'MANUAL' | '' | null;
+};
+
+/**
+ * Full serializer for a workshop staff assignment.
+ */
+export type WorkshopStaffWritable = {
+    workshop: number;
+    event_staff: string;
+    /**
+     * * `INSTRUCTOR` - Instructor
+     * * `ASSISTANT` - Assistant
+     * * `LEADER` - Leader
+     * * `OTHER` - Other
+     */
+    role?: 'INSTRUCTOR' | 'ASSISTANT' | 'LEADER' | 'OTHER';
+    /**
+     * Additional notes about the staff member's role or responsibilities for the workshop
+     */
+    notes?: string | null;
     added_by?: number | null;
 };
 
@@ -33357,6 +35097,868 @@ export type EventEventVenuesFloorPlansUpdateResponses = {
 };
 
 export type EventEventVenuesFloorPlansUpdateResponse = EventEventVenuesFloorPlansUpdateResponses[keyof EventEventVenuesFloorPlansUpdateResponses];
+
+export type EventFormDelegateTokensListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+    };
+    url: '/api/event/form-delegate-tokens/';
+};
+
+export type EventFormDelegateTokensListResponses = {
+    200: PaginatedEventFormDelegateTokenList;
+};
+
+export type EventFormDelegateTokensListResponse = EventFormDelegateTokensListResponses[keyof EventFormDelegateTokensListResponses];
+
+export type EventFormDelegateTokensCreateData = {
+    body: EventFormDelegateTokenRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-delegate-tokens/';
+};
+
+export type EventFormDelegateTokensCreateResponses = {
+    201: EventFormDelegateToken;
+};
+
+export type EventFormDelegateTokensCreateResponse = EventFormDelegateTokensCreateResponses[keyof EventFormDelegateTokensCreateResponses];
+
+export type EventFormDelegateTokensDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form delegate token.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-delegate-tokens/{id}/';
+};
+
+export type EventFormDelegateTokensDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormDelegateTokensDestroyResponse = EventFormDelegateTokensDestroyResponses[keyof EventFormDelegateTokensDestroyResponses];
+
+export type EventFormDelegateTokensRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form delegate token.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-delegate-tokens/{id}/';
+};
+
+export type EventFormDelegateTokensRetrieveResponses = {
+    200: EventFormDelegateToken;
+};
+
+export type EventFormDelegateTokensRetrieveResponse = EventFormDelegateTokensRetrieveResponses[keyof EventFormDelegateTokensRetrieveResponses];
+
+export type EventFormDelegateTokensValidateRetrieveData = {
+    body?: never;
+    path?: never;
+    query: {
+        token: string;
+    };
+    url: '/api/event/form-delegate-tokens/validate/';
+};
+
+export type EventFormDelegateTokensValidateRetrieveErrors = {
+    /**
+     * token query parameter required
+     */
+    400: unknown;
+    /**
+     * Token not found or expired
+     */
+    404: unknown;
+};
+
+export type EventFormDelegateTokensValidateRetrieveResponses = {
+    200: EventFormDelegateTokenValidate;
+};
+
+export type EventFormDelegateTokensValidateRetrieveResponse = EventFormDelegateTokensValidateRetrieveResponses[keyof EventFormDelegateTokensValidateRetrieveResponses];
+
+export type EventFormQuestionOptionsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/form-question-options/';
+};
+
+export type EventFormQuestionOptionsListResponses = {
+    200: PaginatedEventFormQuestionOptionList;
+};
+
+export type EventFormQuestionOptionsListResponse = EventFormQuestionOptionsListResponses[keyof EventFormQuestionOptionsListResponses];
+
+export type EventFormQuestionOptionsCreateData = {
+    body: EventFormQuestionOptionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-question-options/';
+};
+
+export type EventFormQuestionOptionsCreateResponses = {
+    201: EventFormQuestionOption;
+};
+
+export type EventFormQuestionOptionsCreateResponse = EventFormQuestionOptionsCreateResponses[keyof EventFormQuestionOptionsCreateResponses];
+
+export type EventFormQuestionOptionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event form question option.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-question-options/{id}/';
+};
+
+export type EventFormQuestionOptionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormQuestionOptionsDestroyResponse = EventFormQuestionOptionsDestroyResponses[keyof EventFormQuestionOptionsDestroyResponses];
+
+export type EventFormQuestionOptionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event form question option.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-question-options/{id}/';
+};
+
+export type EventFormQuestionOptionsRetrieveResponses = {
+    200: EventFormQuestionOption;
+};
+
+export type EventFormQuestionOptionsRetrieveResponse = EventFormQuestionOptionsRetrieveResponses[keyof EventFormQuestionOptionsRetrieveResponses];
+
+export type EventFormQuestionOptionsPartialUpdateData = {
+    body?: PatchedEventFormQuestionOptionRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event form question option.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-question-options/{id}/';
+};
+
+export type EventFormQuestionOptionsPartialUpdateResponses = {
+    200: EventFormQuestionOption;
+};
+
+export type EventFormQuestionOptionsPartialUpdateResponse = EventFormQuestionOptionsPartialUpdateResponses[keyof EventFormQuestionOptionsPartialUpdateResponses];
+
+export type EventFormQuestionOptionsUpdateData = {
+    body: EventFormQuestionOptionRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event form question option.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-question-options/{id}/';
+};
+
+export type EventFormQuestionOptionsUpdateResponses = {
+    200: EventFormQuestionOption;
+};
+
+export type EventFormQuestionOptionsUpdateResponse = EventFormQuestionOptionsUpdateResponses[keyof EventFormQuestionOptionsUpdateResponses];
+
+export type EventFormQuestionsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by form ID (UUID)
+         */
+        form?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by question type
+         *
+         * * `short_answer` - Short Answer
+         * * `long_answer` - Long Answer
+         * * `upload` - Upload
+         * * `multiple_choice` - Multiple Choice
+         * * `single_choice` - Single Choice
+         * * `slider` - Slider
+         * * `date` - Date
+         * * `time` - Time
+         * * `email` - Email
+         * * `phone` - Phone
+         * * `rating` - Rating
+         */
+        question_type?: Array<'date' | 'email' | 'long_answer' | 'multiple_choice' | 'phone' | 'rating' | 'short_answer' | 'single_choice' | 'slider' | 'time' | 'upload'>;
+        /**
+         * Filter by required flag
+         */
+        required?: boolean;
+        /**
+         * Search title and body
+         */
+        search?: string;
+    };
+    url: '/api/event/form-questions/';
+};
+
+export type EventFormQuestionsListResponses = {
+    200: PaginatedEventFormQuestionList;
+};
+
+export type EventFormQuestionsListResponse = EventFormQuestionsListResponses[keyof EventFormQuestionsListResponses];
+
+export type EventFormQuestionsCreateData = {
+    body: EventFormQuestionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-questions/';
+};
+
+export type EventFormQuestionsCreateResponses = {
+    201: EventFormQuestion;
+};
+
+export type EventFormQuestionsCreateResponse = EventFormQuestionsCreateResponses[keyof EventFormQuestionsCreateResponses];
+
+export type EventFormQuestionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event form question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-questions/{id}/';
+};
+
+export type EventFormQuestionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormQuestionsDestroyResponse = EventFormQuestionsDestroyResponses[keyof EventFormQuestionsDestroyResponses];
+
+export type EventFormQuestionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this event form question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-questions/{id}/';
+};
+
+export type EventFormQuestionsRetrieveResponses = {
+    200: EventFormQuestion;
+};
+
+export type EventFormQuestionsRetrieveResponse = EventFormQuestionsRetrieveResponses[keyof EventFormQuestionsRetrieveResponses];
+
+export type EventFormQuestionsPartialUpdateData = {
+    body?: PatchedEventFormQuestionRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event form question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-questions/{id}/';
+};
+
+export type EventFormQuestionsPartialUpdateResponses = {
+    200: EventFormQuestion;
+};
+
+export type EventFormQuestionsPartialUpdateResponse = EventFormQuestionsPartialUpdateResponses[keyof EventFormQuestionsPartialUpdateResponses];
+
+export type EventFormQuestionsUpdateData = {
+    body: EventFormQuestionRequest;
+    path: {
+        /**
+         * A unique integer value identifying this event form question.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/event/form-questions/{id}/';
+};
+
+export type EventFormQuestionsUpdateResponses = {
+    200: EventFormQuestion;
+};
+
+export type EventFormQuestionsUpdateResponse = EventFormQuestionsUpdateResponses[keyof EventFormQuestionsUpdateResponses];
+
+export type EventFormResponseAnswersListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Search in answer text
+         */
+        answer_text?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by question ID (UUID)
+         */
+        question?: string;
+        /**
+         * Filter by response ID (UUID)
+         */
+        response?: string;
+    };
+    url: '/api/event/form-response-answers/';
+};
+
+export type EventFormResponseAnswersListResponses = {
+    200: PaginatedEventFormResponseAnswerList;
+};
+
+export type EventFormResponseAnswersListResponse = EventFormResponseAnswersListResponses[keyof EventFormResponseAnswersListResponses];
+
+export type EventFormResponseAnswersCreateData = {
+    body: EventFormResponseAnswerRequestWritable;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-response-answers/';
+};
+
+export type EventFormResponseAnswersCreateResponses = {
+    201: EventFormResponseAnswer;
+};
+
+export type EventFormResponseAnswersCreateResponse = EventFormResponseAnswersCreateResponses[keyof EventFormResponseAnswersCreateResponses];
+
+export type EventFormResponseAnswersDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form response answer.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-response-answers/{id}/';
+};
+
+export type EventFormResponseAnswersDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormResponseAnswersDestroyResponse = EventFormResponseAnswersDestroyResponses[keyof EventFormResponseAnswersDestroyResponses];
+
+export type EventFormResponseAnswersRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form response answer.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-response-answers/{id}/';
+};
+
+export type EventFormResponseAnswersRetrieveResponses = {
+    200: EventFormResponseAnswer;
+};
+
+export type EventFormResponseAnswersRetrieveResponse = EventFormResponseAnswersRetrieveResponses[keyof EventFormResponseAnswersRetrieveResponses];
+
+export type EventFormResponseAnswersPartialUpdateData = {
+    body?: PatchedEventFormResponseAnswerRequestWritable;
+    path: {
+        /**
+         * A UUID string identifying this event form response answer.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-response-answers/{id}/';
+};
+
+export type EventFormResponseAnswersPartialUpdateResponses = {
+    200: EventFormResponseAnswer;
+};
+
+export type EventFormResponseAnswersPartialUpdateResponse = EventFormResponseAnswersPartialUpdateResponses[keyof EventFormResponseAnswersPartialUpdateResponses];
+
+export type EventFormResponseAnswersUpdateData = {
+    body: EventFormResponseAnswerRequestWritable;
+    path: {
+        /**
+         * A UUID string identifying this event form response answer.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-response-answers/{id}/';
+};
+
+export type EventFormResponseAnswersUpdateResponses = {
+    200: EventFormResponseAnswer;
+};
+
+export type EventFormResponseAnswersUpdateResponse = EventFormResponseAnswersUpdateResponses[keyof EventFormResponseAnswersUpdateResponses];
+
+export type EventFormResponsesListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by attendee integer PK
+         */
+        attendee?: number;
+        /**
+         * Filter by attendee UUID
+         */
+        attendee_id?: string;
+        /**
+         * Filter by form ID (UUID)
+         */
+        form?: string;
+        /**
+         * Filter by completion status
+         */
+        is_complete?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/event/form-responses/';
+};
+
+export type EventFormResponsesListResponses = {
+    200: PaginatedEventFormResponseList;
+};
+
+export type EventFormResponsesListResponse = EventFormResponsesListResponses[keyof EventFormResponsesListResponses];
+
+export type EventFormResponsesCreateData = {
+    body: EventFormResponseRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-responses/';
+};
+
+export type EventFormResponsesCreateResponses = {
+    201: EventFormResponse;
+};
+
+export type EventFormResponsesCreateResponse = EventFormResponsesCreateResponses[keyof EventFormResponsesCreateResponses];
+
+export type EventFormResponsesDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form response.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-responses/{id}/';
+};
+
+export type EventFormResponsesDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormResponsesDestroyResponse = EventFormResponsesDestroyResponses[keyof EventFormResponsesDestroyResponses];
+
+export type EventFormResponsesRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form response.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-responses/{id}/';
+};
+
+export type EventFormResponsesRetrieveResponses = {
+    200: EventFormResponse;
+};
+
+export type EventFormResponsesRetrieveResponse = EventFormResponsesRetrieveResponses[keyof EventFormResponsesRetrieveResponses];
+
+export type EventFormResponsesPartialUpdateData = {
+    body?: PatchedEventFormResponseRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form response.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-responses/{id}/';
+};
+
+export type EventFormResponsesPartialUpdateResponses = {
+    200: EventFormResponse;
+};
+
+export type EventFormResponsesPartialUpdateResponse = EventFormResponsesPartialUpdateResponses[keyof EventFormResponsesPartialUpdateResponses];
+
+export type EventFormResponsesUpdateData = {
+    body: EventFormResponseRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form response.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/form-responses/{id}/';
+};
+
+export type EventFormResponsesUpdateResponses = {
+    200: EventFormResponse;
+};
+
+export type EventFormResponsesUpdateResponse = EventFormResponsesUpdateResponses[keyof EventFormResponsesUpdateResponses];
+
+export type EventFormsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        created_by?: number;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by required flag
+         */
+        required?: boolean;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by form status
+         *
+         * * `draft` - Draft
+         * * `published` - Published
+         * * `closed` - Closed
+         */
+        status?: Array<'closed' | 'draft' | 'published'>;
+    };
+    url: '/api/event/forms/';
+};
+
+export type EventFormsListResponses = {
+    200: PaginatedEventFormListList;
+};
+
+export type EventFormsListResponse = EventFormsListResponses[keyof EventFormsListResponses];
+
+export type EventFormsCreateData = {
+    body: EventFormRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/forms/';
+};
+
+export type EventFormsCreateResponses = {
+    201: EventForm;
+};
+
+export type EventFormsCreateResponse = EventFormsCreateResponses[keyof EventFormsCreateResponses];
+
+export type EventFormsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/';
+};
+
+export type EventFormsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type EventFormsDestroyResponse = EventFormsDestroyResponses[keyof EventFormsDestroyResponses];
+
+export type EventFormsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/';
+};
+
+export type EventFormsRetrieveResponses = {
+    200: EventForm;
+};
+
+export type EventFormsRetrieveResponse = EventFormsRetrieveResponses[keyof EventFormsRetrieveResponses];
+
+export type EventFormsPartialUpdateData = {
+    body?: PatchedEventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/';
+};
+
+export type EventFormsPartialUpdateResponses = {
+    200: EventForm;
+};
+
+export type EventFormsPartialUpdateResponse = EventFormsPartialUpdateResponses[keyof EventFormsPartialUpdateResponses];
+
+export type EventFormsUpdateData = {
+    body: EventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/';
+};
+
+export type EventFormsUpdateResponses = {
+    200: EventForm;
+};
+
+export type EventFormsUpdateResponse = EventFormsUpdateResponses[keyof EventFormsUpdateResponses];
+
+export type EventFormsBulkCreateQuestionsCreateData = {
+    body: EventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: {
+        created_by?: number;
+        /**
+         * Filter by event URL-safe title
+         */
+        event?: string;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by required flag
+         */
+        required?: boolean;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by form status
+         *
+         * * `draft` - Draft
+         * * `published` - Published
+         * * `closed` - Closed
+         */
+        status?: Array<'closed' | 'draft' | 'published'>;
+    };
+    url: '/api/event/forms/{id}/bulk-create-questions/';
+};
+
+export type EventFormsBulkCreateQuestionsCreateResponses = {
+    201: PaginatedEventFormQuestionList;
+};
+
+export type EventFormsBulkCreateQuestionsCreateResponse = EventFormsBulkCreateQuestionsCreateResponses[keyof EventFormsBulkCreateQuestionsCreateResponses];
+
+export type EventFormsCloseCreateData = {
+    body: EventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/close/';
+};
+
+export type EventFormsCloseCreateResponses = {
+    200: EventForm;
+};
+
+export type EventFormsCloseCreateResponse = EventFormsCloseCreateResponses[keyof EventFormsCloseCreateResponses];
+
+export type EventFormsPublishCreateData = {
+    body: EventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/publish/';
+};
+
+export type EventFormsPublishCreateResponses = {
+    200: EventForm;
+};
+
+export type EventFormsPublishCreateResponse = EventFormsPublishCreateResponses[keyof EventFormsPublishCreateResponses];
+
+export type EventFormsReorderQuestionsCreateData = {
+    body: EventFormRequest;
+    path: {
+        /**
+         * A UUID string identifying this event form.
+         */
+        id: string;
+    };
+    query?: never;
+    url: '/api/event/forms/{id}/reorder-questions/';
+};
+
+export type EventFormsReorderQuestionsCreateResponses = {
+    /**
+     * Questions reordered successfully
+     */
+    200: unknown;
+};
 
 export type EventListListData = {
     body?: never;
@@ -45424,7 +48026,7 @@ export type PaymentsBankTransferEvidenceUpdateResponses = {
 export type PaymentsBankTransferEvidenceUpdateResponse = PaymentsBankTransferEvidenceUpdateResponses[keyof PaymentsBankTransferEvidenceUpdateResponses];
 
 export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateData = {
-    body: BankTransferEvidenceDetailRequest;
+    body?: never;
     path: {
         /**
          * A UUID string identifying this Bank Transfer Evidence.
@@ -45433,6 +48035,13 @@ export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateData = {
     };
     query?: never;
     url: '/api/payments/bank-transfer-evidence/{bank_transfer_id}/confirm_payment_match/';
+};
+
+export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateErrors = {
+    /**
+     * Permission denied
+     */
+    403: unknown;
 };
 
 export type PaymentsBankTransferEvidenceConfirmPaymentMatchCreateResponses = {
@@ -52514,3 +55123,724 @@ export type UsersVerifyEmailCreateResponses = {
      */
     200: unknown;
 };
+
+export type WorkshopsInterestSubmissionsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        attendee?: number;
+        event?: number;
+        is_finalised?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
+    url: '/api/workshops/interest-submissions/';
+};
+
+export type WorkshopsInterestSubmissionsListResponses = {
+    200: PaginatedWorkshopInterestSubmissionList;
+};
+
+export type WorkshopsInterestSubmissionsListResponse = WorkshopsInterestSubmissionsListResponses[keyof WorkshopsInterestSubmissionsListResponses];
+
+export type WorkshopsInterestSubmissionsCreateData = {
+    body: WorkshopInterestSubmissionCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workshops/interest-submissions/';
+};
+
+export type WorkshopsInterestSubmissionsCreateResponses = {
+    201: WorkshopInterestSubmissionCreate;
+};
+
+export type WorkshopsInterestSubmissionsCreateResponse = WorkshopsInterestSubmissionsCreateResponses[keyof WorkshopsInterestSubmissionsCreateResponses];
+
+export type WorkshopsInterestSubmissionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/';
+};
+
+export type WorkshopsInterestSubmissionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkshopsInterestSubmissionsDestroyResponse = WorkshopsInterestSubmissionsDestroyResponses[keyof WorkshopsInterestSubmissionsDestroyResponses];
+
+export type WorkshopsInterestSubmissionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/';
+};
+
+export type WorkshopsInterestSubmissionsRetrieveResponses = {
+    200: WorkshopInterestSubmission;
+};
+
+export type WorkshopsInterestSubmissionsRetrieveResponse = WorkshopsInterestSubmissionsRetrieveResponses[keyof WorkshopsInterestSubmissionsRetrieveResponses];
+
+export type WorkshopsInterestSubmissionsPartialUpdateData = {
+    body?: PatchedWorkshopInterestSubmissionCreateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/';
+};
+
+export type WorkshopsInterestSubmissionsPartialUpdateResponses = {
+    200: WorkshopInterestSubmissionCreate;
+};
+
+export type WorkshopsInterestSubmissionsPartialUpdateResponse = WorkshopsInterestSubmissionsPartialUpdateResponses[keyof WorkshopsInterestSubmissionsPartialUpdateResponses];
+
+export type WorkshopsInterestSubmissionsUpdateData = {
+    body: WorkshopInterestSubmissionCreateRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/';
+};
+
+export type WorkshopsInterestSubmissionsUpdateResponses = {
+    200: WorkshopInterestSubmissionCreate;
+};
+
+export type WorkshopsInterestSubmissionsUpdateResponse = WorkshopsInterestSubmissionsUpdateResponses[keyof WorkshopsInterestSubmissionsUpdateResponses];
+
+export type WorkshopsInterestSubmissionsFinaliseCreateData = {
+    body: WorkshopInterestSubmissionRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/finalise/';
+};
+
+export type WorkshopsInterestSubmissionsFinaliseCreateResponses = {
+    200: WorkshopInterestSubmission;
+};
+
+export type WorkshopsInterestSubmissionsFinaliseCreateResponse = WorkshopsInterestSubmissionsFinaliseCreateResponses[keyof WorkshopsInterestSubmissionsFinaliseCreateResponses];
+
+export type WorkshopsInterestSubmissionsUnfinalizeCreateData = {
+    body: WorkshopInterestSubmissionRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Interest Submission.
+         */
+        submission_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/interest-submissions/{submission_id}/unfinalize/';
+};
+
+export type WorkshopsInterestSubmissionsUnfinalizeCreateResponses = {
+    200: WorkshopInterestSubmission;
+};
+
+export type WorkshopsInterestSubmissionsUnfinalizeCreateResponse = WorkshopsInterestSubmissionsUnfinalizeCreateResponses[keyof WorkshopsInterestSubmissionsUnfinalizeCreateResponses];
+
+export type WorkshopsListListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * How attendee spots are allocated for this workshop.
+         *
+         * * `FCFS` - First Come First Served
+         * * `INTEREST_RANKING` - Interest Ranking
+         * * `RANDOM` - Random
+         * * `MANUAL` - Manual
+         */
+        allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
+        date_after?: string;
+        date_before?: string;
+        event?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Current lifecycle status of the workshop.
+         *
+         * * `DRAFT` - Draft
+         * * `OPEN` - Open
+         * * `CLOSED` - Closed
+         * * `CANCELLED` - Cancelled
+         */
+        status?: 'CANCELLED' | 'CLOSED' | 'DRAFT' | 'OPEN';
+    };
+    url: '/api/workshops/list/';
+};
+
+export type WorkshopsListListResponses = {
+    200: PaginatedWorkshopListList;
+};
+
+export type WorkshopsListListResponse = WorkshopsListListResponses[keyof WorkshopsListListResponses];
+
+export type WorkshopsListCreateData = {
+    body: WorkshopCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workshops/list/';
+};
+
+export type WorkshopsListCreateResponses = {
+    201: WorkshopCreateUpdate;
+};
+
+export type WorkshopsListCreateResponse = WorkshopsListCreateResponses[keyof WorkshopsListCreateResponses];
+
+export type WorkshopsListDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/';
+};
+
+export type WorkshopsListDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkshopsListDestroyResponse = WorkshopsListDestroyResponses[keyof WorkshopsListDestroyResponses];
+
+export type WorkshopsListRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/';
+};
+
+export type WorkshopsListRetrieveResponses = {
+    200: WorkshopDetail;
+};
+
+export type WorkshopsListRetrieveResponse = WorkshopsListRetrieveResponses[keyof WorkshopsListRetrieveResponses];
+
+export type WorkshopsListPartialUpdateData = {
+    body?: PatchedWorkshopCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/';
+};
+
+export type WorkshopsListPartialUpdateResponses = {
+    200: WorkshopCreateUpdate;
+};
+
+export type WorkshopsListPartialUpdateResponse = WorkshopsListPartialUpdateResponses[keyof WorkshopsListPartialUpdateResponses];
+
+export type WorkshopsListUpdateData = {
+    body: WorkshopCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/';
+};
+
+export type WorkshopsListUpdateResponses = {
+    200: WorkshopCreateUpdate;
+};
+
+export type WorkshopsListUpdateResponse = WorkshopsListUpdateResponses[keyof WorkshopsListUpdateResponses];
+
+export type WorkshopsListCloseRegistrationsCreateData = {
+    body: WorkshopListRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/close-registrations/';
+};
+
+export type WorkshopsListCloseRegistrationsCreateResponses = {
+    200: WorkshopDetail;
+};
+
+export type WorkshopsListCloseRegistrationsCreateResponse = WorkshopsListCloseRegistrationsCreateResponses[keyof WorkshopsListCloseRegistrationsCreateResponses];
+
+export type WorkshopsListOpenRegistrationsCreateData = {
+    body: WorkshopListRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/open-registrations/';
+};
+
+export type WorkshopsListOpenRegistrationsCreateResponses = {
+    200: WorkshopDetail;
+};
+
+export type WorkshopsListOpenRegistrationsCreateResponse = WorkshopsListOpenRegistrationsCreateResponses[keyof WorkshopsListOpenRegistrationsCreateResponses];
+
+export type WorkshopsListRegistrationsListData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: {
+        /**
+         * How attendee spots are allocated for this workshop.
+         *
+         * * `FCFS` - First Come First Served
+         * * `INTEREST_RANKING` - Interest Ranking
+         * * `RANDOM` - Random
+         * * `MANUAL` - Manual
+         */
+        allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
+        date_after?: string;
+        date_before?: string;
+        event?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by registration status (CONFIRMED, WAITLISTED, CANCELLED, PENDING_ALLOCATION)
+         */
+        registration_status?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Current lifecycle status of the workshop.
+         *
+         * * `DRAFT` - Draft
+         * * `OPEN` - Open
+         * * `CLOSED` - Closed
+         * * `CANCELLED` - Cancelled
+         */
+        status?: 'CANCELLED' | 'CLOSED' | 'DRAFT' | 'OPEN';
+    };
+    url: '/api/workshops/list/{id}/registrations/';
+};
+
+export type WorkshopsListRegistrationsListResponses = {
+    200: PaginatedWorkshopRegistrationListList;
+};
+
+export type WorkshopsListRegistrationsListResponse = WorkshopsListRegistrationsListResponses[keyof WorkshopsListRegistrationsListResponses];
+
+export type WorkshopsListRunAllocationCreateData = {
+    body: WorkshopListRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/list/{id}/run-allocation/';
+};
+
+export type WorkshopsListRunAllocationCreateResponses = {
+    /**
+     * Allocation result summary
+     */
+    200: unknown;
+};
+
+export type WorkshopsRegistrationsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which allocation method produced this registration.
+         *
+         * * `FCFS` - First Come First Served
+         * * `INTEREST_RANKING` - Interest Ranking
+         * * `RANDOM` - Random
+         * * `MANUAL` - Manual
+         */
+        allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
+        attendee?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Allocation status for this registration.
+         *
+         * * `PENDING_ALLOCATION` - Pending Allocation
+         * * `CONFIRMED` - Confirmed
+         * * `WAITLISTED` - Waitlisted
+         * * `CANCELLED` - Cancelled
+         */
+        status?: 'CANCELLED' | 'CONFIRMED' | 'PENDING_ALLOCATION' | 'WAITLISTED';
+        workshop?: number;
+    };
+    url: '/api/workshops/registrations/';
+};
+
+export type WorkshopsRegistrationsListResponses = {
+    200: PaginatedWorkshopRegistrationListList;
+};
+
+export type WorkshopsRegistrationsListResponse = WorkshopsRegistrationsListResponses[keyof WorkshopsRegistrationsListResponses];
+
+export type WorkshopsRegistrationsCreateData = {
+    body: WorkshopRegistrationCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workshops/registrations/';
+};
+
+export type WorkshopsRegistrationsCreateResponses = {
+    201: WorkshopRegistrationCreate;
+};
+
+export type WorkshopsRegistrationsCreateResponse = WorkshopsRegistrationsCreateResponses[keyof WorkshopsRegistrationsCreateResponses];
+
+export type WorkshopsRegistrationsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/';
+};
+
+export type WorkshopsRegistrationsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkshopsRegistrationsDestroyResponse = WorkshopsRegistrationsDestroyResponses[keyof WorkshopsRegistrationsDestroyResponses];
+
+export type WorkshopsRegistrationsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/';
+};
+
+export type WorkshopsRegistrationsRetrieveResponses = {
+    200: WorkshopRegistrationDetail;
+};
+
+export type WorkshopsRegistrationsRetrieveResponse = WorkshopsRegistrationsRetrieveResponses[keyof WorkshopsRegistrationsRetrieveResponses];
+
+export type WorkshopsRegistrationsPartialUpdateData = {
+    body?: PatchedWorkshopRegistrationListRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/';
+};
+
+export type WorkshopsRegistrationsPartialUpdateResponses = {
+    200: WorkshopRegistrationList;
+};
+
+export type WorkshopsRegistrationsPartialUpdateResponse = WorkshopsRegistrationsPartialUpdateResponses[keyof WorkshopsRegistrationsPartialUpdateResponses];
+
+export type WorkshopsRegistrationsUpdateData = {
+    body: WorkshopRegistrationListRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/';
+};
+
+export type WorkshopsRegistrationsUpdateResponses = {
+    200: WorkshopRegistrationList;
+};
+
+export type WorkshopsRegistrationsUpdateResponse = WorkshopsRegistrationsUpdateResponses[keyof WorkshopsRegistrationsUpdateResponses];
+
+export type WorkshopsRegistrationsCancelCreateData = {
+    body: WorkshopRegistrationListRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/cancel/';
+};
+
+export type WorkshopsRegistrationsCancelCreateResponses = {
+    200: WorkshopRegistrationDetail;
+};
+
+export type WorkshopsRegistrationsCancelCreateResponse = WorkshopsRegistrationsCancelCreateResponses[keyof WorkshopsRegistrationsCancelCreateResponses];
+
+export type WorkshopsRegistrationsConfirmCreateData = {
+    body: WorkshopRegistrationListRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/confirm/';
+};
+
+export type WorkshopsRegistrationsConfirmCreateResponses = {
+    200: WorkshopRegistrationDetail;
+};
+
+export type WorkshopsRegistrationsConfirmCreateResponse = WorkshopsRegistrationsConfirmCreateResponses[keyof WorkshopsRegistrationsConfirmCreateResponses];
+
+export type WorkshopsRegistrationsPromoteWaitlistCreateData = {
+    body: WorkshopRegistrationListRequest;
+    path: {
+        /**
+         * A UUID string identifying this Workshop Registration.
+         */
+        registration_id: string;
+    };
+    query?: never;
+    url: '/api/workshops/registrations/{registration_id}/promote-waitlist/';
+};
+
+export type WorkshopsRegistrationsPromoteWaitlistCreateResponses = {
+    200: WorkshopRegistrationDetail;
+    /**
+     * No waitlisted attendees to promote.
+     */
+    204: void;
+};
+
+export type WorkshopsRegistrationsPromoteWaitlistCreateResponse = WorkshopsRegistrationsPromoteWaitlistCreateResponses[keyof WorkshopsRegistrationsPromoteWaitlistCreateResponses];
+
+export type WorkshopsStaffListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * * `INSTRUCTOR` - Instructor
+         * * `ASSISTANT` - Assistant
+         * * `LEADER` - Leader
+         * * `OTHER` - Other
+         */
+        role?: 'ASSISTANT' | 'INSTRUCTOR' | 'LEADER' | 'OTHER';
+        workshop?: number;
+    };
+    url: '/api/workshops/staff/';
+};
+
+export type WorkshopsStaffListResponses = {
+    200: PaginatedWorkshopStaffList;
+};
+
+export type WorkshopsStaffListResponse = WorkshopsStaffListResponses[keyof WorkshopsStaffListResponses];
+
+export type WorkshopsStaffCreateData = {
+    body: WorkshopStaffCreateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/workshops/staff/';
+};
+
+export type WorkshopsStaffCreateResponses = {
+    201: WorkshopStaffCreate;
+};
+
+export type WorkshopsStaffCreateResponse = WorkshopsStaffCreateResponses[keyof WorkshopsStaffCreateResponses];
+
+export type WorkshopsStaffDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop Staff.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/staff/{id}/';
+};
+
+export type WorkshopsStaffDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type WorkshopsStaffDestroyResponse = WorkshopsStaffDestroyResponses[keyof WorkshopsStaffDestroyResponses];
+
+export type WorkshopsStaffRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop Staff.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/staff/{id}/';
+};
+
+export type WorkshopsStaffRetrieveResponses = {
+    200: WorkshopStaff;
+};
+
+export type WorkshopsStaffRetrieveResponse = WorkshopsStaffRetrieveResponses[keyof WorkshopsStaffRetrieveResponses];
+
+export type WorkshopsStaffPartialUpdateData = {
+    body?: PatchedWorkshopStaffCreateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop Staff.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/staff/{id}/';
+};
+
+export type WorkshopsStaffPartialUpdateResponses = {
+    200: WorkshopStaffCreate;
+};
+
+export type WorkshopsStaffPartialUpdateResponse = WorkshopsStaffPartialUpdateResponses[keyof WorkshopsStaffPartialUpdateResponses];
+
+export type WorkshopsStaffUpdateData = {
+    body: WorkshopStaffCreateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this Workshop Staff.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/workshops/staff/{id}/';
+};
+
+export type WorkshopsStaffUpdateResponses = {
+    200: WorkshopStaffCreate;
+};
+
+export type WorkshopsStaffUpdateResponse = WorkshopsStaffUpdateResponses[keyof WorkshopsStaffUpdateResponses];

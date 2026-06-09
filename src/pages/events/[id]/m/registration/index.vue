@@ -22,7 +22,7 @@
     </div>
 
     <!-- Page Header Card -->
-    <UCard class="border-t-4 border-t-blue-500 mb-6">
+    <UCard v-if="showPageHeader" class="border-t-4 border-t-blue-500 mb-6">
       <div class="flex items-start justify-between gap-4">
         <div class="flex-1 space-y-2">
           <div class="flex items-center gap-3">
@@ -63,9 +63,11 @@
             {{
               activeTab === 'consents'
                 ? 'Manage consent definitions that attendees agree to during registration'
-                : previewMode
-                  ? 'This is how attendees will see the form'
-                  : 'Configure questions to collect information from attendees'
+                : activeTab === 'forms'
+                  ? 'Create and manage additional forms for attendees to fill out'
+                  : previewMode
+                    ? 'This is how attendees will see the form'
+                    : 'Configure questions to collect information from attendees'
             }}
           </p>
         </div>
@@ -172,6 +174,21 @@
           <UBadge
             v-if="(eventConsents.data.value?.data?.results?.length ?? 0) > 0"
             :label="String(eventConsents.data.value?.data?.results?.length ?? 0)"
+            color="gray"
+            variant="soft"
+            size="xs"
+          />
+        </button>
+        <button
+          @click="activeTab = 'forms'"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+          :class="activeTab === 'forms' ? 'bg-blue-50 text-blue-700' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+        >
+          <UIcon name="i-heroicons-document-text" class="w-4 h-4" />
+          Custom Forms
+          <UBadge
+            v-if="formsList.length > 0"
+            :label="String(formsList.length)"
             color="gray"
             variant="soft"
             size="xs"
@@ -906,6 +923,31 @@
     </div>
     <!-- /Consents Tab -->
 
+    <!-- Custom Forms Tab Content -->
+    <div v-else-if="activeTab === 'forms'">
+      <FormEditor
+        v-if="selectedFormId && eventIntId && eventUUID"
+        :form-id="selectedFormId"
+        :event-int-id="eventIntId ?? 0"
+        :event-uuid="eventUUID"
+        :event-url-safe-title="id"
+        :read-only="readOnly"
+        @back="selectedFormId = null"
+      />
+      <FormsList
+        v-else
+        :forms-list="formsList"
+        :event-int-id="eventIntId ?? 0"
+        :event-url-safe-title="id"
+        :event-uuid="eventUUID"
+        :is-loading="formsLoading"
+        :read-only="readOnly"
+        @edit="(formId: string) => { selectedFormId = formId }"
+        @refresh="refetchForms()"
+      />
+    </div>
+    <!-- /Custom Forms Tab -->
+
     <UModal v-model="showConsentForm" :ui="{ width: 'sm:max-w-3xl' }">
       <UCard class="overflow-hidden">
         <template #header>
@@ -1048,12 +1090,15 @@ import EventsManagementLayout from '~/components/events/EventManagementLayout.vu
 
 import draggable from 'vuedraggable'
 import Swal from 'sweetalert2'
+import FormsList from '~/components/events/forms/FormsList.vue'
+import FormEditor from '~/components/events/forms/FormEditor.vue'
+import { useEventForms } from '~/composables/resources/events/eventForms'
 
 // Track focused fields to prevent auto-save while typing
 const focusedFields = ref(new Set<string>())
 
 // Tab state
-const activeTab = ref<'registration' | 'consents'>('registration')
+const activeTab = ref<'registration' | 'consents' | 'forms'>('registration')
 
 definePageMeta({
   layout: false,
@@ -1080,6 +1125,17 @@ const canDeleteQuestions = computed(() => can('REGISTRATION', 'delete').value.al
 const canCreatedQuestions = computed(() => can('REGISTRATION', 'create').value.allowed)
 const readOnly = computed(() => !canEditQuestions.value && !canDeleteQuestions.value && !canCreatedQuestions.value)
 
+// Forms tab state
+const selectedFormId = ref<string | null>(null)
+const showPageHeader = computed(() => !(activeTab.value === 'forms' && selectedFormId.value))
+
+const formsFilters = computed(() => {
+  if (!id.value) return undefined
+  return { event: id.value }
+})
+const { data: formsData, isLoading: formsLoading, refetch: refetchForms } = useEventForms(formsFilters)
+const formsList = computed(() => (formsData.value?.data as any)?.results ?? [])
+
 // Reordering state
 const isReordering = ref(false)
 let reorderTimeout: ReturnType<typeof setTimeout> | null = null
@@ -1089,6 +1145,7 @@ const { data: event } = useEvent(id)
 
 // Get event integer ID for API calls
 const eventIntId = computed(() => event.value?.data?.id)
+const eventUUID = computed(() => event.value?.data?.event_id)
 
 // Consent definitions (event-scoped)
 const consentSearch = ref('')
