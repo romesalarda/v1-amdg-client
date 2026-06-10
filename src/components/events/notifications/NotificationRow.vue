@@ -4,7 +4,7 @@
       'px-6 py-4 flex items-start gap-4 transition-colors',
       !notification.is_read ? 'bg-blue-50/40 hover:bg-blue-50/60' : 'bg-white hover:bg-gray-50/60',
     ]"
-    @click="handleSpecificRedirect"
+    
   >
     <!-- Priority indicator + icon -->
     <div class="flex flex-col items-center gap-1.5 flex-shrink-0 pt-0.5">
@@ -24,8 +24,8 @@
     </div>
 
     <!-- Content -->
-    <div class="flex-1 min-w-0">
-      <div class="flex items-start justify-between gap-2 mb-1">
+    <div class="flex-1 min-w-0" @click="handleSpecificRedirect" style="cursor: pointer;">
+      <div class="flex items-start justify-between gap-2 mb-1" >
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-xs font-bold text-navy-900">{{ notification.notification_type_display }}</span>
           <span
@@ -121,11 +121,8 @@ const handleSpecificRedirect = () => {
     router.push(`/events/${eventId}/m/shop/orders/${props.notification.related_order}/detail`)
   } else if (props.notification.related_payment) {
     // Redirect to payment details
-    router.push(`/events/${eventId}/payments/${props.notification.related_payment}`)
-  } else {
-    // Fallback to event dashboard
-    router.push(`/events/${eventId}/dashboard`)
-  }
+    router.push(`/events/${eventId}/m/payments/list?payment=${props.notification.related_payment}`)
+  } 
 }
 
 const typeIcon = computed(() => typeIconMap[props.notification.notification_type] ?? 'i-heroicons-bell')

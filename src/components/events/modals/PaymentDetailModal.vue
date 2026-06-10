@@ -657,15 +657,16 @@
                 <div
                   v-for="(checkoutAttendee, index) in checkoutAttendees"
                   :key="`${checkoutAttendee.package_id || 'pkg'}-${checkoutAttendee.attendee_draft?.email || index}`"
-                  class="rounded-lg bg-gray-50 border border-gray-200 p-3"
+                  class="rounded-lg bg-gray-50 border border-gray-200 p-3 hover:bg-gray-100 transition-colors"
+                  @click="router.push(`/events/${eventId}/m/participants/dashboard?search=${checkoutAttendee.attendee_draft?.first_name}+${checkoutAttendee.attendee_draft?.last_name}`)" style="cursor: pointer"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div>
-                      <div class="text-sm font-semibold text-gray-900">
-                        {{ getDraftAttendeeName(checkoutAttendee.attendee_draft) || 'Attendee draft' }}
+                      <div class="text-lg font-semibold font-mono text-gray-900 mb-3">
+                        {{ getDraftAttendeeName(checkoutAttendee.attendee_draft)?.toUpperCase() || 'Attendee draft' }}
                       </div>
                       <div class="mt-1 flex flex-wrap items-center gap-2 text-xs">
-                        <span class="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700">Package: {{ checkoutAttendee.package_id || 'N/A' }}</span>
+                        <span class="rounded-full bg-gray-200 px-2 py-0.5 text-gray-700">Package: {{ bookingPackageDetail(checkoutAttendee.package_id).value?.data?.name }}</span>
                         <span v-if="getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) !== null" class="rounded-full bg-blue-100 px-2 py-0.5 text-blue-800">
                           Age {{ getAttendeeAge(checkoutAttendee.attendee_draft?.date_of_birth) }}
                         </span>
@@ -680,10 +681,10 @@
                   </div>
 
                   <div class="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-700 sm:grid-cols-2">
-                    <div><span class="font-semibold text-gray-800">Gender:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.gender) }}</div>
+                    <div><span class="font-semibold text-gray-800">Gender:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.gender).toUpperCase() }}</div>
                     <div><span class="font-semibold text-gray-800">Date of birth:</span> {{ checkoutAttendee.attendee_draft?.date_of_birth || 'N/A' }}</div>
-                    <div><span class="font-semibold text-gray-800">Email:</span> {{ checkoutAttendee.attendee_draft?.email || 'N/A' }}</div>
-                    <div><span class="font-semibold text-gray-800">Phone:</span> {{ checkoutAttendee.attendee_draft?.phone_number || 'N/A' }}</div>
+                    <div><span class="font-semibold text-gray-800">Email:</span> {{ checkoutAttendee.attendee_draft?.email || 'Not Provided' }}</div>
+                    <div><span class="font-semibold text-gray-800">Phone:</span> {{ checkoutAttendee.attendee_draft?.phone_number || 'Not Provided' }}</div>
                     <div><span class="font-semibold text-gray-800">Relationship:</span> {{ formatMetadataLabel(checkoutAttendee.attendee_draft?.relationship_to_user) }}</div>
                   </div>
 
@@ -947,6 +948,8 @@ import { uploadMultipart } from '~/utils/upload'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { useRouter } from 'vue-router'
 
+import { useBookingPackage } from '~/composables/resources/booking/bookingPackages' 
+
 interface Props {
   payment: any
   open: boolean
@@ -982,6 +985,11 @@ const paymentData = computed(() => {
     method: method || payment.method
   }
 })
+
+const bookingPackageDetail = (packageId: number) => {
+  const { data } = useBookingPackage(computed(() => packageId))
+  return data
+}
 
 const liveRelation = usePaymentLiveRelation({ payment: paymentData })
 const hasLiveRelation = computed(() => liveRelation.hasLiveRelation.value)

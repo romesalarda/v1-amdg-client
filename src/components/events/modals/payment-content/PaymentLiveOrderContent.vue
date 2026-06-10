@@ -25,7 +25,7 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-lg p-4 border border-gray-200">
+    <div class="bg-white rounded-lg p-4 border border-gray-200" @click="router.push(`/events/${event_id}/m/shop/orders/${order?.order_id}/detail`)" style="cursor: pointer;">
       <div class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Order Items ({{ orderItems.length }})</div>
       <div class="space-y-2">
         <div
@@ -67,6 +67,11 @@
 
 <script setup lang="ts">
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const event_id = computed(() => router.currentRoute.value.params.id)
 
 const props = defineProps<{ order: any }>()
 
