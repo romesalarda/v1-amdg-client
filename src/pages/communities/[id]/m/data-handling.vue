@@ -1,8 +1,6 @@
 <template>
-  <EventManagementLayout
-    :event-id="eventId"
-    :event="event?.data"
-  >
+  <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
+
     <div class="flex items-center justify-center min-h-[70vh] px-6">
       <div
         class="max-w-lg w-full text-center bg-white rounded-2xl border border-gray-200 shadow-sm p-10"
@@ -17,12 +15,12 @@
         </div>
 
         <h1 class="text-3xl font-bold text-gray-900 mb-3">
-          Transportation Management
+          Data Handling - Coming Soon
         </h1>
 
         <p class="text-gray-600 mb-6 leading-relaxed">
-          We're currently building this feature to help you manage event
-          transportation, routes, vehicles, and logistics more efficiently.
+          We're currently building this feature to help you manage community
+          data handling, privacy, and compliance more efficiently.
         </p>
 
         <div
@@ -42,20 +40,18 @@
         </div>
       </div>
     </div>
-  </EventManagementLayout>
+</CommunitiesManagementLayout>
 </template>
 <script lang="ts" setup>
 
-import { useEvent } from '~/composables/resources/events/events'
-import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
+import { useOrganisation } from '~/composables/resources/organisation/organisations'
 
 
 const route = useRoute()
-const router = useRouter()
-const eventId = computed(() => String(route.params.id))
+const organisationId = computed(() => route.params.id as string)
 
-// Fetch event details
-const { data: event, isLoading: isLoadingEvent } = useEvent(eventId)
+// Fetch organisation details
+const { data: organisation, isLoading: isLoadingOrganisation } = useOrganisation(organisationId)
 
 definePageMeta({
   layout: false,

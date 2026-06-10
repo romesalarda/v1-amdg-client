@@ -429,10 +429,9 @@
               Payment Content
             </h4>
 
-            <div v-if="hasLiveRelation" class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-              Live relation mode
-              <span class="font-semibold">({{ liveRelationType }})</span>
-            </div>
+            <!-- <div v-if="hasLiveRelation" class="mb-3 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+              <span class="font-semibold font-mono text-md">{{ liveRelationType }}</span>
+            </div> -->
 
             <div v-if="liveRelationLoading" class="rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div class="animate-pulse space-y-2">
@@ -658,7 +657,6 @@
                   v-for="(checkoutAttendee, index) in checkoutAttendees"
                   :key="`${checkoutAttendee.package_id || 'pkg'}-${checkoutAttendee.attendee_draft?.email || index}`"
                   class="rounded-lg bg-gray-50 border border-gray-200 p-3 hover:bg-gray-100 transition-colors"
-                  @click="router.push(`/events/${eventId}/m/participants/dashboard?search=${checkoutAttendee.attendee_draft?.first_name}+${checkoutAttendee.attendee_draft?.last_name}`)" style="cursor: pointer"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div>
