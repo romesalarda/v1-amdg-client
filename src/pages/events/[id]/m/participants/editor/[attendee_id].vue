@@ -201,6 +201,14 @@
               />
             </div>
 
+            <!-- Forms Tab -->
+            <div v-if="currentTab === 'forms'">
+              <AttendeeFormsTab
+                :event-id="eventId"
+                :attendee-id="attendee.data.value?.data?.attendee_id || ''"
+              />
+            </div>
+
             <!-- Orders Tab (NEW) -->
             <div v-if="currentTab === 'orders'">
               <AttendeeOrdersTab
@@ -292,6 +300,7 @@ import AttendeeDetailsTab from '~/components/attendee/editor/AttendeeDetailsTab.
 import AttendeeEmergencyContactsTab from '~/components/attendee/editor/AttendeeEmergencyContactsTab.vue'
 import AttendeeFamilyTab from '~/components/attendee/editor/AttendeeFamilyTab.vue'
 import AttendeeOrdersTab from '~/components/attendee/editor/AttendeeOrdersTab.vue'
+import AttendeeFormsTab from '~/components/attendee/editor/AttendeeFormsTab.vue'
 import AttendeeEditorSidebar from '~/components/attendee/editor/AttendeeEditorSidebar.vue'
 
 definePageMeta({

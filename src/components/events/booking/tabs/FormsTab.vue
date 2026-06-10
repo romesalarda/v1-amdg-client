@@ -245,8 +245,8 @@
                       <span class="text-sm font-bold text-deep-navy">{{ question.question_title }}</span>
                       <span
                         v-if="question.required"
-                        class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-red-600"
-                      >Required</span>
+                        class="inline-flex items-center rounded-full text-[10px] font-black uppercase tracking-wide text-red-600"
+                      >*</span>
                       <span class="inline-flex items-center rounded-full bg-deep-navy/5 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-deep-navy/60">
                         {{ question.question_type_display }}
                       </span>

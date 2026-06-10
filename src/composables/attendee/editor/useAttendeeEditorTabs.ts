@@ -13,6 +13,7 @@ const ATTENDEE_EDITOR_TABS: AttendeeEditorTab[] = [
   { id: 'consents', label: 'Consents' },
   { id: 'family', label: 'Family & Guardians' },
   { id: 'questions', label: 'Question Answers' },
+  { id: 'forms', label: 'Forms' },
   { id: 'orders', label: 'Orders' },
   { id: 'actions', label: 'Actions' },
 ]
