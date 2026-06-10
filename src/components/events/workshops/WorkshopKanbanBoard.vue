@@ -1,24 +1,41 @@
 <template>
   <div class="overflow-x-auto">
-    <div class="flex gap-4 min-w-0 pb-2" style="min-width: max-content;">
+    <div class="flex gap-3.5 min-w-0 pb-2" style="min-width: max-content;">
       <div
         v-for="workshop in workshops"
         :key="workshop.id"
-        class="flex flex-col w-64 flex-shrink-0"
+        class="flex flex-col w-56 flex-shrink-0"
       >
         <!-- Column header -->
-        <div class="bg-white rounded-t-2xl border border-deep-navy/10 px-4 py-3 flex items-center gap-2">
-          <WorkshopStatusBadge :status="workshop.status" />
-          <span class="flex-1 text-xs font-black text-navy-900 truncate">{{ workshop.title }}</span>
-          <span class="text-[10px] text-navy-400 flex-shrink-0">
-            {{ registrationCounts[workshop.id] ?? 0 }}
-            {{ workshop.capacity != null ? `/ ${workshop.capacity}` : '' }}
-          </span>
+        <div class="bg-white rounded-t-2xl border border-b-0 border-deep-navy/10 px-3 pt-2.5 pb-0">
+          <div class="flex items-center gap-2 pb-2">
+            <!-- Status dot -->
+            <span
+              class="w-1.5 h-1.5 rounded-full flex-shrink-0"
+              :class="{
+                'bg-green-400': workshop.status === 'OPEN',
+                'bg-slate-300': workshop.status === 'DRAFT',
+                'bg-red-400': workshop.status === 'CLOSED',
+              }"
+            />
+            <span class="flex-1 text-[11px] font-medium text-navy-900 truncate">{{ workshop.title }}</span>
+            <span class="text-[11px] text-navy-400 flex-shrink-0 tabular-nums">
+              {{ registrationCounts[workshop.id] ?? 0 }}{{ workshop.capacity != null ? ` / ${workshop.capacity}` : '' }}
+            </span>
+          </div>
+          <!-- Capacity bar -->
+          <div class="h-[3px] rounded-full bg-deep-navy/10 overflow-hidden mb-[-1px]">
+            <div
+              class="h-full rounded-full transition-all duration-300"
+              :class="capacityFillClass(workshop)"
+              :style="{ width: capacityPercent(workshop) }"
+            />
+          </div>
         </div>
 
         <!-- Drop zone -->
         <div
-          class="flex-1 min-h-[200px] bg-mist-blue/20 rounded-b-2xl border-x border-b border-deep-navy/10 p-2 space-y-2 transition-colors"
+          class="flex-1 min-h-[240px] bg-white rounded-b-2xl border border-deep-navy/10 p-2 flex flex-col gap-1.5 transition-colors"
           :class="dragOverWorkshopId === workshop.id ? 'bg-primary/5 border-primary/30' : ''"
           @dragover.prevent="dragOverWorkshopId = workshop.id"
           @dragleave="dragOverWorkshopId = null"
@@ -35,51 +52,52 @@
               draggable="true"
               @dragstart="onDragStart(reg)"
               @dragend="dragOverWorkshopId = null"
-              class="flex items-center gap-2 bg-white rounded-lg border border-deep-navy/10 px-3 py-2 cursor-grab select-none hover:border-primary/30 transition-colors group"
+              class="flex items-center gap-2 bg-white rounded-lg border border-deep-navy/10 px-2.5 py-1.5 cursor-grab select-none hover:border-primary/30 active:scale-[0.98] transition-all group"
             >
-              <div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-black text-primary flex-shrink-0">
+              <i class="ti ti-grip-vertical text-[14px] text-navy-200 group-hover:text-navy-300 flex-shrink-0" aria-hidden="true" />
+              <div class="w-[26px] h-[26px] rounded-full bg-primary/10 flex items-center justify-center text-[10px] font-medium text-primary flex-shrink-0">
                 {{ initial(reg.attendee_name) }}
               </div>
-              <span class="flex-1 text-xs font-semibold text-navy-900 truncate">{{ reg.attendee_name }}</span>
+              <span class="flex-1 text-[12px] font-medium text-navy-900 truncate">{{ reg.attendee_name }}</span>
               <WorkshopRegistrationStatusBadge :status="reg.status" />
             </div>
 
-            <div v-if="!(registrationsByWorkshop[workshop.id]?.length)" class="text-xs text-navy-300 text-center py-4">
+            <div v-if="!(registrationsByWorkshop[workshop.id]?.length)" class="text-[11px] text-navy-300 text-center py-6">
               Drop attendees here
             </div>
           </template>
         </div>
-      </div>
+  </div>
 
-      <!-- Unassigned column -->
-      <div class="flex flex-col w-64 flex-shrink-0">
-        <div class="bg-white rounded-t-2xl border border-deep-navy/10 px-4 py-3">
-          <span class="text-xs font-black text-navy-500 uppercase tracking-widest">Unassigned / Waitlisted</span>
+  <!-- Unassigned column -->
+  <div class="flex flex-col w-56 flex-shrink-0">
+    <div class="bg-white rounded-t-2xl border border-b-0 border-deep-navy/10 px-3 pt-2.5 pb-2.5">
+      <span class="text-[10px] font-medium text-navy-400 uppercase tracking-widest">Unassigned / Waitlisted</span>
+    </div>
+    <div
+      class="flex-1 min-h-[240px] bg-white rounded-b-2xl border border-deep-navy/10 p-2 flex flex-col gap-1.5 transition-colors"
+      :class="dragOverWorkshopId === UNASSIGNED_COLUMN ? 'bg-amber-50 border-amber-200' : ''"
+      @dragover.prevent="dragOverWorkshopId = UNASSIGNED_COLUMN"
+      @dragleave="dragOverWorkshopId = null"
+      @drop.prevent="onDrop(UNASSIGNED_COLUMN)"
+    >
+      <div
+        v-for="reg in waitlistedRegistrations"
+        :key="reg.registration_id"
+        class="flex items-center gap-2 bg-white rounded-lg border border-deep-navy/10 px-2.5 py-1.5"
+      >
+        <div class="w-[26px] h-[26px] rounded-full bg-amber-100 flex items-center justify-center text-[10px] font-medium text-amber-700 flex-shrink-0">
+          {{ initial(reg.attendee_name) }}
         </div>
-        <div
-          class="flex-1 min-h-[200px] bg-mist-blue/20 rounded-b-2xl border-x border-b border-deep-navy/10 p-2 space-y-2 transition-colors"
-          :class="dragOverWorkshopId === UNASSIGNED_COLUMN ? 'bg-amber-50 border-amber-200' : ''"
-          @dragover.prevent="dragOverWorkshopId = UNASSIGNED_COLUMN"
-          @dragleave="dragOverWorkshopId = null"
-          @drop.prevent="onDrop(UNASSIGNED_COLUMN)"
-        >
-          <div
-            v-for="reg in waitlistedRegistrations"
-            :key="reg.registration_id"
-            class="flex items-center gap-2 bg-white rounded-lg border border-deep-navy/10 px-3 py-2"
-          >
-            <div class="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center text-[10px] font-black text-amber-700 flex-shrink-0">
-              {{ initial(reg.attendee_name) }}
-            </div>
-            <span class="flex-1 text-xs font-semibold text-navy-900 truncate">{{ reg.attendee_name }}</span>
-            <span class="text-[10px] text-navy-400">W#{{ reg.workshop }}</span>
-          </div>
-          <div v-if="!waitlistedRegistrations.length" class="text-xs text-navy-300 text-center py-4">
-            No waitlisted registrations
-          </div>
-        </div>
+        <span class="flex-1 text-[12px] font-medium text-navy-900 truncate">{{ reg.attendee_name }}</span>
+        <span class="text-[10px] text-navy-300">W#{{ reg.workshop }}</span>
+      </div>
+      <div v-if="!waitlistedRegistrations.length" class="text-[11px] text-navy-300 text-center py-6">
+        No waitlisted registrations
       </div>
     </div>
+  </div>
+</div>
   </div>
 </template>
 
@@ -114,6 +132,20 @@ const { data: allRegsData, isLoading: allRegsLoading } = useWorkshopRegistration
     page_size: 1000,
   })),
 )
+
+function capacityPercent(workshop: WorkshopList) {
+  if (!workshop.capacity) return '0%'
+  const count = registrationCounts.value[workshop.id] ?? 0
+  return `${Math.min(100, Math.round((count / workshop.capacity) * 100))}%`
+}
+
+function capacityFillClass(workshop: WorkshopList) {
+  if (!workshop.capacity) return 'bg-primary'
+  const pct = (registrationCounts.value[workshop.id] ?? 0) / workshop.capacity
+  if (pct >= 0.9) return 'bg-red-400'
+  if (pct >= 0.7) return 'bg-amber-400'
+  return 'bg-primary'
+}
 
 // Filter client-side to only this event's workshops (avoid over-broad queries)
 const allRegs = computed<WorkshopRegistrationList[]>(() => {
