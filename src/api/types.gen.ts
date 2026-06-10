@@ -17139,6 +17139,18 @@ export type PatchedWorkshopCreateUpdateRequest = {
      * Detailed description of the workshop
      */
     description?: string;
+    /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: Blob | File | null;
+    /**
+     * Information about what attendees can expect from the workshop
+     */
+    what_to_expect?: string | null;
+    /**
+     * Information about what attendees should bring to the workshop
+     */
+    what_to_bring?: string | null;
     event?: string;
     date?: string;
     venue?: string | null;
@@ -21169,6 +21181,18 @@ export type WorkshopCreateUpdate = {
      * Detailed description of the workshop
      */
     description: string;
+    /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: string | null;
+    /**
+     * Information about what attendees can expect from the workshop
+     */
+    what_to_expect?: string | null;
+    /**
+     * Information about what attendees should bring to the workshop
+     */
+    what_to_bring?: string | null;
     event: string;
     date: string;
     venue?: string | null;
@@ -21222,6 +21246,18 @@ export type WorkshopCreateUpdateRequest = {
      * Detailed description of the workshop
      */
     description: string;
+    /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: Blob | File | null;
+    /**
+     * Information about what attendees can expect from the workshop
+     */
+    what_to_expect?: string | null;
+    /**
+     * Information about what attendees should bring to the workshop
+     */
+    what_to_bring?: string | null;
     event: string;
     date: string;
     venue?: string | null;
@@ -21275,6 +21311,10 @@ export type WorkshopDetail = {
     event: string;
     date: string;
     /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: string | null;
+    /**
      * Current lifecycle status of the workshop.
      *
      * * `DRAFT` - Draft
@@ -21323,6 +21363,14 @@ export type WorkshopDetail = {
      * Detailed description of the workshop
      */
     description: string;
+    /**
+     * Information about what attendees can expect from the workshop
+     */
+    what_to_expect?: string | null;
+    /**
+     * Information about what attendees should bring to the workshop
+     */
+    what_to_bring?: string | null;
     /**
      * Additional notes or instructions for the workshop
      */
@@ -21432,6 +21480,10 @@ export type WorkshopList = {
     event: string;
     date: string;
     /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: string | null;
+    /**
      * Current lifecycle status of the workshop.
      *
      * * `DRAFT` - Draft
@@ -21485,6 +21537,10 @@ export type WorkshopListRequest = {
     title: string;
     event: string;
     date: string;
+    /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: Blob | File | null;
     /**
      * Current lifecycle status of the workshop.
      *
@@ -29126,6 +29182,10 @@ export type WorkshopDetailWritable = {
     event: string;
     date: string;
     /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: string | null;
+    /**
      * Current lifecycle status of the workshop.
      *
      * * `DRAFT` - Draft
@@ -29163,6 +29223,14 @@ export type WorkshopDetailWritable = {
      * Detailed description of the workshop
      */
     description: string;
+    /**
+     * Information about what attendees can expect from the workshop
+     */
+    what_to_expect?: string | null;
+    /**
+     * Information about what attendees should bring to the workshop
+     */
+    what_to_bring?: string | null;
     /**
      * Additional notes or instructions for the workshop
      */
@@ -29220,6 +29288,10 @@ export type WorkshopListWritable = {
     title: string;
     event: string;
     date: string;
+    /**
+     * Optional image to display on the workshop landing page
+     */
+    landing_image?: string | null;
     /**
      * Current lifecycle status of the workshop.
      *

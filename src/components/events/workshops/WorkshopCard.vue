@@ -1,5 +1,10 @@
 <template>
   <div class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+    <!-- Landing image banner -->
+    <div v-if="landingImage" class="h-24 bg-mist-blue/20 overflow-hidden">
+      <img :src="landingImage" :alt="workshop.title" class="w-full h-full object-cover" />
+    </div>
+
     <!-- Header row -->
     <div class="flex items-start gap-4 p-5">
       <div class="flex-1 min-w-0">
@@ -33,6 +38,16 @@
 
       <!-- Action buttons -->
       <div class="flex items-center gap-1 flex-shrink-0">
+        <!-- Run Allocation (shown for CLOSED workshops or INTEREST_RANKING mode) -->
+        <button
+          v-if="showAllocationButton"
+          @click.stop="emit('run-allocation', workshop.id)"
+          title="Run Allocation"
+          class="flex items-center gap-1 px-2.5 py-1.5 text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg text-[11px] font-bold transition-colors"
+        >
+          <span class="material-symbols-outlined text-sm">auto_awesome</span>
+          Allocate
+        </button>
         <button
           v-if="workshop.status === 'DRAFT' || workshop.status === 'CLOSED'"
           @click.stop="emit('open-registrations', workshop.id)"
@@ -103,6 +118,7 @@ const emit = defineEmits<{
   'open-registrations': [id: number]
   'close-registrations': [id: number]
   'toggle-registrations': [id: number]
+  'run-allocation': [id: number]
 }>()
 
 const allocationLabelMap: Record<string, string> = {
@@ -114,6 +130,13 @@ const allocationLabelMap: Record<string, string> = {
 
 const allocationLabel = computed(
   () => allocationLabelMap[props.workshop.allocation_mode ?? ''] ?? props.workshop.allocation_mode ?? 'Unknown',
+)
+
+// landing_image is returned by the API but not yet in the TS types
+const landingImage = computed(() => (props.workshop as any).landing_image as string | null | undefined)
+
+const showAllocationButton = computed(
+  () => props.workshop.status === 'CLOSED' || props.workshop.allocation_mode === 'INTEREST_RANKING',
 )
 
 const formattedDate = computed(() => {

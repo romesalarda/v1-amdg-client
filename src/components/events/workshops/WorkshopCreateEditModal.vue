@@ -6,7 +6,7 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
         @click.self="close"
       >
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden">
           <!-- Header -->
           <div class="flex items-center gap-3 px-6 py-4 border-b border-navy-50">
             <span class="material-symbols-outlined text-primary">{{ isEdit ? 'edit' : 'add_circle' }}</span>
@@ -18,8 +18,62 @@
             </button>
           </div>
 
+          <!-- Loading skeleton (when fetching detail for edit) -->
+          <div v-if="isLoadingDetail" class="p-6 space-y-4">
+            <div v-for="i in 6" :key="i" class="h-10 bg-mist-blue/50 rounded-xl animate-pulse" />
+          </div>
+
           <!-- Form -->
-          <form @submit.prevent="handleSubmit" class="p-6 space-y-4 overflow-y-auto max-h-[70vh]">
+          <form v-else @submit.prevent="handleSubmit" class="p-6 space-y-5 overflow-y-auto max-h-[75vh]">
+
+            <!-- ─── Landing image upload ─────────────────────────────── -->
+            <div>
+              <label class="block text-xs font-bold text-navy-700 mb-1">Landing Image</label>
+              <!-- Preview -->
+              <div v-if="imagePreview || existingImageUrl" class="relative mb-2">
+                <img
+                  :src="imagePreview || existingImageUrl || ''"
+                  alt="Landing image preview"
+                  class="w-full h-36 object-cover rounded-xl border border-deep-navy/10"
+                />
+                <button
+                  type="button"
+                  @click="clearImage"
+                  class="absolute top-2 right-2 p-1 bg-white/80 hover:bg-white rounded-full shadow text-navy-600 hover:text-red-600 transition-colors"
+                  title="Remove image"
+                >
+                  <span class="material-symbols-outlined text-base">close</span>
+                </button>
+              </div>
+              <!-- Drop zone -->
+              <div
+                class="relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed transition-colors cursor-pointer"
+                :class="isDraggingImage
+                  ? 'border-primary bg-primary/10'
+                  : 'border-deep-navy/15 bg-mist-blue/30 hover:border-primary/50 hover:bg-primary/5'"
+                style="min-height: 90px;"
+                @dragover.prevent="isDraggingImage = true"
+                @dragleave.prevent="isDraggingImage = false"
+                @drop.prevent="onImageDrop"
+                @click="imageInputRef?.click()"
+              >
+                <span class="material-symbols-outlined text-2xl" :class="isDraggingImage ? 'text-primary' : 'text-navy-300'">
+                  {{ isDraggingImage ? 'file_download' : 'add_photo_alternate' }}
+                </span>
+                <p class="text-xs font-semibold" :class="isDraggingImage ? 'text-primary' : 'text-navy-400'">
+                  {{ isDraggingImage ? 'Drop to upload' : 'Drag & drop or click to upload' }}
+                </p>
+                <p class="text-[10px] text-navy-300">JPG, PNG, WEBP — max 5 MB</p>
+                <input
+                  ref="imageInputRef"
+                  type="file"
+                  accept="image/*"
+                  class="hidden"
+                  @change="onImageFileChange"
+                />
+              </div>
+            </div>
+
             <!-- Title -->
             <div>
               <label class="block text-xs font-bold text-navy-700 mb-1">Title *</label>
@@ -44,6 +98,28 @@
                 :class="{ 'border-red-400': errors.description }"
               />
               <p v-if="errors.description" class="text-xs text-red-500 mt-1">{{ errors.description }}</p>
+            </div>
+
+            <!-- What to expect -->
+            <div>
+              <label class="block text-xs font-bold text-navy-700 mb-1">What to Expect</label>
+              <textarea
+                v-model="form.what_to_expect"
+                rows="2"
+                placeholder="What attendees can expect from this workshop…"
+                class="field resize-none"
+              />
+            </div>
+
+            <!-- What to bring -->
+            <div>
+              <label class="block text-xs font-bold text-navy-700 mb-1">What to Bring</label>
+              <textarea
+                v-model="form.what_to_bring"
+                rows="2"
+                placeholder="What attendees should bring…"
+                class="field resize-none"
+              />
             </div>
 
             <!-- Date -->
@@ -144,7 +220,7 @@
             <button
               type="submit"
               @click="handleSubmit"
-              :disabled="isSubmitting"
+              :disabled="isSubmitting || isLoadingDetail"
               class="flex items-center gap-1.5 px-5 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-60"
             >
               <span v-if="isSubmitting" class="material-symbols-outlined text-sm animate-spin">refresh</span>
@@ -160,6 +236,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
 import { useWorkshopForm } from '~/composables/workshops/useWorkshopForm'
+import { useWorkshop } from '~/composables/resources/workshops'
 import type { WorkshopList } from '~/api/types.gen'
 import type { WorkshopFormData } from '~/schemas/workshops/workshop.schema'
 import { defaultWorkshopForm } from '~/schemas/workshops/workshop.schema'
@@ -177,13 +254,57 @@ const emit = defineEmits<{
 
 const isEdit = computed(() => !!props.editWorkshop)
 
+// ─── Fetch detail when editing ─────────────────────────────────────────────────
+const editId = computed(() => (props.editWorkshop?.id ?? 0))
+const { data: detailData, isLoading: isLoadingDetail } = useWorkshop(
+  computed(() => editId.value),
+)
+// Only treat as loading when we're actually editing
+const isLoadingDetail$ = computed(() => isEdit.value && isLoadingDetail.value)
+
+// ─── Image upload state ────────────────────────────────────────────────────────
+const imageInputRef = ref<HTMLInputElement | null>(null)
+const landingImageFile = ref<File | null>(null)
+const imagePreview = ref<string | null>(null)
+const existingImageUrl = ref<string | null>(null)
+const isDraggingImage = ref(false)
+
+function setImageFile(file: File) {
+  if (!file.type.startsWith('image/')) return
+  landingImageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    imagePreview.value = e.target?.result as string
+  }
+  reader.readAsDataURL(file)
+}
+
+function onImageDrop(event: DragEvent) {
+  isDraggingImage.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) setImageFile(file)
+}
+
+function onImageFileChange(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (file) setImageFile(file)
+}
+
+function clearImage() {
+  landingImageFile.value = null
+  imagePreview.value = null
+  existingImageUrl.value = null
+  if (imageInputRef.value) imageInputRef.value.value = ''
+}
+
+// ─── Form composable ───────────────────────────────────────────────────────────
 const { errors, isSubmitting, loadForEdit, submitCreate, submitUpdate, resetForm, setValues } =
   useWorkshopForm(() => {
     emit('saved')
     close()
   })
 
-// Local reactive mirror of form values — drives vee-validate via setValues
+// Local reactive mirror of form values
 const form = ref<WorkshopFormData>({ ...defaultWorkshopForm(), event: props.eventId })
 
 watch(
@@ -192,52 +313,56 @@ watch(
   { deep: true },
 )
 
-// Pre-fill when editing
+// Pre-fill from fetched detail when editing
 watch(
-  () => props.editWorkshop,
-  (workshop) => {
-    if (workshop) {
-      const patch: Partial<WorkshopFormData> = {
-        title: workshop.title,
-        event: workshop.event,
-        date: workshop.date ? workshop.date.slice(0, 16) : '',
-        status: workshop.status,
-        allocation_mode: workshop.allocation_mode,
-        capacity: workshop.capacity ?? null,
-        duration_minutes: workshop.duration_minutes ?? null,
-        registration_opens_at: workshop.registration_opens_at
-          ? workshop.registration_opens_at.slice(0, 16)
-          : null,
-        registration_closes_at: workshop.registration_closes_at
-          ? workshop.registration_closes_at.slice(0, 16)
-          : null,
-      }
-      form.value = { ...defaultWorkshopForm(), event: props.eventId, ...patch }
-      loadForEdit(form.value)
-    } else {
-      form.value = { ...defaultWorkshopForm(), event: props.eventId }
-      resetForm()
+  detailData,
+  (data) => {
+    if (!isEdit.value || !data?.data) return
+    const d = data.data as any
+    existingImageUrl.value = d.landing_image || null
+    const patch: Partial<WorkshopFormData> = {
+      title: d.title,
+      event: d.event,
+      date: d.date ? d.date.slice(0, 16) : '',
+      description: d.description ?? '',
+      notes: d.notes ?? null,
+      what_to_expect: d.what_to_expect ?? null,
+      what_to_bring: d.what_to_bring ?? null,
+      status: d.status,
+      allocation_mode: d.allocation_mode,
+      capacity: d.capacity ?? null,
+      duration_minutes: d.duration_minutes ?? null,
+      registration_opens_at: d.registration_opens_at ? d.registration_opens_at.slice(0, 16) : null,
+      registration_closes_at: d.registration_closes_at ? d.registration_closes_at.slice(0, 16) : null,
     }
+    form.value = { ...defaultWorkshopForm(), event: props.eventId, ...patch }
+    loadForEdit(form.value)
   },
   { immediate: true },
 )
 
-// Sync eventId into form when modal opens and no edit target
+// Reset when switching between create/edit or opening
 watch(
-  () => props.modelValue,
-  (open) => {
-    if (open && !props.editWorkshop) {
+  () => [props.modelValue, props.editWorkshop] as const,
+  ([open, workshop]) => {
+    if (!open) return
+    if (!workshop) {
+      // Create mode
+      landingImageFile.value = null
+      imagePreview.value = null
+      existingImageUrl.value = null
       form.value = { ...defaultWorkshopForm(), event: props.eventId }
       resetForm()
     }
+    // Edit mode: detail fetch watcher handles pre-fill
   },
 )
 
 async function handleSubmit() {
   if (isEdit.value && props.editWorkshop) {
-    await submitUpdate(props.editWorkshop.id)
+    await submitUpdate(props.editWorkshop.id, landingImageFile.value)
   } else {
-    await submitCreate()
+    await submitCreate(landingImageFile.value)
   }
 }
 

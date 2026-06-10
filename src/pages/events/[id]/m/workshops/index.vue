@@ -112,21 +112,8 @@
               @open-registrations="handleOpen"
               @close-registrations="handleClose"
               @toggle-registrations="toggleExpand"
+              @run-allocation="(id) => runAllocById(id)"
             />
-
-            <!-- Run Allocation button (shown when expanded + eligible) -->
-            <div v-if="expandedIds.has(workshop.id)" class="flex justify-end px-3 pt-2 -mb-1">
-              <button
-                v-if="workshop.status === 'CLOSED' || workshop.allocation_mode === 'INTEREST_RANKING'"
-                @click="runAlloc(workshop)"
-                :disabled="allocationRunning"
-                class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 transition-colors disabled:opacity-50"
-              >
-                <span v-if="allocationRunning" class="material-symbols-outlined text-sm animate-spin">refresh</span>
-                <span v-else class="material-symbols-outlined text-sm">auto_awesome</span>
-                Run Allocation
-              </button>
-            </div>
 
             <!-- Registrations panel -->
             <Transition name="slide-down">
@@ -394,6 +381,11 @@ async function runAlloc(workshop: WorkshopList) {
   } catch {
     $notyf?.error('Allocation failed. Please try again.')
   }
+}
+
+async function runAllocById(workshopId: number) {
+  const workshop = workshopList.value.find(w => w.id === workshopId)
+  if (workshop) await runAlloc(workshop)
 }
 </script>
 

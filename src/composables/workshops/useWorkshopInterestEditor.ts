@@ -29,10 +29,11 @@ export function useWorkshopInterestEditor(
   attendeeId: MaybeRefOrGetter<string>,
 ) {
   // ─── Queries ───────────────────────────────────────────────────────────────
+  // Fetch all workshops for the event (OPEN + CLOSED shown; OPEN can be ranked)
   const workshopsQuery = useWorkshops(
     computed(() => {
       const ev = toValue(eventId)
-      return ev ? { event: ev, status: 'OPEN' as const, page_size: 200 } : undefined
+      return ev ? { event: ev, page_size: 200 } : undefined
     }),
   )
 
@@ -56,8 +57,17 @@ export function useWorkshopInterestEditor(
   const isDirty = ref(false)
   const isSaving = ref(false)
 
-  const availableWorkshops = computed<WorkshopList[]>(
+  const allWorkshops = computed<WorkshopList[]>(
     () => workshopsQuery.data.value?.data?.results ?? [],
+  )
+
+  // Only OPEN workshops can be ranked; CLOSED are shown read-only
+  const availableWorkshops = computed<WorkshopList[]>(
+    () => allWorkshops.value.filter(w => w.status === 'OPEN'),
+  )
+
+  const closedWorkshops = computed<WorkshopList[]>(
+    () => allWorkshops.value.filter(w => w.status === 'CLOSED'),
   )
 
   // The existing submission (one per attendee×event)
@@ -173,6 +183,7 @@ export function useWorkshopInterestEditor(
   return {
     // Data
     availableWorkshops,
+    closedWorkshops,
     rankedWorkshops,
     unrankedWorkshops,
     existingSubmission,
