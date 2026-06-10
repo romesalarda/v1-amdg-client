@@ -125,7 +125,7 @@
       <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <section class="lg:col-span-8 space-y-4">
-            <div v-if="booking && selectedAttendeeId" class="rounded-2xl border border-deep-navy/10 bg-white/95 p-3 shadow-sm">
+            <!-- <div v-if="booking && selectedAttendeeId" class="rounded-2xl border border-deep-navy/10 bg-white/95 p-3 shadow-sm">
               <div class="overflow-x-auto">
                 <div class="min-w-max flex items-center gap-2">
                 <button
@@ -144,6 +144,25 @@
                   {{ tab.label }}
                 </button>
                 </div>
+              </div>
+            </div> -->
+            <div v-if="booking && selectedAttendeeId" class="rounded-2xl bg-primary p-1.5 overflow-x-auto">
+              <div class="flex w-max gap-1">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  @click="setActiveTab(tab.id)"
+                  :disabled="isTabDisabled(tab)"
+                  :class="[
+                    'relative px-2 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
+                    activeTab === tab.id
+                      ? 'bg-white text-deep-navy shadow-sm'
+                      : 'text-white hover:text-deep-navy hover:bg-white/50'
+                  ]"
+                >
+                  {{ tab.label }}
+                  <UIcon :name="tab.icon" />
+                </button>
               </div>
             </div>
             <article v-if="selectedAttendeeId && selectedAttendeeIsCancelled" class="rounded-2xl border border-rose-200 bg-rose-50/80 p-4">
@@ -1788,15 +1807,15 @@ if (props.initialAttendeeId) {
   activeTab.value = props.initialTab || 'attendee'
 }
 
-const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhenCancelled?: boolean }> = [
-  { id: 'overview', label: 'Booking' },
-  { id: 'attendee', label: 'Attendee Info', needsAttendee: true, blockWhenCancelled: true },
-  { id: 'tickets', label: 'Tickets', needsAttendee: true, blockWhenCancelled: true },
-  { id: 'payments', label: 'Payments', needsAttendee: false },
-  { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true },
-  { id: 'resources', label: 'Resources', needsAttendee: false },
-  { id: 'forms', label: 'Forms', needsAttendee: true },
-  { id: 'workshops', label: 'Workshops', needsAttendee: true },
+const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhenCancelled?: boolean, icon: string }> = [
+  { id: 'overview', label: 'Booking', icon: 'i-heroicons-information-circle' },
+  { id: 'attendee', label: 'Attendee Info', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-user-circle' },
+  { id: 'tickets', label: 'Tickets', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-ticket' },
+  { id: 'payments', label: 'Payments', needsAttendee: false, icon: 'i-heroicons-currency-pound' },
+  { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-shopping-bag' },
+  { id: 'resources', label: 'Resources', needsAttendee: false, icon: 'i-heroicons-folder' },
+  { id: 'forms', label: 'Forms', needsAttendee: true, icon: 'i-heroicons-document' },
+  { id: 'workshops', label: 'Workshops', needsAttendee: true, icon: 'i-heroicons-academic-cap' },
 ]
 
 const selectedAttendee = computed(() => {

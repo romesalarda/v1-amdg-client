@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-mist-blue pb-32">
+  <div class="min-h-screen bg-mist-blue pb-32 flex flex-col gap-8 items-center justify-center">
     <!-- Back to Dashboard - Fixed Left -->
     <NuxtLink 
       to="/my-dashboard" 
@@ -9,23 +9,23 @@
       <span class="font-semibold">Dashboard</span>
     </NuxtLink>
 
-    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8 w-full">
       <!-- Compact Header -->
       <div class="mb-4 text-center">
-        <h1 class="text-2xl font-black text-navy-900 uppercase tracking-widest">Create Event</h1>
+        <h1 class="text-4xl font-black text-navy-900 uppercase tracking-widest">Create Event</h1>
       </div>
 
       <!-- Form Content -->
       <div class="bg-white rounded-2xl shadow-lg border border-primary/10 p-6">
         <form @submit.prevent="handleStepSubmit">
           <!-- Step 1: Event Details -->
-          <div v-show="currentStep === 0" class="space-y-4 animate-fadeIn">
+          <div v-show="currentStep === 0" class="animate-fadeIn justify-center items-center flex flex-col">
             <div class="border-b border-primary/10 pb-3 mb-4">
-              <h2 class="text-lg font-bold text-navy-900">Event Details</h2>
-              <p class="text-xs text-navy-500">Tell us about your event</p>
+              <h2 class="text-lg font-bold text-navy-900">Event Name</h2>
+              <p class="text-xs text-navy-500">Name your event</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
               <div class="md:col-span-2 space-y-2">
                 <label class="block text-sm font-semibold text-navy-900" for="event-title">
                   Event Title <span class="text-red-500">*</span>
@@ -48,7 +48,7 @@
                 </p>
               </div>
 
-              <div class="space-y-2">
+              <!-- <div class="space-y-2">
                 <label class="block text-sm font-semibold text-navy-900" for="theme">
                   Theme <span class="text-navy-400 text-xs font-normal">(Optional)</span>
                 </label>
@@ -90,20 +90,19 @@
                   rows="3"
                   class="w-full rounded-xl border border-primary/20 bg-white px-4 py-2.5 text-sm text-navy-900 placeholder:text-navy-400 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all resize-none"
                 ></textarea>
-              </div>
+              </div> -->
             </div>
           </div>
 
           <!-- Step 2: Organization & Type -->
           <div v-show="currentStep === 1" class="space-y-4 animate-fadeIn">
             <div class="border-b border-primary/10 pb-3 mb-4">
-              <h2 class="text-lg font-bold text-navy-900">Organization & Type</h2>
-              <p class="text-xs text-navy-500">Select the host organization and event type</p>
+              <h2 class="text-lg font-bold text-navy-900">Organisation & Type</h2>
+              <p class="text-xs text-navy-500">Select the host organisation and event type</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="space-y-2">
-                <label class="block text-sm font-semibold text-navy-900" for="organisation">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 justify-center items-center w-full">
+                <!-- <label class="block text-sm font-semibold text-navy-900" for="organisation">
                   Host Organization <span class="text-red-500">*</span>
                 </label>
                 <div class="relative">
@@ -125,7 +124,15 @@
                     expand_more
                   </span>
                 </div>
-                <p v-if="errors.organisation" class="text-xs text-red-500">{{ errors.organisation }}</p>
+                <p v-if="errors.organisation" class="text-xs text-red-500">{{ errors.organisation }}</p> -->
+              <div class="space-y-2">
+                <label class="block text-sm font-semibold text-navy-900" for="event-type">
+                  Organisation <span class="text-red-500">*</span>
+                </label>
+                <OrganisationSelect
+                  :model-value="organisation"
+                  @update:model-value="(value) => { organisation = value ?? undefined }"
+                />
               </div>
 
               <div class="space-y-2">
@@ -258,22 +265,7 @@
                   Timezone <span class="text-red-500">*</span>
                 </label>
                 <div class="relative max-w-md">
-                  <!-- <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-navy-400 text-xl pointer-events-none">
-                    public
-                  </span>
-                  <select
-                    id="timezone"
-                    v-model="timezone"
-                    class="w-full rounded-xl border border-primary/20 bg-white pl-12 pr-4 py-2.5 text-sm text-navy-900 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>Select timezone</option>
-                    <option v-for="tz in timezoneOptions" :key="tz" :value="tz">
-                      {{ tz }}
-                    </option>
-                  </select>
-                  <span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-navy-400 pointer-events-none">
-                    expand_more
-                  </span> -->
+
                   <TimezoneSelect
                     :model-value="timezone || 'UTC'"
                     :has-error="!!errors.timezone"
@@ -319,11 +311,11 @@
               <div class="bg-mist-blue/30 rounded-xl p-4 border border-primary/10 space-y-2">
                 <h3 class="text-xs font-bold text-navy-900 uppercase tracking-wide flex items-center gap-2">
                   <span class="material-symbols-outlined text-primary text-base">business</span>
-                  Organization & Type
+                  Organisation & Type
                 </h3>
                 <div class="space-y-1.5 text-sm">
                   <div class="flex justify-between">
-                    <span class="text-navy-600">Organization:</span>
+                    <span class="text-navy-600">Organisation:</span>
                     <span class="font-semibold text-navy-900">{{ organizationOptions.find(o => o.value === organisation)?.label || '-' }}</span>
                   </div>
                   <div class="flex justify-between">
@@ -482,6 +474,7 @@ import { useEventTypes } from '~/composables/resources/events/eventTypes'
 import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
 import { useAuthStore } from '~/stores/auth'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
+import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
 import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 definePageMeta({
@@ -495,7 +488,7 @@ const { $notyf } = useNuxtApp()
 const currentStep = ref(0)
 const steps = [
   { title: 'Details', icon: 'info' },
-  { title: 'Organization', icon: 'business' },
+  { title: 'Organisation', icon: 'business' },
   { title: 'Schedule', icon: 'event' },
   { title: 'Review', icon: 'check_circle' }
 ]
@@ -505,7 +498,7 @@ const createEventSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters').max(200, 'Title is too long'),
   short_description: z.string().max(255, 'Description must be 255 characters or less').optional().or(z.literal('')),
   long_description: z.string().optional().or(z.literal('')),
-  organisation: z.number({ required_error: 'Please select an organization' }),
+  organisation: z.number({ required_error: 'Please select an organisation' }),
   event_type: z.number({ required_error: 'Please select an event type' }),
   display_code: z.string().min(1, 'Display code is required').max(10, 'Display code must be 10 characters or less'),
   timezone: z.string().min(1, 'Please select a timezone'),
@@ -537,7 +530,7 @@ const controlledOrganizations = computed(() => controlsData.value?.data?.results
 const organizationOptions = computed(() => {
   return controlledOrganizations.value.map(control => ({
     value: control.organisation,
-    label: control.organisation_name || `Organization ${control.organisation}`
+    label: control.organisation_name || `Organisation ${control.organisation}`
   }))
 })
 
@@ -689,6 +682,11 @@ const nextStep = () => {
   } else if (currentStep.value === 1) {
     if (!organisation.value || !event_type.value || !display_code.value) {
       $notyf?.error('Please complete all required fields')
+      console.log('Validation errors:', {
+        organisation: !organisation.value,
+        event_type: !event_type.value,
+        display_code: !display_code.value,
+      })
       return
     }
     if (isCheckingCode.value) {

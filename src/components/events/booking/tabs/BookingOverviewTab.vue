@@ -40,12 +40,12 @@
             <div class="min-w-0 bg-white p-3">
               <div class="flex items-center justify-between gap-2">
                 <p class="text-headline-sm font-headline text-deep-navy">{{ step.title }}</p>
-                <span
+                <!-- <span
                   class="rounded px-2 py-0.5 text-label-bold font-label-bold uppercase tracking-widest"
                   :class="step.done ? 'bg-green-100 text-green-700' : 'bg-primary/10 text-primary'"
                 >
                   {{ step.done ? 'Done' : 'Next' }}
-                </span>
+                </span> -->
               </div>
               <p class="mt-1 text-body-sm font-body-sm text-deep-navy/70">{{ step.description }}</p>
               <button
@@ -96,9 +96,9 @@
                 </template>
 
                 <template v-else-if="step.action === 'time'">
-                  <p><span class="font-bold text-deep-navy">Starts:</span> {{ props.formatDateTime(props.eventStart) }}</p>
-                  <p><span class="font-bold text-deep-navy">Ends:</span> {{ props.formatDateTime(props.eventEnd) }}</p>
-                  <p><span class="font-bold text-deep-navy">Timezone:</span> {{ props.timezone || 'UTC' }}</p>
+                  <h5><span class="font-bold text-deep-navy">Starts:</span> {{ props.formatDateTime(props.eventStart) }}</h5>
+                  <h5><span class="font-bold text-deep-navy">Ends:</span> {{ props.formatDateTime(props.eventEnd) }}</h5>
+                  <h5><span class="font-bold text-deep-navy">Timezone:</span> {{ props.timezone || 'UTC' }}</h5>
                 </template>
               </div>
             </div>

@@ -13,15 +13,21 @@
           :key="reg.registration_id"
           class="flex items-center gap-3 px-5 py-3"
         >
+        
           <div class="flex-1 min-w-0">
+            <img
+              v-if="workshopNameMap[reg.workshop]?.landing"
+              :src="workshopNameMap[reg.workshop]?.landing"
+              :alt="workshopNameMap[reg.workshop]?.title"
+              class="w-full h-full object-cover max-h-12 rounded-md mb-1"
+            />
             <p class="text-sm font-semibold text-navy-900 truncate">
-              {{ workshopNameMap[reg.workshop] ?? `Workshop #${reg.workshop}` }}
+              {{ workshopNameMap[reg.workshop]?.title ?? `Workshop #${reg.workshop}` }}
             </p>
             <p class="text-xs text-navy-400">
               Registered {{ formatDate(reg.registered_at) }}
             </p>
           </div>
-          <WorkshopRegistrationStatusBadge :status="reg.status" />
         </div>
       </div>
     </section>
@@ -81,10 +87,10 @@ const { data: workshopsData } = useWorkshops(
     urlSafeEventId.value ? { event: urlSafeEventId.value, page_size: 200 } : undefined,
   ),
 )
-const workshopNameMap = computed<Record<number, string>>(() => {
-  const map: Record<number, string> = {}
+const workshopNameMap = computed<Record<number, { title: string, landing: string }>>(() => {
+  const map: Record<number, { title: string, landing: string }> = {}
   for (const w of workshopsData.value?.data?.results ?? []) {
-    map[w.id] = w.title
+    map[w.id] = { title: w.title, landing: w.landing_image ?? '' }
   }
   return map
 })
