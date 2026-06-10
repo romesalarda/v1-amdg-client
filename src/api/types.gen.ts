@@ -17139,7 +17139,7 @@ export type PatchedWorkshopCreateUpdateRequest = {
      * Detailed description of the workshop
      */
     description?: string;
-    event?: number;
+    event?: string;
     date?: string;
     venue?: string | null;
     room?: number | null;
@@ -17190,8 +17190,8 @@ export type PatchedWorkshopCreateUpdateRequest = {
  * - ranks are unique within the submission
  */
 export type PatchedWorkshopInterestSubmissionCreateRequest = {
-    event?: number;
-    attendee?: number;
+    event?: string;
+    attendee?: string | null;
     ranks?: Array<WorkshopInterestRankRequest>;
 };
 
@@ -17200,7 +17200,7 @@ export type PatchedWorkshopInterestSubmissionCreateRequest = {
  */
 export type PatchedWorkshopRegistrationListRequest = {
     workshop?: number;
-    attendee?: number;
+    attendee?: string;
     /**
      * Allocation status for this registration.
      *
@@ -21169,7 +21169,7 @@ export type WorkshopCreateUpdate = {
      * Detailed description of the workshop
      */
     description: string;
-    event: number;
+    event: string;
     date: string;
     venue?: string | null;
     room?: number | null;
@@ -21222,7 +21222,7 @@ export type WorkshopCreateUpdateRequest = {
      * Detailed description of the workshop
      */
     description: string;
-    event: number;
+    event: string;
     date: string;
     venue?: string | null;
     room?: number | null;
@@ -21272,7 +21272,7 @@ export type WorkshopCreateUpdateRequest = {
 export type WorkshopDetail = {
     readonly id: number;
     title: string;
-    event: number;
+    event: string;
     date: string;
     /**
      * Current lifecycle status of the workshop.
@@ -21369,8 +21369,8 @@ export type WorkshopInterestRankRequest = {
  */
 export type WorkshopInterestSubmission = {
     readonly submission_id: string;
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     readonly attendee_name: string;
     readonly submitted_at: string;
     readonly updated_at: string;
@@ -21394,8 +21394,8 @@ export type WorkshopInterestSubmission = {
  * - ranks are unique within the submission
  */
 export type WorkshopInterestSubmissionCreate = {
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     ranks: Array<WorkshopInterestRank>;
 };
 
@@ -21406,8 +21406,8 @@ export type WorkshopInterestSubmissionCreate = {
  * - ranks are unique within the submission
  */
 export type WorkshopInterestSubmissionCreateRequest = {
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     ranks: Array<WorkshopInterestRankRequest>;
 };
 
@@ -21415,8 +21415,8 @@ export type WorkshopInterestSubmissionCreateRequest = {
  * Read serializer for an interest submission including nested ranks.
  */
 export type WorkshopInterestSubmissionRequest = {
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     /**
      * When True the submission is locked and ready for allocation.
      */
@@ -21429,7 +21429,7 @@ export type WorkshopInterestSubmissionRequest = {
 export type WorkshopList = {
     readonly id: number;
     title: string;
-    event: number;
+    event: string;
     date: string;
     /**
      * Current lifecycle status of the workshop.
@@ -21483,7 +21483,7 @@ export type WorkshopList = {
  */
 export type WorkshopListRequest = {
     title: string;
-    event: number;
+    event: string;
     date: string;
     /**
      * Current lifecycle status of the workshop.
@@ -21526,7 +21526,7 @@ export type WorkshopListRequest = {
  */
 export type WorkshopRegistrationCreate = {
     workshop: number;
-    attendee: number;
+    attendee: string;
     /**
      * Allocation status for this registration.
      *
@@ -21547,7 +21547,7 @@ export type WorkshopRegistrationCreate = {
  */
 export type WorkshopRegistrationCreateRequest = {
     workshop: number;
-    attendee: number;
+    attendee: string;
     /**
      * Allocation status for this registration.
      *
@@ -21573,7 +21573,7 @@ export type WorkshopRegistrationDetail = {
      */
     readonly booking_reference: string | null;
     workshop: number;
-    attendee: number;
+    attendee: string;
     readonly attendee_name: string;
     /**
      * Allocation status for this registration.
@@ -21630,7 +21630,7 @@ export type WorkshopRegistrationList = {
      */
     readonly booking_reference: string | null;
     workshop: number;
-    attendee: number;
+    attendee: string;
     readonly attendee_name: string;
     /**
      * Allocation status for this registration.
@@ -21666,7 +21666,7 @@ export type WorkshopRegistrationList = {
  */
 export type WorkshopRegistrationListRequest = {
     workshop: number;
-    attendee: number;
+    attendee: string;
     /**
      * Allocation status for this registration.
      *
@@ -29123,7 +29123,7 @@ export type VenueMetadataWritable = {
  */
 export type WorkshopDetailWritable = {
     title: string;
-    event: number;
+    event: string;
     date: string;
     /**
      * Current lifecycle status of the workshop.
@@ -29193,8 +29193,8 @@ export type WorkshopInterestRankWritable = {
  * Read serializer for an interest submission including nested ranks.
  */
 export type WorkshopInterestSubmissionWritable = {
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     /**
      * When True the submission is locked and ready for allocation.
      */
@@ -29208,8 +29208,8 @@ export type WorkshopInterestSubmissionWritable = {
  * - ranks are unique within the submission
  */
 export type WorkshopInterestSubmissionCreateWritable = {
-    event: number;
-    attendee: number;
+    event: string;
+    attendee: string | null;
     ranks: Array<WorkshopInterestRankWritable>;
 };
 
@@ -29218,7 +29218,7 @@ export type WorkshopInterestSubmissionCreateWritable = {
  */
 export type WorkshopListWritable = {
     title: string;
-    event: number;
+    event: string;
     date: string;
     /**
      * Current lifecycle status of the workshop.
@@ -29261,7 +29261,7 @@ export type WorkshopListWritable = {
  */
 export type WorkshopRegistrationDetailWritable = {
     workshop: number;
-    attendee: number;
+    attendee: string;
     /**
      * Allocation status for this registration.
      *
@@ -29302,7 +29302,7 @@ export type WorkshopRegistrationDetailWritable = {
  */
 export type WorkshopRegistrationListWritable = {
     workshop: number;
-    attendee: number;
+    attendee: string;
     /**
      * Allocation status for this registration.
      *
@@ -55224,8 +55224,9 @@ export type WorkshopsInterestSubmissionsListData = {
     body?: never;
     path?: never;
     query?: {
-        attendee?: number;
-        event?: number;
+        attendee?: string;
+        event?: string;
+        event_id?: string;
         is_finalised?: boolean;
         /**
          * Which field to use when ordering the results.
@@ -55388,7 +55389,8 @@ export type WorkshopsListListData = {
         allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
         date_after?: string;
         date_before?: string;
-        event?: number;
+        event?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -55568,7 +55570,8 @@ export type WorkshopsListRegistrationsListData = {
         allocation_mode?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
         date_after?: string;
         date_before?: string;
-        event?: number;
+        event?: string;
+        event_id?: string;
         /**
          * Which field to use when ordering the results.
          */
@@ -55622,7 +55625,7 @@ export type WorkshopsListRunAllocationCreateData = {
 
 export type WorkshopsListRunAllocationCreateResponses = {
     /**
-     * Allocation result summary
+     * Allocation result message or updated workshop details.
      */
     200: unknown;
 };
@@ -55640,7 +55643,7 @@ export type WorkshopsRegistrationsListData = {
          * * `MANUAL` - Manual
          */
         allocation_method?: 'FCFS' | 'INTEREST_RANKING' | 'MANUAL' | 'RANDOM';
-        attendee?: number;
+        attendee?: string;
         /**
          * Which field to use when ordering the results.
          */

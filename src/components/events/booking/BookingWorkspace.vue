@@ -270,6 +270,10 @@
               <FormsTab :event-id="eventId" :selected-attendee-id="selectedAttendeeId" />
             </article>
 
+            <article v-if="selectedAttendeeId && activeTab === 'workshops'" class="bg-white border border-deep-navy/10 rounded-2xl p-5">
+              <WorkshopsTab :event-id="eventId" :attendee-id="selectedAttendeeId" :event-uuid="eventUUID" />
+            </article>
+
             <article v-if="selectedAttendeeId && activeTab === 'attendee' && !selectedAttendeeIsCancelled" class="bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-4">
               <AttendeeInfoTab
                 :selected-attendee-id="selectedAttendeeId"
@@ -1399,6 +1403,7 @@ import OrdersTab from '~/components/events/booking/tabs/OrdersTab.vue'
 import PaymentsTab from '~/components/events/booking/tabs/PaymentsTab.vue'
 import ResourcesTab from '~/components/events/booking/tabs/ResourcesTab.vue'
 import FormsTab from '~/components/events/booking/tabs/FormsTab.vue'
+import WorkshopsTab from '~/components/events/booking/tabs/WorkshopsTab.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { uploadMultipart } from '~/utils/upload'
 import { locationsAreasList } from '~/api/sdk.gen'
@@ -1441,7 +1446,7 @@ import { useBookingOrderDisplay } from '~/composables/booking/useBookingOrderDis
 import { useBookingJourneySteps, type JourneyStepAction } from '~/composables/booking/useBookingJourneySteps'
 import { formatDate, formatDateTime } from '~/utils/time'
 
-type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments' | 'resources' | 'forms'
+type TabId = 'overview' | 'attendee' | 'tickets' | 'orders' | 'payments' | 'resources' | 'forms' | 'workshops'
 type AreaOption = { label: string; value: number }
 type EmergencyContactRelationship = 'parent' | 'sibling' | 'child' | 'spouse' | 'friend' | 'other'
 type BookingAttendee = { id?: string; name?: string; is_cancelled?: boolean }
@@ -1465,6 +1470,7 @@ const myBooking = useEventMyBooking(eventId, computed(() => ({
   booking_reference: bookingReference.value,
 })))
 const event = useEvent(eventId)
+const eventUUID = computed(() => event.data.value?.data?.event_id || '')
 
 const isNotFound = computed(() => {
   const error = myBooking.error.value as unknown as ApiErrorLike | undefined
@@ -1790,6 +1796,7 @@ const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhen
   { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true },
   { id: 'resources', label: 'Resources', needsAttendee: false },
   { id: 'forms', label: 'Forms', needsAttendee: true },
+  { id: 'workshops', label: 'Workshops', needsAttendee: true },
 ]
 
 const selectedAttendee = computed(() => {
@@ -1899,6 +1906,13 @@ const tabComponentMap = computed(() => ({
     props: {
       eventId: eventId.value,
       selectedAttendeeId: selectedAttendeeId.value,
+    },
+  },
+  workshops: {
+    component: WorkshopsTab,
+    props: {
+      eventId: eventId.value,
+      attendeeId: selectedAttendeeId.value,
     },
   },
 }))
