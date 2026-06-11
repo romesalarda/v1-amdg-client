@@ -15,7 +15,7 @@
       Unable to load payment summary right now.
     </div>
     <template v-else>
-      <section class="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-mist-blue/40 p-4 shadow-sm" v-if="props.paymentSummaryData?.totals?.outstanding_payments">
+      <!-- <section class="rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50 via-white to-mist-blue/40 p-4 shadow-sm" v-if="props.paymentSummaryData?.totals?.outstanding_payments">
         <p class="text-label-bold font-label-bold uppercase tracking-[0.22em] text-blue-700">Outstanding now</p>
         <div class="mt-3 flex items-end justify-between gap-4">
           <div>
@@ -24,10 +24,10 @@
           </div>
           <span class="rounded-lg bg-white/80 px-3 py-1 text-label-bold font-label-bold uppercase tracking-wide text-blue-700">Needs attention</span>
         </div>
-      </section>
+      </section> -->
 
       <section class="space-y-4">
-        <p class="text-label-bold font-label-bold uppercase tracking-[0.22em] text-deep-navy">Attendee payments</p>
+        <!-- <p class="text-label-bold font-label-bold uppercase tracking-[0.22em] text-deep-navy">Attendee payments</p> -->
         <div v-if="props.attendeeLevelPayments.length" class="space-y-4">
           <article v-for="payment in props.attendeeLevelPayments" :key="payment.payment_id || payment.payment_reference" class="rounded-xl border border-deep-navy/10 bg-white p-4 shadow-sm">
             <div class="flex items-start justify-between gap-3">
@@ -87,44 +87,66 @@
               </button>
             </div>
 
-            <div v-if="props.isOutstandingBankTransfer(payment) && props.hasSummaryBankMetadata(payment)" class="mt-4 space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <div class="flex items-center justify-between gap-2">
-                <p class="text-label-bold font-label-bold uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
-                <button
-                  v-if="props.getRequiredTransferReference(payment)"
-                  type="button"
-                  class="rounded-lg border border-blue-300 px-2 py-1 text-label-bold font-label-bold uppercase tracking-wide text-blue-700 transition-colors hover:bg-white"
-                  @click="props.onCopyTransferReference(props.getRequiredTransferReference(payment) || '')"
-                >
-                  Copy ref
-                </button>
-              </div>
-              <div class="grid gap-2 md:grid-cols-2">
-                <div class="rounded-xl border border-white bg-white/90 p-3">
-                  <p class="text-label-bold font-label-bold uppercase tracking-wide text-blue-700/70">Account name</p>
-                  <p class="mt-1 break-words text-body-sm font-label-bold text-blue-900">{{ props.getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
-                </div>
-                <div class="rounded-xl border border-white bg-white/90 p-3">
-                  <p class="text-label-bold font-label-bold uppercase tracking-wide text-blue-700/70">Sort code</p>
-                  <p class="mt-1 text-headline-sm font-headline text-blue-900">{{ props.getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
-                </div>
-                <div class="rounded-xl border border-white bg-white/90 p-3">
-                  <p class="text-label-bold font-label-bold uppercase tracking-wide text-blue-700/70">Account number</p>
-                  <p class="mt-1 text-headline-sm font-headline text-blue-900">{{ props.getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
-                </div>
-                <div v-if="props.getRequiredTransferReference(payment)" class="rounded-xl border border-blue-300 bg-white p-3 md:col-span-2">
-                  <p class="text-label-bold font-label-bold uppercase tracking-[0.2em] text-blue-800">Transfer reference</p>
-                  <p class="mt-1 break-all text-body-sm font-label-bold text-blue-900">{{ props.getRequiredTransferReference(payment) }}</p>
-                </div>
-              </div>
-            </div>
+            <div v-if="props.isOutstandingBankTransfer(payment) && props.hasSummaryBankMetadata(payment)" class="mt-4 space-y-3 rounded-xl  p-4">
+                  <p class="text-[11px] text-deep-navy/50">Bank transfer instructions</p>
 
-            <div v-if="props.getRelatedOrderLabels(payment).length" class="mt-4 rounded-xl border border-deep-navy/10 bg-mist-blue/25 p-3">
+                  <!-- Step 1: Amount -->
+                  <div class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">1</span>
+                    <div>
+                      <p class="text-[11px] text-deep-navy/50 mb-0.5">Pay exact amount</p>
+                      <p class="text-[18px] font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Account details -->
+                  <div class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">2</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[11px] text-deep-navy/50 mb-2">Account details</p>
+                      <div class="grid grid-cols-3 gap-2">
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Account name</p>
+                          <p class="text-[12px] font-medium text-deep-navy break-words">{{ props.getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Sort code</p>
+                          <p class="text-[13px] font-semibold text-deep-navy">{{ props.getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        </div>
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Account no.</p>
+                          <p class="text-[13px] font-semibold text-deep-navy">{{ props.getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Transfer reference -->
+                  <div v-if="props.getRequiredTransferReference(payment)" class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">3</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[11px] text-deep-navy/50 mb-2">Transfer reference (required)</p>
+                      <div class="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
+                        <span class="font-mono text-[12px] font-medium text-blue-800 break-all">{{ props.getRequiredTransferReference(payment) }}</span>
+                        <button
+                          type="button"
+                          class="shrink-0 flex items-center gap-1 rounded-md border border-blue-200 px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-100"
+                          @click="props.onCopyTransferReference(props.getRequiredTransferReference(payment) || '')"
+                        >
+                          <UIcon name="i-heroicons-document-duplicate" class="w-3 h-3" />
+                          Copy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+            <!-- <div v-if="props.getRelatedOrderLabels(payment).length" class="mt-4 rounded-xl border border-deep-navy/10 bg-mist-blue/25 p-3">
               <p class="text-label-bold font-label-bold uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
               <div class="mt-2 flex flex-wrap gap-2">
                 <span v-for="label in props.getRelatedOrderLabels(payment)" :key="label" class="rounded-lg border border-deep-navy/10 bg-white px-2.5 py-1 text-body-sm font-body-sm text-deep-navy">{{ label }}</span>
               </div>
-            </div>
+            </div> -->
           </article>
         </div>
         <p v-else class="rounded-xl border border-deep-navy/10 bg-mist-blue/30 p-4 text-body-sm font-body-sm text-deep-navy/65">No attendee-level payments yet.</p>
@@ -192,6 +214,8 @@
             </div>
 
             <div v-if="props.isOutstandingBankTransfer(payment) && props.hasSummaryBankMetadata(payment)" class="mt-4 space-y-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+              
+
               <div class="flex items-center justify-between gap-2">
                 <p class="text-label-bold font-label-bold uppercase tracking-[0.2em] text-blue-700">Bank transfer details</p>
                 <button
@@ -252,6 +276,7 @@ function paymentStatusClass(payment: any): string {
   if (status === 'PARTIALLY_REFUNDED') return 'bg-amber-100 text-amber-800'
   if (status === 'REFUNDED' || status === 'PENDING_REFUND') return 'bg-rose-100 text-rose-700'
   if (status === 'COMPLETED' || status === 'PAID') return 'bg-green-100 text-green-700'
+  if (status === 'PENDING') return 'bg-yellow-100 text-yellow-800'
   if (status === 'FAILED' || status === 'CANCELLED') return 'bg-slate-200 text-slate-700'
   return 'bg-primary/10 text-primary'
 }

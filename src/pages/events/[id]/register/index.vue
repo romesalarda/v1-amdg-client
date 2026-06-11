@@ -1827,11 +1827,6 @@ const handleCheckout = async () => {
 				const bookingId = Number(checkoutResult.value?.booking_id || 0)
 				if (paymentId) {
 					startPaymentStatusPolling(paymentId, bookingId > 0 ? bookingId : undefined)
-					toast.add({
-						title: 'Payment confirmed',
-						description: 'Stripe confirmed your payment. Finalizing your registration now.',
-						color: 'amber',
-					})
 					return
 				}
 

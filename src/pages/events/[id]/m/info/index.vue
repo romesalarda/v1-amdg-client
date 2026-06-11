@@ -462,7 +462,7 @@
         <section v-if="authorizationHistory.length > 0" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary text-xl">history</span>
-            <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Authorization History</h2>
+            <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Authorisation History</h2>
           </div>
           <div class="p-6">
             <div class="space-y-4">
@@ -935,7 +935,7 @@ const handleStatusAction = (newStatus: string) => {
       requireTyping: false,
       buttonColor: 'warning',
       isDestructive: false,
-      icon: 'door_close',
+      icon: 'block',
     },
     ARCHIVED: {
       title: 'Archive Event',

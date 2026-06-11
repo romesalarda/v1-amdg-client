@@ -18,108 +18,242 @@
           <div
             v-for="payment in props.outstandingPayments"
             :key="payment.payment_id || payment.payment_reference"
-            :class="props.paymentAttentionCardClass(payment)"
+            :class="[
+              'rounded-r-xl border-l-2 border border-l-[2.5px] bg-white p-4 mb-3',
+              props.needsEvidenceUpload(payment)
+                ? 'border-l-red-500 border-gray-200'
+                : props.hasUploadedEvidence(String(payment.payment_id || ''))
+                  ? 'border-l-blue-400 border-gray-200'
+                  : 'border-l-transparent border-gray-200'
+            ]"
           >
-            <div class="flex items-center justify-between gap-3">
-              <div>
-                <p class="text-xs font-black text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
-                <p class="text-sm font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
-                <p class="text-xs" :class="props.needsEvidenceUpload(payment) ? 'text-red-700' : 'text-blue-700'">
-                  {{ props.paymentAttentionLabel(payment) }}
-                </p>
-                <p class="text-[11px] text-deep-navy/75 mt-1">{{ payment.method_title || payment.method_type || 'Method unavailable' }}</p>
+            <!-- Header row -->
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <span class="text-[12px] text-deep-navy/60">{{ payment.payment_reference || 'Payment' }}</span>
+
+                  <!-- Needs evidence badge -->
+                  <span v-if="props.needsEvidenceUpload(payment)" class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
+                    <i-heroicons-exclamation-circle class="w-3 h-3" />
+                    Evidence needed
+                  </span>
+
+                  <!-- Waiting badge -->
+                  <span v-else-if="props.hasUploadedEvidence(String(payment.payment_id || ''))" class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-[11px] font-medium text-blue-700">
+                    <UIcon name="i-heroicons-clock" class="w-3 h-3" />
+                    Awaiting verification
+                  </span>
+
+                  <!-- Generic pending badge -->
+                  <span v-else class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-700">
+                    <UIcon name="i-heroicons-arrow-path" class="w-3 h-3" />
+                    Awaiting payment
+                  </span>
+                </div>
+
+                <p class="text-[17px] font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
+
+                <div class="mt-0.5 flex items-center gap-1 text-[12px] text-deep-navy/60">
+                  <UIcon name="i-heroicons-building-library" v-if="props.isOutstandingBankTransfer(payment)" class="w-3.5 h-3.5" />
+                  <UIcon name="i-heroicons-credit-card" v-else class="w-3.5 h-3.5" />
+                  {{ payment.method_title || payment.method_type || 'Method unavailable' }}
+                </div>
               </div>
+
               <button
                 type="button"
-                class="rounded-lg border border-blue-300 px-3 py-1.5 text-[11px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100"
+                class="shrink-0 flex items-center gap-1 rounded-lg border border-gray-200 px-3 py-1.5 text-[12px] text-deep-navy/60 hover:bg-gray-50"
                 @click="props.onTogglePaymentExpand(payment)"
               >
-                {{ props.isPaymentExpanded(payment.payment_id || '') ? 'Hide details' : 'View method' }}
+                <UIcon name="i-heroicons-chevron-up" v-if="props.isPaymentExpanded(payment.payment_id || '')" class="w-3.5 h-3.5" />
+                <UIcon name="i-heroicons-chevron-down" v-else class="w-3.5 h-3.5" />
+                {{ props.isPaymentExpanded(payment.payment_id || '') ? 'Hide' : 'Details' }}
               </button>
             </div>
 
-            <p v-if="props.isOutstandingBankTransfer(payment) && props.hasUploadedEvidence(String(payment.payment_id || ''))" class="mt-2 rounded-md border border-blue-200 bg-white px-2 py-2 text-[11px] text-blue-800">
-              Evidence uploaded. Waiting for verification.
-            </p>
+            <!-- Waiting notice — always visible, no action required -->
+            <div
+              v-if="props.isOutstandingBankTransfer(payment) && props.hasUploadedEvidence(String(payment.payment_id || ''))"
+              class="mt-3 flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-[12px] text-blue-700"
+            >
+              <UIcon name="i-heroicons-check-circle" class="w-4 h-4 shrink-0" />
+              Evidence uploaded — no action needed. Waiting for verification.
+            </div>
 
-            <div v-if="props.isOutstandingBankTransfer(payment) && props.needsEvidenceUpload(payment)" class="mt-2 rounded-md border border-red-200 bg-white p-3 text-[12px] text-red-900 space-y-2">
-              <p class="font-black uppercase tracking-wide text-[10px] text-red-700">Upload payment evidence</p>
-              <div>
-                <label class="mb-1 block text-[11px] font-semibold">Evidence file <span class="text-red-600">*</span></label>
-                <input type="file" accept=".pdf,.jpg,.jpeg,.png" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" @change="props.onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)">
+            <!-- Evidence upload form — only when action is required -->
+            <div
+              v-if="props.isOutstandingBankTransfer(payment) && props.needsEvidenceUpload(payment)"
+              class="mt-3 rounded-lg border border-red-100 bg-gray-50 p-3 space-y-2"
+            >
+              <div class="flex items-center gap-1.5 mb-1">
+                <UIcon name="i-heroicons-arrow-up-tray" class="w-4 h-4 text-red-600" />
+                <span class="text-[12px] font-medium text-red-700">Upload payment evidence</span>
               </div>
-              <div class="space-y-2">
+
+              <div>
+                <label class="mb-1 block text-[11px] text-deep-navy/60">Evidence file <span class="text-red-500">*</span></label>
+                <input
+                  type="file"
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px]"
+                  @change="props.onEvidenceUploadFileChange(String(payment.payment_id || ''), $event)"
+                >
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
                 <div>
-                  <label class="mb-1 block text-[11px] font-semibold">Payer name <span class="text-red-600">*</span></label>
-                  <input v-model="props.evidenceUploadForm[String(payment.payment_id || '')].payer_name" type="text" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="Full name">
+                  <label class="mb-1 block text-[11px] text-deep-navy/60">Payer name <span class="text-red-500">*</span></label>
+                  <input
+                    v-model="props.evidenceUploadForm[String(payment.payment_id || '')].payer_name"
+                    type="text"
+                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px]"
+                    placeholder="Full name"
+                  >
                 </div>
                 <div>
-                  <label class="mb-1 block text-[11px] font-semibold">Payer account last 4 <span class="text-red-600">*</span></label>
-                  <input v-model="props.evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4" type="text" maxlength="4" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="1234">
+                  <label class="mb-1 block text-[11px] text-deep-navy/60">Account last 4 <span class="text-red-500">*</span></label>
+                  <input
+                    v-model="props.evidenceUploadForm[String(payment.payment_id || '')].payer_account_last4"
+                    type="text"
+                    maxlength="4"
+                    class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px]"
+                    placeholder="1234"
+                  >
                 </div>
               </div>
+
               <div>
-                <label class="mb-1 block text-[11px] font-semibold">Amount on evidence <span class="text-red-600">*</span></label>
-                <input v-model="props.evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence" type="number" min="0" step="0.01" class="w-full rounded-lg border border-red-200 px-3 py-2 text-sm" placeholder="0.00">
+                <label class="mb-1 block text-[11px] text-deep-navy/60">Amount on evidence <span class="text-red-500">*</span></label>
+                <input
+                  v-model="props.evidenceUploadForm[String(payment.payment_id || '')].amount_on_evidence"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-[13px]"
+                  placeholder="0.00"
+                >
               </div>
-              <p v-if="props.evidenceUploadError[String(payment.payment_id || '')]" class="text-xs font-semibold text-red-700">{{ props.evidenceUploadError[String(payment.payment_id || '')] }}</p>
-              <p v-if="props.evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-xs font-semibold text-blue-700">{{ props.evidenceUploadSuccess[String(payment.payment_id || '')] }}</p>
-              <div class="flex justify-end">
-                <button type="button" class="rounded-lg bg-red-600 px-3 py-2 text-[11px] font-black uppercase tracking-wide text-white hover:bg-red-700 disabled:opacity-60" :disabled="!!props.evidenceUploadPending[String(payment.payment_id || '')]" @click="props.onUploadOutstandingEvidence(payment)">
+
+              <p v-if="props.evidenceUploadError[String(payment.payment_id || '')]" class="text-[12px] text-red-600">
+                {{ props.evidenceUploadError[String(payment.payment_id || '')] }}
+              </p>
+              <p v-if="props.evidenceUploadSuccess[String(payment.payment_id || '')]" class="text-[12px] text-blue-600">
+                {{ props.evidenceUploadSuccess[String(payment.payment_id || '')] }}
+              </p>
+
+              <div class="flex justify-end pt-1">
+                <button
+                  type="button"
+                  class="flex items-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-[12px] font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                  :disabled="!!props.evidenceUploadPending[String(payment.payment_id || '')]"
+                  @click="props.onUploadOutstandingEvidence(payment)"
+                >
+                  <UIcon name="i-heroicons-arrow-up-tray" class="w-3.5 h-3.5" />
                   {{ props.evidenceUploadPending[String(payment.payment_id || '')] ? 'Uploading...' : 'Upload evidence' }}
                 </button>
               </div>
             </div>
 
-            <div v-if="props.isPaymentExpanded(payment.payment_id || '')" class="mt-3 rounded-lg border border-deep-navy/10 bg-mist-blue/40 p-3 text-xs text-deep-navy/80 space-y-2">
-              <p v-if="props.paymentDetailLoading[payment.payment_id || '']">Loading payment method...</p>
+            <!-- Expanded details -->
+            <div v-if="props.isPaymentExpanded(payment.payment_id || '')" class="mt-3 space-y-3">
+              <div class="h-px bg-gray-100" />
+
+              <p v-if="props.paymentDetailLoading[payment.payment_id || '']" class="text-[12px] text-deep-navy/50">
+                Loading payment method...
+              </p>
+
               <template v-else>
-                <p><span class="font-black text-deep-navy">Method:</span> {{ props.getPaymentMethodType(payment.payment_id || '') }}</p>
-                <div v-if="props.isOutstandingBankTransfer(payment)" class="rounded-md border border-blue-200 bg-white p-3 space-y-2">
-                  <p class="font-black uppercase tracking-wide text-[10px] text-blue-700">Bank transfer instructions</p>
-                  <ol class="space-y-2 text-[12px] text-deep-navy/90">
-                    <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
-                      <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">1. Pay this exact amount</p>
-                      <p class="mt-1 text-xl font-black text-deep-navy">{{ payment.amount || '-' }}</p>
-                    </li>
-                    <li class="rounded-md border border-deep-navy/10 bg-mist-blue/20 p-2">
-                      <p class="text-[10px] font-black uppercase tracking-wide text-deep-navy/60">2. Use these account details</p>
-                      <div class="mt-1 space-y-2">
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account name</p>
-                          <p class="mt-1 text-sm font-black text-deep-navy break-words">{{ props.getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
+                <!-- Bank transfer instructions -->
+                <div v-if="props.isOutstandingBankTransfer(payment)" class="space-y-3">
+                  <p class="text-[11px] text-deep-navy/50">Bank transfer instructions</p>
+
+                  <!-- Step 1: Amount -->
+                  <div class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">1</span>
+                    <div>
+                      <p class="text-[11px] text-deep-navy/50 mb-0.5">Pay exact amount</p>
+                      <p class="text-[18px] font-semibold text-deep-navy">{{ payment.amount || '-' }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Step 2: Account details -->
+                  <div class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">2</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[11px] text-deep-navy/50 mb-2">Account details</p>
+                      <div class="grid grid-cols-3 gap-2">
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Account name</p>
+                          <p class="text-[12px] font-medium text-deep-navy break-words">{{ props.getProvidedDetail(payment, 'account_name') || 'Unavailable' }}</p>
                         </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Sort code</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ props.getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Sort code</p>
+                          <p class="text-[13px] font-semibold text-deep-navy">{{ props.getProvidedDetail(payment, 'sort_code') || 'Unavailable' }}</p>
                         </div>
-                        <div class="rounded-md border border-deep-navy/10 bg-white p-2">
-                          <p class="text-[10px] uppercase tracking-wide text-deep-navy/55 font-black">Account number</p>
-                          <p class="mt-1 text-lg font-black text-deep-navy">{{ props.getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
+                        <div class="rounded-lg bg-gray-50 border border-gray-100 px-2.5 py-2">
+                          <p class="text-[10px] text-deep-navy/50 mb-0.5">Account no.</p>
+                          <p class="text-[13px] font-semibold text-deep-navy">{{ props.getProvidedDetail(payment, 'account_number') || 'Unavailable' }}</p>
                         </div>
                       </div>
-                    </li>
-                    <li v-if="props.getRequiredTransferReference(payment)" class="rounded-md border border-blue-300 bg-blue-50 p-2">
-                      <p class="text-[10px] font-black uppercase tracking-wide text-blue-800">3. Add this exact transfer reference</p>
-                      <div class="mt-1 flex items-center justify-between gap-2">
-                        <p class="text-sm font-black text-blue-900 break-all">{{ props.getRequiredTransferReference(payment) }}</p>
-                        <button type="button" class="shrink-0 rounded-md border border-blue-300 px-2 py-1 text-[10px] font-black uppercase tracking-wide text-blue-700 hover:bg-blue-100" @click="props.onCopyTransferReference(props.getRequiredTransferReference(payment) || '')">
+                    </div>
+                  </div>
+
+                  <!-- Step 3: Transfer reference -->
+                  <div v-if="props.getRequiredTransferReference(payment)" class="flex items-start gap-2">
+                    <span class="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[11px] text-deep-navy/50">3</span>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-[11px] text-deep-navy/50 mb-2">Transfer reference (required)</p>
+                      <div class="flex items-center justify-between gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
+                        <span class="font-mono text-[12px] font-medium text-blue-800 break-all">{{ props.getRequiredTransferReference(payment) }}</span>
+                        <button
+                          type="button"
+                          class="shrink-0 flex items-center gap-1 rounded-md border border-blue-200 px-2 py-1 text-[11px] text-blue-700 hover:bg-blue-100"
+                          @click="props.onCopyTransferReference(props.getRequiredTransferReference(payment) || '')"
+                        >
+                          <UIcon name="i-heroicons-document-duplicate" class="w-3 h-3" />
                           Copy
                         </button>
                       </div>
-                    </li>
-                  </ol>
+                    </div>
+                  </div>
                 </div>
-                <p v-if="!props.isOutstandingBankTransfer(payment)" class="text-[11px] text-deep-navy/70">This payment is {{ payment.method_title || payment.method_type || 'not bank transfer' }}.</p>
-                <p v-if="props.getBankTransferReference(payment.payment_id || '')"><span class="font-black text-deep-navy">Bank transfer reference:</span> {{ props.getBankTransferReference(payment.payment_id || '') }}</p>
-                <p v-if="props.getBankTransferInstructions(payment.payment_id || '')" class="whitespace-pre-line"><span class="font-black text-deep-navy">Instructions:</span> {{ props.getBankTransferInstructions(payment.payment_id || '') }}</p>
+
+                <!-- Non-bank transfer method note -->
+                <p v-if="!props.isOutstandingBankTransfer(payment)" class="text-[12px] text-deep-navy/50">
+                  This payment is via {{ payment.method_title || payment.method_type || 'an unknown method' }}. No bank transfer instructions apply.
+                </p>
+
+                <template v-if="props.getBankTransferReference(payment.payment_id || '')">
+                  <div class="h-px bg-gray-100" />
+                  <p class="text-[12px] text-deep-navy/60">
+                    <span class="font-medium text-deep-navy">Bank transfer reference:</span>
+                    {{ props.getBankTransferReference(payment.payment_id || '') }}
+                  </p>
+                </template>
+
+                <template v-if="props.getBankTransferInstructions(payment.payment_id || '')">
+                  <div class="h-px bg-gray-100" />
+                  <p class="whitespace-pre-line text-[12px] text-deep-navy/60">
+                    <span class="font-medium text-deep-navy">Instructions:</span>
+                    {{ props.getBankTransferInstructions(payment.payment_id || '') }}
+                  </p>
+                </template>
               </template>
             </div>
 
-            <div v-if="props.getRelatedOrderLabels(payment).length" class="mt-4 rounded-2xl border border-deep-navy/10 bg-mist-blue/25 p-3">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/60">Related orders</p>
-              <div class="mt-2 flex flex-wrap gap-2">
-                <span v-for="label in props.getRelatedOrderLabels(payment)" :key="label" class="rounded-full border border-deep-navy/10 bg-white px-2.5 py-1 text-[11px] font-semibold text-deep-navy">{{ label }}</span>
+            <!-- Related orders -->
+            <div v-if="props.getRelatedOrderLabels(payment).length" class="mt-3">
+              <div class="h-px bg-gray-100 mb-3" />
+              <p class="text-[10px] text-deep-navy/50 mb-2">Related orders</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  v-for="label in props.getRelatedOrderLabels(payment)"
+                  :key="label"
+                  class="rounded-full border border-gray-200 bg-gray-50 px-2.5 py-0.5 text-[11px] text-deep-navy/70"
+                >
+                  {{ label }}
+                </span>
               </div>
             </div>
           </div>
@@ -137,14 +271,14 @@
               </span>
               <span class="text-xs text-deep-navy/70">{{ order.item_count }} item(s)</span>
               <span class="text-sm font-bold text-deep-navy">{{ order.total_amount }}</span>
-              <button
+              <!-- <button
                 v-if="props.canCancelOrder(order.status)"
                 type="button"
                 class="rounded-lg border border-red-300 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-red-700 hover:bg-red-50"
                 @click="props.onCancelOrder(order.order_id)"
               >
                 Cancel
-              </button>
+              </button> -->
             </div>
           </div>
 
