@@ -29,7 +29,7 @@ type PersonalInfoDraft = {
   medicalConditions: MedicalConditionItemDraft[]
   accessibilityRequirements: PersonalInfoItemDraft[]
   emergencyContact: EmergencyContactDraft | null
-  organisationId?: number | null
+  organisationId?: number | null | number[]
   alternativeSigninIdentifier?: AlternativeSigninDraft | null
   notes?: string
 }

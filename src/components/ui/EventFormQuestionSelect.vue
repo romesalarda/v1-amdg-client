@@ -1,32 +1,28 @@
-<!-- Replace AccessibilityRequirementSelect.vue with this file (adds multiple prop + clear) -->
 <template>
   <div ref="containerRef">
     <div
       class="w-full px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
-      :class="{ 'border-red-500 focus-within:border-red-500': hasError }"
-      @click="openDropdown"
+      :class="{ 'opacity-50 cursor-not-allowed': !formId }"
+      @click="formId ? openDropdown() : undefined"
     >
-      <span class="material-symbols-outlined text-primary text-base shrink-0">accessible</span>
+      <span class="material-symbols-outlined text-primary text-base shrink-0">quiz</span>
       <input
         ref="inputRef"
         v-model="searchQuery"
         type="text"
         class="flex-1 bg-transparent text-sm font-medium text-navy-900 outline-none placeholder:text-navy-400 min-w-0"
-        :placeholder="triggerPlaceholder"
-        @focus="openDropdown"
+        :placeholder="selectedLabel || placeholder"
+        :disabled="!formId"
+        @focus="formId ? openDropdown() : undefined"
         @keydown.escape="closeDropdown"
         @keydown.arrow-down.prevent="highlightNext"
         @keydown.arrow-up.prevent="highlightPrev"
         @keydown.enter.prevent="selectHighlighted"
       />
       <span
-        v-if="!multiple && singleLabel && !searchQuery"
+        v-if="selectedLabel && !searchQuery"
         class="text-xs font-bold text-primary truncate max-w-[180px]"
-      >{{ singleLabel }}</span>
-      <span
-        v-if="multiple && multiValues.length > 0 && !searchQuery"
-        class="text-xs font-bold text-primary shrink-0"
-      >{{ multiValues.length }} selected</span>
+      >{{ selectedLabel }}</span>
       <button
         v-if="hasAnyValue"
         class="material-symbols-outlined text-navy-400 text-base shrink-0 hover:text-red-500 transition-colors"
@@ -57,16 +53,16 @@
         >
           <div v-if="isLoading" class="flex items-center justify-center gap-2 py-4 text-sm text-navy-400">
             <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
-            Loading…
+            Loading questions…
           </div>
 
-          <div v-else-if="!options.length" class="py-4 text-center text-sm text-navy-400">
-            No accessibility requirements found
+          <div v-else-if="!filteredOptions.length" class="py-4 text-center text-sm text-navy-400">
+            No questions found
           </div>
 
-          <ul v-else class="max-h-56 overflow-y-auto py-1">
+          <ul v-else class="max-h-64 overflow-y-auto py-1">
             <li
-              v-for="(option, index) in options"
+              v-for="(option, index) in filteredOptions"
               :key="option.id"
               :ref="(el) => setItemRef(el, index)"
               class="flex items-center gap-3 px-4 py-2.5 cursor-pointer text-sm font-medium transition-colors"
@@ -74,14 +70,20 @@
                 isSelected(option.id) ? 'bg-primary/10 text-primary' : 'text-navy-800 hover:bg-mist-blue',
                 index === highlightedIndex ? 'bg-mist-blue' : '',
               ]"
-              @click="selectItem(option.id, option.label)"
+              @click="selectItem(option.id, option.title)"
               @mouseenter="highlightedIndex = index"
             >
               <span
                 class="material-symbols-outlined text-base shrink-0"
                 :class="isSelected(option.id) ? 'text-primary' : 'text-navy-300'"
               >{{ multiple ? (isSelected(option.id) ? 'check_box' : 'check_box_outline_blank') : (isSelected(option.id) ? 'check_circle' : 'radio_button_unchecked') }}</span>
-              <span class="truncate">{{ option.label }}</span>
+              <div class="flex flex-col min-w-0">
+                <span class="truncate">{{ option.title }}</span>
+                <span
+                  class="text-xs truncate"
+                  :class="isSelected(option.id) ? 'text-primary/70' : 'text-navy-400'"
+                >{{ option.typeDisplay }}</span>
+              </div>
             </li>
           </ul>
         </div>
@@ -92,35 +94,68 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, type CSSProperties } from 'vue'
-import { useAccessibilityRequirementSearch } from '~/composables/resources/attendee/useAccessibilityRequirementSearch'
+import { useEventFormQuestions } from '~/composables/resources/events/eventForms'
 
 const props = withDefaults(defineProps<{
   modelValue?: number | null | number[]
+  formId?: string | null
   multiple?: boolean
   placeholder?: string
-  hasError?: boolean
 }>(), {
   modelValue: null,
+  formId: null,
   multiple: false,
-  placeholder: 'Search accessibility requirement…',
-  hasError: false,
+  placeholder: 'Select a question…',
 })
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: number | null | number[]): void
+  /** Emitted with the full option object so callers can react to question type */
+  (e: 'select', option: { id: number; title: string; type: string; typeDisplay: string; minValue: number | null; maxValue: number | null; options: { id: number; option_text: string }[] } | null): void
 }>()
 
 const isOpen = ref(false)
 const searchQuery = ref('')
 const highlightedIndex = ref(-1)
 const singleLabel = ref('')
+const selectedLabel = computed(() => singleLabel.value)
 const containerRef = ref<HTMLElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 const itemRefs = ref<Array<HTMLElement | null>>([])
 const dropdownStyle = ref<CSSProperties>({})
 
-const { options, isLoading } = useAccessibilityRequirementSearch(searchQuery)
+const query = useEventFormQuestions(
+  computed(() => ({
+    form: props.formId || undefined,
+    page_size: 200,
+    ordering: 'order',
+  })),
+  { enabled: computed(() => !!props.formId) },
+)
+
+const isLoading = query.isLoading
+
+const allOptions = computed(() => {
+  const rows = query.data.value?.data?.results || []
+  return rows.map((r: any) => ({
+    id: Number(r.id),
+    title: String(r.question_title || '').trim(),
+    type: String(r.question_type || ''),
+    typeDisplay: String(r.question_type_display || r.question_type || '').trim(),
+    minValue: r.min_value ?? null,
+    maxValue: r.max_value ?? null,
+    options: (r.options || []) as { id: number; option_text: string }[],
+  })).filter((r) => Number.isFinite(r.id) && r.title.length > 0)
+})
+
+const filteredOptions = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return allOptions.value
+  return allOptions.value.filter((o) => o.title.toLowerCase().includes(q))
+})
+
+// ── Multi-select helpers ────────────────────────────────────────────────────
 
 const multiValues = computed<number[]>(() => {
   if (!props.multiple) return []
@@ -131,27 +166,31 @@ const hasAnyValue = computed(() =>
   props.multiple ? multiValues.value.length > 0 : props.modelValue != null,
 )
 
-const triggerPlaceholder = computed(() => {
-  if (props.multiple) {
-    return multiValues.value.length > 0 ? 'Search to add more…' : props.placeholder
-  }
-  return singleLabel.value || props.placeholder
-})
-
 function isSelected(id: number): boolean {
   if (props.multiple) return multiValues.value.includes(id)
   return props.modelValue === id
 }
 
-watch(options, (nextOptions) => {
+// ── Label resolution ────────────────────────────────────────────────────────
+
+watch(allOptions, (opts) => {
   if (props.multiple || !props.modelValue) return
-  const selected = nextOptions.find((item) => item.id === props.modelValue)
-  if (selected) singleLabel.value = selected.label
+  const selected = opts.find((o) => o.id === props.modelValue)
+  if (selected) singleLabel.value = selected.title
 }, { immediate: true })
 
 watch(() => props.modelValue, (val) => {
   if (!props.multiple && !val) singleLabel.value = ''
 })
+
+// Reset when form changes
+watch(() => props.formId, () => {
+  singleLabel.value = ''
+  emit('update:modelValue', props.multiple ? [] : null)
+  emit('select', null)
+})
+
+// ── Dropdown ────────────────────────────────────────────────────────────────
 
 function setItemRef(el: unknown, index: number) {
   itemRefs.value[index] = el as HTMLElement | null
@@ -173,15 +212,18 @@ function closeDropdown() {
   dropdownStyle.value = {}
 }
 
-function selectItem(id: number, label: string) {
+function selectItem(id: number, title: string) {
+  const option = allOptions.value.find((o) => o.id === id) ?? null
+
   if (props.multiple) {
     const current = multiValues.value
     const idx = current.indexOf(id)
     emit('update:modelValue', idx === -1 ? [...current, id] : current.filter(v => v !== id))
     searchQuery.value = ''
   } else {
-    singleLabel.value = label
+    singleLabel.value = title
     emit('update:modelValue', id)
+    emit('select', option)
     closeDropdown()
   }
 }
@@ -189,11 +231,12 @@ function selectItem(id: number, label: string) {
 function clearSelection() {
   singleLabel.value = ''
   emit('update:modelValue', props.multiple ? [] : null)
+  emit('select', null)
 }
 
 function highlightNext() {
   if (!isOpen.value) { openDropdown(); return }
-  highlightedIndex.value = Math.min(highlightedIndex.value + 1, options.value.length - 1)
+  highlightedIndex.value = Math.min(highlightedIndex.value + 1, filteredOptions.value.length - 1)
   scrollToHighlighted()
 }
 
@@ -203,8 +246,8 @@ function highlightPrev() {
 }
 
 function selectHighlighted() {
-  const option = options.value[highlightedIndex.value]
-  if (option) selectItem(option.id, option.label)
+  const option = filteredOptions.value[highlightedIndex.value]
+  if (option) selectItem(option.id, option.title)
 }
 
 function scrollToHighlighted() {

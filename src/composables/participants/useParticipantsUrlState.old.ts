@@ -79,21 +79,6 @@ export type ParticipantsFilters = {
   createdAfter: string | undefined
   createdBefore: string | undefined
   includeDeleted: boolean | undefined
-
-  // Event form filters
-  hasFormResponses: boolean | undefined
-  formResponseForm: string | undefined
-  formResponseComplete: boolean | undefined
-  formAnswerSearch: string | undefined
-  formAnsweredQuestion: number | undefined
-  formHasUnansweredRequired: boolean | undefined
-  formSelectedOption: number | undefined
-  formAnswerSubmittedAfter: string | undefined
-  formAnswerSubmittedBefore: string | undefined
-  formNumericAnswerMin: number | undefined
-  formNumericAnswerMax: number | undefined
-  formAnswerDateAfter: string | undefined
-  formAnswerDateBefore: string | undefined
 }
 
 function makeEmptyFilters(): ParticipantsFilters {
@@ -160,20 +145,6 @@ function makeEmptyFilters(): ParticipantsFilters {
     createdAfter: undefined,
     createdBefore: undefined,
     includeDeleted: undefined,
-    // Event form filters
-    hasFormResponses: undefined,
-    formResponseForm: undefined,
-    formResponseComplete: undefined,
-    formAnswerSearch: undefined,
-    formAnsweredQuestion: undefined,
-    formHasUnansweredRequired: undefined,
-    formSelectedOption: undefined,
-    formAnswerSubmittedAfter: undefined,
-    formAnswerSubmittedBefore: undefined,
-    formNumericAnswerMin: undefined,
-    formNumericAnswerMax: undefined,
-    formAnswerDateAfter: undefined,
-    formAnswerDateBefore: undefined,
   }
 }
 
@@ -289,21 +260,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     createdAfter: route.query.created_after as string | undefined,
     createdBefore: route.query.created_before as string | undefined,
     includeDeleted: route.query.include_deleted === 'true' ? true : undefined,
-
-    // Event form filters
-    hasFormResponses: route.query.has_form_responses === 'true' ? true : undefined,
-    formResponseForm: route.query.form_response_form as string | undefined,
-    formResponseComplete: route.query.form_response_complete === 'true' ? true : undefined,
-    formAnswerSearch: route.query.form_answer_search as string | undefined,
-    formAnsweredQuestion: route.query.form_answered_question ? Number(route.query.form_answered_question) : undefined,
-    formHasUnansweredRequired: route.query.form_has_unanswered_required === 'true' ? true : undefined,
-    formSelectedOption: route.query.form_selected_option ? Number(route.query.form_selected_option) : undefined,
-    formAnswerSubmittedAfter: route.query.form_answer_submitted_after as string | undefined,
-    formAnswerSubmittedBefore: route.query.form_answer_submitted_before as string | undefined,
-    formNumericAnswerMin: route.query.form_numeric_answer_min ? Number(route.query.form_numeric_answer_min) : undefined,
-    formNumericAnswerMax: route.query.form_numeric_answer_max ? Number(route.query.form_numeric_answer_max) : undefined,
-    formAnswerDateAfter: route.query.form_answer_date_after as string | undefined,
-    formAnswerDateBefore: route.query.form_answer_date_before as string | undefined,
   })
 
   const debouncedQuestionSearch = ref(filters.value.questionAnswerSearch || '')
@@ -388,7 +344,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.selectedOption) params.selected_option = f.selectedOption
     if (f.sliderAnswerMin) params.slider_answer_min = f.sliderAnswerMin
     if (f.sliderAnswerMax) params.slider_answer_max = f.sliderAnswerMax
-    if (f.answeredQuestionType) params.answered_question_type = f.answeredQuestionType
     if (f.hasOrders !== undefined) params.has_orders = f.hasOrders
     if (f.orderStatus) params.order_status = f.orderStatus
     if (f.orderStatusNot) params.order_status_not = f.orderStatusNot
@@ -426,21 +381,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.createdAfter) params.created_after = f.createdAfter
     if (f.createdBefore) params.created_before = f.createdBefore
     if (f.includeDeleted !== undefined) params.include_deleted = f.includeDeleted
-
-    // Event form filters
-    if (f.hasFormResponses !== undefined) params.has_form_responses = f.hasFormResponses
-    if (f.formResponseForm) params.form_response_form = f.formResponseForm
-    if (f.formResponseComplete !== undefined) params.form_response_complete = f.formResponseComplete
-    if (f.formAnswerSearch) params.form_answer_search = f.formAnswerSearch
-    if (f.formAnsweredQuestion) params.form_answered_question = f.formAnsweredQuestion
-    if (f.formHasUnansweredRequired !== undefined) params.form_has_unanswered_required = f.formHasUnansweredRequired
-    if (f.formSelectedOption) params.form_selected_option = f.formSelectedOption
-    if (f.formAnswerSubmittedAfter) params.form_answer_submitted_after = f.formAnswerSubmittedAfter
-    if (f.formAnswerSubmittedBefore) params.form_answer_submitted_before = f.formAnswerSubmittedBefore
-    if (f.formNumericAnswerMin !== undefined) params.form_numeric_answer_min = f.formNumericAnswerMin
-    if (f.formNumericAnswerMax !== undefined) params.form_numeric_answer_max = f.formNumericAnswerMax
-    if (f.formAnswerDateAfter) params.form_answer_date_after = f.formAnswerDateAfter
-    if (f.formAnswerDateBefore) params.form_answer_date_before = f.formAnswerDateBefore
 
     return params
   })
@@ -508,20 +448,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.hasDiscountsUsed !== undefined) count++
     if (f.discountId) count++
     if (f.discountName) count++
-    // Form filter count
-    if (f.hasFormResponses !== undefined) count++
-    if (f.formResponseForm) count++
-    if (f.formResponseComplete !== undefined) count++
-    if (f.formAnswerSearch) count++
-    if (f.formAnsweredQuestion) count++
-    if (f.formHasUnansweredRequired !== undefined) count++
-    if (f.formSelectedOption) count++
-    if (f.formAnswerSubmittedAfter) count++
-    if (f.formAnswerSubmittedBefore) count++
-    if (f.formNumericAnswerMin !== undefined) count++
-    if (f.formNumericAnswerMax !== undefined) count++
-    if (f.formAnswerDateAfter) count++
-    if (f.formAnswerDateBefore) count++
     return count
   })
 
@@ -538,44 +464,31 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     return computed(() => {
       const chips: Array<{ key: string; label: string; value: string }> = []
 
-      const parseValue = (value: string ): string[] => {
-        if (value.includes(',')) {
-          return value.split(',').map(v => v.trim())
-        }
-        return [value]
-      }
-
       const formatValue = (value: any, key: string): string => {
         if (typeof value === 'boolean') return value ? 'Yes' : 'No'
         if (key === 'organisation' && organisationsList.length > 0) {
           const org = organisationsList.find((o: any) => o.id === value)
-          const orgList = organisationsList.filter((o: any) => parseValue(String(value)).includes(String(o.id)))
-          return org?.title || String(orgList.map((o: any) => o.title).join(', ')) || String(value)
+          return org?.title || String(value)
         }
         if (key === 'areaFrom' && areasList.length > 0) {
           const area = areasList.find((a: any) => a.id === value)
-          const areaList = areasList.filter((a: any) => parseValue(String(value)).includes(String(a.id)))
-          return area?.area_name || String(areaList.map((a: any) => a.area_name).join(', ')) || String(value)
+          return area?.area_name || String(value)
         }
         if (key === 'question' && questionsList.length > 0) {
           const question = questionsList.find((q: any) => q.id === value)
-          const questionList = questionsList.filter((q: any) => parseValue(String(value)).includes(String(q.id)))
-          return question?.question_body || String(questionList.map((q: any) => q.question_body).join(', ')) || String(value)
+          return question?.question_body || String(value)
         }
         if (key === 'dietaryRequirement' && dietaryList.length > 0) {
           const req = dietaryList.find((r: any) => r.id === value)
-          const reqList = dietaryList.filter((r: any) => parseValue(String(value)).includes(String(r.id)))
-          return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
+          return req?.label || String(value)
         }
         if (key === 'medicalCondition' && medicalList.length > 0) {
           const cond = medicalList.find((c: any) => c.id === value)
-          const condList = medicalList.filter((c: any) => parseValue(String(value)).includes(String(c.id)))
-          return cond?.label || String(condList.map((c: any) => c.label).join(', ')) || String(value)
+          return cond?.label || String(value)
         }
         if (key === 'accessibilityRequirement' && accessibilityList.length > 0) {
           const req = accessibilityList.find((r: any) => r.id === value)
-          const reqList = accessibilityList.filter((r: any) => parseValue(String(value)).includes(String(r.id)))
-          return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
+          return req?.label || String(value)
         }
         return String(value)
       }
@@ -643,20 +556,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
         includeDeleted: 'Include Deleted',
         hasEmergencyContacts: 'Has Emergency Contacts',
         answeredQuestionType: 'Answered Question Type',
-        // Form filter labels
-        hasFormResponses: 'Has Form Responses',
-        formResponseForm: 'Form',
-        formResponseComplete: 'Form Response Complete',
-        formAnswerSearch: 'Form Answer Search',
-        formAnsweredQuestion: 'Form Question',
-        formHasUnansweredRequired: 'Unanswered Required (Form)',
-        formSelectedOption: 'Form Selected Option',
-        formAnswerSubmittedAfter: 'Form Submitted After',
-        formAnswerSubmittedBefore: 'Form Submitted Before',
-        formNumericAnswerMin: 'Form Answer Min',
-        formNumericAnswerMax: 'Form Answer Max',
-        formAnswerDateAfter: 'Form Date After',
-        formAnswerDateBefore: 'Form Date Before',
       }
 
       Object.entries(filters.value).forEach(([key, value]) => {
@@ -753,21 +652,6 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
       if (f.createdAfter) query.created_after = f.createdAfter
       if (f.createdBefore) query.created_before = f.createdBefore
       if (f.includeDeleted !== undefined) query.include_deleted = f.includeDeleted
-
-      // Event form filters
-      if (f.hasFormResponses !== undefined) query.has_form_responses = f.hasFormResponses
-      if (f.formResponseForm) query.form_response_form = f.formResponseForm
-      if (f.formResponseComplete !== undefined) query.form_response_complete = f.formResponseComplete
-      if (f.formAnswerSearch) query.form_answer_search = f.formAnswerSearch
-      if (f.formAnsweredQuestion) query.form_answered_question = f.formAnsweredQuestion
-      if (f.formHasUnansweredRequired !== undefined) query.form_has_unanswered_required = f.formHasUnansweredRequired
-      if (f.formSelectedOption) query.form_selected_option = f.formSelectedOption
-      if (f.formAnswerSubmittedAfter) query.form_answer_submitted_after = f.formAnswerSubmittedAfter
-      if (f.formAnswerSubmittedBefore) query.form_answer_submitted_before = f.formAnswerSubmittedBefore
-      if (f.formNumericAnswerMin !== undefined) query.form_numeric_answer_min = f.formNumericAnswerMin
-      if (f.formNumericAnswerMax !== undefined) query.form_numeric_answer_max = f.formNumericAnswerMax
-      if (f.formAnswerDateAfter) query.form_answer_date_after = f.formAnswerDateAfter
-      if (f.formAnswerDateBefore) query.form_answer_date_before = f.formAnswerDateBefore
 
       router.replace({ query })
     },

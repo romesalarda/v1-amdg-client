@@ -328,7 +328,7 @@
 </template>
 
 <script setup lang="ts">
-import { useParticipantsUrlState } from '~/composables/participants/useParticipantsUrlState'
+import { useParticipantsUrlState } from '~/composables/participants/useParticipantsUrlState.js'
 import { useParticipantsDashboardData } from '~/composables/participants/useParticipantsDashboardData'
 import {
   useDeleteAttendee,

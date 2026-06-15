@@ -11,7 +11,7 @@
         v-model="searchQuery"
         type="text"
         class="flex-1 bg-transparent text-sm font-medium text-navy-900 outline-none placeholder:text-navy-400 min-w-0"
-        :placeholder="selectedLabel || 'Search organisation…'"
+        :placeholder="triggerPlaceholder"
         @focus="openDropdown"
         @keydown.escape="closeDropdown"
         @keydown.arrow-down.prevent="highlightNext"
@@ -19,12 +19,24 @@
         @keydown.enter.prevent="selectHighlighted"
       />
       <span
-        v-if="selectedLabel && !searchQuery"
+        v-if="!multiple && singleLabel && !searchQuery"
         class="text-xs font-bold text-primary truncate max-w-[180px]"
-      >{{ selectedLabel }}</span>
-      <span class="material-symbols-outlined text-navy-400 text-base shrink-0 transition-transform" :class="{ 'rotate-180': isOpen }">
-        expand_more
-      </span>
+      >{{ singleLabel }}</span>
+      <span
+        v-if="multiple && multiValues.length > 0 && !searchQuery"
+        class="text-xs font-bold text-primary shrink-0"
+      >{{ multiValues.length }} selected</span>
+      <button
+        v-if="hasAnyValue"
+        class="material-symbols-outlined text-navy-400 text-base shrink-0 hover:text-red-500 transition-colors"
+        type="button"
+        @click.stop="clearSelection"
+      >close</button>
+      <span
+        v-else
+        class="material-symbols-outlined text-navy-400 text-base shrink-0 transition-transform"
+        :class="{ 'rotate-180': isOpen }"
+      >expand_more</span>
     </div>
 
     <Teleport to="body">
@@ -58,7 +70,7 @@
               :ref="el => setItemRef(el, index)"
               class="flex items-center gap-3 px-4 py-2.5 cursor-pointer text-sm font-medium transition-colors"
               :class="[
-                option.id === modelValue ? 'bg-primary text-white' : 'text-navy-800 hover:bg-mist-blue',
+                isSelected(option.id) ? 'bg-primary/10 text-primary' : 'text-navy-800 hover:bg-mist-blue',
                 index === highlightedIndex ? 'bg-mist-blue' : '',
               ]"
               @click="selectOrganisation(option.id, option.title)"
@@ -66,8 +78,8 @@
             >
               <span
                 class="material-symbols-outlined text-base shrink-0"
-                :class="option.id === modelValue ? 'text-white' : 'text-primary'"
-              >check_circle</span>
+                :class="isSelected(option.id) ? 'text-primary' : 'text-navy-300'"
+              >{{ multiple ? (isSelected(option.id) ? 'check_box' : 'check_box_outline_blank') : (isSelected(option.id) ? 'check_circle' : 'radio_button_unchecked') }}</span>
               <span class="truncate">{{ option.title }}</span>
             </li>
           </ul>
@@ -78,22 +90,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount, type CSSProperties } from 'vue'
+import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, type CSSProperties } from 'vue'
 import { useOrganisationSearch } from '~/composables/resources/organisation/useOrganisationSearch'
 
-const props = defineProps<{
-  modelValue?: number | null
+const props = withDefaults(defineProps<{
+  modelValue?: number | null | number[]
+  multiple?: boolean
   hasError?: boolean
-}>()
+}>(), {
+  modelValue: null,
+  multiple: false,
+  hasError: false,
+})
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: number | null): void
+  (e: 'update:modelValue', value: number | null | number[]): void
 }>()
 
 const isOpen = ref(false)
 const searchQuery = ref('')
 const highlightedIndex = ref(-1)
-const selectedLabel = ref('')
+const singleLabel = ref('')
 const containerRef = ref<HTMLElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -102,17 +119,48 @@ const dropdownStyle = ref<CSSProperties>({})
 
 const { options, isLoading } = useOrganisationSearch(searchQuery)
 
-watch(options, (nextOptions) => {
-  if (!props.modelValue) return
-  const selected = nextOptions.find((item) => item.id === props.modelValue)
-  if (selected) {
-    selectedLabel.value = selected.title
+// ── Computed helpers ──────────────────────────────────────────────────────────
+
+const multiValues = computed<number[]>(() => {
+  if (!props.multiple) return []
+  return Array.isArray(props.modelValue) ? (props.modelValue as number[]) : []
+})
+
+const hasAnyValue = computed(() =>
+  props.multiple ? multiValues.value.length > 0 : props.modelValue != null,
+)
+
+const triggerPlaceholder = computed(() => {
+  if (props.multiple) {
+    return multiValues.value.length > 0 ? 'Search to add more…' : 'Search organisation…'
   }
+  return singleLabel.value || 'Search organisation…'
+})
+
+function isSelected(id: number): boolean {
+  if (props.multiple) return multiValues.value.includes(id)
+  return props.modelValue === id
+}
+
+// ── Watch for external label resolution (single mode) ────────────────────────
+
+watch(options, (nextOptions) => {
+  if (props.multiple || !props.modelValue) return
+  const selected = nextOptions.find((item) => item.id === props.modelValue)
+  if (selected) singleLabel.value = selected.title
 }, { immediate: true })
+
+watch(() => props.modelValue, (val) => {
+  if (!props.multiple && !val) singleLabel.value = ''
+})
+
+// ── Item ref tracking ─────────────────────────────────────────────────────────
 
 function setItemRef(el: unknown, index: number) {
   itemRefs.value[index] = el as HTMLElement | null
 }
+
+// ── Dropdown open/close ───────────────────────────────────────────────────────
 
 function openDropdown() {
   isOpen.value = true
@@ -130,19 +178,36 @@ function closeDropdown() {
   dropdownStyle.value = {}
 }
 
+// ── Selection ─────────────────────────────────────────────────────────────────
+
 function selectOrganisation(id: number, title: string) {
-  selectedLabel.value = title
-  emit('update:modelValue', id)
-  closeDropdown()
+  if (props.multiple) {
+    const current = multiValues.value
+    const idx = current.indexOf(id)
+    emit('update:modelValue', idx === -1 ? [...current, id] : current.filter(v => v !== id))
+    searchQuery.value = ''
+    // keep dropdown open for multi
+  } else {
+    singleLabel.value = title
+    emit('update:modelValue', id)
+    closeDropdown()
+  }
 }
 
-function highlightNext() {
-  if (!isOpen.value) {
-    openDropdown()
-    return
+function clearSelection() {
+  if (props.multiple) {
+    emit('update:modelValue', [])
+  } else {
+    singleLabel.value = ''
+    emit('update:modelValue', null)
   }
-  const max = options.value.length - 1
-  highlightedIndex.value = Math.min(highlightedIndex.value + 1, max)
+}
+
+// ── Keyboard nav ──────────────────────────────────────────────────────────────
+
+function highlightNext() {
+  if (!isOpen.value) { openDropdown(); return }
+  highlightedIndex.value = Math.min(highlightedIndex.value + 1, options.value.length - 1)
   scrollToHighlighted()
 }
 
@@ -153,25 +218,21 @@ function highlightPrev() {
 
 function selectHighlighted() {
   const option = options.value[highlightedIndex.value]
-  if (option) {
-    selectOrganisation(option.id, option.title)
-  }
+  if (option) selectOrganisation(option.id, option.title)
 }
 
 function scrollToHighlighted() {
-  nextTick(() => {
-    itemRefs.value[highlightedIndex.value]?.scrollIntoView({ block: 'nearest' })
-  })
+  nextTick(() => { itemRefs.value[highlightedIndex.value]?.scrollIntoView({ block: 'nearest' }) })
 }
+
+// ── Dropdown position ─────────────────────────────────────────────────────────
 
 function updateDropdownPosition() {
   const trigger = containerRef.value?.firstElementChild as HTMLElement | null
   if (!trigger) return
-
   const rect = trigger.getBoundingClientRect()
   const top = Math.round(rect.bottom + 8)
   const maxHeight = Math.max(160, window.innerHeight - top - 16)
-
   dropdownStyle.value = {
     top: `${top}px`,
     left: `${Math.round(rect.left)}px`,
@@ -183,41 +244,27 @@ function updateDropdownPosition() {
 
 function handleOutsideClick(event: MouseEvent) {
   const target = event.target as Node
-  if (containerRef.value?.contains(target) || dropdownRef.value?.contains(target)) {
-    return
-  }
-  if (isOpen.value) {
-    closeDropdown()
-  }
+  if (containerRef.value?.contains(target) || dropdownRef.value?.contains(target)) return
+  if (isOpen.value) closeDropdown()
 }
 
 function handleViewportChange() {
-  if (isOpen.value) {
-    updateDropdownPosition()
-  }
+  if (isOpen.value) updateDropdownPosition()
 }
 
 watch(isOpen, (value) => {
   if (value) {
+    window.addEventListener('resize', handleViewportChange)
+    window.addEventListener('scroll', handleViewportChange, true)
     nextTick(updateDropdownPosition)
+  } else {
+    window.removeEventListener('resize', handleViewportChange)
+    window.removeEventListener('scroll', handleViewportChange, true)
   }
 })
 
-watch(() => props.modelValue, (value) => {
-  if (!value) {
-    selectedLabel.value = ''
-  }
-})
-
-onMounted(() => {
-  document.addEventListener('mousedown', handleOutsideClick)
-  window.addEventListener('scroll', handleViewportChange, true)
-  window.addEventListener('resize', handleViewportChange)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('mousedown', handleOutsideClick)
-  window.removeEventListener('scroll', handleViewportChange, true)
-  window.removeEventListener('resize', handleViewportChange)
-})
+onMounted(() => { document.addEventListener('mousedown', handleOutsideClick) })
+onBeforeUnmount(() => { document.removeEventListener('mousedown', handleOutsideClick) })
 </script>
+
+     

@@ -111,7 +111,7 @@ const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersona
     medical_conditions: medicalConditions.length ? medicalConditions : undefined,
     accessibility_requirements: accessibilityRequirements.length ? accessibilityRequirements : undefined,
     emergency_contact: mappedEmergencyContact,
-    organisation_id: info.organisationId ?? null,
+    organisation_id: typeof info.organisationId === 'number' ? info.organisationId : null,
     alternative_signin_identifier: mappedAlternativeSignin,
   }
 }

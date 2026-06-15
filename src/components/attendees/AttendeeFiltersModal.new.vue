@@ -16,17 +16,17 @@
       </div>
 
       <!-- Tab Navigation -->
-      <div class="flex gap-2 border-b border-gray-200 mb-6">
+      <div class="flex gap-2 border-b border-gray-200 mb-6 overflow-x-auto">
         <button
           v-for="tab in tabs"
           :key="tab.value"
-          @click="currentTab = tab.value"
-          class="px-4 py-2 text-sm font-medium transition-colors relative"
+          class="px-4 py-2 text-sm font-medium transition-colors relative shrink-0"
           :class="[
             currentTab === tab.value
               ? 'text-primary border-b-2 border-primary'
               : 'text-gray-500 hover:text-gray-700'
           ]"
+          @click="currentTab = tab.value"
         >
           <UIcon :name="tab.icon" class="w-4 h-4 inline-block mr-2" />
           {{ tab.label }}
@@ -129,7 +129,7 @@
               <!-- Organisation -->
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Organisation</label>
-                <OrganisationSelect v-model="localFilters.organisation" multiple/>
+                <OrganisationSelect v-model="localFilters.organisation" />
               </div>
 
               <!-- Area From -->
@@ -156,7 +156,7 @@
                   <span class="text-sm font-medium text-gray-700">Has Dietary Requirements</span>
                 </div>
                 <div v-if="localFilters.hasDietaryRequirements" class="pl-6">
-                  <DietaryRequirementSelect v-model="localFilters.dietaryRequirement" multiple />
+                  <DietaryRequirementSelect v-model="localFilters.dietaryRequirement" :multiple="true" />
                 </div>
               </div>
 
@@ -167,7 +167,7 @@
                   <span class="text-sm font-medium text-gray-700">Has Medical Conditions</span>
                 </div>
                 <div v-if="localFilters.hasMedicalConditions" class="pl-6">
-                  <MedicalConditionSelect v-model="localFilters.medicalCondition" multiple />
+                  <MedicalConditionSelect v-model="localFilters.medicalCondition" :multiple="true" />
                 </div>
               </div>
 
@@ -178,7 +178,7 @@
                   <span class="text-sm font-medium text-gray-700">Has Accessibility Requirements</span>
                 </div>
                 <div v-if="localFilters.hasAccessibilityRequirements" class="pl-6">
-                  <AccessibilityRequirementSelect v-model="localFilters.accessibilityRequirement" multiple />
+                  <AccessibilityRequirementSelect v-model="localFilters.accessibilityRequirement" :multiple="true" />
                 </div>
               </div>
 
@@ -278,6 +278,15 @@
               </template>
             </div>
           </div>
+        </div>
+
+        <!-- Forms Tab -->
+        <div v-if="currentTab === 'forms'" class="space-y-6">
+          <EventFormFilterPanel
+            :model-value="formFilters"
+            :event-slug="eventSlug"
+            @update:model-value="onFormFiltersUpdate"
+          />
         </div>
 
         <!-- Orders Tab -->
@@ -686,6 +695,8 @@ import AccessibilityRequirementSelect from '~/components/ui/AccessibilityRequire
 import EventQuestionSelect from '~/components/ui/EventQuestionSelect.vue'
 import ProductSelect from '~/components/ui/ProductSelect.vue'
 import ProductDiscountSelect from '~/components/ui/ProductDiscountSelect.vue'
+import EventFormFilterPanel from '~/components/attendees/EventFormFilterPanel.vue'
+import type { EventFormFilters } from '~/components/attendees/EventFormFilterPanel.vue'
 import { useEventQuestions } from '~/composables/resources/events/eventQuestions'
 
 interface Props {
@@ -721,7 +732,7 @@ const isOpen = computed({
   set: (value) => emit('update:modelValue', value)
 })
 
-const currentTab = ref<'basic' | 'questions' | 'orders' | 'payments' | 'advanced'>('basic')
+const currentTab = ref<'basic' | 'questions' | 'forms' | 'orders' | 'payments' | 'advanced'>('basic')
 const localFilters = ref({ ...props.filters })
 const debouncedQuestionSearch = ref(props.filters.questionAnswerSearch || '')
 const selectedAreaLabel = ref<string | null>(null)
@@ -735,6 +746,7 @@ watch(() => props.filters, (newFilters) => {
 const tabs = [
   { value: 'basic' as const, label: 'Basic', icon: 'i-heroicons-user-group' },
   { value: 'questions' as const, label: 'Questions', icon: 'i-heroicons-question-mark-circle' },
+  { value: 'forms' as const, label: 'Forms', icon: 'i-heroicons-document-text' },
   { value: 'orders' as const, label: 'Orders', icon: 'i-heroicons-shopping-cart' },
   { value: 'payments' as const, label: 'Payments', icon: 'i-heroicons-credit-card' },
   { value: 'advanced' as const, label: 'Advanced', icon: 'i-heroicons-adjustments-horizontal' },
@@ -795,7 +807,7 @@ const verificationStatusOptions = [
   { value: 'processed', label: 'Processed' },
 ]
 
-// Fetch event questions for the selected-question type-specific UI
+// Fetch event questions for type-specific UI in the questions tab
 const eventQuestionsQuery = useEventQuestions(
   computed(() => ({
     event: props.eventSlug || undefined,
@@ -804,12 +816,56 @@ const eventQuestionsQuery = useEventQuestions(
   { enabled: computed(() => !!props.eventSlug) },
 )
 
-// Get selected question details (for type-specific answer filter UI)
+// Get selected question details
 const selectedQuestion = computed(() => {
   if (!localFilters.value.question) return null
   const results = eventQuestionsQuery.data.value?.data?.results || []
   return results.find((q: any) => q.id === localFilters.value.question) ?? null
 })
+
+// ── Form filters bridge ────────────────────────────────────────────────────────
+// The EventFormFilterPanel works with a sub-object; we mirror it in/out of localFilters
+
+const FORM_FILTER_KEYS: (keyof EventFormFilters)[] = [
+  'hasFormResponses',
+  'formResponseForm',
+  'formResponseComplete',
+  'formAnswerSearch',
+  'formAnsweredQuestion',
+  'formHasUnansweredRequired',
+  'formSelectedOption',
+  'formAnswerSubmittedAfter',
+  'formAnswerSubmittedBefore',
+  'formNumericAnswerMin',
+  'formNumericAnswerMax',
+  'formAnswerDateAfter',
+  'formAnswerDateBefore',
+]
+
+const formFilters = computed<EventFormFilters>(() => {
+  const f = localFilters.value
+  return {
+    hasFormResponses: f.hasFormResponses,
+    formResponseForm: f.formResponseForm,
+    formResponseComplete: f.formResponseComplete,
+    formAnswerSearch: f.formAnswerSearch,
+    formAnsweredQuestion: f.formAnsweredQuestion,
+    formHasUnansweredRequired: f.formHasUnansweredRequired,
+    formSelectedOption: f.formSelectedOption,
+    formAnswerSubmittedAfter: f.formAnswerSubmittedAfter,
+    formAnswerSubmittedBefore: f.formAnswerSubmittedBefore,
+    formNumericAnswerMin: f.formNumericAnswerMin,
+    formNumericAnswerMax: f.formNumericAnswerMax,
+    formAnswerDateAfter: f.formAnswerDateAfter,
+    formAnswerDateBefore: f.formAnswerDateBefore,
+  }
+})
+
+function onFormFiltersUpdate(updated: EventFormFilters) {
+  for (const key of FORM_FILTER_KEYS) {
+    (localFilters.value as any)[key] = (updated as any)[key]
+  }
+}
 
 // Count active filters per tab
 function getTabFilterCount(tab: string): number {
@@ -842,6 +898,10 @@ function getTabFilterCount(tab: string): number {
     if (filters.selectedOption) count++
     if (filters.sliderAnswerMin) count++
     if (filters.sliderAnswerMax) count++
+  } else if (tab === 'forms') {
+    for (const key of FORM_FILTER_KEYS) {
+      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') count++
+    }
   } else if (tab === 'orders') {
     if (filters.hasOrders) count++
     if (filters.orderStatus) count++
@@ -894,7 +954,6 @@ function onQuestionSearchInput(event: Event) {
 }
 
 function applyFilters() {
-  // Update question answer search from debounced value
   localFilters.value.questionAnswerSearch = debouncedQuestionSearch.value || undefined
   emit('apply', { ...localFilters.value })
   isOpen.value = false

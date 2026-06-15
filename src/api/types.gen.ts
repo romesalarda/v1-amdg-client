@@ -7957,12 +7957,18 @@ export type EventNotification = {
      * * `ORDER_FULFILLMENT` - Order Fulfillment Required
      * * `BOOKING_CONFIRMATION` - Booking Confirmed
      * * `REFUND_REQUEST` - Refund Requested
+     * * `REFUND_UPDATE` - Refund Updated
+     * * `REFUND_APPROVAL` - Refund Approval Needed
+     * * `REFUND_PROCESSED` - Refund Processed
+     * * `REFUND_REJECTION` - Refund Rejected
+     * * `PAYMENT_SUCCESS` - Payment Successful
      * * `PAYMENT_FAILED` - Payment Failed
+     * * `PAYMENT_UPDATE` - Payment Updated
      * * `CAPACITY_WARNING` - Capacity Warning
      * * `AUTHORIZATION_REQUEST` - Authorization Request
      * * `GENERAL` - General Notification
      */
-    notification_type: 'ORDER_FULFILLMENT' | 'BOOKING_CONFIRMATION' | 'REFUND_REQUEST' | 'PAYMENT_FAILED' | 'CAPACITY_WARNING' | 'AUTHORIZATION_REQUEST' | 'GENERAL';
+    notification_type: 'ORDER_FULFILLMENT' | 'BOOKING_CONFIRMATION' | 'REFUND_REQUEST' | 'REFUND_UPDATE' | 'REFUND_APPROVAL' | 'REFUND_PROCESSED' | 'REFUND_REJECTION' | 'PAYMENT_SUCCESS' | 'PAYMENT_FAILED' | 'PAYMENT_UPDATE' | 'CAPACITY_WARNING' | 'AUTHORIZATION_REQUEST' | 'GENERAL';
     readonly notification_type_display: string;
     /**
      * * `LOW` - Low
@@ -17594,6 +17600,7 @@ export type PaymentMethod = {
     readonly event_name: string;
     created_by?: number | null;
     readonly created_by_name: string | null;
+    description?: string | null;
     readonly created_at: string;
     readonly updated_at: string;
     provided_details?: unknown;
@@ -17672,6 +17679,7 @@ export type PaymentMethodDetail = {
     readonly event_name: string;
     created_by?: number | null;
     readonly created_by_name: string | null;
+    description?: string | null;
     readonly created_at: string;
     readonly updated_at: string;
     provided_details?: unknown;
@@ -17683,7 +17691,6 @@ export type PaymentMethodDetail = {
         event?: string;
         created_by?: string;
     };
-    description?: string | null;
 };
 
 /**
@@ -27797,6 +27804,7 @@ export type PaymentMethodWritable = {
     bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
+    description?: string | null;
     provided_details?: unknown;
 };
 
@@ -27818,8 +27826,8 @@ export type PaymentMethodDetailWritable = {
     bank_transfer_required_immediately?: boolean;
     event: number;
     created_by?: number | null;
-    provided_details?: unknown;
     description?: string | null;
+    provided_details?: unknown;
 };
 
 /**
@@ -29620,7 +29628,10 @@ export type AttendeesListData = {
     body?: never;
     path?: never;
     query?: {
-        accessibility_requirement?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        accessibility_requirement?: Array<number>;
         /**
          * Filter attendees with maximum age (inclusive)
          */
@@ -29638,17 +29649,13 @@ export type AttendeesListData = {
          */
         answer_submitted_before?: string;
         /**
-         * Filter by question type
-         *
-         * * `short_answer` - Short Answer
-         * * `long_answer` - Long Answer
-         * * `upload` - Upload
-         * * `multiple_choice` - Multiple Choice
-         * * `single_choice` - Single Choice
-         * * `slider` - Slider
+         * Multiple values may be separated by commas.
          */
-        answered_question_type?: 'long_answer' | 'multiple_choice' | 'short_answer' | 'single_choice' | 'slider' | 'upload';
-        area_from?: number;
+        answered_question_type?: Array<string>;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        area_from?: Array<number>;
         area_from_name?: string;
         attendee_display_id?: string;
         attendee_display_id__icontains?: string;
@@ -29656,30 +29663,31 @@ export type AttendeesListData = {
          * Filter by bank transfer reference
          */
         bank_transfer_reference?: string;
-        booking?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        booking?: Array<string>;
         created_after?: string;
         created_before?: string;
         date_of_birth?: string;
         date_of_birth_after?: string;
         date_of_birth_before?: string;
-        dietary_requirement?: number;
         /**
-         * Filter by discount UUID
+         * Multiple values may be separated by commas.
          */
-        discount_id?: string;
+        dietary_requirement?: Array<number>;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        discount_id?: Array<string>;
         /**
          * Filter by discount name
          */
         discount_name?: string;
         /**
-         * Filter by donation verification status
-         *
-         * * `pending` - Pending
-         * * `verified` - Verified
-         * * `rejected` - Rejected
-         * * `processed` - Processed
+         * Multiple values may be separated by commas.
          */
-        donation_status?: 'pending' | 'processed' | 'rejected' | 'verified';
+        donation_status?: Array<string>;
         email?: string;
         /**
          * Filter attendees by event UUID
@@ -29687,6 +29695,58 @@ export type AttendeesListData = {
         event?: string;
         event_title?: string;
         first_name?: string;
+        /**
+         * EventForm date-type answer on or after this date (YYYY-MM-DD)
+         */
+        form_answer_date_after?: string;
+        /**
+         * EventForm date-type answer on or before this date (YYYY-MM-DD)
+         */
+        form_answer_date_before?: string;
+        /**
+         * Search within EventForm answer text (icontains)
+         */
+        form_answer_search?: string;
+        /**
+         * EventForm answers submitted after this datetime
+         */
+        form_answer_submitted_after?: string;
+        /**
+         * EventForm answers submitted before this datetime
+         */
+        form_answer_submitted_before?: string;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        form_answered_question?: Array<number>;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        form_answered_question_type?: Array<string>;
+        /**
+         * Has unanswered required EventForm questions (uses is_complete flag)
+         */
+        form_has_unanswered_required?: boolean;
+        /**
+         * EventForm slider/rating answer maximum value (numeric cast)
+         */
+        form_numeric_answer_max?: number;
+        /**
+         * EventForm slider/rating answer minimum value (numeric cast)
+         */
+        form_numeric_answer_min?: number;
+        /**
+         * Filter by form response completion status
+         */
+        form_response_complete?: boolean;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        form_response_form?: Array<string>;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        form_selected_option?: Array<number>;
         /**
          * Full name search
          */
@@ -29713,6 +29773,10 @@ export type AttendeesListData = {
          */
         has_donations?: boolean;
         has_emergency_contacts?: boolean;
+        /**
+         * Has any EventForm responses
+         */
+        has_form_responses?: boolean;
         has_medical_conditions?: boolean;
         /**
          * Has any orders
@@ -29747,7 +29811,10 @@ export type AttendeesListData = {
         is_minor?: boolean;
         is_registered?: boolean;
         last_name?: string;
-        medical_condition?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        medical_condition?: Array<number>;
         /**
          * Orders created after date
          */
@@ -29761,31 +29828,13 @@ export type AttendeesListData = {
          */
         order_reference_id?: string;
         /**
-         * Filter by order status
-         *
-         * * `draft` - Draft
-         * * `pending` - Pending
-         * * `processing` - Processing
-         * * `completed` - Completed
-         * * `cancelled` - Cancelled
-         * * `pending_refund` - Pending Refund
-         * * `partially_refunded` - Partially Refunded
-         * * `refunded` - Refunded
+         * Multiple values may be separated by commas.
          */
-        order_status?: 'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        order_status?: Array<string>;
         /**
-         * Exclude order status
-         *
-         * * `draft` - Draft
-         * * `pending` - Pending
-         * * `processing` - Processing
-         * * `completed` - Completed
-         * * `cancelled` - Cancelled
-         * * `pending_refund` - Pending Refund
-         * * `partially_refunded` - Partially Refunded
-         * * `refunded` - Refunded
+         * Multiple values may be separated by commas.
          */
-        order_status_not?: 'cancelled' | 'completed' | 'draft' | 'partially_refunded' | 'pending' | 'pending_refund' | 'processing' | 'refunded';
+        order_status_not?: Array<string>;
         /**
          * Order total maximum amount
          */
@@ -29798,7 +29847,10 @@ export type AttendeesListData = {
          * Which field to use when ordering the results.
          */
         ordering?: string;
-        organisation?: number;
+        /**
+         * Multiple values may be separated by commas.
+         */
+        organisation?: Array<number>;
         organisation_name?: string;
         /**
          * A page number within the paginated result set.
@@ -29809,38 +29861,25 @@ export type AttendeesListData = {
          */
         page_size?: number;
         /**
-         * Filter by payment UUID
+         * Multiple values may be separated by commas.
          */
-        payment_id?: string;
+        payment_id?: Array<string>;
         /**
          * Filter by payment method title
          */
         payment_method_title?: string;
         /**
-         * Filter by payment method type
-         *
-         * * `BANK_TRANSFER` - Bank Transfer
-         * * `STRIPE` - Stripe
-         * * `CASH` - Cash
+         * Multiple values may be separated by commas.
          */
-        payment_method_type?: 'BANK_TRANSFER' | 'CASH' | 'STRIPE';
+        payment_method_type?: Array<string>;
         /**
          * Filter by payment reference
          */
         payment_reference?: string;
         /**
-         * Filter by payment status
-         *
-         * * `DRAFTING` - Drafting
-         * * `PENDING` - Pending
-         * * `COMPLETED` - Completed
-         * * `CANCELLED` - Cancelled
-         * * `FAILED` - Failed
-         * * `PENDING_REFUND` - Pending Refund
-         * * `REFUNDED` - Refunded
-         * * `PARTIALLY_REFUNDED` - Partially Refunded
+         * Multiple values may be separated by commas.
          */
-        payment_status?: 'CANCELLED' | 'COMPLETED' | 'DRAFTING' | 'FAILED' | 'PARTIALLY_REFUNDED' | 'PENDING' | 'PENDING_REFUND' | 'REFUNDED';
+        payment_status?: Array<string>;
         /**
          * Payment target type
          *
@@ -29851,17 +29890,17 @@ export type AttendeesListData = {
         payment_target?: 'booking' | 'order' | 'ticket';
         phone_number?: string;
         /**
-         * Filter by purchased product variant ID
+         * Multiple values may be separated by commas.
          */
-        purchased_product?: number;
+        purchased_product?: Array<number>;
         /**
          * Search in purchased product titles
          */
         purchased_product_title?: string;
         /**
-         * Filter by specific question UUID
+         * Multiple values may be separated by commas.
          */
-        question?: string;
+        question?: Array<string>;
         /**
          * Search within answer text
          */
@@ -29871,14 +29910,9 @@ export type AttendeesListData = {
          */
         refund_is_active?: boolean;
         /**
-         * Filter by refund verification status
-         *
-         * * `pending` - Pending
-         * * `verified` - Verified
-         * * `rejected` - Rejected
-         * * `processed` - Processed
+         * Multiple values may be separated by commas.
          */
-        refund_status?: 'pending' | 'processed' | 'rejected' | 'verified';
+        refund_status?: Array<string>;
         /**
          * * `self` - Self
          * * `spouse` - Spouse
@@ -29894,9 +29928,9 @@ export type AttendeesListData = {
          */
         search?: string;
         /**
-         * Filter by selected choice option ID
+         * Multiple values may be separated by commas.
          */
-        selected_option?: number;
+        selected_option?: Array<number>;
         self_registered?: boolean;
         /**
          * Slider answer maximum value
@@ -36137,7 +36171,7 @@ export type EventListListData = {
          */
         anchor_verse?: string;
         /**
-         * Filter by area ID (alias of location)
+         * Filter by area ID
          */
         area?: number;
         /**
@@ -36145,22 +36179,22 @@ export type EventListListData = {
          */
         area_name?: string;
         /**
-         * Filter by chapter ID through event location
+         * Filter by chapter ID
          */
         chapter?: number;
         /**
-         * Filter by chapter name through event location
+         * Filter by chapter name
          */
         chapter_name?: string;
         created_by?: number;
         display_code?: string;
         display_identifier?: string;
         /**
-         * Filter by end datetime greater than or equal
+         * Filter by end datetime >=
          */
         end_after?: string;
         /**
-         * Filter by end datetime less than or equal
+         * Filter by end datetime <=
          */
         end_before?: string;
         /**
@@ -36176,11 +36210,11 @@ export type EventListListData = {
          */
         event_type_title?: string;
         /**
-         * Postgres trigram fuzzy search (falls back to standard search if unavailable)
+         * Postgres trigram fuzzy search
          */
         fuzzy_search?: string;
         /**
-         * Optional fuzzy similarity threshold between 0.0 and 1.0 (default: 0.2)
+         * Fuzzy similarity threshold (default 0.2)
          */
         fuzzy_threshold?: number;
         /**
@@ -36208,15 +36242,15 @@ export type EventListListData = {
          */
         page_size?: number;
         /**
-         * Standard text search across event, organisation, location, and venue fields
+         * Standard text search
          */
         search?: string;
         /**
-         * Filter by start datetime greater than or equal
+         * Filter by start datetime >=
          */
         start_after?: string;
         /**
-         * Filter by start datetime less than or equal
+         * Filter by start datetime <=
          */
         start_before?: string;
         /**
@@ -36229,7 +36263,7 @@ export type EventListListData = {
         theme?: string;
         title?: string;
         /**
-         * Filter by venue ID through event venues
+         * Filter by venue ID
          */
         venue?: number;
         /**
@@ -36377,25 +36411,10 @@ export type EventListAddAvailabilityWindowCreateResponse = EventListAddAvailabil
 
 export type EventListAddLandingImageCreateData = {
     body?: {
-        /**
-         * Image name
-         */
         name: string;
-        /**
-         * Optional description
-         */
         description?: string;
-        /**
-         * Image file
-         */
         image: Blob | File;
-        /**
-         * Set as main landing image (default: true)
-         */
         is_main?: boolean;
-        /**
-         * Whether image is public (default: true)
-         */
         public?: boolean;
     };
     path: {
@@ -36427,34 +36446,13 @@ export type EventListAddLandingImageCreateResponse = EventListAddLandingImageCre
 
 export type EventListAddResourceCreateData = {
     body?: {
-        /**
-         * Resource name
-         */
         name: string;
-        /**
-         * Optional description
-         */
         description?: string;
-        /**
-         * Optional tag (e.g., LANDING_PHOTO)
-         */
         tag?: string;
         resource_type: 'DOCUMENT' | 'IMAGE' | 'VIDEO' | 'AUDIO' | 'LINK' | 'OTHER';
-        /**
-         * Whether resource is public
-         */
         public?: boolean;
-        /**
-         * File upload for DOCUMENT/OTHER types
-         */
         file?: Blob | File;
-        /**
-         * Image upload for IMAGE type
-         */
         image?: Blob | File;
-        /**
-         * URL for LINK type
-         */
         link?: string;
     };
     path: {
@@ -36622,29 +36620,11 @@ export type EventListApplyAvailabilityTemplateCreateResponse = EventListApplyAva
 
 export type EventListAssignPermissionCreateData = {
     body?: {
-        /**
-         * User ID
-         */
         user_id: number;
-        /**
-         * Permission ID
-         */
         permission_id: number;
-        /**
-         * If True, user can only READ (other flags ignored)
-         */
         read_only?: boolean;
-        /**
-         * Allow CREATE operations
-         */
         allow_create?: boolean;
-        /**
-         * Allow UPDATE operations
-         */
         allow_update?: boolean;
-        /**
-         * Allow DELETE operations
-         */
         allow_delete?: boolean;
     };
     path: {
@@ -36759,7 +36739,7 @@ export type EventListCheckPermissionsRetrieveData = {
     };
     query?: {
         /**
-         * Optional: Check permissions for a specific user ID. If omitted, checks current authenticated user.
+         * Optional: Check permissions for a specific user ID.
          */
         user_id?: number;
     };
@@ -36768,15 +36748,15 @@ export type EventListCheckPermissionsRetrieveData = {
 
 export type EventListCheckPermissionsRetrieveErrors = {
     /**
-     * Authentication required. User must be logged in to check permissions
+     * Authentication required
      */
     401: unknown;
     /**
-     * Permission denied. Only admins and event creators can check permissions for other users
+     * Permission denied
      */
     403: unknown;
     /**
-     * User not found with the specified user_id
+     * User not found
      */
     404: unknown;
 };
@@ -36785,77 +36765,8 @@ export type EventListCheckPermissionsRetrieveResponses = {
     /**
      * Comprehensive permission information for the user
      */
-    200: {
-        /**
-         * ID of the user whose permissions were checked
-         */
-        user_id: number;
-        /**
-         * Email address of the user
-         */
-        user_email: string;
-        /**
-         * Full name of the user
-         */
-        user_name?: string;
-        /**
-         * Whether the user created this event
-         */
-        is_creator: boolean;
-        /**
-         * Whether the user is an event staff member
-         */
-        is_staff_member: boolean;
-        /**
-         * Whether the user is a Django staff/superuser
-         */
-        is_admin: boolean;
-        /**
-         * Can edit event details and settings
-         */
-        can_manage_event: boolean;
-        /**
-         * Can add/remove staff members
-         */
-        can_manage_staff: boolean;
-        /**
-         * Can create/manage staff invitations
-         */
-        can_manage_invites: boolean;
-        /**
-         * Can add/remove resources (images, documents, links)
-         */
-        can_manage_resources: boolean;
-        /**
-         * Can soft delete or restore the event
-         */
-        can_delete_event: boolean;
-        /**
-         * List of explicitly assigned permissions with details
-         */
-        assigned_permissions: Array<{
-            id?: number;
-            permission_name?: string;
-            permission_code?: string;
-            permission_category?: string;
-            assigned_at?: string;
-            assigned_by_email?: string;
-        }>;
-        /**
-         * List of assigned roles with details
-         */
-        assigned_roles: Array<{
-            id?: number;
-            role_name?: string;
-            role_code?: string;
-            role_category?: string;
-            assigned_at?: string;
-            assigned_by_email?: string;
-        }>;
-    };
+    200: unknown;
 };
-
-export type EventListCheckPermissionsRetrieveResponse = EventListCheckPermissionsRetrieveResponses[keyof EventListCheckPermissionsRetrieveResponses];
 
 export type EventListDemoteLandingImageCreateData = {
     body: EventDetailRequest;
@@ -36979,33 +36890,12 @@ export type EventListMyBookingRetrieveData = {
         url_safe_title: string;
     };
     query?: {
-        /**
-         * Filter by attendee name (first or last, case-insensitive)
-         */
         attendee_name?: string;
-        /**
-         * Filter bookings made after this date (ISO 8601 format)
-         */
         booked_after?: string;
-        /**
-         * Filter bookings made before this date (ISO 8601 format)
-         */
         booked_before?: string;
-        /**
-         * Filter bookings from last N days (e.g., 7, 30, 90)
-         */
         booked_in_days?: number;
-        /**
-         * Filter by booking reference (contains, case-insensitive)
-         */
         booking_reference?: string;
-        /**
-         * Filter by outstanding payment status (true/false)
-         */
         has_outstanding_payments?: boolean;
-        /**
-         * Page number (defaults to 1, 20 results per page)
-         */
         page?: number;
     };
     url: '/api/event/list/{url_safe_title}/my-booking/';
@@ -37038,29 +36928,11 @@ export type EventListMyOutstandingBookingPaymentsRetrieveData = {
         url_safe_title: string;
     };
     query?: {
-        /**
-         * Filter by attendee name in associated booking (first or last, case-insensitive)
-         */
         attendee_name?: string;
-        /**
-         * Filter payments for bookings made after this date (ISO 8601 format)
-         */
         booked_after?: string;
-        /**
-         * Filter payments for bookings made before this date (ISO 8601 format)
-         */
         booked_before?: string;
-        /**
-         * Filter payments for bookings from last N days (e.g., 7, 30, 90)
-         */
         booked_in_days?: number;
-        /**
-         * Page number (defaults to 1, 20 results per page)
-         */
         page?: number;
-        /**
-         * Filter by payment status (PENDING, DRAFTING, etc.)
-         */
         payment_status?: string;
     };
     url: '/api/event/list/{url_safe_title}/my-outstanding-booking-payments/';
@@ -37098,7 +36970,7 @@ export type EventListMyPaymentSummaryRetrieveData = {
          */
         attendee_id?: string;
         /**
-         * Optional booking reference to target a specific booking within this event.
+         * Optional booking reference to target a specific booking.
          */
         booking_reference?: string;
     };
@@ -37499,7 +37371,7 @@ export type EventListSaveWindowsAsTemplateCreateData = {
          */
         name: string;
         /**
-         * Optional description of the template
+         * Optional description
          */
         description?: string;
     };
@@ -37818,35 +37690,14 @@ export type EventListSponsorshipPackagesPartialUpdateResponse = EventListSponsor
 export type EventStaffInvitesListData = {
     body?: never;
     path: {
-        /**
-         * UUID of the event to list invites for
-         */
         url_safe_title: string;
     };
     query?: {
-        /**
-         * Filter invites by acceptance status. true=accepted, false=not accepted
-         */
         accepted?: boolean;
-        /**
-         * Filter invites by validity status. Valid invites are: active, not expired, and not yet accepted. Use true to get only valid (pending) invites, false to get invalid invites
-         */
         is_valid?: boolean;
-        /**
-         * Page number for pagination
-         */
         page?: number;
-        /**
-         * Number of results per page (default: 20)
-         */
         page_size?: number;
-        /**
-         * Search invites by target user email address. Case-insensitive partial match
-         */
         search?: string;
-        /**
-         * Filter invites by target user ID. Returns all invites sent to the specified user for this event
-         */
         target_user?: number;
     };
     url: '/api/event/list/{url_safe_title}/staff-invites/';
@@ -37854,23 +37705,20 @@ export type EventStaffInvitesListData = {
 
 export type EventStaffInvitesListErrors = {
     /**
-     * Authentication required. User must be logged in to list invites
+     * Authentication required
      */
     401: unknown;
     /**
-     * Permission denied. User is not event creator, staff, or target user
+     * Permission denied
      */
     403: unknown;
     /**
-     * Event not found with the specified event_id
+     * Event not found
      */
     404: unknown;
 };
 
 export type EventStaffInvitesListResponses = {
-    /**
-     * Successfully retrieved list of invites. Returns paginated results with invite summaries including: invite ID, event details, target user info, inviter info, acceptance status, validity status, timestamps, and HATEOAS links for related actions
-     */
     200: PaginatedEventStaffInviteListList;
 };
 
@@ -37879,9 +37727,6 @@ export type EventStaffInvitesListResponse = EventStaffInvitesListResponses[keyof
 export type EventStaffInvitesCreateData = {
     body: EventStaffInviteRequest;
     path: {
-        /**
-         * UUID of the event to create invite for
-         */
         url_safe_title: string;
     };
     query?: never;
@@ -37890,32 +37735,24 @@ export type EventStaffInvitesCreateData = {
 
 export type EventStaffInvitesCreateErrors = {
     /**
-     * Bad request - validation errors occurred. Common causes:
-     * - Target user already has an active invite for this event
-     * - Target user is already an event staff member
-     * - Expiry date is in the past
-     * - Required fields missing (target_user)
-     * - Invalid field values or formats
+     * Validation errors
      */
     400: unknown;
     /**
-     * Authentication required. User must be logged in to create invites
+     * Authentication required
      */
     401: unknown;
     /**
-     * Permission denied. User is not event creator or existing staff member
+     * Permission denied
      */
     403: unknown;
     /**
-     * Event not found with the specified url_safe_title
+     * Event not found
      */
     404: unknown;
 };
 
 export type EventStaffInvitesCreateResponses = {
-    /**
-     * Successfully created new staff invite. Returns complete invite details including: invite ID, event information, target user details, inviter details, expiry date, validity status, and HATEOAS links for management and acceptance actions
-     */
     201: EventStaffInvite;
 };
 
@@ -37924,12 +37761,9 @@ export type EventStaffInvitesCreateResponse = EventStaffInvitesCreateResponses[k
 export type EventStaffInviteDeleteData = {
     body?: never;
     path: {
-        /**
-         * UUID of the specific staff invite to delete
-         */
         invite_id: string;
         /**
-         * UUID of the event containing the invite
+         * URL safe title
          */
         url_safe_title: string;
     };
@@ -37939,22 +37773,18 @@ export type EventStaffInviteDeleteData = {
 
 export type EventStaffInviteDeleteErrors = {
     /**
-     * Authentication required. User must be logged in
-     */
-    401: unknown;
-    /**
-     * Permission denied. User is not event creator or existing staff member
+     * Permission denied
      */
     403: unknown;
     /**
-     * Invite not found
+     * Not found
      */
     404: unknown;
 };
 
 export type EventStaffInviteDeleteResponses = {
     /**
-     * Successfully deleted invite. The invite has been permanently removed from the system
+     * Deleted
      */
     204: void;
 };
@@ -37964,13 +37794,7 @@ export type EventStaffInviteDeleteResponse = EventStaffInviteDeleteResponses[key
 export type EventStaffInviteRetrieveData = {
     body?: never;
     path: {
-        /**
-         * Integer ID of the specific staff invite to retrieve
-         */
         invite_id: string;
-        /**
-         * UUID of the event containing the invite
-         */
         url_safe_title: string;
     };
     query?: never;
@@ -37979,23 +37803,20 @@ export type EventStaffInviteRetrieveData = {
 
 export type EventStaffInviteRetrieveErrors = {
     /**
-     * Authentication required. User must be logged in to access invites
+     * Authentication required
      */
     401: unknown;
     /**
-     * Permission denied. User is not event creator, staff, or the target user
+     * Permission denied
      */
     403: unknown;
     /**
-     * Not found. Either the event does not exist with the specified event_id, or the invite does not exist with the specified invite_id for this event
+     * Not found
      */
     404: unknown;
 };
 
 export type EventStaffInviteRetrieveResponses = {
-    /**
-     * Successfully retrieved invite. Returns complete invite details with all fields including: invite ID, event information, target user details, inviter details, acceptance status, validity status, timestamps, expiry date, and HATEOAS links
-     */
     200: EventStaffInvite;
 };
 
@@ -38004,12 +37825,9 @@ export type EventStaffInviteRetrieveResponse = EventStaffInviteRetrieveResponses
 export type EventStaffInvitePartialUpdateData = {
     body?: PatchedEventStaffInviteRequest;
     path: {
-        /**
-         * UUID of the specific staff invite to update
-         */
         invite_id: string;
         /**
-         * UUID of the event containing the invite
+         * URL safe title
          */
         url_safe_title: string;
     };
@@ -38019,30 +37837,20 @@ export type EventStaffInvitePartialUpdateData = {
 
 export type EventStaffInvitePartialUpdateErrors = {
     /**
-     * Bad request - validation errors occurred. Common causes:
-     * - Attempting to modify an already-accepted invite
-     * - New target user already has an active invite for this event
-     * - New expiry date is in the past
+     * Validation errors
      */
     400: unknown;
     /**
-     * Authentication required. User must be logged in
-     */
-    401: unknown;
-    /**
-     * Permission denied. User is not event creator or existing staff member
+     * Permission denied
      */
     403: unknown;
     /**
-     * Invite not found
+     * Not found
      */
     404: unknown;
 };
 
 export type EventStaffInvitePartialUpdateResponses = {
-    /**
-     * Successfully updated invite. Returns complete updated invite details
-     */
     200: EventStaffInvite;
 };
 
@@ -38051,12 +37859,9 @@ export type EventStaffInvitePartialUpdateResponse = EventStaffInvitePartialUpdat
 export type EventStaffInviteUpdateData = {
     body: EventStaffInviteRequest;
     path: {
-        /**
-         * UUID of the specific staff invite to update
-         */
         invite_id: string;
         /**
-         * UUID of the event containing the invite
+         * URL safe title
          */
         url_safe_title: string;
     };
@@ -38066,32 +37871,20 @@ export type EventStaffInviteUpdateData = {
 
 export type EventStaffInviteUpdateErrors = {
     /**
-     * Bad request - validation errors occurred. Common causes:
-     * - Attempting to modify an already-accepted invite
-     * - New target user already has an active invite for this event
-     * - New target user is already an event staff member
-     * - New expiry date is in the past
-     * - Required fields missing
+     * Validation errors
      */
     400: unknown;
     /**
-     * Authentication required. User must be logged in
-     */
-    401: unknown;
-    /**
-     * Permission denied. User is not event creator or existing staff member
+     * Permission denied
      */
     403: unknown;
     /**
-     * Invite not found
+     * Not found
      */
     404: unknown;
 };
 
 export type EventStaffInviteUpdateResponses = {
-    /**
-     * Successfully updated invite. Returns complete updated invite details
-     */
     200: EventStaffInvite;
 };
 
@@ -38100,13 +37893,7 @@ export type EventStaffInviteUpdateResponse = EventStaffInviteUpdateResponses[key
 export type EventListStaffInvitesAcceptCreateData = {
     body?: never;
     path: {
-        /**
-         * UUID of the specific staff invite to accept
-         */
         invite_id: string;
-        /**
-         * UUID of the event for which the invite was sent
-         */
         url_safe_title: string;
     };
     query?: never;
@@ -38115,52 +37902,29 @@ export type EventListStaffInvitesAcceptCreateData = {
 
 export type EventListStaffInvitesAcceptCreateErrors = {
     /**
-     * Bad request - invite is not valid for acceptance. Common causes:
-     * - Invite has already been accepted (accepted=True)
-     * - Invite has been deactivated (is_active=False)
-     * - Invite has expired (expires_at in the past)
-     * - User is already an event staff member
-     * - Invite is in an invalid state
-     *
-     * Error response includes a specific message explaining why the invite cannot be accepted
+     * Invite not valid for acceptance.
      */
     400: unknown;
     /**
-     * Authentication required. User must be logged in to accept invites
+     * Authentication required.
      */
     401: unknown;
     /**
-     * Permission denied. The authenticated user is not the target user of this invite. Users can only accept invites that were sent to them specifically
+     * Not the invite target.
      */
     403: unknown;
     /**
-     * Not found. Either:
-     * - The event does not exist with the specified event_id
-     * - The invite does not exist with the specified invite_id
-     * - The invite exists but is not associated with this event
+     * Invite not found.
      */
     404: unknown;
 };
 
 export type EventListStaffInvitesAcceptCreateResponses = {
     /**
-     * Invite successfully accepted. User has been added to the event staff team. Returns a success message and the EventStaff object containing: staff ID, event details, user information, role, join date, and management links
+     * Invite accepted; EventStaff created.
      */
-    200: {
-        /**
-         * Success confirmation message
-         */
-        message?: string;
-        /**
-         * The newly created EventStaff object with complete details
-         */
-        staff?: {
-            [key: string]: unknown;
-        };
-    };
+    200: unknown;
 };
-
-export type EventListStaffInvitesAcceptCreateResponse = EventListStaffInvitesAcceptCreateResponses[keyof EventListStaffInvitesAcceptCreateResponses];
 
 export type EventListStaffListListData = {
     body?: never;
@@ -38247,7 +38011,7 @@ export type EventListUpdateAvailabilityWindowPartialUpdateData = {
     };
     query?: {
         /**
-         * Availability window ID to update (UUID). Can also be provided in request body as availability_id.
+         * Availability window ID to update. Can also be provided in request body as availability_id.
          */
         window_id?: string;
     };
@@ -38285,7 +38049,7 @@ export type EventListUpdateAvailabilityWindowUpdateData = {
     };
     query?: {
         /**
-         * Availability window ID to update (UUID). Can also be provided in request body as availability_id.
+         * Availability window ID to update. Can also be provided in request body as availability_id.
          */
         window_id?: string;
     };
@@ -38315,21 +38079,9 @@ export type EventListUpdateAvailabilityWindowUpdateResponse = EventListUpdateAva
 
 export type EventListUpdateResourcePartialUpdateData = {
     body?: {
-        /**
-         * Resource name
-         */
         name?: string;
-        /**
-         * Resource description
-         */
         description?: string;
-        /**
-         * Resource tag (e.g., LANDING_PHOTO_MAIN, LANDING_PHOTO_SECONDARY)
-         */
         tag?: string;
-        /**
-         * Whether resource is public
-         */
         public?: boolean;
     };
     path: {
@@ -38382,7 +38134,7 @@ export type EventListWsTokenCreateData = {
 
 export type EventListWsTokenCreateErrors = {
     /**
-     * Permission denied - user does not have access to this event
+     * Permission denied
      */
     403: unknown;
     /**
@@ -38397,7 +38149,7 @@ export type EventListWsTokenCreateResponses = {
      */
     200: {
         /**
-         * WebSocket-specific JWT token (5-minute expiry)
+         * WebSocket-specific JWT (5-minute expiry)
          */
         token?: string;
         /**
@@ -38405,7 +38157,7 @@ export type EventListWsTokenCreateResponses = {
          */
         expires_in?: number;
         /**
-         * WebSocket URL pattern to connect to
+         * WebSocket URL to connect to
          */
         ws_url?: string;
     };

@@ -131,7 +131,7 @@
                 </label>
                 <OrganisationSelect
                   :model-value="organisation"
-                  @update:model-value="(value) => { organisation = value ?? undefined }"
+                  @update:model-value="(value) => { organisation = typeof value === 'number' ? value : undefined }"
                 />
               </div>
 

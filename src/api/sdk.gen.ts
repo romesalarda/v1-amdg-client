@@ -175,6 +175,30 @@ export const actionsRetrieve = <ThrowOnError extends boolean = false>(options: O
  * Retrieve a paginated list of attendees with comprehensive filtering and search capabilities. Results include attendee demographics, contact information, event associations, and relationship details. Staff members can view all attendees, while regular users can only view attendees they own or guard.
  */
 export const attendeesList = <ThrowOnError extends boolean = false>(options?: Options<AttendeesListData, ThrowOnError>) => (options?.client ?? client).get<AttendeesListResponses, unknown, ThrowOnError>({
+    querySerializer: { parameters: {
+            accessibility_requirement: { array: { explode: false } },
+            answered_question_type: { array: { explode: false } },
+            area_from: { array: { explode: false } },
+            booking: { array: { explode: false } },
+            dietary_requirement: { array: { explode: false } },
+            discount_id: { array: { explode: false } },
+            donation_status: { array: { explode: false } },
+            form_answered_question: { array: { explode: false } },
+            form_answered_question_type: { array: { explode: false } },
+            form_response_form: { array: { explode: false } },
+            form_selected_option: { array: { explode: false } },
+            medical_condition: { array: { explode: false } },
+            order_status: { array: { explode: false } },
+            order_status_not: { array: { explode: false } },
+            organisation: { array: { explode: false } },
+            payment_id: { array: { explode: false } },
+            payment_method_type: { array: { explode: false } },
+            payment_status: { array: { explode: false } },
+            purchased_product: { array: { explode: false } },
+            question: { array: { explode: false } },
+            refund_status: { array: { explode: false } },
+            selected_option: { array: { explode: false } }
+        } },
     security: [{ scheme: 'bearer', type: 'http' }, {
             in: 'cookie',
             name: 'sessionid',
@@ -4369,7 +4393,7 @@ export const eventFormsReorderQuestionsCreate = <ThrowOnError extends boolean = 
 /**
  * List Events
  *
- * Retrieve a paginated list of all events with comprehensive filtering and search capabilities. Results include event details, status, type, organization, dates, and registration information. Non-staff users only see published and active events, while staff can view all events including drafts. Supports filtering by status, event type, organization, area/chapter location, venue details, date windows, thematic fields, and both standard and fuzzy text search. All query parameter names are flat (no double-underscore notation).
+ * Retrieve a paginated list of all events with comprehensive filtering and search capabilities. Non-staff users only see published and active events, while staff can view all events including drafts.
  */
 export const eventListList = <ThrowOnError extends boolean = false>(options?: Options<EventListListData, ThrowOnError>) => (options?.client ?? client).get<EventListListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4384,7 +4408,7 @@ export const eventListList = <ThrowOnError extends boolean = false>(options?: Op
 /**
  * Create Event
  *
- * Create a new event with complete information including title, dates, location, type, and settings. Automatically assigns the authenticated user as the event creator. Creates associated event settings and generates unique display code for identification.
+ * Create a new event. Automatically assigns the authenticated user as the event creator and generates a unique display code for identification.
  */
 export const eventListCreate = <ThrowOnError extends boolean = false>(options: Options<EventListCreateData, ThrowOnError>) => (options.client ?? client).post<EventListCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4403,7 +4427,7 @@ export const eventListCreate = <ThrowOnError extends boolean = false>(options: O
 /**
  * Delete Event
  *
- * Soft delete an event by marking it as deleted without permanent removal. Soft-deleted events are hidden from public view but retained for audit purposes. Only event creators and staff can delete events.
+ * Soft delete an event by marking it as deleted without permanent removal. Soft-deleted events are hidden from public view but retained for audit purposes.
  */
 export const eventListDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListDestroyResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4418,7 +4442,7 @@ export const eventListDestroy = <ThrowOnError extends boolean = false>(options: 
 /**
  * Get Event Details
  *
- * Retrieve comprehensive details about a specific event including all metadata, dates, registration information, settings, staff, resources, reviews, and associated content. Includes HATEOAS links for related resources and nested endpoints.
+ * Retrieve comprehensive details about a specific event including all metadata, dates, registration information, settings, staff, resources, reviews, and associated content.
  */
 export const eventListRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4433,7 +4457,7 @@ export const eventListRetrieve = <ThrowOnError extends boolean = false>(options:
 /**
  * Partially Update Event
  *
- * Partially update an event without providing complete payload. Allows updating individual fields like dates, description, or status. Only event creators and staff can update events.
+ * Partially update an event without providing complete payload.
  */
 export const eventListPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventListPartialUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4452,7 +4476,7 @@ export const eventListPartialUpdate = <ThrowOnError extends boolean = false>(opt
 /**
  * Update Event
  *
- * Update all fields of an existing event. Requires complete payload with all fields. Use PATCH for partial updates. Only event creators and staff can update events.
+ * Update all fields of an existing event. Use PATCH for partial updates.
  */
 export const eventListUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListUpdateData, ThrowOnError>) => (options.client ?? client).put<EventListUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4471,7 +4495,7 @@ export const eventListUpdate = <ThrowOnError extends boolean = false>(options: O
 /**
  * Add Availability Window
  *
- * Add a new availability window to the event defining when registrations are open. Specify start and end times, capacity limits, and other scheduling constraints. Only event creators, staff, and superusers can add availability windows.
+ * Add a new availability window to the event defining when registrations are open. Only event creators and superusers can add availability windows.
  */
 export const eventListAddAvailabilityWindowCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddAvailabilityWindowCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddAvailabilityWindowCreateResponses, EventListAddAvailabilityWindowCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4490,7 +4514,7 @@ export const eventListAddAvailabilityWindowCreate = <ThrowOnError extends boolea
 /**
  * Add Landing Image to Event
  *
- * Add a landing image to the event for display on event pages and listings. Can specify whether this is the main landing image or a secondary image. If set as main, any existing main landing image is automatically demoted to secondary. Only event creators, staff, and superusers can add landing images.
+ * Add a landing image to the event. If set as main, any existing main landing image is automatically demoted to secondary. Only event creators and superusers can add landing images.
  */
 export const eventListAddLandingImageCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddLandingImageCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddLandingImageCreateResponses, EventListAddLandingImageCreateErrors, ThrowOnError>({
     ...formDataBodySerializer,
@@ -4510,7 +4534,7 @@ export const eventListAddLandingImageCreate = <ThrowOnError extends boolean = fa
 /**
  * Add Resource to Event
  *
- * Add a new resource to the event such as documents, images, videos, audio files, or links. Supports file uploads for documents and images, or URL for links. Resources can be tagged for organization (e.g., LANDING_PHOTO) and marked as public or private. Only event creators, staff, and superusers can add resources.
+ * Add a new resource to the event such as documents, images, videos, audio files, or links. Only event creators and superusers can add resources.
  */
 export const eventListAddResourceCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddResourceCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddResourceCreateResponses, EventListAddResourceCreateErrors, ThrowOnError>({
     ...formDataBodySerializer,
@@ -4530,7 +4554,7 @@ export const eventListAddResourceCreate = <ThrowOnError extends boolean = false>
 /**
  * Add Staff to Event
  *
- * Add a user as a staff member to the event with optional notes. Creates an EventStaff instance linking the user to the event. Only event creators, staff, and superusers can add staff members. Returns validation error if user is already a staff member.
+ * Add a user as a staff member to the event with optional notes. Creates an EventStaff instance linking the user to the event. Only event creators and superusers can add staff members. Returns validation error if user is already a staff member.
  */
 export const eventListAddStaffCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAddStaffCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAddStaffCreateResponses, EventListAddStaffCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4549,7 +4573,7 @@ export const eventListAddStaffCreate = <ThrowOnError extends boolean = false>(op
 /**
  * Apply Template to Event
  *
- * Apply an availability window template to the event. This will create multiple availability windows based on the template configuration. Each window's dates are calculated using offsets from the event start date. This is a convenient way to set up standard availability windows (registration, payment, refunds, etc.) without manually creating each one.
+ * Apply an availability window template to the event. Creates multiple availability windows based on the template configuration. Each window's dates are calculated using offsets from the event start date.
  */
 export const eventListApplyAvailabilityTemplateCreate = <ThrowOnError extends boolean = false>(options: Options<EventListApplyAvailabilityTemplateCreateData, ThrowOnError>) => (options.client ?? client).post<EventListApplyAvailabilityTemplateCreateResponses, EventListApplyAvailabilityTemplateCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4568,7 +4592,7 @@ export const eventListApplyAvailabilityTemplateCreate = <ThrowOnError extends bo
 /**
  * Assign Permission to User
  *
- * Assign a specific permission to a user for this event, granting them access to perform specific actions. Creates an EventPermissionAssignment linking user, event, and permission with CRUD flags. CRUD flags control granular access: read_only (if True, only read access), allow_create, allow_update, allow_delete. Prevents duplicate assignments to the same user for the same permission. Only event creators, staff, and superusers can assign permissions.
+ * Assign a specific permission to a user for this event with CRUD flags. Only event creators and superusers can assign permissions.
  */
 export const eventListAssignPermissionCreate = <ThrowOnError extends boolean = false>(options: Options<EventListAssignPermissionCreateData, ThrowOnError>) => (options.client ?? client).post<EventListAssignPermissionCreateResponses, EventListAssignPermissionCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4587,7 +4611,7 @@ export const eventListAssignPermissionCreate = <ThrowOnError extends boolean = f
 /**
  * List Availability Windows
  *
- * Retrieve all availability windows configured for the event. Availability windows define time slots when the event is open for registrations or bookings. Used for scheduling and capacity management.
+ * Retrieve all availability windows configured for the event. Availability windows define time slots when the event is open for registrations or bookings.
  */
 export const eventListAvailabilityWindowsList = <ThrowOnError extends boolean = false>(options: Options<EventListAvailabilityWindowsListData, ThrowOnError>) => (options.client ?? client).get<EventListAvailabilityWindowsListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4602,29 +4626,7 @@ export const eventListAvailabilityWindowsList = <ThrowOnError extends boolean = 
 /**
  * Check User Permissions for Event
  *
- * Get comprehensive permission information for a user on this event. Returns detailed access rights including:
- *
- * **User Relationships:**
- * - Whether the user is the event creator
- * - Whether the user is an event staff member
- * - Whether the user is a Django admin/staff
- *
- * **Computed Permissions:**
- * - `can_manage_event`: Edit event details, settings, and configuration
- * - `can_manage_staff`: Add/remove staff members and manage team
- * - `can_manage_invites`: Create and manage staff invitations
- * - `can_manage_resources`: Add/remove event resources (documents, images, links)
- * - `can_delete_event`: Soft delete or restore the event
- *
- * **Explicit Assignments:**
- * - List of specific permissions explicitly assigned to the user
- * - List of roles assigned to the user (which grant bundles of permissions)
- *
- * **Usage:**
- * - If `user_id` query param is provided, checks permissions for that user (requires admin/owner access)
- * - If no `user_id` provided, checks permissions for the currently authenticated user
- * - Useful for UI to show/hide management buttons based on user access
- * - Helps frontend determine what actions are available to the user
+ * Get comprehensive permission information for a user on this event. If `user_id` query param is provided, checks permissions for that user (requires admin/owner access). Otherwise checks the current authenticated user.
  */
 export const eventListCheckPermissionsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListCheckPermissionsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListCheckPermissionsRetrieveResponses, EventListCheckPermissionsRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4639,7 +4641,7 @@ export const eventListCheckPermissionsRetrieve = <ThrowOnError extends boolean =
 /**
  * Demote Landing Image to Secondary
  *
- * Demote the main landing image to secondary by updating its tag. This is more efficient than deleting and re-creating images. Only event creators, staff, and superusers can demote images. Requires resource_id query parameter.
+ * Demote the main landing image to secondary. Only event creators and superusers can demote images.
  */
 export const eventListDemoteLandingImageCreate = <ThrowOnError extends boolean = false>(options: Options<EventListDemoteLandingImageCreateData, ThrowOnError>) => (options.client ?? client).post<EventListDemoteLandingImageCreateResponses, EventListDemoteLandingImageCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4658,7 +4660,7 @@ export const eventListDemoteLandingImageCreate = <ThrowOnError extends boolean =
 /**
  * Get Landing Images
  *
- * Retrieve all landing images for the event including both main and secondary images. Landing images are displayed on event pages, listings, and promotional materials. Images are tagged as LANDING_PHOTO_MAIN or LANDING_PHOTO_SECONDARY for identification.
+ * Retrieve all landing images for the event including both main and secondary images. Images are tagged as LANDING_PHOTO_MAIN or LANDING_PHOTO_SECONDARY.
  */
 export const eventListLandingImagesList = <ThrowOnError extends boolean = false>(options: Options<EventListLandingImagesListData, ThrowOnError>) => (options.client ?? client).get<EventListLandingImagesListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4673,7 +4675,7 @@ export const eventListLandingImagesList = <ThrowOnError extends boolean = false>
 /**
  * Get Current User Bookings For Event (Paginated)
  *
- * Retrieve all of the current authenticated user's bookings for this event with pagination and filtering support. Results include attendees, tickets, and payments. Selection precedence is: bookings created by current user first, then bookings where user is linked as an attendee. Supports filtering by outstanding payments, booking dates, attendee names, and more. Uses OR logic for combining filters.
+ * Retrieve all of the current authenticated user's bookings for this event with pagination and filtering support. Results include attendees, tickets, and payments.
  */
 export const eventListMyBookingRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListMyBookingRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListMyBookingRetrieveResponses, EventListMyBookingRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4688,7 +4690,7 @@ export const eventListMyBookingRetrieve = <ThrowOnError extends boolean = false>
 /**
  * Get Outstanding Booking Payments
  *
- * Retrieve all outstanding (unpaid) payment records for the current authenticated user in this event. Outstanding payments include both payments linked to existing bookings and payments with pending checkout intents (bookings not yet created). Supports pagination and comprehensive filtering by payment status, booking dates, attendee names, and more. Uses OR logic for combining filters to show broader results.
+ * Retrieve all outstanding (unpaid) payment records for the current authenticated user in this event. Supports pagination and filtering.
  */
 export const eventListMyOutstandingBookingPaymentsRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListMyOutstandingBookingPaymentsRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListMyOutstandingBookingPaymentsRetrieveResponses, EventListMyOutstandingBookingPaymentsRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4703,7 +4705,7 @@ export const eventListMyOutstandingBookingPaymentsRetrieve = <ThrowOnError exten
 /**
  * Get Unified Payment Summary For Current User Booking
  *
- * Retrieve a booking payment summary for the current authenticated user. The response keeps separate sections for booking, shop, attendee, and outstanding payments, but each payment_id is canonical and appears in only one section. Use the returned relationship metadata to understand whether a payment is tied to a booking, one or more orders, and the related attendee identities. Outstanding payments are unpaid only and are deduplicated before serialization.
+ * Retrieve a booking payment summary for the current authenticated user. The response keeps separate sections for booking, shop, attendee, and outstanding payments, but each payment_id is canonical and appears in only one section.
  */
 export const eventListMyPaymentSummaryRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventListMyPaymentSummaryRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventListMyPaymentSummaryRetrieveResponses, EventListMyPaymentSummaryRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4733,7 +4735,7 @@ export const eventListPreviewTemplateApplicationRetrieve = <ThrowOnError extends
 /**
  * Promote Landing Image to Main
  *
- * Promote a secondary landing image to main landing image by updating its tag. Automatically demotes the current main image to secondary if one exists. This is more efficient than deleting and re-creating images. Only event creators, staff, and superusers can promote images. Requires resource_id query parameter.
+ * Promote a secondary landing image to main landing image. Automatically demotes the current main image to secondary. Only event creators and superusers can promote images.
  */
 export const eventListPromoteLandingImageCreate = <ThrowOnError extends boolean = false>(options: Options<EventListPromoteLandingImageCreateData, ThrowOnError>) => (options.client ?? client).post<EventListPromoteLandingImageCreateResponses, EventListPromoteLandingImageCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4767,7 +4769,7 @@ export const eventListPublicSponsorsRetrieve = <ThrowOnError extends boolean = f
 /**
  * Remove Availability Window
  *
- * Remove an availability window from the event by its window ID. Permanently deletes the window and affects event scheduling. Only event creators, staff, and superusers can remove availability windows. Requires window_id query parameter.
+ * Remove an availability window from the event by its window ID. Only event creators and superusers can remove availability windows.
  */
 export const eventListRemoveAvailabilityWindowDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveAvailabilityWindowDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveAvailabilityWindowDestroyResponses, EventListRemoveAvailabilityWindowDestroyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4782,7 +4784,7 @@ export const eventListRemoveAvailabilityWindowDestroy = <ThrowOnError extends bo
 /**
  * Remove Resource from Event
  *
- * Remove a resource from the event by its resource ID. Permanently deletes the resource including any uploaded files. Protected resources cannot be removed. Only event creators, staff, and superusers can remove resources. Requires resource_id query parameter.
+ * Remove a resource from the event by its resource ID. Protected resources cannot be removed. Only event creators and superusers can remove resources.
  */
 export const eventListRemoveResourceDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveResourceDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveResourceDestroyResponses, EventListRemoveResourceDestroyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4797,7 +4799,7 @@ export const eventListRemoveResourceDestroy = <ThrowOnError extends boolean = fa
 /**
  * Remove Staff from Event
  *
- * Remove a staff member from an event by their staff ID. Permanently deletes the EventStaff instance. Only event creators, staff, and superusers can remove staff members. Requires staff_id query parameter.
+ * Remove a staff member from an event by their staff ID. Permanently deletes the EventStaff instance. Only event creators and superusers can remove staff members. Requires staff_id query parameter.
  */
 export const eventListRemoveStaffDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRemoveStaffDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRemoveStaffDestroyResponses, EventListRemoveStaffDestroyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4812,7 +4814,7 @@ export const eventListRemoveStaffDestroy = <ThrowOnError extends boolean = false
 /**
  * List Event Resources
  *
- * Retrieve all resources associated with the event including documents, images, videos, and links. Supports filtering by tag (e.g., LANDING_PHOTO) and resource type. Resources can be public or restricted based on permissions.
+ * Retrieve all resources associated with the event including documents, images, videos, and links. Supports filtering by tag and resource type.
  */
 export const eventListResourcesList = <ThrowOnError extends boolean = false>(options: Options<EventListResourcesListData, ThrowOnError>) => (options.client ?? client).get<EventListResourcesListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4827,7 +4829,7 @@ export const eventListResourcesList = <ThrowOnError extends boolean = false>(opt
 /**
  * Restore Soft-Deleted Event
  *
- * Restore a previously soft-deleted event back to active status. Clears the deletion timestamp and deleted_by field. Makes the event visible and accessible again in all listings. Only event creators, staff, and superusers can restore events.
+ * Restore a previously soft-deleted event back to active status. Only event creators and superusers can restore events.
  */
 export const eventListRestoreCreate = <ThrowOnError extends boolean = false>(options: Options<EventListRestoreCreateData, ThrowOnError>) => (options.client ?? client).post<EventListRestoreCreateResponses, EventListRestoreCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4846,7 +4848,7 @@ export const eventListRestoreCreate = <ThrowOnError extends boolean = false>(opt
 /**
  * Revoke Permission from User
  *
- * Revoke a specific permission from a user for this event by deleting the permission assignment. Immediately removes the user's access to perform the specific action. Only event creators, staff, and superusers can revoke permissions. Requires assignment_id query parameter.
+ * Revoke a specific permission from a user for this event. Only event creators and superusers can revoke permissions.
  */
 export const eventListRevokePermissionDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListRevokePermissionDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListRevokePermissionDestroyResponses, EventListRevokePermissionDestroyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4861,7 +4863,7 @@ export const eventListRevokePermissionDestroy = <ThrowOnError extends boolean = 
 /**
  * Save Current Windows as Template
  *
- * Save the current event's availability windows as a reusable template. The template will be associated with your organization and can be applied to future events. Window dates are converted to offsets from event start date for reusability.
+ * Save the current event's availability windows as a reusable template. The template will be associated with your organization and can be applied to future events.
  */
 export const eventListSaveWindowsAsTemplateCreate = <ThrowOnError extends boolean = false>(options: Options<EventListSaveWindowsAsTemplateCreateData, ThrowOnError>) => (options.client ?? client).post<EventListSaveWindowsAsTemplateCreateResponses, EventListSaveWindowsAsTemplateCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -4895,7 +4897,7 @@ export const eventListSettingsRetrieve = <ThrowOnError extends boolean = false>(
 /**
  * Soft Delete Event
  *
- * Soft delete an event by marking it as deleted without permanent removal. Records the user who performed the deletion and timestamp. Soft-deleted events can be restored later using the restore endpoint. Only event creators, staff, and superusers can soft delete events.
+ * Soft delete an event by marking it as deleted without permanent removal. Only event creators and superusers can soft delete events.
  */
 export const eventListSoftDeleteCreate = <ThrowOnError extends boolean = false>(options: Options<EventListSoftDeleteCreateData, ThrowOnError>) => (options.client ?? client).post<EventListSoftDeleteCreateResponses, EventListSoftDeleteCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5118,23 +5120,13 @@ export const eventListSponsorshipPackagesPartialUpdate = <ThrowOnError extends b
 /**
  * List Event Staff Invites
  *
- * Retrieve a paginated list of all staff invites for this specific event with comprehensive filtering capabilities. Permission-based visibility ensures users only see relevant invites:
- * - Event creators and existing staff members can view ALL invites for their event
- * - Regular authenticated users can only see invites where they are the target user
- * - Django staff and superusers have full visibility
+ * Retrieve a paginated list of all staff invites for this specific event. Event creators and existing staff members can view ALL invites. Regular authenticated users can only see invites where they are the target user.
  *
  * **Filtering Options:**
  * - `accepted`: Filter by whether invite has been accepted (true/false)
- * - `is_valid`: Filter by validity status - valid invites are active, not expired, and not accepted
- * - `target_user`: Filter by target user ID to see all invites for a specific user
- * - `search`: Search by target user email address for quick lookup
- *
- * Results are automatically ordered by creation date (newest first) and include:
- * - Invite status (active, accepted, expired)
- * - Target user information (email, name)
- * - Inviter information (who sent the invite)
- * - Validity status (is_valid property)
- * - HATEOAS links for invite management and acceptance
+ * - `is_valid`: Filter by validity status
+ * - `target_user`: Filter by target user ID
+ * - `search`: Search by target user email address
  */
 export const eventStaffInvitesList = <ThrowOnError extends boolean = false>(options: Options<EventStaffInvitesListData, ThrowOnError>) => (options.client ?? client).get<EventStaffInvitesListResponses, EventStaffInvitesListErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5149,31 +5141,7 @@ export const eventStaffInvitesList = <ThrowOnError extends boolean = false>(opti
 /**
  * Create Event Staff Invite
  *
- * Create a new staff invite to invite a user to join the event staff team. The invite is sent to a target user who can then accept it to become an event staff member.
- *
- * **Required Fields:**
- * - `target_user` (integer): ID of the user being invited
- *
- * **Optional Fields:**
- * - `expires_at` (datetime): When the invite expires (ISO 8601 format). If omitted, invite never expires
- *
- * **Permissions:**
- * Only event creators and existing event staff members can create invites. Django staff and superusers also have permission.
- *
- * **Validations:**
- * - Target user must exist in the system
- * - Target user cannot already have an active invite for this event
- * - Target user cannot already be an event staff member
- * - Expiry date (if provided) must be in the future
- * - The authenticated user is automatically recorded as the inviter
- *
- * **Workflow:**
- * 1. Event creator/staff creates invite
- * 2. Target user receives notification (outside API scope)
- * 3. Target user can view invite via GET request or my-invites action
- * 4. Target user accepts invite via accept action
- * 5. EventStaff record is automatically created
- * 6. Invite is marked as accepted and inactive
+ * Create a new staff invite to invite a user to join the event staff team. Only event creators and existing event staff members can create invites.
  */
 export const eventStaffInvitesCreate = <ThrowOnError extends boolean = false>(options: Options<EventStaffInvitesCreateData, ThrowOnError>) => (options.client ?? client).post<EventStaffInvitesCreateResponses, EventStaffInvitesCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5192,21 +5160,10 @@ export const eventStaffInvitesCreate = <ThrowOnError extends boolean = false>(op
 /**
  * Delete Staff Invite
  *
- * Permanently delete a staff invite from the system. This action is irreversible.
+ * ViewSet for comprehensive event management.
  *
- * **Use Cases:**
- * - Rescind an invite before it's accepted
- * - Clean up expired or invalid invites
- * - Remove duplicate or erroneous invites
- *
- * **Behavior:**
- * - Completely removes invite record from database
- * - Cannot be undone
- * - Safe to delete accepted invites (doesn't affect EventStaff membership)
- * - No response body on success (204 status)
- *
- * **Permissions:**
- * Only event creators and existing event staff members can delete invites. Django staff and superusers also have full access.
+ * Core CRUD and a small set of first-class actions live here.
+ * All domain-specific actions are provided by the mixin classes above.
  */
 export const eventStaffInviteDelete = <ThrowOnError extends boolean = false>(options: Options<EventStaffInviteDeleteData, ThrowOnError>) => (options.client ?? client).delete<EventStaffInviteDeleteResponses, EventStaffInviteDeleteErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5221,19 +5178,10 @@ export const eventStaffInviteDelete = <ThrowOnError extends boolean = false>(opt
 /**
  * Retrieve Staff Invite Details
  *
- * Fetch complete details for a specific event staff invite including:
- * - Full invite metadata (ID, status, created/updated timestamps)
- * - Complete event information (ID, name, description, dates)
- * - Target user details (ID, email, name, profile)
- * - Inviter information (who sent the invite)
- * - Validity and acceptance status
- * - Expiry information (if applicable)
- * - HATEOAS links for invite management and acceptance
+ * ViewSet for comprehensive event management.
  *
- * **Permissions:** Users can retrieve invites if they are:
- * - The event creator or existing staff member (can see all invites)
- * - The target user of the invite (can see their own invite)
- * - Django staff or superuser (full visibility)
+ * Core CRUD and a small set of first-class actions live here.
+ * All domain-specific actions are provided by the mixin classes above.
  */
 export const eventStaffInviteRetrieve = <ThrowOnError extends boolean = false>(options: Options<EventStaffInviteRetrieveData, ThrowOnError>) => (options.client ?? client).get<EventStaffInviteRetrieveResponses, EventStaffInviteRetrieveErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5248,20 +5196,10 @@ export const eventStaffInviteRetrieve = <ThrowOnError extends boolean = false>(o
 /**
  * Partial Update Staff Invite
  *
- * Update specific fields of an existing staff invite without replacing the entire object.
+ * ViewSet for comprehensive event management.
  *
- * **Optional Fields** (provide only what you want to change):
- * - `target_user` (integer): Change the target user
- * - `expires_at` (datetime or null): Modify expiry date or remove expiry
- *
- * **Behavior:**
- * - Only provided fields are updated
- * - Unprovided fields remain unchanged
- * - Useful for extending expiry without changing target user
- * - Cannot modify already accepted invites
- *
- * **Permissions:**
- * Only event creators and existing event staff members can update invites. Django staff and superusers also have full access.
+ * Core CRUD and a small set of first-class actions live here.
+ * All domain-specific actions are provided by the mixin classes above.
  */
 export const eventStaffInvitePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffInvitePartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventStaffInvitePartialUpdateResponses, EventStaffInvitePartialUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5280,21 +5218,10 @@ export const eventStaffInvitePartialUpdate = <ThrowOnError extends boolean = fal
 /**
  * Full Update Staff Invite
  *
- * Completely replace an existing staff invite with new data. All fields must be provided.
+ * ViewSet for comprehensive event management.
  *
- * **Required Fields:**
- * - `target_user` (integer): New target user ID
- * - `expires_at` (datetime or null): New expiry date (ISO 8601) or null for no expiry
- *
- * **Behavior:**
- * - Replaces ALL editable fields with provided values
- * - Read-only fields (event, created_at, updated_at) are preserved
- * - Can change target user if new user doesn't have existing invite
- * - Can modify expiry date or remove it (set to null)
- * - Cannot modify already accepted invites
- *
- * **Permissions:**
- * Only event creators and existing event staff members can update invites. Django staff and superusers also have full access.
+ * Core CRUD and a small set of first-class actions live here.
+ * All domain-specific actions are provided by the mixin classes above.
  */
 export const eventStaffInviteUpdate = <ThrowOnError extends boolean = false>(options: Options<EventStaffInviteUpdateData, ThrowOnError>) => (options.client ?? client).put<EventStaffInviteUpdateResponses, EventStaffInviteUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5313,44 +5240,7 @@ export const eventStaffInviteUpdate = <ThrowOnError extends boolean = false>(opt
 /**
  * Accept Event Staff Invite
  *
- * **Accept Staff Invitation and Join Event Team**
- *
- * This endpoint allows a user to accept a staff invitation they received for an event. Accepting the invite automatically adds the user to the event's staff team and marks the invite as processed.
- *
- * **Workflow:**
- * 1. User receives a staff invite (created via POST /staff-invites/)
- * 2. User can view their pending invites via GET /staff-invites/ or my-invites action
- * 3. User accepts invite by calling this endpoint
- * 4. System validates the invite is still valid
- * 5. System creates EventStaff record for the user
- * 6. Invite is marked as accepted and deactivated
- * 7. User now has staff permissions for the event
- *
- * **Permissions:**
- * Only the target user specified in the invite can accept it. The system validates:
- * - The authenticated user matches the invite's target_user
- * - The invite is still active and not deactivated
- * - The invite has not already been accepted
- * - The invite has not expired (if expiry date was set)
- * - The user is not already a staff member for this event
- *
- * **Validation Checks:**
- * - **Active Status**: Invite must be active (is_active=True)
- * - **Acceptance Status**: Invite must not be already accepted
- * - **Expiry Date**: If set, expires_at must be in the future
- * - **Target User**: Authenticated user must be the invite target
- * - **Duplicate Staff**: User cannot already be an event staff member
- *
- * **Success Response:**
- * Returns a success message and the newly created EventStaff object with:
- * - Staff member ID and role information
- * - Event details
- * - User information
- * - Timestamps (joined date)
- * - HATEOAS links for staff management
- *
- * **Atomic Operation:**
- * The acceptance process is atomic - either both the EventStaff record is created AND the invite is marked as accepted, or neither happens. This prevents data inconsistencies.
+ * Accept a staff invitation. Only the invite target can accept it. On success, an EventStaff record is created and the invite is marked accepted.
  */
 export const eventListStaffInvitesAcceptCreate = <ThrowOnError extends boolean = false>(options: Options<EventListStaffInvitesAcceptCreateData, ThrowOnError>) => (options.client ?? client).post<EventListStaffInvitesAcceptCreateResponses, EventListStaffInvitesAcceptCreateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5380,7 +5270,7 @@ export const eventListStaffListList = <ThrowOnError extends boolean = false>(opt
 /**
  * Update Availability Window
  *
- * Update an existing availability window for the event. Allows partial updates (PATCH) or full updates (PUT) of availability window properties. Only event creators, staff, and superusers can update availability windows. The window_id can be provided as a query parameter or in the request body as 'availability_id'. Validates that the window belongs to this event before updating.
+ * Update an existing availability window for the event. Allows partial updates (PATCH) or full updates (PUT). Only event creators and superusers can update availability windows. The window_id can be provided as a query parameter or in the request body as 'availability_id'.
  */
 export const eventListUpdateAvailabilityWindowPartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListUpdateAvailabilityWindowPartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventListUpdateAvailabilityWindowPartialUpdateResponses, EventListUpdateAvailabilityWindowPartialUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5399,7 +5289,7 @@ export const eventListUpdateAvailabilityWindowPartialUpdate = <ThrowOnError exte
 /**
  * Update Availability Window
  *
- * Update an existing availability window for the event. Allows partial updates (PATCH) or full updates (PUT) of availability window properties. Only event creators, staff, and superusers can update availability windows. The window_id can be provided as a query parameter or in the request body as 'availability_id'. Validates that the window belongs to this event before updating.
+ * Update an existing availability window for the event. Allows partial updates (PATCH) or full updates (PUT). Only event creators and superusers can update availability windows. The window_id can be provided as a query parameter or in the request body as 'availability_id'.
  */
 export const eventListUpdateAvailabilityWindowUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListUpdateAvailabilityWindowUpdateData, ThrowOnError>) => (options.client ?? client).put<EventListUpdateAvailabilityWindowUpdateResponses, EventListUpdateAvailabilityWindowUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5418,7 +5308,7 @@ export const eventListUpdateAvailabilityWindowUpdate = <ThrowOnError extends boo
 /**
  * Update Resource Metadata
  *
- * Update resource metadata such as name, description, tag, and public visibility. This endpoint updates resource information without requiring file re-upload. Useful for changing resource categories, updating descriptions, or modifying tags. Only event creators, staff, and superusers can update resources. Requires resource_id query parameter.
+ * Update resource metadata such as name, description, tag, and public visibility. Only event creators and superusers can update resources.
  */
 export const eventListUpdateResourcePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListUpdateResourcePartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventListUpdateResourcePartialUpdateResponses, EventListUpdateResourcePartialUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5442,20 +5332,13 @@ export const eventListUpdateResourcePartialUpdate = <ThrowOnError extends boolea
  * **Security:**
  * - Token expires in 5 minutes
  * - Token type='websocket' to prevent cross-use with HTTP endpoints
- * - User must have permission to access the event (creator, staff, or admin)
- *
+ * - User must be the event creator, an event staff member, or a platform admin
  *
  * **Usage:**
  * 1. Call this endpoint with valid HTTP authentication
  * 2. Receive short-lived WebSocket token
- * 3. Connect to WebSocket: `ws://host/ws/events/{event_id}/questions/?token={ws_token}`
+ * 3. Connect to WebSocket using the returned URL
  * 4. Token must be refreshed every 5 minutes for ongoing connections
- *
- *
- * **Response includes:**
- * - `token`: The WebSocket JWT to use in query parameter
- * - `expires_in`: Seconds until expiration (300)
- * - `ws_url`: Complete WebSocket URL with placeholders
  *
  */
 export const eventListWsTokenCreate = <ThrowOnError extends boolean = false>(options: Options<EventListWsTokenCreateData, ThrowOnError>) => (options.client ?? client).post<EventListWsTokenCreateResponses, EventListWsTokenCreateErrors, ThrowOnError>({
@@ -5475,7 +5358,7 @@ export const eventListWsTokenCreate = <ThrowOnError extends boolean = false>(opt
 /**
  * List Availability Window Templates
  *
- * Retrieve all available templates for creating availability windows. Includes both system-defined predefined templates and custom templates created by the user's organization. Templates contain configurations for creating multiple availability windows with predefined offsets from the event date.
+ * Retrieve all available templates for creating availability windows. Includes both system-defined predefined templates and custom templates created by the user's organization.
  */
 export const eventListAvailabilityTemplatesList = <ThrowOnError extends boolean = false>(options?: Options<EventListAvailabilityTemplatesListData, ThrowOnError>) => (options?.client ?? client).get<EventListAvailabilityTemplatesListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5490,7 +5373,7 @@ export const eventListAvailabilityTemplatesList = <ThrowOnError extends boolean 
 /**
  * Manage Availability Window Template
  *
- * Update (PATCH) or delete (DELETE) an availability window template. Only the creator of the template can modify it. Predefined templates cannot be modified. For updates: only name and description can be changed. Window configurations are immutable.
+ * Update (PATCH) or delete (DELETE) an availability window template. Only the creator of the template can modify it. Predefined templates cannot be modified. For updates: only name and description can be changed.
  */
 export const eventListAvailabilityTemplatesManageDestroy = <ThrowOnError extends boolean = false>(options: Options<EventListAvailabilityTemplatesManageDestroyData, ThrowOnError>) => (options.client ?? client).delete<EventListAvailabilityTemplatesManageDestroyResponses, EventListAvailabilityTemplatesManageDestroyErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5505,7 +5388,7 @@ export const eventListAvailabilityTemplatesManageDestroy = <ThrowOnError extends
 /**
  * Manage Availability Window Template
  *
- * Update (PATCH) or delete (DELETE) an availability window template. Only the creator of the template can modify it. Predefined templates cannot be modified. For updates: only name and description can be changed. Window configurations are immutable.
+ * Update (PATCH) or delete (DELETE) an availability window template. Only the creator of the template can modify it. Predefined templates cannot be modified. For updates: only name and description can be changed.
  */
 export const eventListAvailabilityTemplatesManagePartialUpdate = <ThrowOnError extends boolean = false>(options: Options<EventListAvailabilityTemplatesManagePartialUpdateData, ThrowOnError>) => (options.client ?? client).patch<EventListAvailabilityTemplatesManagePartialUpdateResponses, EventListAvailabilityTemplatesManagePartialUpdateErrors, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5524,7 +5407,7 @@ export const eventListAvailabilityTemplatesManagePartialUpdate = <ThrowOnError e
 /**
  * Get Ongoing Events
  *
- * Retrieve all currently active/ongoing events that have started but not yet ended. Perfect for displaying 'happening now' events and real-time event monitoring. Filters events where current time is between start and end datetime.
+ * Retrieve all currently active events that have started but not yet ended.
  */
 export const eventListOngoingList = <ThrowOnError extends boolean = false>(options?: Options<EventListOngoingListData, ThrowOnError>) => (options?.client ?? client).get<EventListOngoingListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -5554,7 +5437,7 @@ export const eventListSponsorableList = <ThrowOnError extends boolean = false>(o
 /**
  * Get Upcoming Events
  *
- * Retrieve all upcoming events that haven't started yet, ordered by start date. Useful for displaying future events on calendars and event listings. Includes pagination support for large result sets.
+ * Retrieve all upcoming events that haven't started yet, ordered by start date.
  */
 export const eventListUpcomingList = <ThrowOnError extends boolean = false>(options?: Options<EventListUpcomingListData, ThrowOnError>) => (options?.client ?? client).get<EventListUpcomingListResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -7213,7 +7096,7 @@ export const eventTypesList = <ThrowOnError extends boolean = false>(options?: O
 /**
  * Create Event Type
  *
- * Create a new event type category for organizing and categorizing events. Event types help users filter and understand the nature of events. Requires authentication and appropriate permissions.
+ * Create a new event type category for organizing and categorizing events. Requires authentication and appropriate permissions.
  */
 export const eventTypesCreate = <ThrowOnError extends boolean = false>(options: Options<EventTypesCreateData, ThrowOnError>) => (options.client ?? client).post<EventTypesCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -7281,7 +7164,7 @@ export const eventTypesPartialUpdate = <ThrowOnError extends boolean = false>(op
 /**
  * Update Event Type
  *
- * Update all fields of an existing event type. Requires complete payload. Use PATCH for partial updates.
+ * Update all fields of an existing event type. Use PATCH for partial updates.
  */
 export const eventTypesUpdate = <ThrowOnError extends boolean = false>(options: Options<EventTypesUpdateData, ThrowOnError>) => (options.client ?? client).put<EventTypesUpdateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
