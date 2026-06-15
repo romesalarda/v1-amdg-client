@@ -42,6 +42,23 @@
               color="blue"
               variant="soft"
             />
+
+            <!-- View tab switcher -->
+            <div class="flex bg-gray-100 rounded-lg p-0.5 ml-1">
+              <button
+                v-for="tab in [{ value: 'questions', label: 'Questions', icon: 'i-heroicons-document-text' }, { value: 'responses', label: 'Responses', icon: 'i-heroicons-users' }]"
+                :key="tab.value"
+                type="button"
+                :class="[
+                  'flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-colors',
+                  activeTab === tab.value ? 'bg-white text-primary shadow-sm' : 'text-gray-600 hover:text-gray-900'
+                ]"
+                @click="activeTab = tab.value as EditorTab"
+              >
+                <UIcon :name="tab.icon" class="w-3.5 h-3.5" />
+                {{ tab.label }}
+              </button>
+            </div>
             
             <!-- WS Connection Status Indicator -->
             <div class="flex items-center gap-2 px-2 py-1 rounded-lg bg-gray-50">
@@ -144,8 +161,38 @@
 
     <!-- Content Split -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-      <!-- Main questions area (3/4) -->
+      <!-- Main area (3/4) -->
       <div class="lg:col-span-3 space-y-4">
+
+        <!-- ── Responses tab ──────────────────────────────────────────────── -->
+        <template v-if="activeTab === 'responses'">
+          <FormResponsesTable
+            :responses="responsesTable.responses.value"
+            :total-count="responsesTable.totalCount.value"
+            :total-pages="responsesTable.totalPages.value"
+            :filters="responsesTable.filters.value"
+            :active-filter-count="responsesTable.activeFilterCount.value"
+            :is-filter-sidebar-open="responsesTable.isFilterSidebarOpen.value"
+            :responses-query="responsesTable.responsesQuery"
+            @open-response="handleOpenResponse"
+            @apply-filters="responsesTable.applyFilters"
+            @clear-filters="responsesTable.clearFilters"
+            @set-page="responsesTable.setPage"
+            @update:is-filter-sidebar-open="v => responsesTable.isFilterSidebarOpen.value = v"
+          />
+
+          <FormResponseDetailModal
+            v-model="isResponseDetailOpen"
+            :response="responsesTable.selectedResponse.value"
+            :answers="responsesTable.selectedResponse.value ? responsesTable.getAnswers(responsesTable.selectedResponse.value.id) : []"
+            :form-questions="(responsesTable.formDetail.value?.questions ?? []) as any[]"
+            :is-loading-answers="responsesTable.selectedResponse.value ? responsesTable.isLoadingAnswers(responsesTable.selectedResponse.value.id) : false"
+            @close="handleCloseResponseDetail"
+          />
+        </template>
+
+        <!-- ── Questions tab ─────────────────────────────────────────────── -->
+        <template v-else>
         <div v-if="isFormLoading" class="space-y-4">
           <USkeleton v-for="i in 3" :key="i" class="h-40 rounded-xl" />
         </div>
@@ -253,6 +300,7 @@
             </UDropdown>
           </div>
         </div>
+        </template><!-- end questions tab -->
       </div>
 
       <!-- Sidebar widgets (1/4) -->
@@ -279,6 +327,12 @@
               </div>
               <div class="text-sm text-gray-600">Required Questions</div>
             </div>
+            <div>
+              <div class="text-3xl font-bold text-emerald-600">
+                {{ responsesTable.totalCount.value }}
+              </div>
+              <div class="text-sm text-gray-600">Total Responses</div>
+            </div>
             <div class="pt-3 border-t border-gray-200 flex items-center justify-between text-sm">
               <span class="text-gray-600">Required form</span>
               <UBadge
@@ -288,6 +342,15 @@
                 size="xs"
               />
             </div>
+            <UButton
+              label="View Responses"
+              icon="i-heroicons-users"
+              size="xs"
+              variant="soft"
+              color="green"
+              block
+              @click="activeTab = 'responses'"
+            />
           </div>
         </UCard>
 
@@ -359,9 +422,12 @@ import { ref, computed, toRef, watch, nextTick, onMounted } from 'vue'
 import draggable from 'vuedraggable'
 import Swal from 'sweetalert2'
 import QuestionCard from './QuestionCard.vue'
+import FormResponsesTable from './FormResponsesTable.vue'
+import FormResponseDetailModal from './FormResponseDetailModal.vue'
 import { useEventForm } from '~/composables/resources/events/eventForms'
 import { useEventFormBuilder } from '~/composables/websockets/events/useEventFormBuilder'
 import { useEventFormsWebSocket } from '~/composables/websockets/events/useEventFormsWebSocket'
+import { useFormResponsesTable } from '~/composables/resources/events/useFormResponsesTable'
 
 const props = defineProps<{
   formId: string
@@ -380,6 +446,24 @@ const toast = useToast()
 const focusedFields = ref(new Set<string>())
 const isReordering = ref(false)
 let reorderTimeout: ReturnType<typeof setTimeout> | null = null
+
+// ── View tab ──────────────────────────────────────────────────────────────────
+type EditorTab = 'questions' | 'responses'
+const activeTab = ref<EditorTab>('questions')
+
+// ── Responses table ───────────────────────────────────────────────────────────
+const responsesTable = useFormResponsesTable(toRef(props, 'formId'))
+const isResponseDetailOpen = ref(false)
+
+function handleOpenResponse(response: Parameters<typeof responsesTable.openResponse>[0]) {
+  responsesTable.openResponse(response)
+  isResponseDetailOpen.value = true
+}
+
+function handleCloseResponseDetail() {
+  isResponseDetailOpen.value = false
+  responsesTable.closeResponse()
+}
 
 // Fetch details for the form
 const { data: formData, isLoading: isFormLoading, refetch } = useEventForm(toRef(props, 'formId'))
