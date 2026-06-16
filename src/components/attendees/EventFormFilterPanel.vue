@@ -53,12 +53,17 @@
         />
       </div>
 
-      <!-- Type-specific answer filters — only shown when exactly 1 question is selected -->
-      <template v-if="selectedQuestion">
+      <!-- Type-specific answer filters — each block shows independently based on selected question types -->
+      <template v-if="selectedQuestionsDetails.length > 0">
         <div class="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-3">
           <p class="text-xs font-semibold text-gray-600">
-            Answer filter for: <span class="text-primary">{{ selectedQuestion.title }}</span>
-            <span class="ml-1 text-gray-400 font-normal">({{ selectedQuestion.typeDisplay }})</span>
+            <template v-if="selectedQuestion">
+              Answer filter for: <span class="text-primary">{{ selectedQuestion.title }}</span>
+              <span class="ml-1 text-gray-400 font-normal">({{ selectedQuestion.typeDisplay }})</span>
+            </template>
+            <template v-else>
+              Answer filters for <span class="text-primary">{{ selectedQuestionsDetails.length }} selected questions</span>
+            </template>
           </p>
 
           <!-- Text types: short_answer, long_answer, email, phone -->
@@ -72,25 +77,26 @@
             <p class="text-xs text-gray-500 mt-1">Finds attendees whose answer contains this text</p>
           </div>
 
-          <!-- Choice types: single_choice, multiple_choice -->
-          <div v-else-if="isChoiceType">
-            <label class="block text-xs font-semibold text-gray-700 mb-2">Selected Option</label>
+          <!-- Choice types: single_choice, multiple_choice (1 question only — option sets differ per question) -->
+          <div v-if="isChoiceType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">Selected Option(s)</label>
             <USelectMenu
-              v-model="local.formSelectedOption"
-              :options="selectedQuestion.options || []"
-              placeholder="Any option"
+              v-model="localFormSelectedOptions"
+              :options="selectedQuestion!.options || []"
+              :multiple="true"
+              placeholder="Any option…"
               value-attribute="id"
               option-attribute="option_text"
               class="w-full"
             />
-            <p class="text-xs text-gray-500 mt-1">Finds attendees who selected this option</p>
+            <p class="text-xs text-gray-500 mt-1">Finds attendees who selected any of these options</p>
           </div>
 
           <!-- Range types: slider, rating -->
-          <div v-else-if="isRangeType">
+          <div v-if="isRangeType">
             <label class="block text-xs font-semibold text-gray-700 mb-2">
               Answer Value Range
-              <span v-if="selectedQuestion.minValue != null && selectedQuestion.maxValue != null" class="text-gray-400 font-normal">
+              <span v-if="selectedQuestion?.minValue != null && selectedQuestion?.maxValue != null" class="text-gray-400 font-normal">
                 ({{ selectedQuestion.minValue }}–{{ selectedQuestion.maxValue }})
               </span>
             </label>
@@ -99,21 +105,21 @@
                 v-model.number="local.formNumericAnswerMin"
                 type="number"
                 placeholder="Min"
-                :min="selectedQuestion.minValue ?? undefined"
-                :max="selectedQuestion.maxValue ?? undefined"
+                :min="selectedQuestion?.minValue ?? undefined"
+                :max="selectedQuestion?.maxValue ?? undefined"
               />
               <UInput
                 v-model.number="local.formNumericAnswerMax"
                 type="number"
                 placeholder="Max"
-                :min="selectedQuestion.minValue ?? undefined"
-                :max="selectedQuestion.maxValue ?? undefined"
+                :min="selectedQuestion?.minValue ?? undefined"
+                :max="selectedQuestion?.maxValue ?? undefined"
               />
             </div>
           </div>
 
           <!-- Date type -->
-          <div v-else-if="isDateType">
+          <div v-if="isDateType">
             <label class="block text-xs font-semibold text-gray-700 mb-2">Date Answer Range</label>
             <DateRangePicker
               :model-value-start="local.formAnswerDateAfter"
@@ -130,7 +136,7 @@
           </div>
 
           <!-- Time type -->
-          <div v-else-if="isTimeType">
+          <div v-if="isTimeType">
             <label class="block text-xs font-semibold text-gray-700 mb-2">Time Answer Range</label>
             <TimeRangePicker
               :model-value-from="local.formAnswerTimeAfter"
@@ -141,32 +147,13 @@
           </div>
 
           <!-- Upload type -->
-          <div v-else-if="isUploadType">
+          <div v-if="isUploadType">
             <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
               Upload questions can only be filtered by submission date (see below).
             </p>
           </div>
         </div>
       </template>
-
-      <!-- Info when multiple questions selected: no per-question answer filters -->
-      <div v-else-if="local.formAnsweredQuestions.length > 1" class="rounded-lg bg-blue-50 border border-blue-200 p-3">
-        <p class="text-xs text-blue-700">
-          <span class="font-semibold">{{ local.formAnsweredQuestions.length }} questions selected.</span>
-          Select a single question to apply answer-type-specific filters (text search, option matching, etc).
-          The text search below applies across all selected questions.
-        </p>
-      </div>
-
-      <!-- General text search (applies when 1+ questions selected) -->
-      <div v-if="local.formAnsweredQuestions.length > 0 && (local.formAnsweredQuestions.length > 1 || isTextType || isUploadType)">
-        <label class="block text-xs font-semibold text-gray-700 mb-2">Search Across Answers</label>
-        <UInput
-          v-model="local.formAnswerSearch"
-          placeholder="Contains…"
-          icon="i-heroicons-magnifying-glass"
-        />
-      </div>
     </template>
 
     <!-- Answer submission date range (visible when any form context active) -->
@@ -207,8 +194,8 @@ export interface EventFormFilters {
   /** Array of selected question IDs */
   formAnsweredQuestions: number[]
   formHasUnansweredRequired: boolean | undefined
-  /** Only applicable when exactly one question is selected */
-  formSelectedOption: number | undefined
+  /** Comma-separated option IDs; e.g. "1,2" — only applicable when exactly one choice question is selected */
+  formSelectedOption: string | undefined
   formAnswerSubmittedAfter: string | undefined
   formAnswerSubmittedBefore: string | undefined
   formNumericAnswerMin: number | undefined
@@ -276,14 +263,16 @@ function clearedAnswerFilters(): Partial<EventFormFilters> {
 
 function onFormsChange(newForms: string | string[] | null) {
   const forms = Array.isArray(newForms) ? newForms : (newForms ? [newForms] : [])
-  // Batch all mutations into one assignment so the watcher emits only once.
+  // Only clear selected questions and answer filters when ALL forms are removed.
+  // Adding or swapping forms should preserve existing question selections so
+  // users can accumulate cross-form question filters without losing their work.
+  const clearQuestions = forms.length === 0
   local.value = {
     ...local.value,
     formResponseForms: forms,
-    formAnsweredQuestions: [],
-    ...clearedAnswerFilters(),
+    ...(clearQuestions ? { formAnsweredQuestions: [], ...clearedAnswerFilters() } : {}),
   }
-  selectedQuestionsDetails.value = []
+  if (clearQuestions) selectedQuestionsDetails.value = []
 }
 
 function onQuestionsSelections(selections: QuestionDetail[]) {
@@ -307,10 +296,29 @@ const DATE_TYPES = new Set(['date'])
 const UPLOAD_TYPES = new Set(['upload'])
 const TIME_TYPES = new Set(['time'])
 
-const isTextType = computed(() => !!selectedQuestion.value && TEXT_TYPES.has(selectedQuestion.value.type))
-const isChoiceType = computed(() => !!selectedQuestion.value && CHOICE_TYPES.has(selectedQuestion.value.type))
-const isRangeType = computed(() => !!selectedQuestion.value && RANGE_TYPES.has(selectedQuestion.value.type))
-const isDateType = computed(() => !!selectedQuestion.value && DATE_TYPES.has(selectedQuestion.value.type))
-const isUploadType = computed(() => !!selectedQuestion.value && UPLOAD_TYPES.has(selectedQuestion.value.type))
-const isTimeType = computed(() => !!selectedQuestion.value && TIME_TYPES.has(selectedQuestion.value.type))
+// Each flag activates independently — show a filter section whenever ANY selected
+// question is of that type, so mixed-type selections show all applicable filters.
+const isTextType = computed(() => selectedQuestionsDetails.value.some(q => TEXT_TYPES.has(q.type)))
+// Choice requires exactly 1 question — each question has its own distinct option set.
+const isChoiceType = computed(() => selectedQuestionsDetails.value.length === 1 && CHOICE_TYPES.has(selectedQuestionsDetails.value[0]?.type ?? ''))
+const isRangeType = computed(() => selectedQuestionsDetails.value.some(q => RANGE_TYPES.has(q.type)))
+const isDateType = computed(() => selectedQuestionsDetails.value.some(q => DATE_TYPES.has(q.type)))
+const isUploadType = computed(() => selectedQuestionsDetails.value.some(q => UPLOAD_TYPES.has(q.type)))
+const isTimeType = computed(() => selectedQuestionsDetails.value.some(q => TIME_TYPES.has(q.type)))
+
+// ── Multi-select option helper (choice type) ──────────────────────────────────
+
+// Converts formSelectedOption (comma-separated string) ↔ number[] for USelectMenu.
+const localFormSelectedOptions = computed({
+  get: (): number[] =>
+    local.value.formSelectedOption
+      ? String(local.value.formSelectedOption).split(',').map(Number).filter(Number.isFinite)
+      : [],
+  set: (val: number[]) => {
+    local.value = {
+      ...local.value,
+      formSelectedOption: val.length > 0 ? val.join(',') : undefined,
+    }
+  },
+})
 </script>

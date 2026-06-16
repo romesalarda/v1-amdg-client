@@ -112,21 +112,28 @@
                 <UIcon name="i-heroicons-clipboard-document-list" class="h-6 w-6" />
               </div>
             </div>
-          </div> -->
-          <div class="rounded-xl bg-gradient-to-br p-6 text-white" :class="eventStateAppearance.gradient">
-              <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/55">Event state</p>
-              <div class="mt-3 flex items-center justify-between gap-4">
+                      </div> -->
+            <div
+              class="rounded-xl bg-gradient-to-br p-5 text-white"
+              :class="eventStateAppearance.gradient"
+            >
+              <p class="text-[10px] font-semibold uppercase tracking-[0.28em] text-white/50">
+                Event state
+              </p>
+
+              <div class="mt-4 flex items-start justify-between gap-3">
                 <div>
-                  <div class="text-2xl font-black" :class="eventStateAppearance.textColor">
+                  <div class="text-2xl font-semibold leading-tight" :class="eventStateAppearance.textColor">
                     {{ event?.status_display || 'N/A' }}
                   </div>
-                  <p class="mt-1 text-xs font-medium uppercase tracking-[0.2em] text-white/40">
+                  <p class="mt-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-white/40">
                     Current status
                   </p>
                 </div>
-                <!-- <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                  <UIcon :name="eventStateAppearance.icon" class="h-7 w-7 text-white/80" />
-                </div> -->
+
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                  <UIcon :name="eventStateAppearance.icon" class="h-6 w-6 text-white/80" />
+                </div>
               </div>
             </div>
         </section>

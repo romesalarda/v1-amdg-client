@@ -183,7 +183,10 @@
 							v-for="item in bookingItems"
 							:key="item.booking.booking_reference"
 							:to="`/events/${eventId}/b/${item.booking.booking_reference}`"
-							class="group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md"
+							:class="[
+								'group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md',
+								item.booking.is_cancelled ? 'opacity-50' : ''
+							]"
 						>
 							<div class="flex min-w-0 items-center gap-5">
 								<!-- <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b132b] font-black text-[#bec5e5]">
@@ -196,8 +199,11 @@
 								/>
 								<div class="min-w-0">
 									<h3 class="font-black text-[#181c20] text-xl md:text-2xl">{{ getBookingDisplayTitle(item) }}</h3>
-									<p class="text-sm font-medium text-[#0b132b]/55">
+									<p class="text-sm font-medium text-[#0b132b]/55" v-if="!item.booking.is_cancelled">
 										Ref: #{{ item.booking.booking_reference.slice(0,20).toUpperCase()  }} ...
+									</p>
+									<p class="text-sm font-medium text-red-600" v-else>
+										Cancelled Booking
 									</p>
 								</div>
 							</div>
@@ -685,26 +691,26 @@ function getBookingDisplayTitle(item: {
 	return 'Your booking'
 }
 
-function getBookingPaymentTotal(payments?: Array<{ amount?: string }>) {
+function getBookingPaymentTotal(payments?: Array<{ amount?: string, final_amount?: string, status?: string }>) {
 	if (!payments?.length) {
 		return '-'
 	}
 
-	const firstAmount = payments[0]?.amount || ''
+	const firstAmount = payments[0]?.final_amount || ''
 	const currencySymbolMatch = firstAmount.match(/^[^\d-]+/)
 	const currencySymbol = currencySymbolMatch?.[0] || ''
 
 	const total = payments.reduce((sum, payment) => {
-		const rawAmount = payment?.amount || ''
+		const rawAmount = payment?.final_amount || ''
 		const numeric = Number(rawAmount.replace(/[^\d.-]/g, ''))
-		if (Number.isNaN(numeric)) {
+		if (Number.isNaN(numeric) || !payment || payment.status !== 'COMPLETED') {
 			return sum
 		}
 		return sum + numeric
 	}, 0)
 
 	if (!Number.isFinite(total) || total <= 0) {
-		return payments[0]?.amount || '-'
+		return payments[0]?.final_amount || '-'
 	}
 
 	if (total.toFixed(2) === '0.00') {

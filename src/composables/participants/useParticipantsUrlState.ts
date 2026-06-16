@@ -89,7 +89,8 @@ export type ParticipantsFilters = {
   /** Comma-separated question IDs; e.g. "10,20" */
   formAnsweredQuestions: string | undefined
   formHasUnansweredRequired: boolean | undefined
-  formSelectedOption: number | undefined
+  /** Comma-separated option IDs; e.g. "1,2" */
+  formSelectedOption: string | undefined
   formAnswerSubmittedAfter: string | undefined
   formAnswerSubmittedBefore: string | undefined
   formNumericAnswerMin: number | undefined
@@ -303,7 +304,7 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     formAnswerSearch: route.query.form_answer_search as string | undefined,
     formAnsweredQuestions: route.query.form_answered_question as string | undefined,
     formHasUnansweredRequired: route.query.form_has_unanswered_required === 'true' ? true : undefined,
-    formSelectedOption: route.query.form_selected_option ? Number(route.query.form_selected_option) : undefined,
+    formSelectedOption: route.query.form_selected_option as string | undefined,
     formAnswerSubmittedAfter: route.query.form_answer_submitted_after as string | undefined,
     formAnswerSubmittedBefore: route.query.form_answer_submitted_before as string | undefined,
     formNumericAnswerMin: route.query.form_numeric_answer_min ? Number(route.query.form_numeric_answer_min) : undefined,

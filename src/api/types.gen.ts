@@ -1748,6 +1748,12 @@ export type BookingDetail = {
     readonly booked_at: string;
     readonly event_url_safe_title: string;
     /**
+     * A booking package is considered cancelled if it is inactive or if its associated ticket type is inactive
+     * and all the tickets linked to this package are inactive (i.e., can be deleted).
+     * This ensures that a package is only considered cancelled if it is no longer usable for any active
+     */
+    readonly is_cancelled: boolean;
+    /**
      *  links
      */
     readonly _links: {
@@ -1923,6 +1929,12 @@ export type BookingList = {
     readonly attendee_count: number;
     readonly booked_at: string;
     readonly event_url_safe_title: string;
+    /**
+     * A booking package is considered cancelled if it is inactive or if its associated ticket type is inactive
+     * and all the tickets linked to this package are inactive (i.e., can be deleted).
+     * This ensures that a package is only considered cancelled if it is no longer usable for any active
+     */
+    readonly is_cancelled: boolean;
     /**
      *  links
      */
