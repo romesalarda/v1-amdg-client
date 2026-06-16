@@ -115,6 +115,7 @@ export const useAttendeeHealthRequirements = (attendeeId: Ref<string>) => {
           severity: newMedicalCondition.value.severity || undefined,
           details: newMedicalCondition.value.details || '',
           notes: newMedicalCondition.value.notes || '',
+          attendee: attendeeId.value,
         } as any,
       })
       cancelAddMedicalCondition()
@@ -151,6 +152,7 @@ export const useAttendeeHealthRequirements = (attendeeId: Ref<string>) => {
           severity: newMedicalCondition.value.severity || undefined,
           details: newMedicalCondition.value.details || '',
           notes: newMedicalCondition.value.notes || '',
+          attendee: attendeeId.value, // Include the attendee ID in the update payload
         } as any,
       })
       cancelEditMedicalCondition()
