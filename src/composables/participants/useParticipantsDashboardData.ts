@@ -50,7 +50,12 @@ export function useParticipantsDashboardData(
   const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
   const { data: familyGroupsData, isLoading: familyGroupsLoading, refetch: refetchFamilyGroups } = useFamilyGroups(familyGroupsQueryParams)
   const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
-  const { data: eventFormQuestionsData } = useEventFormQuestions(computed(() => ({ form: queryParams.value.form_response_form, page_size: 100})))
+  const { data: eventFormQuestionsData } = useEventFormQuestions(computed(() => {
+    // Use first form ID from comma-separated list for chip label resolution
+    const formParam = queryParams.value.form_response_form
+    const firstFormId = formParam ? String(formParam).split(',')[0].trim() : undefined
+    return { form: firstFormId, page_size: 100 }
+  }))
 
   // ─── Stats queries ───────────────────────────────────────────────────────────
 

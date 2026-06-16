@@ -825,13 +825,14 @@ const selectedQuestion = computed(() => {
 
 // ── Form filters bridge ────────────────────────────────────────────────────────
 // The EventFormFilterPanel works with a sub-object; we mirror it in/out of localFilters
+// localFilters stores comma-separated strings; EventFormFilters uses typed arrays
 
-const FORM_FILTER_KEYS: (keyof EventFormFilters)[] = [
+const FORM_FILTER_KEYS = [
   'hasFormResponses',
-  'formResponseForm',
+  'formResponseForms',
   'formResponseComplete',
   'formAnswerSearch',
-  'formAnsweredQuestion',
+  'formAnsweredQuestions',
   'formHasUnansweredRequired',
   'formSelectedOption',
   'formAnswerSubmittedAfter',
@@ -842,16 +843,22 @@ const FORM_FILTER_KEYS: (keyof EventFormFilters)[] = [
   'formAnswerDateBefore',
   'formAnswerTimeAfter',
   'formAnswerTimeBefore',
-]
+] as const
 
 const formFilters = computed<EventFormFilters>(() => {
   const f = localFilters.value
   return {
     hasFormResponses: f.hasFormResponses,
-    formResponseForm: f.formResponseForm,
+    // Convert comma-separated string → string[]
+    formResponseForms: f.formResponseForms
+      ? String(f.formResponseForms).split(',').map((s: string) => s.trim()).filter(Boolean)
+      : [],
     formResponseComplete: f.formResponseComplete,
     formAnswerSearch: f.formAnswerSearch,
-    formAnsweredQuestion: f.formAnsweredQuestion,
+    // Convert comma-separated string → number[]
+    formAnsweredQuestions: f.formAnsweredQuestions
+      ? String(f.formAnsweredQuestions).split(',').map((s: string) => Number(s.trim())).filter((n: number) => Number.isFinite(n))
+      : [],
     formHasUnansweredRequired: f.formHasUnansweredRequired,
     formSelectedOption: f.formSelectedOption,
     formAnswerSubmittedAfter: f.formAnswerSubmittedAfter,
@@ -866,9 +873,26 @@ const formFilters = computed<EventFormFilters>(() => {
 })
 
 function onFormFiltersUpdate(updated: EventFormFilters) {
-  for (const key of FORM_FILTER_KEYS) {
-    (localFilters.value as any)[key] = (updated as any)[key]
-  }
+  // Convert arrays back to comma-separated strings for localFilters
+  localFilters.value.hasFormResponses = updated.hasFormResponses
+  localFilters.value.formResponseForms = updated.formResponseForms.length > 0
+    ? updated.formResponseForms.join(',')
+    : undefined
+  localFilters.value.formResponseComplete = updated.formResponseComplete
+  localFilters.value.formAnswerSearch = updated.formAnswerSearch
+  localFilters.value.formAnsweredQuestions = updated.formAnsweredQuestions.length > 0
+    ? updated.formAnsweredQuestions.join(',')
+    : undefined
+  localFilters.value.formHasUnansweredRequired = updated.formHasUnansweredRequired
+  localFilters.value.formSelectedOption = updated.formSelectedOption
+  localFilters.value.formAnswerSubmittedAfter = updated.formAnswerSubmittedAfter
+  localFilters.value.formAnswerSubmittedBefore = updated.formAnswerSubmittedBefore
+  localFilters.value.formNumericAnswerMin = updated.formNumericAnswerMin
+  localFilters.value.formNumericAnswerMax = updated.formNumericAnswerMax
+  localFilters.value.formAnswerDateAfter = updated.formAnswerDateAfter
+  localFilters.value.formAnswerDateBefore = updated.formAnswerDateBefore
+  localFilters.value.formAnswerTimeAfter = updated.formAnswerTimeAfter
+  localFilters.value.formAnswerTimeBefore = updated.formAnswerTimeBefore
 }
 
 // Count active filters per tab
@@ -904,7 +928,8 @@ function getTabFilterCount(tab: string): number {
     if (filters.sliderAnswerMax) count++
   } else if (tab === 'forms') {
     for (const key of FORM_FILTER_KEYS) {
-      if (filters[key] !== undefined && filters[key] !== null && filters[key] !== '') count++
+      const val = (filters as any)[key]
+      if (val !== undefined && val !== null && val !== '') count++
     }
   } else if (tab === 'orders') {
     if (filters.hasOrders) count++
@@ -958,6 +983,7 @@ function onQuestionSearchInput(event: Event) {
 }
 
 function applyFilters() {
+  // ensure previous filters still carry over if the search is empty
   localFilters.value.questionAnswerSearch = debouncedQuestionSearch.value || undefined
   emit('apply', { ...localFilters.value })
   isOpen.value = false

@@ -2,7 +2,7 @@
   <div ref="containerRef">
     <div
       class="w-full px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
-      @click="openDropdown"
+      @mousedown.prevent="openDropdown"
     >
       <span class="material-symbols-outlined text-primary text-base shrink-0">dynamic_form</span>
       <input
@@ -10,19 +10,24 @@
         v-model="searchQuery"
         type="text"
         class="flex-1 bg-transparent text-sm font-medium text-navy-900 outline-none placeholder:text-navy-400 min-w-0"
-        :placeholder="selectedLabel || placeholder"
-        @focus="openDropdown"
+        :placeholder="multiple ? (multiTriggerLabel || placeholder) : (selectedLabel || placeholder)"
         @keydown.escape="closeDropdown"
         @keydown.arrow-down.prevent="highlightNext"
         @keydown.arrow-up.prevent="highlightPrev"
         @keydown.enter.prevent="selectHighlighted"
       />
+      <!-- Single mode: show selected label -->
       <span
-        v-if="selectedLabel && !searchQuery"
+        v-if="!multiple && selectedLabel && !searchQuery"
         class="text-xs font-bold text-primary truncate max-w-[180px]"
       >{{ selectedLabel }}</span>
+      <!-- Multi mode: show badge with count -->
+      <span
+        v-if="multiple && multiValues.length > 0 && !searchQuery"
+        class="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0"
+      >{{ multiValues.length }}</span>
       <button
-        v-if="modelValue"
+        v-if="hasAnyValue"
         class="material-symbols-outlined text-navy-400 text-base shrink-0 hover:text-red-500 transition-colors"
         type="button"
         @click.stop="clearSelection"
@@ -32,6 +37,22 @@
         class="material-symbols-outlined text-navy-400 text-base shrink-0 transition-transform"
         :class="{ 'rotate-180': isOpen }"
       >expand_more</span>
+    </div>
+
+    <!-- Multi mode: selected tag chips -->
+    <div v-if="multiple && multiValues.length > 0" class="flex flex-wrap gap-1.5 mt-2">
+      <span
+        v-for="id in multiValues"
+        :key="id"
+        class="inline-flex items-center gap-1 px-2.5 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-lg"
+      >
+        {{ allOptions.find(o => o.id === id)?.title || id }}
+        <button
+          class="material-symbols-outlined text-xs hover:text-red-500 transition-colors leading-none"
+          type="button"
+          @click.stop="selectItem(id, '')"
+        >close</button>
+      </span>
     </div>
 
     <Teleport to="body">
@@ -69,7 +90,7 @@
               :ref="(el) => setItemRef(el, index)"
               class="flex items-center gap-3 px-4 py-2.5 cursor-pointer text-sm font-medium transition-colors"
               :class="[
-                option.id === modelValue ? 'bg-primary/10 text-primary' : 'text-navy-800 hover:bg-mist-blue',
+                isSelected(option.id) ? 'bg-primary/10 text-primary' : 'text-navy-800 hover:bg-mist-blue',
                 index === highlightedIndex ? 'bg-mist-blue' : '',
               ]"
               @click="selectItem(option.id, option.title)"
@@ -77,20 +98,25 @@
             >
               <span
                 class="material-symbols-outlined text-base shrink-0"
-                :class="option.id === modelValue ? 'text-primary' : 'text-navy-300'"
-              >{{ option.id === modelValue ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                :class="isSelected(option.id) ? 'text-primary' : 'text-navy-300'"
+              >{{ multiple ? (isSelected(option.id) ? 'check_box' : 'check_box_outline_blank') : (isSelected(option.id) ? 'check_circle' : 'radio_button_unchecked') }}</span>
               <div class="flex flex-col min-w-0">
                 <span class="truncate">{{ option.title }}</span>
                 <span
                   class="text-xs truncate"
                   :class="[
-                    option.id === modelValue ? 'text-primary/70' : 'text-navy-400',
+                    isSelected(option.id) ? 'text-primary/70' : 'text-navy-400',
                     option.statusColor,
                   ]"
                 >{{ option.statusDisplay }}</span>
               </div>
             </li>
           </ul>
+          <!-- Multi mode: footer with done button -->
+          <div v-if="multiple && filteredOptions.length > 0" class="border-t border-navy-100 px-4 py-2 flex justify-between items-center">
+            <span class="text-xs text-navy-400">{{ multiValues.length }} selected</span>
+            <button class="text-xs font-semibold text-primary hover:text-primary/80 transition-colors" type="button" @click="closeDropdown">Done</button>
+          </div>
         </div>
       </Transition>
     </Teleport>
@@ -102,16 +128,18 @@ import { ref, computed, watch, nextTick, onMounted, onBeforeUnmount, type CSSPro
 import { useEventForms } from '~/composables/resources/events/eventForms'
 
 const props = withDefaults(defineProps<{
-  modelValue?: string | null
+  modelValue?: string | string[] | null
   eventSlug?: string
   placeholder?: string
+  multiple?: boolean
 }>(), {
   modelValue: null,
   placeholder: 'Select a form…',
+  multiple: false,
 })
 
 const emit = defineEmits<{
-  (e: 'update:modelValue', value: string | null): void
+  (e: 'update:modelValue', value: string | string[] | null): void
 }>()
 
 const isOpen = ref(false)
@@ -157,14 +185,41 @@ const filteredOptions = computed(() => {
   return allOptions.value.filter((o) => o.title.toLowerCase().includes(q))
 })
 
+// ── Multi-select helpers ────────────────────────────────────────────────────
+
+const multiValues = computed<string[]>(() => {
+  if (!props.multiple) return []
+  return Array.isArray(props.modelValue) ? (props.modelValue as string[]) : []
+})
+
+const hasAnyValue = computed(() =>
+  props.multiple ? multiValues.value.length > 0 : (props.modelValue != null && props.modelValue !== ''),
+)
+
+function isSelected(id: string): boolean {
+  if (props.multiple) return multiValues.value.includes(id)
+  return props.modelValue === id
+}
+
+// Multi-select trigger label: show names of selected forms, or count
+const multiTriggerLabel = computed(() => {
+  if (!props.multiple || multiValues.value.length === 0) return ''
+  const names = multiValues.value
+    .map(id => allOptions.value.find(o => o.id === id)?.title)
+    .filter(Boolean)
+  if (names.length === 0) return `${multiValues.value.length} form(s) selected`
+  if (names.length === 1) return names[0]!
+  return `${names.length} forms`
+})
+
 watch(allOptions, (opts) => {
-  if (!props.modelValue) return
+  if (props.multiple || !props.modelValue) return
   const selected = opts.find((o) => o.id === props.modelValue)
   if (selected) selectedLabel.value = selected.title
 }, { immediate: true })
 
 watch(() => props.modelValue, (val) => {
-  if (!val) selectedLabel.value = ''
+  if (!props.multiple && !val) selectedLabel.value = ''
 })
 
 function setItemRef(el: unknown, index: number) {
@@ -172,6 +227,7 @@ function setItemRef(el: unknown, index: number) {
 }
 
 function openDropdown() {
+  if (isOpen.value) return
   isOpen.value = true
   highlightedIndex.value = -1
   nextTick(() => {
@@ -188,14 +244,22 @@ function closeDropdown() {
 }
 
 function selectItem(id: string, label: string) {
-  selectedLabel.value = label
-  emit('update:modelValue', id)
-  closeDropdown()
+  if (props.multiple) {
+    const current = multiValues.value
+    const idx = current.indexOf(id)
+    emit('update:modelValue', idx === -1 ? [...current, id] : current.filter(v => v !== id))
+    searchQuery.value = ''
+    // Keep dropdown open in multi-select mode
+  } else {
+    selectedLabel.value = label
+    emit('update:modelValue', id)
+    closeDropdown()
+  }
 }
 
 function clearSelection() {
   selectedLabel.value = ''
-  emit('update:modelValue', null)
+  emit('update:modelValue', props.multiple ? [] : null)
 }
 
 function highlightNext() {

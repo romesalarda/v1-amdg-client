@@ -21,88 +21,100 @@
       />
     </div>
 
-    <!-- Form selector -->
+    <!-- Form selector (multi-select) -->
     <div>
-      <label class="block text-xs font-semibold text-gray-700 mb-2">Filter by Form</label>
+      <label class="block text-xs font-semibold text-gray-700 mb-2">Filter by Form(s)</label>
       <EventFormSelect
-        v-model="local.formResponseForm"
+        :model-value="local.formResponseForms"
         :event-slug="eventSlug"
-        placeholder="Select a form…"
-        @update:model-value="onFormChange"
+        :multiple="true"
+        placeholder="Select one or more forms…"
+        @update:model-value="onFormsChange"
       />
+      <p v-if="local.formResponseForms.length > 1" class="text-xs text-gray-500 mt-1">
+        Attendees must have a response to any of the selected forms
+      </p>
     </div>
 
-    <!-- Question selector (visible once a form is selected) -->
-    <template v-if="local.formResponseForm">
+    <!-- Question selector (visible once at least one form is selected) -->
+    <template v-if="local.formResponseForms.length > 0">
       <div>
-        <label class="block text-xs font-semibold text-gray-700 mb-2">Filter by Question</label>
+        <label class="block text-xs font-semibold text-gray-700 mb-2">
+          Filter by Question(s)
+          <span v-if="local.formResponseForms.length > 1" class="text-gray-400 font-normal">(across all selected forms)</span>
+        </label>
         <EventFormQuestionSelect
-          v-model="local.formAnsweredQuestion"
-          :form-id="local.formResponseForm"
-          placeholder="Select a question…"
-          @select="onQuestionSelect"
+          :model-value="local.formAnsweredQuestions"
+          :form-ids="local.formResponseForms"
+          :multiple="true"
+          placeholder="Select one or more questions…"
+          @update:model-value="(v) => local.formAnsweredQuestions = Array.isArray(v) ? (v as number[]) : []"
+          @selections="onQuestionsSelections"
         />
       </div>
 
-      <!-- Type-specific answer filters -->
+      <!-- Type-specific answer filters — only shown when exactly 1 question is selected -->
       <template v-if="selectedQuestion">
-        <!-- Text types: short_answer, long_answer, email, phone -->
-        <div v-if="isTextType">
-          <label class="block text-xs font-semibold text-gray-700 mb-2">Search in Answer Text</label>
-          <UInput
-            v-model="local.formAnswerSearch"
-            placeholder="Contains…"
-            icon="i-heroicons-magnifying-glass"
-          />
-          <p class="text-xs text-gray-500 mt-1">Finds attendees whose answer contains this text</p>
-        </div>
+        <div class="rounded-lg bg-gray-50 border border-gray-200 p-3 space-y-3">
+          <p class="text-xs font-semibold text-gray-600">
+            Answer filter for: <span class="text-primary">{{ selectedQuestion.title }}</span>
+            <span class="ml-1 text-gray-400 font-normal">({{ selectedQuestion.typeDisplay }})</span>
+          </p>
 
-        <!-- Choice types: single_choice, multiple_choice -->
-        <div v-else-if="isChoiceType">
-          <label class="block text-xs font-semibold text-gray-700 mb-2">Selected Option</label>
-          <USelectMenu
-            v-model="local.formSelectedOption"
-            :options="selectedQuestion.options || []"
-            placeholder="Any option"
-            value-attribute="id"
-            option-attribute="option_text"
-            class="w-full"
-          />
-          <p class="text-xs text-gray-500 mt-1">Finds attendees who selected this option</p>
-        </div>
-
-        <!-- Range types: slider, rating -->
-        <div v-else-if="isRangeType">
-          <label class="block text-xs font-semibold text-gray-700 mb-2">
-            Answer Value Range
-            <span v-if="selectedQuestion.minValue != null && selectedQuestion.maxValue != null" class="text-gray-400 font-normal">
-              ({{ selectedQuestion.minValue }}–{{ selectedQuestion.maxValue }})
-            </span>
-          </label>
-          <div class="grid grid-cols-2 gap-2">
+          <!-- Text types: short_answer, long_answer, email, phone -->
+          <div v-if="isTextType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">Search in Answer Text</label>
             <UInput
-              v-model.number="local.formNumericAnswerMin"
-              type="number"
-              placeholder="Min"
-              :min="selectedQuestion.minValue ?? undefined"
-              :max="selectedQuestion.maxValue ?? undefined"
+              v-model="local.formAnswerSearch"
+              placeholder="Contains…"
+              icon="i-heroicons-magnifying-glass"
             />
-            <UInput
-              v-model.number="local.formNumericAnswerMax"
-              type="number"
-              placeholder="Max"
-              :min="selectedQuestion.minValue ?? undefined"
-              :max="selectedQuestion.maxValue ?? undefined"
-            />
+            <p class="text-xs text-gray-500 mt-1">Finds attendees whose answer contains this text</p>
           </div>
-        </div>
 
-        <!-- Date type -->
-        <div v-else-if="isDateType">
-          <label class="block text-xs font-semibold text-gray-700 mb-2">Date Answer Range</label>
-          <!-- <div class="grid grid-cols-2 gap-2"> -->
-            <!-- <UInput v-model="local.formAnswerDateAfter" type="date" placeholder="On or after" />
-            <UInput v-model="local.formAnswerDateBefore" type="date" placeholder="On or before" /> -->
+          <!-- Choice types: single_choice, multiple_choice -->
+          <div v-else-if="isChoiceType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">Selected Option</label>
+            <USelectMenu
+              v-model="local.formSelectedOption"
+              :options="selectedQuestion.options || []"
+              placeholder="Any option"
+              value-attribute="id"
+              option-attribute="option_text"
+              class="w-full"
+            />
+            <p class="text-xs text-gray-500 mt-1">Finds attendees who selected this option</p>
+          </div>
+
+          <!-- Range types: slider, rating -->
+          <div v-else-if="isRangeType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">
+              Answer Value Range
+              <span v-if="selectedQuestion.minValue != null && selectedQuestion.maxValue != null" class="text-gray-400 font-normal">
+                ({{ selectedQuestion.minValue }}–{{ selectedQuestion.maxValue }})
+              </span>
+            </label>
+            <div class="grid grid-cols-2 gap-2">
+              <UInput
+                v-model.number="local.formNumericAnswerMin"
+                type="number"
+                placeholder="Min"
+                :min="selectedQuestion.minValue ?? undefined"
+                :max="selectedQuestion.maxValue ?? undefined"
+              />
+              <UInput
+                v-model.number="local.formNumericAnswerMax"
+                type="number"
+                placeholder="Max"
+                :min="selectedQuestion.minValue ?? undefined"
+                :max="selectedQuestion.maxValue ?? undefined"
+              />
+            </div>
+          </div>
+
+          <!-- Date type -->
+          <div v-else-if="isDateType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">Date Answer Range</label>
             <DateRangePicker
               :model-value-start="local.formAnswerDateAfter"
               :model-value-end="local.formAnswerDateBefore"
@@ -114,32 +126,51 @@
                   {{ label }}
                 </div>
               </template>
-          </DateRangePicker>
-          <!-- </div> -->
-        </div>
+            </DateRangePicker>
+          </div>
 
-        <!-- Time type -->
-        <div v-else-if="isTimeType">
-          <label class="block text-xs font-semibold text-gray-700 mb-2">Time Answer Range</label>
-          <TimeRangePicker
-            :model-value-from="local.formAnswerTimeAfter"
-            :model-value-to="local.formAnswerTimeBefore"
-            @update:model-value-from="local.formAnswerTimeAfter = $event ?? undefined"
-            @update:model-value-to="local.formAnswerTimeBefore = $event ?? undefined"
-          />
-        </div>
+          <!-- Time type -->
+          <div v-else-if="isTimeType">
+            <label class="block text-xs font-semibold text-gray-700 mb-2">Time Answer Range</label>
+            <TimeRangePicker
+              :model-value-from="local.formAnswerTimeAfter"
+              :model-value-to="local.formAnswerTimeBefore"
+              @update:model-value-from="local.formAnswerTimeAfter = $event ?? undefined"
+              @update:model-value-to="local.formAnswerTimeBefore = $event ?? undefined"
+            />
+          </div>
 
-        <!-- Upload type -->
-        <div v-else-if="isUploadType">
-          <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
-            Upload questions can only be filtered by submission date (see below).
-          </p>
+          <!-- Upload type -->
+          <div v-else-if="isUploadType">
+            <p class="text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+              Upload questions can only be filtered by submission date (see below).
+            </p>
+          </div>
         </div>
       </template>
+
+      <!-- Info when multiple questions selected: no per-question answer filters -->
+      <div v-else-if="local.formAnsweredQuestions.length > 1" class="rounded-lg bg-blue-50 border border-blue-200 p-3">
+        <p class="text-xs text-blue-700">
+          <span class="font-semibold">{{ local.formAnsweredQuestions.length }} questions selected.</span>
+          Select a single question to apply answer-type-specific filters (text search, option matching, etc).
+          The text search below applies across all selected questions.
+        </p>
+      </div>
+
+      <!-- General text search (applies when 1+ questions selected) -->
+      <div v-if="local.formAnsweredQuestions.length > 0 && (local.formAnsweredQuestions.length > 1 || isTextType || isUploadType)">
+        <label class="block text-xs font-semibold text-gray-700 mb-2">Search Across Answers</label>
+        <UInput
+          v-model="local.formAnswerSearch"
+          placeholder="Contains…"
+          icon="i-heroicons-magnifying-glass"
+        />
+      </div>
     </template>
 
-    <!-- Answer submission date range (visible when any question context active) -->
-    <div v-if="local.formResponseForm || local.hasFormResponses">
+    <!-- Answer submission date range (visible when any form context active) -->
+    <div v-if="local.formResponseForms.length > 0 || local.hasFormResponses">
       <label class="block text-xs font-semibold text-gray-700 mb-2">Answer Submitted Date Range</label>
       <div class="grid grid-cols-2 gap-2">
         <DateRangePicker
@@ -165,14 +196,18 @@ import EventFormSelect from '~/components/ui/EventFormSelect.vue'
 import EventFormQuestionSelect from '~/components/ui/EventFormQuestionSelect.vue'
 import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 import TimeRangePicker from '~/components/ui/timerange/TimeRangePicker.vue'
+
 /** Shape of the filter values this panel manages */
 export interface EventFormFilters {
   hasFormResponses: boolean | undefined
-  formResponseForm: string | undefined
+  /** Array of selected form IDs */
+  formResponseForms: string[]
   formResponseComplete: boolean | undefined
   formAnswerSearch: string | undefined
-  formAnsweredQuestion: number | undefined
+  /** Array of selected question IDs */
+  formAnsweredQuestions: number[]
   formHasUnansweredRequired: boolean | undefined
+  /** Only applicable when exactly one question is selected */
   formSelectedOption: number | undefined
   formAnswerSubmittedAfter: string | undefined
   formAnswerSubmittedBefore: string | undefined
@@ -206,52 +241,60 @@ const emit = defineEmits<{
 }>()
 
 // ── Local reactive copy ───────────────────────────────────────────────────────
+// The panel uses v-if in the parent (tab switch), so it re-mounts fresh each
+// time the Forms tab is opened. Initialising from modelValue on creation is
+// sufficient — no prop→local watcher is needed.
 
 const local = ref<EventFormFilters>({ ...props.modelValue })
 
-// Sync parent → local
-watch(() => props.modelValue, (v) => {
-  local.value = { ...v }
-}, { deep: true })
+// Sync local → parent (user edits inside the panel).
+watch(local, (v) => { emit('update:modelValue', { ...v }) }, { deep: true })
 
-// Sync local → parent
-watch(local, (v) => {
-  emit('update:modelValue', { ...v })
-}, { deep: true })
+// ── Selected question details (for type-specific filters) ─────────────────────
 
-// ── Selected question detail ──────────────────────────────────────────────────
+/** Tracks full details of currently selected questions (populated via @selections emit) */
+const selectedQuestionsDetails = ref<QuestionDetail[]>([])
 
-const selectedQuestion = ref<QuestionDetail | null>(null)
+/** The single selected question — only truthy when exactly 1 question is chosen */
+const selectedQuestion = computed<QuestionDetail | null>(() =>
+  selectedQuestionsDetails.value.length === 1 ? selectedQuestionsDetails.value[0] : null,
+)
 
-function onFormChange() {
-  // Clear question-specific filters when form changes
-  local.value.formAnsweredQuestion = undefined
-  local.value.formAnswerSearch = undefined
-  local.value.formSelectedOption = undefined
-  local.value.formNumericAnswerMin = undefined
-  local.value.formNumericAnswerMax = undefined
-  local.value.formAnswerDateAfter = undefined
-  local.value.formAnswerDateBefore = undefined
-  local.value.formAnswerTimeAfter = undefined
-  local.value.formAnswerTimeBefore = undefined
-  selectedQuestion.value = null
+// Returns a plain object with all answer-type-specific fields cleared.
+function clearedAnswerFilters(): Partial<EventFormFilters> {
+  return {
+    formAnswerSearch: undefined,
+    formSelectedOption: undefined,
+    formNumericAnswerMin: undefined,
+    formNumericAnswerMax: undefined,
+    formAnswerDateAfter: undefined,
+    formAnswerDateBefore: undefined,
+    formAnswerTimeAfter: undefined,
+    formAnswerTimeBefore: undefined,
+  }
 }
 
-function onQuestionSelect(question: QuestionDetail | null) {
-  selectedQuestion.value = question
-  // Clear answer-type-specific values when question changes
-  local.value.formAnswerSearch = undefined
-  local.value.formSelectedOption = undefined
-  local.value.formNumericAnswerMin = undefined
-  local.value.formNumericAnswerMax = undefined
-  local.value.formAnswerDateAfter = undefined
-  local.value.formAnswerDateBefore = undefined
-  local.value.formAnswerTimeAfter = undefined
-  local.value.formAnswerTimeBefore = undefined
-  if (question) {
-    local.value.formAnsweredQuestion = question.id
-  } else {
-    local.value.formAnsweredQuestion = undefined
+function onFormsChange(newForms: string | string[] | null) {
+  const forms = Array.isArray(newForms) ? newForms : (newForms ? [newForms] : [])
+  // Batch all mutations into one assignment so the watcher emits only once.
+  local.value = {
+    ...local.value,
+    formResponseForms: forms,
+    formAnsweredQuestions: [],
+    ...clearedAnswerFilters(),
+  }
+  selectedQuestionsDetails.value = []
+}
+
+function onQuestionsSelections(selections: QuestionDetail[]) {
+  const newIds = selections.map(q => q.id).sort((a, b) => a - b).join(',')
+  const oldIds = selectedQuestionsDetails.value.map(q => q.id).sort((a, b) => a - b).join(',')
+  selectedQuestionsDetails.value = selections
+  // Only clear type-specific answer filters when the question selection changes.
+  // This prevents spurious clears when @selections fires due to allOptions
+  // recomputing but the selected IDs haven't actually changed.
+  if (newIds !== oldIds) {
+    local.value = { ...local.value, ...clearedAnswerFilters() }
   }
 }
 

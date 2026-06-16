@@ -82,10 +82,12 @@ export type ParticipantsFilters = {
 
   // Event form filters
   hasFormResponses: boolean | undefined
-  formResponseForm: string | undefined
+  /** Comma-separated form IDs; e.g. "1,2,3" */
+  formResponseForms: string | undefined
   formResponseComplete: boolean | undefined
   formAnswerSearch: string | undefined
-  formAnsweredQuestion: number | undefined
+  /** Comma-separated question IDs; e.g. "10,20" */
+  formAnsweredQuestions: string | undefined
   formHasUnansweredRequired: boolean | undefined
   formSelectedOption: number | undefined
   formAnswerSubmittedAfter: string | undefined
@@ -164,10 +166,10 @@ function makeEmptyFilters(): ParticipantsFilters {
     includeDeleted: undefined,
     // Event form filters
     hasFormResponses: undefined,
-    formResponseForm: undefined,
+    formResponseForms: undefined,
     formResponseComplete: undefined,
     formAnswerSearch: undefined,
-    formAnsweredQuestion: undefined,
+    formAnsweredQuestions: undefined,
     formHasUnansweredRequired: undefined,
     formSelectedOption: undefined,
     formAnswerSubmittedAfter: undefined,
@@ -296,10 +298,10 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
 
     // Event form filters
     hasFormResponses: route.query.has_form_responses === 'true' ? true : undefined,
-    formResponseForm: route.query.form_response_form as string | undefined,
+    formResponseForms: route.query.form_response_form as string | undefined,
     formResponseComplete: route.query.form_response_complete === 'true' ? true : undefined,
     formAnswerSearch: route.query.form_answer_search as string | undefined,
-    formAnsweredQuestion: route.query.form_answered_question ? Number(route.query.form_answered_question) : undefined,
+    formAnsweredQuestions: route.query.form_answered_question as string | undefined,
     formHasUnansweredRequired: route.query.form_has_unanswered_required === 'true' ? true : undefined,
     formSelectedOption: route.query.form_selected_option ? Number(route.query.form_selected_option) : undefined,
     formAnswerSubmittedAfter: route.query.form_answer_submitted_after as string | undefined,
@@ -435,10 +437,10 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
 
     // Event form filters
     if (f.hasFormResponses !== undefined) params.has_form_responses = f.hasFormResponses
-    if (f.formResponseForm) params.form_response_form = f.formResponseForm
+    if (f.formResponseForms) params.form_response_form = f.formResponseForms
     if (f.formResponseComplete !== undefined) params.form_response_complete = f.formResponseComplete
     if (f.formAnswerSearch) params.form_answer_search = f.formAnswerSearch
-    if (f.formAnsweredQuestion) params.form_answered_question = f.formAnsweredQuestion
+    if (f.formAnsweredQuestions) params.form_answered_question = f.formAnsweredQuestions
     if (f.formHasUnansweredRequired !== undefined) params.form_has_unanswered_required = f.formHasUnansweredRequired
     if (f.formSelectedOption) params.form_selected_option = f.formSelectedOption
     if (f.formAnswerSubmittedAfter) params.form_answer_submitted_after = f.formAnswerSubmittedAfter
@@ -518,10 +520,10 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.discountName) count++
     // Form filter count
     if (f.hasFormResponses !== undefined) count++
-    if (f.formResponseForm) count++
+    if (f.formResponseForms) count++
     if (f.formResponseComplete !== undefined) count++
     if (f.formAnswerSearch) count++
-    if (f.formAnsweredQuestion) count++
+    if (f.formAnsweredQuestions) count++
     if (f.formHasUnansweredRequired !== undefined) count++
     if (f.formSelectedOption) count++
     if (f.formAnswerSubmittedAfter) count++
@@ -589,10 +591,19 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
           return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
         }
 
-        if (key === 'formAnsweredQuestion' && formQuestionsList.length > 0) {
-          const question = formQuestionsList.find((q: any) => q.id === value)
-          const questionList = formQuestionsList.filter((q: any) => parseValue(String(value)).includes(String(q.id)))
-          return question?.question_title || String(questionList.map((q: any) => q.question_body).join(', ')) || String(value)
+        if (key === 'formAnsweredQuestions' && formQuestionsList.length > 0) {
+          const ids = String(value).split(',').map(Number).filter(Number.isFinite)
+          const names = ids.map(id => {
+            const q = formQuestionsList.find((q: any) => q.id === id)
+            return q?.question_title || q?.question_body || `Question ${id}`
+          })
+          if (names.length === 1) return names[0]
+          return `${names.length} questions`
+        }
+        if (key === 'formResponseForms') {
+          const ids = String(value).split(',').filter(Boolean)
+          if (ids.length === 1) return `Form ${ids[0]}`
+          return `${ids.length} forms`
         }
         if (key === 'formAnswerTimeAfter' && formQuestionsList.length > 0) {
           return `Form Time After: ${String(value)}`
@@ -668,10 +679,10 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
         answeredQuestionType: 'Answered Question Type',
         // Form filter labels
         hasFormResponses: 'Has Form Responses',
-        formResponseForm: 'Form',
+        formResponseForms: 'Form(s)',
         formResponseComplete: 'Form Response Complete',
         formAnswerSearch: 'Form Answer Search',
-        formAnsweredQuestion: 'Form Question',
+        formAnsweredQuestions: 'Form Question(s)',
         formHasUnansweredRequired: 'Unanswered Required (Form)',
         formSelectedOption: 'Form Selected Option',
         formAnswerSubmittedAfter: 'Form Submitted After',
@@ -781,10 +792,10 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
 
       // Event form filters
       if (f.hasFormResponses !== undefined) query.has_form_responses = f.hasFormResponses
-      if (f.formResponseForm) query.form_response_form = f.formResponseForm
+      if (f.formResponseForms) query.form_response_form = f.formResponseForms
       if (f.formResponseComplete !== undefined) query.form_response_complete = f.formResponseComplete
       if (f.formAnswerSearch) query.form_answer_search = f.formAnswerSearch
-      if (f.formAnsweredQuestion) query.form_answered_question = f.formAnsweredQuestion
+      if (f.formAnsweredQuestions) query.form_answered_question = f.formAnsweredQuestions
       if (f.formHasUnansweredRequired !== undefined) query.form_has_unanswered_required = f.formHasUnansweredRequired
       if (f.formSelectedOption) query.form_selected_option = f.formSelectedOption
       if (f.formAnswerSubmittedAfter) query.form_answer_submitted_after = f.formAnswerSubmittedAfter
