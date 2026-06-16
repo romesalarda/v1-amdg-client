@@ -35,7 +35,7 @@
 
                   <!-- Needs evidence badge -->
                   <span v-if="props.needsEvidenceUpload(payment)" class="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-700">
-                    <i-heroicons-exclamation-circle class="w-3 h-3" />
+                    <UIcon name="i-heroicons-exclamation-circle" class="w-3 h-3" />
                     Evidence needed
                   </span>
 

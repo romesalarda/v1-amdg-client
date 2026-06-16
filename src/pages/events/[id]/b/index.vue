@@ -182,7 +182,7 @@
 						<NuxtLink
 							v-for="item in bookingItems"
 							:key="item.booking.booking_reference"
-							:to="`/events/${eventId}/b/${item.booking.booking_reference}`"
+							:to="getURLRedirect(item.booking)"
 							:class="[
 								'group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md',
 								item.booking.is_cancelled ? 'opacity-50' : ''
@@ -640,6 +640,18 @@ function getBookingAttendeePreview(item: {
 	booking?: { attendees?: Array<{ name?: string }> }
 }) {
 	return item.booking?.attendees?.filter(attendee => attendee.name).slice(0, 3) || []
+}
+
+function getURLRedirect(booking?: { booking_reference?: string, attendees?: Array<{ 
+	name?: string, display_id?: string, url?: string, is_cancelled?: boolean, is_registered?: boolean, is_checked_in?: boolean, id?: string }> }) {
+	if (!booking?.booking_reference) {
+		return ''
+	}
+
+	if (booking.attendees?.length === 1) {
+		return `/events/${eventId.value}/b/${booking.booking_reference}?attendee=${encodeURIComponent(booking.attendees[0].id || '')}`
+	}
+	return `/events/${eventId.value}/b/${booking.booking_reference}`
 }
 
 function hasOutstandingPayment(payments?: Array<{ status?: string }>) {
