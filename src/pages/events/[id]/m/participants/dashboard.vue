@@ -255,15 +255,8 @@
       v-model="showFiltersModal"
       :filters="filters"
       :event-slug="id"
-      :organisations="organisations"
-      :areas="areas"
-      :dietary-requirements="dietaryRequirements"
-      :medical-conditions="medicalConditions"
-      :accessibility-requirements="accessibilityRequirements"
-      :event-questions="eventQuestions"
       @apply="applyFilters"
       @clear="clearAllFilters"
-      @question-search-input="handleQuestionSearchInput"
     />
 
     <AttendeeDetailsModal
@@ -385,9 +378,9 @@ const {
   clearAllFilters,
   removeFilter,
   applyFilters,
-  handleQuestionSearchInput,
   showFilters,
   showFiltersModal,
+  postFilterBody,
   queryParams,
   bookingsQueryParams,
   familyGroupsQueryParams,
@@ -415,6 +408,7 @@ const {
   areas,
   eventQuestions,
   formQuestions,
+  eventForms,
   dietaryRequirements,
   medicalConditions,
   accessibilityRequirements,
@@ -426,7 +420,7 @@ const {
   usedIssuedTickets,
   cancelledIssuedTickets,
   orderEventQueryValue,
-} = useParticipantsDashboardData(id, queryParams, bookingsQueryParams, familyGroupsQueryParams, eventBookingsQueryParams)
+} = useParticipantsDashboardData(id, postFilterBody, queryParams, bookingsQueryParams, familyGroupsQueryParams, eventBookingsQueryParams)
 
 // ─── Active filter chips ──────────────────────────────────────────────────────
 // buildActiveFilterChips takes plain arrays and returns a computed; wrapping in
@@ -441,6 +435,7 @@ const activeFilterChips = computed(() =>
     medicalConditions.value,
     accessibilityRequirements.value,
     formQuestions.value,
+    eventForms.value,
   ).value,
 )
 

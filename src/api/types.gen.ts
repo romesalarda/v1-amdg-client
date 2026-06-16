@@ -81,6 +81,17 @@ export type AddDebitRequestRequest = {
     debit_id: string;
 };
 
+export type AdvancedFilterRequest = {
+    relationship_to_user?: string | null;
+    self_registered?: boolean | null;
+    has_booking?: boolean | null;
+    booking?: Array<string>;
+    date_of_birth_after?: string | null;
+    date_of_birth_before?: string | null;
+    created_after?: string | null;
+    created_before?: string | null;
+};
+
 /**
  * Serializer for age distribution statistics.
  */
@@ -860,6 +871,56 @@ export type AttendeeDraftRequest = {
      * Event question responses (required questions must have answers)
      */
     question_answers?: Array<EventQuestionAnswerDraftRequest>;
+};
+
+/**
+ * Root serializer for POST /api/attendees/filter/
+ *
+ * Pagination and ordering live here alongside the nested `filters` object.
+ */
+export type AttendeeFilterRequestRequest = {
+    event: string;
+    page?: number;
+    page_size?: number;
+    search?: string | null;
+    ordering?: string | null;
+    filters?: AttendeeFiltersRequest;
+};
+
+/**
+ * Shape of the paginated response from POST /api/attendees/filter/
+ */
+export type AttendeeFilterResponse = {
+    count: number;
+    page: number;
+    page_size: number;
+    total_pages: number;
+    has_next: boolean;
+    has_previous: boolean;
+    results: Array<{
+        [key: string]: unknown;
+    }>;
+};
+
+/**
+ * The top-level `filters` object in the POST body.
+ *
+ * `operator` controls how the top-level sections are combined (currently AND-only
+ * across sections; OR applies within forms.operator and registration_questions.operator).
+ */
+export type AttendeeFiltersRequest = {
+    /**
+     * * `AND` - AND
+     * * `OR` - OR
+     */
+    operator?: 'AND' | 'OR';
+    demographics?: DemographicsFilterRequest;
+    status?: StatusFilterRequest;
+    forms?: FormsFilterRequest;
+    registration_questions?: RegistrationQuestionsFilterRequest;
+    orders?: OrdersFilterRequest;
+    payments?: PaymentsFilterRequest;
+    advanced?: AdvancedFilterRequest;
 };
 
 /**
@@ -4957,6 +5018,23 @@ export type Demographics = {
     areas: {
         [key: string]: unknown;
     };
+};
+
+export type DemographicsFilterRequest = {
+    gender?: string | null;
+    age_min?: number | null;
+    age_max?: number | null;
+    is_minor?: boolean | null;
+    organisation?: Array<number>;
+    area_from?: Array<number>;
+    has_dietary_requirements?: boolean | null;
+    dietary_requirement?: Array<number>;
+    has_medical_conditions?: boolean | null;
+    medical_condition?: Array<number>;
+    has_accessibility_requirements?: boolean | null;
+    accessibility_requirement?: Array<number>;
+    has_emergency_contacts?: boolean | null;
+    include_deleted?: boolean;
 };
 
 /**
@@ -11096,6 +11174,77 @@ export type FloorPlanList = {
 };
 
 /**
+ * A filter condition scoped to a single EventForm.
+ *
+ * `questions` contains per-question conditions for questions belonging to this form.
+ * The `operator` controls how multiple question conditions within this form are combined.
+ */
+export type FormConditionRequest = {
+    form: string;
+    has_response?: boolean | null;
+    response_complete?: boolean | null;
+    /**
+     * * `AND` - AND
+     * * `OR` - OR
+     */
+    operator?: 'AND' | 'OR';
+    questions?: Array<FormQuestionConditionRequest>;
+};
+
+/**
+ * Validates a single per-question condition for an EventForm question.
+ *
+ * The `type` field drives which filter fields are permitted:
+ * - text/email/phone  → contains
+ * - choice            → selected_options (list of option IDs)
+ * - slider/rating     → min, max
+ * - date              → date_after, date_before
+ * - time              → time_after, time_before
+ * - upload            → submitted_after, submitted_before
+ */
+export type FormQuestionConditionRequest = {
+    question_id: number;
+    /**
+     * * `short_answer` - short_answer
+     * * `long_answer` - long_answer
+     * * `email` - email
+     * * `phone` - phone
+     * * `single_choice` - single_choice
+     * * `multiple_choice` - multiple_choice
+     * * `slider` - slider
+     * * `rating` - rating
+     * * `date` - date
+     * * `time` - time
+     * * `upload` - upload
+     */
+    type: 'short_answer' | 'long_answer' | 'email' | 'phone' | 'single_choice' | 'multiple_choice' | 'slider' | 'rating' | 'date' | 'time' | 'upload';
+    contains?: string;
+    selected_options?: Array<number>;
+    min?: number;
+    max?: number;
+    date_after?: string;
+    date_before?: string;
+    time_after?: string;
+    time_before?: string;
+    submitted_after?: string;
+    submitted_before?: string;
+};
+
+/**
+ * Filters for EventForm responses.
+ *
+ * `operator` controls how multiple FormConditions are combined (AND/OR).
+ */
+export type FormsFilterRequest = {
+    /**
+     * * `AND` - AND
+     * * `OR` - OR
+     */
+    operator?: 'AND' | 'OR';
+    conditions?: Array<FormConditionRequest>;
+};
+
+/**
  * Serializer for gender distribution statistics.
  */
 export type GenderDistribution = {
@@ -12292,6 +12441,21 @@ export type OrdersByProduct = {
     distribution: Array<{
         [key: string]: unknown;
     }>;
+};
+
+export type OrdersFilterRequest = {
+    has_orders?: boolean | null;
+    order_status?: Array<string>;
+    order_status_not?: Array<string>;
+    purchased_product?: Array<number>;
+    purchased_product_title?: string | null;
+    order_total_min?: string | null;
+    order_total_max?: string | null;
+    order_created_after?: string | null;
+    order_created_before?: string | null;
+    order_reference_id?: string | null;
+    has_completed_orders?: boolean | null;
+    has_pending_orders?: boolean | null;
 };
 
 /**
@@ -17917,6 +18081,30 @@ export type PaymentUpdateRequest = {
     description?: string | null;
 };
 
+export type PaymentsFilterRequest = {
+    has_payments?: boolean | null;
+    payment_id?: Array<string>;
+    payment_reference?: string | null;
+    bank_transfer_reference?: string | null;
+    payment_status?: Array<string>;
+    /**
+     * * `booking` - booking
+     * * `order` - order
+     * * `ticket` - ticket
+     */
+    payment_target?: 'booking' | 'order' | 'ticket' | null;
+    payment_method_type?: Array<string>;
+    payment_method_title?: string | null;
+    has_refunds?: boolean | null;
+    refund_status?: Array<string>;
+    refund_is_active?: boolean | null;
+    has_donations?: boolean | null;
+    donation_status?: Array<string>;
+    has_discounts_used?: boolean | null;
+    discount_id?: Array<string>;
+    discount_name?: string | null;
+};
+
 /**
  * Serializer for combined personal info statistics.
  */
@@ -19193,6 +19381,42 @@ export type RefundTrends = {
 };
 
 /**
+ * Validates a single per-question condition for a registration (EventQuestion) question.
+ *
+ * Registration questions use UUID IDs and support fewer types than EventFormQuestions.
+ */
+export type RegQuestionConditionRequest = {
+    question_id: string;
+    /**
+     * * `short_answer` - short_answer
+     * * `long_answer` - long_answer
+     * * `upload` - upload
+     * * `single_choice` - single_choice
+     * * `multiple_choice` - multiple_choice
+     * * `slider` - slider
+     */
+    type: 'short_answer' | 'long_answer' | 'upload' | 'single_choice' | 'multiple_choice' | 'slider';
+    contains?: string;
+    selected_options?: Array<number>;
+    min?: number;
+    max?: number;
+    submitted_after?: string;
+    submitted_before?: string;
+};
+
+/**
+ * Filters for event registration (EventQuestion) answers.
+ */
+export type RegistrationQuestionsFilterRequest = {
+    /**
+     * * `AND` - AND
+     * * `OR` - OR
+     */
+    operator?: 'AND' | 'OR';
+    conditions?: Array<RegQuestionConditionRequest>;
+};
+
+/**
  * Serializer for relationship distribution statistics.
  */
 export type RelationshipDistribution = {
@@ -19886,6 +20110,13 @@ export type StatusBreakdown = {
     status: string;
     count: number;
     percentage: number;
+};
+
+export type StatusFilterRequest = {
+    is_checked_in?: boolean | null;
+    is_registered?: boolean | null;
+    is_cancelled?: boolean | null;
+    is_staff?: boolean | null;
 };
 
 /**
@@ -30793,6 +31024,26 @@ export type AttendeesRequestCancellationRefundCreateResponses = {
 };
 
 export type AttendeesRequestCancellationRefundCreateResponse = AttendeesRequestCancellationRefundCreateResponses[keyof AttendeesRequestCancellationRefundCreateResponses];
+
+export type AttendeesFilterCreateData = {
+    body: AttendeeFilterRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/attendees/filter/';
+};
+
+export type AttendeesFilterCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type AttendeesFilterCreateResponses = {
+    200: AttendeeFilterResponse;
+};
+
+export type AttendeesFilterCreateResponse = AttendeesFilterCreateResponses[keyof AttendeesFilterCreateResponses];
 
 export type AttendeesStatisticsListData = {
     body?: never;

@@ -1,198 +1,82 @@
-import type { MaybeRefOrGetter } from 'vue'
+﻿import type { MaybeRefOrGetter } from 'vue'
 import { toValue } from 'vue'
+import type {
+  AttendeeFiltersRequest,
+  AttendeeFilterRequestRequest,
+} from '~/api/types.gen'
 
 export type ParticipantsView = 'attendees' | 'bookings' | 'families' | 'statistics' | 'tickets'
 
-export type ParticipantsFilters = {
-  // Demographics
-  organisation: number | undefined
-  areaFrom: number | undefined
-  gender: string | undefined
-  ageMin: number | undefined
-  ageMax: number | undefined
+// Re-export the structured filter type so consumers can import from one place
+export type { AttendeeFiltersRequest }
 
-  // Status filters
-  isCheckedIn: boolean | undefined
-  isRegistered: boolean | undefined
-  isCancelled: boolean | undefined
-  isMinor: boolean | undefined
-  isStaff: boolean | undefined
+// ── URL encode / decode ───────────────────────────────────────────────────────
 
-  // Personal needs
-  hasDietaryRequirements: boolean | undefined
-  dietaryRequirement: number | undefined
-  hasMedicalConditions: boolean | undefined
-  medicalCondition: number | undefined
-  hasAccessibilityRequirements: boolean | undefined
-  accessibilityRequirement: number | undefined
-  hasEmergencyContacts: boolean | undefined
-
-  // Question filters
-  hasAnsweredQuestions: boolean | undefined
-  question: string | undefined
-  questionAnswerSearch: string | undefined
-  answeredQuestionType: string | undefined
-  hasUnansweredRequiredQuestions: boolean | undefined
-  selectedOption: number | undefined
-  sliderAnswerMin: number | undefined
-  sliderAnswerMax: number | undefined
-
-  // Order filters
-  hasOrders: boolean | undefined
-  orderStatus: string | undefined
-  orderStatusNot: string | undefined
-  purchasedProduct: number | undefined
-  purchasedProductTitle: string | undefined
-  orderTotalMin: number | undefined
-  orderTotalMax: number | undefined
-  orderCreatedAfter: string | undefined
-  orderCreatedBefore: string | undefined
-  orderReferenceId: string | undefined
-  hasCompletedOrders: boolean | undefined
-  hasPendingOrders: boolean | undefined
-
-  // Payment filters
-  hasPayments: boolean | undefined
-  paymentId: string | undefined
-  paymentReference: string | undefined
-  bankTransferReference: string | undefined
-  paymentStatus: string | undefined
-  paymentTarget: string | undefined
-  paymentMethodType: string | undefined
-  paymentMethodTitle: string | undefined
-  hasRefunds: boolean | undefined
-  refundStatus: string | undefined
-  refundIsActive: boolean | undefined
-  hasDonations: boolean | undefined
-  donationStatus: string | undefined
-  hasDiscountsUsed: boolean | undefined
-  discountId: string | undefined
-  discountName: string | undefined
-
-  // Advanced filters
-  relationshipToUser: string | undefined
-  selfRegistered: boolean | undefined
-  hasBooking: boolean | undefined
-  booking: string | undefined
-  dateOfBirthAfter: string | undefined
-  dateOfBirthBefore: string | undefined
-  createdAfter: string | undefined
-  createdBefore: string | undefined
-  includeDeleted: boolean | undefined
-
-  // Event form filters
-  hasFormResponses: boolean | undefined
-  /** Comma-separated form IDs; e.g. "1,2,3" */
-  formResponseForms: string | undefined
-  formResponseComplete: boolean | undefined
-  formAnswerSearch: string | undefined
-  /** Comma-separated question IDs; e.g. "10,20" */
-  formAnsweredQuestions: string | undefined
-  formHasUnansweredRequired: boolean | undefined
-  /** Comma-separated option IDs; e.g. "1,2" */
-  formSelectedOption: string | undefined
-  formAnswerSubmittedAfter: string | undefined
-  formAnswerSubmittedBefore: string | undefined
-  formNumericAnswerMin: number | undefined
-  formNumericAnswerMax: number | undefined
-  formAnswerDateAfter: string | undefined
-  formAnswerDateBefore: string | undefined
-  formAnswerTimeAfter: string | undefined
-  formAnswerTimeBefore: string | undefined
-}
-
-function makeEmptyFilters(): ParticipantsFilters {
-  return {
-    organisation: undefined,
-    areaFrom: undefined,
-    gender: undefined,
-    ageMin: undefined,
-    ageMax: undefined,
-    isCheckedIn: undefined,
-    isRegistered: undefined,
-    isCancelled: undefined,
-    isMinor: undefined,
-    isStaff: undefined,
-    hasDietaryRequirements: undefined,
-    dietaryRequirement: undefined,
-    hasMedicalConditions: undefined,
-    medicalCondition: undefined,
-    hasAccessibilityRequirements: undefined,
-    accessibilityRequirement: undefined,
-    hasEmergencyContacts: undefined,
-    hasAnsweredQuestions: undefined,
-    question: undefined,
-    questionAnswerSearch: undefined,
-    answeredQuestionType: undefined,
-    hasUnansweredRequiredQuestions: undefined,
-    selectedOption: undefined,
-    sliderAnswerMin: undefined,
-    sliderAnswerMax: undefined,
-    hasOrders: undefined,
-    orderStatus: undefined,
-    orderStatusNot: undefined,
-    purchasedProduct: undefined,
-    purchasedProductTitle: undefined,
-    orderTotalMin: undefined,
-    orderTotalMax: undefined,
-    orderCreatedAfter: undefined,
-    orderCreatedBefore: undefined,
-    orderReferenceId: undefined,
-    hasCompletedOrders: undefined,
-    hasPendingOrders: undefined,
-    hasPayments: undefined,
-    paymentId: undefined,
-    paymentReference: undefined,
-    bankTransferReference: undefined,
-    paymentStatus: undefined,
-    paymentTarget: undefined,
-    paymentMethodType: undefined,
-    paymentMethodTitle: undefined,
-    hasRefunds: undefined,
-    refundStatus: undefined,
-    refundIsActive: undefined,
-    hasDonations: undefined,
-    donationStatus: undefined,
-    hasDiscountsUsed: undefined,
-    discountId: undefined,
-    discountName: undefined,
-    relationshipToUser: undefined,
-    selfRegistered: undefined,
-    hasBooking: undefined,
-    booking: undefined,
-    dateOfBirthAfter: undefined,
-    dateOfBirthBefore: undefined,
-    createdAfter: undefined,
-    createdBefore: undefined,
-    includeDeleted: undefined,
-    // Event form filters
-    hasFormResponses: undefined,
-    formResponseForms: undefined,
-    formResponseComplete: undefined,
-    formAnswerSearch: undefined,
-    formAnsweredQuestions: undefined,
-    formHasUnansweredRequired: undefined,
-    formSelectedOption: undefined,
-    formAnswerSubmittedAfter: undefined,
-    formAnswerSubmittedBefore: undefined,
-    formNumericAnswerMin: undefined,
-    formNumericAnswerMax: undefined,
-    formAnswerDateAfter: undefined,
-    formAnswerDateBefore: undefined,
-    formAnswerTimeAfter: undefined,
-    formAnswerTimeBefore: undefined,
+function encodeFilters(filters: AttendeeFiltersRequest): string {
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(filters))))
+  }
+  catch {
+    return ''
   }
 }
+
+function decodeFilters(raw: string): AttendeeFiltersRequest | null {
+  try {
+    const json = decodeURIComponent(escape(atob(raw)))
+    return JSON.parse(json) as AttendeeFiltersRequest
+  }
+  catch {
+    return null
+  }
+}
+
+function makeEmptyFilters(): AttendeeFiltersRequest {
+  return {
+    operator: 'AND',
+    demographics: {},
+    status: {},
+    forms: { operator: 'AND', conditions: [] },
+    registration_questions: { operator: 'AND', conditions: [] },
+    orders: {},
+    payments: {},
+    advanced: {},
+  }
+}
+
+// ── Active filter counting ────────────────────────────────────────────────────
+
+function countDefinedFields(obj: Record<string, unknown>): number {
+  let count = 0
+  for (const val of Object.values(obj)) {
+    if (val === undefined || val === null) continue
+    if (Array.isArray(val) && val.length === 0) continue
+    count++
+  }
+  return count
+}
+
+function countFilters(filters: AttendeeFiltersRequest): number {
+  let count = 0
+  if (filters.demographics) count += countDefinedFields(filters.demographics as any)
+  if (filters.status) count += countDefinedFields(filters.status as any)
+  if (filters.orders) count += countDefinedFields(filters.orders as any)
+  if (filters.payments) count += countDefinedFields(filters.payments as any)
+  if (filters.advanced) count += countDefinedFields(filters.advanced as any)
+  count += (filters.forms?.conditions ?? []).length
+  count += (filters.registration_questions?.conditions ?? []).length
+  return count
+}
+
+// ── Main composable ───────────────────────────────────────────────────────────
 
 export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
   const route = useRoute()
   const router = useRouter()
 
-  // ─── Helpers ────────────────────────────────────────────────────────────────
-
   function getQueryString(value: unknown): string | undefined {
     if (Array.isArray(value)) {
-      const first = value.find(v => typeof v === 'string')
+      const first = value.find((v) => typeof v === 'string')
       return typeof first === 'string' ? first : undefined
     }
     return typeof value === 'string' ? value : undefined
@@ -207,141 +91,42 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     return 'attendees'
   }
 
-  // ─── State ──────────────────────────────────────────────────────────────────
+  // ─── State ───────────────────────────────────────────────────────────────────
 
   const currentView = ref<ParticipantsView>(parseView(route.query.view))
+  const searchQuery = ref(getQueryString(route.query.search) || '')
+  const currentPage = ref(Number(getQueryString(route.query.page)) || 1)
+  const pageSize = ref(Number(getQueryString(route.query.page_size)) || 25)
 
-  const searchQuery = ref(route.query.search as string || '')
-  const currentPage = ref(Number(route.query.page) || 1)
-  const pageSize = ref(Number(route.query.page_size) || 25)
-  const currentSort = ref<string>(route.query.ordering as string || '')
-  const sortDirection = ref<'asc' | 'desc'>('asc')
+  const _initialOrdering = getQueryString(route.query.ordering) || ''
+  const currentSort = ref<string>(_initialOrdering.startsWith('-') ? _initialOrdering.slice(1) : _initialOrdering)
+  const sortDirection = ref<'asc' | 'desc'>(_initialOrdering.startsWith('-') ? 'desc' : 'asc')
 
   const showFilters = ref(false)
   const showFiltersModal = ref(false)
 
-  const filters = ref<ParticipantsFilters>({
-    // Demographics
-    organisation: route.query.organisation ? Number(route.query.organisation) : undefined,
-    areaFrom: route.query.area_from ? Number(route.query.area_from) : undefined,
-    gender: route.query.gender as string | undefined,
-    ageMin: route.query.age_min ? Number(route.query.age_min) : undefined,
-    ageMax: route.query.age_max ? Number(route.query.age_max) : undefined,
-
-    // Status filters
-    isCheckedIn: route.query.is_checked_in === 'true' ? true : undefined,
-    isRegistered: route.query.is_registered === 'true' ? true : undefined,
-    isCancelled: route.query.is_cancelled === 'true' ? true : undefined,
-    isMinor: route.query.is_minor === 'true' ? true : undefined,
-    isStaff: route.query.is_event_staff === 'true' ? true : undefined,
-
-    // Personal needs
-    hasDietaryRequirements: route.query.has_dietary_requirements === 'true' ? true : undefined,
-    dietaryRequirement: route.query.dietary_requirement ? Number(route.query.dietary_requirement) : undefined,
-    hasMedicalConditions: route.query.has_medical_conditions === 'true' ? true : undefined,
-    medicalCondition: route.query.medical_condition ? Number(route.query.medical_condition) : undefined,
-    hasAccessibilityRequirements: route.query.has_accessibility_requirements === 'true' ? true : undefined,
-    accessibilityRequirement: route.query.accessibility_requirement ? Number(route.query.accessibility_requirement) : undefined,
-    hasEmergencyContacts: route.query.has_emergency_contacts === 'true' ? true : undefined,
-
-    // Question filters
-    hasAnsweredQuestions: route.query.has_answered_questions === 'true' ? true : undefined,
-    question: route.query.question as string | undefined,
-    questionAnswerSearch: route.query.question_answer_search as string | undefined,
-    answeredQuestionType: route.query.answered_question_type as string | undefined,
-    hasUnansweredRequiredQuestions: route.query.has_unanswered_required_questions === 'true' ? true : undefined,
-    selectedOption: route.query.selected_option ? Number(route.query.selected_option) : undefined,
-    sliderAnswerMin: route.query.slider_answer_min ? Number(route.query.slider_answer_min) : undefined,
-    sliderAnswerMax: route.query.slider_answer_max ? Number(route.query.slider_answer_max) : undefined,
-
-    // Order filters
-    hasOrders: route.query.has_orders === 'true' ? true : undefined,
-    orderStatus: route.query.order_status as string | undefined,
-    orderStatusNot: route.query.order_status_not as string | undefined,
-    purchasedProduct: route.query.purchased_product ? Number(route.query.purchased_product) : undefined,
-    purchasedProductTitle: route.query.purchased_product_title as string | undefined,
-    orderTotalMin: route.query.order_total_min ? Number(route.query.order_total_min) : undefined,
-    orderTotalMax: route.query.order_total_max ? Number(route.query.order_total_max) : undefined,
-    orderCreatedAfter: route.query.order_created_after as string | undefined,
-    orderCreatedBefore: route.query.order_created_before as string | undefined,
-    orderReferenceId: route.query.order_reference_id as string | undefined,
-    hasCompletedOrders: route.query.has_completed_orders === 'true' ? true : undefined,
-    hasPendingOrders: route.query.has_pending_orders === 'true' ? true : undefined,
-
-    // Payment filters
-    hasPayments: route.query.has_payments === 'true' ? true : undefined,
-    paymentId: route.query.payment_id as string | undefined,
-    paymentReference: route.query.payment_reference as string | undefined,
-    bankTransferReference: route.query.bank_transfer_reference as string | undefined,
-    paymentStatus: route.query.payment_status as string | undefined,
-    paymentTarget: route.query.payment_target as string | undefined,
-    paymentMethodType: route.query.payment_method_type as string | undefined,
-    paymentMethodTitle: route.query.payment_method_title as string | undefined,
-    hasRefunds: route.query.has_refunds === 'true' ? true : undefined,
-    refundStatus: route.query.refund_status as string | undefined,
-    refundIsActive: route.query.refund_is_active === 'true' ? true : undefined,
-    hasDonations: route.query.has_donations === 'true' ? true : undefined,
-    donationStatus: route.query.donation_status as string | undefined,
-    hasDiscountsUsed: route.query.has_discounts_used === 'true' ? true : undefined,
-    discountId: route.query.discount_id as string | undefined,
-    discountName: route.query.discount_name as string | undefined,
-
-    // Advanced filters
-    relationshipToUser: route.query.relationship_to_user as string | undefined,
-    selfRegistered: route.query.self_registered === 'true' ? true : undefined,
-    hasBooking: route.query.has_booking === 'true' ? true : undefined,
-    booking: route.query.booking as string | undefined,
-    dateOfBirthAfter: route.query.date_of_birth_after as string | undefined,
-    dateOfBirthBefore: route.query.date_of_birth_before as string | undefined,
-    createdAfter: route.query.created_after as string | undefined,
-    createdBefore: route.query.created_before as string | undefined,
-    includeDeleted: route.query.include_deleted === 'true' ? true : undefined,
-
-    // Event form filters
-    hasFormResponses: route.query.has_form_responses === 'true' ? true : undefined,
-    formResponseForms: route.query.form_response_form as string | undefined,
-    formResponseComplete: route.query.form_response_complete === 'true' ? true : undefined,
-    formAnswerSearch: route.query.form_answer_search as string | undefined,
-    formAnsweredQuestions: route.query.form_answered_question as string | undefined,
-    formHasUnansweredRequired: route.query.form_has_unanswered_required === 'true' ? true : undefined,
-    formSelectedOption: route.query.form_selected_option as string | undefined,
-    formAnswerSubmittedAfter: route.query.form_answer_submitted_after as string | undefined,
-    formAnswerSubmittedBefore: route.query.form_answer_submitted_before as string | undefined,
-    formNumericAnswerMin: route.query.form_numeric_answer_min ? Number(route.query.form_numeric_answer_min) : undefined,
-    formNumericAnswerMax: route.query.form_numeric_answer_max ? Number(route.query.form_numeric_answer_max) : undefined,
-    formAnswerDateAfter: route.query.form_answer_date_after as string | undefined,
-    formAnswerDateBefore: route.query.form_answer_date_before as string | undefined,
-    formAnswerTimeAfter: route.query.form_answer_time_after as string | undefined,
-    formAnswerTimeBefore: route.query.form_answer_time_before as string | undefined,
-  })
-
-  const debouncedQuestionSearch = ref(filters.value.questionAnswerSearch || '')
-  let questionSearchTimeout: ReturnType<typeof setTimeout>
+  const _rawF = getQueryString(route.query.f)
+  const _decoded = _rawF ? decodeFilters(_rawF) : null
+  const filters = ref<AttendeeFiltersRequest>(_decoded ?? makeEmptyFilters())
 
   const debouncedSearch = ref(searchQuery.value)
   let searchTimeout: ReturnType<typeof setTimeout>
 
-  // ─── Route → state sync (external navigation) ───────────────────────────────
+  // ─── Route → state sync ──────────────────────────────────────────────────────
 
-  watch(() => route.query.view, (view) => {
-    currentView.value = parseView(view)
-  })
-
+  watch(() => route.query.view, (view) => { currentView.value = parseView(view) })
   watch(() => route.query.search, (value) => {
     const next = getQueryString(value) || ''
     if (searchQuery.value !== next) searchQuery.value = next
   })
-
   watch(() => route.query.page, (value) => {
     const next = Number(getQueryString(value)) || 1
     if (currentPage.value !== next) currentPage.value = next
   })
-
   watch(() => route.query.page_size, (value) => {
     const next = Number(getQueryString(value)) || 25
     if (pageSize.value !== next) pageSize.value = next
   })
-
   watch(() => route.query.ordering, (value) => {
     const ordering = getQueryString(value) || ''
     const nextDir: 'asc' | 'desc' = ordering.startsWith('-') ? 'desc' : 'asc'
@@ -349,8 +134,13 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (sortDirection.value !== nextDir) sortDirection.value = nextDir
     if (currentSort.value !== nextSort) currentSort.value = nextSort
   })
+  watch(() => route.query.f, (value) => {
+    const raw = getQueryString(value)
+    const decoded = raw ? decodeFilters(raw) : null
+    filters.value = decoded ?? makeEmptyFilters()
+  })
 
-  // ─── Debounced search ───────────────────────────────────────────────────────
+  // ─── Debounced search ────────────────────────────────────────────────────────
 
   watch(searchQuery, (newValue) => {
     clearTimeout(searchTimeout)
@@ -360,183 +150,56 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     }, 300)
   })
 
-  // ─── Query params ───────────────────────────────────────────────────────────
+  // ─── Query params ────────────────────────────────────────────────────────────
 
-  const queryParams = computed(() => {
+  /** POST body for POST /api/attendees/filter/ */
+  const postFilterBody = computed<AttendeeFilterRequestRequest>(() => {
     const id = toValue(eventId)
-    const params: Record<string, any> = {
+    const body: AttendeeFilterRequestRequest = {
       event: id,
       page: currentPage.value,
       page_size: pageSize.value,
+      filters: filters.value,
     }
+    if (debouncedSearch.value) body.search = debouncedSearch.value
+    if (currentSort.value)
+      body.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+    return body
+  })
 
+  /** GET params for stats / bookings / family groups (unchanged GET endpoints) */
+  const queryParams = computed(() => {
+    const id = toValue(eventId)
+    const params: Record<string, any> = { event: id, page: currentPage.value, page_size: pageSize.value }
     if (debouncedSearch.value) params.search = debouncedSearch.value
-    if (currentSort.value) params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
-
-    const f = filters.value
-    if (f.organisation) params.organisation = f.organisation
-    if (f.areaFrom) params.area_from = f.areaFrom
-    if (f.gender) params.gender = f.gender
-    if (f.ageMin) params.age_min = f.ageMin
-    if (f.ageMax) params.age_max = f.ageMax
-    if (f.isMinor !== undefined) params.is_minor = f.isMinor
-    if (f.isCheckedIn !== undefined) params.is_checked_in = f.isCheckedIn
-    if (f.isRegistered !== undefined) params.is_registered = f.isRegistered
-    if (f.isCancelled !== undefined) params.is_cancelled = f.isCancelled
-    if (f.isStaff !== undefined) params.is_event_staff = f.isStaff
-    if (f.hasDietaryRequirements !== undefined) params.has_dietary_requirements = f.hasDietaryRequirements
-    if (f.dietaryRequirement) params.dietary_requirement = f.dietaryRequirement
-    if (f.hasMedicalConditions !== undefined) params.has_medical_conditions = f.hasMedicalConditions
-    if (f.medicalCondition) params.medical_condition = f.medicalCondition
-    if (f.hasAccessibilityRequirements !== undefined) params.has_accessibility_requirements = f.hasAccessibilityRequirements
-    if (f.accessibilityRequirement) params.accessibility_requirement = f.accessibilityRequirement
-    if (f.question) params.question = f.question
-    if (debouncedQuestionSearch.value) params.question_answer_search = debouncedQuestionSearch.value
-    if (f.hasAnsweredQuestions !== undefined) params.has_answered_questions = f.hasAnsweredQuestions
-    if (f.hasUnansweredRequiredQuestions !== undefined) params.has_unanswered_required_questions = f.hasUnansweredRequiredQuestions
-    if (f.selectedOption) params.selected_option = f.selectedOption
-    if (f.sliderAnswerMin) params.slider_answer_min = f.sliderAnswerMin
-    if (f.sliderAnswerMax) params.slider_answer_max = f.sliderAnswerMax
-    if (f.answeredQuestionType) params.answered_question_type = f.answeredQuestionType
-    if (f.hasOrders !== undefined) params.has_orders = f.hasOrders
-    if (f.orderStatus) params.order_status = f.orderStatus
-    if (f.orderStatusNot) params.order_status_not = f.orderStatusNot
-    if (f.purchasedProduct) params.purchased_product = f.purchasedProduct
-    if (f.purchasedProductTitle) params.purchased_product_title = f.purchasedProductTitle
-    if (f.orderTotalMin) params.order_total_min = f.orderTotalMin
-    if (f.orderTotalMax) params.order_total_max = f.orderTotalMax
-    if (f.orderCreatedAfter) params.order_created_after = f.orderCreatedAfter
-    if (f.orderCreatedBefore) params.order_created_before = f.orderCreatedBefore
-    if (f.orderReferenceId) params.order_reference_id = f.orderReferenceId
-    if (f.hasCompletedOrders !== undefined) params.has_completed_orders = f.hasCompletedOrders
-    if (f.hasPendingOrders !== undefined) params.has_pending_orders = f.hasPendingOrders
-    if (f.hasPayments !== undefined) params.has_payments = f.hasPayments
-    if (f.paymentId) params.payment_id = f.paymentId
-    if (f.paymentReference) params.payment_reference = f.paymentReference
-    if (f.bankTransferReference) params.bank_transfer_reference = f.bankTransferReference
-    if (f.paymentStatus) params.payment_status = f.paymentStatus
-    if (f.paymentTarget) params.payment_target = f.paymentTarget
-    if (f.paymentMethodType) params.payment_method_type = f.paymentMethodType
-    if (f.paymentMethodTitle) params.payment_method_title = f.paymentMethodTitle
-    if (f.hasRefunds !== undefined) params.has_refunds = f.hasRefunds
-    if (f.refundStatus) params.refund_status = f.refundStatus
-    if (f.refundIsActive !== undefined) params.refund_is_active = f.refundIsActive
-    if (f.hasDonations !== undefined) params.has_donations = f.hasDonations
-    if (f.donationStatus) params.donation_status = f.donationStatus
-    if (f.hasDiscountsUsed !== undefined) params.has_discounts_used = f.hasDiscountsUsed
-    if (f.discountId) params.discount_id = f.discountId
-    if (f.discountName) params.discount_name = f.discountName
-    if (f.relationshipToUser) params.relationship_to_user = f.relationshipToUser
-    if (f.selfRegistered !== undefined) params.self_registered = f.selfRegistered
-    if (f.hasBooking !== undefined) params.has_booking = f.hasBooking
-    if (f.booking) params.booking = f.booking
-    if (f.dateOfBirthAfter) params.date_of_birth_after = f.dateOfBirthAfter
-    if (f.dateOfBirthBefore) params.date_of_birth_before = f.dateOfBirthBefore
-    if (f.createdAfter) params.created_after = f.createdAfter
-    if (f.createdBefore) params.created_before = f.createdBefore
-    if (f.includeDeleted !== undefined) params.include_deleted = f.includeDeleted
-
-    // Event form filters
-    if (f.hasFormResponses !== undefined) params.has_form_responses = f.hasFormResponses
-    if (f.formResponseForms) params.form_response_form = f.formResponseForms
-    if (f.formResponseComplete !== undefined) params.form_response_complete = f.formResponseComplete
-    if (f.formAnswerSearch) params.form_answer_search = f.formAnswerSearch
-    if (f.formAnsweredQuestions) params.form_answered_question = f.formAnsweredQuestions
-    if (f.formHasUnansweredRequired !== undefined) params.form_has_unanswered_required = f.formHasUnansweredRequired
-    if (f.formSelectedOption) params.form_selected_option = f.formSelectedOption
-    if (f.formAnswerSubmittedAfter) params.form_answer_submitted_after = f.formAnswerSubmittedAfter
-    if (f.formAnswerSubmittedBefore) params.form_answer_submitted_before = f.formAnswerSubmittedBefore
-    if (f.formNumericAnswerMin !== undefined) params.form_numeric_answer_min = f.formNumericAnswerMin
-    if (f.formNumericAnswerMax !== undefined) params.form_numeric_answer_max = f.formNumericAnswerMax
-    if (f.formAnswerDateAfter) params.form_answer_date_after = f.formAnswerDateAfter
-    if (f.formAnswerDateBefore) params.form_answer_date_before = f.formAnswerDateBefore
-    if (f.formAnswerTimeAfter) params.form_answer_time_after = f.formAnswerTimeAfter
-    if (f.formAnswerTimeBefore) params.form_answer_time_before = f.formAnswerTimeBefore
-
+    if (currentSort.value)
+      params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
     return params
   })
 
   const bookingsQueryParams = computed(() => {
     const id = toValue(eventId)
-    const params: Record<string, any> = {
-      event: id,
-      page: currentPage.value,
-      page_size: pageSize.value,
-    }
+    const params: Record<string, any> = { event: id, page: currentPage.value, page_size: pageSize.value }
     if (debouncedSearch.value) params.search = debouncedSearch.value
-    if (currentSort.value) params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+    if (currentSort.value)
+      params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
     return params
   })
 
   const familyGroupsQueryParams = computed(() => {
     const id = toValue(eventId)
-    const params: Record<string, any> = {
-      event: id,
-      page: currentPage.value,
-      page_size: pageSize.value,
-    }
+    const params: Record<string, any> = { event: id, page: currentPage.value, page_size: pageSize.value }
     if (debouncedSearch.value) params.search = debouncedSearch.value
-    if (currentSort.value) params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+    if (currentSort.value)
+      params.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
     return params
   })
 
-  const eventBookingsQueryParams = computed(() => ({
-    event: toValue(eventId),
-    page_size: 100,
-  }))
+  const eventBookingsQueryParams = computed(() => ({ event: toValue(eventId), page_size: 100 }))
 
   // ─── Active filter count ─────────────────────────────────────────────────────
 
-  const activeFilterCount = computed(() => {
-    let count = 0
-    const f = filters.value
-    if (f.organisation) count++
-    if (f.areaFrom) count++
-    if (f.gender) count++
-    if (f.ageMin) count++
-    if (f.ageMax) count++
-    if (f.isCheckedIn !== undefined) count++
-    if (f.isRegistered !== undefined) count++
-    if (f.isCancelled !== undefined) count++
-    if (f.isMinor !== undefined) count++
-    if (f.isStaff !== undefined) count++
-    if (f.hasDietaryRequirements !== undefined) count++
-    if (f.hasMedicalConditions !== undefined) count++
-    if (f.hasAccessibilityRequirements !== undefined) count++
-    if (f.hasPayments !== undefined) count++
-    if (f.paymentId) count++
-    if (f.paymentReference) count++
-    if (f.bankTransferReference) count++
-    if (f.paymentStatus) count++
-    if (f.paymentTarget) count++
-    if (f.paymentMethodType) count++
-    if (f.paymentMethodTitle) count++
-    if (f.hasRefunds !== undefined) count++
-    if (f.refundStatus) count++
-    if (f.refundIsActive !== undefined) count++
-    if (f.hasDonations !== undefined) count++
-    if (f.donationStatus) count++
-    if (f.hasDiscountsUsed !== undefined) count++
-    if (f.discountId) count++
-    if (f.discountName) count++
-    // Form filter count
-    if (f.hasFormResponses !== undefined) count++
-    if (f.formResponseForms) count++
-    if (f.formResponseComplete !== undefined) count++
-    if (f.formAnswerSearch) count++
-    if (f.formAnsweredQuestions) count++
-    if (f.formHasUnansweredRequired !== undefined) count++
-    if (f.formSelectedOption) count++
-    if (f.formAnswerSubmittedAfter) count++
-    if (f.formAnswerSubmittedBefore) count++
-    if (f.formNumericAnswerMin !== undefined) count++
-    if (f.formNumericAnswerMax !== undefined) count++
-    if (f.formAnswerDateAfter) count++
-    if (f.formAnswerDateBefore) count++
-    if (f.formAnswerTimeAfter) count++
-    if (f.formAnswerTimeBefore) count++
-    return count
-  })
+  const activeFilterCount = computed(() => countFilters(filters.value))
 
   // ─── Active filter chips ─────────────────────────────────────────────────────
 
@@ -548,272 +211,204 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     medicalList: any[],
     accessibilityList: any[],
     formQuestionsList: any[],
+    formsList: any[] = [],
   ) {
     return computed(() => {
       const chips: Array<{ key: string; label: string; value: string }> = []
+      const f = filters.value
 
-      const parseValue = (value: string ): string[] => {
-        if (value.includes(',')) {
-          return value.split(',').map(v => v.trim())
-        }
-        return [value]
+      // ── Helper: look up a form question title by integer ID ──────────────────
+      function fqTitle(questionId: number): string {
+        const q = formQuestionsList.find((q: any) => Number(q.id) === questionId)
+        return q ? String(q.question_title || '').trim() || `Q${questionId}` : `Q${questionId}`
       }
 
-      const formatValue = (value: any, key: string): string => {
-        if (typeof value === 'boolean') return value ? 'Yes' : 'No'
-        if (key === 'organisation' && organisationsList.length > 0) {
-          const org = organisationsList.find((o: any) => o.id === value)
-          const orgList = organisationsList.filter((o: any) => parseValue(String(value)).includes(String(o.id)))
-          return org?.title || String(orgList.map((o: any) => o.title).join(', ')) || String(value)
-        }
-        if (key === 'areaFrom' && areasList.length > 0) {
-          const area = areasList.find((a: any) => a.id === value)
-          const areaList = areasList.filter((a: any) => parseValue(String(value)).includes(String(a.id)))
-          return area?.area_name || String(areaList.map((a: any) => a.area_name).join(', ')) || String(value)
-        }
-        if (key === 'question' && questionsList.length > 0) {
-          const question = questionsList.find((q: any) => q.id === value)
-          const questionList = questionsList.filter((q: any) => parseValue(String(value)).includes(String(q.id)))
-          return question?.question_body || String(questionList.map((q: any) => q.question_body).join(', ')) || String(value)
-        }
-        if (key === 'dietaryRequirement' && dietaryList.length > 0) {
-          const req = dietaryList.find((r: any) => r.id === value)
-          const reqList = dietaryList.filter((r: any) => parseValue(String(value)).includes(String(r.id)))
-          return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
-        }
-        if (key === 'medicalCondition' && medicalList.length > 0) {
-          const cond = medicalList.find((c: any) => c.id === value)
-          const condList = medicalList.filter((c: any) => parseValue(String(value)).includes(String(c.id)))
-          return cond?.label || String(condList.map((c: any) => c.label).join(', ')) || String(value)
-        }
-        if (key === 'accessibilityRequirement' && accessibilityList.length > 0) {
-          const req = accessibilityList.find((r: any) => r.id === value)
-          const reqList = accessibilityList.filter((r: any) => parseValue(String(value)).includes(String(r.id)))
-          return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
-        }
-
-        if (key === 'formAnsweredQuestions' && formQuestionsList.length > 0) {
-          const ids = String(value).split(',').map(Number).filter(Number.isFinite)
-          const names = ids.map(id => {
-            const q = formQuestionsList.find((q: any) => q.id === id)
-            return q?.question_title || q?.question_body || `Question ${id}`
-          })
-          if (names.length === 1) return names[0]
-          return `${names.length} questions`
-        }
-        if (key === 'formResponseForms') {
-          const ids = String(value).split(',').filter(Boolean)
-          if (ids.length === 1) return `Form ${ids[0]}`
-          return `${ids.length} forms`
-        }
-        if (key === 'formAnswerTimeAfter' && formQuestionsList.length > 0) {
-          return `Form Time After: ${String(value)}`
-        }
-        if (key === 'formAnswerTimeBefore' && formQuestionsList.length > 0) {
-          return `Form Time Before: ${String(value)}`
-        }
-        return String(value)
+      // ── Helper: look up a form title by UUID ─────────────────────────────────
+      function formTitle(formId: string): string {
+        const form = formsList.find((f: any) => f.id === formId)
+        return form ? String(form.title || '').trim() || formId.slice(0, 8) : formId.slice(0, 8)
       }
 
-      const labels: Record<string, string> = {
-        organisation: 'Organisation',
-        areaFrom: 'Area',
-        gender: 'Gender',
-        ageMin: 'Min Age',
-        ageMax: 'Max Age',
-        isMinor: 'Minor',
-        isCheckedIn: 'Checked In',
-        isRegistered: 'Registered',
-        isCancelled: 'Cancelled',
-        isStaff: 'Staff',
-        hasDietaryRequirements: 'Has Dietary Req',
-        dietaryRequirement: 'Dietary Requirement',
-        hasMedicalConditions: 'Has Medical Cond',
-        medicalCondition: 'Medical Condition',
-        hasAccessibilityRequirements: 'Has Accessibility',
-        accessibilityRequirement: 'Accessibility Req',
-        question: 'Question',
-        questionAnswerSearch: 'Answer Search',
-        hasAnsweredQuestions: 'Answered Questions',
-        hasUnansweredRequiredQuestions: 'Unanswered Required',
-        selectedOption: 'Selected Option',
-        sliderAnswerMin: 'Slider Min',
-        sliderAnswerMax: 'Slider Max',
-        hasOrders: 'Has Orders',
-        orderStatus: 'Order Status',
-        orderStatusNot: 'Order Status Not',
-        purchasedProduct: 'Product',
-        purchasedProductTitle: 'Product Title',
-        orderTotalMin: 'Order Min',
-        orderTotalMax: 'Order Max',
-        orderCreatedAfter: 'Order After',
-        orderCreatedBefore: 'Order Before',
-        orderReferenceId: 'Order Reference',
-        hasCompletedOrders: 'Has Completed Orders',
-        hasPendingOrders: 'Has Pending Orders',
-        hasPayments: 'Has Payments',
-        paymentId: 'Payment ID',
-        paymentReference: 'Payment Reference',
-        bankTransferReference: 'Bank Transfer Ref',
-        paymentStatus: 'Payment Status',
-        paymentTarget: 'Payment Target',
-        paymentMethodType: 'Method Type',
-        paymentMethodTitle: 'Method Title',
-        hasRefunds: 'Has Refunds',
-        refundStatus: 'Refund Status',
-        refundIsActive: 'Refund Active',
-        hasDonations: 'Has Donations',
-        donationStatus: 'Donation Status',
-        hasDiscountsUsed: 'Has Discounts Used',
-        discountId: 'Discount ID',
-        discountName: 'Discount Name',
-        relationshipToUser: 'Relationship',
-        selfRegistered: 'Self Registered',
-        hasBooking: 'Has Booking',
-        booking: 'Booking',
-        dateOfBirthAfter: 'DOB After',
-        dateOfBirthBefore: 'DOB Before',
-        createdAfter: 'Created After',
-        createdBefore: 'Created Before',
-        includeDeleted: 'Include Deleted',
-        hasEmergencyContacts: 'Has Emergency Contacts',
-        answeredQuestionType: 'Answered Question Type',
-        // Form filter labels
-        hasFormResponses: 'Has Form Responses',
-        formResponseForms: 'Form(s)',
-        formResponseComplete: 'Form Response Complete',
-        formAnswerSearch: 'Form Answer Search',
-        formAnsweredQuestions: 'Form Question(s)',
-        formHasUnansweredRequired: 'Unanswered Required (Form)',
-        formSelectedOption: 'Form Selected Option',
-        formAnswerSubmittedAfter: 'Form Submitted After',
-        formAnswerSubmittedBefore: 'Form Submitted Before',
-        formNumericAnswerMin: 'Form Answer Min',
-        formNumericAnswerMax: 'Form Answer Max',
-        formAnswerDateAfter: 'Form Date After',
-        formAnswerDateBefore: 'Form Date Before',
-        formAnswerTimeAfter: 'Form Time After',
-        formAnswerTimeBefore: 'Form Time Before',
+      // ── Helper: look up a registration question title by UUID ────────────────
+      function rqTitle(questionId: string): string {
+        const q = questionsList.find((q: any) => String(q.id) === questionId)
+        return q ? String(q.question_title || q.question_body || '').trim() || `Q${questionId.slice(0, 6)}` : `Q${questionId.slice(0, 6)}`
       }
 
-      Object.entries(filters.value).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+      // ── Helper: build a human-readable summary of a question condition ────────
+      function fqConditionSummary(qCond: any): string {
+        const type = String(qCond.type || '')
+        if (type === 'short_answer' || type === 'long_answer' || type === 'email' || type === 'phone') {
+          return qCond.contains ? `contains "${qCond.contains}"` : 'has answer'
+        }
+        if (type === 'single_choice' || type === 'multiple_choice') {
+          const opts = qCond.selected_options
+          return opts?.length ? `option ${opts.join('/')}` : 'any option'
+        }
+        if (type === 'slider' || type === 'rating') {
+          if (qCond.min != null && qCond.max != null) return `${qCond.min}–${qCond.max}`
+          if (qCond.min != null) return `≥ ${qCond.min}`
+          if (qCond.max != null) return `≤ ${qCond.max}`
+          return 'any value'
+        }
+        if (type === 'date') {
+          if (qCond.date_after && qCond.date_before) return `${qCond.date_after} – ${qCond.date_before}`
+          if (qCond.date_after) return `after ${qCond.date_after}`
+          if (qCond.date_before) return `before ${qCond.date_before}`
+          return 'any date'
+        }
+        if (type === 'time') {
+          if (qCond.time_after && qCond.time_before) return `${qCond.time_after} – ${qCond.time_before}`
+          if (qCond.time_after) return `after ${qCond.time_after}`
+          if (qCond.time_before) return `before ${qCond.time_before}`
+          return 'any time'
+        }
+        if (type === 'upload') {
+          return 'submitted'
+        }
+        return type
+      }
+
+      const d = f.demographics ?? {}
+      if (d.gender) chips.push({ key: 'demographics.gender', label: 'Gender', value: String(d.gender) })
+      if (d.age_min != null) chips.push({ key: 'demographics.age_min', label: 'Min Age', value: String(d.age_min) })
+      if (d.age_max != null) chips.push({ key: 'demographics.age_max', label: 'Max Age', value: String(d.age_max) })
+      if (d.is_minor != null) chips.push({ key: 'demographics.is_minor', label: 'Minor', value: d.is_minor ? 'Yes' : 'No' })
+      if (d.organisation && d.organisation.length > 0) {
+        const names = d.organisation.map((id) => organisationsList.find((o: any) => o.id === id)?.title || String(id))
+        chips.push({ key: 'demographics.organisation', label: 'Organisation', value: names.join(', ') })
+      }
+      if (d.area_from && d.area_from.length > 0) {
+        const names = d.area_from.map((id) => areasList.find((a: any) => a.id === id)?.area_name || String(id))
+        chips.push({ key: 'demographics.area_from', label: 'Area', value: names.join(', ') })
+      }
+      if (d.has_dietary_requirements != null) chips.push({ key: 'demographics.has_dietary_requirements', label: 'Has Dietary', value: d.has_dietary_requirements ? 'Yes' : 'No' })
+      if (d.dietary_requirement && d.dietary_requirement.length > 0) {
+        const names = d.dietary_requirement.map((id) => dietaryList.find((r: any) => r.id === id)?.label || String(id))
+        chips.push({ key: 'demographics.dietary_requirement', label: 'Dietary', value: names.join(', ') })
+      }
+      if (d.has_medical_conditions != null) chips.push({ key: 'demographics.has_medical_conditions', label: 'Has Medical', value: d.has_medical_conditions ? 'Yes' : 'No' })
+      if (d.medical_condition && d.medical_condition.length > 0) {
+        const names = d.medical_condition.map((id) => medicalList.find((c: any) => c.id === id)?.label || String(id))
+        chips.push({ key: 'demographics.medical_condition', label: 'Medical', value: names.join(', ') })
+      }
+      if (d.has_accessibility_requirements != null) chips.push({ key: 'demographics.has_accessibility_requirements', label: 'Has Accessibility', value: d.has_accessibility_requirements ? 'Yes' : 'No' })
+      if (d.accessibility_requirement && d.accessibility_requirement.length > 0) {
+        const names = d.accessibility_requirement.map((id) => accessibilityList.find((r: any) => r.id === id)?.label || String(id))
+        chips.push({ key: 'demographics.accessibility_requirement', label: 'Accessibility', value: names.join(', ') })
+      }
+      if (d.has_emergency_contacts != null) chips.push({ key: 'demographics.has_emergency_contacts', label: 'Emergency Contacts', value: d.has_emergency_contacts ? 'Yes' : 'No' })
+      if (d.include_deleted) chips.push({ key: 'demographics.include_deleted', label: 'Include Deleted', value: 'Yes' })
+
+      const s = f.status ?? {}
+      if (s.is_checked_in != null) chips.push({ key: 'status.is_checked_in', label: 'Checked In', value: s.is_checked_in ? 'Yes' : 'No' })
+      if (s.is_registered != null) chips.push({ key: 'status.is_registered', label: 'Registered', value: s.is_registered ? 'Yes' : 'No' })
+      if (s.is_cancelled != null) chips.push({ key: 'status.is_cancelled', label: 'Cancelled', value: s.is_cancelled ? 'Yes' : 'No' })
+      if (s.is_staff != null) chips.push({ key: 'status.is_staff', label: 'Staff', value: s.is_staff ? 'Yes' : 'No' })
+
+      // ── Form condition chips — one chip per question condition ──────────────
+      ;(f.forms?.conditions ?? []).forEach((cond, i) => {
+        const title = formTitle(cond.form)
+        const questions = cond.questions ?? []
+        if (questions.length === 0) {
+          // Only has_response / response_complete filters
+          const parts: string[] = []
+          if (cond.has_response === true) parts.push('has response')
+          else if (cond.has_response === false) parts.push('no response')
+          if (cond.response_complete === true) parts.push('complete')
+          else if (cond.response_complete === false) parts.push('incomplete')
           chips.push({
-            key,
-            label: labels[key] || key,
-            value: formatValue(value, key),
+            key: `forms.${i}`,
+            label: title,
+            value: parts.join(', ') || 'response filter',
+          })
+        }
+        else {
+          questions.forEach((qCond: any, qi: number) => {
+            chips.push({
+              key: `forms.${i}.q${qi}`,
+              label: title,
+              value: `${fqTitle(qCond.question_id)}: ${fqConditionSummary(qCond)}`,
+            })
           })
         }
       })
+
+      // ── Registration question chips — one chip per condition ────────────────
+      ;(f.registration_questions?.conditions ?? []).forEach((cond, i) => {
+        const title = rqTitle(String(cond.question_id))
+        chips.push({
+          key: `rq.${i}`,
+          label: 'Question',
+          value: `${title}: ${fqConditionSummary(cond)}`,
+        })
+      })
+
+      const o = f.orders ?? {}
+      if (o.has_orders != null) chips.push({ key: 'orders.has_orders', label: 'Has Orders', value: o.has_orders ? 'Yes' : 'No' })
+      if (o.order_status && o.order_status.length > 0) chips.push({ key: 'orders.order_status', label: 'Order Status', value: o.order_status.join(', ') })
+      if (o.order_status_not && o.order_status_not.length > 0) chips.push({ key: 'orders.order_status_not', label: 'Order Status Not', value: o.order_status_not.join(', ') })
+      if (o.purchased_product && o.purchased_product.length > 0) chips.push({ key: 'orders.purchased_product', label: 'Product', value: String(o.purchased_product.join(', ')) })
+      if (o.purchased_product_title) chips.push({ key: 'orders.purchased_product_title', label: 'Product Title', value: String(o.purchased_product_title) })
+      if (o.order_total_min != null) chips.push({ key: 'orders.order_total_min', label: 'Order Min', value: String(o.order_total_min) })
+      if (o.order_total_max != null) chips.push({ key: 'orders.order_total_max', label: 'Order Max', value: String(o.order_total_max) })
+      if (o.order_created_after) chips.push({ key: 'orders.order_created_after', label: 'Order After', value: String(o.order_created_after) })
+      if (o.order_created_before) chips.push({ key: 'orders.order_created_before', label: 'Order Before', value: String(o.order_created_before) })
+      if (o.order_reference_id) chips.push({ key: 'orders.order_reference_id', label: 'Order Ref', value: String(o.order_reference_id) })
+      if (o.has_completed_orders != null) chips.push({ key: 'orders.has_completed_orders', label: 'Completed Orders', value: o.has_completed_orders ? 'Yes' : 'No' })
+      if (o.has_pending_orders != null) chips.push({ key: 'orders.has_pending_orders', label: 'Pending Orders', value: o.has_pending_orders ? 'Yes' : 'No' })
+
+      const p = f.payments ?? {}
+      if (p.has_payments != null) chips.push({ key: 'payments.has_payments', label: 'Has Payments', value: p.has_payments ? 'Yes' : 'No' })
+      if (p.payment_status && p.payment_status.length > 0) chips.push({ key: 'payments.payment_status', label: 'Payment Status', value: p.payment_status.join(', ') })
+      if (p.payment_method_type && p.payment_method_type.length > 0) chips.push({ key: 'payments.payment_method_type', label: 'Method Type', value: p.payment_method_type.join(', ') })
+      if (p.payment_reference) chips.push({ key: 'payments.payment_reference', label: 'Payment Ref', value: String(p.payment_reference) })
+      if (p.bank_transfer_reference) chips.push({ key: 'payments.bank_transfer_reference', label: 'Bank Transfer Ref', value: String(p.bank_transfer_reference) })
+      if (p.has_refunds != null) chips.push({ key: 'payments.has_refunds', label: 'Has Refunds', value: p.has_refunds ? 'Yes' : 'No' })
+      if (p.refund_status && p.refund_status.length > 0) chips.push({ key: 'payments.refund_status', label: 'Refund Status', value: p.refund_status.join(', ') })
+      if (p.has_donations != null) chips.push({ key: 'payments.has_donations', label: 'Has Donations', value: p.has_donations ? 'Yes' : 'No' })
+      if (p.has_discounts_used != null) chips.push({ key: 'payments.has_discounts_used', label: 'Has Discounts', value: p.has_discounts_used ? 'Yes' : 'No' })
+      if (p.discount_name) chips.push({ key: 'payments.discount_name', label: 'Discount Name', value: String(p.discount_name) })
+
+      const a = f.advanced ?? {}
+      if (a.relationship_to_user) chips.push({ key: 'advanced.relationship_to_user', label: 'Relationship', value: String(a.relationship_to_user) })
+      if (a.self_registered != null) chips.push({ key: 'advanced.self_registered', label: 'Self Registered', value: a.self_registered ? 'Yes' : 'No' })
+      if (a.has_booking != null) chips.push({ key: 'advanced.has_booking', label: 'Has Booking', value: a.has_booking ? 'Yes' : 'No' })
+      if (a.date_of_birth_after) chips.push({ key: 'advanced.date_of_birth_after', label: 'DOB After', value: String(a.date_of_birth_after) })
+      if (a.date_of_birth_before) chips.push({ key: 'advanced.date_of_birth_before', label: 'DOB Before', value: String(a.date_of_birth_before) })
+      if (a.created_after) chips.push({ key: 'advanced.created_after', label: 'Created After', value: String(a.created_after) })
+      if (a.created_before) chips.push({ key: 'advanced.created_before', label: 'Created Before', value: String(a.created_before) })
 
       return chips
     })
   }
 
-  // ─── URL → state sync (big watcher) ─────────────────────────────────────────
+  // ─── URL → state sync (watcher) ──────────────────────────────────────────────
 
   watch(
     [searchQuery, currentPage, pageSize, currentSort, sortDirection, filters, currentView],
     () => {
       const query: Record<string, any> = {}
-      const f = filters.value
-
       if (searchQuery.value) query.search = searchQuery.value
       if (currentPage.value > 1) query.page = currentPage.value
       if (pageSize.value !== 25) query.page_size = pageSize.value
-      if (currentSort.value) query.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
-      if (currentView.value === 'bookings') query.view = 'bookings'
-      if (currentView.value === 'families') query.view = 'families'
-      if (currentView.value === 'statistics') query.view = 'statistics'
-      if (currentView.value === 'tickets') query.view = 'tickets'
-      if (currentView.value === 'tickets' && route.query.ticket_id) query.ticket_id = route.query.ticket_id
+      if (currentSort.value)
+        query.ordering = sortDirection.value === 'desc' ? `-${currentSort.value}` : currentSort.value
+      if (currentView.value !== 'attendees') query.view = currentView.value
+      if (currentView.value === 'tickets' && route.query.ticket_id)
+        query.ticket_id = route.query.ticket_id
 
-      if (f.organisation) query.organisation = f.organisation
-      if (f.areaFrom) query.area_from = f.areaFrom
-      if (f.gender) query.gender = f.gender
-      if (f.ageMin) query.age_min = f.ageMin
-      if (f.ageMax) query.age_max = f.ageMax
-      if (f.isCheckedIn !== undefined) query.is_checked_in = f.isCheckedIn
-      if (f.isRegistered !== undefined) query.is_registered = f.isRegistered
-      if (f.isCancelled !== undefined) query.is_cancelled = f.isCancelled
-      if (f.isMinor !== undefined) query.is_minor = f.isMinor
-      if (f.isStaff !== undefined) query.is_event_staff = f.isStaff
-      if (f.hasDietaryRequirements !== undefined) query.has_dietary_requirements = f.hasDietaryRequirements
-      if (f.dietaryRequirement) query.dietary_requirement = f.dietaryRequirement
-      if (f.hasMedicalConditions !== undefined) query.has_medical_conditions = f.hasMedicalConditions
-      if (f.medicalCondition) query.medical_condition = f.medicalCondition
-      if (f.hasAccessibilityRequirements !== undefined) query.has_accessibility_requirements = f.hasAccessibilityRequirements
-      if (f.accessibilityRequirement) query.accessibility_requirement = f.accessibilityRequirement
-      if (f.hasEmergencyContacts !== undefined) query.has_emergency_contacts = f.hasEmergencyContacts
-      if (f.question) query.question = f.question
-      if (f.questionAnswerSearch) query.question_answer_search = f.questionAnswerSearch
-      if (f.hasAnsweredQuestions !== undefined) query.has_answered_questions = f.hasAnsweredQuestions
-      if (f.hasUnansweredRequiredQuestions !== undefined) query.has_unanswered_required_questions = f.hasUnansweredRequiredQuestions
-      if (f.selectedOption) query.selected_option = f.selectedOption
-      if (f.sliderAnswerMin) query.slider_answer_min = f.sliderAnswerMin
-      if (f.sliderAnswerMax) query.slider_answer_max = f.sliderAnswerMax
-      if (f.answeredQuestionType) query.answered_question_type = f.answeredQuestionType
-      if (f.hasOrders !== undefined) query.has_orders = f.hasOrders
-      if (f.orderStatus) query.order_status = f.orderStatus
-      if (f.orderStatusNot) query.order_status_not = f.orderStatusNot
-      if (f.purchasedProduct) query.purchased_product = f.purchasedProduct
-      if (f.purchasedProductTitle) query.purchased_product_title = f.purchasedProductTitle
-      if (f.orderTotalMin) query.order_total_min = f.orderTotalMin
-      if (f.orderTotalMax) query.order_total_max = f.orderTotalMax
-      if (f.orderCreatedAfter) query.order_created_after = f.orderCreatedAfter
-      if (f.orderCreatedBefore) query.order_created_before = f.orderCreatedBefore
-      if (f.orderReferenceId) query.order_reference_id = f.orderReferenceId
-      if (f.hasCompletedOrders !== undefined) query.has_completed_orders = f.hasCompletedOrders
-      if (f.hasPendingOrders !== undefined) query.has_pending_orders = f.hasPendingOrders
-      if (f.hasPayments !== undefined) query.has_payments = f.hasPayments
-      if (f.paymentId) query.payment_id = f.paymentId
-      if (f.paymentReference) query.payment_reference = f.paymentReference
-      if (f.bankTransferReference) query.bank_transfer_reference = f.bankTransferReference
-      if (f.paymentStatus) query.payment_status = f.paymentStatus
-      if (f.paymentTarget) query.payment_target = f.paymentTarget
-      if (f.paymentMethodType) query.payment_method_type = f.paymentMethodType
-      if (f.paymentMethodTitle) query.payment_method_title = f.paymentMethodTitle
-      if (f.hasRefunds !== undefined) query.has_refunds = f.hasRefunds
-      if (f.refundStatus) query.refund_status = f.refundStatus
-      if (f.refundIsActive !== undefined) query.refund_is_active = f.refundIsActive
-      if (f.hasDonations !== undefined) query.has_donations = f.hasDonations
-      if (f.donationStatus) query.donation_status = f.donationStatus
-      if (f.hasDiscountsUsed !== undefined) query.has_discounts_used = f.hasDiscountsUsed
-      if (f.discountId) query.discount_id = f.discountId
-      if (f.discountName) query.discount_name = f.discountName
-      if (f.relationshipToUser) query.relationship_to_user = f.relationshipToUser
-      if (f.selfRegistered !== undefined) query.self_registered = f.selfRegistered
-      if (f.hasBooking !== undefined) query.has_booking = f.hasBooking
-      if (f.booking) query.booking = f.booking
-      if (f.dateOfBirthAfter) query.date_of_birth_after = f.dateOfBirthAfter
-      if (f.dateOfBirthBefore) query.date_of_birth_before = f.dateOfBirthBefore
-      if (f.createdAfter) query.created_after = f.createdAfter
-      if (f.createdBefore) query.created_before = f.createdBefore
-      if (f.includeDeleted !== undefined) query.include_deleted = f.includeDeleted
-
-      // Event form filters
-      if (f.hasFormResponses !== undefined) query.has_form_responses = f.hasFormResponses
-      if (f.formResponseForms) query.form_response_form = f.formResponseForms
-      if (f.formResponseComplete !== undefined) query.form_response_complete = f.formResponseComplete
-      if (f.formAnswerSearch) query.form_answer_search = f.formAnswerSearch
-      if (f.formAnsweredQuestions) query.form_answered_question = f.formAnsweredQuestions
-      if (f.formHasUnansweredRequired !== undefined) query.form_has_unanswered_required = f.formHasUnansweredRequired
-      if (f.formSelectedOption) query.form_selected_option = f.formSelectedOption
-      if (f.formAnswerSubmittedAfter) query.form_answer_submitted_after = f.formAnswerSubmittedAfter
-      if (f.formAnswerSubmittedBefore) query.form_answer_submitted_before = f.formAnswerSubmittedBefore
-      if (f.formNumericAnswerMin !== undefined) query.form_numeric_answer_min = f.formNumericAnswerMin
-      if (f.formNumericAnswerMax !== undefined) query.form_numeric_answer_max = f.formNumericAnswerMax
-      if (f.formAnswerDateAfter) query.form_answer_date_after = f.formAnswerDateAfter
-      if (f.formAnswerDateBefore) query.form_answer_date_before = f.formAnswerDateBefore
-      if (f.formAnswerTimeAfter) query.form_answer_time_after = f.formAnswerTimeAfter
-      if (f.formAnswerTimeBefore) query.form_answer_time_before = f.formAnswerTimeBefore
+      if (countFilters(filters.value) > 0) {
+        const encoded = encodeFilters(filters.value)
+        if (encoded) query.f = encoded
+      }
 
       router.replace({ query })
     },
     { deep: true },
   )
 
-  // ─── Actions ─────────────────────────────────────────────────────────────────
+  // ─── Actions ──────────────────────────────────────────────────────────────────
 
   function changeView(view: ParticipantsView) {
     currentView.value = view
@@ -823,48 +418,54 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
   function setSorting(field: string) {
     if (currentSort.value === field) {
       sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
-    } else {
+    }
+    else {
       currentSort.value = field
       sortDirection.value = 'asc'
     }
+    currentPage.value = 1
   }
 
   function clearAllFilters() {
     searchQuery.value = ''
-    debouncedQuestionSearch.value = ''
     filters.value = makeEmptyFilters()
     currentPage.value = 1
   }
 
   function removeFilter(key: string) {
-    // @ts-ignore - dynamic key access
-    filters.value[key] = undefined
-    if (key === 'questionAnswerSearch') {
-      debouncedQuestionSearch.value = ''
+    const [section, field] = key.split('.')
+    const f = filters.value as any
+    if (section === 'forms') {
+      const idx = Number(field)
+      if (!Number.isNaN(idx)) {
+        const conditions = [...(f.forms?.conditions ?? [])]
+        conditions.splice(idx, 1)
+        filters.value = { ...filters.value, forms: { ...filters.value.forms, conditions } }
+      }
+    }
+    else if (section === 'rq') {
+      const idx = Number(field)
+      if (!Number.isNaN(idx)) {
+        const conditions = [...(f.registration_questions?.conditions ?? [])]
+        conditions.splice(idx, 1)
+        filters.value = { ...filters.value, registration_questions: { ...filters.value.registration_questions, conditions } }
+      }
+    }
+    else if (f[section] && field) {
+      filters.value = { ...filters.value, [section]: { ...f[section], [field]: undefined } }
     }
     currentPage.value = 1
   }
 
-  function applyFilters(updatedFilters: ParticipantsFilters) {
+  function applyFilters(updatedFilters: AttendeeFiltersRequest) {
     filters.value = { ...updatedFilters }
     currentPage.value = 1
     showFiltersModal.value = false
   }
 
-  function handleQuestionSearchInput(value: string) {
-    clearTimeout(questionSearchTimeout)
-    questionSearchTimeout = setTimeout(() => {
-      debouncedQuestionSearch.value = value
-      filters.value.questionAnswerSearch = value
-    }, 500)
-  }
-
   return {
-    // View
     currentView,
     changeView,
-
-    // Search & pagination
     searchQuery,
     debouncedSearch,
     currentPage,
@@ -872,22 +473,15 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     currentSort,
     sortDirection,
     setSorting,
-
-    // Filters
     filters,
-    debouncedQuestionSearch,
     activeFilterCount,
     buildActiveFilterChips,
     clearAllFilters,
     removeFilter,
     applyFilters,
-    handleQuestionSearchInput,
-
-    // Filter UI
     showFilters,
     showFiltersModal,
-
-    // Query params
+    postFilterBody,
     queryParams,
     bookingsQueryParams,
     familyGroupsQueryParams,

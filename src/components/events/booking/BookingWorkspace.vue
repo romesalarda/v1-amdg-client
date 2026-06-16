@@ -147,21 +147,20 @@
               </div>
             </div> -->
             <div v-if="booking && selectedAttendeeId" class="rounded-2xl bg-primary p-1.5 overflow-x-auto">
-              <div class="flex w-max gap-1">
+              <div class="tabs-container flex w-full gap-1">
                 <button
                   v-for="tab in tabs"
                   :key="tab.id"
                   @click="setActiveTab(tab.id)"
                   :disabled="isTabDisabled(tab)"
                   :class="[
-                    'relative px-2 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
+                    'tab-button relative flex-1 px-2 py-1 rounded-xl text-sm font-semibold transition-all duration-300 ease-out flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
                     activeTab === tab.id
                       ? 'bg-white text-deep-navy shadow-sm'
-                      : 'text-white hover:text-deep-navy hover:bg-white/50'
+                      : 'text-white hover:text-deep-navy hover:bg-white/80'
                   ]"
                 >
                   {{ tab.label }}
-                  <UIcon :name="tab.icon" />
                 </button>
               </div>
             </div>
@@ -1809,7 +1808,7 @@ if (props.initialAttendeeId) {
 
 const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhenCancelled?: boolean, icon: string }> = [
   { id: 'overview', label: 'Booking', icon: 'i-heroicons-information-circle' },
-  { id: 'attendee', label: 'Attendee Info', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-user-circle' },
+  { id: 'attendee', label: 'Attendee', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-user-circle' },
   { id: 'tickets', label: 'Tickets', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-ticket' },
   { id: 'payments', label: 'Payments', needsAttendee: false, icon: 'i-heroicons-currency-pound' },
   { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-shopping-bag' },
@@ -3073,5 +3072,29 @@ onUnmounted(() => {
     box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.1);
     border-color: rgba(245, 158, 11, 0.85);
   }
+}
+
+.tabs-container .tab-button {
+  transition:
+    transform 250ms ease,
+    background-color 250ms ease,
+    color 250ms ease;
+}
+
+.tabs-container:hover .tab-button {
+  transform: scale(0.96);
+}
+
+.tabs-container .tab-button:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+.tabs-container .tab-button:hover + .tab-button {
+  transform: scale(1.05);
+}
+
+.tabs-container .tab-button:has(+ .tab-button:hover) {
+  transform: scale(1.05);
 }
 </style>

@@ -1,6 +1,7 @@
 import type { MaybeRefOrGetter, ComputedRef } from 'vue'
 import { toValue } from 'vue'
 import { useAttendees } from '~/composables/resources/attendee/attendees'
+import { useAttendeesPostFilter } from '~/composables/resources/attendee/useAttendeesPostFilter'
 import { useBookings } from '~/composables/resources/booking/bookings'
 import { useBookingTickets } from '~/composables/resources/booking/bookingTickets'
 import { useEvent } from '~/composables/resources/events/events'
@@ -10,7 +11,7 @@ import { useAreas } from '~/composables/resources/locations/locations'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
-import { useEventFormQuestions } from '../resources/events/eventForms'
+import { useEventForms, useEventFormQuestions } from '../resources/events/eventForms'
 import { useFamilyGroups } from '~/composables/resources/common/familyGroups'
 import type { AttendeeList, BookingList, FamilyGroupList } from '~/api/types.gen'
 
@@ -31,8 +32,11 @@ export interface ExtendedBookingList extends Omit<BookingList, 'attendees'> {
   }>
 }
 
+import type { AttendeeFilterRequestRequest } from '~/api/types.gen'
+
 export function useParticipantsDashboardData(
   eventId: MaybeRefOrGetter<string>,
+  postFilterBody: ComputedRef<AttendeeFilterRequestRequest>,
   queryParams: ComputedRef<Record<string, any>>,
   bookingsQueryParams: ComputedRef<Record<string, any>>,
   familyGroupsQueryParams: ComputedRef<Record<string, any>>,
@@ -46,16 +50,25 @@ export function useParticipantsDashboardData(
 
   // ─── Main data ───────────────────────────────────────────────────────────────
 
-  const { data: attendeesData, isLoading } = useAttendees(queryParams)
+  const { data: attendeesData, isLoading } = useAttendeesPostFilter(postFilterBody)
   const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
   const { data: familyGroupsData, isLoading: familyGroupsLoading, refetch: refetchFamilyGroups } = useFamilyGroups(familyGroupsQueryParams)
   const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
   const { data: eventFormQuestionsData } = useEventFormQuestions(computed(() => {
-    // Use first form ID from comma-separated list for chip label resolution
-    const formParam = queryParams.value.form_response_form
-    const firstFormId = formParam ? String(formParam).split(',')[0].trim() : undefined
-    return { form: firstFormId, page_size: 100 }
+    // Collect all unique form IDs from the POST filter body conditions
+    const conditions = postFilterBody.value.filters?.forms?.conditions ?? []
+    const formIds = [...new Set(conditions.map((c: any) => c.form).filter(Boolean))]
+    if (!formIds.length) return undefined
+    // Fetch questions for the first form ID — chips use this for label resolution.
+    // FormConditionCard fetches its own questions per-form for the modal UI.
+    return { form: formIds[0], page_size: 200, ordering: 'order' }
   }))
+
+  // Fetch event forms list for form title resolution in chips
+  const { data: eventFormsData } = useEventForms(
+    computed(() => id.value ? { event: id.value, page_size: 100 } : undefined),
+    { enabled: computed(() => !!id.value) },
+  )
 
   // ─── Stats queries ───────────────────────────────────────────────────────────
 
@@ -79,8 +92,9 @@ export function useParticipantsDashboardData(
 
   // ─── Computed ─────────────────────────────────────────────────────────────────
 
-  const attendees = computed(() => (attendeesData.value?.data?.results || []) as ExtendedAttendeeList[])
-  const totalAttendees = computed(() => attendeesData.value?.data?.count || 0)
+  // POST filter response has results/count at root level
+  const attendees = computed(() => (attendeesData.value?.results ?? []) as unknown as ExtendedAttendeeList[])
+  const totalAttendees = computed(() => attendeesData.value?.count ?? 0)
 
   const bookings = computed(() => (bookingsData.value?.data?.results || []) as BookingList[])
   const totalBookings = computed(() => bookingsData.value?.data?.count || 0)
@@ -97,6 +111,7 @@ export function useParticipantsDashboardData(
 
   const organisations = computed(() => organisationsData.value?.data?.results || [])
   const formQuestions = computed(() => eventFormQuestionsData.value?.data?.results || [])
+  const eventForms = computed(() => eventFormsData.value?.data?.results || [])
   const areas = computed(() => areasData.value?.data?.results || [])
   const eventQuestions = computed(() => eventQuestionsData.value?.data?.results || [])
   const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.results || [])
@@ -146,6 +161,7 @@ export function useParticipantsDashboardData(
     areas,
     eventQuestions,
     formQuestions,
+    eventForms,
     dietaryRequirements,
     medicalConditions,
     accessibilityRequirements,

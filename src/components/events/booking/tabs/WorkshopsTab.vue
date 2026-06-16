@@ -3,6 +3,7 @@
 
     <!-- Attendee registration statuses -->
     <section v-if="attendeeRegistrations.length" class="bg-white rounded-2xl border border-deep-navy/10 shadow-drawn overflow-hidden">
+      <WorkshopInfoModal v-model="infoModalOpen" :workshop-id="infoModalWorkshopId" />
       <div class="flex items-center gap-2 px-5 py-4 border-b border-navy-50">
         <span class="material-symbols-outlined text-primary">workspace_premium</span>
         <h3 class="text-sm font-black text-primary uppercase tracking-widest">Your Workshop Allocations</h3>
@@ -11,7 +12,8 @@
         <div
           v-for="reg in attendeeRegistrations"
           :key="reg.registration_id"
-          class="flex items-center gap-3 px-5 py-3"
+          class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-navy-50 transition-colors"
+          @click="infoModalWorkshopId = reg.workshop; infoModalOpen = true"
         >
         
           <div class="flex-1 min-w-0">
@@ -19,12 +21,12 @@
               v-if="workshopNameMap[reg.workshop]?.landing"
               :src="workshopNameMap[reg.workshop]?.landing"
               :alt="workshopNameMap[reg.workshop]?.title"
-              class="w-full h-full object-cover max-h-12 rounded-md mb-1"
+              class="w-full h-full object-cover max-h-30 rounded-md mb-1"
             />
-            <p class="text-sm font-semibold text-navy-900 truncate">
+            <p class="text-xl font-bold text-navy-900 truncate mt-2">
               {{ workshopNameMap[reg.workshop]?.title ?? `Workshop #${reg.workshop}` }}
             </p>
-            <p class="text-xs text-navy-400">
+            <p class="text-md text-navy-400">
               Registered {{ formatDate(reg.registered_at) }}
             </p>
           </div>
@@ -57,8 +59,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import WorkshopInterestForm from '~/components/events/workshops/WorkshopInterestForm.vue'
-import WorkshopRegistrationStatusBadge from '~/components/events/workshops/WorkshopRegistrationStatusBadge.vue'
 import { useWorkshopRegistrations, useWorkshops } from '~/composables/resources/workshops'
+import WorkshopInfoModal from '~/components/events/workshops/WorkshopInfoModal.vue'
 
 const props = defineProps<{
   eventId: string
@@ -67,6 +69,8 @@ const props = defineProps<{
 }>()
 
 const { $notyf } = useNuxtApp()
+const infoModalOpen = ref(false)
+const infoModalWorkshopId = ref<number | null>(null)
 
 const urlSafeEventId = computed(() => encodeURIComponent(props.eventId))
 const numericAttendeeId = computed(() => String(props.attendeeId))
