@@ -121,10 +121,12 @@
         <!-- Time type -->
         <div v-else-if="isTimeType">
           <label class="block text-xs font-semibold text-gray-700 mb-2">Time Answer Range</label>
-          <div class="grid grid-cols-2 gap-2">
-            <UInput v-model="local.formAnswerTimeAfter" type="time" placeholder="On or after" />
-            <UInput v-model="local.formAnswerTimeBefore" type="time" placeholder="On or before" />
-          </div>
+          <TimeRangePicker
+            :model-value-from="local.formAnswerTimeAfter"
+            :model-value-to="local.formAnswerTimeBefore"
+            @update:model-value-from="local.formAnswerTimeAfter = $event ?? undefined"
+            @update:model-value-to="local.formAnswerTimeBefore = $event ?? undefined"
+          />
         </div>
 
         <!-- Upload type -->
@@ -137,20 +139,21 @@
     </template>
 
     <!-- Answer submission date range (visible when any question context active) -->
-     {{ selectedQuestion?.typeDisplay  }}
     <div v-if="local.formResponseForm || local.hasFormResponses">
       <label class="block text-xs font-semibold text-gray-700 mb-2">Answer Submitted Date Range</label>
       <div class="grid grid-cols-2 gap-2">
-        <UInput
-          v-model="local.formAnswerSubmittedAfter"
-          type="datetime-local"
-          placeholder="After"
-        />
-        <UInput
-          v-model="local.formAnswerSubmittedBefore"
-          type="datetime-local"
-          placeholder="Before"
-        />
+        <DateRangePicker
+          :model-value-start="local.formAnswerSubmittedAfter"
+          :model-value-end="local.formAnswerSubmittedBefore"
+          @update:model-value-start="local.formAnswerSubmittedAfter = $event"
+          @update:model-value-end="local.formAnswerSubmittedBefore = $event"
+        >
+          <template #default="{ label }">
+            <div class="w-full rounded-xl border border-navy-200 bg-white px-4 py-3 text-sm font-medium text-navy-900 transition-colors hover:border-primary/60">
+              {{ label }}
+            </div>
+          </template>
+        </DateRangePicker>
       </div>
     </div>
   </div>
@@ -161,7 +164,7 @@ import { ref, computed, watch } from 'vue'
 import EventFormSelect from '~/components/ui/EventFormSelect.vue'
 import EventFormQuestionSelect from '~/components/ui/EventFormQuestionSelect.vue'
 import DateRangePicker from '~/components/ui/DateRangePicker.vue'
-
+import TimeRangePicker from '~/components/ui/timerange/TimeRangePicker.vue'
 /** Shape of the filter values this panel manages */
 export interface EventFormFilters {
   hasFormResponses: boolean | undefined
