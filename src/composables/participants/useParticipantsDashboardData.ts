@@ -10,6 +10,7 @@ import { useAreas } from '~/composables/resources/locations/locations'
 import { useDietaryRequirements } from '~/composables/resources/attendee/attendeeDietaryRequirements'
 import { useMedicalConditions } from '~/composables/resources/attendee/bookingMedicalConditions'
 import { useAccessibilityRequirements } from '~/composables/resources/attendee/accessibilityRequirements'
+import { useEventFormQuestions } from '../resources/events/eventForms'
 import { useFamilyGroups } from '~/composables/resources/common/familyGroups'
 import type { AttendeeList, BookingList, FamilyGroupList } from '~/api/types.gen'
 
@@ -49,6 +50,7 @@ export function useParticipantsDashboardData(
   const { data: bookingsData, isLoading: bookingsLoading } = useBookings(bookingsQueryParams)
   const { data: familyGroupsData, isLoading: familyGroupsLoading, refetch: refetchFamilyGroups } = useFamilyGroups(familyGroupsQueryParams)
   const { data: eventBookingsData } = useBookings(eventBookingsQueryParams)
+  const { data: eventFormQuestionsData } = useEventFormQuestions(computed(() => ({ form: queryParams.value.form_response_form, page_size: 100})))
 
   // ─── Stats queries ───────────────────────────────────────────────────────────
 
@@ -89,6 +91,7 @@ export function useParticipantsDashboardData(
   })
 
   const organisations = computed(() => organisationsData.value?.data?.results || [])
+  const formQuestions = computed(() => eventFormQuestionsData.value?.data?.results || [])
   const areas = computed(() => areasData.value?.data?.results || [])
   const eventQuestions = computed(() => eventQuestionsData.value?.data?.results || [])
   const dietaryRequirements = computed(() => dietaryRequirementsData.value?.data?.results || [])
@@ -137,6 +140,7 @@ export function useParticipantsDashboardData(
     organisations,
     areas,
     eventQuestions,
+    formQuestions,
     dietaryRequirements,
     medicalConditions,
     accessibilityRequirements,

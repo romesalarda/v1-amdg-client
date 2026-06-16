@@ -29716,6 +29716,14 @@ export type AttendeesListData = {
          */
         form_answer_submitted_before?: string;
         /**
+         * EventForm time-type answer on or after this time (HH:MM:SS)
+         */
+        form_answer_time_after?: string;
+        /**
+         * EventForm time-type answer on or before this time (HH:MM:SS)
+         */
+        form_answer_time_before?: string;
+        /**
          * Multiple values may be separated by commas.
          */
         form_answered_question?: Array<number>;

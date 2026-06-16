@@ -100,9 +100,30 @@
         <!-- Date type -->
         <div v-else-if="isDateType">
           <label class="block text-xs font-semibold text-gray-700 mb-2">Date Answer Range</label>
+          <!-- <div class="grid grid-cols-2 gap-2"> -->
+            <!-- <UInput v-model="local.formAnswerDateAfter" type="date" placeholder="On or after" />
+            <UInput v-model="local.formAnswerDateBefore" type="date" placeholder="On or before" /> -->
+            <DateRangePicker
+              :model-value-start="local.formAnswerDateAfter"
+              :model-value-end="local.formAnswerDateBefore"
+              @update:model-value-start="local.formAnswerDateAfter = $event"
+              @update:model-value-end="local.formAnswerDateBefore = $event"
+            >
+              <template #default="{ label }">
+                <div class="w-full rounded-xl border border-navy-200 bg-white px-4 py-3 text-sm font-medium text-navy-900 transition-colors hover:border-primary/60">
+                  {{ label }}
+                </div>
+              </template>
+          </DateRangePicker>
+          <!-- </div> -->
+        </div>
+
+        <!-- Time type -->
+        <div v-else-if="isTimeType">
+          <label class="block text-xs font-semibold text-gray-700 mb-2">Time Answer Range</label>
           <div class="grid grid-cols-2 gap-2">
-            <UInput v-model="local.formAnswerDateAfter" type="date" placeholder="On or after" />
-            <UInput v-model="local.formAnswerDateBefore" type="date" placeholder="On or before" />
+            <UInput v-model="local.formAnswerTimeAfter" type="time" placeholder="On or after" />
+            <UInput v-model="local.formAnswerTimeBefore" type="time" placeholder="On or before" />
           </div>
         </div>
 
@@ -116,6 +137,7 @@
     </template>
 
     <!-- Answer submission date range (visible when any question context active) -->
+     {{ selectedQuestion?.typeDisplay  }}
     <div v-if="local.formResponseForm || local.hasFormResponses">
       <label class="block text-xs font-semibold text-gray-700 mb-2">Answer Submitted Date Range</label>
       <div class="grid grid-cols-2 gap-2">
@@ -138,6 +160,7 @@
 import { ref, computed, watch } from 'vue'
 import EventFormSelect from '~/components/ui/EventFormSelect.vue'
 import EventFormQuestionSelect from '~/components/ui/EventFormQuestionSelect.vue'
+import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 /** Shape of the filter values this panel manages */
 export interface EventFormFilters {
@@ -154,6 +177,8 @@ export interface EventFormFilters {
   formNumericAnswerMax: number | undefined
   formAnswerDateAfter: string | undefined
   formAnswerDateBefore: string | undefined
+  formAnswerTimeAfter: string | undefined
+  formAnswerTimeBefore: string | undefined
 }
 
 interface QuestionDetail {
@@ -204,6 +229,8 @@ function onFormChange() {
   local.value.formNumericAnswerMax = undefined
   local.value.formAnswerDateAfter = undefined
   local.value.formAnswerDateBefore = undefined
+  local.value.formAnswerTimeAfter = undefined
+  local.value.formAnswerTimeBefore = undefined
   selectedQuestion.value = null
 }
 
@@ -216,6 +243,8 @@ function onQuestionSelect(question: QuestionDetail | null) {
   local.value.formNumericAnswerMax = undefined
   local.value.formAnswerDateAfter = undefined
   local.value.formAnswerDateBefore = undefined
+  local.value.formAnswerTimeAfter = undefined
+  local.value.formAnswerTimeBefore = undefined
   if (question) {
     local.value.formAnsweredQuestion = question.id
   } else {
@@ -230,10 +259,12 @@ const CHOICE_TYPES = new Set(['single_choice', 'multiple_choice'])
 const RANGE_TYPES = new Set(['slider', 'rating'])
 const DATE_TYPES = new Set(['date'])
 const UPLOAD_TYPES = new Set(['upload'])
+const TIME_TYPES = new Set(['time'])
 
 const isTextType = computed(() => !!selectedQuestion.value && TEXT_TYPES.has(selectedQuestion.value.type))
 const isChoiceType = computed(() => !!selectedQuestion.value && CHOICE_TYPES.has(selectedQuestion.value.type))
 const isRangeType = computed(() => !!selectedQuestion.value && RANGE_TYPES.has(selectedQuestion.value.type))
 const isDateType = computed(() => !!selectedQuestion.value && DATE_TYPES.has(selectedQuestion.value.type))
 const isUploadType = computed(() => !!selectedQuestion.value && UPLOAD_TYPES.has(selectedQuestion.value.type))
+const isTimeType = computed(() => !!selectedQuestion.value && TIME_TYPES.has(selectedQuestion.value.type))
 </script>

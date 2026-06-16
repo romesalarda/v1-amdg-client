@@ -258,7 +258,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ParticipantsView } from '~/composables/participants/useParticipantsUrlState.old'
+import type { ParticipantsView } from '~/composables/participants/useParticipantsUrlState'
 
 defineProps<{
   currentView: ParticipantsView

@@ -414,6 +414,7 @@ const {
   organisations,
   areas,
   eventQuestions,
+  formQuestions,
   dietaryRequirements,
   medicalConditions,
   accessibilityRequirements,
@@ -439,6 +440,7 @@ const activeFilterChips = computed(() =>
     dietaryRequirements.value,
     medicalConditions.value,
     accessibilityRequirements.value,
+    formQuestions.value,
   ).value,
 )
 

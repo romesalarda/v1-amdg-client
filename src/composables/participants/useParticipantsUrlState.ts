@@ -94,6 +94,8 @@ export type ParticipantsFilters = {
   formNumericAnswerMax: number | undefined
   formAnswerDateAfter: string | undefined
   formAnswerDateBefore: string | undefined
+  formAnswerTimeAfter: string | undefined
+  formAnswerTimeBefore: string | undefined
 }
 
 function makeEmptyFilters(): ParticipantsFilters {
@@ -174,6 +176,8 @@ function makeEmptyFilters(): ParticipantsFilters {
     formNumericAnswerMax: undefined,
     formAnswerDateAfter: undefined,
     formAnswerDateBefore: undefined,
+    formAnswerTimeAfter: undefined,
+    formAnswerTimeBefore: undefined,
   }
 }
 
@@ -304,6 +308,8 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     formNumericAnswerMax: route.query.form_numeric_answer_max ? Number(route.query.form_numeric_answer_max) : undefined,
     formAnswerDateAfter: route.query.form_answer_date_after as string | undefined,
     formAnswerDateBefore: route.query.form_answer_date_before as string | undefined,
+    formAnswerTimeAfter: route.query.form_answer_time_after as string | undefined,
+    formAnswerTimeBefore: route.query.form_answer_time_before as string | undefined,
   })
 
   const debouncedQuestionSearch = ref(filters.value.questionAnswerSearch || '')
@@ -441,6 +447,8 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.formNumericAnswerMax !== undefined) params.form_numeric_answer_max = f.formNumericAnswerMax
     if (f.formAnswerDateAfter) params.form_answer_date_after = f.formAnswerDateAfter
     if (f.formAnswerDateBefore) params.form_answer_date_before = f.formAnswerDateBefore
+    if (f.formAnswerTimeAfter) params.form_answer_time_after = f.formAnswerTimeAfter
+    if (f.formAnswerTimeBefore) params.form_answer_time_before = f.formAnswerTimeBefore
 
     return params
   })
@@ -522,6 +530,8 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     if (f.formNumericAnswerMax !== undefined) count++
     if (f.formAnswerDateAfter) count++
     if (f.formAnswerDateBefore) count++
+    if (f.formAnswerTimeAfter) count++
+    if (f.formAnswerTimeBefore) count++
     return count
   })
 
@@ -534,6 +544,7 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
     dietaryList: any[],
     medicalList: any[],
     accessibilityList: any[],
+    formQuestionsList: any[],
   ) {
     return computed(() => {
       const chips: Array<{ key: string; label: string; value: string }> = []
@@ -576,6 +587,18 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
           const req = accessibilityList.find((r: any) => r.id === value)
           const reqList = accessibilityList.filter((r: any) => parseValue(String(value)).includes(String(r.id)))
           return req?.label || String(reqList.map((r: any) => r.label).join(', ')) || String(value)
+        }
+
+        if (key === 'formAnsweredQuestion' && formQuestionsList.length > 0) {
+          const question = formQuestionsList.find((q: any) => q.id === value)
+          const questionList = formQuestionsList.filter((q: any) => parseValue(String(value)).includes(String(q.id)))
+          return question?.question_title || String(questionList.map((q: any) => q.question_body).join(', ')) || String(value)
+        }
+        if (key === 'formAnswerTimeAfter' && formQuestionsList.length > 0) {
+          return `Form Time After: ${String(value)}`
+        }
+        if (key === 'formAnswerTimeBefore' && formQuestionsList.length > 0) {
+          return `Form Time Before: ${String(value)}`
         }
         return String(value)
       }
@@ -657,6 +680,8 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
         formNumericAnswerMax: 'Form Answer Max',
         formAnswerDateAfter: 'Form Date After',
         formAnswerDateBefore: 'Form Date Before',
+        formAnswerTimeAfter: 'Form Time After',
+        formAnswerTimeBefore: 'Form Time Before',
       }
 
       Object.entries(filters.value).forEach(([key, value]) => {
@@ -768,6 +793,8 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
       if (f.formNumericAnswerMax !== undefined) query.form_numeric_answer_max = f.formNumericAnswerMax
       if (f.formAnswerDateAfter) query.form_answer_date_after = f.formAnswerDateAfter
       if (f.formAnswerDateBefore) query.form_answer_date_before = f.formAnswerDateBefore
+      if (f.formAnswerTimeAfter) query.form_answer_time_after = f.formAnswerTimeAfter
+      if (f.formAnswerTimeBefore) query.form_answer_time_before = f.formAnswerTimeBefore
 
       router.replace({ query })
     },
