@@ -9,10 +9,10 @@
       <div class="hidden w-1/2 pr-12 lg:block">
         <p class="mb-4 text-xs uppercase tracking-[0.4em] text-slate-200/80">AMDG Portal</p>
         <h1 class="max-w-md text-5xl font-serif leading-tight text-white">
-          The digital engine behind every Catholic event.
+          Events Management for Catholic Communities
         </h1>
         <p class="mt-6 max-w-md text-base leading-relaxed text-slate-200/80">
-          Manage registrations, track ticket activity, and stay connected with your community in one place.
+          Manage registrations, track ticket activity, and stay connected with your community or parish in one place.
         </p>
       </div>
 
@@ -28,8 +28,8 @@
 
             <h2 class="text-3xl font-serif text-white">Sign in to AMDG</h2>
             <p class="mt-2 text-sm text-slate-200/80">
-              Access your dashboard and continue your workflow.
-              <NuxtLink to="/register" class="ml-1 font-semibold text-white transition-colors hover:text-slate-100">Need an account?</NuxtLink>
+              Don't have an account?
+              <NuxtLink to="/register" class="ml-1 font-semibold text-white transition-colors hover:text-slate-100">Create one</NuxtLink>
             </p>
           </div>
 
@@ -70,13 +70,12 @@
                 Sign in
               </UButton>
 
-              <div class="relative">
-                <div class="absolute inset-0 flex items-center">
-                  <div class="w-full border-t border-white/25"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                  <span class="px-3 text-slate-200 bg-transparent">Or continue with</span>
-                </div>
+              <div class="flex items-center gap-4">
+                <div class="flex-1 border-t border-white/25"></div>
+                <span class="text-sm text-slate-200 whitespace-nowrap">
+                  Or continue with
+                </span>
+                <div class="flex-1 border-t border-white/25"></div>
               </div>
 
               <UButton

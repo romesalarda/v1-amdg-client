@@ -157,13 +157,12 @@
                 Create account
               </UButton>
 
-              <div class="relative">
-                <div class="absolute inset-0 flex items-center">
-                  <div class="w-full border-t border-white/25"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                  <span class="px-3 bg-transparent text-slate-200">Or continue with</span>
-                </div>
+              <div class="flex items-center gap-4">
+                <div class="flex-1 border-t border-white/25"></div>
+                <span class="text-sm text-slate-200 whitespace-nowrap">
+                  Or continue with
+                </span>
+                <div class="flex-1 border-t border-white/25"></div>
               </div>
 
               <UButton

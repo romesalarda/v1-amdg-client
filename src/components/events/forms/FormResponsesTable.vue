@@ -144,10 +144,15 @@
         >
           <!-- Avatar -->
           <div
-            class="h-9 w-9 rounded-full flex items-center justify-center shrink-0 text-sm font-black uppercase text-white select-none"
+            class="h-12 w-12 rounded-full flex items-center justify-center shrink-0 text-sm font-black uppercase text-white select-none"
             :class="response.is_complete ? 'bg-emerald-500' : 'bg-amber-400'"
           >
-            {{ initials(response.attendee_display) }}
+            <!-- {{ initials(response.attendee_display) }} -->
+            <img
+              :src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${response.attendee_display || response.attendee}`"
+              alt="Default profile"
+              class="w-12 h-12 rounded-full object-cover"
+            />
           </div>
 
           <!-- Name + ID -->
@@ -162,7 +167,7 @@
 
           <!-- Completion badge -->
           <span
-            class="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide"
+            class="shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wide font-mono"
             :class="
               response.is_complete
                 ? 'bg-emerald-100 text-emerald-700'

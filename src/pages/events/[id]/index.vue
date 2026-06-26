@@ -138,7 +138,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy truncate">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy font-mono text-[18px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 
@@ -149,9 +149,9 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
-                <p class="font-black text-deep-navy truncate">
+                <p class="font-black text-deep-navy font-mono text-[20px]">
                   {{ formatTime(event.start_datetime, event.timezone) }}
-                  <span class="text-xs text-deep-navy/70">({{ event.timezone }})</span>
+                  <span class="text-md text-deep-navy/70">({{ event.timezone }})</span>
                 </p>
               </div>
             </div>
@@ -163,7 +163,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
-                <p class="font-black text-deep-navy truncate">
+                <p class="font-black text-deep-navy font-mono text-[20px]">
                   {{ primaryVenue?.name || event.organisation_name || 'TBA' }}
                 </p>
               </div>

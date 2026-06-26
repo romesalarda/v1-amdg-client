@@ -1,1023 +1,870 @@
 <template>
-  <div class="bg-white text-[#181c20] selection:bg-[#bec5e5] selection:text-[#181c20]">
-    <header class="fixed inset-x-0 top-0 z-50 px-4 py-4 sm:px-6 lg:px-10">
-      <div class="flex items-start justify-between">
-        <div class="inline-flex items-center gap-3 rounded-2xl border border-white/15 bg-[#0B132B]/55 px-4 py-3 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl sm:gap-4 sm:px-5">
-          <NuxtLink to="/" class="text-sm font-black tracking-[0.16em] no-underline sm:text-base">
-            AMDG
-          </NuxtLink>
+  <div class="min-h-screen bg-gray-50 text-on-surface">
 
-          <div class="relative" ref="locationRoot">
-            <button
-              type="button"
-              class="flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-2.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-blue-100 transition-colors hover:bg-white/20"
-              @click="isLocationOpen = !isLocationOpen"
-            >
-              <img src="/assets/images/uk.png" alt="UK" class="h-4 w-4 rounded-full object-cover" />
-              <span>UK</span>
-              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
+    <!-- Dark Navy Search Strip -->
+    <section class="w-full bg-blue-600 sticky top-[40px] z-40 pb-6 pt-5">
+      <div class="max-w-[1100px] mx-auto px-6">
 
-            <div
-              v-if="isLocationOpen"
-              class="absolute left-0 top-[calc(100%+0.5rem)] min-w-[150px] overflow-hidden rounded-xl border border-white/20 bg-[#0B132B]/90 p-1 shadow-xl backdrop-blur-xl"
-            >
-              <button
-                type="button"
-                class="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left text-[11px] font-bold uppercase tracking-[0.12em] text-blue-100 transition-colors hover:bg-white/10"
-                @click="isLocationOpen = false"
+        <!-- Search Pill -->
+        <div class="bg-white rounded-lg p-1 flex flex-col md:flex-row items-stretch md:items-center search-pill overflow-hidden mb-4 shadow-lg">
+          <!-- Location -->
+          <div class="flex-1 flex items-center px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 group">
+            <svg class="w-5 h-5 text-gray-400 mr-3 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <div class="flex flex-col flex-1 min-w-0">
+              <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Location</span>
+              <select
+                v-model="selectedLocation"
+                class="w-full border-none p-0 focus:ring-0 text-deep-navy font-semibold text-sm bg-transparent appearance-none cursor-pointer"
               >
-                <img src="/assets/images/uk.png" alt="UK" class="h-4 w-4 rounded-full object-cover" />
-                United Kingdom
-              </button>
+                <option value="all">All of United Kingdom</option>
+                <option
+                  v-for="area in locationOptions"
+                  :key="area.id"
+                  :value="area.area_name"
+                >
+                  {{ area.area_name }}
+                </option>
+              </select>
             </div>
+            <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
           </div>
-        </div>
-
-        <div
-          v-if="isLoggedIn"
-          class="relative inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl"
-          ref="profileMenuRoot"
-        >
-          <button
-            type="button"
-            class="group relative block rounded-full border border-white/30 p-[2px] transition-colors hover:border-white"
-            aria-label="Open profile menu"
-            @click="isProfileMenuOpen = !isProfileMenuOpen"
+          <!-- Date Range Picker -->
+          <DateRangePicker
+            v-model:model-value-start="advancedStartAfter"
+            v-model:model-value-end="advancedStartBefore"
+            class="flex-1"
           >
-            <div class="h-9 w-9 overflow-hidden rounded-full bg-gradient-to-br from-[#dbe1ff] to-[#7b83a0]">
-              <img
-                v-if="profileImageUrl"
-                :src="profileImageUrl"
-                alt="Profile"
-                class="h-full w-full object-cover"
-              />
-              <div v-else class="flex h-full w-full items-center justify-center text-xs font-black text-[#0B132B]">
-                {{ profileInitials }}
+            <template #default="{ label, active }">
+              <div class="flex items-center px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 group h-full">
+                <svg class="w-5 h-5 mr-3 shrink-0 transition-colors" :class="active ? 'text-blue-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <div class="flex flex-col flex-1 min-w-0">
+                  <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Dates</span>
+                  <span class="text-deep-navy font-semibold text-sm truncate" :class="active ? 'text-blue-600' : ''">{{ label }}</span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </template>
+          </DateRangePicker>
+          <!-- Search Input -->
+          <div class="flex-[2] flex items-center px-4 py-3">
+            <svg class="w-5 h-5 text-gray-400 mr-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <div class="flex flex-col flex-1 min-w-0">
+              <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Search</span>
+              <div class="flex items-center">
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  class="w-full border-none p-0 focus:ring-0 text-deep-navy font-semibold text-sm bg-transparent placeholder:text-gray-300"
+                  placeholder="Search events, organisations..."
+                />
+                <button
+                  v-if="searchQuery"
+                  @click="searchQuery = ''"
+                  class="ml-2 text-gray-400 hover:text-gray-600 shrink-0"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
-          </button>
-
-          <div
-            v-if="isProfileMenuOpen"
-            class="absolute right-0 top-[calc(100%+0.65rem)] min-w-[220px] overflow-hidden rounded-2xl border border-white/20 bg-[#0B132B]/95 shadow-xl backdrop-blur-xl"
-          >
-            <div class="border-b border-white/10 px-4 py-3">
-              <p class="text-sm font-semibold text-white">{{ profileDisplayName }}</p>
-              <p class="truncate text-xs text-blue-100/70">{{ profileEmail }}</p>
-            </div>
-
-            <NuxtLink to="/my-dashboard" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
-              My Dashboard
-            </NuxtLink>
-            <NuxtLink to="/events" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
-              Events
-            </NuxtLink>
-            <NuxtLink to="/communities" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
-              Communities
-            </NuxtLink>
-            <NuxtLink to="/profile" class="block px-4 py-2.5 text-sm font-medium text-blue-100 no-underline transition-colors hover:bg-white/10" @click="isProfileMenuOpen = false">
-              Profile
-            </NuxtLink>
+          </div>
+          <!-- More Filters + Search Button -->
+          <div class="flex items-center gap-2 px-2 py-1 md:py-0">
+            <!-- <button
+              type="button"
+              @click="showAdvancedFilters = !showAdvancedFilters"
+              class="hidden md:inline-flex items-center gap-1.5 px-4 py-3 text-[11px] font-bold uppercase tracking-widest transition-colors border rounded-lg"
+              :class="showAdvancedFilters ? 'bg-deep-navy text-white border-deep-navy' : 'text-deep-navy border-gray-300 hover:border-deep-navy'"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+              </svg>
+              Filters
+              <span
+                v-if="advancedActiveCount"
+                class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[9px]"
+              >
+                {{ advancedActiveCount }}
+              </span>
+            </button> -->
             <button
               type="button"
-              class="w-full border-0 border-t border-white/10 bg-transparent px-4 py-2.5 text-left text-sm font-semibold text-[#f7b7b7] transition-colors hover:bg-white/10"
-              @click="handleLogout"
+              @click="applyFilters"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold text-sm transition-colors active:scale-95 whitespace-nowrap"
             >
-              Logout
+              Search
             </button>
           </div>
         </div>
 
-        <div v-else class="inline-flex items-center rounded-2xl border border-white/15 bg-[#0B132B]/55 p-2 text-white shadow-[0_14px_34px_rgba(0,0,0,0.25)] backdrop-blur-xl">
-          <NuxtLink to="/login" class="rounded-full border border-white/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-blue-100 no-underline transition-colors hover:border-white hover:text-white">
-            Login
+        <!-- Mobile: More Filters toggle -->
+        <div class="md:hidden mb-3">
+          <button
+            type="button"
+            @click="showAdvancedFilters = !showAdvancedFilters"
+            class="w-full h-10 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center justify-center gap-2 border"
+            :class="showAdvancedFilters ? 'bg-white text-deep-navy border-white' : 'text-white border-white/30 hover:border-white/60'"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+            </svg>
+            <span>More Filters</span>
+            <span
+              v-if="advancedActiveCount"
+              class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[9px]"
+            >
+              {{ advancedActiveCount }}
+            </span>
+          </button>
+        </div>
+
+        <!-- Status Filter Pills -->
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
+          <button
+            @click="selectedFilter = 'all'"
+            :class="selectedFilter === 'all' ? 'bg-white text-deep-navy' : 'bg-white/10 text-white/80 border border-white/20 hover:border-white/50 hover:text-white'"
+            class="whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors"
+          >
+            All Events
+          </button>
+          <button
+            @click="selectedFilter = 'open'"
+            :class="selectedFilter === 'open' ? 'bg-white text-deep-navy' : 'bg-white/10 text-white/80 border border-white/20 hover:border-white/50 hover:text-white'"
+            class="whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors"
+          >
+            Open for Registration
+          </button>
+          <button
+            @click="selectedFilter = 'published'"
+            :class="selectedFilter === 'published' ? 'bg-white text-deep-navy' : 'bg-white/10 text-white/80 border border-white/20 hover:border-white/50 hover:text-white'"
+            class="whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors"
+          >
+            Published
+          </button>
+          <button
+            @click="selectedFilter = 'in_progress'"
+            :class="selectedFilter === 'in_progress' ? 'bg-white text-deep-navy' : 'bg-white/10 text-white/80 border border-white/20 hover:border-white/50 hover:text-white'"
+            class="whitespace-nowrap px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-wider transition-colors"
+          >
+            In Progress
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Featured Event Hero -->
+    <section v-if="featuredEvent" class="relative h-[500px] overflow-hidden bg-deep-navy">
+      <div
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        :style="featuredEvent.main_landing_image?.image ? `background-image: url('${resolveImageUrl(featuredEvent.main_landing_image.image)}')` : ''"
+      ></div>
+      <div class="hero-gradient absolute inset-0"></div>
+      <div class="relative max-w-[1300px] mx-auto h-full px-2 flex flex-col justify-center items-start text-white">
+        <!-- <span class="bg-gold text-deep-navy px-3 py-1 rounded-sm text-[12px] font-bold uppercase tracking-widest mb-4">
+          Featured Experience
+        </span> -->
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-4 max-w-3xl leading-tight tracking-tight">
+          {{ featuredEvent.title }}
+        </h1>
+        <p v-if="featuredEvent.start_datetime" class="text-white/80 font-bold text-sm mb-8 uppercase tracking-wider">
+          {{ formatEventDate(featuredEvent.start_datetime) }}
+          <span v-if="featuredEvent.organisation_name"> · {{ featuredEvent.organisation_name }}</span>
+        </p>
+        <div class="flex gap-4">
+          <NuxtLink
+            :to="`/events/${featuredEvent.url_safe_title}`"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg font-bold text-md transition-all transform hover:scale-105 active:scale-95 no-underline"
+          >
+            View Details
           </NuxtLink>
         </div>
       </div>
-    </header>
+    </section>
 
-    <main>
-      <section class="relative flex min-h-[820px] items-center justify-center overflow-hidden bg-[#0B132B] px-6 lg:px-12">
-        <div class="absolute inset-0 z-0 overflow-hidden">
-          <UiFlowingBackground position="absolute" :speed="3" :soft="8" :palette="4" />
-          <div class="absolute inset-0"></div>
-          <div class="absolute inset-0 opacity-25"></div>
+    <!-- Upcoming Events Section -->
+    <main ref="eventsSection" class="max-w-[1300px] mx-auto px-6 py-12 pb-24">
+
+      <!-- Section Header -->
+      <div class="flex justify-between items-end mb-8">
+        <div>
+          <h2 class="text-2xl font-bold text-deep-navy mb-1">Upcoming Events</h2>
+          <p class="text-gray-500 text-sm">Discover experiences that move the soul and unite the community.</p>
         </div>
+        <div class="text-gray-500 text-sm font-mono">
+          {{ totalEvents }} {{ totalEvents === 1 ? 'event' : 'events' }}
+        </div>
+      </div>
 
-        <div class="relative z-10 mx-auto max-w-5xl text-center" data-reveal data-reveal-delay="0ms">
-          <h1 class="mx-auto mb-8 max-w-4xl text-5xl font-black leading-[1.05] tracking-tight text-white md:text-7xl">
-            Ad majorem Dei <span class="italic text-[#dbe1ff]">gloriam</span>
-          </h1>
-          <!-- <p class="mx-auto mb-12 max-w-2xl text-lg font-light leading-relaxed text-blue-100/90 md:text-xl">
-            For His greater glory
+      <!-- Loading State -->
+      <div v-if="showPlaceholderCards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="i in 6" :key="i" class="group cursor-pointer">
+          <div class="relative aspect-[16/9] mb-4 overflow-hidden rounded-lg bg-gray-200 animate-pulse shadow-sm"></div>
+          <div class="space-y-2">
+            <div class="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+            <div class="h-5 bg-gray-200 rounded animate-pulse w-3/4"></div>
+            <div class="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Events Grid -->
+      <div v-else-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <!-- Event Card -->
+        <div
+          v-for="event in paginatedEvents"
+          :key="event.event_id"
+          class="group cursor-pointer"
+          @click="navigateTo(`/events/${event.url_safe_title}`)"
+        >
+          <div class="relative aspect-[16/9] mb-4 overflow-hidden rounded-lg shadow-sm">
+            <img
+              v-if="event.main_landing_image?.image"
+              :alt="event.title"
+              :src="resolveImageUrl(event.main_landing_image.image_urls?.original)"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              @error="onImageError"
+            />
+            <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-200 to-primary-400">
+              <svg class="w-16 h-16 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <!-- Status badge -->
+            <div class="absolute top-3 left-3">
+              <span v-if="event.status === 'OPEN'" class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-sm text-[10px] font-bold text-deep-navy uppercase tracking-tighter shadow-sm">
+                Open
+              </span>
+              <span v-else-if="event.status === 'PUBLISHED'" class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-sm text-[10px] font-bold text-deep-navy uppercase tracking-tighter shadow-sm">
+                Published
+              </span>
+              <span v-else-if="event.status === 'IN_PROGRESS'" class="bg-blue-600/90 backdrop-blur-sm px-2 py-1 rounded-sm text-[10px] font-bold text-white uppercase tracking-tighter shadow-sm">
+                In Progress
+              </span>
+            </div>
+          </div>
+          <h3 class="font-bold text-lg text-deep-navy mb-1 group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
+            {{ event.title }}
+          </h3>
+          <p class="text-gold-600 font-bold text-xs mb-1 uppercase tracking-wider">
+            {{ formatEventDate(event.start_datetime) }}
+            <span v-if="event.organisation_name"> · {{ event.organisation_name }}</span>
+          </p>
+          <!-- <p v-if="event.description" class="text-gray-500 text-sm line-clamp-2">
+            {{ event.description }}
           </p> -->
-
-          <div class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:gap-6">
-            <NuxtLink
-              v-if="!isLoggedIn"
-              class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]"
-              to="/register"
-            >
-              Get Started
-            </NuxtLink>
-
-            <template v-else>
-              <NuxtLink class="rounded-full bg-white px-10 py-5 text-sm font-bold tracking-wide text-[#0B132B] shadow-xl shadow-black/20 transition-all hover:bg-[#e5e8ed]" to="/my-dashboard">
-                My Dashboard
-              </NuxtLink>
-              <NuxtLink class="rounded-full border border-white/45 bg-white/18 px-10 py-5 text-sm font-bold tracking-wide text-white shadow-[0_8px_24px_rgba(24,28,32,0.18)] backdrop-blur-xl transition-all hover:bg-white/28" to="/events">
-                View Events
-              </NuxtLink>
-            </template>
-          </div>
         </div>
-      </section>
 
-      <section class="bg-white py-24">
-        <div class="mx-auto grid max-w-7xl grid-cols-1 items-center gap-20 px-6 lg:grid-cols-2 lg:px-12">
-          <div class="relative" data-reveal data-reveal-delay="0ms">
-            <div class="overflow-hidden rounded-[2rem] shadow-[0_8px_24px_rgba(24,28,32,0.06)] transition-transform duration-700 hover:-rotate-0 md:-rotate-2">
-              <img
-                class="h-64 w-full object-cover md:h-[500px]"
-                src="/assets/images/landing-cover.jpg"
-                alt="A diverse group of Catholic community members gathered in a warm sunlit parish hall"
-              />
-            </div>
-            <div class="absolute -bottom-6 -right-6 max-w-[240px] rounded-[1.5rem] bg-[#0B132B] p-8 text-white shadow-[0_8px_24px_rgba(24,28,32,0.06)]" data-reveal data-reveal-delay="120ms">
-              <div class="grid grid-cols-2 gap-4">
-                <div>
-                  <p class="text-3xl font-bold leading-none">{{ parishTrustedDisplay }}</p>
-                  <p class="mt-1 text-[10px] uppercase tracking-widest text-slate-400">Parishes</p>
-                </div>
-                <div>
-                  <p class="text-3xl font-bold leading-none">{{ usersTrustedDisplay }}</p>
-                  <p class="mt-1 text-[10px] uppercase tracking-widest text-slate-400">Users</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="space-y-8" data-reveal data-reveal-delay="80ms">
-            <h2 class="text-4xl font-bold leading-tight text-[#0B132B] md:text-5xl">Service Beyond Software</h2>
-            <p class="text-lg leading-relaxed text-[#4f6073]">
-              At AMDG, we don't just provide a dashboard; we offer a supportive partnership. Our platform is designed to handle the complexity of diocesan logistics so you can focus on the heart of your ministry.
-            </p>
-            <div class="flex items-start gap-4" data-reveal data-reveal-delay="140ms">
-              <span class="mt-1 text-4xl text-[#131a33]">✦</span>
-              <div>
-                <h4 class="font-bold text-[#0B132B]">Mission-First Approach</h4>
-                <p class="text-sm text-[#4f6073]">Every feature is prayerfully considered to ensure it serves the spiritual health of your flock.</p>
-              </div>
-            </div>
-            <div class="flex items-start gap-4" data-reveal data-reveal-delay="220ms">
-              <span class="mt-1 text-4xl text-[#131a33]">✦</span>
-              <div>
-                <h4 class="font-bold text-[#0B132B]">Concierge Support</h4>
-                <p class="text-sm text-[#4f6073]">A dedicated team that understands parish life, available when you need them most.</p>
-              </div>
-            </div>
-          </div>
+        <!-- CTA Promo Bento Card -->
+        <div v-if="!authStore.isAuthenticated" class="bg-deep-navy rounded-lg p-8 flex flex-col justify-center items-center text-center text-white relative overflow-hidden group">
+          <div class="absolute top-0 right-0 w-32 h-32 bg-gold/20 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-gold/40 transition-all pointer-events-none"></div>
+          <div class="absolute bottom-0 left-0 w-32 h-32 bg-blue-600/20 rounded-full -ml-16 -mb-16 blur-2xl group-hover:bg-blue-600/40 transition-all pointer-events-none"></div>
+          <h3 class="text-xl font-bold mb-3">Ad Majorem Dei Gloriam</h3>
+          <p class="text-white/70 text-sm mb-6 max-w-xs mx-auto">Register to access all events and connect with your faith community.</p>
+          <NuxtLink
+            to="/register"
+            class="bg-white text-deep-navy px-6 py-3 rounded-lg font-bold text-sm hover:shadow-lg transition-all active:scale-95 no-underline"
+          >
+            Get Started
+          </NuxtLink>
         </div>
-      </section>
+      </div>
 
-      <section class="bg-[#f1f4f9] py-32">
-        <div class="mx-auto max-w-7xl px-6 lg:px-12">
-          <div class="mb-20 text-center" data-reveal data-reveal-delay="0ms">
-            <h2 class="mb-4 text-5xl font-extrabold tracking-tight text-[#0B132B]">Operational Snapshot</h2>
-            <div class="mx-auto h-1.5 w-24 rounded-full bg-[#131a33]"></div>
-            <p class="text-lg text-[#4f6073] pt-4">
-              An example view of your operational metrics at a glance.
-            </p>
-          </div>
-
-          <div class="grid h-auto grid-cols-1 gap-8 md:grid-cols-12">
-            <article class="rounded-[2.2rem] bg-[#101b36] p-8 text-white shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-5" data-reveal data-reveal-delay="40ms">
-              <div class="mb-6 flex items-center justify-between">
-                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-200/80">Payments</p>
-                <span class="rounded-full border border-blue-200/30 bg-blue-100/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-blue-100">
-                  Powered by Stripe
-                </span>
-              </div>
-              <div class="mb-4 flex items-end justify-between gap-4">
-                <div>
-                  <p class="text-[12px] text-blue-100/75">Gross revenue</p>
-                  <p class="text-4xl font-black tracking-tight">£{{ formatMockCurrency(animatedRevenueStat) }}</p>
-                </div>
-                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                  <svg viewBox="0 0 24 24" class="h-6 w-6 text-blue-100" fill="none" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7H14.5a3.5 3.5 0 0 1 0 7H6" />
-                  </svg>
-                </div>
-              </div>
-              <div class="rounded-2xl bg-white/5 p-2">
-                <v-chart :option="revenueMiniOption" :autoresize="true" class="h-44" />
-              </div>
-            </article>
-
-            <article
-              class="rounded-[2.2rem] bg-white p-8 shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-7"
-              data-reveal
-              data-reveal-delay="120ms"
-              @mouseenter="hoveredSnapshot = 'registrations'"
-              @mouseleave="hoveredSnapshot = null"
-            >
-              <div class="mb-6 flex items-center justify-between">
-                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Registrations</p>
-                <span class="text-[11px] font-bold uppercase tracking-[0.14em] text-[#0B132B]">+18.2% this month</span>
-              </div>
-              <div class="mb-3 flex items-end justify-between">
-                <p class="text-4xl font-black tracking-tight text-[#0B132B]">{{ animatedRegistrationTotal }}</p>
-                <p class="text-sm font-semibold text-[#4f6073]">Monthly trend</p>
-              </div>
-              <div class="rounded-2xl border border-[#dfe6f1] bg-[#f8fafc] p-3">
-                <v-chart :option="registrationMiniOption" :autoresize="true" class="h-44" />
-              </div>
-            </article>
-
-            <article
-              class="rounded-[2.2rem] bg-white p-8 shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-4"
-              data-reveal
-              data-reveal-delay="80ms"
-              @mouseenter="hoveredSnapshot = 'checkin'"
-              @mouseleave="hoveredSnapshot = null"
-            >
-              <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Check-in Rate</p>
-              <div class="mt-5">
-                <GaugeChart
-                  :value="checkinRateTarget"
-                  :max="100"
-                  unit="%"
-                  height="220px"
-                />
-              </div>
-            </article>
-
-            <article
-              class="rounded-[2.2rem] bg-white p-8 shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-8"
-              data-reveal
-              data-reveal-delay="160ms"
-              @mouseenter="hoveredSnapshot = 'performance'"
-              @mouseleave="hoveredSnapshot = null"
-            >
-              <p class="mb-4 text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Performance Mix</p>
-              <div class="rounded-2xl border border-[#dfe6f1] bg-[#f8fafc] p-3">
-                <v-chart :option="performanceMixOption" :autoresize="true" class="h-44" />
-              </div>
-            </article>
-
-            <article
-              class="rounded-[2.2rem] bg-white p-8 shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-6"
-              data-reveal
-              data-reveal-delay="200ms"
-              @mouseenter="hoveredSnapshot = 'products'"
-              @mouseleave="hoveredSnapshot = null"
-            >
-              <div class="mb-4 flex items-center justify-between">
-                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Products</p>
-                <span class="text-xs font-semibold text-[#4f6073]">Revenue by category</span>
-              </div>
-              <div class="rounded-2xl border border-[#dfe6f1] bg-[#f8fafc] p-3">
-                <v-chart :option="productsRevenueOption" :autoresize="true" class="h-52" />
-              </div>
-            </article>
-
-            <article
-              class="rounded-[2.2rem] bg-white p-8 shadow-[0_8px_24px_rgba(24,28,32,0.06)] md:col-span-6"
-              data-reveal
-              data-reveal-delay="220ms"
-              @mouseenter="hoveredSnapshot = 'attendees'"
-              @mouseleave="hoveredSnapshot = null"
-            >
-              <div class="mb-4 flex items-center justify-between">
-                <p class="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Attendees</p>
-                <span class="text-xs font-semibold text-[#4f6073]">Demographics split</span>
-              </div>
-              <div class="rounded-2xl border border-[#dfe6f1] bg-[#f8fafc] p-3">
-                <v-chart :option="attendeeDemographicsOption" :autoresize="true" class="h-52" />
-              </div>
-            </article>
-          </div>
+      <!-- Empty State -->
+      <div v-else class="text-center py-20">
+        <div class="border border-gray-200 p-12 bg-white max-w-2xl mx-auto rounded-xl shadow-sm">
+          <svg class="w-16 h-16 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="text-xl font-bold text-deep-navy mb-2">No Events Found</h3>
+          <p class="text-gray-500 text-sm">
+            {{ searchQuery ? 'Try adjusting your search criteria' : 'Check back soon for upcoming events' }}
+          </p>
         </div>
-      </section>
+      </div>
 
-      <section class="bg-[#f8fafc] py-28">
-        <div class="mx-auto max-w-7xl px-6 lg:px-12">
-          <div class="mb-10 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between" data-reveal data-reveal-delay="0ms">
-            <div>
-              <p class="mb-3 text-xs font-black uppercase tracking-[0.22em] text-[#4f6073]">Global Presence</p>
-              <h2 class="text-4xl font-black tracking-tight text-[#0B132B] md:text-5xl">Community Distribution Map</h2>
-              <p class="mt-4 max-w-2xl text-sm leading-relaxed text-[#4f6073] md:text-base">
-                Live attendee distribution by parish, chapter, cluster, and country. Explore where communities gather at a glance.
-              </p>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <button
-                v-for="scope in locationDistributionLevels"
-                :key="scope.value"
-                type="button"
-                class="rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.13em] transition-colors"
-                :class="distributionLevel === scope.value
-                  ? 'border-[#5f6f87] bg-[#eef2f7] text-[#1f2b3d]'
-                  : 'border-[#d8e0eb] bg-white text-[#5a677b] hover:border-[#9aa8be]'"
-                @click="distributionLevel = scope.value"
-              >
-                {{ scope.label }}
-              </button>
-            </div>
-          </div>
-
-          <div class="mt-8 mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" data-reveal data-reveal-delay="60ms">
-            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">{{ distributionLevelMetricLabel }}</p>
-              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionLevelCount }}</p>
-              <p class="mt-2 text-sm text-[#4f6073]">Locations currently shown on the map.</p>
-            </div>
-
-            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Mapped attendees</p>
-              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionWithLocation }}</p>
-              <p class="mt-2 text-sm text-[#4f6073]">People linked to a parish, chapter, cluster, or country.</p>
-            </div>
-
-            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Total attendees</p>
-              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionTotal }}</p>
-              <p class="mt-2 text-sm text-[#4f6073]">All attendees in the current dataset.</p>
-            </div>
-
-            <div class="rounded-[1.6rem] border border-[#dfe6f1] bg-white p-5 shadow-[0_10px_24px_rgba(24,28,32,0.05)]">
-              <p class="text-[10px] font-bold uppercase tracking-[0.18em] text-[#4f6073]">Without location</p>
-              <p class="mt-3 text-3xl font-black tracking-tight text-[#0B132B]">{{ animatedDistributionWithoutLocation }}</p>
-              <p class="mt-2 text-sm text-[#4f6073]">Attendees not yet tied to a map point.</p>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 gap-6" data-reveal data-reveal-delay="100ms">
-            <div class="overflow-hidden rounded-[2rem] border border-[#dfe6f1] bg-white p-4 shadow-[0_18px_40px_rgba(24,28,32,0.08)]">
-              <div v-if="distributionPending" class="flex h-[420px] items-center justify-center text-sm font-semibold text-[#4f6073]">
-                Loading distribution map...
-              </div>
-              <div v-else-if="distributionFeatures.length === 0" class="flex h-[420px] items-center justify-center text-sm font-semibold text-[#4f6073]">
-                No mapped attendee locations available for this level.
-              </div>
-              <MapLibre
-                v-else
-                :map-style="mapStyle"
-                :center="distributionMapCenter"
-                :zoom="distributionMapZoom"
-                :sources="distributionMapSources"
-                :layers="distributionMapLayers"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Footer/>
+      <!-- Pagination -->
+      <div class="flex justify-center mt-12">
+        <UPagination
+          v-model="currentPage"
+          :page-count="itemsPerPage"
+          :total="Math.max(totalEvents, 1)"
+        />
+      </div>
     </main>
+
+    <!-- Explore by Region Section -->
+    <section class="w-full bg-deep-navy py-20">
+      <div class="max-w-[1500px] mx-auto px-6">
+        <div class="mb-10">
+          <h2 class="text-2xl font-bold text-white mb-1">Explore by Region</h2>
+          <p class="text-white/60 text-sm">Find events happening near you.</p>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <!-- London -->
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 0ms;"
+            @click="applyRegionFilter('London')"
+          >
+            <img
+              alt="London"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/london.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">London</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('London') }} Active Events
+              </span>
+            </div>
+          </button>
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 100ms;"
+            @click="applyRegionFilter('Manchester')"
+          >
+            <img
+              alt="Manchester"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/manchester.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Manchester</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('Birmingham') }} Active Events
+              </span>
+            </div>
+          </button>
+          <!-- Southeast -->
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 200ms;"
+            @click="applyRegionFilter('Southeast')"
+          >
+            <img
+              alt="Birmingham"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/birmingham.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Birmingham</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('Birmingham') }} Active Events
+              </span>
+            </div>
+          </button>
+          <!-- Wales -->
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 300ms;"
+            @click="applyRegionFilter('Cardiff')"
+          >
+            <img
+              alt="Cardiff"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/cardiff.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Cardiff</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('Cardiff') }} Active Events
+              </span>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            class="region-card group h-72 relative overflow-hidden rounded-lg border border-white/10 opacity-0 animate-fade-in-up"
+            style="animation-delay: 300ms;"
+            @click="applyRegionFilter('Edinburgh')"
+          >
+            <img
+              alt="Edinburgh"
+              class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              src="/assets/images/locations/edinburgh.jpg"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <div class="absolute inset-0 p-6 flex flex-col justify-end text-left">
+              <span class="text-xl font-bold text-white uppercase tracking-tight">Edinburgh</span>
+              <span class="text-white/60 text-xs font-bold uppercase tracking-widest mt-1">
+                {{ getEventCountByLocation('Edinburgh') }} Active Events
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action (standalone, for non-grid authenticated users) -->
+    <div v-if="!authStore.isAuthenticated" class="max-w-[1100px] mx-auto px-6 py-16">
+      <div class="bg-deep-navy text-white rounded-xl p-12 text-center relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gold/10 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-blue-600/10 rounded-full -ml-32 -mb-32 blur-3xl pointer-events-none"></div>
+        <div class="relative">
+          <span class="inline-block bg-gold text-deep-navy px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest mb-6">
+            Join The Community
+          </span>
+          <h3 class="text-3xl font-bold mb-3">Create Your Account Today</h3>
+          <p class="text-white/70 mb-8 max-w-xl mx-auto text-sm leading-relaxed">
+            Sign up to access all events, register for gatherings, and connect with your faith community.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <NuxtLink
+              to="/register"
+              class="bg-white text-deep-navy px-8 py-4 font-bold text-sm rounded-lg hover:shadow-lg transition-all active:scale-95 no-underline"
+            >
+              Sign Up Free
+            </NuxtLink>
+            <NuxtLink
+              to="/login"
+              class="border border-white/30 text-white px-8 py-4 font-bold text-sm rounded-lg hover:border-white/60 transition-colors no-underline"
+            >
+              Login
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
-<script lang="ts" setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import VChart from 'vue-echarts'
-import { use } from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { BarChart, LineChart, PieChart } from 'echarts/charts'
-import { GridComponent, TooltipComponent, TitleComponent, LegendComponent } from 'echarts/components'
-import type { FeatureCollection, GeoJsonProperties, Geometry } from 'geojson'
-import { useMe } from '~/composables/resources/user/users'
-import { useMyProfile } from '~/composables/resources/user/profiles'
-import { useLogout } from '~/composables/resources/user/auth'
-import GaugeChart from '~/components/charts/GaugeChart.vue'
-import MapLibre from '~/components/common/MapLibre.vue'
-import { resolveImageUrl } from '~/utils/image'
-import Footer from '~/components/common/Footer.vue'
-
-use([
-  CanvasRenderer,
-  BarChart,
-  LineChart,
-  PieChart,
-  GridComponent,
-  TooltipComponent,
-  TitleComponent,
-  LegendComponent,
-])
+<script setup lang="ts">
+import { useEvents } from '~/composables/resources/events/events'
+import { useLocationAreas } from '~/composables/resources/locations/locationAreas'
+import type { EventListListData } from '~/api/types.gen'
+import { useAuthStore } from '~/stores/auth'
+import { resolveImageUrl, onImageError } from '~/utils/image'
+import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 definePageMeta({
-  layout: false,
+  layout: 'default',
+  middleware: ['auth'],
 })
 
-useHead({
-  title: 'AMDG - Elevating the Sacred Mission of Parish Management',
-})
+const authStore = useAuthStore()
+const route = useRoute()
+const router = useRouter()
 
-const revealObserver = ref<IntersectionObserver | null>(null)
-const locationRoot = ref<HTMLElement | null>(null)
-const profileMenuRoot = ref<HTMLElement | null>(null)
-const isLocationOpen = ref(false)
-const isProfileMenuOpen = ref(false)
-const hoveredSnapshot = ref<'registrations' | 'checkin' | 'performance' | 'products' | 'attendees' | null>(null)
-const mapStyle = 'https://demotiles.maplibre.org/style.json'
-const distributionLevel = ref<'area' | 'chapter' | 'cluster' | 'country'>('area')
+// Search and filter state
+const searchQuery = ref('')
+const debouncedSearchQuery = ref('')
+const selectedFilter = ref('all')
+const selectedSort = ref('date')
+const selectedLocation = ref<string>('all')
+const selectedRegion = ref('')
+const showAdvancedFilters = ref(false)
+const advancedOrganisationName = ref('')
+const advancedEventTypeTitle = ref('')
+const advancedChapterName = ref('')
+const advancedVenueName = ref('')
+const advancedVenueCity = ref('')
+const advancedTheme = ref('')
+const advancedAnchorVerse = ref('')
+const advancedStartAfter = ref('')
+const advancedStartBefore = ref('')
+const advancedEndAfter = ref('')
+const advancedEndBefore = ref('')
+const currentPage = ref(1)
+const itemsPerPage = 12
+const isSyncingFromRoute = ref(false)
+const isSearchDebouncing = ref(false)
+const searchDebounceMs = 450
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
-const locationDistributionLevels = [
-  { value: 'area' as const, label: 'Area' },
-  { value: 'chapter' as const, label: 'Chapter' },
-  { value: 'cluster' as const, label: 'Cluster' },
-  { value: 'country' as const, label: 'Country' },
-]
+// Refs for scrolling
+const eventsSection = ref<HTMLElement | null>(null)
+const hasScrolledToEvents = ref(false)
 
-const mockMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-const mockRevenueGrossSeries = [18200, 19450, 20110, 22680, 24760, 25540, 26950, 28420, 30100, 32890, 34980, 37240]
-const mockRevenueNetSeries = [17410, 18620, 19290, 21780, 23850, 24520, 25880, 27290, 28890, 31520, 33460, 35630]
-const mockStripeFeeSeries = [790, 830, 820, 900, 910, 1020, 1070, 1130, 1210, 1370, 1520, 1610]
-const mockRevenueHoverGrossSeries = [18820, 20340, 21210, 23100, 25540, 26210, 27980, 29640, 31890, 33940, 36510, 38990]
-const mockRevenueHoverNetSeries = [17920, 19330, 20120, 22010, 24230, 24990, 26560, 28010, 30020, 32110, 34440, 36680]
-const mockRevenueHoverStripeFeeSeries = [900, 1010, 1090, 1090, 1310, 1220, 1420, 1630, 1870, 1830, 2070, 2310]
+// Location options for filters
+const { data: areaData } = useLocationAreas(computed(() => ({
+  page_size: 200,
+  active: true,
+  ordering: 'area_name',
+})))
 
-const mockRegistrationSeries = [96, 104, 110, 124, 132, 149, 156, 170, 182, 196, 214, 232]
-const mockRegistrationCumulativeSeries = mockRegistrationSeries.reduce<number[]>((acc, value, index) => {
-  const previous = index === 0 ? 0 : acc[index - 1]
-  acc.push(previous + value)
-  return acc
-}, [])
-const mockRegistrationHoverSeries = [102, 112, 118, 136, 143, 161, 170, 188, 197, 221, 239, 258]
-const mockRegistrationHoverCumulativeSeries = mockRegistrationHoverSeries.reduce<number[]>((acc, value, index) => {
-  const previous = index === 0 ? 0 : acc[index - 1]
-  acc.push(previous + value)
-  return acc
-}, [])
+const locationOptions = computed(() => areaData.value?.data?.results || [])
 
-const mockPerformanceLabels = ['Bookings', 'Products', 'Donations', 'Sponsors']
-const mockPerformanceValues = [71, 48, 29, 36]
-const mockPerformanceHoverValues = [75, 56, 41, 44]
-const mockProductsRevenue = [
-  { label: 'Retreat Kits', value: 19480 },
-  { label: 'Books', value: 12220 },
-  { label: 'Tickets', value: 28760 },
-  { label: 'Merch', value: 9680 },
-  { label: 'Courses', value: 14110 },
-]
-const mockProductsHoverRevenue = [
-  { label: 'Retreat Kits', value: 20840 },
-  { label: 'Books', value: 13600 },
-  { label: 'Tickets', value: 31410 },
-  { label: 'Merch', value: 11490 },
-  { label: 'Courses', value: 15820 },
-]
-const mockDemographics = [
-  { label: '18-24', value: 186 },
-  { label: '25-34', value: 314 },
-  { label: '35-44', value: 267 },
-  { label: '45-54', value: 196 },
-  { label: '55+', value: 132 },
-]
-const mockDemographicsHover = [
-  { label: '18-24', value: 203 },
-  { label: '25-34', value: 292 },
-  { label: '35-44', value: 285 },
-  { label: '45-54', value: 214 },
-  { label: '55+', value: 151 },
-]
-
-const mockRevenueStat = mockRevenueGrossSeries[mockRevenueGrossSeries.length - 1]
-const mockRegistrationTotal = mockRegistrationCumulativeSeries[mockRegistrationCumulativeSeries.length - 1]
-const mockCheckinRate = 91
-
-const formatMockCurrency = (value: number) => value.toLocaleString('en-GB')
-
-const useAnimatedNumber = (source: () => number, duration = 900, delay = 0) => {
-  const animatedValue = ref(0)
-  let stepTimerId: ReturnType<typeof setTimeout> | null = null
-  let startTimerId: ReturnType<typeof setTimeout> | null = null
-
-  const animate = (from: number, to: number) => {
-    if (stepTimerId !== null) {
-      clearTimeout(stepTimerId)
-      stepTimerId = null
-    }
-    if (startTimerId !== null) {
-      clearTimeout(startTimerId)
-      startTimerId = null
-    }
-
-    const run = () => {
-      const startedAt = Date.now()
-      const delta = to - from
-
-      const step = () => {
-        const progress = Math.min((Date.now() - startedAt) / duration, 1)
-        const easedProgress = 1 - Math.pow(1 - progress, 3)
-        animatedValue.value = Math.round(from + delta * easedProgress)
-
-        if (progress < 1) {
-          stepTimerId = setTimeout(step, 16)
-        }
-      }
-
-      step()
-    }
-
-    if (delay > 0) {
-      startTimerId = setTimeout(run, delay)
-      return
-    }
-
-    run()
-  }
-
-  watch(source, (nextValue, previousValue) => {
-    animate(previousValue ?? 0, nextValue)
-  }, {
-    immediate: true,
-  })
-
-  onBeforeUnmount(() => {
-    if (stepTimerId !== null) {
-      clearTimeout(stepTimerId)
-    }
-    if (startTimerId !== null) {
-      clearTimeout(startTimerId)
-    }
-  })
-
-  return animatedValue
+const statusMap: Record<string, string> = {
+  open: 'OPEN',
+  published: 'PUBLISHED',
+  in_progress: 'IN_PROGRESS',
 }
 
-const revenueStatTarget = computed(() => (
-  hoveredSnapshot.value === 'registrations'
-    ? mockRevenueHoverGrossSeries[mockRevenueHoverGrossSeries.length - 1]
-    : mockRevenueGrossSeries[mockRevenueGrossSeries.length - 1]
-))
-
-const registrationTotalTarget = computed(() => (
-  hoveredSnapshot.value === 'registrations'
-    ? mockRegistrationHoverCumulativeSeries[mockRegistrationHoverCumulativeSeries.length - 1]
-    : mockRegistrationCumulativeSeries[mockRegistrationCumulativeSeries.length - 1]
-))
-
-const checkinRateTarget = computed(() => (hoveredSnapshot.value === 'checkin' ? 94 : mockCheckinRate))
-
-const animatedRevenueStat = useAnimatedNumber(() => revenueStatTarget.value)
-const animatedRegistrationTotal = useAnimatedNumber(() => registrationTotalTarget.value)
-const animatedCheckinRate = useAnimatedNumber(() => checkinRateTarget.value)
-
-const revenueMiniOption = computed(() => {
-  const grossSeries = hoveredSnapshot.value === 'registrations' ? mockRevenueHoverGrossSeries : mockRevenueGrossSeries
-  const netSeries = hoveredSnapshot.value === 'registrations' ? mockRevenueHoverNetSeries : mockRevenueNetSeries
-  const stripeFeeSeries = hoveredSnapshot.value === 'registrations' ? mockRevenueHoverStripeFeeSeries : mockStripeFeeSeries
-
-  return {
-    legend: {
-      top: 0,
-      right: 0,
-      textStyle: { color: '#dbe8ff', fontSize: 10 },
-    },
-    grid: { left: 40, right: 14, top: 28, bottom: 24, containLabel: false },
-    xAxis: {
-      type: 'category',
-      data: mockMonths,
-      axisLine: { lineStyle: { color: 'rgba(219,232,255,0.35)' } },
-      axisLabel: { color: '#dbe8ff', fontSize: 10 },
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      splitLine: { lineStyle: { color: 'rgba(219,232,255,0.16)' } },
-      axisLabel: {
-        color: '#dbe8ff',
-        fontSize: 10,
-        formatter: (value: number) => `£${Math.round(value / 1000)}k`,
-      },
-    },
-    series: [
-      {
-        type: 'bar',
-        name: 'Gross',
-        data: grossSeries,
-        barWidth: '36%',
-        itemStyle: {
-          color: '#6ca8ff',
-          borderRadius: [4, 4, 0, 0],
-        },
-      },
-      {
-        type: 'line',
-        name: 'Net',
-        data: netSeries,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: '#f2f6ff', width: 2.2 },
-      },
-    ],
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: (params: any[]) => {
-        const gross = params.find((item) => item.seriesName === 'Gross')?.data ?? 0
-        const net = params.find((item) => item.seriesName === 'Net')?.data ?? 0
-        const idx = params?.[0]?.dataIndex ?? 0
-        const fee = stripeFeeSeries[idx] ?? 0
-        return [
-          `${params?.[0]?.axisValue}`,
-          `Gross: £${Number(gross).toLocaleString('en-GB')}`,
-          `Net: £${Number(net).toLocaleString('en-GB')}`,
-          `Stripe fee: £${Number(fee).toLocaleString('en-GB')}`,
-        ].join('<br/>')
-      },
-    },
-  }
-})
-
-const registrationMiniOption = computed(() => {
-  const registrationSeries = hoveredSnapshot.value === 'registrations' ? mockRegistrationHoverSeries : mockRegistrationSeries
-  const cumulativeSeries = hoveredSnapshot.value === 'registrations' ? mockRegistrationHoverCumulativeSeries : mockRegistrationCumulativeSeries
-
-  return {
-    legend: {
-      top: 0,
-      right: 0,
-      textStyle: { color: '#4f6073', fontSize: 10 },
-    },
-    grid: { left: 36, right: 16, top: 28, bottom: 22, containLabel: false },
-    xAxis: {
-      type: 'category',
-      data: mockMonths,
-      axisLine: { lineStyle: { color: '#cad6e6' } },
-      axisLabel: { color: '#4f6073', fontSize: 10 },
-    },
-    yAxis: {
-      type: 'value',
-      axisLine: { show: false },
-      axisLabel: { color: '#4f6073', fontSize: 10 },
-      splitLine: { lineStyle: { color: '#e7edf6' } },
-    },
-    series: [
-      {
-        name: 'New',
-        type: 'line',
-        data: registrationSeries,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: '#0B132B', width: 2.5 },
-        areaStyle: {
-          color: 'rgba(11, 19, 43, 0.12)',
-        },
-      },
-      {
-        name: 'Cumulative',
-        type: 'line',
-        data: cumulativeSeries,
-        smooth: true,
-        symbol: 'none',
-        lineStyle: { color: '#d4a72c', width: 2, type: 'dashed' },
-      },
-    ],
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'line' },
-      formatter: (params: any[]) => {
-        const rows = params.map((item) => `${item.seriesName}: ${Number(item.data).toLocaleString('en-GB')}`)
-        return [`${params?.[0]?.axisValue}`, ...rows].join('<br/>')
-      },
-    },
-  }
-})
-
-const performanceMixOption = computed(() => ({
-  grid: { left: 48, right: 16, top: 12, bottom: 18, containLabel: false },
-  xAxis: {
-    type: 'value',
-    max: 100,
-    axisLabel: { color: '#4f6073', formatter: '{value}%' },
-    splitLine: { lineStyle: { color: '#e7edf6' } },
-  },
-  yAxis: {
-    type: 'category',
-    data: mockPerformanceLabels,
-    axisLabel: { color: '#0B132B', fontWeight: 600 },
-    axisLine: { show: false },
-    axisTick: { show: false },
-  },
-  series: [
-    {
-      type: 'bar',
-      data: hoveredSnapshot.value === 'performance' ? mockPerformanceHoverValues : mockPerformanceValues,
-      barWidth: 16,
-      itemStyle: {
-        color: '#0B132B',
-        borderRadius: [0, 8, 8, 0],
-      },
-      label: {
-        show: true,
-        position: 'right',
-        formatter: '{c}%',
-        color: '#0B132B',
-        fontWeight: 700,
-      },
-    },
-  ],
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: { type: 'shadow' },
-    formatter: (params: any[]) => `${params[0].axisValue}: ${params[0].data}%`,
-  },
-}))
-
-const productsRevenueOption = computed(() => ({
-  grid: { left: 52, right: 16, top: 16, bottom: 24, containLabel: false },
-  xAxis: {
-    type: 'value',
-    axisLabel: {
-      color: '#4f6073',
-      formatter: (value: number) => `£${Math.round(value / 1000)}k`,
-    },
-    splitLine: { lineStyle: { color: '#e7edf6' } },
-  },
-  yAxis: {
-    type: 'category',
-    data: (hoveredSnapshot.value === 'products' ? mockProductsHoverRevenue : mockProductsRevenue).map((item) => item.label),
-    axisLabel: { color: '#0B132B', fontSize: 11 },
-    axisLine: { show: false },
-    axisTick: { show: false },
-  },
-  series: [
-    {
-      type: 'bar',
-      data: (hoveredSnapshot.value === 'products' ? mockProductsHoverRevenue : mockProductsRevenue).map((item) => item.value),
-      barWidth: 16,
-      itemStyle: { color: '#1f3c88', borderRadius: [0, 8, 8, 0] },
-    },
-  ],
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: { type: 'shadow' },
-    formatter: (params: any[]) => `${params[0].axisValue}: £${Number(params[0].data).toLocaleString('en-GB')}`,
-  },
-}))
-
-const attendeeDemographicsOption = computed(() => ({
-  legend: {
-    bottom: 0,
-    textStyle: { color: '#4f6073', fontSize: 10 },
-  },
-  series: [
-    {
-      type: 'pie',
-      radius: ['44%', '72%'],
-      center: ['50%', '42%'],
-      itemStyle: {
-        borderColor: '#ffffff',
-        borderWidth: 2,
-      },
-      label: {
-        color: '#0B132B',
-        formatter: '{b}: {d}%',
-      },
-      data: (hoveredSnapshot.value === 'attendees' ? mockDemographicsHover : mockDemographics).map((item, index) => ({
-        value: item.value,
-        name: item.label,
-        itemStyle: {
-          color: ['#0B132B', '#1f3c88', '#2f5dab', '#5f84c2', '#95acd9'][index],
-        },
-      })),
-    },
-  ],
-  tooltip: {
-    trigger: 'item',
-    formatter: '{b}: {c} ({d}%)',
-  },
-}))
-
-type DistributionFeature = {
-  type: 'Feature'
-  geometry: {
-    type: 'Point'
-    coordinates: [number, number]
-  }
-  properties: {
-    label: string
-    attendee_count: number
-    level: string
-  }
+const reverseStatusMap: Record<string, string> = {
+  OPEN: 'open',
+  PUBLISHED: 'published',
+  IN_PROGRESS: 'in_progress',
 }
 
-type DistributionResponse = {
-  level: 'area' | 'chapter' | 'cluster' | 'country'
-  total_attendees: number
-  total_with_location: number
-  total_without_location: number
-  type: 'FeatureCollection'
-  features: DistributionFeature[]
+const orderingMap: Record<string, string> = {
+  date: 'start_datetime',
+  date_desc: '-start_datetime',
+  name: 'title',
+  name_desc: '-title',
 }
 
-const { data: parishDistributionData } = useAsyncData(
-  'home-parish-distribution',
-  async () => await $fetch<DistributionResponse>('/api/locations/statistics/distribution-map/', {
-    query: {
-      level: 'area',
-    },
-  }),
-  {
-    default: () => ({
-      level: 'area',
-      total_attendees: 0,
-      total_with_location: 0,
-      total_without_location: 0,
-      type: 'FeatureCollection',
-      features: [],
-    }),
-  },
-)
+const reverseOrderingMap: Record<string, string> = {
+  start_datetime: 'date',
+  '-start_datetime': 'date_desc',
+  title: 'name',
+  '-title': 'name_desc',
+}
 
-const { data: distributionData, pending: distributionPending } = useAsyncData(
-  'home-location-distribution',
-  async () => await $fetch<DistributionResponse>('/api/locations/statistics/distribution-map/', {
-    query: {
-      level: distributionLevel.value,
-    },
-  }),
-  {
-    default: () => ({
-      level: 'area',
-      total_attendees: 0,
-      total_with_location: 0,
-      total_without_location: 0,
-      type: 'FeatureCollection',
-      features: [],
-    }),
-    watch: [distributionLevel],
-  },
-)
+const backendQuery = computed<EventListListData['query']>(() => {
+  const query: EventListListData['query'] = {
+    page: currentPage.value,
+    page_size: itemsPerPage,
+    ordering: orderingMap[selectedSort.value] || 'start_datetime',
+  }
 
-const { data: userData } = useMe()
-const { data: profileData } = useMyProfile()
-const { mutate: logout } = useLogout()
+  if (debouncedSearchQuery.value.trim()) {
+    query.search = debouncedSearchQuery.value.trim()
+  }
 
-const isLoggedIn = computed(() => Boolean(userData.value?.data))
-const profileDisplayName = computed(() => userData.value?.data?.display_name || 'AMDG User')
-const profileEmail = computed(() => userData.value?.data?.email || '')
+  if (selectedFilter.value !== 'all') {
+    query.status = statusMap[selectedFilter.value]
+  }
 
-const parishTrustedTarget = computed(() => parishDistributionData.value?.features?.length ?? 0)
-const animatedParishTrustedCount = useAnimatedNumber(() => parishTrustedTarget.value, 900, 120)
-const parishTrustedDisplay = computed(() => `${animatedParishTrustedCount.value}+`)
-const usersTrustedTarget = computed(() => parishDistributionData.value?.total_attendees ?? 0)
-const animatedUsersTrustedCount = useAnimatedNumber(() => usersTrustedTarget.value, 900, 240)
-const usersTrustedDisplay = computed(() => `${animatedUsersTrustedCount.value}+`)
+  if (selectedLocation.value !== 'all') {
+    query.area_name = selectedLocation.value.trim()
+  }
 
-const profileImageUrl = computed(() => {
-  const profilePicture = profileData.value?.data?.profile_picture_url
-  return profilePicture ? resolveImageUrl(profilePicture) : ''
+  if (selectedRegion.value.trim()) {
+    query.area_name = selectedRegion.value.trim()
+  }
+
+  if (advancedOrganisationName.value.trim()) query.organisation_name = advancedOrganisationName.value.trim()
+  if (advancedEventTypeTitle.value.trim()) query.event_type_title = advancedEventTypeTitle.value.trim()
+  if (advancedChapterName.value.trim()) query.chapter_name = advancedChapterName.value.trim()
+  if (advancedVenueName.value.trim()) query.venue_name = advancedVenueName.value.trim()
+  if (advancedVenueCity.value.trim()) query.venue_city = advancedVenueCity.value.trim()
+  if (advancedTheme.value.trim()) query.theme = advancedTheme.value.trim()
+  if (advancedAnchorVerse.value.trim()) query.anchor_verse = advancedAnchorVerse.value.trim()
+  if (advancedStartAfter.value) query.start_after = advancedStartAfter.value
+  if (advancedStartBefore.value) query.start_before = advancedStartBefore.value
+  if (advancedEndAfter.value) query.end_after = advancedEndAfter.value
+  if (advancedEndBefore.value) query.end_before = advancedEndBefore.value
+
+  return query
 })
 
-const profileInitials = computed(() => {
-  const displayName = userData.value?.data?.display_name
-  if (!displayName) return 'AM'
+// Fetch events from list endpoint with backend filtering
+const { data: eventsData, isLoading: isLoadingEvents } = useEvents(backendQuery)
+const allEvents = computed(() => eventsData.value?.data?.results || [])
+const totalEvents = computed(() => eventsData.value?.data?.count || 0)
+const showPlaceholderCards = computed(() => isLoadingEvents.value || isSearchDebouncing.value)
 
-  return displayName
-    .split(' ')
-    .map((chunk) => chunk[0])
-    .join('')
-    .toUpperCase()
-    .slice(0, 2)
+// Featured event (first OPEN event with image)
+const featuredEvent = computed(() => {
+  return allEvents.value.find(event => 
+    event.status === 'OPEN' && event.main_landing_image?.image
+  ) || allEvents.value[0]
 })
 
-const distributionFeatures = computed(() => {
-  const features = distributionData.value?.features || []
-  return [...features].sort((a, b) => b.properties.attendee_count - a.properties.attendee_count)
-})
+// Format date helper
+const formatEventDate = (dateString: string) => {
+  const date = new Date(dateString)
+  const month = date.toLocaleDateString('en-US', { month: 'short' }).toUpperCase()
+  const day = date.getDate()
+  const year = date.getFullYear()
+  return `${month} ${day}, ${year}`
+}
 
-const distributionLevelMetricLabel = computed(() => {
-  if (distributionLevel.value === 'area') return 'Parishes'
-  if (distributionLevel.value === 'chapter') return 'Chapters'
-  if (distributionLevel.value === 'cluster') return 'Clusters'
-  return 'Countries'
-})
+// Region quick filter count (based on currently loaded response)
+const getEventCountByLocation = (location: string) => {
+  return allEvents.value.filter(event =>
+    event.location?.toLowerCase().includes(location.toLowerCase())
+  ).length
+}
 
-const distributionLevelCountTarget = computed(() => distributionFeatures.value.length)
-const distributionWithLocationTarget = computed(() => distributionData.value?.total_with_location ?? 0)
-const distributionTotalTarget = computed(() => distributionData.value?.total_attendees ?? 0)
-const distributionWithoutLocationTarget = computed(() => distributionData.value?.total_without_location ?? 0)
-
-const animatedDistributionLevelCount = useAnimatedNumber(() => distributionLevelCountTarget.value, 900, 0)
-const animatedDistributionWithLocation = useAnimatedNumber(() => distributionWithLocationTarget.value, 900, 140)
-const animatedDistributionTotal = useAnimatedNumber(() => distributionTotalTarget.value, 900, 280)
-const animatedDistributionWithoutLocation = useAnimatedNumber(() => distributionWithoutLocationTarget.value, 900, 420)
-
-const distributionMapSources = computed(() => ([
-  {
-    name: 'distribution',
-    data: {
-      type: 'FeatureCollection',
-      features: distributionFeatures.value,
-    } as FeatureCollection<Geometry, GeoJsonProperties>,
-  },
-]))
-
-const distributionMapLayers = computed(() => ([
-  {
-    id: 'distribution-circles',
-    type: 'circle',
-    source: 'distribution',
-    paint: {
-      'circle-color': '#34495e',
-      'circle-radius': 7,
-      'circle-stroke-color': '#ffffff',
-      'circle-stroke-width': 1.5,
-      'circle-opacity': 0.74,
-    },
-  },
-]))
-
-const distributionMapCenter = computed<[number, number]>(() => {
-  if (!distributionFeatures.value.length) return [0, 20]
-
-  const totalLongitude = distributionFeatures.value.reduce((sum, feature) => sum + feature.geometry.coordinates[0], 0)
-  const totalLatitude = distributionFeatures.value.reduce((sum, feature) => sum + feature.geometry.coordinates[1], 0)
+const filteredEvents = computed(() => allEvents.value)
+const advancedActiveCount = computed(() => {
   return [
-    totalLongitude / distributionFeatures.value.length,
-    totalLatitude / distributionFeatures.value.length,
-  ]
+    advancedOrganisationName.value,
+    advancedEventTypeTitle.value,
+    advancedChapterName.value,
+    advancedVenueName.value,
+    advancedVenueCity.value,
+    advancedTheme.value,
+    advancedAnchorVerse.value,
+    advancedStartAfter.value,
+    advancedStartBefore.value,
+    advancedEndAfter.value,
+    advancedEndBefore.value,
+  ].filter(value => value && value.toString().trim()).length
 })
 
-const distributionMapZoom = computed(() => {
-  const count = distributionFeatures.value.length
-  if (count <= 1) return 3.2
-  if (count <= 5) return 2.7
-  return 1.8
+// Pagination
+const totalPages = computed(() => Math.max(1, Math.ceil((totalEvents.value || 0) / itemsPerPage)))
+const paginatedEvents = computed(() => filteredEvents.value)
+
+const applyRegionFilter = (region: string) => {
+  selectedRegion.value = region
+  selectedLocation.value = 'all'
+  currentPage.value = 1
+}
+
+const applyFilters = () => {
+  currentPage.value = 1
+}
+
+const clearAdvancedFilters = () => {
+  advancedOrganisationName.value = ''
+  advancedEventTypeTitle.value = ''
+  advancedChapterName.value = ''
+  advancedVenueName.value = ''
+  advancedVenueCity.value = ''
+  advancedTheme.value = ''
+  advancedAnchorVerse.value = ''
+  advancedStartAfter.value = ''
+  advancedStartBefore.value = ''
+  advancedEndAfter.value = ''
+  advancedEndBefore.value = ''
+}
+
+// Reset to page 1 when filters change
+watch([
+  searchQuery,
+  selectedFilter,
+  selectedSort,
+  selectedLocation,
+  selectedRegion,
+  advancedOrganisationName,
+  advancedEventTypeTitle,
+  advancedChapterName,
+  advancedVenueName,
+  advancedVenueCity,
+  advancedTheme,
+  advancedAnchorVerse,
+  advancedStartAfter,
+  advancedStartBefore,
+  advancedEndAfter,
+  advancedEndBefore,
+], () => {
+  if (isSyncingFromRoute.value) {
+    return
+  }
+  currentPage.value = 1
 })
 
-const handleDocumentClick = (event: MouseEvent) => {
-  const target = event.target as Node
-  if (!locationRoot.value?.contains(target)) {
-    isLocationOpen.value = false
+watch(searchQuery, (value) => {
+  if (isSyncingFromRoute.value) {
+    if (searchDebounceTimer) {
+      clearTimeout(searchDebounceTimer)
+      searchDebounceTimer = null
+    }
+    debouncedSearchQuery.value = value
+    isSearchDebouncing.value = false
+    return
   }
-  if (!profileMenuRoot.value?.contains(target)) {
-    isProfileMenuOpen.value = false
+
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
   }
+
+  isSearchDebouncing.value = debouncedSearchQuery.value !== value
+
+  searchDebounceTimer = setTimeout(() => {
+    debouncedSearchQuery.value = value
+    isSearchDebouncing.value = false
+    searchDebounceTimer = null
+  }, searchDebounceMs)
+})
+
+watch(selectedLocation, (value) => {
+  if (isSyncingFromRoute.value) {
+    return
+  }
+
+  if (value !== 'all' && selectedRegion.value) {
+    selectedRegion.value = ''
+  }
+})
+
+const buildQueryParams = () => {
+  const query: Record<string, string> = {}
+
+  if (searchQuery.value.trim()) query.search = searchQuery.value.trim()
+  if (selectedFilter.value !== 'all') query.status = statusMap[selectedFilter.value]
+  if (selectedSort.value !== 'date') query.ordering = orderingMap[selectedSort.value]
+  if (selectedLocation.value !== 'all') query.area_name = selectedLocation.value.trim()
+  if (selectedRegion.value.trim()) query.area_name = selectedRegion.value.trim()
+  if (advancedOrganisationName.value.trim()) query.organisation_name = advancedOrganisationName.value.trim()
+  if (advancedEventTypeTitle.value.trim()) query.event_type_title = advancedEventTypeTitle.value.trim()
+  if (advancedChapterName.value.trim()) query.chapter_name = advancedChapterName.value.trim()
+  if (advancedVenueName.value.trim()) query.venue_name = advancedVenueName.value.trim()
+  if (advancedVenueCity.value.trim()) query.venue_city = advancedVenueCity.value.trim()
+  if (advancedTheme.value.trim()) query.theme = advancedTheme.value.trim()
+  if (advancedAnchorVerse.value.trim()) query.anchor_verse = advancedAnchorVerse.value.trim()
+  if (advancedStartAfter.value) query.start_after = advancedStartAfter.value
+  if (advancedStartBefore.value) query.start_before = advancedStartBefore.value
+  if (advancedEndAfter.value) query.end_after = advancedEndAfter.value
+  if (advancedEndBefore.value) query.end_before = advancedEndBefore.value
+  if (currentPage.value > 1) query.page = String(currentPage.value)
+
+  return query
 }
 
-const handleLogout = () => {
-  isProfileMenuOpen.value = false
-  logout(undefined, {
-    onSuccess: () => {
-      navigateTo('/')
-    },
-  })
-}
+watch(
+  () => route.query,
+  (query) => {
+    isSyncingFromRoute.value = true
 
-onMounted(() => {
-  const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'))
+    searchQuery.value = typeof query.search === 'string' ? query.search : ''
+    debouncedSearchQuery.value = searchQuery.value
 
-  revealObserver.value = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return
+    const status = typeof query.status === 'string' ? query.status : ''
+    selectedFilter.value = reverseStatusMap[status] || 'all'
 
-        const target = entry.target as HTMLElement
-        target.classList.add('is-visible')
-        revealObserver.value?.unobserve(target)
-      })
-    },
-    {
-      threshold: 0.16,
-      rootMargin: '0px 0px -8% 0px',
-    },
-  )
+    const ordering = typeof query.ordering === 'string' ? query.ordering : 'start_datetime'
+    selectedSort.value = reverseOrderingMap[ordering] || 'date'
 
-  targets.forEach((target) => {
-    revealObserver.value?.observe(target)
-  })
+    const areaName = typeof query.area_name === 'string' ? query.area_name : ''
+    selectedLocation.value = areaName || 'all'
+    selectedRegion.value = ''
 
-  document.addEventListener('click', handleDocumentClick)
+    advancedOrganisationName.value = typeof query.organisation_name === 'string' ? query.organisation_name : ''
+    advancedEventTypeTitle.value = typeof query.event_type_title === 'string' ? query.event_type_title : ''
+    advancedChapterName.value = typeof query.chapter_name === 'string' ? query.chapter_name : ''
+    advancedVenueName.value = typeof query.venue_name === 'string' ? query.venue_name : ''
+    advancedVenueCity.value = typeof query.venue_city === 'string' ? query.venue_city : ''
+    advancedTheme.value = typeof query.theme === 'string' ? query.theme : ''
+    advancedAnchorVerse.value = typeof query.anchor_verse === 'string' ? query.anchor_verse : ''
+    advancedStartAfter.value = typeof query.start_after === 'string' ? query.start_after : ''
+    advancedStartBefore.value = typeof query.start_before === 'string' ? query.start_before : ''
+    advancedEndAfter.value = typeof query.end_after === 'string' ? query.end_after : ''
+    advancedEndBefore.value = typeof query.end_before === 'string' ? query.end_before : ''
+
+    showAdvancedFilters.value = Boolean(
+      advancedOrganisationName.value ||
+      advancedEventTypeTitle.value ||
+      advancedChapterName.value ||
+      advancedVenueName.value ||
+      advancedVenueCity.value ||
+      advancedTheme.value ||
+      advancedAnchorVerse.value ||
+      advancedStartAfter.value ||
+      advancedStartBefore.value ||
+      advancedEndAfter.value ||
+      advancedEndBefore.value
+    )
+
+    const page = typeof query.page === 'string' ? Number(query.page) : 1
+    currentPage.value = Number.isFinite(page) && page > 0 ? page : 1
+
+    hasScrolledToEvents.value = !!searchQuery.value
+    isSyncingFromRoute.value = false
+  },
+  { immediate: true }
+)
+
+watch([
+  searchQuery,
+  selectedFilter,
+  selectedSort,
+  selectedLocation,
+  selectedRegion,
+  advancedOrganisationName,
+  advancedEventTypeTitle,
+  advancedChapterName,
+  advancedVenueName,
+  advancedVenueCity,
+  advancedTheme,
+  advancedAnchorVerse,
+  advancedStartAfter,
+  advancedStartBefore,
+  advancedEndAfter,
+  advancedEndBefore,
+  currentPage,
+], async () => {
+  if (isSyncingFromRoute.value) {
+    return
+  }
+  await router.replace({ query: buildQueryParams() })
 })
 
 onBeforeUnmount(() => {
-  revealObserver.value?.disconnect()
-  document.removeEventListener('click', handleDocumentClick)
+  if (searchDebounceTimer) {
+    clearTimeout(searchDebounceTimer)
+    searchDebounceTimer = null
+  }
+})
+
+// Auto-scroll to events section when user starts typing
+watch(searchQuery, (newQuery) => {
+  if (newQuery && !hasScrolledToEvents.value && eventsSection.value) {
+    // User started typing, scroll to events section
+    hasScrolledToEvents.value = true
+    
+    nextTick(() => {
+      eventsSection.value?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      })
+    })
+  } else if (!newQuery) {
+    // Reset scroll flag when search is cleared
+    hasScrolledToEvents.value = false
+  }
+})
+
+// Set page metadata
+useHead({
+  title: 'Events - Discover Faith Gatherings',
+  meta: [
+    { name: 'description', content: 'Browse and join upcoming faith events, conferences, and spiritual gatherings from communities around the world.' }
+  ]
 })
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
-  transition-property: opacity, transform;
-  transition-duration: 700ms;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: opacity, transform;
+.search-pill {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
+.hero-gradient {
+  background: linear-gradient(to right, rgba(10, 25, 47, 0.9) 0%, rgba(10, 25, 47, 0.5) 50%, rgba(10, 25, 47, 0.15) 100%);
+}
+
+.region-card {
+  background: transparent;
+  padding: 0;
+  text-align: left;
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out forwards;
 }
 </style>

@@ -5,7 +5,7 @@
       <div class="max-w-xs">
         <span class="text-2xl font-black tracking-tighter uppercase mb-6 block">AMDG</span>
         <p class="text-[10px] text-white/40 leading-relaxed font-bold tracking-widest uppercase">
-          Digital engine for the greater glory of God. 
+          Events Management System for Catholic Events
         </p>
       </div>
 
@@ -18,7 +18,6 @@
           <ul class="space-y-4 text-[10px] font-bold tracking-widest uppercase text-white/60">
             <li><NuxtLink to="/events" class="hover:text-blue-300 transition-colors no-underline">Events</NuxtLink></li>
             <li><NuxtLink to="/communities" class="hover:text-blue-300 transition-colors no-underline">Communities</NuxtLink></li>
-            <li><NuxtLink to="/about" class="hover:text-blue-300 transition-colors no-underline">About</NuxtLink></li>
           </ul>
         </div>
 
