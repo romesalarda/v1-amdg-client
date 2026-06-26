@@ -116,6 +116,8 @@ export function useBookingShop() {
 
   const orderCreationBlockedReason = computed(() => {
     const blocked = latestBlockingOrder.value
+
+    
     if (!blocked) return ''
 
     const reference = blocked.order_reference_id || blocked.order_id

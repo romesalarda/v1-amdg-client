@@ -50,7 +50,7 @@ export function useCreateEventFormResponse() {
       eventFormResponsesCreate({ body }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: FORM_RESPONSES_KEY })
-    },
+    }
   })
 }
 

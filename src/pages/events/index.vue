@@ -222,12 +222,14 @@
       <!-- Events Grid -->
       <div v-else-if="filteredEvents.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         <!-- Event Card -->
-        <div
-          v-for="event in paginatedEvents"
-          :key="event.event_id"
-          class="group cursor-pointer"
-          @click="navigateTo(`/events/${event.url_safe_title}`)"
-        >
+        <NuxtLink
+            v-for="event in paginatedEvents"
+            :key="event.event_id"
+            :to="`/events/${event.url_safe_title}`"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="group cursor-pointer"
+          >
           <div class="relative aspect-[16/9] mb-4 overflow-hidden rounded-lg shadow-sm">
             <img
               v-if="event.main_landing_image?.image"
@@ -264,7 +266,7 @@
           <!-- <p v-if="event.description" class="text-gray-500 text-sm line-clamp-2">
             {{ event.description }}
           </p> -->
-        </div>
+        </NuxtLink>
 
         <!-- CTA Promo Bento Card -->
         <div v-if="!authStore.isAuthenticated" class="bg-deep-navy rounded-lg p-8 flex flex-col justify-center items-center text-center text-white relative overflow-hidden group">

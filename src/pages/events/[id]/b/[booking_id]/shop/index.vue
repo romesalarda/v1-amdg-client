@@ -34,30 +34,22 @@
 
 		<div class="mx-auto max-w-screen-xl space-y-5 px-4 py-6 md:px-6">
 
-			<!-- <section class="rounded-3xl border border-deep-navy/10 bg-white p-5 shadow-sm">
-				<div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-12 xl:items-end">
-					<div class="xl:col-span-6">
-					
-						<p class="mt-1 text-[11px] text-deep-navy/45">Booking ref {{ booking?.booking_reference || bookingReference }}</p>
-					</div>
-
-					<div class="flex items-center gap-2 xl:col-span-3 xl:justify-end">
-						<NuxtLink
-							:to="cartHref"
-							class="inline-flex items-center rounded-xl bg-deep-navy px-4 py-2.5 text-xs font-black uppercase tracking-wide text-white hover:bg-blue-700"
-						>
-							Cart ({{ cartItemCount }})
-						</NuxtLink>
-					</div>
-				</div>
-			</section> -->
-
 			<section v-if="bookingQuery.isLoading.value" class="rounded-2xl border border-deep-navy/10 bg-white p-5 text-sm text-deep-navy/70">
 				Loading booking context...
 			</section>
 
 			<section v-else-if="bookingQuery.error.value" class="rounded-2xl border border-red-200 bg-red-50 p-5 text-sm text-red-700">
 				Unable to load booking data for this shop.
+			</section>
+
+			<section v-else-if="attendeeQuery.data.value?.data?.is_cancelled">
+				<div class="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center text-slate-600">
+					<div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-200 text-slate-500">
+						<UIcon name="i-heroicons-x-circle" class="h-7 w-7" />
+					</div>
+					<p class="mt-4 text-base font-black uppercase tracking-[0.22em] text-slate-500">Shopping not available</p>
+					<p class="mt-2 text-sm text-slate-500">This attendee's booking has been cancelled.</p>
+				</div>
 			</section>
 
 			<section v-else class="grid grid-cols-1 gap-5 xl:grid-cols-12">
@@ -386,9 +378,11 @@ const {
 	addVariantToCart,
 	isOrderCreationBlocked,
 	orderCreationBlockedReason,
+	attendeeQuery,
 } = useBookingShop()
 
 const { data: eventData } = useEvent(eventId)
+
 const eventTitle = computed(() => eventData.value?.data?.title || bookingQuery.data.value?.event?.title || 'Event shop')
 const heroImageSrc = computed(() => resolveImageUrl(eventData.value?.data?.main_landing_image?.image || null, ''))
 const bookingWorkspaceHref = computed(() => `/events/${eventId.value}/b/${bookingReference.value}`)

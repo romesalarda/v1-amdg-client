@@ -73,12 +73,10 @@
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Customer</p>
               <p class="mt-1 text-sm font-semibold text-slate-900">{{ order.customer_name || 'N/A' }}</p>
-              <p class="mt-1 text-xs text-slate-500">ID: {{ order.customer || 'N/A' }}</p>
             </div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Attendee</p>
               <p class="mt-1 text-sm font-semibold text-slate-900">{{ order.attendee_name || 'N/A' }}</p>
-              <p class="mt-1 text-xs text-slate-500">ID: {{ order.attendee || 'N/A' }}</p>
             </div>
             <div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p class="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">Items</p>

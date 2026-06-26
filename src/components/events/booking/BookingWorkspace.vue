@@ -1366,7 +1366,7 @@
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Quick actions</p>
               <div class="mt-3 space-y-2">
                 <NuxtLink
-                  v-if="!selectedAttendeeIsCancelled"
+                  v-if="true"
                   :to="bookingShopHref"
                   class="flex w-full items-center justify-between rounded-xl border border-emerald-300 bg-emerald-600 px-3 py-2.5 text-left text-[11px] font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-700"
                 >
@@ -1813,8 +1813,8 @@ const tabs: Array<{ id: TabId; label: string; needsAttendee?: boolean; blockWhen
   { id: 'payments', label: 'Payments', needsAttendee: false, icon: 'i-heroicons-currency-pound' },
   { id: 'orders', label: 'Orders', needsAttendee: true, blockWhenCancelled: true, icon: 'i-heroicons-shopping-bag' },
   { id: 'resources', label: 'Resources', needsAttendee: false, icon: 'i-heroicons-folder' },
-  { id: 'forms', label: 'Forms', needsAttendee: true, icon: 'i-heroicons-document' },
-  { id: 'workshops', label: 'Workshops', needsAttendee: true, icon: 'i-heroicons-academic-cap' },
+  { id: 'forms', label: 'Forms', needsAttendee: true, icon: 'i-heroicons-document', blockWhenCancelled: true   },
+  { id: 'workshops', label: 'Workshops', needsAttendee: true, icon: 'i-heroicons-academic-cap', blockWhenCancelled: true },
 ]
 
 const selectedAttendee = computed(() => {
