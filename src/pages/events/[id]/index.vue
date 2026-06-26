@@ -138,7 +138,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy font-mono text-[18px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy font-mono text-[20px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 

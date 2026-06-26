@@ -37,6 +37,7 @@ import type {
   EventFormQuestionsPartialUpdateData,
   EventFormQuestionsUpdateData,
 } from '~/api/types.gen'
+import { uploadMultipart } from '~/utils/upload'
 
 const FORMS_QUERY_KEY = ['eventForms'] as const
 const QUESTIONS_QUERY_KEY = ['eventFormQuestions'] as const
@@ -87,14 +88,52 @@ export function useCreateEventForm() {
 }
 
 /**
- * Update an existing form
+ * Update an existing form.
+ * When `landingImage` is provided (or `landing_image` is being cleared),
+ * the request is sent as multipart/form-data so the file is transmitted correctly.
  */
 export function useUpdateEventForm() {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: ({ formId, body }: { formId: string; body: EventFormsPartialUpdateData['body'] }) =>
-      eventFormsPartialUpdate({ path: { id: formId }, body }),
+    mutationFn: async ({
+      formId,
+      body,
+      landingImage,
+    }: {
+      formId: string
+      body: EventFormsPartialUpdateData['body']
+      landingImage?: File | null
+    }) => {
+      // Use multipart when uploading or explicitly clearing the landing image
+      const needsMultipart =
+        landingImage instanceof File ||
+        (body && 'landing_image' in body && body.landing_image === null)
+
+      if (needsMultipart) {
+        const fd = new FormData()
+        if (body) {
+          for (const [key, value] of Object.entries(body)) {
+            if (key === 'landing_image') continue // handled below
+            if (value === null || value === undefined) {
+              // Send empty string so DRF clears nullable fields
+              fd.append(key, '')
+            } else {
+              fd.append(key, String(value))
+            }
+          }
+        }
+        if (landingImage instanceof File) {
+          fd.append('landing_image', landingImage)
+        } else {
+          // Explicitly clear the field
+          fd.append('landing_image', '')
+        }
+        return uploadMultipart(`/api/event/forms/${formId}/`, fd, { method: 'PATCH' })
+      }
+
+      return eventFormsPartialUpdate({ path: { id: formId }, body })
+    },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: FORMS_QUERY_KEY })
       queryClient.invalidateQueries({

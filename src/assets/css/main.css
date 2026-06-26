@@ -224,14 +224,6 @@
     color: rgba(255, 255, 255, 0.5) !important;
   }
   
-  .form-group-dark input:focus,
-  .form-group-dark textarea:focus,
-  .form-group-dark select:focus {
-    border-color: rgba(0, 33, 71, 0.6);
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(0, 33, 71, 0.4);
-    /* ring: 0 !important; */
-  }
   
   /* Force full width on form elements */
   .form-group-dark > div,

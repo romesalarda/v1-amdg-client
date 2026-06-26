@@ -7510,6 +7510,10 @@ export type EventForm = {
     readonly created_at: string;
     readonly updated_at: string;
     /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: string | null;
+    /**
      * Optional deadline for form submission. Ignored if the form is closed.
      */
     deadline?: string | null;
@@ -7595,6 +7599,10 @@ export type EventFormList = {
      * Optional message to display when the deadline has passed.
      */
     deadline_message?: string;
+    /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: string | null;
     readonly created_at: string;
     readonly updated_at: string;
 };
@@ -7732,6 +7740,10 @@ export type EventFormRequest = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: Blob | File | null;
     /**
      * Optional deadline for form submission. Ignored if the form is closed.
      */
@@ -15734,6 +15746,10 @@ export type PatchedEventFormRequest = {
      * Allow attendees to edit their responses until the form is closed.
      */
     allow_response_editing?: boolean;
+    /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: Blob | File | null;
     /**
      * Optional deadline for form submission. Ignored if the form is closed.
      */
@@ -24836,6 +24852,10 @@ export type EventFormWritable = {
      */
     allow_response_editing?: boolean;
     /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: string | null;
+    /**
      * Optional deadline for form submission. Ignored if the form is closed.
      */
     deadline?: string | null;
@@ -24894,6 +24914,10 @@ export type EventFormListWritable = {
      * Optional message to display when the deadline has passed.
      */
     deadline_message?: string;
+    /**
+     * Optional image to display on the form landing page.
+     */
+    landing_image?: string | null;
 };
 
 /**

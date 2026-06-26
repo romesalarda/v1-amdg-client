@@ -21,6 +21,67 @@
       />
     </div>
 
+    <!-- Landing Image Banner -->
+    <div
+      class="relative w-full rounded-2xl overflow-hidden shadow-sm group cursor-pointer"
+      style="height: 200px;"
+      :class="{ 'cursor-default': readOnly }"
+      @click="!readOnly && landingImageInputRef?.click()"
+    >
+      <!-- Image or placeholder -->
+      <img
+        v-if="landingImagePreview || formData?.data?.landing_image"
+        :src="landingImagePreview || formData?.data?.landing_image || ''"
+        alt="Form landing image"
+        class="w-full h-full object-cover"
+      />
+      <div
+        v-else
+        class="w-full h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"
+      />
+
+      <!-- Hover overlay (edit mode only) -->
+      <div
+        v-if="!readOnly"
+        class="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center"
+      >
+        <div class="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-2 text-white">
+          <UIcon
+            v-if="isUploadingLandingImage"
+            name="i-heroicons-arrow-path"
+            class="w-8 h-8 animate-spin"
+          />
+          <template v-else>
+            <UIcon name="i-heroicons-camera" class="w-8 h-8" />
+            <span class="text-sm font-semibold drop-shadow">
+              {{ formData?.data?.landing_image || landingImagePreview ? 'Change landing image' : 'Upload landing image' }}
+            </span>
+            <span class="text-xs opacity-75">JPG, PNG, WEBP — max 5 MB</span>
+          </template>
+        </div>
+      </div>
+
+      <!-- Remove button (shown when image exists) -->
+      <button
+        v-if="!readOnly && (landingImagePreview || formData?.data?.landing_image)"
+        type="button"
+        class="absolute top-3 right-3 p-1.5 bg-white/80 hover:bg-white rounded-full shadow text-gray-600 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100"
+        title="Remove landing image"
+        @click.stop="removeLandingImage"
+      >
+        <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
+      </button>
+
+      <!-- Hidden file input -->
+      <input
+        ref="landingImageInputRef"
+        type="file"
+        accept="image/*"
+        class="hidden"
+        @change="onLandingImageChange"
+      />
+    </div>
+
     <!-- Page Header / Form Header Card -->
     <UCard class="border-t-4 border-t-blue-500 mb-6">
       <div class="flex items-start justify-between gap-4 flex-wrap">
@@ -379,39 +440,6 @@
         </UCard>
 
         <!-- Keyboard Shortcuts Widget -->
-        <UCard>
-          <template #header>
-            <div class="flex items-center justify-between">
-              <h3 class="font-semibold text-gray-900">Keyboard Shortcuts</h3>
-              <UIcon
-                name="i-heroicons-command-line"
-                class="w-5 h-5 text-gray-400"
-              />
-            </div>
-          </template>
-          <div class="space-y-2 text-xs">
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Undo</span>
-              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+Z</kbd>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Redo</span>
-              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+Y</kbd>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Save All</span>
-              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+S</kbd>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Duplicate</span>
-              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Ctrl+D</kbd>
-            </div>
-            <div class="flex items-center justify-between">
-              <span class="text-gray-600">Delete</span>
-              <kbd class="px-2 py-1 bg-gray-100 rounded text-gray-700 font-mono">Del</kbd>
-            </div>
-          </div>
-        </UCard>
       </div>
     </div>
   </div>
@@ -424,7 +452,7 @@ import Swal from 'sweetalert2'
 import QuestionCard from './QuestionCard.vue'
 import FormResponsesTable from './FormResponsesTable.vue'
 import FormResponseDetailModal from './FormResponseDetailModal.vue'
-import { useEventForm } from '~/composables/resources/events/eventForms'
+import { useEventForm, useUpdateEventForm } from '~/composables/resources/events/eventForms'
 import { useEventFormBuilder } from '~/composables/websockets/events/useEventFormBuilder'
 import { useEventFormsWebSocket } from '~/composables/websockets/events/useEventFormsWebSocket'
 import { useFormResponsesTable } from '~/composables/resources/events/useFormResponsesTable'
@@ -467,6 +495,60 @@ function handleCloseResponseDetail() {
 
 // Fetch details for the form
 const { data: formData, isLoading: isFormLoading, refetch } = useEventForm(toRef(props, 'formId'))
+
+// ── Landing image ─────────────────────────────────────────────────────────────
+const landingImageInputRef = ref<HTMLInputElement | null>(null)
+const landingImagePreview = ref<string | null>(null)
+const isUploadingLandingImage = ref(false)
+const updateFormMutation = useUpdateEventForm()
+
+function onLandingImageChange(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  // Show local preview immediately
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    landingImagePreview.value = e.target?.result as string
+  }
+  reader.readAsDataURL(file)
+  // Upload right away
+  uploadLandingImage(file)
+  // Reset the input so the same file can be selected again
+  if (landingImageInputRef.value) landingImageInputRef.value.value = ''
+}
+
+async function uploadLandingImage(file: File) {
+  isUploadingLandingImage.value = true
+  try {
+    await updateFormMutation.mutateAsync({
+      formId: props.formId,
+      body: {},
+      landingImage: file,
+    })
+    toast.add({ title: 'Landing image saved', color: 'green', timeout: 2000 })
+  } catch {
+    toast.add({ title: 'Upload failed', description: 'Could not save landing image', color: 'red', timeout: 3000 })
+    landingImagePreview.value = null
+  } finally {
+    isUploadingLandingImage.value = false
+  }
+}
+
+async function removeLandingImage() {
+  landingImagePreview.value = null
+  isUploadingLandingImage.value = true
+  try {
+    await updateFormMutation.mutateAsync({
+      formId: props.formId,
+      body: { landing_image: null },
+    })
+    toast.add({ title: 'Landing image removed', color: 'green', timeout: 2000 })
+  } catch {
+    toast.add({ title: 'Remove failed', description: 'Could not remove landing image', color: 'red', timeout: 3000 })
+  } finally {
+    isUploadingLandingImage.value = false
+  }
+}
 
 // WebSocket
 const ws = useEventFormsWebSocket(toRef(props, 'eventUrlSafeTitle'))

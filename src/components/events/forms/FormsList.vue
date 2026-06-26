@@ -71,13 +71,35 @@
       <UCard
         v-for="form in forms"
         :key="form.id"
-        class="hover:shadow-lg transition-all border border-gray-100 relative group flex flex-col justify-between"
+        class="hover:shadow-lg transition-all border border-gray-100 relative group flex flex-col justify-between overflow-hidden"
         :class="{
           'border-t-4 border-t-blue-500': form.status === 'published',
           'border-t-4 border-t-gray-400': form.status === 'draft',
           'border-t-4 border-t-red-400': form.status === 'closed',
         }"
+        :ui="{ body: { padding: 'p-0' } }"
       >
+        <!-- Landing image banner -->
+        <div class="relative w-full overflow-hidden" style="height: 120px;">
+          <img
+            v-if="form.landing_image"
+            :src="form.landing_image"
+            alt="Form landing image"
+            class="w-full h-full object-cover"
+          />
+          <div
+            v-else
+            class="w-full h-full bg-gradient-to-r"
+            :class="{
+              'from-blue-400 to-indigo-500': form.status === 'published',
+              'from-gray-300 to-gray-400': form.status === 'draft',
+              'from-red-300 to-rose-400': form.status === 'closed',
+            }"
+          />
+        </div>
+
+        <!-- Card body -->
+        <div class="p-4 space-y-3 flex-1">
         <div class="space-y-3 flex-1">
           <div class="flex items-start justify-between gap-2">
             <div class="flex-1 min-w-0">
@@ -153,6 +175,7 @@
             @click="publishForm(form.id)"
           />
         </div>
+        </div>
       </UCard>
     </div>
 
@@ -174,6 +197,57 @@
         </template>
 
         <div class="space-y-4">
+          <!-- Landing Image Upload -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Landing Image</label>
+            <!-- Preview -->
+            <div v-if="formImagePreview || (editingFormId && editingFormLandingImage)" class="relative mb-2">
+              <img
+                :src="formImagePreview || editingFormLandingImage || ''"
+                alt="Landing image preview"
+                class="w-full h-32 object-cover rounded-lg border border-gray-200"
+              />
+              <UButton
+                icon="i-heroicons-x-mark"
+                variant="ghost"
+                size="xs"
+                color="gray"
+                class="absolute top-2 right-2 bg-white/80 hover:bg-white shadow"
+                title="Remove image"
+                @click="clearFormImage"
+              />
+            </div>
+            <!-- Drop zone -->
+            <div
+              class="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed transition-colors cursor-pointer"
+              :class="isFormImageDragging
+                ? 'border-blue-500 bg-blue-50'
+                : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/50'"
+              style="min-height: 80px;"
+              @dragover.prevent="isFormImageDragging = true"
+              @dragleave.prevent="isFormImageDragging = false"
+              @drop.prevent="onFormImageDrop"
+              @click="formImageInputRef?.click()"
+            >
+              <UIcon
+                :name="isFormImageDragging ? 'i-heroicons-arrow-down-tray' : 'i-heroicons-photo'"
+                class="w-6 h-6"
+                :class="isFormImageDragging ? 'text-blue-500' : 'text-gray-400'"
+              />
+              <p class="text-xs font-medium" :class="isFormImageDragging ? 'text-blue-600' : 'text-gray-500'">
+                {{ isFormImageDragging ? 'Drop to upload' : 'Drag & drop or click to upload' }}
+              </p>
+              <p class="text-[10px] text-gray-400">JPG, PNG, WEBP — max 5 MB</p>
+              <input
+                ref="formImageInputRef"
+                type="file"
+                accept="image/*"
+                class="hidden"
+                @change="onFormImageFileChange"
+              />
+            </div>
+          </div>
+
           <UFormGroup label="Form Title" required>
             <UInput
               v-model="formFields.title"
@@ -295,7 +369,42 @@ const emit = defineEmits<{
 const searchQuery = ref('')
 const showCreateModal = ref(false)
 const editingFormId = ref<string | null>(null)
+const editingFormLandingImage = ref<string | null>(null)
 const isSubmitting = ref(false)
+
+// ── Landing image upload state ─────────────────────────────────────────────────────
+const formImageInputRef = ref<HTMLInputElement | null>(null)
+const formImageFile = ref<File | null>(null)
+const formImagePreview = ref<string | null>(null)
+const isFormImageDragging = ref(false)
+
+function setFormImageFile(file: File) {
+  if (!file.type.startsWith('image/')) return
+  formImageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    formImagePreview.value = e.target?.result as string
+  }
+  reader.readAsDataURL(file)
+}
+
+function onFormImageFileChange(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (file) setFormImageFile(file)
+}
+
+function onFormImageDrop(event: DragEvent) {
+  isFormImageDragging.value = false
+  const file = event.dataTransfer?.files?.[0]
+  if (file) setFormImageFile(file)
+}
+
+function clearFormImage() {
+  formImageFile.value = null
+  formImagePreview.value = null
+  editingFormLandingImage.value = null
+  if (formImageInputRef.value) formImageInputRef.value.value = ''
+}
 
 const toast = useToast()
 const createFormMutation = useCreateEventForm()
@@ -362,6 +471,9 @@ const formatDate = (isoString: string) => {
 
 const openCreateModal = () => {
   editingFormId.value = null
+  editingFormLandingImage.value = null
+  formImageFile.value = null
+  formImagePreview.value = null
   formFields.title = ''
   formFields.description = ''
   formFields.required = false
@@ -375,6 +487,9 @@ const openCreateModal = () => {
 
 const openEditModal = (form: any) => {
   editingFormId.value = form.id
+  editingFormLandingImage.value = form.landing_image || null
+  formImageFile.value = null
+  formImagePreview.value = null
   formFields.title = form.title
   formFields.description = form.description || ''
   formFields.required = !!form.required
@@ -423,16 +538,27 @@ const submitForm = async () => {
       pre_opens_message: formFields.pre_opens_message.trim(),
     }
 
-    
+    // Determine if we need to clear the landing image
+    const clearImage = editingFormId.value ? editingFormLandingImage.value === null && !formImageFile.value : false
+    const imagePayload = clearImage ? { landing_image: null as null } : {}
 
     if (editingFormId.value) {
       await updateFormMutation.mutateAsync({
         formId: editingFormId.value,
-        body: payload,
+        body: { ...payload, ...imagePayload },
+        landingImage: formImageFile.value ?? undefined,
       })
       toast.add({ title: 'Form Updated', description: 'Form settings saved successfully', color: 'green' })
     } else {
-      await createFormMutation.mutateAsync(payload)
+      // For create, first create the form then upload the image if provided
+      const created = await createFormMutation.mutateAsync(payload)
+      if (formImageFile.value && created?.data?.id) {
+        await updateFormMutation.mutateAsync({
+          formId: created.data.id,
+          body: {},
+          landingImage: formImageFile.value,
+        })
+      }
       toast.add({ title: 'Form Created', description: 'Form created successfully', color: 'green' })
     }
     closeCreateModal()

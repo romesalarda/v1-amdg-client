@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
       <!-- ── Main column ─────────────────────────────────────────── -->
-      <div class="lg:col-span-8 space-y-6">
+      <div :class="view === 'list' ? 'lg:col-span-9 space-y-6' : 'lg:col-span-12 space-y-6'">
 
         <!-- Toolbar -->
         <div class="flex items-center gap-3">
@@ -161,7 +161,7 @@
       </div>
 
       <!-- ── Sidebar ─────────────────────────────────────────────── -->
-      <div class="lg:col-span-4 space-y-6">
+      <div :class="view === 'list' ? 'lg:col-span-3 space-y-6' : 'lg:col-span-0 space-y-6'" v-if="view === 'list'">
 
         <!-- Stats card -->
         <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">

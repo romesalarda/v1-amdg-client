@@ -83,7 +83,14 @@
         class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-sm"
       >
         <!-- Form header -->
+        <img
+            v-if="form.landing_image"
+            :src="form.landing_image"
+            alt="Form landing image"
+            class="w-full object-cover h-20"
+          />
         <div class="flex items-start justify-between gap-4 border-b border-deep-navy/10 px-5 py-4">
+          
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
               <h3 class="text-sm font-black text-deep-navy">{{ form.title }}</h3>
