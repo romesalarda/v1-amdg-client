@@ -93,17 +93,18 @@
           
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <h3 class="text-sm font-black text-deep-navy">{{ form.title }}</h3>
+              <h3 class="text-xl font-mono font-bold text-deep-navy text-[30px]">{{ form.title }}</h3>
               <span
                 v-if="form.required"
                 class="inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide text-red-700"
               >
                 Required
               </span>
-              <span :class="formStatusBadgeClass(form)">
-                {{ formStatusLabel(form) }}
-              </span>
+              
             </div>
+            <span :class="formStatusBadgeClass(form)">
+                {{ formStatusLabel(form) }}
+            </span>
             <p v-if="form.description" class="mt-1 text-xs text-deep-navy/60">
               {{ form.description }}
             </p>
@@ -1105,7 +1106,7 @@ function formStatusLabel(form: EventForm): string {
 }
 
 function formStatusBadgeClass(form: EventForm): string {
-  const base = 'inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide'
+  const base = 'inline-flex items-center rounded-full px-3 py-0.5 text-[10px] font-black uppercase tracking-wide'
   if (form.status === 'closed') return `${base} bg-deep-navy/10 text-deep-navy/60`
   if (isFormNotYetOpen(form)) return `${base} bg-sky-100 text-sky-700`
   if (isDeadlinePassed(form)) return `${base} bg-amber-100 text-amber-700`

@@ -313,7 +313,14 @@
                       <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Staff Role</span>
                       <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Leadership</span>
                     </div>
-                    <button @click.stop="router.push(`/events/${event.url_safe_title}/m/dashboard`)" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4">Manage Event</button>
+                    <!-- <button @click.stop="router.push(`/events/${event.url_safe_title}/m/dashboard`)" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4">Manage Event</button> -->
+                    <NuxtLink 
+                      :to="`/events/${event.url_safe_title}/m/dashboard`" 
+                      target="_blank"
+                      class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4"
+                    >
+                      Manage Event
+                    </NuxtLink>
                   </div>
                 </div>
               </div>

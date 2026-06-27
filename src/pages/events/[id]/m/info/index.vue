@@ -272,7 +272,7 @@
                 <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">{{ start_datetime ? new Date(start_datetime).toLocaleString() : '-' }}</p>
                 <span v-if="errors.start_datetime" class="text-xs text-red-500 font-medium">{{ errors.start_datetime }}</span>
               </div>
-
+              
               <div class="space-y-2">
                 <label class="block text-xs font-black text-primary uppercase tracking-wider">
                   End Date & Time <span class="text-red-500">*</span>
@@ -816,8 +816,8 @@ watch(event, (newEvent) => {
       display_code: newEvent.display_code,
       short_description: newEvent.short_description || '',
       long_description: newEvent.long_description || '',
-      start_datetime: newEvent.start_datetime ? new Date(newEvent.start_datetime).toISOString().slice(0, 16) : '',
-      end_datetime: newEvent.end_datetime ? new Date(newEvent.end_datetime).toISOString().slice(0, 16) : '',
+      start_datetime: newEvent.start_datetime?.slice(0, 16) || '',
+      end_datetime: newEvent.end_datetime?.slice(0, 16) || '',
       expected_attendance: newEvent.expected_attendance,
       maximum_attendance: newEvent.maximum_attendance,
       timezone: newEvent.timezone || 'UTC',
@@ -1115,8 +1115,8 @@ const saveChanges = async () => {
       eventId: id.value,
       body: {
         ...values,
-        start_datetime: values.start_datetime ? new Date(values.start_datetime).toISOString() : new Date().toISOString(),
-        end_datetime: values.end_datetime ? new Date(values.end_datetime).toISOString() : new Date().toISOString(),
+        start_datetime: values.start_datetime,
+        end_datetime: values.end_datetime
       },
     })
     
@@ -1145,8 +1145,8 @@ const onSubmit = handleSubmit(async (values) => {
       eventId: id.value,
       body: {
         ...values,
-        start_datetime: new Date(values.start_datetime).toISOString(),
-        end_datetime: new Date(values.end_datetime).toISOString(),
+        start_datetime: values.start_datetime ? new Date(values.start_datetime).toISOString() : new Date().toISOString(),
+        end_datetime: values.end_datetime ? new Date(values.end_datetime).toISOString() : new Date().toISOString(),
         external_link: values.external_link || null,
         external_event: values.external_event || false,
       },
