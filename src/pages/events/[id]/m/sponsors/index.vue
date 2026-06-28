@@ -815,7 +815,13 @@ import { useCurrentUserEventPermissions } from '~/composables/permissions'
 import { formatDate } from '~/utils/time'
 
 definePageMeta({
-	layout: false,
+  layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
 
 type SponsorStatus = 'pending' | 'verified' | 'rejected' | 'processed'

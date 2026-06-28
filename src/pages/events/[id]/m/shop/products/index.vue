@@ -44,9 +44,17 @@ const router = useRouter()
 const isSearching = ref(false)
 const hasSearchedForProduct = ref(false)
 
+
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'PRODUCT_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
+
 
 // Fetch event data
 const { data: event } = useEvent(computed(() => String(route.params.id)))

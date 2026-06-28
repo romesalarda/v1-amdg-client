@@ -436,7 +436,7 @@ definePageMeta({
     category: 'PRODUCT_MANAGEMENT',
     action: 'read',
     deniedRedirect: '/403',
-  }
+  },
 })
 
 const route = useRoute()

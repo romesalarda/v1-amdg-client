@@ -59,9 +59,14 @@ const { data: event, isLoading: isLoadingEvent } = useEvent(eventId)
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
- 
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
+
 
 
 </script>

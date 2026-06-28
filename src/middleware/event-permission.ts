@@ -68,9 +68,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Get event permission configuration from route meta
   const permissionMeta = to.meta.eventPermission as EventPermissionMeta | undefined
   
-  console.log(permissionMeta);
-  
-
   if (!permissionMeta) {
     // No permission check configured for this route
     return
@@ -106,8 +103,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
 
     const permissions = eventData?.user_permissions as UserEventPermissions | undefined
-
-    console.log(eventData);
     
 
     if (!permissions) {
@@ -199,7 +194,7 @@ function getPermissionDeniedMessage(meta: EventPermissionMeta): string {
   if (meta.category) {
     const action = meta.action || 'access'
     const category = formatCategory(meta.category)
-    return `You don't have permission to ${action} ${category}.`
+    return `You don't have permission to access this page. Required permission: ${action.toUpperCase()} ${category.toUpperCase()}.`
   }
 
   if (meta.anyOf && meta.anyOf.length > 0) {

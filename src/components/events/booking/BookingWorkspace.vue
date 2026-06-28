@@ -2975,7 +2975,17 @@ let countdownInterval: ReturnType<typeof setInterval> | null = null
 onMounted(() => {
   updateCountdown()
   countdownInterval = setInterval(updateCountdown, 1000)
+
+  // if there is only one attendee, select it by default
+  forceSingleView()
+
 })
+
+const forceSingleView = () => {
+  if (attendees.value.length === 1) {
+    selectedAttendeeId.value = attendees.value[0].id || ''
+  }
+}
 
 onUnmounted(() => {
   if (countdownInterval) {

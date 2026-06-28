@@ -7,6 +7,12 @@ const route = useRoute()
 
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
 
 // Redirect if at exact /m/ path

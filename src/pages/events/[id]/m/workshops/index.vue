@@ -243,7 +243,12 @@ import type { WorkshopList } from '~/api/types.gen'
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
 
 const route = useRoute()

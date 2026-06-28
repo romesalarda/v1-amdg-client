@@ -187,7 +187,6 @@ import Navbar from '~/components/common/Navbar.vue'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import type { EventDetail } from '~/api/types.gen'
 
-
 const props = defineProps<{
   eventId: string
   event?: EventDetail,
@@ -330,6 +329,7 @@ const getStatusColor = (status: string): 'gray' | 'blue' | 'green' | 'red' | 'ye
   }
   return colors[status] || 'gray'
 }
+
 </script>
 
 <style scoped>

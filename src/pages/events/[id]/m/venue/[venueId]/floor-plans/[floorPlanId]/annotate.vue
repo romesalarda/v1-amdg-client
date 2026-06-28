@@ -511,9 +511,13 @@ import { useEvent } from '~/composables/resources/events/events'
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
-
 // ── Route params ──────────────────────────────────────────────────────────
 const route = useRoute()
 const toast = useToast()

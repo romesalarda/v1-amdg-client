@@ -14,7 +14,7 @@
 
             <!-- Additional help text -->
             <div class="text-sm text-gray-500 mb-8">
-                <p>If you believe this is a mistake, please contact an event administrator.</p>
+                <p>Looks like you tried to access a restricted page, please contact an event administrator if you believe this is a mistake.</p>
             </div>
 
             <!-- Action buttons -->

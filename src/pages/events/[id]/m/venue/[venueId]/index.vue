@@ -216,8 +216,15 @@ import { computed } from 'vue'
 import type { VenueDetail } from '~/api/types.gen'
 import { useLocationVenue } from '~/composables/resources/locations/locationVenues'
 
-definePageMeta({ layout: 'default', middleware: ['auth'] })
-
+definePageMeta({
+  layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
+})
 const route = useRoute()
 const venueId = computed(() => Number(route.params.venueId))
 

@@ -303,9 +303,17 @@ import AttendeeOrdersTab from '~/components/attendee/editor/AttendeeOrdersTab.vu
 import AttendeeFormsTab from '~/components/attendee/editor/AttendeeFormsTab.vue'
 import AttendeeEditorSidebar from '~/components/attendee/editor/AttendeeEditorSidebar.vue'
 
+
 definePageMeta({
   layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'BOOKING_MANAGEMENT',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
 })
+
 
 // Route & Router
 const route = useRoute()

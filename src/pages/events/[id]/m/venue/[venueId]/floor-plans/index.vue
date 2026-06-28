@@ -216,8 +216,15 @@ import {
 } from '~/composables/resources/venues/eventVenueFloorPlans'
 import type { FloorPlanListItem } from '~/composables/resources/venues/eventVenueFloorPlans'
 
-definePageMeta({ layout: 'default', middleware: ['auth'] })
-
+definePageMeta({
+  layout: false,
+  middleware: ['auth', 'event-permission'],
+  eventPermission: {
+    category: 'GENERAL',
+    action: 'read',
+    deniedRedirect: '/403',
+  },
+})
 const route = useRoute()
 const toast = useToast()
 
