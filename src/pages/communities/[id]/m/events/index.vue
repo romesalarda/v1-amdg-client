@@ -1,6 +1,6 @@
 <template>
   <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
-    <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <!-- <div class="mb-8 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
       <div>
         <h1 class="text-4xl font-black text-deep-navy tracking-tight">Community Events</h1>
         <p class="mt-2 text-sm font-medium text-deep-navy/60">
@@ -10,37 +10,64 @@
       <div class="inline-flex items-center rounded-md bg-deep-navy px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white">
         {{ totalCount }} total
       </div>
-    </div>
+    </div> -->
 
-    <div class="mb-8 rounded-lg bg-white p-3 shadow-[0_18px_36px_rgba(15,23,42,0.08)] ring-1 ring-slate-200">
-      <div class="flex flex-col gap-3 md:flex-row md:items-center">
+    <div class="mb-8 bg-blue-600 px-4 py-6 sm:px-6 lg:px-8 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
+      <div class="mx-auto flex max-w-4xl items-center rounded-full border border-slate-200 bg-white px-2 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.08)] transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+        <!-- Search -->
         <div class="relative flex-1">
-          <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          <svg
+            class="pointer-events-none absolute left-5 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
           </svg>
+
           <input
             v-model="searchQuery"
-            class="h-11 w-full rounded-md bg-slate-100 pl-12 pr-10 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-slate-300"
-            placeholder="Search events by title, type, or description"
             type="text"
+            placeholder="Search events, types, descriptions..."
+            class="h-12 w-full rounded-full bg-transparent pl-12 pr-10 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none"
           />
+
           <button
             v-if="searchQuery"
             @click="searchQuery = ''"
-            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition hover:bg-slate-200 hover:text-slate-700"
+            class="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
           >
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
         </div>
 
-        <div class="relative md:w-64">
+        <!-- Divider -->
+        <div class="mx-2 hidden h-8 w-px bg-slate-200 md:block"></div>
+
+        <!-- Status Filter -->
+        <div class="relative w-auto md:w-56">
           <select
             v-model="statusFilter"
-            class="h-11 w-full appearance-none rounded-md bg-slate-100 px-4 pr-10 text-xs font-semibold uppercase tracking-[0.18em] text-slate-700 focus:border-transparent focus:ring-2 focus:ring-slate-300"
+            class="h-12 w-full appearance-none rounded-full bg-transparent px-5 pr-10 text-sm font-medium text-slate-700 focus:outline-none"
           >
-            <option :value="undefined">All statuses</option>
+            <option :value="undefined">All Statuses</option>
             <option value="DRAFTING">Drafting</option>
             <option value="PUBLISHED">Published</option>
             <option value="OPEN">Open</option>
@@ -51,10 +78,40 @@
             <option value="POSTPONED">Postponed</option>
             <option value="ARCHIVED">Archived</option>
           </select>
-          <svg class="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+
+          <svg
+            class="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
           </svg>
         </div>
+
+        <!-- Search Button -->
+        <button
+          class="ml-2 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-white transition hover:bg-blue-700"
+        >
+          <svg
+            class="h-5 w-5"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        </button>
       </div>
     </div>
 
@@ -100,7 +157,7 @@
           <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-primary" />
           <h2 class="text-sm font-black uppercase tracking-widest text-primary">Events</h2>
         </div>
-        <p class="mt-1 text-xs text-gray-500">Live list of events with status, timing, and registration progress.</p>
+        <p class="mt-3 text-xs text-gray-500">Live list of events with status, timing, and registration progress.</p>
       </div>
 
       <div class="overflow-x-auto">

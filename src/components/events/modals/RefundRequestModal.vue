@@ -1091,7 +1091,7 @@ function toVariantLookupKey(productId: string, variantId: string): string {
   return `${productId}::${variantId}`
 }
 
-function getProductIdFromUnknown(item: any): string | undefined {
+function getProductIdFromUnknown(item: any): string {
   const candidates = [
     item?.product_id,
     item?.product_public_id,
@@ -1107,7 +1107,7 @@ function getProductIdFromUnknown(item: any): string | undefined {
     if (normalized) return normalized
   }
 
-  return undefined
+  throw new Error('Unable to determine product ID from item: ' + JSON.stringify(item))
 }
 
 function getLiveOrderItemProductDetails(item: any): Record<string, any> | null {

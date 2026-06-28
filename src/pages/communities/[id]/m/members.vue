@@ -1,12 +1,21 @@
 <template>
   <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
     <div class="space-y-8">
-      <div>
-        <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Members & Invites</h1>
-        <p class="text-sm text-deep-navy/60 mt-2 font-medium">Manage organisation members, invitations, and access codes.</p>
-      </div>
 
-      <UTabs :items="tabItems" class="w-full">
+      <UTabs
+          :items="tabItems"
+          class="w-full"
+          :ui="{
+            list: {
+              base: 'sticky top-[40px] z-40 flex items-center gap-8 bg-[#026CDF] px-8 py-0',
+              background: '',
+              tab: {
+                active: 'border-white text-black hover:text-white',
+                inactive: 'text-white hover:text-white',
+              },
+            },
+          }"
+        >
         <template #item="{ item }">
           <div v-if="item.key === 'members'" class="mt-6">
             <section class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
@@ -572,9 +581,9 @@ const searchQuery = ref('')
 const membersSearchInput = ref('')
 const membersSearchQuery = ref('')
 const tabItems = [
-  { key: 'members', label: 'Members' },
-  { key: 'invites', label: 'Invitations' },
-  { key: 'access-codes', label: 'Access Codes' },
+  { key: 'members', label: 'Members', icons: 'i-heroicons-users' },
+  { key: 'invites', label: 'Invitations', icons: 'i-heroicons-mail' },
+  { key: 'access-codes', label: 'Access Codes', icons: 'i-heroicons-key' },
 ]
 useHead({
   title: 'Members & Invites',

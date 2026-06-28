@@ -54,7 +54,7 @@
 
         <!-- Organisation Details -->
         <div class="flex-1 min-w-0">
-          <h2 class="text-sm font-bold text-white truncate">
+          <h2 class="text-sm font-bold text-white">
             {{ organisation?.title || 'Community' }}
           </h2>
           <p class="text-xs text-white/60 mt-1">Management Dashboard</p>

@@ -8,7 +8,21 @@
                 </button>
             </div>
 
-            <UTabs :items="tabItems" class="w-full">
+            <UTabs
+                :items="tabItems"
+                class="w-full"
+                :ui="{
+                    list: {
+                    base: 'sticky top-[40px] z-40 flex items-center gap-8 bg-[#026CDF] px-8 py-0',
+                    background: '',
+                    tab: {
+                        active: 'border-white text-black hover:text-white',
+                        inactive: 'text-white hover:text-white',
+                        padding: 'px-0 py-4',
+                    },
+                    },
+                }"
+            >
                 <template #item="{ item }">
                     <div v-if="item.key === 'pending-invites'" class="mt-8">
                         <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
