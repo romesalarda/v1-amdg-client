@@ -37,11 +37,11 @@
         <!-- Header with status badge -->
         <div class="flex items-start justify-between gap-3 border-b border-deep-navy/10 bg-white px-5 py-4">
           <div class="min-w-0 flex-1">
-            <h3 class="text-sm font-semibold text-deep-navy">
+            <h3 class="text-xl font-semibold text-deep-navy">
               {{ ticket.attendee_name }}
             </h3>
             <p class="mt-1 truncate font-mono text-[11px] text-deep-navy/60">
-              {{ ticket.ticket_code }}
+              {{ ticket.ticket_id }}
             </p>
           </div>
           <span
@@ -58,13 +58,13 @@
         <div class="flex flex-col gap-4 p-5 sm:flex-row sm:gap-5 sm:p-5 print:flex-col print:gap-4">
           <!-- QR Code -->
           <div class="flex-shrink-0">
-            <div class="flex h-32 w-32 items-center justify-center rounded-lg border border-deep-navy/20 bg-white print:border-deep-navy/10">
+            <div class="flex h-64 w-64 items-center justify-center rounded-lg border border-deep-navy/20 bg-white print:border-deep-navy/10">
               <Qrcode
                 v-if="ticket.qr_value"
                 :value="ticket.qr_value"
-                :width="128"
-                :height="128"
-                class="h-32 w-32"
+                :width="256"
+                :height="256"
+                class="h-64 w-64 print:h-32 print:w-32"
               />
               <div v-else class="flex items-center justify-center text-center text-xs text-deep-navy/40">
                 <span>Invalid QR</span>
@@ -105,20 +105,6 @@
               <p class="mt-1 text-sm font-semibold text-deep-navy">
                 {{ formatDateTime(ticket.issued_at) }}
               </p>
-            </div>
-
-            <div v-if="ticket.url" class="pt-2">
-              <NuxtLink
-                :to="ticket.url"
-                external
-                target="_blank"
-                class="inline-flex items-center gap-1 rounded-lg border border-blue-300 bg-blue-50 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-blue-700 hover:bg-blue-100"
-              >
-                View ticket details
-                <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </NuxtLink>
             </div>
           </div>
         </div>

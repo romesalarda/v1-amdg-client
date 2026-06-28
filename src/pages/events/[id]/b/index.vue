@@ -385,12 +385,25 @@ definePageMeta({
 	layout: 'booking' as any,
 })
 
+
 const route = useRoute()
 const router = useRouter()
 
 const eventId = computed(() => String(route.params.id || ''))
 const { data: eventData } = useEvent(eventId)
 const event = computed(() => eventData.value?.data)
+
+
+useHead({
+	title: 'Booking for ' + (event.value?.title || 'Event'),
+	meta: [
+		{
+			name: 'description',
+			content: 'Manage your bookings, track outstanding payments, and complete transfers from a single dashboard.',
+		},
+	],
+})
+
 
 const { data: venuesData } = useEventVenues(computed(() => ({
 	event: eventId.value,

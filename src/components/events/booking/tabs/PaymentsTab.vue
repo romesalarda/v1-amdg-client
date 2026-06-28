@@ -162,7 +162,7 @@
                 <p class="mt-1 truncate text-headline-sm font-headline text-deep-navy">{{ payment.payment_reference || 'Payment' }}</p>
                 <p class="mt-1 text-body-sm font-body-sm text-deep-navy/65">{{ props.paymentContextSummary(payment) }}</p>
               </div>
-              <span class="shrink-0 rounded px-2 py-0.5 text-label-bold font-label-bold uppercase" :class="paymentStatusClass(payment)">
+              <span class="shrink-0 rounded p-2 text-label-bold font-label-bold uppercase" :class="paymentStatusClass(payment)">
                 {{ paymentStatusLabel(payment) }}
               </span>
             </div>
@@ -263,7 +263,7 @@
 
 <script setup lang="ts">
 function normalizedPaymentStatus(payment: any): string {
-  const fallback = payment?.is_outstanding ? 'PENDING' : 'COMPLETED'
+  const fallback = payment?.is_outstanding ? 'PENDING' : 'COMPLETED ✓'
   return String(payment?.status || fallback).trim().toUpperCase()
 }
 

@@ -138,7 +138,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy font-mono text-[20px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy text-[17px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
               </div>
             </div>
 
@@ -149,7 +149,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
-                <p class="font-black text-deep-navy font-mono text-[20px]">
+                <p class="font-black text-deep-navy text-[17px]">
                   {{ formatTime(event.start_datetime, event.timezone) }}
                   <span class="text-md text-deep-navy/70">({{ event.timezone }})</span>
                 </p>
@@ -163,7 +163,7 @@
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
-                <p class="font-black text-deep-navy font-mono text-[20px]">
+                <p class="font-black text-deep-navy text-[17px]">
                   {{ primaryVenue?.name || event.organisation_name || 'TBA' }}
                 </p>
               </div>
@@ -174,7 +174,7 @@
               <UIcon name="i-heroicons-currency-pound" class="w-8 h-8 text-blue-500" />
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Registration Fee</p>
-                <p class="font-black text-deep-navy truncate font-mono text-[20px]">
+                <p class="font-black text-deep-navy truncate text-[17px]">
                   {{ event.general_price }}
                 </p>
               </div>
@@ -359,10 +359,9 @@
                   Preview
                 </NuxtLink>
 
-
                 <NuxtLink
                   v-if="bookingData?.bookings && bookingData.bookings.length > 0 && !isPreview"
-                  :href="`/events/${event.url_safe_title}/b`"
+                  :href="!onlyOneBooking ? `/events/${event.url_safe_title}/b` : `/events/${event.url_safe_title}/b/${singleBookingId}`"
                   class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   View my bookings
@@ -643,6 +642,8 @@ onBeforeUnmount(() => {
 const { data: bookingData } = useEventMyBooking(eventId)
 const userBookings = computed(() => bookingData.value?.bookings)
 
+const onlyOneBooking = computed(() => userBookings.value && userBookings.value.length === 1)
+const singleBookingId = computed(() => onlyOneBooking.value && userBookings.value ? userBookings.value[0].booking.booking_reference : null)
 // Registration modal state
 const showRegistrationModal = ref(false)
 const registrarAttending = ref(true)

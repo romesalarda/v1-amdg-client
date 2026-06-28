@@ -23,7 +23,7 @@
           <div class="p-4">
             <div v-if="!props.isPersonalInfoEditing" class="space-y-3">
               <div class="rounded-lg border border-deep-navy/10 bg-mist-blue/30 p-3">
-                <p class="text-sm font-black text-deep-navy">{{ props.attendeeForm.first_name }} {{ props.attendeeForm.last_name }}</p>
+                <p class="text-xl font-black text-deep-navy">{{ props.attendeeForm.first_name }} {{ props.attendeeForm.last_name }}</p>
                 <p class="mt-1 text-xs text-deep-navy/60">{{ props.attendeeForm.relationship_to_user && props.attendeeForm.relationship_to_user !== 'self' ? props.attendeeForm.relationship_to_user.charAt(0).toUpperCase() + props.attendeeForm.relationship_to_user.slice(1) : 'Self' }}</p>
               </div>
               <div class="grid gap-3 md:grid-cols-2">

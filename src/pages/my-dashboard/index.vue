@@ -457,7 +457,7 @@
           <h3 class="text-lg font-black text-deep-navy mb-2">No Communities Yet</h3>
           <p class="text-deep-navy/60 font-medium text-sm mb-4">Join a community to get started</p>
           <button 
-            @click="router.push('/organisations')"
+            @click="router.push('/communities')"
             class="bg-deep-navy text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-blue-600 transition-all shadow-lg shadow-deep-navy/20"
           >
             Explore Communities

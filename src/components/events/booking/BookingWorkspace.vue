@@ -14,7 +14,7 @@
         <div class="mx-auto flex w-full max-w-6xl flex-col gap-6 px-5 py-6 sm:px-6 sm:py-8 md:flex-row md:items-end md:justify-between md:gap-8 md:px-8 md:py-0">
           <div class="space-y-3 md:max-w-xl md:justify-self-start md:space-y-4">
             <div class="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 backdrop-blur-sm">
-              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Live Event Portal</span>
+              <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200">Booking Management</span>
             </div>
             <h1 class="font-headline text-3xl font-extrabold tracking-tighter text-white sm:text-4xl md:text-6xl">{{ eventTitle }}</h1>
             <p class="max-w-lg text-base leading-relaxed text-white/80 sm:text-lg md:text-xl md:text-white/75">Welcome back, <span class="font-medium text-white">{{ booking?.made_by_name || 'Unknown' }}</span>.</p>
@@ -2985,6 +2985,16 @@ onUnmounted(() => {
     clearTimeout(areaSearchDebounceTimer)
     areaSearchDebounceTimer = null
   }
+})
+
+useHead({
+	title: 'Manage Booking',
+	meta: [
+		{
+			name: 'description',
+			content: 'Manage your booking, view attendee details, and update your information for the event.',
+		},
+	],
 })
 
 </script>

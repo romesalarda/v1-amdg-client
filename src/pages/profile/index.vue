@@ -68,7 +68,7 @@
                       <input
                         type="file"
                         accept="image/jpeg,image/png,image/gif"
-                        class="block w-full text-sm text-navy-700 font-medium file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-mist-blue file:text-primary hover:file:bg-primary hover:file:text-white file:transition-all cursor-pointer"
+                        class="block w-full text-sm text-navy-700 font-medium file:mr-4 file:py-2.5 file:px-5 file:rounded-lg file:border-0 file:text-xs file:font-bold file:uppercase file:tracking-wider file:bg-mist-blue file:text-primary hover:file:bg-green-500 hover:file:text-white file:transition-all cursor-pointer"
                         @change="handleFileChange"
                       />
                     </label>
@@ -354,13 +354,13 @@
         >
           <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-white">warning</span>
-              <p class="text-xs md:text-sm font-black uppercase tracking-wider">You have unsaved changes</p>
+              <span class="material-symbols-outlined text-red-500">warning</span>
+              <p class="text-xs md:text-sm font-black uppercase tracking-wider text-red-500">You have unsaved changes</p>
             </div>
             <div class="flex items-center gap-2 md:gap-3">
               <button
                 type="button"
-                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg border border-white/40 text-white hover:bg-white hover:text-primary transition-all disabled:opacity-50"
+                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg border border-white/40 text-white hover:bg-red-500 hover:text-primary transition-all disabled:opacity-50"
                 :disabled="isSaving"
                 @click="resetForm"
               >
@@ -368,7 +368,7 @@
               </button>
               <button
                 type="button"
-                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg bg-white text-primary hover:bg-navy-50 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                class="px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg bg-green-500 text-white hover:bg-green-600 transition-all disabled:opacity-50 flex items-center gap-1.5"
                 :disabled="isSaving"
                 @click="handleSubmit"
               >

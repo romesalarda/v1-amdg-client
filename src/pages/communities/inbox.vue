@@ -1,75 +1,83 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <section class="max-w-6xl mx-auto px-6 lg:px-10 py-10">
-      <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
-        <div class="px-8 py-8 bg-gradient-to-r from-deep-navy to-deep-navy/80 text-white">
-          <p class="text-[10px] font-black uppercase tracking-[0.25em] text-blue-200">Invitation Center</p>
-          <h1 class="mt-3 text-3xl md:text-4xl font-black uppercase tracking-tight">Your Invitations</h1>
-          <p class="mt-3 text-sm text-blue-100/90 max-w-2xl">
-            Review and accept invitations for communities, location leadership, and event staffing.
-          </p>
-          <div class="mt-5 flex flex-wrap gap-3">
-            <NuxtLink to="/communities" class="px-5 py-2 bg-white text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider border-2 border-white hover:bg-blue-50 transition-colors">
+  <div class="min-h-screen bg-gray-50 text-on-surface">
+
+    <!-- Blue Header Strip -->
+    <section class="w-full bg-blue-600 pb-8 pt-6">
+      <div class="max-w-[1100px] mx-auto px-6">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div>
+            <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-200 mb-1">Invitation Center</p>
+            <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight">Your Invitations</h1>
+            <p class="mt-2 text-sm text-blue-100/80 max-w-xl">
+              Review and accept invitations for communities, location leadership, and event staffing.
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-3 shrink-0">
+            <NuxtLink to="/communities" class="px-5 py-2.5 bg-white text-deep-navy rounded-lg font-bold text-sm hover:shadow-lg transition-all active:scale-95">
               Browse Communities
             </NuxtLink>
-            <NuxtLink to="/events" class="px-5 py-2 bg-transparent text-white rounded-lg font-black text-xs uppercase tracking-wider border-2 border-white/60 hover:border-white transition-colors">
+            <NuxtLink to="/events" class="px-5 py-2.5 bg-white/10 text-white rounded-lg font-bold text-sm border border-white/30 hover:border-white/60 transition-colors">
               Browse Events
             </NuxtLink>
           </div>
         </div>
 
-        <div class="px-8 py-6 border-t-2 border-deep-navy/10 bg-deep-navy/5">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Community Invites</p>
-              <p class="text-2xl font-black text-deep-navy mt-2">{{ orgInvites.length }}</p>
-            </div>
-            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Leader Invites</p>
-              <p class="text-2xl font-black text-deep-navy mt-2">{{ leaderInvites.length }}</p>
-            </div>
-            <div class="bg-white border-2 border-deep-navy/10 rounded-xl p-4">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-deep-navy/50">Event Staff Invites</p>
-              <p class="text-2xl font-black text-deep-navy mt-2">{{ staffInvites.length }}</p>
-            </div>
+        <!-- Stats Row -->
+        <div class="grid grid-cols-3 gap-4 mt-6">
+          <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Community Invites</p>
+            <p class="text-2xl font-bold text-white mt-1">{{ orgInvites.length }}</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Leader Invites</p>
+            <p class="text-2xl font-bold text-white mt-1">{{ leaderInvites.length }}</p>
+          </div>
+          <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
+            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Staff Invites</p>
+            <p class="text-2xl font-bold text-white mt-1">{{ staffInvites.length }}</p>
           </div>
         </div>
       </div>
     </section>
 
-    <section v-if="isLoading" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12 space-y-4">
-      <div v-for="i in 3" :key="i" class="bg-white border-2 border-deep-navy/10 rounded-xl p-5">
+    <!-- Loading State -->
+    <section v-if="isLoading" class="max-w-[1100px] mx-auto px-6 py-10 space-y-4">
+      <div v-for="i in 3" :key="i" class="bg-white rounded-lg shadow-sm p-6">
         <USkeleton class="h-5 w-40" />
         <USkeleton class="h-4 w-72 mt-3" />
         <USkeleton class="h-10 w-28 mt-5" />
       </div>
     </section>
 
-    <section v-else-if="hasInvites" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12 space-y-8">
-      <div v-if="orgInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
-        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
-          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Community Invitations</h2>
+    <!-- Invite Lists -->
+    <main v-else-if="hasInvites" class="max-w-[1100px] mx-auto px-6 py-10 pb-24 space-y-8">
+
+      <!-- Community Invitations -->
+      <div v-if="orgInvites.length > 0">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-deep-navy">Community Invitations</h2>
+          <span class="text-sm text-gray-500 font-mono">{{ orgInvites.length }} invite{{ orgInvites.length !== 1 ? 's' : '' }}</span>
         </div>
-        <div class="divide-y-2 divide-deep-navy/5">
-          <div v-for="invite in orgInvites" :key="`org-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.organisation_name }}</p>
-              <p class="text-xs text-deep-navy/60 font-medium mt-1">Invited by {{ invite.invited_by_name || 'Unknown user' }}</p>
-              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div v-for="(invite, idx) in orgInvites" :key="`org-${invite.id}`" :class="idx > 0 ? 'border-t border-gray-100' : ''" class="px-6 py-5 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-deep-navy leading-snug">{{ invite.organisation_name }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Invited by {{ invite.invited_by_name || 'Unknown user' }}</p>
+              <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">{{ formatDate(invite.added_at) }}</p>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" :class="statusBadgeClass(invite)">
                 {{ statusLabel(invite) }}
               </span>
               <button
                 v-if="isInviteAcceptable(invite)"
                 :disabled="acceptingOrgInviteId === invite.id"
                 @click="handleAcceptOrgInvite(invite.id)"
-                class="px-4 py-2 bg-deep-navy text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-deep-navy/90 transition-colors disabled:opacity-50"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition-colors active:scale-95 disabled:opacity-50"
               >
                 {{ acceptingOrgInviteId === invite.id ? 'Accepting...' : 'Accept' }}
               </button>
-              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border-2 border-deep-navy/20 text-deep-navy rounded-lg font-black text-xs uppercase tracking-wider hover:border-deep-navy/50 transition-colors">
+              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border border-gray-300 text-deep-navy rounded-lg font-bold text-xs hover:border-gray-400 transition-colors">
                 View
               </NuxtLink>
             </div>
@@ -77,30 +85,32 @@
         </div>
       </div>
 
-      <div v-if="leaderInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
-        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
-          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Leader Invitations</h2>
+      <!-- Leader Invitations -->
+      <div v-if="leaderInvites.length > 0">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-deep-navy">Leader Invitations</h2>
+          <span class="text-sm text-gray-500 font-mono">{{ leaderInvites.length }} invite{{ leaderInvites.length !== 1 ? 's' : '' }}</span>
         </div>
-        <div class="divide-y-2 divide-deep-navy/5">
-          <div v-for="invite in leaderInvites" :key="`leader-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.organisation_name }}</p>
-              <p class="text-xs text-deep-navy/60 font-medium mt-1">{{ invite.location_name }} · {{ invite.location_type }} #{{ invite.location_id }}</p>
-              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div v-for="(invite, idx) in leaderInvites" :key="`leader-${invite.id}`" :class="idx > 0 ? 'border-t border-gray-100' : ''" class="px-6 py-5 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-deep-navy leading-snug">{{ invite.organisation_name }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">{{ invite.location_name }} · {{ invite.location_type }} #{{ invite.location_id }}</p>
+              <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">{{ formatDate(invite.added_at) }}</p>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" :class="statusBadgeClass(invite)">
                 {{ statusLabel(invite) }}
               </span>
               <button
                 v-if="isInviteAcceptable(invite)"
                 :disabled="acceptingLeaderInviteId === invite.id"
                 @click="handleAcceptLeaderInvite(invite.id, invite)"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-blue-700 transition-colors disabled:opacity-50"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs transition-colors active:scale-95 disabled:opacity-50"
               >
                 {{ acceptingLeaderInviteId === invite.id ? 'Accepting...' : 'Accept' }}
               </button>
-              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border-2 border-blue-200 text-blue-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-blue-400 transition-colors">
+              <NuxtLink :to="resolveInviteCommunityPath(invite)" class="px-4 py-2 border border-gray-300 text-deep-navy rounded-lg font-bold text-xs hover:border-gray-400 transition-colors">
                 View
               </NuxtLink>
             </div>
@@ -108,50 +118,62 @@
         </div>
       </div>
 
-      <div v-if="staffInvites.length > 0" class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn overflow-hidden">
-        <div class="px-8 py-5 border-b-2 border-deep-navy/10">
-          <h2 class="text-lg font-black text-deep-navy uppercase tracking-tight">Event Staff Invitations</h2>
+      <!-- Event Staff Invitations -->
+      <div v-if="staffInvites.length > 0">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-deep-navy">Event Staff Invitations</h2>
+          <span class="text-sm text-gray-500 font-mono">{{ staffInvites.length }} invite{{ staffInvites.length !== 1 ? 's' : '' }}</span>
         </div>
-        <div class="divide-y-2 divide-deep-navy/5">
-          <div v-for="invite in staffInvites" :key="`staff-${invite.id}`" class="px-8 py-5 flex items-start justify-between gap-4">
-            <div>
-              <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ invite.event_title }}</p>
-              <p class="text-xs text-deep-navy/60 font-medium mt-1">Invited by {{ invite.invited_by_email || 'Unknown user' }}</p>
-              <p class="text-[10px] text-deep-navy/50 font-bold uppercase tracking-wider mt-2">Received {{ formatDate(invite.added_at) }}</p>
+        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div v-for="(invite, idx) in staffInvites" :key="`staff-${invite.id}`" :class="idx > 0 ? 'border-t border-gray-100' : ''" class="px-6 py-5 flex items-center justify-between gap-4">
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-deep-navy leading-snug">{{ invite.event_title }}</p>
+              <p class="text-xs text-gray-500 mt-0.5">Invited by {{ invite.invited_by_email || 'Unknown user' }}</p>
+              <p class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mt-1">{{ formatDate(invite.added_at) }}</p>
             </div>
-            <div class="flex items-center gap-2">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider" :class="statusBadgeClass(invite)">
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider" :class="statusBadgeClass(invite)">
                 {{ statusLabel(invite) }}
               </span>
               <button
                 v-if="isInviteAcceptable(invite)"
                 :disabled="acceptingStaffInviteId === invite.id"
                 @click="handleAcceptStaffInvite(invite)"
-                class="px-4 py-2 bg-violet-600 text-white rounded-lg font-black text-xs uppercase tracking-wider hover:bg-violet-700 transition-colors disabled:opacity-50"
+                class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-xs transition-colors active:scale-95 disabled:opacity-50"
               >
                 {{ acceptingStaffInviteId === invite.id ? 'Accepting...' : 'Accept' }}
               </button>
-              <NuxtLink :to="`/events/${invite.event}`" class="px-4 py-2 border-2 border-violet-200 text-violet-700 rounded-lg font-black text-xs uppercase tracking-wider hover:border-violet-400 transition-colors">
+              <NuxtLink :to="`/events/${invite.event}`" class="px-4 py-2 border border-gray-300 text-deep-navy rounded-lg font-bold text-xs hover:border-gray-400 transition-colors">
                 View
               </NuxtLink>
             </div>
           </div>
         </div>
       </div>
-    </section>
 
-    <section v-else class="max-w-6xl mx-auto px-6 lg:px-10 pb-12">
-      <div class="bg-white border-2 border-deep-navy/20 rounded-xl p-12 text-center">
-        <h3 class="text-lg font-black text-deep-navy uppercase tracking-tight">No Pending Invitations</h3>
-        <p class="text-sm text-deep-navy/60 font-medium mt-2">You are all caught up for now.</p>
+    </main>
+
+    <!-- Empty State -->
+    <div v-else-if="!isLoading" class="max-w-[1100px] mx-auto px-6 py-10 pb-24">
+      <div class="border border-gray-200 p-12 bg-white max-w-2xl mx-auto rounded-xl shadow-sm text-center">
+        <svg class="w-16 h-16 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+        </svg>
+        <h3 class="text-xl font-bold text-deep-navy mb-2">No Pending Invitations</h3>
+        <p class="text-gray-500 text-sm">You are all caught up for now.</p>
+        <NuxtLink to="/communities" class="inline-block mt-6 bg-deep-navy text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-deep-navy/90 transition-colors active:scale-95">
+          Browse Communities
+        </NuxtLink>
       </div>
-    </section>
+    </div>
 
-    <section v-if="isError" class="max-w-6xl mx-auto px-6 lg:px-10 pb-12">
-      <div class="bg-red-50 border-2 border-red-200 rounded-xl px-8 py-6">
+    <!-- Error Banner -->
+    <div v-if="isError" class="max-w-[1100px] mx-auto px-6 pb-8">
+      <div class="bg-red-50 border border-red-200 rounded-lg px-6 py-4">
         <p class="text-red-700 font-bold text-sm">Failed to load invitations. Please refresh and try again.</p>
       </div>
-    </section>
+    </div>
+
   </div>
 </template>
 
