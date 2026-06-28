@@ -400,9 +400,9 @@
           </div>
           <div class="p-6 space-y-6">
             <div class="space-y-1">
-              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event ID</p>
+              <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event Uptime</p>
               <p class="text-[11px] font-bold text-primary break-all bg-mist-blue p-2 rounded-lg border border-navy-100/50">
-                {{ event?.display_identifier || '-' }}
+                {{ event?.uptime }}
               </p>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -425,6 +425,43 @@
                 <span class="bg-navy-500 text-white px-3 py-1 rounded text-[11px] font-black">
                   {{ event?.number_of_attendees || 0 }}
                 </span>
+              </div>
+              <div class="flex justify-between items-center mt-2">
+                <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identifier</p>
+                <span class="bg-navy-500 text-white px-3 py-1 rounded text-[9px] font-black"
+                @click=""
+                >
+                    {{ event?.display_identifier || 0 }}
+                </span>
+
+            </div>
+          </div>  
+          </div>
+        </section>
+
+         <section v-if="authorizationHistory.length > 0" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary text-xl">history</span>
+            <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Authorisation History</h2>
+          </div>
+          <div class="p-6">
+            <div class="space-y-4">
+              <div 
+                v-for="auth in authorizationHistory.slice(0, 5)" 
+                :key="auth.id"
+                class="border-l-4 pl-4 py-2"
+                :class="getAuthBorderClass(auth.status)"
+              >
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-xs font-black uppercase tracking-wider" :class="getAuthTextClass(auth.status)">
+                    {{ auth.status_display }}
+                  </span>
+                  <span class="text-[10px] text-gray-500 font-medium">
+                    {{ formatCompactDateTime(auth.reviewed_at) }}
+                  </span>
+                </div>
+                <p class="text-[10px] text-navy-600 font-medium">By: {{ auth.reviewed_by_email }}</p>
+                <p v-if="auth.reason" class="text-xs text-navy-700 mt-1 italic">"{{ auth.reason }}"</p>
               </div>
             </div>
           </div>
@@ -455,35 +492,6 @@
                 <p class="text-xs text-navy-600 font-medium">Add important registration information early in the text.</p>
               </li>
             </ul>
-          </div>
-        </section>
-
-        <!-- Authorization History -->
-        <section v-if="authorizationHistory.length > 0" class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
-          <div class="px-6 py-4 border-b border-navy-50 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-xl">history</span>
-            <h2 class="text-[11px] font-black text-primary uppercase tracking-widest">Authorisation History</h2>
-          </div>
-          <div class="p-6">
-            <div class="space-y-4">
-              <div 
-                v-for="auth in authorizationHistory.slice(0, 5)" 
-                :key="auth.id"
-                class="border-l-4 pl-4 py-2"
-                :class="getAuthBorderClass(auth.status)"
-              >
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-black uppercase tracking-wider" :class="getAuthTextClass(auth.status)">
-                    {{ auth.status_display }}
-                  </span>
-                  <span class="text-[10px] text-gray-500 font-medium">
-                    {{ formatCompactDateTime(auth.reviewed_at) }}
-                  </span>
-                </div>
-                <p class="text-[10px] text-navy-600 font-medium">By: {{ auth.reviewed_by_email }}</p>
-                <p v-if="auth.reason" class="text-xs text-navy-700 mt-1 italic">"{{ auth.reason }}"</p>
-              </div>
-            </div>
           </div>
         </section>
 
@@ -1212,4 +1220,5 @@ const resetForm = () => {
 }
 
 const isSubmitting = computed(() => updateMutation.isPending.value)
+
 </script>

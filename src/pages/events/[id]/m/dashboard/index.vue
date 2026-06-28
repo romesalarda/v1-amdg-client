@@ -196,7 +196,7 @@
               <div class="border-b border-black/5 bg-gradient-to-r from-deep-navy to-[#153457] px-6 py-5 text-white">
                 <div class="flex items-center justify-between gap-3">
                   <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">Readiness</p>
+                    <!-- <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">Readiness</p> -->
                     <h2 class="mt-1 text-xl font-black" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                       Outstanding tasks
                     </h2>

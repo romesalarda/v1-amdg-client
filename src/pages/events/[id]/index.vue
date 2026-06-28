@@ -398,6 +398,7 @@
                   </svg>
                   Share Event
                 </button>
+                
               </div>
 
               <!-- Status Badge -->
@@ -410,6 +411,9 @@
                   >
                     {{ event.status_display }}
                   </span>
+                </div>
+                <div class="font-black text-sm text-black text-left mt-4">
+                  {{ event.uptime }}
                 </div>
               </div>
             </div>
