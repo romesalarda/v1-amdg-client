@@ -11757,6 +11757,124 @@ export type LeaderList = {
     };
 };
 
+/**
+ * Read serializer for LeaderPermission with nested leader context.
+ */
+export type LeaderPermission = {
+    readonly id: number;
+    leader: number;
+    readonly leader_user: string;
+    readonly leader_user_id: number;
+    readonly organisation: string | null;
+    readonly organisation_url_safe_title: string | null;
+    /**
+     * * `allow_event_approval` - Allow Event Approval
+     * * `allow_manage_leaders` - Allow Managing Leaders
+     * * `allow_manage_organisation` - Allow Managing Organisation
+     * * `allow_membership_access` - Allow Access to Membership Information
+     * * `allow_organisation_sponsor` - Allow Sponsoring the Organisation
+     * * `allow_policy_management` - Allow Managing Organisation Policies
+     * * `allow_data_management` - Allow Managing Organisation Data
+     * * `allow_review_access` - Allow Access to Reviews and Feedback
+     * * `allow_monetary_access` - Allow Access to Monetary Transactions
+     * * `allow_landing_page_management` - Allow Managing Organisation Landing Page
+     */
+    permission_code: 'allow_event_approval' | 'allow_manage_leaders' | 'allow_manage_organisation' | 'allow_membership_access' | 'allow_organisation_sponsor' | 'allow_policy_management' | 'allow_data_management' | 'allow_review_access' | 'allow_monetary_access' | 'allow_landing_page_management';
+    description?: string;
+    /**
+     * Whether this permission allows create access.
+     */
+    allow_create?: boolean;
+    /**
+     * Whether this permission allows read access.
+     */
+    allow_read?: boolean;
+    /**
+     * Whether this permission allows update access.
+     */
+    allow_update?: boolean;
+    /**
+     * Whether this permission allows delete access.
+     */
+    allow_delete?: boolean;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Create/update serializer for LeaderPermission.
+ */
+export type LeaderPermissionCreateUpdate = {
+    leader: number;
+    /**
+     * * `allow_event_approval` - Allow Event Approval
+     * * `allow_manage_leaders` - Allow Managing Leaders
+     * * `allow_manage_organisation` - Allow Managing Organisation
+     * * `allow_membership_access` - Allow Access to Membership Information
+     * * `allow_organisation_sponsor` - Allow Sponsoring the Organisation
+     * * `allow_policy_management` - Allow Managing Organisation Policies
+     * * `allow_data_management` - Allow Managing Organisation Data
+     * * `allow_review_access` - Allow Access to Reviews and Feedback
+     * * `allow_monetary_access` - Allow Access to Monetary Transactions
+     * * `allow_landing_page_management` - Allow Managing Organisation Landing Page
+     */
+    permission_code: 'allow_event_approval' | 'allow_manage_leaders' | 'allow_manage_organisation' | 'allow_membership_access' | 'allow_organisation_sponsor' | 'allow_policy_management' | 'allow_data_management' | 'allow_review_access' | 'allow_monetary_access' | 'allow_landing_page_management';
+    description?: string;
+    /**
+     * Whether this permission allows create access.
+     */
+    allow_create?: boolean;
+    /**
+     * Whether this permission allows read access.
+     */
+    allow_read?: boolean;
+    /**
+     * Whether this permission allows update access.
+     */
+    allow_update?: boolean;
+    /**
+     * Whether this permission allows delete access.
+     */
+    allow_delete?: boolean;
+};
+
+/**
+ * Create/update serializer for LeaderPermission.
+ */
+export type LeaderPermissionCreateUpdateRequest = {
+    leader: number;
+    /**
+     * * `allow_event_approval` - Allow Event Approval
+     * * `allow_manage_leaders` - Allow Managing Leaders
+     * * `allow_manage_organisation` - Allow Managing Organisation
+     * * `allow_membership_access` - Allow Access to Membership Information
+     * * `allow_organisation_sponsor` - Allow Sponsoring the Organisation
+     * * `allow_policy_management` - Allow Managing Organisation Policies
+     * * `allow_data_management` - Allow Managing Organisation Data
+     * * `allow_review_access` - Allow Access to Reviews and Feedback
+     * * `allow_monetary_access` - Allow Access to Monetary Transactions
+     * * `allow_landing_page_management` - Allow Managing Organisation Landing Page
+     */
+    permission_code: 'allow_event_approval' | 'allow_manage_leaders' | 'allow_manage_organisation' | 'allow_membership_access' | 'allow_organisation_sponsor' | 'allow_policy_management' | 'allow_data_management' | 'allow_review_access' | 'allow_monetary_access' | 'allow_landing_page_management';
+    description?: string;
+    /**
+     * Whether this permission allows create access.
+     */
+    allow_create?: boolean;
+    /**
+     * Whether this permission allows read access.
+     */
+    allow_read?: boolean;
+    /**
+     * Whether this permission allows update access.
+     */
+    allow_update?: boolean;
+    /**
+     * Whether this permission allows delete access.
+     */
+    allow_delete?: boolean;
+};
+
 export type LeadersOnMapGeoJson = {
     type: string;
     features: Array<GeoJsonFeature>;
@@ -12683,6 +12801,22 @@ export type OrganisationDetail = {
      * Number of controllers
      */
     readonly controllers_count: number;
+    /**
+     * Requesting user's permissions for this organisation (controller, member, leader status and codes)
+     */
+    readonly user_permissions: {
+        is_staff?: boolean;
+        is_controller?: boolean;
+        is_member?: boolean;
+        is_leader?: boolean;
+        leader_permissions?: Array<{
+            permission_code?: string;
+            allow_create?: boolean;
+            allow_read?: boolean;
+            allow_update?: boolean;
+            allow_delete?: boolean;
+        }>;
+    };
 };
 
 /**
@@ -12703,6 +12837,154 @@ export type OrganisationEventPerformanceStatistics = {
     filters_applied: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Serializer for OrganisationEventPolicy — used for both read and update.
+ */
+export type OrganisationEventPolicy = {
+    readonly id: number;
+    readonly organisation: number;
+    readonly organisation_title: string;
+    readonly organisation_url_safe_title: string;
+    /**
+     * Whether events under this organisation can be created by external users.
+     */
+    allow_external_events?: boolean;
+    /**
+     * Whether attendees can be deleted from events under this organisation.
+     */
+    allow_attendee_deletions?: boolean;
+    /**
+     * Whether events under this organisation can be workshops.
+     */
+    allow_workshops?: boolean;
+    /**
+     * Whether events under this organisation can have product releases.
+     */
+    allow_product_releases?: boolean;
+    /**
+     * Whether events under this organisation can have sponsors.
+     */
+    allow_sponsors?: boolean;
+    /**
+     * Whether events under this organisation must have a long description.
+     */
+    require_long_description?: boolean;
+    /**
+     * Whether events under this organisation must have a short description.
+     */
+    require_short_description?: boolean;
+    /**
+     * Whether events under this organisation must have a landing image.
+     */
+    require_landing_image?: boolean;
+    /**
+     * Whether product releases must be approved by the organisation.
+     */
+    product_release_must_be_approved_by_organisation?: boolean;
+    /**
+     * Whether events must be approved by the organisation.
+     */
+    must_be_approved_by_organisation?: boolean;
+    /**
+     * The maximum number of attendees allowed for events under this organisation. Set to 0 for unlimited.
+     */
+    max_attendees_per_event?: number;
+    /**
+     * The maximum number of events an organiser can create under this organisation. Set to 0 for unlimited.
+     */
+    max_events_per_organiser?: number;
+    /**
+     * Whether card payments are allowed for events under this organisation.
+     */
+    card_payments_are_allowed?: boolean;
+    /**
+     * Whether bank transfers are allowed for events under this organisation.
+     */
+    bank_transfers_are_allowed?: boolean;
+    /**
+     * The maximum price for event packages under this organisation.
+     */
+    max_package_price?: string;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * Create/update serializer for OrganisationEventTypePolicyRestriction.
+ */
+export type OrganisationEventTypePolicyRestrictionCreateUpdate = {
+    organisation: number;
+    event_type: number;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
+};
+
+/**
+ * Create/update serializer for OrganisationEventTypePolicyRestriction.
+ */
+export type OrganisationEventTypePolicyRestrictionCreateUpdateRequest = {
+    organisation: number;
+    event_type: number;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
+};
+
+/**
+ * Detail serializer for OrganisationEventTypePolicyRestriction — identical to list.
+ */
+export type OrganisationEventTypePolicyRestrictionDetail = {
+    readonly id: number;
+    organisation: number;
+    readonly organisation_title: string;
+    readonly organisation_url_safe_title: string;
+    event_type: number;
+    readonly event_type_name: string;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+/**
+ * List serializer for OrganisationEventTypePolicyRestriction.
+ */
+export type OrganisationEventTypePolicyRestrictionList = {
+    readonly id: number;
+    organisation: number;
+    readonly organisation_title: string;
+    readonly organisation_url_safe_title: string;
+    event_type: number;
+    readonly event_type_name: string;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
+    readonly created_at: string;
+    readonly updated_at: string;
 };
 
 /**
@@ -13822,6 +14104,13 @@ export type PaginatedLeaderListList = {
     results: Array<LeaderList>;
 };
 
+export type PaginatedLeaderPermissionList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<LeaderPermission>;
+};
+
 export type PaginatedLocationLeaderInviteListList = {
     count: number;
     next?: string | null;
@@ -13869,6 +14158,13 @@ export type PaginatedOrganisationControlList = {
     next?: string | null;
     previous?: string | null;
     results: Array<OrganisationControl>;
+};
+
+export type PaginatedOrganisationEventTypePolicyRestrictionListList = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OrganisationEventTypePolicyRestrictionList>;
 };
 
 export type PaginatedOrganisationInviteListList = {
@@ -16834,6 +17130,43 @@ export type PatchedLeaderCreateUpdateRequest = {
 };
 
 /**
+ * Create/update serializer for LeaderPermission.
+ */
+export type PatchedLeaderPermissionCreateUpdateRequest = {
+    leader?: number;
+    /**
+     * * `allow_event_approval` - Allow Event Approval
+     * * `allow_manage_leaders` - Allow Managing Leaders
+     * * `allow_manage_organisation` - Allow Managing Organisation
+     * * `allow_membership_access` - Allow Access to Membership Information
+     * * `allow_organisation_sponsor` - Allow Sponsoring the Organisation
+     * * `allow_policy_management` - Allow Managing Organisation Policies
+     * * `allow_data_management` - Allow Managing Organisation Data
+     * * `allow_review_access` - Allow Access to Reviews and Feedback
+     * * `allow_monetary_access` - Allow Access to Monetary Transactions
+     * * `allow_landing_page_management` - Allow Managing Organisation Landing Page
+     */
+    permission_code?: 'allow_event_approval' | 'allow_manage_leaders' | 'allow_manage_organisation' | 'allow_membership_access' | 'allow_organisation_sponsor' | 'allow_policy_management' | 'allow_data_management' | 'allow_review_access' | 'allow_monetary_access' | 'allow_landing_page_management';
+    description?: string;
+    /**
+     * Whether this permission allows create access.
+     */
+    allow_create?: boolean;
+    /**
+     * Whether this permission allows read access.
+     */
+    allow_read?: boolean;
+    /**
+     * Whether this permission allows update access.
+     */
+    allow_update?: boolean;
+    /**
+     * Whether this permission allows delete access.
+     */
+    allow_delete?: boolean;
+};
+
+/**
  * Create/update serializer for location leader invites.
  */
 export type PatchedLocationLeaderInviteCreateUpdateRequest = {
@@ -16923,6 +17256,88 @@ export type PatchedOrganisationCreateUpdateRequest = {
     landing_image?: Blob | File | null;
     required_acceptance_code?: boolean;
     requires_manual_verification?: boolean;
+};
+
+/**
+ * Serializer for OrganisationEventPolicy — used for both read and update.
+ */
+export type PatchedOrganisationEventPolicyRequest = {
+    /**
+     * Whether events under this organisation can be created by external users.
+     */
+    allow_external_events?: boolean;
+    /**
+     * Whether attendees can be deleted from events under this organisation.
+     */
+    allow_attendee_deletions?: boolean;
+    /**
+     * Whether events under this organisation can be workshops.
+     */
+    allow_workshops?: boolean;
+    /**
+     * Whether events under this organisation can have product releases.
+     */
+    allow_product_releases?: boolean;
+    /**
+     * Whether events under this organisation can have sponsors.
+     */
+    allow_sponsors?: boolean;
+    /**
+     * Whether events under this organisation must have a long description.
+     */
+    require_long_description?: boolean;
+    /**
+     * Whether events under this organisation must have a short description.
+     */
+    require_short_description?: boolean;
+    /**
+     * Whether events under this organisation must have a landing image.
+     */
+    require_landing_image?: boolean;
+    /**
+     * Whether product releases must be approved by the organisation.
+     */
+    product_release_must_be_approved_by_organisation?: boolean;
+    /**
+     * Whether events must be approved by the organisation.
+     */
+    must_be_approved_by_organisation?: boolean;
+    /**
+     * The maximum number of attendees allowed for events under this organisation. Set to 0 for unlimited.
+     */
+    max_attendees_per_event?: number;
+    /**
+     * The maximum number of events an organiser can create under this organisation. Set to 0 for unlimited.
+     */
+    max_events_per_organiser?: number;
+    /**
+     * Whether card payments are allowed for events under this organisation.
+     */
+    card_payments_are_allowed?: boolean;
+    /**
+     * Whether bank transfers are allowed for events under this organisation.
+     */
+    bank_transfers_are_allowed?: boolean;
+    /**
+     * The maximum price for event packages under this organisation.
+     */
+    max_package_price?: string;
+};
+
+/**
+ * Create/update serializer for OrganisationEventTypePolicyRestriction.
+ */
+export type PatchedOrganisationEventTypePolicyRestrictionCreateUpdateRequest = {
+    organisation?: number;
+    event_type?: number;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
 };
 
 /**
@@ -26525,6 +26940,43 @@ export type LeaderListWritable = {
 };
 
 /**
+ * Read serializer for LeaderPermission with nested leader context.
+ */
+export type LeaderPermissionWritable = {
+    leader: number;
+    /**
+     * * `allow_event_approval` - Allow Event Approval
+     * * `allow_manage_leaders` - Allow Managing Leaders
+     * * `allow_manage_organisation` - Allow Managing Organisation
+     * * `allow_membership_access` - Allow Access to Membership Information
+     * * `allow_organisation_sponsor` - Allow Sponsoring the Organisation
+     * * `allow_policy_management` - Allow Managing Organisation Policies
+     * * `allow_data_management` - Allow Managing Organisation Data
+     * * `allow_review_access` - Allow Access to Reviews and Feedback
+     * * `allow_monetary_access` - Allow Access to Monetary Transactions
+     * * `allow_landing_page_management` - Allow Managing Organisation Landing Page
+     */
+    permission_code: 'allow_event_approval' | 'allow_manage_leaders' | 'allow_manage_organisation' | 'allow_membership_access' | 'allow_organisation_sponsor' | 'allow_policy_management' | 'allow_data_management' | 'allow_review_access' | 'allow_monetary_access' | 'allow_landing_page_management';
+    description?: string;
+    /**
+     * Whether this permission allows create access.
+     */
+    allow_create?: boolean;
+    /**
+     * Whether this permission allows read access.
+     */
+    allow_read?: boolean;
+    /**
+     * Whether this permission allows update access.
+     */
+    allow_update?: boolean;
+    /**
+     * Whether this permission allows delete access.
+     */
+    allow_delete?: boolean;
+};
+
+/**
  * Serializer for combined location breakdown statistics.
  */
 export type LocationBreakdownWritable = {
@@ -26812,6 +27264,104 @@ export type OrganisationDetailWritable = {
     created_by?: number | null;
     landing_image?: string | null;
     logo?: string | null;
+};
+
+/**
+ * Serializer for OrganisationEventPolicy — used for both read and update.
+ */
+export type OrganisationEventPolicyWritable = {
+    /**
+     * Whether events under this organisation can be created by external users.
+     */
+    allow_external_events?: boolean;
+    /**
+     * Whether attendees can be deleted from events under this organisation.
+     */
+    allow_attendee_deletions?: boolean;
+    /**
+     * Whether events under this organisation can be workshops.
+     */
+    allow_workshops?: boolean;
+    /**
+     * Whether events under this organisation can have product releases.
+     */
+    allow_product_releases?: boolean;
+    /**
+     * Whether events under this organisation can have sponsors.
+     */
+    allow_sponsors?: boolean;
+    /**
+     * Whether events under this organisation must have a long description.
+     */
+    require_long_description?: boolean;
+    /**
+     * Whether events under this organisation must have a short description.
+     */
+    require_short_description?: boolean;
+    /**
+     * Whether events under this organisation must have a landing image.
+     */
+    require_landing_image?: boolean;
+    /**
+     * Whether product releases must be approved by the organisation.
+     */
+    product_release_must_be_approved_by_organisation?: boolean;
+    /**
+     * Whether events must be approved by the organisation.
+     */
+    must_be_approved_by_organisation?: boolean;
+    /**
+     * The maximum number of attendees allowed for events under this organisation. Set to 0 for unlimited.
+     */
+    max_attendees_per_event?: number;
+    /**
+     * The maximum number of events an organiser can create under this organisation. Set to 0 for unlimited.
+     */
+    max_events_per_organiser?: number;
+    /**
+     * Whether card payments are allowed for events under this organisation.
+     */
+    card_payments_are_allowed?: boolean;
+    /**
+     * Whether bank transfers are allowed for events under this organisation.
+     */
+    bank_transfers_are_allowed?: boolean;
+    /**
+     * The maximum price for event packages under this organisation.
+     */
+    max_package_price?: string;
+};
+
+/**
+ * Detail serializer for OrganisationEventTypePolicyRestriction — identical to list.
+ */
+export type OrganisationEventTypePolicyRestrictionDetailWritable = {
+    organisation: number;
+    event_type: number;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
+};
+
+/**
+ * List serializer for OrganisationEventTypePolicyRestriction.
+ */
+export type OrganisationEventTypePolicyRestrictionListWritable = {
+    organisation: number;
+    event_type: number;
+    /**
+     * Whether this event type is allowed for events under this organisation.
+     */
+    is_allowed?: boolean;
+    /**
+     * Whether events of this type require approval from the organisation.
+     */
+    requires_approval?: boolean;
 };
 
 /**
@@ -27429,6 +27979,13 @@ export type PaginatedLeaderListListWritable = {
     results: Array<LeaderListWritable>;
 };
 
+export type PaginatedLeaderPermissionListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<LeaderPermissionWritable>;
+};
+
 export type PaginatedLocationLeaderInviteListListWritable = {
     count: number;
     next?: string | null;
@@ -27476,6 +28033,13 @@ export type PaginatedOrganisationControlListWritable = {
     next?: string | null;
     previous?: string | null;
     results: Array<OrganisationControlWritable>;
+};
+
+export type PaginatedOrganisationEventTypePolicyRestrictionListListWritable = {
+    count: number;
+    next?: string | null;
+    previous?: string | null;
+    results: Array<OrganisationEventTypePolicyRestrictionListWritable>;
 };
 
 export type PaginatedOrganisationInviteListListWritable = {
@@ -45880,6 +46444,136 @@ export type OrganisationsControlsRetrieveResponses = {
 
 export type OrganisationsControlsRetrieveResponse = OrganisationsControlsRetrieveResponses[keyof OrganisationsControlsRetrieveResponses];
 
+export type OrganisationsEventTypeRestrictionsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by EventType ID
+         */
+        event_type?: number;
+        /**
+         * Filter by whether the event type is allowed
+         */
+        is_allowed?: boolean;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Filter by organisation id or url_safe_title
+         */
+        organisation?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by whether approval is required
+         */
+        requires_approval?: boolean;
+    };
+    url: '/api/organisations/event-type-restrictions/';
+};
+
+export type OrganisationsEventTypeRestrictionsListResponses = {
+    200: PaginatedOrganisationEventTypePolicyRestrictionListList;
+};
+
+export type OrganisationsEventTypeRestrictionsListResponse = OrganisationsEventTypeRestrictionsListResponses[keyof OrganisationsEventTypeRestrictionsListResponses];
+
+export type OrganisationsEventTypeRestrictionsCreateData = {
+    body: OrganisationEventTypePolicyRestrictionCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/event-type-restrictions/';
+};
+
+export type OrganisationsEventTypeRestrictionsCreateResponses = {
+    201: OrganisationEventTypePolicyRestrictionCreateUpdate;
+};
+
+export type OrganisationsEventTypeRestrictionsCreateResponse = OrganisationsEventTypeRestrictionsCreateResponses[keyof OrganisationsEventTypeRestrictionsCreateResponses];
+
+export type OrganisationsEventTypeRestrictionsDestroyData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this organisation event type policy restriction.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/organisations/event-type-restrictions/{id}/';
+};
+
+export type OrganisationsEventTypeRestrictionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type OrganisationsEventTypeRestrictionsDestroyResponse = OrganisationsEventTypeRestrictionsDestroyResponses[keyof OrganisationsEventTypeRestrictionsDestroyResponses];
+
+export type OrganisationsEventTypeRestrictionsRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * A unique integer value identifying this organisation event type policy restriction.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/organisations/event-type-restrictions/{id}/';
+};
+
+export type OrganisationsEventTypeRestrictionsRetrieveResponses = {
+    200: OrganisationEventTypePolicyRestrictionDetail;
+};
+
+export type OrganisationsEventTypeRestrictionsRetrieveResponse = OrganisationsEventTypeRestrictionsRetrieveResponses[keyof OrganisationsEventTypeRestrictionsRetrieveResponses];
+
+export type OrganisationsEventTypeRestrictionsPartialUpdateData = {
+    body?: PatchedOrganisationEventTypePolicyRestrictionCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this organisation event type policy restriction.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/organisations/event-type-restrictions/{id}/';
+};
+
+export type OrganisationsEventTypeRestrictionsPartialUpdateResponses = {
+    200: OrganisationEventTypePolicyRestrictionCreateUpdate;
+};
+
+export type OrganisationsEventTypeRestrictionsPartialUpdateResponse = OrganisationsEventTypeRestrictionsPartialUpdateResponses[keyof OrganisationsEventTypeRestrictionsPartialUpdateResponses];
+
+export type OrganisationsEventTypeRestrictionsUpdateData = {
+    body: OrganisationEventTypePolicyRestrictionCreateUpdateRequest;
+    path: {
+        /**
+         * A unique integer value identifying this organisation event type policy restriction.
+         */
+        id: number;
+    };
+    query?: never;
+    url: '/api/organisations/event-type-restrictions/{id}/';
+};
+
+export type OrganisationsEventTypeRestrictionsUpdateResponses = {
+    200: OrganisationEventTypePolicyRestrictionCreateUpdate;
+};
+
+export type OrganisationsEventTypeRestrictionsUpdateResponse = OrganisationsEventTypeRestrictionsUpdateResponses[keyof OrganisationsEventTypeRestrictionsUpdateResponses];
+
 export type OrganisationsInvitesListData = {
     body?: never;
     path?: never;
@@ -46370,6 +47064,128 @@ export type OrganisationsLeaderInvitesMyInvitesRetrieveResponses = {
 };
 
 export type OrganisationsLeaderInvitesMyInvitesRetrieveResponse = OrganisationsLeaderInvitesMyInvitesRetrieveResponses[keyof OrganisationsLeaderInvitesMyInvitesRetrieveResponses];
+
+export type OrganisationsLeaderPermissionsListData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Filter by leader ID
+         */
+        leader?: number;
+        /**
+         * Which field to use when ordering the results.
+         */
+        ordering?: string;
+        /**
+         * Filter by organisation id or url_safe_title
+         */
+        organisation?: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+        /**
+         * Filter by permission code
+         */
+        permission_code?: string;
+        /**
+         * A search term.
+         */
+        search?: string;
+        /**
+         * Filter by user ID
+         */
+        user?: number;
+    };
+    url: '/api/organisations/leader-permissions/';
+};
+
+export type OrganisationsLeaderPermissionsListResponses = {
+    200: PaginatedLeaderPermissionList;
+};
+
+export type OrganisationsLeaderPermissionsListResponse = OrganisationsLeaderPermissionsListResponses[keyof OrganisationsLeaderPermissionsListResponses];
+
+export type OrganisationsLeaderPermissionsCreateData = {
+    body: LeaderPermissionCreateUpdateRequest;
+    path?: never;
+    query?: never;
+    url: '/api/organisations/leader-permissions/';
+};
+
+export type OrganisationsLeaderPermissionsCreateResponses = {
+    201: LeaderPermissionCreateUpdate;
+};
+
+export type OrganisationsLeaderPermissionsCreateResponse = OrganisationsLeaderPermissionsCreateResponses[keyof OrganisationsLeaderPermissionsCreateResponses];
+
+export type OrganisationsLeaderPermissionsDestroyData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-permissions/{id}/';
+};
+
+export type OrganisationsLeaderPermissionsDestroyResponses = {
+    /**
+     * No response body
+     */
+    204: void;
+};
+
+export type OrganisationsLeaderPermissionsDestroyResponse = OrganisationsLeaderPermissionsDestroyResponses[keyof OrganisationsLeaderPermissionsDestroyResponses];
+
+export type OrganisationsLeaderPermissionsRetrieveData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-permissions/{id}/';
+};
+
+export type OrganisationsLeaderPermissionsRetrieveResponses = {
+    200: LeaderPermission;
+};
+
+export type OrganisationsLeaderPermissionsRetrieveResponse = OrganisationsLeaderPermissionsRetrieveResponses[keyof OrganisationsLeaderPermissionsRetrieveResponses];
+
+export type OrganisationsLeaderPermissionsPartialUpdateData = {
+    body?: PatchedLeaderPermissionCreateUpdateRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-permissions/{id}/';
+};
+
+export type OrganisationsLeaderPermissionsPartialUpdateResponses = {
+    200: LeaderPermissionCreateUpdate;
+};
+
+export type OrganisationsLeaderPermissionsPartialUpdateResponse = OrganisationsLeaderPermissionsPartialUpdateResponses[keyof OrganisationsLeaderPermissionsPartialUpdateResponses];
+
+export type OrganisationsLeaderPermissionsUpdateData = {
+    body: LeaderPermissionCreateUpdateRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/organisations/leader-permissions/{id}/';
+};
+
+export type OrganisationsLeaderPermissionsUpdateResponses = {
+    200: LeaderPermissionCreateUpdate;
+};
+
+export type OrganisationsLeaderPermissionsUpdateResponse = OrganisationsLeaderPermissionsUpdateResponses[keyof OrganisationsLeaderPermissionsUpdateResponses];
 
 export type OrganisationsLeadersListData = {
     body?: never;
@@ -46863,11 +47679,57 @@ export type OrganisationsListMyPermissionsRetrieveResponses = {
     200: {
         organisation?: string;
         organisation_url_safe_title?: string;
-        can_view?: boolean;
+        is_staff?: boolean;
+        is_controller?: boolean;
+        is_member?: boolean;
+        is_leader?: boolean;
+        leader_permissions?: Array<{
+            permission_code?: string;
+            allow_create?: boolean;
+            allow_read?: boolean;
+            allow_update?: boolean;
+            allow_delete?: boolean;
+        }>;
     };
 };
 
 export type OrganisationsListMyPermissionsRetrieveResponse = OrganisationsListMyPermissionsRetrieveResponses[keyof OrganisationsListMyPermissionsRetrieveResponses];
+
+export type OrganisationsListPolicyRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * URL-safe version of the title, auto-generated if not provided.
+         */
+        url_safe_title: string;
+    };
+    query?: never;
+    url: '/api/organisations/list/{url_safe_title}/policy/';
+};
+
+export type OrganisationsListPolicyRetrieveResponses = {
+    200: OrganisationEventPolicy;
+};
+
+export type OrganisationsListPolicyRetrieveResponse = OrganisationsListPolicyRetrieveResponses[keyof OrganisationsListPolicyRetrieveResponses];
+
+export type OrganisationsListPolicyPartialUpdateData = {
+    body?: PatchedOrganisationEventPolicyRequest;
+    path: {
+        /**
+         * URL-safe version of the title, auto-generated if not provided.
+         */
+        url_safe_title: string;
+    };
+    query?: never;
+    url: '/api/organisations/list/{url_safe_title}/policy/';
+};
+
+export type OrganisationsListPolicyPartialUpdateResponses = {
+    200: OrganisationEventPolicy;
+};
+
+export type OrganisationsListPolicyPartialUpdateResponse = OrganisationsListPolicyPartialUpdateResponses[keyof OrganisationsListPolicyPartialUpdateResponses];
 
 export type OrganisationsMembershipsListData = {
     body?: never;

@@ -32,7 +32,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 
 
-    const canRead = permissionsResponse.data?.can_view
+    const canRead = permissionsResponse.data?.is_controller || permissionsResponse.data?.is_leader
     
     if (!canRead) {
       // User is not a controller
