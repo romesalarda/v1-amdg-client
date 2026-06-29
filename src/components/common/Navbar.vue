@@ -232,8 +232,8 @@ const handleLogout = async () => {
   closeDropdown()
   logout(undefined, {
     onSuccess: () => {
-      // Navigate to home page after logout
-      navigateTo('/')
+      // Navigate to login page after logout
+      navigateTo('/login')
     },
   })
 }

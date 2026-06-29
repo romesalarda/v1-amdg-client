@@ -63,8 +63,8 @@
 						]"
 					>
 						<div class="flex items-center justify-center gap-2">
-							<span class="material-symbols-outlined text-lg">swap_horiz</span>
-							<span>Sponsor Flow</span>
+							<span class="material-symbols-outlined text-lg">add_ad</span>
+							<span>Sponsor An Event</span>
 						</div>
 					</button>
 					<button

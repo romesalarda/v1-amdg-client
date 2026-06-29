@@ -54,141 +54,262 @@
 		</div>
 
 		<!-- Ledger panels -->
-		<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-			<!-- Inbound ledger -->
-			<div class="border border-deep-navy/10 rounded-xl shadow-sm p-6 space-y-6 bg-white">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-							<span class="material-symbols-outlined text-blue-600 text-lg">arrow_downward</span>
-						</div>
-						<div>
-							<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Inbound</p>
-							<h2 class="text-sm font-black text-deep-navy">Sponsors Funding Your Events</h2>
-						</div>
-					</div>
-					<span class="text-xs font-semibold text-gray-500">{{ inboundCount }} results</span>
-				</div>
+		<div class="space-y-6">
+	<!-- Header / Tabs / Filters -->
+	<div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-blue-600 p-6 rounded-xl">
+		<div class="flex items-center rounded-xl bg-gray-100 p-1 w-fit">
+			<button
+				type="button"
+				@click="activeLedgerTab = 'inbound'"
+				:class="
+					activeLedgerTab === 'inbound'
+						? 'bg-white text-deep-navy shadow-sm'
+						: 'text-gray-500 hover:text-deep-navy'
+				"
+				class="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+			>
+				Inbound
+			</button>
 
-				<div class="flex flex-col md:flex-row gap-3">
-					<input
-						v-model="ledgerSearch"
-						type="text"
-						placeholder="Search sponsor, event, or package"
-						class="flex-1 px-4 py-2.5 rounded-lg border border-deep-navy/20 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					/>
-					<button
-						type="button"
-						@click="ledgerUseSelectedEvent = !ledgerUseSelectedEvent"
-						:class="ledgerUseSelectedEvent ? 'bg-primary text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-						class="px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-					>
-						{{ ledgerUseSelectedEvent ? 'Selected Event' : 'All Events' }}
-					</button>
-				</div>
-
-				<div v-if="isLoadingInbound" class="space-y-4">
-					<USkeleton class="h-24 w-full" />
-					<USkeleton class="h-24 w-full" />
-				</div>
-				<div v-else-if="inboundSponsors.length === 0" class="text-center py-12 bg-gray-50 border border-dashed border-deep-navy/20 rounded-xl">
-					<p class="text-sm font-semibold text-gray-500">No inbound sponsors match this view yet.</p>
-				</div>
-				<div v-else class="space-y-4">
-					<div v-for="row in inboundSponsors" :key="row.sponsor_id" class="p-5 border border-deep-navy/10 rounded-xl hover:border-deep-navy/20 transition-colors">
-						<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-							<div class="space-y-1">
-								<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">{{ row.event_title }}</p>
-								<p class="text-base font-black text-deep-navy">{{ row.organisation_title }}</p>
-								<p class="text-xs text-gray-500">
-									{{ row.package_name || 'No package' }} &middot; {{ formatDateSafe(row.added_at) }}
-								</p>
-							</div>
-							<div class="flex items-center gap-2 shrink-0">
-								<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
-									{{ row.payment?.payment_reference ? row.payment.payment_reference.slice(0, 20).concat('...') : 'Awaiting payment' }}
-								</span>
-								<span class="text-sm font-black text-deep-navy">
-									{{ row.payment?.base_amount ? formatMoney(row.payment.base_amount, 'GBP') : 'Pending' }}
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="pt-2 flex items-center justify-between">
-					<p class="text-xs font-semibold text-gray-500">Page {{ inboundPage }}</p>
-					<UPagination v-model="inboundPage" :total="inboundCount" :page-count="ledgerPageSize" :max="5" />
-				</div>
-			</div>
-
-			<!-- Outbound ledger -->
-			<div class="border border-deep-navy/10 rounded-xl shadow-sm p-6 space-y-6 bg-white">
-				<div class="flex items-center justify-between">
-					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">
-							<span class="material-symbols-outlined text-emerald-600 text-lg">arrow_upward</span>
-						</div>
-						<div>
-							<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Outbound</p>
-							<h2 class="text-sm font-black text-deep-navy">Events You Sponsor</h2>
-						</div>
-					</div>
-					<span class="text-xs font-semibold text-gray-500">{{ outboundCount }} results</span>
-				</div>
-
-				<div class="flex flex-col md:flex-row gap-3">
-					<input
-						v-model="ledgerSearch"
-						type="text"
-						placeholder="Search event or package"
-						class="flex-1 px-4 py-2.5 rounded-lg border border-deep-navy/20 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-					/>
-					<button
-						type="button"
-						@click="ledgerUseSelectedEvent = !ledgerUseSelectedEvent"
-						:class="ledgerUseSelectedEvent ? 'bg-primary text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
-						class="px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-					>
-						{{ ledgerUseSelectedEvent ? 'Selected Event' : 'All Events' }}
-					</button>
-				</div>
-
-				<div v-if="isLoadingOutbound" class="space-y-4">
-					<USkeleton class="h-24 w-full" />
-					<USkeleton class="h-24 w-full" />
-				</div>
-				<div v-else-if="outboundSponsors.length === 0" class="text-center py-12 bg-gray-50 border border-dashed border-deep-navy/20 rounded-xl">
-					<p class="text-sm font-semibold text-gray-500">No outbound sponsorships match this view yet.</p>
-				</div>
-				<div v-else class="space-y-4">
-					<div v-for="row in outboundSponsors" :key="row.sponsor_id" class="p-5 border border-deep-navy/10 rounded-xl hover:border-deep-navy/20 transition-colors">
-						<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-							<div class="space-y-1">
-								<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Sponsoring as {{ row.name }}</p>
-								<p class="text-base font-black text-deep-navy">{{ row.event_title }}</p>
-								<p class="text-xs text-gray-500">
-									{{ row.package_name || 'No package' }} &middot; {{ formatDateSafe(row.added_at) }}
-								</p>
-							</div>
-							<div class="flex items-center gap-2 shrink-0">
-								<span class="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
-									{{ row.payment?.payment_reference ? row.payment.payment_reference.slice(0, 15).concat('...') : 'Awaiting payment' }}
-								</span>
-								<span class="text-sm font-black text-deep-navy">
-									{{ row.payment?.base_amount ? formatMoney(row.payment.base_amount, 'GBP') : 'Pending' }}
-								</span>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="pt-2 flex items-center justify-between">
-					<p class="text-xs font-semibold text-gray-500">Page {{ outboundPage }}</p>
-					<UPagination v-model="outboundPage" :total="outboundCount" :page-count="ledgerPageSize" :max="5" />
-				</div>
-			</div>
+			<button
+				type="button"
+				@click="activeLedgerTab = 'outbound'"
+				:class="
+					activeLedgerTab === 'outbound'
+						? 'bg-white text-deep-navy shadow-sm'
+						: 'text-gray-500 hover:text-deep-navy'
+				"
+				class="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
+			>
+				Outbound
+			</button>
 		</div>
+
+		<div class="flex flex-col md:flex-row gap-3 flex-1 lg:justify-end">
+			<input
+				v-model="ledgerSearch"
+				type="text"
+				:placeholder="
+					activeLedgerTab === 'inbound'
+						? 'Search sponsor, event or package'
+						: 'Search event or package'
+				"
+				class="flex-1 px-4 py-2.5 rounded-lg border border-deep-navy/20 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+			/>
+
+			<button
+				type="button"
+				@click="ledgerUseSelectedEvent = !ledgerUseSelectedEvent"
+				:class="
+					ledgerUseSelectedEvent
+						? 'bg-primary text-white shadow-md'
+						: 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+				"
+				class="px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors"
+			>
+				{{ ledgerUseSelectedEvent ? 'Selected Event' : 'All Events' }}
+			</button>
+		</div>
+	</div>
+
+	<!-- Card -->
+	<div class="border border-deep-navy/10 rounded-xl shadow-sm p-6 space-y-6 bg-white">
+		<!-- Inbound -->
+		<template v-if="activeLedgerTab === 'inbound'">
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
+						<span class="material-symbols-outlined text-blue-600 text-lg">
+							arrow_downward
+						</span>
+					</div>
+
+					<div>
+						<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+							Inbound
+						</p>
+						<h2 class="text-sm font-black text-deep-navy">
+							Sponsors Funding Your Events
+						</h2>
+					</div>
+				</div>
+
+				<span class="text-xs font-semibold text-gray-500">
+					{{ inboundCount }} results
+				</span>
+			</div>
+
+			<div v-if="isLoadingInbound" class="space-y-4">
+				<USkeleton class="h-24 w-full" />
+				<USkeleton class="h-24 w-full" />
+			</div>
+
+			<div
+				v-else-if="inboundSponsors.length === 0"
+				class="text-center py-12 bg-gray-50 border border-dashed border-deep-navy/20 rounded-xl"
+			>
+				<p class="text-sm font-semibold text-gray-500">
+					No inbound sponsors match this view yet.
+				</p>
+			</div>
+
+			<div v-else class="space-y-4">
+				<div
+					v-for="row in inboundSponsors"
+					:key="row.sponsor_id"
+					class="p-5 border border-deep-navy/10 rounded-xl hover:border-deep-navy/20 transition-colors"
+				>
+					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+						<div class="space-y-1">
+							<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+								{{ row.event_title }}
+							</p>
+
+							<p class="text-base font-black text-deep-navy">
+								{{ row.organisation_title }}
+							</p>
+
+							<p class="text-xs text-gray-500">
+								{{ row.package_name || 'No package' }}
+								&middot;
+								{{ formatDateSafe(row.added_at) }}
+							</p>
+						</div>
+
+						<div class="flex items-center gap-2 shrink-0">
+							<span class="px-3 py-1.5 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+								{{
+									row.payment?.payment_reference
+										? row.payment.payment_reference
+										: 'Awaiting payment'
+								}}
+							</span>
+
+							<span class="text-xl font-black text-deep-navy font-mono">
+								{{
+									row.payment?.base_amount
+										? formatMoney(row.payment.base_amount, 'GBP')
+										: 'Pending'
+								}}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="pt-2 flex items-center justify-between">
+				<p class="text-xs font-semibold text-gray-500">
+					Page {{ inboundPage }}
+				</p>
+
+				<UPagination
+					v-model="inboundPage"
+					:total="inboundCount"
+					:page-count="ledgerPageSize"
+					:max="5"
+				/>
+			</div>
+		</template>
+
+		<!-- Outbound -->
+		<template v-else>
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">
+						<span class="material-symbols-outlined text-emerald-600 text-lg">
+							arrow_upward
+						</span>
+					</div>
+
+					<div>
+						<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+							Outbound
+						</p>
+
+						<h2 class="text-sm font-black text-deep-navy">
+							Events You Sponsor
+						</h2>
+					</div>
+				</div>
+
+				<span class="text-xs font-semibold text-gray-500">
+					{{ outboundCount }} results
+				</span>
+			</div>
+
+			<div v-if="isLoadingOutbound" class="space-y-4">
+				<USkeleton class="h-24 w-full" />
+				<USkeleton class="h-24 w-full" />
+			</div>
+
+			<div
+				v-else-if="outboundSponsors.length === 0"
+				class="text-center py-12 bg-gray-50 border border-dashed border-deep-navy/20 rounded-xl"
+			>
+				<p class="text-sm font-semibold text-gray-500">
+					No outbound sponsorships match this view yet.
+				</p>
+			</div>
+
+			<div v-else class="space-y-4">
+				<div
+					v-for="row in outboundSponsors"
+					:key="row.sponsor_id"
+					class="p-5 border border-deep-navy/10 rounded-xl hover:border-deep-navy/20 transition-colors"
+				>
+					<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+						<div class="space-y-1">
+							<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">
+								Sponsoring as {{ row.name }}
+							</p>
+
+							<p class="text-base font-black text-deep-navy">
+								{{ row.event_title }}
+							</p>
+
+							<p class="text-xs text-gray-500">
+								{{ row.package_name || 'No package' }}
+								&middot;
+								{{ formatDateSafe(row.added_at) }}
+							</p>
+						</div>
+
+						<div class="flex items-center gap-2 shrink-0">
+							<span class="px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold">
+								{{
+									row.payment?.payment_reference
+										? row.payment.payment_reference
+										: 'Awaiting payment'
+								}}
+							</span>
+
+							<span class="text-xl font-black text-deep-navy font-mono">
+								{{
+									row.payment?.base_amount
+										? formatMoney(row.payment.base_amount, 'GBP')
+										: 'Pending'
+								}}
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="pt-2 flex items-center justify-between">
+				<p class="text-xs font-semibold text-gray-500">
+					Page {{ outboundPage }}
+				</p>
+
+				<UPagination
+					v-model="outboundPage"
+					:total="outboundCount"
+					:page-count="ledgerPageSize"
+					:max="5"
+				/>
+			</div>
+		</template>
+	</div>
+</div>
 	</div>
 </template>
 
@@ -199,6 +320,7 @@ import BarChart from '~/components/charts/BarChart.vue'
 import { useSponsorOverview } from '~/composables/communities/sponsors/useSponsorOverview'
 import { formatMoney } from '~/utils/money'
 import { formatDate } from '~/utils/time'
+const activeLedgerTab = ref<'inbound' | 'outbound'>('inbound')
 
 const props = defineProps<{
 	organisationId: string
