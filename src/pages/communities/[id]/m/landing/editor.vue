@@ -104,7 +104,7 @@
       <!-- Organization Details -->
       <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
         <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-          <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Organization Details</h2>
+          <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Organisation Details</h2>
         </div>
 
         <div class="p-8 space-y-6">
@@ -381,7 +381,7 @@ const handleSubmit = handleFormSubmit(async (values) => {
       }, {
         onSuccess: () => {
           showSuccess.value = true
-          $notyf.success('Organization updated successfully!')
+          $notyf.success('Organisation updated successfully!')
           
           // Cleanup
           if (imagePreview.value) {
@@ -400,7 +400,7 @@ const handleSubmit = handleFormSubmit(async (values) => {
           }, 3000)
         },
         onError: (error: any) => {
-          $notyf.error(error?.body?.error || error?.message || 'Failed to update organization')
+          $notyf.error(error?.body?.error || error?.message || 'Failed to update organisation')
         }
       })
     } else {
@@ -411,19 +411,19 @@ const handleSubmit = handleFormSubmit(async (values) => {
       }, {
         onSuccess: () => {
           showSuccess.value = true
-          $notyf.success('Organization updated successfully!')
+          $notyf.success('Organisation updated successfully!')
           setTimeout(() => {
             showSuccess.value = false
           }, 3000)
         },
         onError: (error: any) => {
-          $notyf.error(error?.body?.error || error?.message || 'Failed to update organization')
+          $notyf.error(error?.body?.error || error?.message || 'Failed to update organisation')
         }
       })
     }
   } catch (err) {
-    console.error('Error updating organization:', err)
-    $notyf.error('Error updating organization' + (err instanceof Error ? `: ${err.message}` : ''))
+    console.error('Error updating organisation:', err)
+    $notyf.error('Error updating organisation' + (err instanceof Error ? `: ${err.message}` : ''))
   }
 })
 

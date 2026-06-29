@@ -13,7 +13,7 @@
     </div> -->
 
     <div class="mb-8 bg-blue-600 px-4 py-6 sm:px-6 lg:px-8 rounded-2xl shadow-[0_12px_30px_rgba(15,23,42,0.08)]">
-      <div class="mx-auto flex max-w-4xl items-center rounded-full border border-slate-200 bg-white px-2 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.08)] transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
+      <div class="mx-auto flex max-w-5xl items-center rounded-full border border-slate-200 bg-white px-2 py-2 shadow-[0_12px_30px_rgba(15,23,42,0.08)] transition focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-100">
         <!-- Search -->
         <div class="relative flex-1">
           <svg
@@ -151,7 +151,7 @@
       </p>
     </div>
 
-    <section v-else class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+    <section v-else class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn">
       <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
         <div class="flex items-center gap-3">
           <UIcon name="i-heroicons-calendar-days" class="h-5 w-5 text-primary" />

@@ -2,12 +2,12 @@
 	<CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
 		<div class="space-y-6">
 			<!-- Page header -->
-			<div class="bg-white border border-deep-navy/10 rounded-xl shadow-sm p-6">
+			<div class=" border border-deep-navy/10 rounded-xl shadow-sm p-6 bg-blue-600">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
-						<p class="text-xs font-semibold text-gray-500 uppercase tracking-widest">Community Sponsorships</p>
-						<h1 class="mt-1 text-2xl font-black text-deep-navy">Inbound + Outbound Momentum</h1>
-						<p class="mt-1 text-sm text-gray-500 max-w-2xl">
+						<p class="text-xs font-semibold text-white uppercase tracking-widest">Community Sponsorships</p>
+						<h1 class="mt-1 text-2xl text-white text-deep-navy">Inbound + Outbound Momentum</h1>
+						<p class="mt-1 text-sm text-white max-w-2xl">
 							Track who sponsors your events, what you sponsor elsewhere, and move from selection to checkout in three clear steps.
 						</p>
 					</div>

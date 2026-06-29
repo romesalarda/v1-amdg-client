@@ -7,7 +7,7 @@
           class="w-full"
           :ui="{
             list: {
-              base: 'sticky top-[40px] z-40 flex items-center gap-8 bg-[#026CDF] px-8 py-0',
+              base: 'sticky top-[40px] z-40 flex items-center gap-8 bg-[#026CDF] px-2 py-0',
               background: '',
               tab: {
                 active: 'border-white text-black hover:text-white',
@@ -18,7 +18,7 @@
         >
         <template #item="{ item }">
           <div v-if="item.key === 'members'" class="mt-6">
-            <section class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+            <section class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn ">
               <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-primary" />
@@ -128,7 +128,7 @@
                         </span>
                         <span
                           v-else
-                          class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 font-semibold text-[10px] uppercase tracking-[0.12em] text-gray-600"
+                          class="inline-flex items-center rounded-md bg-gray-100 px-2.5 py-1 font-semibold text-[10px] uppercase tracking-[0.12em] text-gray-600 bg-green-100 text-green-700"
                         >
                           Active
                         </span>
@@ -207,7 +207,7 @@
           </div>
 
           <div v-if="item.key === 'invites'" class="mt-6 space-y-8">
-            <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+            <div class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn">
               <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-heroicons-user-plus" class="h-5 w-5 text-primary" />
@@ -287,7 +287,7 @@
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-deep-navy/10 bg-white shadow-drawn">
+            <div class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn">
               <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-heroicons-envelope" class="h-5 w-5 text-primary" />
@@ -409,7 +409,7 @@
           <div v-if="item.key === 'access-codes'" class="mt-6">
             <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
               <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Access Codes</h2>
+                <h2 class="text-xl font-black uppercase tracking-widest text-primary">Access Codes</h2>
                 <p class="text-sm text-deep-navy/60 mt-2 font-medium">Create codes that users can use to join your community.</p>
               </div>
 
@@ -551,6 +551,70 @@
         </template>
       </UTabs>
     </div>
+    <div
+      class="fixed bottom-0 left-64 right-0 z-50 border-t border-gray-200 bg-blue-600 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
+    >
+      <div class="px-4 py-3 sm:px-6 lg:px-8">
+        <div
+          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <!-- Left -->
+          <div class="min-w-0">
+            <h2 class="text-sm font-semibold text-deep-navy text-white">
+              Membership Access
+            </h2>
+            <p class="mt-1 text-xs text-white">
+              Configure how new members are admitted to your organisation.
+            </p>
+          </div>
+
+          <!-- Right -->
+          <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
+            <!-- Verification -->
+            <div
+              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
+            >
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-deep-navy">
+                  Require verification
+                </h3>
+                <p class="mt-1 text-xs leading-5 text-gray-500">
+                  New members must be manually approved before they can access the
+                  community.
+                </p>
+              </div>
+
+              <UToggle
+                v-model="requiresVerification"
+                :disabled="isUpdatingMembership"
+                @change="toggleUserRequiresVerification(requiresVerification)"
+              />
+            </div>
+
+            <!-- Acceptance Code -->
+            <div
+              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
+            >
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-deep-navy">
+                  Require acceptance code
+                </h3>
+                <p class="mt-1 text-xs leading-5 text-gray-500">
+                  Members must enter a valid invitation code before joining the
+                  organisation.
+                </p>
+              </div>
+
+              <UToggle
+                v-model="requireAcceptanceCode"
+                :disabled="isUpdatingMembership"
+                @change="toggleRequireAcceptanceCode(requireAcceptanceCode)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
     <MembershipDetailsModal v-model="isMembershipModalOpen" :membership-id="selectedMembershipId" />
   </CommunitiesManagementLayout>
 </template>
@@ -560,6 +624,7 @@ import { useOrganisation } from '~/composables/resources/organisation/organisati
 import { useOrganisationMemberships, useDeleteOrganisationMembership, useVerifyOrganisationMembershipManually } from '~/composables/resources/organisation/organisationMemberships'
 import { useOrganisationInvites, useCreateOrganisationInvite, useDeleteOrganisationInvite } from '~/composables/resources/organisation/organisationInvites'
 import { useOrganisationAcceptanceCodes, useCreateOrganisationAcceptanceCode, useDeleteOrganisationAcceptanceCode } from '~/composables/resources/organisation/organisationAcceptanceCodes'
+import { useUpdateOrganisation } from '~/composables/resources/organisation/organisations'
 import { useUsers } from '~/composables/resources/user/users'
 import MembershipDetailsModal from '~/components/communities/MembershipDetailsModal.vue'
 import { formatDate, isExpiringSoon } from '~/utils/time'
@@ -594,6 +659,13 @@ const { data: orgData } = useOrganisation(organisationId)
 const organisation = computed(() => orgData.value?.data)
 const organisationNumericId = computed(() => organisation.value?.id)
 
+const requiresVerification = ref(false)
+const requireAcceptanceCode = ref(false)
+
+watchEffect(() => {
+  requiresVerification.value = organisation.value?.requires_manual_verification ?? false
+  requireAcceptanceCode.value = organisation.value?.required_acceptance_code ?? false
+})
 // Fetch all users for search
 const { data: usersData, isLoading: isLoadingUsers } = useUsers(computed(() => ({
   search: searchQuery.value,
@@ -610,6 +682,48 @@ const { data: membershipsData, isLoading: isLoadingMembers } = useOrganisationMe
   page: membersPage.value,
   page_size: membersPageSize.value,
 })))
+
+const { mutate: updateMembership, isPending: isUpdatingMembership } = useUpdateOrganisation()
+
+const toggleUserRequiresVerification = (requiresVerification: boolean | undefined) => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
+  try {
+    updateMembership({
+      organisationId: organisationNumericId.value,
+      body: {
+        title: organisation.value?.title || '',
+        requires_manual_verification: requiresVerification,
+      }
+    })
+    $notyf.success(`Membership verification requirement updated successfully!`)
+  } catch (error: any) {
+    $notyf.error(error?.body?.error || error?.message || 'Failed to update membership verification requirement')
+  }
+}
+
+const toggleRequireAcceptanceCode = (requireAcceptanceCode: boolean | undefined) => {
+  if (!organisationNumericId.value) {
+    $notyf.error('Community information is still loading. Please try again.')
+    return
+  }
+
+  try {
+    updateMembership({
+      organisationId: organisationNumericId.value,
+      body: {
+        title: organisation.value?.title || '',
+        required_acceptance_code: requireAcceptanceCode,
+      }
+    })
+    $notyf.success(`Membership acceptance code requirement updated successfully!`)
+  } catch (error: any) {
+    $notyf.error(error?.body?.error || error?.message || 'Failed to update membership acceptance code requirement')
+  }
+}
 
 const memberships = computed(() => membershipsData.value?.data?.results || [])
 const membersTotalCount = computed(() => membershipsData.value?.data?.count || 0)
