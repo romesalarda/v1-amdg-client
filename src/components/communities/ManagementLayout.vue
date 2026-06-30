@@ -67,12 +67,15 @@
       <NuxtLink
         v-for="tab in tabs"
         :key="tab.path"
-        :to="`/communities/${organisationId}/m/${tab.path}`"
+        :to="tab.disabled ? undefined : `/communities/${organisationId}/m/${tab.path}`"
         @click="onTabClick"
+        :disabled="tab.disabled"
         :class="[
           'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all',
           isActive(tab.path)
             ? 'bg-white/10 text-white'
+            : tab.disabled
+            ? 'text-white/40 cursor-not-allowed'
             : 'text-white/60 hover:text-white hover:bg-white/5',
         ]"
       >
@@ -125,12 +128,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
+import { useCurrentLeaderPermissions } from '~/composables/permissions'
 import Navbar from '~/components/common/Navbar.vue'
 
 const props = defineProps<{
-  organisationId: string | number
+  organisationId: string
   organisation?: any
 }>()
+
+const { hasLeaderPermission } = useCurrentLeaderPermissions(props.organisationId)
 
 const route = useRoute()
 const sidebarOpen = ref(false)
@@ -140,51 +146,61 @@ const tabs = computed(() => [
     path: 'dashboard',
     label: 'Dashboard',
     icon: 'i-heroicons-chart-bar',
+    disabled: hasLeaderPermission('allow_manage_organisation', 'read').value === false,
   },
   {
     path: 'landing/editor',
     label: 'Landing Page',
     icon: 'i-heroicons-photo',
+    disabled: hasLeaderPermission('allow_landing_page_management', 'read').value === false,
   },
   {
     path: 'members',
     label: 'Members',
     icon: 'i-heroicons-users',
+    disabled: hasLeaderPermission('allow_membership_access', 'read').value === false,
   },
   {
     path: 'events',
     label: 'Events',
     icon: 'i-heroicons-calendar-days',
+    disabled: hasLeaderPermission('allow_event_approval', 'read').value === false,
   },
   {
     path: 'sponsors',
     label: 'Sponsors',
     icon: 'i-heroicons-banknotes',
+    disabled: hasLeaderPermission('allow_organisation_sponsor', 'read').value === false,
   },
   {
     path: 'leaders',
     label: 'Leaders',
     icon: 'i-heroicons-shield-check',
+    disabled: hasLeaderPermission('allow_manage_leaders', 'read').value === false,
   },
   {
     path: 'statistics',
     label: 'Statistics',
     icon: 'i-heroicons-chart-pie',
+    disabled: hasLeaderPermission('allow_data_management', 'read').value === false,
   },
   {
     path: 'policies',
     label: 'Policies',
     icon: 'i-heroicons-document-text',
+    disabled: hasLeaderPermission('allow_policy_management', 'read').value === false,
   },
   {
     path: 'data-handling',
     label: 'Data Handling',
     icon: 'i-heroicons-shield-exclamation',
+    disabled: hasLeaderPermission('allow_data_management', 'read').value === false, 
   },
   {
     path: 'reviews',
     label: 'Reviews',
     icon: 'i-heroicons-star',
+    disabled: hasLeaderPermission('allow_review_access', 'read').value === false,
   }
 ])
 
