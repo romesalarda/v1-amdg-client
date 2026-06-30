@@ -17,5 +17,10 @@
 </template>
 
 <script setup lang="ts">
-
+useHead({
+  title: '500 Server Error',
+  meta: [
+    { name: 'description', content: 'Oops! Something went wrong on our end. Please try again later or contact support if the problem persists.' },
+  ],
+})
 </script>

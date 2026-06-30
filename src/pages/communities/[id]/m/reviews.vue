@@ -55,7 +55,10 @@ const { data: organisation, isLoading: isLoadingOrganisation } = useOrganisation
 
 definePageMeta({
   layout: false,
-  middleware: ['auth'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
+  leaderPermission: { 
+    code: 'allow_review_access' 
+  },
 })
 
 

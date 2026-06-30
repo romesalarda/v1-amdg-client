@@ -638,8 +638,11 @@ import { useDebounceFn } from '@vueuse/core'
 import Swal from 'sweetalert2'
 
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
   layout: false,
+  leaderPermission: { 
+    code: 'allow_membership_access' 
+  },
 })
 const selectedAttendees = ref<number[]>([])
 

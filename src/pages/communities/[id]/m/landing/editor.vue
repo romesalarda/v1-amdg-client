@@ -222,8 +222,11 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { useForm, useField } from 'vee-validate'
 
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
   layout: false,
+  leaderPermission: { 
+    code: 'allow_landing_page_management' 
+  },
 })
 
 const route = useRoute()

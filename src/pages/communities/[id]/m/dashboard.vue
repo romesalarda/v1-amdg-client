@@ -189,8 +189,11 @@ import {
 } from '~/composables/statistics/organisations/organisation-statistics'
 
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
   layout: false,
+  leaderPermission: { 
+    code: 'allow_manage_organisation' 
+  },
 })
 
 const route = useRoute()

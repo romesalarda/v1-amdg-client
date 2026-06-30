@@ -40,7 +40,7 @@
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="event" class="space-y-6">
+    <div v-else-if="event" class="space-y-6 m-5">
       <!-- Page Header with Actions -->
       <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-5">
         <div class="flex items-start justify-between gap-6">
@@ -314,8 +314,18 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
-  layout: false, // We will use the ManagementLayout directly in the template
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
+  layout: false,
+  leaderPermission: { 
+    code: 'allow_event_approval' 
+  },
+})
+
+useHead({
+  title: 'Community Event Management',
+  meta: [
+    { name: 'description', content: 'Manage and view event details for the community.' },
+  ],
 })
 
 import { useEvent } from '~/composables/resources/events/events'

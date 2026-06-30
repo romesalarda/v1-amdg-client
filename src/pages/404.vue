@@ -18,4 +18,11 @@
 
 <script setup lang="ts">
 
+useHead({
+  title: '404 Page Not Found',
+  meta: [
+    { name: 'description', content: 'The page you are looking for does not exist or has been moved.' },
+  ],
+})
+
 </script>

@@ -118,8 +118,11 @@ import Swal from 'sweetalert2'
 import type { SponsorableEventList } from '~/api/types.gen'
 
 definePageMeta({
-	middleware: ['auth', 'organisation-controller'],
+	middleware: ['auth', 'organisation-controller', 'leader-permission'],
 	layout: false,
+	leaderPermission: { 
+		code: 'allow_monetary_access' 
+	},
 })
 
 useHead({

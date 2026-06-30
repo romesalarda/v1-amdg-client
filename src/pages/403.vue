@@ -40,6 +40,13 @@
 const route = useRoute()
 const router = useRouter()
 
+useHead({
+  title: '403 Access Denied',
+  meta: [
+    { name: 'description', content: 'You do not have permission to access this page.' },
+  ],
+})
+
 // Get error message from query params
 const errorMessage = computed(() => route.query.message as string | undefined)
 

@@ -232,8 +232,11 @@ use([
 ])
 
 definePageMeta({
-	middleware: ['auth', 'organisation-controller'],
+	middleware: ['auth', 'organisation-controller', 'leader-permission'],
 	layout: false,
+	leaderPermission: { 
+		code: 'allow_data_management' 
+	},
 })
 
 const route = useRoute()

@@ -460,8 +460,11 @@ const getRegistrationLabel = (event: EventList) => {
 }
 
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
   layout: false,
+  leaderPermission: { 
+    code: 'allow_event_approval' 
+  },
 })
 
 </script>

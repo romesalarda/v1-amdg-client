@@ -27,14 +27,14 @@
     />
 
     <!-- Main Content -->
-    <div v-else-if="event" class="space-y-6 pb-28">
+    <div v-else-if="event" class="space-y-6 pb-28 m-6">
 
       <!-- Page Header -->
-      <div class="bg-white rounded-xl border-2 border-deep-navy/10 p-6 shadow-sm">
+      <div class="bg-[#026CDF] rounded-xl border-2 border-deep-navy/10 p-6 shadow-sm">
         <div class="flex items-start justify-between gap-6">
           <div class="flex-1">
-            <h1 class="text-3xl font-black text-deep-navy mb-2">Authorise <span class="text-deep-navy/60 font-medium">{{ event.title }}</span></h1>
-            <p class="text-deep-navy/60 font-medium mb-4">Review this event's details and flag any issues before authorisation.</p>
+            <h1 class="text-3xl text-white text-deep-navy mb-2">Authorise <span class="text-white/90 font-medium">{{ event.title }}</span></h1>
+            <p class="text-white/60 font-medium mb-4">Review this event's details and flag any issues before authorisation.</p>
             <div class="flex flex-wrap gap-3">
               <UBadge :color="getStatusColor(event.status)" :label="event.status_display" size="lg" />
               <UBadge v-if="event.is_approved" color="green" label="Authorized" size="lg" />
@@ -472,8 +472,18 @@ import { useReviewIssues } from '~/composables/useReviewIssues'
 
 // ── Page Meta ────────────────────────────────────────────────────────────────
 definePageMeta({
-  middleware: ['auth', 'organisation-controller'],
+  middleware: ['auth', 'organisation-controller', 'leader-permission'],
   layout: false,
+  leaderPermission: { 
+    code: 'allow_event_approval' 
+  },
+})
+
+useHead({
+  title: 'Authorise Event',
+  meta: [
+    { name: 'description', content: 'Authorise event details and manage approvals for the community.' },
+  ],
 })
 
 const route = useRoute()

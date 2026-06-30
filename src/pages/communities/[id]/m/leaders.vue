@@ -290,8 +290,11 @@ import { useCurrentLeaderPermissions } from '~/composables/permissions'
 import type { LeaderList } from '~/api/types.gen'
 
 definePageMeta({
-    middleware: ['auth', 'organisation-controller'],
+    middleware: ['auth', 'organisation-controller', 'leader-permission'],
     layout: false,
+    leaderPermission: { 
+        code: 'allow_manage_leaders' 
+    },
 })
 
 useHead({
