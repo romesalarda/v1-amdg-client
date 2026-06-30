@@ -1,62 +1,61 @@
 <template>
-  <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
+    <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
+        <div class="space-y-8">
+            <div class="flex items-center justify-between">
+                <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Community Policies</h1>
+            </div>
 
-    <div class="flex items-center justify-center min-h-[70vh] px-6">
-      <div
-        class="max-w-lg w-full text-center bg-white rounded-2xl border border-gray-200 shadow-sm p-10"
-      >
-        <div
-          class="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-50"
-        >
-          <UIcon
-            name="i-heroicons-wrench-screwdriver"
-            class="h-10 w-10 text-amber-500"
-          />
+            <div v-if="isLoadingPolicy" class="space-y-4">
+                <USkeleton class="h-48 w-full rounded-xl" />
+                <USkeleton class="h-48 w-full rounded-xl" />
+                <USkeleton class="h-48 w-full rounded-xl" />
+            </div>
+
+            <div v-else-if="policyError" class="bg-white border-2 border-red-400 rounded-xl shadow-drawn p-8 text-center">
+                <p class="text-sm font-black text-red-600 uppercase tracking-tight">Failed to load policies</p>
+                <p class="text-xs text-red-400 font-medium mt-2">{{ (policyError as any)?.message ?? 'An unexpected error occurred.' }}</p>
+            </div>
+
+            <PolicyForm
+                v-else-if="policy"
+                :policy="policy"
+                :can-edit="canEdit"
+                :org-id="organisationId"
+                @saved="refetchPolicy"
+            />
+
+            <div v-else class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn p-8 text-center">
+                <p class="text-sm font-bold text-deep-navy/60">No policy configuration found.</p>
+            </div>
         </div>
-
-        <h1 class="text-3xl font-bold text-gray-900 mb-3">
-          Community Policies - Coming Soon
-        </h1>
-
-        <p class="text-gray-600 mb-6 leading-relaxed">
-          We're currently building this feature to help you manage community
-          policies, guidelines, and regulations more efficiently.
-        </p>
-
-        <div
-          class="inline-flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700"
-        >
-          <UIcon
-            name="i-heroicons-clock"
-            class="h-4 w-4"
-          />
-          Coming Soon
-        </div>
-
-        <div class="mt-8 border-t pt-6">
-          <p class="text-sm text-gray-500">
-            Stay tuned for future updates.
-          </p>
-        </div>
-      </div>
-    </div>
-</CommunitiesManagementLayout>
+    </CommunitiesManagementLayout>
 </template>
+
 <script lang="ts" setup>
-
 import { useOrganisation } from '~/composables/resources/organisation/organisations'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
+import { useCurrentLeaderPermissions } from '~/composables/permissions'
+import PolicyForm from '~/components/communities/policies/PolicyForm.vue'
 
+definePageMeta({
+    layout: false,
+    middleware: ['auth', 'leader-permission'],
+    leaderPermission: { code: 'allow_policy_management' },
+})
+
+useHead({
+    title: 'Community Policies',
+})
 
 const route = useRoute()
 const organisationId = computed(() => route.params.id as string)
 
-// Fetch organisation details
-const { data: organisation, isLoading: isLoadingOrganisation } = useOrganisation(organisationId)
+const { data: organisationData } = useOrganisation(organisationId)
+const organisation = computed(() => organisationData.value?.data)
 
-definePageMeta({
-  layout: false,
-  middleware: ['auth'],
-})
+const { data: policyData, isLoading: isLoadingPolicy, error: policyError, refetch: refetchPolicy } = useOrganisationPolicy(organisationId)
+const policy = computed(() => policyData.value?.data)
 
-
+const { canManagePolicy } = useCurrentLeaderPermissions(organisationId)
+const canEdit = computed(() => canManagePolicy.value)
 </script>

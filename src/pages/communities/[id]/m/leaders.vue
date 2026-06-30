@@ -157,7 +157,13 @@
                             </div>
 
                             <div v-else-if="leaders.length > 0" class="divide-y-2 divide-deep-navy/5">
-                                <div v-for="leader in leaders" :key="leader.id" class="px-8 py-6 flex items-center justify-between gap-6">
+                                <div
+                                    v-for="leader in leaders"
+                                    :key="leader.id"
+                                    class="px-8 py-6 flex items-center justify-between gap-6 cursor-pointer hover:bg-deep-navy/[0.02] transition-colors"
+                                    :class="{ 'bg-deep-navy/[0.04]': selectedLeader?.id === leader.id }"
+                                    @click="selectedLeader = leader"
+                                >
                                     <div>
                                         <p class="text-sm font-black text-deep-navy uppercase tracking-tight">{{ leader.user_name }}</p>
                                         <p class="text-xs text-deep-navy/60 font-medium mt-0.5">{{ leader.user_email }}</p>
@@ -169,13 +175,19 @@
                                         </p>
                                     </div>
 
-                                    <button
-                                        :disabled="removingLeaderId === leader.id"
-                                        @click="removeLeader(leader.id)"
-                                        class="px-5 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
-                                    >
-                                        {{ removingLeaderId === leader.id ? 'Removing...' : 'Remove' }}
-                                    </button>
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-[10px] font-bold text-deep-navy/40 uppercase tracking-wider">
+                                            View Permissions
+                                        </span>
+                                        <button
+                                            v-if="isController"
+                                            :disabled="removingLeaderId === leader.id"
+                                            @click.stop="removeLeader(leader.id)"
+                                            class="px-5 py-2 border-2 border-red-500 text-red-600 hover:bg-red-500 hover:text-white rounded-xl font-black text-xs uppercase tracking-wider transition-all disabled:opacity-50"
+                                        >
+                                            {{ removingLeaderId === leader.id ? 'Removing...' : 'Remove' }}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 
@@ -241,6 +253,14 @@
         <UModal v-model="isInviteModalOpen" prevent-focus>
             <InviteLeaderModal :organisation-id="organisationNumericId" :leaders="leadersSnapshot" :pending-invites="pendingInvites" />
         </UModal>
+
+        <LeaderPermissionsPanel
+            :open="!!selectedLeader"
+            :leader="selectedLeader"
+            :organisation-id="organisationId"
+            :is-controller="isController"
+            @close="selectedLeader = null"
+        />
     </CommunitiesManagementLayout>
 </template>
 
@@ -258,6 +278,9 @@ import { useLocationClusters } from '~/composables/resources/locations/locationC
 import { useLocationChapters } from '~/composables/resources/locations/locationChapters'
 import { useLocationAreas } from '~/composables/resources/locations/locationAreas'
 import InviteLeaderModal from '~/components/communities/InviteLeaderModal.vue'
+import LeaderPermissionsPanel from '~/components/communities/leaders/LeaderPermissionsPanel.vue'
+import { useCurrentLeaderPermissions } from '~/composables/permissions'
+import type { LeaderList } from '~/api/types.gen'
 
 definePageMeta({
     middleware: ['auth', 'organisation-controller'],
@@ -276,6 +299,10 @@ const organisationId = computed(() => route.params.id as string)
 const { data: organisationData } = useOrganisation(organisationId)
 const organisation = computed(() => organisationData.value?.data)
 const organisationNumericId = computed(() => organisation.value?.id || 0)
+
+const { isController } = useCurrentLeaderPermissions(organisationId)
+
+const selectedLeader = ref<LeaderList | null>(null)
 
 const isInviteModalOpen = ref(false)
 const showInviteHistory = ref(false)

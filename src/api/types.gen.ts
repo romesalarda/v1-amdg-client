@@ -47127,7 +47127,10 @@ export type OrganisationsLeaderPermissionsCreateResponse = OrganisationsLeaderPe
 export type OrganisationsLeaderPermissionsDestroyData = {
     body?: never;
     path: {
-        id: string;
+        /**
+         * A unique integer value identifying this leader permission.
+         */
+        id: number;
     };
     query?: never;
     url: '/api/organisations/leader-permissions/{id}/';
@@ -47145,7 +47148,10 @@ export type OrganisationsLeaderPermissionsDestroyResponse = OrganisationsLeaderP
 export type OrganisationsLeaderPermissionsRetrieveData = {
     body?: never;
     path: {
-        id: string;
+        /**
+         * A unique integer value identifying this leader permission.
+         */
+        id: number;
     };
     query?: never;
     url: '/api/organisations/leader-permissions/{id}/';
@@ -47160,7 +47166,10 @@ export type OrganisationsLeaderPermissionsRetrieveResponse = OrganisationsLeader
 export type OrganisationsLeaderPermissionsPartialUpdateData = {
     body?: PatchedLeaderPermissionCreateUpdateRequest;
     path: {
-        id: string;
+        /**
+         * A unique integer value identifying this leader permission.
+         */
+        id: number;
     };
     query?: never;
     url: '/api/organisations/leader-permissions/{id}/';
@@ -47175,7 +47184,10 @@ export type OrganisationsLeaderPermissionsPartialUpdateResponse = OrganisationsL
 export type OrganisationsLeaderPermissionsUpdateData = {
     body: LeaderPermissionCreateUpdateRequest;
     path: {
-        id: string;
+        /**
+         * A unique integer value identifying this leader permission.
+         */
+        id: number;
     };
     query?: never;
     url: '/api/organisations/leader-permissions/{id}/';

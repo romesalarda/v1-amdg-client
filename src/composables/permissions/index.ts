@@ -21,6 +21,16 @@ export {
 } from './useCurrentUserPermissions'
 
 export {
+  useCurrentLeaderPermissions,
+} from './useCurrentLeaderPermissions'
+
+export type {
+  LeaderPermissionCode,
+  LeaderPermissionCRUDAction,
+  CurrentLeaderPermission,
+} from './useCurrentLeaderPermissions'
+
+export {
   useAssignEventPermission,
   useRevokeEventPermission,
   useCheckEventPermissions,
