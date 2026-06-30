@@ -1,10 +1,10 @@
 <template>
 	<CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-		<div class="space-y-6">
-			<div class="flex items-center justify-between">
+		<div class="space-y-6 m-5">
+			<div class="flex items-center justify-between bg-[#026CDF] rounded-lg px-6 py-4">
 				<div>
-					<h1 class="text-2xl font-black text-deep-navy uppercase tracking-widest">Organisation Statistics</h1>
-					<p class="text-sm text-gray-500 font-medium mt-1">
+					<h1 class="text-2xl font-black text-white uppercase">Organisation Statistics</h1>
+					<p class="text-sm text-white/60 font-medium mt-1">
 						Live analytics for {{ organisation?.title || 'this community' }}
 					</p>
 				</div>
@@ -12,9 +12,10 @@
 					<UButton
 						:to="`/communities/${organisationId}/m/dashboard`"
 						variant="outline"
-						color="gray"
+						color="white"
 						icon="i-heroicons-arrow-left"
 						size="sm"
+						class="text-white"
 					>
 						Back to Dashboard
 					</UButton>
@@ -29,7 +30,7 @@
 				</div>
 			</div>
 
-			<div class="text-xs text-gray-500">
+			<div class="text-xs text-black font-semibold uppercase tracking-wide flex items-center gap-2">
 				Auto-refresh every 60 seconds.
 				<span v-if="overview?.generated_at">Last updated: {{ new Date(overview.generated_at).toLocaleString() }}</span>
 			</div>
@@ -65,7 +66,7 @@
 				One or more statistics blocks failed to load. The visible data may be incomplete.
 			</div>
 
-			<section class="border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
+			<section class="border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden bg-white">
 				<div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
 					<UIcon name="i-heroicons-globe-alt" class="w-5 h-5 text-primary" />
 					<h3 class="text-sm font-black text-primary uppercase tracking-widest">Global Distribution</h3>

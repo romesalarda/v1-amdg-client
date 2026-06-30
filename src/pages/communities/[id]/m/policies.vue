@@ -1,6 +1,6 @@
 <template>
     <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-        <div class="space-y-8">
+        <div class="space-y-8 m-5">
             <div class="flex items-center justify-between">
                 <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Community Policies</h1>
             </div>

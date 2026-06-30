@@ -5,18 +5,20 @@
       <USkeleton v-for="i in 8" :key="i" class="h-32" />
     </div>
 
-    <div v-else-if="organisation" class="space-y-8">
-      <div class="flex items-center justify-between">
+    <div v-else-if="organisation" class="space-y-8 m-6">
+      <div class="flex items-center justify-between bg-blue-600 rounded-lg p-6">
         <div>
-          <h2 class="text-xl font-semibold text-gray-900">Organisation Snapshot</h2>
-          <p class="text-sm text-gray-500">Live data refreshes every 60 seconds.</p>
+          <h2 class="text-xl font-semibold text-white">Organisation Snapshot</h2>
+          <p class="text-sm text-white/80">Live data refreshes every 60 seconds.</p>
         </div>
         <div class="flex items-center gap-3">
           <UButton
             size="sm"
             variant="outline"
+            color="white"
             icon="i-heroicons-chart-pie"
             :to="`/communities/${organisationId}/m/statistics`"
+            class="text-white"
           >
             Open Statistics
           </UButton>

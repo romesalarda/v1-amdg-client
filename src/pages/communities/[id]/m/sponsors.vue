@@ -1,8 +1,8 @@
 <template>
 	<CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-		<div class="space-y-6">
+		<div class="space-y-6 m-5">
 			<!-- Page header -->
-			<div class=" border border-deep-navy/10 rounded-xl shadow-sm p-6 bg-blue-600">
+			<div class=" border border-deep-navy/10 shadow-sm p-6 bg-blue-600 rounded-xl">
 				<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 					<div>
 						<p class="text-xs font-semibold text-white uppercase tracking-widest">Community Sponsorships</p>

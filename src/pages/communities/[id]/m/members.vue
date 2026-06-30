@@ -1,38 +1,40 @@
 <template>
   <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
-    <div class="space-y-8">
+    <div class="space-y-5">
 
       <UTabs
           :items="tabItems"
           class="w-full"
           :ui="{
             list: {
-              base: 'sticky top-[40px] z-40 flex items-center gap-8 bg-[#026CDF] px-2 py-0',
+              base: 'z-40 flex items-center gap-8 bg-[#026CDF]',
               background: '',
               tab: {
-                active: 'border-white text-black hover:text-white',
-                inactive: 'text-white hover:text-white',
+                active: 'border-white text-black hover:text-black',
+                inactive: 'text-white hover:text-white/80',
               },
+              // disable rounded
+              rounded: 'rounded-none',
             },
           }"
         >
         <template #item="{ item }">
-          <div v-if="item.key === 'members'" class="mt-6">
-            <section class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn ">
-              <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
+          <div v-if="item.key === 'members'" class="">
+            <section class="overflow-hidden border-b-2 border-deep-navy bg-white shadow-drawn">
+              <div class="border-b border-gray-100 px-6 py-5 sm:px-8 bg-[#026CDF]">
                 <div class="flex items-center gap-3">
-                  <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-primary" />
-                  <h2 class="text-sm font-black uppercase tracking-widest text-primary">Members</h2>
+                  <UIcon name="i-heroicons-user-group" class="h-5 w-5 text-white" />
+                  <h2 class="text-sm font-black uppercase tracking-widest text-white">Members</h2>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">View active members and manage verification.</p>
+                <p class="mt-1 text-xs text-white/60">View active members and manage verification.</p>
 
                 <div class="mt-4">
-                  <label for="member-search" class="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">
+                  <label for="member-search" class="mb-2 block text-[10px] font-black uppercase tracking-[0.18em] text-white/60">
                     Search Members
                   </label>
                   <div class="relative">
                     <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                      <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg class="h-4 w-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
                     </div>
@@ -111,18 +113,18 @@
                         <div class="flex items-center justify-center gap-2 ">
                           <span
                           v-if="member.is_verified"
-                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 font-semibold text-sm text-green-700"
+                          class="inline-flex items-center rounded-md bg-green-100 px-2.5 py-1 font-mono text-sm text-green-700"
                         >
-                          <UIcon
+                          <!-- <UIcon
                             name="i-heroicons-check-badge"
                             class="h-6 w-6 text-green-700 mr-1"
                           >
-                          </UIcon>
+                          </UIcon> -->
                           Verified
                         </span>
                         <span
                           v-else-if="member.requires_verification"
-                          class="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 font-semibold text-[10px] uppercase tracking-[0.12em] text-amber-700"
+                          class="inline-flex items-center rounded-md bg-amber-100 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.12em] text-amber-700"
                         >
                           Needs Verification
                         </span>
@@ -204,10 +206,74 @@
                 <UPagination v-model="membersPage" :page-count="membersPageSize" :total="membersTotalCount" :max="7" />
               </div>
             </section>
+             <div
+      class="fixed bottom-0 left-64 right-0 z-50 border-t border-gray-200 bg-deep-navy backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
+    >
+      <div class="px-4 py-3 sm:px-6 lg:px-8">
+        <div
+          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+        >
+          <!-- Left -->
+          <div class="min-w-0">
+            <h2 class="text-sm font-semibold text-deep-navy text-white">
+              Membership Access
+            </h2>
+            <p class="mt-1 text-xs text-white">
+              Configure how new members are admitted to your organisation.
+            </p>
+          </div>
+
+          <!-- Right -->
+          <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
+            <!-- Verification -->
+            <div
+              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
+            >
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-deep-navy">
+                  Require verification
+                </h3>
+                <p class="mt-1 text-xs leading-5 text-gray-500">
+                  New members must be manually approved before they can access the
+                  community.
+                </p>
+              </div>
+
+              <UToggle
+                v-model="requiresVerification"
+                :disabled="isUpdatingMembership"
+                @change="toggleUserRequiresVerification(requiresVerification)"
+              />
+            </div>
+
+            <!-- Acceptance Code -->
+            <div
+              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
+            >
+              <div class="min-w-0">
+                <h3 class="text-sm font-medium text-deep-navy">
+                  Require acceptance code
+                </h3>
+                <p class="mt-1 text-xs leading-5 text-gray-500">
+                  Members must enter a valid invitation code before joining the
+                  organisation.
+                </p>
+              </div>
+
+              <UToggle
+                v-model="requireAcceptanceCode"
+                :disabled="isUpdatingMembership"
+                @change="toggleRequireAcceptanceCode(requireAcceptanceCode)"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
           </div>
 
           <div v-if="item.key === 'invites'" class="mt-6 space-y-8">
-            <div class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn">
+            <div class="overflow-hidden border-t-2 border-b-2 border-deep-navy bg-white shadow-drawn">
               <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-heroicons-user-plus" class="h-5 w-5 text-primary" />
@@ -287,7 +353,7 @@
               </div>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border-2 border-deep-navy bg-white shadow-drawn">
+            <div class="overflow-hidden border-t-2 border-b-2 border-deep-navy bg-white shadow-drawn">
               <div class="border-b border-gray-100 px-6 py-5 sm:px-8">
                 <div class="flex items-center gap-3">
                   <UIcon name="i-heroicons-envelope" class="h-5 w-5 text-primary" />
@@ -403,14 +469,17 @@
                   </ul>
                 </div>
               </div>
-            </div>
+            </div> 
           </div>
 
-          <div v-if="item.key === 'access-codes'" class="mt-6">
-            <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-              <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                <h2 class="text-xl font-black uppercase tracking-widest text-primary">Access Codes</h2>
-                <p class="text-sm text-deep-navy/60 mt-2 font-medium">Create codes that users can use to join your community.</p>
+          <div v-if="item.key === 'access-codes'">
+            <div class="bg-white border-b-2 border-deep-navy shadow-drawn">
+              <div class="px-8 py-6 border-b-2 border-deep-navy/10 bg-[#026CDF]">
+                <div class="flex items-center gap-3">
+                  <UIcon name="i-heroicons-key" class="h-5 w-5 text-white" />
+                  <h2 class="text-sm font-black uppercase tracking-widest text-white">Access Codes</h2>
+                </div>
+                <p class="text-sm text-white/60 mt-2 font-medium">Create codes that users can use to join your community.</p>
               </div>
 
               <div class="p-8 border-b-2 border-deep-navy/10 bg-deep-navy/5">
@@ -551,70 +620,7 @@
         </template>
       </UTabs>
     </div>
-    <div
-      class="fixed bottom-0 left-64 right-0 z-50 border-t border-gray-200 bg-blue-600 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
-    >
-      <div class="px-4 py-3 sm:px-6 lg:px-8">
-        <div
-          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-        >
-          <!-- Left -->
-          <div class="min-w-0">
-            <h2 class="text-sm font-semibold text-deep-navy text-white">
-              Membership Access
-            </h2>
-            <p class="mt-1 text-xs text-white">
-              Configure how new members are admitted to your organisation.
-            </p>
-          </div>
-
-          <!-- Right -->
-          <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
-            <!-- Verification -->
-            <div
-              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
-            >
-              <div class="min-w-0">
-                <h3 class="text-sm font-medium text-deep-navy">
-                  Require verification
-                </h3>
-                <p class="mt-1 text-xs leading-5 text-gray-500">
-                  New members must be manually approved before they can access the
-                  community.
-                </p>
-              </div>
-
-              <UToggle
-                v-model="requiresVerification"
-                :disabled="isUpdatingMembership"
-                @change="toggleUserRequiresVerification(requiresVerification)"
-              />
-            </div>
-
-            <!-- Acceptance Code -->
-            <div
-              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
-            >
-              <div class="min-w-0">
-                <h3 class="text-sm font-medium text-deep-navy">
-                  Require acceptance code
-                </h3>
-                <p class="mt-1 text-xs leading-5 text-gray-500">
-                  Members must enter a valid invitation code before joining the
-                  organisation.
-                </p>
-              </div>
-
-              <UToggle
-                v-model="requireAcceptanceCode"
-                :disabled="isUpdatingMembership"
-                @change="toggleRequireAcceptanceCode(requireAcceptanceCode)"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+   
     <MembershipDetailsModal v-model="isMembershipModalOpen" :membership-id="selectedMembershipId" />
   </CommunitiesManagementLayout>
 </template>

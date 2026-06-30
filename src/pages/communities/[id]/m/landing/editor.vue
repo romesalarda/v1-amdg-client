@@ -19,7 +19,7 @@
     </div>
 
     <!-- Editor Form -->
-    <form v-else-if="organisation" @submit.prevent="handleSubmit" class="space-y-8">
+    <form v-else-if="organisation" @submit.prevent="handleSubmit" class="space-y-8 m-6">
       <!-- Current Landing Image -->
       <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
         <div class="px-8 py-6 border-b-2 border-deep-navy/10">

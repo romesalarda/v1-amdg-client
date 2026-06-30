@@ -1,10 +1,15 @@
 <template>
     <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
         <div class="space-y-8">
-            <div class="flex items-center justify-between">
-                <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Manage Leaders</h1>
+            <div class="flex items-center justify-between m-5">
+                <div>
+                    <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Manage Volunteers</h1>
+                    <p class="text-sm text-gray-500 font-medium mt-1">
+                        Assign other users 'Volunteers' within your community to host events
+                    </p>
+                </div>
                 <button @click="isInviteModalOpen = true" class="px-6 py-3 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all">
-                    Invite Leader
+                    Invite Volunteer
                 </button>
             </div>
 
@@ -20,19 +25,21 @@
                         inactive: 'text-white hover:text-white',
                         padding: 'px-0 py-4',
                     },
+                    rounded: 'rounded-none',
                     },
+
                 }"
             >
                 <template #item="{ item }">
-                    <div v-if="item.key === 'pending-invites'" class="mt-8">
-                        <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 flex items-center justify-between gap-3">
+                    <div v-if="item.key === 'pending-invites'">
+                        <div class="bg-white border-b-2 border-deep-navy shadow-drawn">
+                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 flex items-center justify-between gap-3 bg-[#026CDF]">
                                 <div>
-                                    <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Pending Leader Invites</h2>
-                                    <p class="text-sm text-deep-navy/60 mt-2 font-medium">Outstanding invitations for location leadership</p>
+                                    <h2 class="text-xl font-black text-white uppercase tracking-tight">Pending Leader Invites</h2>
+                                    <p class="text-sm text-white/60 mt-2 font-medium">Outstanding invitations for location leadership</p>
                                 </div>
-                                <label class="text-xs font-bold text-deep-navy/60 flex items-center gap-2">
-                                    <input v-model="showInviteHistory" type="checkbox" class="rounded border-deep-navy/40" />
+                                <label class="text-xs font-bold text-white/60 flex items-center gap-2">
+                                    <input v-model="showInviteHistory" type="checkbox" class="rounded border-white/40" />
                                     Show full invite history
                                 </label>
                             </div>
@@ -79,17 +86,17 @@
                         </div>
                     </div>
 
-                    <div v-if="item.key === 'current-leaders'" class="mt-8">
-                        <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 space-y-6">
+                    <div v-if="item.key === 'current-leaders'">
+                        <div class="bg-white border-b-2 border-deep-navy shadow-drawn">
+                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 space-y-6 bg-[#026CDF]">
                                 <div>
-                                    <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Current Leaders</h2>
-                                    <p class="text-sm text-deep-navy/60 mt-2 font-medium">Active leader assignments in this organisation</p>
+                                    <h2 class="text-xl font-black text-white uppercase tracking-tight">Current Volunteers</h2>
+                                    <p class="text-sm text-white/60 mt-2 font-medium">Active volunteer assignments in this organisation</p>
                                 </div>
 
                                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
                                     <div>
-                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                        <label class="block text-[10px] font-black text-white/50 mb-2 uppercase tracking-[0.2em]">
                                             Location Type
                                         </label>
                                         <select
@@ -103,7 +110,7 @@
                                     </div>
 
                                     <div>
-                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                        <label class="block text-[10px] font-black text-white/50 mb-2 uppercase tracking-[0.2em]">
                                             Location
                                         </label>
                                         <select
@@ -119,12 +126,12 @@
                                     </div>
 
                                     <div class="lg:col-span-2">
-                                        <label class="block text-[10px] font-black text-deep-navy/50 mb-2 uppercase tracking-[0.2em]">
+                                        <label class="block text-[10px] font-black text-white/50 mb-2 uppercase tracking-[0.2em]">
                                             Search Leaders
                                         </label>
                                         <div class="relative">
                                             <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                                <svg class="h-4 w-4 text-deep-navy/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <svg class="h-4 w-4 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                                 </svg>
                                             </div>
@@ -139,11 +146,11 @@
                                 </div>
 
                                 <div v-if="isLeaderFilteringActive" class="flex items-center justify-between">
-                                    <p class="text-xs text-deep-navy/50 font-medium">
+                                    <p class="text-xs text-white/50 font-medium">
                                         Filters are active. Showing {{ leadersTotalCount }} matching leaders.
                                     </p>
                                     <button
-                                        class="px-4 py-2 border-2 border-deep-navy/30 text-deep-navy rounded-xl font-black text-xs uppercase tracking-wider hover:bg-deep-navy/5 transition-all"
+                                        class="px-4 py-2 border-2 border-white/30 text-white rounded-xl font-black text-xs uppercase tracking-wider hover:bg-white/5 transition-all"
                                         @click="resetLeaderFilters"
                                     >
                                         Clear Filters
@@ -215,12 +222,12 @@
                         </div>
                     </div>
 
-                    <div v-if="item.key === 'history'" class="mt-8">
-                        <div class="bg-white border-2 border-deep-navy rounded-xl shadow-drawn">
-                            <div class="px-8 py-6 border-b-2 border-deep-navy/10">
-                                <h2 class="text-xl font-black text-deep-navy uppercase tracking-tight">Operational History</h2>
-                                <p class="text-sm text-deep-navy/60 mt-2 font-medium">
-                                    Combined invite lifecycle and active leader assignment snapshot.
+                    <div v-if="item.key === 'history'">
+                        <div class="bg-white border-b-2 border-deep-navy shadow-drawn">
+                            <div class="px-8 py-6 border-b-2 border-deep-navy/10 bg-[#026CDF]">
+                                <h2 class="text-xl text-white uppercase tracking-tight">Operational History</h2>
+                                <p class="text-sm text-white/60 mt-2 font-medium">
+                                    Combined invite lifecycle and active volunteer assignment snapshot.
                                 </p>
                             </div>
 

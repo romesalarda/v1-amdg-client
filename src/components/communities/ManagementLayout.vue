@@ -116,7 +116,7 @@
     </header>
 
     <!-- Content Area -->
-    <div class="p-8">
+    <div class="">
       <slot />
     </div>
   </div>
