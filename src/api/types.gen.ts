@@ -372,7 +372,7 @@ export type AttendeeActionRequest = {
  * Create/Update serializer for AttendeeAlternativeSigninIdentifier with validation.
  */
 export type AttendeeAlternativeSigninCreateUpdate = {
-    attendee: number;
+    attendee: string;
     ticket?: string | null;
     identifier: string;
     /**
@@ -385,7 +385,7 @@ export type AttendeeAlternativeSigninCreateUpdate = {
  * Create/Update serializer for AttendeeAlternativeSigninIdentifier with validation.
  */
 export type AttendeeAlternativeSigninCreateUpdateRequest = {
-    attendee: number;
+    attendee: string;
     ticket?: string | null;
     identifier: string;
     /**
@@ -14498,7 +14498,7 @@ export type PatchedAttendeeAccessibilityRequirementRequest = {
  * Create/Update serializer for AttendeeAlternativeSigninIdentifier with validation.
  */
 export type PatchedAttendeeAlternativeSigninCreateUpdateRequest = {
-    attendee?: number;
+    attendee?: string;
     ticket?: string | null;
     identifier?: string;
     /**

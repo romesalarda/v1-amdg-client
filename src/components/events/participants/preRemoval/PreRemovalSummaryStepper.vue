@@ -3,7 +3,7 @@
     <div class="mb-4 flex items-start justify-between gap-5">
       <div>
         <h3 class="text-xl font-bold text-gray-900">Pre-removal summary</h3>
-        <p class="text-sm text-gray-500">
+        <p class="text-lg text-gray-500">
           {{ attendeeLabel }}
         </p>
       </div>
@@ -198,6 +198,7 @@
                 variant="solid"
                 size="sm"
                 :disabled="payment.item.can_request_refund === false"
+                :class="payment.item.can_request_refund ? '' : 'cursor-not-allowed opacity-50'"
                 @click="$emit('requestRefund', payment.item)"
               >
                 Request refund

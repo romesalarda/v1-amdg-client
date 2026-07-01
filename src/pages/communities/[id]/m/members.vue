@@ -459,7 +459,7 @@
               </div>
             </div>
 
-            <div class="bg-blue-500/10 border-2 border-blue-500/20 rounded-xl p-6">
+            <div class="bg-blue-500/10 border-2 border-blue-500/20 p-6">
               <div class="flex gap-4">
                 <div class="flex-shrink-0">
                   <div class="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
@@ -668,7 +668,7 @@ definePageMeta({
   },
 })
 const selectedAttendees = ref<number[]>([])
-const isCollapsed = ref(false)
+const isCollapsed = ref(true)
 
 const route = useRoute()
 const { $notyf } = useNuxtApp()

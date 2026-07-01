@@ -97,7 +97,7 @@
 
         <div class="mt-4 rounded-xl border p-4" :class="criticalMedicalItems.length ? 'border-red-200 bg-red-50' : 'border-gray-200 bg-gray-50'">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="text-xs font-black uppercase tracking-widest" :class="criticalMedicalItems.length ? 'text-red-700' : 'text-gray-700'">
+            <h3 class="text-xs font-black uppercase" :class="criticalMedicalItems.length ? 'text-red-700' : 'text-gray-700'">
               Critical Health Info
             </h3>
             <UBadge :color="criticalMedicalItems.length ? 'red' : 'gray'" variant="soft" size="xs">
@@ -124,7 +124,7 @@
 
         <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
           <div class="flex items-center justify-between gap-3">
-            <h3 class="text-xs font-black uppercase tracking-widest text-gray-700">Recent Actions</h3>
+            <h3 class="text-xs font-black uppercase text-gray-700">Recent Actions</h3>
             <UBadge color="gray" variant="soft" size="xs">{{ recentActions.length }}</UBadge>
           </div>
 
@@ -154,7 +154,7 @@
         <div class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
           <div class="flex items-start justify-between gap-3">
             <div>
-              <h3 class="text-xs font-black uppercase tracking-widest text-gray-700">Pre-Removal Review</h3>
+              <h3 class="text-xs font-black uppercase text-gray-700">Want to remove this attendee?</h3>
               <p class="mt-1 text-xs text-gray-500">Deletion blockers, package checks, and final action flow.</p>
             </div>
             <UButton

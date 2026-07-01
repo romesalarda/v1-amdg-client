@@ -201,6 +201,32 @@
               />
             </div>
 
+            <!-- Alt. Identifiers Tab -->
+            <div v-if="currentTab === 'identifiers'">
+              <AttendeeIdentifiersTab
+                :attendee-id="attendeeId"
+                :signins="attendeeSignins.data.value?.data?.results || []"
+                :signins-loading="signinsLoading"
+                :show-add-form="showAddSigninForm"
+                :editing-signin-id="editingSigninId"
+                :new-signin="newSignin"
+                :event-signin-definitions="eventSigninDefinitions.data.value?.data?.results || []"
+                :create-pending="createSigninMutation.isPending.value"
+                :update-pending="updateSigninMutation.isPending.value"
+                :delete-pending="deleteSigninMutation.isPending.value"
+                @set-show-add-form="showAddSigninForm = $event"
+                @update-event-alternative-signin="newSignin.event_alternative_signin = $event"
+                @update-identifier="newSignin.identifier = $event"
+                @update-ticket="newSignin.ticket = $event"
+                @add-signin="handleAddSignin"
+                @update-signin="handleUpdateSignin"
+                @cancel-add-signin="cancelAddSignin"
+                @cancel-edit-signin="cancelEditSignin"
+                @start-edit-signin="startEditSignin($event)"
+                @delete-signin="handleDeleteSignin($event)"
+              />
+            </div>
+
             <!-- Forms Tab -->
             <div v-if="currentTab === 'forms'">
               <AttendeeFormsTab
@@ -287,6 +313,7 @@ import { useAttendeeOrganisationsEditor } from '~/composables/attendee/editor/us
 import { useAttendeeOrdersEditor } from '~/composables/attendee/editor/useAttendeeOrdersEditor'
 import { useAttendeeActionsHistoryEditor } from '~/composables/attendee/editor/useAttendeeActionsHistoryEditor'
 import { useAttendeeEditorTabs } from '~/composables/attendee/editor/useAttendeeEditorTabs'
+import { useAttendeeIdentifiersEditor } from '~/composables/attendee/editor/useAttendeeIdentifiersEditor'
 
 // Composables - Consents
 // Components
@@ -301,6 +328,7 @@ import AttendeeEmergencyContactsTab from '~/components/attendee/editor/AttendeeE
 import AttendeeFamilyTab from '~/components/attendee/editor/AttendeeFamilyTab.vue'
 import AttendeeOrdersTab from '~/components/attendee/editor/AttendeeOrdersTab.vue'
 import AttendeeFormsTab from '~/components/attendee/editor/AttendeeFormsTab.vue'
+import AttendeeIdentifiersTab from '~/components/attendee/editor/AttendeeIdentifiersTab.vue'
 import AttendeeEditorSidebar from '~/components/attendee/editor/AttendeeEditorSidebar.vue'
 
 
@@ -496,6 +524,24 @@ const {
   handleChangeOrganisation,
   removeOrganisation,
 } = useAttendeeOrganisationsEditor(attendeeId)
+
+const {
+  attendeeSignins,
+  eventSigninDefinitions,
+  signinsLoading,
+  showAddForm: showAddSigninForm,
+  editingSigninId,
+  newSignin,
+  cancelAddSignin,
+  startEditSignin,
+  cancelEditSignin,
+  handleAddSignin,
+  handleUpdateSignin,
+  handleDeleteSignin,
+  createMutation: createSigninMutation,
+  updateMutation: updateSigninMutation,
+  deleteMutation: deleteSigninMutation,
+} = useAttendeeIdentifiersEditor(attendeeId, eventId)
 
 const {
   attendeeOrders,

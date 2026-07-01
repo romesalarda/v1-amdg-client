@@ -1,15 +1,6 @@
 <template>
-  <ManagementLayout :organisation-id="organisationId" :organisation="organisation">
     <!-- Back Button -->
-    <!-- <UButton
-      :to="`/communities/${organisationId}/m/events`"
-      icon="i-heroicons-arrow-left"
-      variant="ghost"
-      color="gray"
-      class="mb-6"
-    >
-      Back to Events
-    </UButton> -->
+    <Navbar />
 
     <!-- Loading State -->
     <div v-if="isLoadingEvent" class="space-y-6">
@@ -27,8 +18,7 @@
     />
 
     <!-- Main Content -->
-    <div v-else-if="event" class="space-y-6 pb-28 m-6">
-
+    <div v-else-if="event" class="space-y-6 pb-28 m-10">
       <!-- Page Header -->
       <div class="bg-[#026CDF] rounded-xl border-2 border-deep-navy/10 p-6 shadow-sm">
         <div class="flex items-start justify-between gap-6">
@@ -49,7 +39,17 @@
               {{ sectionIssues.length }} issue{{ sectionIssues.length !== 1 ? 's' : '' }} flagged
             </span>
           </div>
+          <UButton
+            :to="`/communities/${organisationId}/m/events`"
+            icon="i-heroicons-arrow-left"
+            variant="solid"
+            color="white"
+            class="mb-6"
+          >
+            Back to Events
+        </UButton>
         </div>
+        
       </div>
 
 
@@ -419,7 +419,7 @@
     </div>
 
     <!-- ─── STICKY BOTTOM NAV ──────────────────────────────────── -->
-    <div v-if="event" class="fixed bottom-0 left-0 right-0 lg:left-64 z-40 bg-white border-t-2 border-deep-navy/10 shadow-[0_-4px_24px_rgba(0,0,0,0.07)]">
+    <div v-if="event" class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t-2 border-deep-navy/10 shadow-[0_-4px_24px_rgba(0,0,0,0.07)]">
       <div class="px-8 py-4 flex items-center gap-6">
         <!-- Back button -->
         <!-- <UButton
@@ -451,8 +451,9 @@
         </UButton>
         <div v-else class="flex-shrink-0 w-32" /> -->
       </div>
+    
+
     </div>
-  </ManagementLayout>
 </template>
 
 <script setup lang="ts">
@@ -469,6 +470,8 @@ import ManagementLayout from '~/components/communities/ManagementLayout.vue'
 import EventAuthorizationForm from '~/components/events/forms/EventAuthorizationForm.vue'
 import BudgetReviewPanel from '~/components/events/authorise/BudgetReviewPanel.vue'
 import { useReviewIssues } from '~/composables/useReviewIssues'
+import Navbar from '~/components/common/Navbar.vue'
+import Footer from '~/components/common/Footer.vue'
 
 // ── Page Meta ────────────────────────────────────────────────────────────────
 definePageMeta({
