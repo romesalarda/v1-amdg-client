@@ -10,14 +10,14 @@
               <span class="material-symbols-outlined text-yellow-700 text-2xl">warning</span>
             </div>
             <div class="flex-1">
-              <h3 class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Authorization Required</h3>
-              <p class="text-sm text-yellow-800 leading-relaxed mb-3">This event requires authorization before it can be published or opened for registration.</p>
+              <h3 class="text-sm font-black text-yellow-900 uppercase tracking-wider mb-2">Authorisation Required</h3>
+              <p class="text-sm text-yellow-800 leading-relaxed mb-3">This event requires authorisation before it can be published or opened for registration.</p>
               <NuxtLink
                 :to="`/communities/${event.organisation}/m/events/${event.url_safe_title}/authorise`"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg transition-all text-xs font-bold uppercase tracking-wider shadow-lg shadow-yellow-600/20"
               >
                 <span class="material-symbols-outlined text-base">verified</span>
-                Request Authorization
+                Request Authorisation
               </NuxtLink>
             </div>
           </div>
@@ -428,7 +428,7 @@
               </div>
               <div class="flex justify-between items-center mt-2">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identifier</p>
-                <span class="bg-navy-500 text-white px-3 py-1 rounded text-[9px] font-black"
+                <span class="bg-blue-600 text-white px-3 py-1 rounded text-[9px] font-black font-mono"
                 @click=""
                 >
                     {{ event?.display_identifier || 0 }}

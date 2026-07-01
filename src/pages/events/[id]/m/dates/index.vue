@@ -2,14 +2,14 @@
   <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="space-y-6">
       <!-- Page Header -->
-      <section class="bg-gradient-to-br from-white via-mist-blue/20 to-white rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
+      <section class="bg-blue-600 rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
         <div class="flex items-start justify-between gap-4 px-8 py-6">
           <div>
             <div class="flex items-center gap-3 mb-2">
-              <span class="material-symbols-outlined text-primary text-2xl">calendar_clock</span>
-              <h1 class="text-[13px] font-black text-primary dark:text-white uppercase tracking-widest">Availability Windows</h1>
+              <span class="material-symbols-outlined text-white text-2xl">calendar_clock</span>
+              <h1 class="text-[13px] font-black text-white uppercase tracking-widest">Availability Windows</h1>
             </div>
-            <p class="text-sm text-navy-600 dark:text-navy-300">
+            <p class="text-sm text-white/90 max-w-lg">
               Manage time-based availability for refunds, registration, merchandise, and more.
             </p>
           </div>

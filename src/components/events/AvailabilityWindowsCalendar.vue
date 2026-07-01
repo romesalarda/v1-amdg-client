@@ -53,9 +53,11 @@
             :key="index"
             class="min-h-[120px] border-r border-b border-gray-200 last:border-r-0 p-2 relative cursor-pointer hover:bg-primary/5 transition-colors"
             :class="{
-              'bg-gray-50': !day.isCurrentMonth,
-              'bg-blue-50': day.isToday && day.isCurrentMonth,
-              'bg-white': day.isCurrentMonth && !day.isToday
+              'bg-gray-50': !day.isCurrentMonth && !day.isToday && !isEventDay(day.date),
+              'bg-blue-50': day.isToday && day.isCurrentMonth && !isEventDay(day.date),
+              'bg-white': day.isCurrentMonth && !day.isToday && !isEventDay(day.date),
+              'bg-purple-100': isEventDay(day.date),
+
             }"
             @click="handleDateClick(day)"
           >
@@ -79,7 +81,7 @@
                   variant="solid"
                   class="text-[9px] px-1"
                 >
-                  EVENT
+                  EVENT 🎉
                 </UBadge>
                 <span
                   v-if="isEventStartDay(day.date)"

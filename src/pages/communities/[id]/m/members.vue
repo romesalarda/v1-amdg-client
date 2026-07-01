@@ -206,70 +206,93 @@
                 <UPagination v-model="membersPage" :page-count="membersPageSize" :total="membersTotalCount" :max="7" />
               </div>
             </section>
-             <div
-      class="fixed bottom-0 left-64 right-0 z-50 border-t border-gray-200 bg-deep-navy backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
-    >
-      <div class="px-4 py-3 sm:px-6 lg:px-8">
-        <div
-          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-        >
-          <!-- Left -->
-          <div class="min-w-0">
-            <h2 class="text-sm font-semibold text-deep-navy text-white">
-              Membership Access
-            </h2>
-            <p class="mt-1 text-xs text-white">
-              Configure how new members are admitted to your organisation.
-            </p>
-          </div>
 
-          <!-- Right -->
-          <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
-            <!-- Verification -->
             <div
-              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
+              :class="[
+                'fixed bottom-0 left-64 right-0 z-50 transition-transform duration-300 ease-in-out',
+                isCollapsed ? 'translate-y-[calc(100%-48px)]' : 'translate-y-0'
+              ]"
             >
-              <div class="min-w-0">
-                <h3 class="text-sm font-medium text-deep-navy">
-                  Require verification
-                </h3>
-                <p class="mt-1 text-xs leading-5 text-gray-500">
-                  New members must be manually approved before they can access the
-                  community.
-                </p>
+              <!-- Toggle Handle -->
+              <div class="flex justify-center">
+                <button
+                  @click="isCollapsed = !isCollapsed"
+                  class="flex h-12 items-center gap-2 rounded-t-xl border border-b-0 border-gray-200 bg-blue-600 px-5 text-sm font-medium text-white shadow-lg hover:bg-blue-700 transition"
+                >
+                  <UIcon
+                    :name="isCollapsed ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'"
+                    class="h-4 w-4"
+                  />
+                  {{ isCollapsed ? 'Show Membership Settings' : 'Hide Membership Settings' }}
+                </button>
               </div>
 
-              <UToggle
-                v-model="requiresVerification"
-                :disabled="isUpdatingMembership"
-                @change="toggleUserRequiresVerification(requiresVerification)"
-              />
-            </div>
+              <!-- Bottom Bar -->
+              <div
+                class="border-t border-gray-200 bg-blue-600 backdrop-blur-xl shadow-[0_-8px_30px_rgba(0,0,0,0.08)]"
+              >
+                <div class="px-4 py-3 sm:px-6 lg:px-8">
+                  <div
+                    class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
+                  >
+                    <!-- Left -->
+                    <div class="min-w-0">
+                      <h2 class="text-sm font-semibold text-white">
+                        Membership Access
+                      </h2>
+                      <p class="mt-1 text-xs text-white">
+                        Configure how new members are admitted to your organisation.
+                      </p>
+                    </div>
 
-            <!-- Acceptance Code -->
-            <div
-              class="flex items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 min-w-[320px]"
-            >
-              <div class="min-w-0">
-                <h3 class="text-sm font-medium text-deep-navy">
-                  Require acceptance code
-                </h3>
-                <p class="mt-1 text-xs leading-5 text-gray-500">
-                  Members must enter a valid invitation code before joining the
-                  organisation.
-                </p>
+                    <!-- Right -->
+                    <div class="grid gap-3 sm:grid-cols-2 lg:w-auto">
+                      <!-- Verification -->
+                      <div
+                        class="flex min-w-[320px] items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                      >
+                        <div>
+                          <h3 class="text-sm font-medium text-deep-navy">
+                            Require verification
+                          </h3>
+                          <p class="mt-1 text-xs leading-5 text-gray-500">
+                            New members must be manually approved before they can access the
+                            community.
+                          </p>
+                        </div>
+
+                        <UToggle
+                          v-model="requiresVerification"
+                          :disabled="isUpdatingMembership"
+                          @change="toggleUserRequiresVerification(requiresVerification)"
+                        />
+                      </div>
+
+                      <!-- Acceptance Code -->
+                      <div
+                        class="flex min-w-[320px] items-start justify-between gap-4 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3"
+                      >
+                        <div>
+                          <h3 class="text-sm font-medium text-deep-navy">
+                            Require acceptance code
+                          </h3>
+                          <p class="mt-1 text-xs leading-5 text-gray-500">
+                            Members must enter a valid invitation code before joining the
+                            organisation.
+                          </p>
+                        </div>
+
+                        <UToggle
+                          v-model="requireAcceptanceCode"
+                          :disabled="isUpdatingMembership"
+                          @change="toggleRequireAcceptanceCode(requireAcceptanceCode)"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-
-              <UToggle
-                v-model="requireAcceptanceCode"
-                :disabled="isUpdatingMembership"
-                @change="toggleRequireAcceptanceCode(requireAcceptanceCode)"
-              />
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
           </div>
 
           <div v-if="item.key === 'invites'" class="mt-6 space-y-8">
@@ -645,6 +668,7 @@ definePageMeta({
   },
 })
 const selectedAttendees = ref<number[]>([])
+const isCollapsed = ref(false)
 
 const route = useRoute()
 const { $notyf } = useNuxtApp()

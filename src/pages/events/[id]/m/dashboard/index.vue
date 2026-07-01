@@ -193,7 +193,7 @@
 
           <div class="xl:col-span-4 space-y-6">
             <section class="rounded-xl bg-white overflow-hidden border border-black/5 shadow-sm">
-              <div class="border-b border-black/5 bg-gradient-to-r from-deep-navy to-[#153457] px-6 py-5 text-white">
+              <div class="border-b border-black/5 bg-blue-600 px-6 py-5 text-white">
                 <div class="flex items-center justify-between gap-3">
                   <div>
                     <!-- <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">Readiness</p> -->
@@ -1236,10 +1236,10 @@ const outstandingTaskAppearanceByCode: Record<string, Omit<OutstandingTaskView, 
   },
   NO_CONSENTS_CONFIRMED: {
     icon: 'i-heroicons-shield-check',
-    badgeClass: 'bg-green-100 text-green-800',
-    cardClass: 'border-green-200 bg-green-50/60',
-    iconClass: 'text-green-700',
-    iconContainerClass: 'bg-green-100',
+    badgeClass: 'bg-red-100 text-red-800',
+    cardClass: 'border-red-200 bg-red-50/60',
+    iconClass: 'text-red-700',
+    iconContainerClass: 'bg-red-100',
     levelLabel: 'Required',
   },
   LANDING_IMAGE_REQUIRED: {

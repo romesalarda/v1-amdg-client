@@ -1,6 +1,6 @@
 <template>
 	<ClientOnly>
-		<div class="relative overflow-hidden rounded-3xl bg-mist-blue/40">
+		<div class="relative overflow-hidden bg-mist-blue/40">
 			<div ref="mapContainer" class="h-[384px] w-full bg-mist-blue"></div>
 			<div class="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-white/85 to-transparent"></div>
 			<div
