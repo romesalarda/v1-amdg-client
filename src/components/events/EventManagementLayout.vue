@@ -140,34 +140,36 @@
   <div :class="['min-h-screen bg-mist-blue transition-all duration-300', sidebarOpen ? 'lg:ml-64' : 'ml-0']">
     <!-- Top Header Bar -->
     <header :class="[
-      'h-16 bg-white border-b border-gray-200 sticky z-30 px-8 flex items-center justify-between',
+      'h-16 bg-white border-b border-gray-200 sticky z-30 px-4 sm:px-8 flex items-center justify-between gap-2',
       hasHero ? 'top-0' : 'top-12'
     ]">
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <button
           @click="sidebarOpen = !sidebarOpen"
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-2 hover:bg-gray-100 rounded-lg transition-colors shrink-0"
         >
           <UIcon name="i-heroicons-bars-3" class="w-5 h-5 text-gray-600" />
         </button>
-        <div>
-          <h3 class="font-bold text-deep-navy">{{ currentPageTitle }}</h3>
-          <p class="text-xs text-gray-500">{{ event?.title || 'Loading...' }}</p>
+        <div class="min-w-0">
+          <h3 class="font-bold text-deep-navy truncate">{{ currentPageTitle }}</h3>
+          <p class="text-xs text-gray-500 truncate">{{ event?.title || 'Loading...' }}</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <span v-if="event?.organisation_name" class="text-xs text-gray-500">
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <span
+          v-if="event?.organisation_name"
+          class="hidden sm:block text-xs text-gray-500 max-w-[140px] truncate"
+        >
           {{ event.organisation_name }}
         </span>
 
         <NuxtLink
           :to="`/events/${eventId}/m/notifications`"
-          class="text-xs text-blue-500 hover:underline flex items-center gap-1"
+          class="text-xs text-blue-500 hover:underline flex items-center gap-1 shrink-0"
         >
           <UIcon name="i-heroicons-bell" class="w-4 h-4" />
-          Notifications 
+          <span class="hidden sm:inline">Notifications</span>
         </NuxtLink>
-
       </div>
     </header>
 

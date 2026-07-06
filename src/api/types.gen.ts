@@ -708,6 +708,14 @@ export type AttendeeDetail = {
     readonly is_registered: boolean;
     readonly is_checked_in: boolean;
     readonly is_refunded: boolean;
+    /**
+     * Get the last check-in timestamp for the attendee.
+     */
+    readonly last_check_in_at: string;
+    /**
+     * Get the last check-in day for the attendee.
+     */
+    readonly event_day_last_seen: number;
     readonly created_at: string;
     /**
      *  links
@@ -1012,6 +1020,14 @@ export type AttendeeList = {
     readonly is_registered: boolean;
     readonly is_checked_in: boolean;
     readonly is_refunded: boolean;
+    /**
+     * Get the last check-in timestamp for the attendee.
+     */
+    readonly last_check_in_at: string;
+    /**
+     * Get the last check-in day for the attendee.
+     */
+    readonly event_day_last_seen: number;
     readonly created_at: string;
     /**
      *  links

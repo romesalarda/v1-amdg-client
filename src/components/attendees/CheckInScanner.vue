@@ -110,6 +110,13 @@
                 Outstanding payments
               </div>
             </div>
+            <button
+              class="ml-auto text-white/70 hover:text-white transition-colors"
+              title="Dismiss"
+              @click="$emit('clear-last')"  
+            >
+              <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
+            </button>
           </div>
 
           <!-- Error -->
@@ -122,6 +129,13 @@
               <p class="font-bold text-sm">Scan failed</p>
               <p class="text-xs opacity-90 mt-0.5">{{ lastError }}</p>
             </div>
+            <button
+              class="ml-auto text-white/70 hover:text-white transition-colors"
+              title="Dismiss"
+              @click="$emit('clear-last')"
+            >
+              <UIcon name="i-heroicons-x-mark" class="w-4 h-4" />
+            </button>
           </div>
         </div>
       </Transition>
@@ -209,6 +223,7 @@ const emit = defineEmits<{
   detect: [barcodes: Array<{ rawValue: string }>]
   'manual-submit': [code: string]
   'update:action': [action: ScanAction]
+  'clear-last': []
 }>()
 
 // ── Camera state ─────────────────────────────────────────────────────────────

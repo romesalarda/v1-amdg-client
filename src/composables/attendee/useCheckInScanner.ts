@@ -97,6 +97,19 @@ export function useCheckInScanner(options: UseCheckInScannerOptions) {
         },
       })
 
+      if (res.error) {
+        failureCount.value++
+        const err = res.error as any
+        const detail =
+          err?.detail ||
+          err?.non_field_errors?.[0] ||
+          (typeof err === 'string' ? err : null) ||
+          'Unknown error'
+        lastError.value = detail
+        console.error('[CheckInScanner] Scan failed:', detail, res.error)
+        return
+      }
+
       if (res.data) {
         const entry: ScanResult = {
           id: res.data.check_in_id,

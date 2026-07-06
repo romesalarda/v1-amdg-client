@@ -32,6 +32,7 @@
             @detect="onDetect"
             @manual-submit="submitManual"
             @update:action="currentAction = $event"
+            @clear-last="clearLast"
           />
         </div>
 
@@ -171,6 +172,7 @@ const {
   failureCount,
   onDetect,
   submitManual,
+  clearLast,
 } = useCheckInScanner({
   eventIdentifier,
   action: currentAction,

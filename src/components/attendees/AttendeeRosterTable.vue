@@ -92,15 +92,6 @@
       </div>
     </div>
 
-    <!-- Connection status banner -->
-    <div
-      v-if="!isConnected"
-      class="px-5 py-2 bg-amber-50 border-b border-amber-100 flex items-center gap-2"
-    >
-      <UIcon name="i-heroicons-signal-slash" class="w-4 h-4 text-amber-500" />
-      <span class="text-xs text-amber-700">Live updates paused — reconnecting…</span>
-    </div>
-
     <!-- Selection action bar -->
     <Transition
       enter-active-class="transition-all duration-200"
@@ -257,6 +248,7 @@
       />
     </div>
 
+
     <!-- Advanced filters modal -->
     <AttendeeFiltersModal
       v-model="showFiltersModal"
@@ -271,15 +263,15 @@
 
 <script setup lang="ts">
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
-import { useAttendeeRosterSocket } from '~/composables/websockets/events/useAttendeeRosterSocket'
-import type { AttendeeRosterItem, AttendeeRosterListResponse, AttendeeUpdatedPayload } from '~/composables/websockets/events/useAttendeeRosterSocket'
+import { useAttendeesPostFilterResults } from '~/composables/resources/attendee/useAttendeesPostFilter'
+import type { AttendeeFiltersRequest, AttendeeFilterRequestRequest, AttendeeList } from '~/api/types.gen'
 
 const toast = useToast()
 
 // ── Props ─────────────────────────────────────────────────────────────────
 
 interface Props {
-  /** URL-safe event identifier (slug or UUID) for the WS connection */
+  /** URL-safe event identifier (slug or UUID) */
   eventIdentifier: string
   /** Number of event days — used to pre-populate day pills. Auto-detected if omitted. */
   eventDaysCount?: number
@@ -293,23 +285,92 @@ const emit = defineEmits<{
 
 // ── Constants ─────────────────────────────────────────────────────────────
 
-const PAGE_SIZE = 5
+const PAGE_SIZE = 25
 
 // ── State ─────────────────────────────────────────────────────────────────
 
-const attendees = ref<AttendeeRosterItem[]>([])
-const totalCount = ref(0)
 const currentPage = ref(1)
-const isLoading = ref(true)
-
 const activeDay = ref<number | null>(null)
 const checkedInFilter = ref<boolean | null>(null)
 const searchInput = ref('')
+const debouncedSearchValue = ref('')
 
 // ── Selection ─────────────────────────────────────────────────────────────
 
 const selectedIds = ref<string[]>([])
 const selectionActionLoading = ref(false)
+
+// ── Filter state ──────────────────────────────────────────────────────────
+
+const showFiltersModal = ref(false)
+
+function makeEmptyFilters(): AttendeeFiltersRequest {
+  return {
+    operator: 'AND',
+    demographics: {},
+    status: {},
+    forms: { operator: 'AND', conditions: [] },
+    registration_questions: { operator: 'AND', conditions: [] },
+    orders: {},
+    payments: {},
+    advanced: {},
+  }
+}
+
+const modalFilters = ref<AttendeeFiltersRequest>(makeEmptyFilters())
+
+const loadPage = (page: number) => {
+  currentPage.value = page
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+// ── POST filter body ──────────────────────────────────────────────────────
+
+const postFilterBody = computed<AttendeeFilterRequestRequest>(() => {
+  // Merge quick-filter check-in toggle with modal status filters
+  const mergedStatus = {
+    ...(modalFilters.value.status ?? {}),
+    ...(checkedInFilter.value !== null ? { is_checked_in: checkedInFilter.value } : {}),
+  }
+
+  const filters: AttendeeFiltersRequest = {
+    ...modalFilters.value,
+    status: mergedStatus,
+  }
+
+  const body: AttendeeFilterRequestRequest = {
+    event: props.eventIdentifier,
+    page: currentPage.value,
+    page_size: PAGE_SIZE,
+    filters,
+  }
+
+  if (debouncedSearchValue.value) body.search = debouncedSearchValue.value
+
+  return body
+})
+
+// ── Data fetch ────────────────────────────────────────────────────────────
+
+// Roster rows may carry extra fields (last_check_in_at, event_day_last_seen,
+// has_outstanding_payments) returned by the filter endpoint but not in the
+// generated AttendeeList type.
+type RosterRow = AttendeeList & {
+  last_check_in_at?: string | null
+  event_day_last_seen?: number | null
+  has_outstanding_payments?: boolean
+}
+
+const {
+  attendees: rawAttendees,
+  total: totalCount,
+  totalPages,
+  isLoading,
+} = useAttendeesPostFilterResults(postFilterBody)
+
+const attendees = computed(() => rawAttendees.value as RosterRow[])
+
+// ── Computeds ─────────────────────────────────────────────────────────────
 
 const allPageSelected = computed(
   () => attendees.value.length > 0 && attendees.value.every((a) => selectedIds.value.includes(a.attendee_id)),
@@ -318,34 +379,43 @@ const somePageSelected = computed(
   () => selectedIds.value.length > 0 && !allPageSelected.value,
 )
 
-/** Advanced filter state (camelCase keys matching AttendeeFiltersModal expectations) */
-const showFiltersModal = ref(false)
-const modalFilters = ref<Record<string, any>>({
-  organisation: undefined,
-  areaFrom: undefined,
-  gender: undefined,
-  ageMin: undefined,
-  ageMax: undefined,
-  isMinor: undefined,
-  isCheckedIn: undefined,
-  isRegistered: undefined,
-  isCancelled: undefined,
-  isStaff: undefined,
-  hasDietaryRequirements: undefined,
-  hasMedicalConditions: undefined,
-  hasAccessibilityRequirements: undefined,
-  hasEmergencyContacts: undefined,
-  relationshipToUser: undefined,
+function countDefined(obj: Record<string, unknown> | undefined | null): number {
+  if (!obj) return 0
+  let count = 0
+  for (const v of Object.values(obj)) {
+    if (v === undefined || v === null) continue
+    if (Array.isArray(v) && v.length === 0) continue
+    count++
+  }
+  return count
+}
+
+const activeModalFilterCount = computed(() => {
+  const f = modalFilters.value
+  return (
+    countDefined(f.demographics as Record<string, unknown>) +
+    countDefined(f.status as Record<string, unknown>) +
+    countDefined(f.orders as Record<string, unknown>) +
+    countDefined(f.payments as Record<string, unknown>) +
+    countDefined(f.advanced as Record<string, unknown>) +
+    (f.registration_questions?.conditions?.length ?? 0) +
+    (f.forms?.conditions?.length ?? 0)
+  )
 })
 
-const activeModalFilterCount = computed(() =>
-  Object.values(modalFilters.value).filter((v) => v !== undefined && v !== null && v !== '').length,
-)
+const checkedInCount = computed(() => attendees.value.filter((a) => a.is_checked_in).length)
 
-/** Days discovered from returned data (filled on first response) */
+// ── Day pills ─────────────────────────────────────────────────────────────
+
 const discoveredDays = ref<number[]>([])
 
-const checkedInCount = computed(() => attendees.value.filter((a) => a.is_checked_in).length)
+watch(attendees, (rows) => {
+  const days = rows
+    .map((a) => a.event_day_last_seen)
+    .filter((d): d is number => d != null)
+  const unique = [...new Set([...discoveredDays.value, ...days])]
+  discoveredDays.value = unique
+})
 
 const dayPills = computed<number[]>(() => {
   if (props.eventDaysCount) {
@@ -354,72 +424,23 @@ const dayPills = computed<number[]>(() => {
   return [...discoveredDays.value].sort((a, b) => a - b)
 })
 
-const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE))
-
 // ── Columns ───────────────────────────────────────────────────────────────
 
 const columns = [
   { key: 'select', label: '' },
   { key: 'attendee_display_id', label: 'Attendee' },
   { key: 'area_from_name', label: 'Area' },
-  // { key: 'ticket_type_code', label: 'Ticket' },
   { key: 'is_checked_in', label: 'Status' },
   { key: 'last_check_in_at', label: 'Last Check-in' },
   { key: 'event_day_last_seen', label: 'Day' },
   { key: 'has_outstanding_payments', label: 'Payments' },
 ]
 
-// ── WebSocket ─────────────────────────────────────────────────────────────
+// ── Reset page on filter changes ──────────────────────────────────────────
 
-const ws = useAttendeeRosterSocket(computed(() => props.eventIdentifier))
-const isConnected = ws.isConnected
-
-// Handle paginated list response
-ws.onPageReceived((resp: AttendeeRosterListResponse) => {
-  attendees.value = resp.attendees
-  totalCount.value = resp.total_count
-  isLoading.value = false
-
-  // Discover event days from returned data
-  const days = resp.attendees
-    .map((a) => a.event_day_last_seen)
-    .filter((d): d is number => d != null)
-  const unique = [...new Set([...discoveredDays.value, ...days])]
-  discoveredDays.value = unique
-})
-
-// Handle real-time single-attendee updates
-ws.onAttendeeUpdated((payload: AttendeeUpdatedPayload) => {
-  const idx = attendees.value.findIndex(
-    (a) => a.attendee_id === payload.attendee.attendee_id,
-  )
-  if (idx !== -1) {
-    attendees.value[idx] = payload.attendee
-    // Update discovered days
-    const day = payload.attendee.event_day_last_seen
-    if (day != null && !discoveredDays.value.includes(day)) {
-      discoveredDays.value = [...discoveredDays.value, day].sort((a, b) => a - b)
-    }
-  }
-})
-
-// Reload after bulk check-in/out operations
-ws.onBulkUpdated(() => {
-  loadPage(currentPage.value)
-})
-
-// Load page when WS connects
-watch(isConnected, (connected) => {
-  if (connected) {
-    loadPage(1)
-  }
-})
-
-// ── Pagination ────────────────────────────────────────────────────────────
-
-watch(currentPage, (page) => {
-  loadPage(page)
-})
+watch([checkedInFilter, debouncedSearchValue, modalFilters], () => {
+  currentPage.value = 1
+}, { deep: true })
 
 // ── Selection helpers ─────────────────────────────────────────────────────
 
@@ -434,11 +455,9 @@ function toggleSelect(attendeeId: string) {
 
 function toggleSelectAll() {
   if (allPageSelected.value) {
-    // Deselect all on this page
     const pageIds = new Set(attendees.value.map((a) => a.attendee_id))
     selectedIds.value = selectedIds.value.filter((id) => !pageIds.has(id))
   } else {
-    // Add all on this page that aren't already selected
     const toAdd = attendees.value
       .map((a) => a.attendee_id)
       .filter((id) => !selectedIds.value.includes(id))
@@ -468,7 +487,6 @@ async function executeSelectionAction(selectedAction: 'CHECK_IN' | 'CHECK_OUT') 
       color: 'green',
     })
     clearSelection()
-    loadPage(currentPage.value)
   } catch (err: any) {
     toast.add({
       title: 'Action failed',
@@ -485,78 +503,27 @@ async function executeSelectionAction(selectedAction: 'CHECK_IN' | 'CHECK_OUT') 
 function selectDay(day: number | null) {
   activeDay.value = day
   currentPage.value = 1
-  loadPage(1)
 }
 
-// Debounced search
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 function debouncedSearch() {
   if (searchTimer) clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
+    debouncedSearchValue.value = searchInput.value
     currentPage.value = 1
-    loadPage(1)
   }, 300)
 }
 
-// ── Load ──────────────────────────────────────────────────────────────────
-
-/** Map camelCase modal filters → snake_case WS filter keys */
-function buildWsFilters() {
-  const f = modalFilters.value
-  return {
-    day: activeDay.value ?? undefined,
-    search: searchInput.value || undefined,
-    is_checked_in: checkedInFilter.value ?? f.isCheckedIn,
-    is_cancelled: f.isCancelled,
-    is_registered: f.isRegistered,
-    is_event_staff: f.isStaff,
-    is_minor: f.isMinor,
-    gender: f.gender || undefined,
-    age_min: f.ageMin,
-    age_max: f.ageMax,
-    area_from: f.areaFrom,
-    organisation: f.organisation,
-    has_dietary_requirements: f.hasDietaryRequirements,
-    has_medical_conditions: f.hasMedicalConditions,
-    has_accessibility_requirements: f.hasAccessibilityRequirements,
-    has_emergency_contacts: f.hasEmergencyContacts,
-    relationship_to_user: f.relationshipToUser || undefined,
-  }
-}
-
-function loadPage(page: number) {
-  isLoading.value = true
-  ws.requestPage(page, PAGE_SIZE, buildWsFilters())
-}
-
-function applyRosterFilters(updatedFilters: Record<string, any>) {
+function applyRosterFilters(updatedFilters: AttendeeFiltersRequest) {
   modalFilters.value = { ...updatedFilters }
   showFiltersModal.value = false
   currentPage.value = 1
-  loadPage(1)
 }
 
 function clearRosterFilters() {
-  modalFilters.value = {
-    organisation: undefined,
-    areaFrom: undefined,
-    gender: undefined,
-    ageMin: undefined,
-    ageMax: undefined,
-    isMinor: undefined,
-    isCheckedIn: undefined,
-    isRegistered: undefined,
-    isCancelled: undefined,
-    isStaff: undefined,
-    hasDietaryRequirements: undefined,
-    hasMedicalConditions: undefined,
-    hasAccessibilityRequirements: undefined,
-    hasEmergencyContacts: undefined,
-    relationshipToUser: undefined,
-  }
+  modalFilters.value = makeEmptyFilters()
   showFiltersModal.value = false
   currentPage.value = 1
-  loadPage(1)
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────
