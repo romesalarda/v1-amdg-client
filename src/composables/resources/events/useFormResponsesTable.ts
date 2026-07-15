@@ -9,6 +9,12 @@ import type {
   EventFormResponseAnswer,
   EventForm,
 } from '~/api/types.gen'
+import {
+  useFormResponsesFilterPost,
+  countActiveAdvancedFilters,
+  makeEmptyAdvancedFilters,
+} from '~/composables/resources/events/useFormResponsesFilter'
+import type { FormResponseAdvancedFilters } from '~/composables/resources/events/useFormResponsesFilter'
 
 export interface FormResponsesTableFilters {
   is_complete?: boolean | undefined
@@ -23,6 +29,8 @@ export interface ResponseWithAnswers {
   isLoadingAnswers: boolean
 }
 
+export type { FormResponseAdvancedFilters }
+
 /**
  * Composable powering the FormResponsesTable component.
  * Handles server-side paging, filtering by is_complete, and lazy-loading answers per response.
@@ -36,6 +44,43 @@ export function useFormResponsesTable(formId: MaybeRefOrGetter<string>) {
   })
 
   const isFilterSidebarOpen = ref(false)
+  const isAdvancedFilterOpen = ref(false)
+
+  // ── Advanced (POST) filters ───────────────────────────────────────────────
+  const advancedFilters = ref<FormResponseAdvancedFilters>(makeEmptyAdvancedFilters())
+  const isAdvancedMode = computed(() => countActiveAdvancedFilters(advancedFilters.value) > 0)
+  const advancedActiveCount = computed(() => countActiveAdvancedFilters(advancedFilters.value))
+
+  // POST filter mutation
+  const filterMutation = useFormResponsesFilterPost()
+
+  // POST filter result state (populated after mutation succeeds)
+  const filteredResponses = ref<EventFormResponse[]>([])
+  const filteredTotalCount = ref(0)
+  const filteredTotalPages = ref(1)
+  const filteredPage = ref(1)
+
+  async function runAdvancedFilter(page = 1) {
+    const fid = toValue(formId)
+    if (!fid) return
+    filteredPage.value = page
+    try {
+      const result = await filterMutation.mutateAsync({
+        form: fid,
+        page,
+        page_size: filters.value.page_size ?? 25,
+        ordering: filters.value.ordering ?? '-submitted_at',
+        demographics: advancedFilters.value.demographics,
+        status: advancedFilters.value.status,
+        question_filter: advancedFilters.value.question_filter,
+      })
+      filteredResponses.value = result.results
+      filteredTotalCount.value = result.count
+      filteredTotalPages.value = result.total_pages
+    } catch {
+      // errors surfaced via filterMutation.error
+    }
+  }
 
   const queryParams = computed<EventFormResponsesListData['query']>(() => ({
     form: toValue(formId),
@@ -53,18 +98,21 @@ export function useFormResponsesTable(formId: MaybeRefOrGetter<string>) {
     ) as EventFormResponsesListData['query']
   })
 
-  // ── Responses query ───────────────────────────────────────────────────────
+  // ── Responses query (GET — simple mode) ──────────────────────────────────
   const responsesQuery = useEventFormResponses(cleanedQueryParams)
 
-  const responses = computed<EventFormResponse[]>(
-    () => (responsesQuery.data.value?.data as any)?.results ?? [],
-  )
-  const totalCount = computed<number>(
-    () => (responsesQuery.data.value?.data as any)?.count ?? 0,
-  )
-  const totalPages = computed(() =>
-    Math.ceil(totalCount.value / (filters.value.page_size ?? 25)),
-  )
+  const responses = computed<EventFormResponse[]>(() => {
+    if (isAdvancedMode.value) return filteredResponses.value
+    return (responsesQuery.data.value?.data as any)?.results ?? []
+  })
+  const totalCount = computed<number>(() => {
+    if (isAdvancedMode.value) return filteredTotalCount.value
+    return (responsesQuery.data.value?.data as any)?.count ?? 0
+  })
+  const totalPages = computed(() => {
+    if (isAdvancedMode.value) return filteredTotalPages.value
+    return Math.ceil(totalCount.value / (filters.value.page_size ?? 25))
+  })
 
   // ── Form detail (questions) ───────────────────────────────────────────────
   const formDetail = ref<EventForm | null>(null)
@@ -142,10 +190,32 @@ export function useFormResponsesTable(formId: MaybeRefOrGetter<string>) {
   // ── Filter helpers ─────────────────────────────────────────────────────────
   function applyFilters(newFilters: Partial<FormResponsesTableFilters>) {
     filters.value = { ...filters.value, ...newFilters, page: 1 }
+    // If in advanced mode, re-run the POST filter with new simple filter params
+    if (isAdvancedMode.value) {
+      runAdvancedFilter(1)
+    }
   }
 
   function clearFilters() {
     filters.value = { page: 1, page_size: filters.value.page_size ?? 25, ordering: '-submitted_at' }
+    // Also clear advanced filters
+    advancedFilters.value = makeEmptyAdvancedFilters()
+    filteredResponses.value = []
+    filteredTotalCount.value = 0
+    filteredTotalPages.value = 1
+  }
+
+  function applyAdvancedFilters(newAdvanced: FormResponseAdvancedFilters) {
+    advancedFilters.value = newAdvanced
+    filters.value = { ...filters.value, page: 1 }
+    runAdvancedFilter(1)
+  }
+
+  function clearAdvancedFilters() {
+    advancedFilters.value = makeEmptyAdvancedFilters()
+    filteredResponses.value = []
+    filteredTotalCount.value = 0
+    filteredTotalPages.value = 1
   }
 
   const activeFilterCount = computed(() => {
@@ -156,13 +226,24 @@ export function useFormResponsesTable(formId: MaybeRefOrGetter<string>) {
   })
 
   function setPage(page: number) {
-    filters.value = { ...filters.value, page }
+    if (isAdvancedMode.value) {
+      runAdvancedFilter(page)
+    } else {
+      filters.value = { ...filters.value, page }
+    }
   }
 
   return {
     // state
     filters,
     isFilterSidebarOpen,
+    isAdvancedFilterOpen,
+
+    // advanced filter state
+    advancedFilters,
+    isAdvancedMode,
+    advancedActiveCount,
+    filterMutation,
 
     // queries
     responsesQuery,
@@ -190,6 +271,8 @@ export function useFormResponsesTable(formId: MaybeRefOrGetter<string>) {
     activeFilterCount,
     applyFilters,
     clearFilters,
+    applyAdvancedFilters,
+    clearAdvancedFilters,
     setPage,
   }
 }

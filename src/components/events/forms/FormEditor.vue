@@ -233,6 +233,8 @@
             :total-pages="responsesTable.totalPages.value"
             :filters="responsesTable.filters.value"
             :active-filter-count="responsesTable.activeFilterCount.value"
+            :advanced-active-count="responsesTable.advancedActiveCount.value"
+            :is-advanced-filtering="responsesTable.filterMutation.isPending.value"
             :is-filter-sidebar-open="responsesTable.isFilterSidebarOpen.value"
             :responses-query="responsesTable.responsesQuery"
             @open-response="handleOpenResponse"
@@ -240,6 +242,7 @@
             @clear-filters="responsesTable.clearFilters"
             @set-page="responsesTable.setPage"
             @update:is-filter-sidebar-open="v => responsesTable.isFilterSidebarOpen.value = v"
+            @open-advanced-filter="isAdvancedFilterOpen = true"
           />
 
           <FormResponseDetailModal
@@ -249,6 +252,14 @@
             :form-questions="(responsesTable.formDetail.value?.questions ?? []) as any[]"
             :is-loading-answers="responsesTable.selectedResponse.value ? responsesTable.isLoadingAnswers(responsesTable.selectedResponse.value.id) : false"
             @close="handleCloseResponseDetail"
+          />
+
+          <FormResponsesFilterSlideover
+            v-model="isAdvancedFilterOpen"
+            :filters="responsesTable.advancedFilters.value"
+            :form-id="props.formId"
+            @apply="responsesTable.applyAdvancedFilters"
+            @clear="responsesTable.clearAdvancedFilters"
           />
         </template>
 
@@ -452,6 +463,7 @@ import Swal from 'sweetalert2'
 import QuestionCard from './QuestionCard.vue'
 import FormResponsesTable from './FormResponsesTable.vue'
 import FormResponseDetailModal from './FormResponseDetailModal.vue'
+import FormResponsesFilterSlideover from './FormResponsesFilterSlideover.vue'
 import { useEventForm, useUpdateEventForm } from '~/composables/resources/events/eventForms'
 import { useEventFormBuilder } from '~/composables/websockets/events/useEventFormBuilder'
 import { useEventFormsWebSocket } from '~/composables/websockets/events/useEventFormsWebSocket'
@@ -482,6 +494,7 @@ const activeTab = ref<EditorTab>('questions')
 // ── Responses table ───────────────────────────────────────────────────────────
 const responsesTable = useFormResponsesTable(toRef(props, 'formId'))
 const isResponseDetailOpen = ref(false)
+const isAdvancedFilterOpen = ref(false)
 
 function handleOpenResponse(response: Parameters<typeof responsesTable.openResponse>[0]) {
   responsesTable.openResponse(response)

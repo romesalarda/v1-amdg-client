@@ -26,11 +26,31 @@
             size="xs"
             variant="ghost"
             color="gray"
-            :loading="responsesQuery.isFetching.value"
+            :loading="responsesQuery.isFetching.value || isAdvancedFiltering"
             @click="responsesQuery.refetch()"
           />
 
-          <!-- Filter toggle -->
+          <!-- Advanced Filter button -->
+          <button
+            class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
+            :class="
+              advancedActiveCount > 0
+                ? 'bg-indigo-600 text-white'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            "
+            @click="$emit('open-advanced-filter')"
+          >
+            <UIcon name="i-heroicons-funnel" class="w-3.5 h-3.5" />
+            Advanced
+            <span
+              v-if="advancedActiveCount > 0"
+              class="ml-0.5 rounded-full bg-white/25 px-1.5 text-[10px] font-black"
+            >
+              {{ advancedActiveCount }}
+            </span>
+          </button>
+
+          <!-- Simple Filter toggle -->
           <button
             class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
             :class="
@@ -322,6 +342,8 @@ const props = defineProps<{
   totalPages: number
   filters: FormResponsesTableFilters
   activeFilterCount: number
+  advancedActiveCount: number
+  isAdvancedFiltering: boolean
   isFilterSidebarOpen: boolean
   responsesQuery: {
     isLoading: { value: boolean }
@@ -337,6 +359,7 @@ const emit = defineEmits<{
   (e: 'clear-filters'): void
   (e: 'set-page', page: number): void
   (e: 'update:isFilterSidebarOpen', value: boolean): void
+  (e: 'open-advanced-filter'): void
 }>()
 
 // Make isFilterSidebarOpen a writable computed so the template can use v-model-like binding

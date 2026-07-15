@@ -11262,6 +11262,38 @@ export type FormQuestionConditionRequest = {
 };
 
 /**
+ * Root serializer for POST /api/event-form-responses/filter/
+ *
+ * Returns the same paginated EventFormResponse list as the GET endpoint but allows
+ * richer filtering via a structured JSON body.
+ */
+export type FormResponseFilterRequestRequest = {
+    form: string;
+    page?: number;
+    page_size?: number;
+    ordering?: string | null;
+    search?: string | null;
+    demographics?: DemographicsFilterRequest;
+    status?: StatusFilterRequest;
+    question_filter?: FormResponseQuestionFilterRequest;
+};
+
+/**
+ * Question-answer conditions scoped to the form being filtered.
+ *
+ * Since the form ID is already known (taken from the `form` field in the request),
+ * there is no need to pick a form inside each condition.
+ */
+export type FormResponseQuestionFilterRequest = {
+    /**
+     * * `AND` - AND
+     * * `OR` - OR
+     */
+    operator?: 'AND' | 'OR';
+    conditions?: Array<FormQuestionConditionRequest>;
+};
+
+/**
  * Filters for EventForm responses.
  *
  * `operator` controls how multiple FormConditions are combined (AND/OR).
@@ -36797,6 +36829,27 @@ export type EventFormResponsesUpdateResponses = {
 };
 
 export type EventFormResponsesUpdateResponse = EventFormResponsesUpdateResponses[keyof EventFormResponsesUpdateResponses];
+
+export type EventFormResponsesFilterCreateData = {
+    body: FormResponseFilterRequestRequest;
+    path?: never;
+    query?: never;
+    url: '/api/event/form-responses/filter/';
+};
+
+export type EventFormResponsesFilterCreateErrors = {
+    /**
+     * Validation error
+     */
+    400: unknown;
+};
+
+export type EventFormResponsesFilterCreateResponses = {
+    /**
+     * Paginated list of matching form responses
+     */
+    200: unknown;
+};
 
 export type EventFormsListData = {
     body?: never;
