@@ -366,6 +366,7 @@ const {
   total: totalCount,
   totalPages,
   isLoading,
+  refetch: refetchAttendees,
 } = useAttendeesPostFilterResults(postFilterBody)
 
 const attendees = computed(() => rawAttendees.value as RosterRow[])
@@ -487,6 +488,8 @@ async function executeSelectionAction(selectedAction: 'CHECK_IN' | 'CHECK_OUT') 
       color: 'green',
     })
     clearSelection()
+
+    await refetchAttendees()
   } catch (err: any) {
     toast.add({
       title: 'Action failed',

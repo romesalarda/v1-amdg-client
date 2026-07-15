@@ -282,6 +282,15 @@ export function useParticipantsUrlState(eventId: MaybeRefOrGetter<string>) {
         const names = d.area_from.map((id) => areasList.find((a: any) => a.id === id)?.area_name || String(id))
         chips.push({ key: 'demographics.area_from', label: 'Area', value: names.join(', ') })
       }
+      if ((d as any).chapter_from && (d as any).chapter_from.length > 0) {
+        chips.push({ key: 'demographics.chapter_from', label: 'Chapter', value: ((d as any).chapter_from as number[]).map(String).join(', ') })
+      }
+      if ((d as any).cluster_from && (d as any).cluster_from.length > 0) {
+        chips.push({ key: 'demographics.cluster_from', label: 'Cluster', value: ((d as any).cluster_from as number[]).map(String).join(', ') })
+      }
+      if ((d as any).country_from && (d as any).country_from.length > 0) {
+        chips.push({ key: 'demographics.country_from', label: 'Country', value: ((d as any).country_from as number[]).map(String).join(', ') })
+      }
       if (d.has_dietary_requirements != null) chips.push({ key: 'demographics.has_dietary_requirements', label: 'Has Dietary', value: d.has_dietary_requirements ? 'Yes' : 'No' })
       if (d.dietary_requirement && d.dietary_requirement.length > 0) {
         const names = d.dietary_requirement.map((id) => dietaryList.find((r: any) => r.id === id)?.label || String(id))

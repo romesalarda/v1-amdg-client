@@ -68,14 +68,14 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-700 mb-2">Organisation</label>
-                <OrganisationSelect :model-value="orgValue" @update:model-value="onOrgChange" />
+                <OrganisationSelect :model-value="orgValue" :multiple="true" @update:model-value="onOrgChange" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Area From</label>
-                <AreaSearchSelect
-                  :model-value="areaValue"
-                  :selected-label="selectedAreaLabel"
-                  @select="onAreaSelect"
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Location (Area From)</label>
+                <LocationMultiSelect
+                  :model-value="locationValue"
+                  :allowed-types="['area']"
+                  @update:model-value="onLocationChange"
                 />
               </div>
             </div>
@@ -324,7 +324,7 @@
 <script setup lang="ts">
 import type { AttendeeFiltersRequest } from '~/api/types.gen'
 import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
-import AreaSearchSelect from '~/components/ui/AreaSearchSelect.vue'
+import LocationMultiSelect, { type LocationMultiSelectValue } from '~/components/ui/LocationMultiSelect.vue'
 import DietaryRequirementSelect from '~/components/ui/DietaryRequirementSelect.vue'
 import MedicalConditionSelect from '~/components/ui/MedicalConditionSelect.vue'
 import AccessibilityRequirementSelect from '~/components/ui/AccessibilityRequirementSelect.vue'
@@ -356,7 +356,13 @@ const currentTab = ref<'basic' | 'questions' | 'forms' | 'orders' | 'payments' |
 function makeLocalFilters(source: AttendeeFiltersRequest): AttendeeFiltersRequest {
   return {
     operator: source.operator ?? 'AND',
-    demographics: { ...(source.demographics ?? {}) },
+    demographics: {
+      area_from: [],
+      chapter_from: [],
+      cluster_from: [],
+      country_from: [],
+      ...(source.demographics ?? {}),
+    } as any,
     status: { ...(source.status ?? {}) },
     forms: { operator: 'AND', conditions: [], ...(source.forms ?? {}) },
     registration_questions: { operator: 'AND', conditions: [], ...(source.registration_questions ?? {}) },
@@ -367,7 +373,6 @@ function makeLocalFilters(source: AttendeeFiltersRequest): AttendeeFiltersReques
 }
 
 const localFilters = ref<AttendeeFiltersRequest>(makeLocalFilters(props.filters))
-const selectedAreaLabel = ref<string | null>(null)
 
 // Typed section accessors — strips `| null` so component v-model bindings typecheck.
 // These are always populated because makeLocalFilters initialises each sub-object.
@@ -383,17 +388,26 @@ watch(() => props.filters, (newFilters) => {
 
 // ── Single-value adapters for selects that still take a single ID ─────────────
 
-const orgValue = computed(() => localFilters.value.demographics?.organisation?.[0] ?? null)
+const orgValue = computed(() => localFilters.value.demographics?.organisation ?? [])
 function onOrgChange(v: number | number[] | null) {
   if (v === null) localFilters.value.demographics!.organisation = []
   else if (Array.isArray(v)) localFilters.value.demographics!.organisation = v
   else localFilters.value.demographics!.organisation = [v]
 }
 
-const areaValue = computed(() => localFilters.value.demographics?.area_from?.[0] ?? null)
-function onAreaSelect(id: number | null, label: string | null) {
-  localFilters.value.demographics!.area_from = id ? [id] : []
-  selectedAreaLabel.value = label
+const locationValue = computed<LocationMultiSelectValue>(() => ({
+  area: (localFilters.value.demographics as any)?.area_from ?? [],
+  chapter: (localFilters.value.demographics as any)?.chapter_from ?? [],
+  cluster: (localFilters.value.demographics as any)?.cluster_from ?? [],
+  country: (localFilters.value.demographics as any)?.country_from ?? [],
+}))
+
+function onLocationChange(v: LocationMultiSelectValue) {
+  const d = localFilters.value.demographics as any
+  d.area_from = v.area ?? []
+  d.chapter_from = v.chapter ?? []
+  d.cluster_from = v.cluster ?? []
+  d.country_from = v.country ?? []
 }
 
 

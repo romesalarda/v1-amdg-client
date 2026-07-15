@@ -5043,6 +5043,9 @@ export type DemographicsFilterRequest = {
     is_minor?: boolean | null;
     organisation?: Array<number>;
     area_from?: Array<number>;
+    chapter_from?: Array<number>;
+    cluster_from?: Array<number>;
+    country_from?: Array<number>;
     has_dietary_requirements?: boolean | null;
     dietary_requirement?: Array<number>;
     has_medical_conditions?: boolean | null;
