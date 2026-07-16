@@ -1,22 +1,29 @@
 <template>
-  <div class="space-y-6">
+  <div class="space-y-6 bg-slate-50 -m-4 p-4 rounded-2xl md:-m-6 md:p-6">
     <!-- Header Controls -->
     <div class="flex items-center justify-between gap-4 flex-wrap">
       <div class="flex items-center gap-3 flex-1 min-w-[240px]">
-        <UInput
-          v-model="searchQuery"
-          placeholder="Search forms by title or description..."
-          icon="i-heroicons-magnifying-glass"
-          size="sm"
-          class="flex-1"
-          :loading="isLoading"
-        />
+        <div class="relative flex-1">
+          <UInput
+            v-model="searchQuery"
+            placeholder="Search forms by title or description..."
+            icon="i-heroicons-magnifying-glass"
+            size="lg"
+            class="flex-1"
+            :loading="isLoading"
+            :ui="{
+              rounded: 'rounded-full',
+              base: 'shadow-sm border-slate-200 focus:ring-2 focus:ring-[#2F6FED]/40 focus:border-[#2F6FED]',
+            }"
+          />
+        </div>
         <UButton
           v-if="searchQuery"
           icon="i-heroicons-x-mark"
-          size="sm"
+          size="lg"
           color="gray"
           variant="ghost"
+          class="rounded-full"
           @click="searchQuery = ''"
         />
       </div>
@@ -24,173 +31,176 @@
         v-if="!readOnly"
         label="Create Form"
         icon="i-heroicons-plus"
-        size="sm"
+        size="lg"
+        class="rounded-full font-bold tracking-tight bg-[#2F6FED] hover:bg-[#2559C7] shadow-lg shadow-[#2F6FED]/25 px-5"
         @click="openCreateModal"
       />
     </div>
 
     <!-- Forms Grid -->
     <div v-if="isLoading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <USkeleton v-for="i in 3" :key="i" class="h-48 rounded-xl" />
+      <USkeleton v-for="i in 3" :key="i" class="h-64 rounded-2xl" />
     </div>
 
     <!-- Empty: no forms yet -->
-    <UCard v-else-if="forms.length === 0 && !searchQuery" class="text-center py-16">
+    <div v-else-if="forms.length === 0 && !searchQuery" class="text-center py-20 rounded-2xl border-2 border-dashed border-slate-200 bg-white">
       <div class="space-y-4">
         <div class="flex justify-center">
-          <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
-            <UIcon name="i-heroicons-clipboard-document-list" class="w-10 h-10 text-blue-600" />
+          <div class="w-20 h-20 rounded-full flex items-center justify-center bg-[#2F6FED]/10">
+            <UIcon name="i-heroicons-clipboard-document-list" class="w-10 h-10 text-[#2F6FED]" />
           </div>
         </div>
         <div>
-          <h3 class="text-lg font-semibold text-gray-900 mb-2">No custom forms yet</h3>
-          <p class="text-sm text-gray-600 mb-6">Create additional feedback forms, surveys, or questionnaires for your attendees.</p>
+          <h3 class="text-xl font-extrabold tracking-tight text-[#0B1120] mb-2">No custom forms yet</h3>
+          <p class="text-sm text-slate-500 mb-6 max-w-sm mx-auto">Create additional feedback forms, surveys, or questionnaires for your attendees.</p>
         </div>
         <UButton
           v-if="!readOnly"
           label="Create First Form"
           icon="i-heroicons-plus"
           size="lg"
+          class="rounded-full font-bold bg-[#2F6FED] hover:bg-[#2559C7] shadow-lg shadow-[#2F6FED]/25 px-6"
           @click="openCreateModal"
         />
       </div>
-    </UCard>
+    </div>
 
     <!-- Empty: search returned no results -->
-    <UCard v-else-if="forms.length === 0 && searchQuery" class="text-center py-12">
+    <div v-else-if="forms.length === 0 && searchQuery" class="text-center py-16 rounded-2xl border-2 border-dashed border-slate-200 bg-white">
       <div class="space-y-3">
-        <UIcon name="i-heroicons-magnifying-glass" class="w-10 h-10 text-gray-400 mx-auto" />
-        <h3 class="font-semibold text-gray-900">No results for &ldquo;{{ searchQuery }}&rdquo;</h3>
-        <p class="text-sm text-gray-600">Try a different search term.</p>
-        <UButton label="Clear Search" variant="ghost" size="sm" @click="searchQuery = ''" />
+        <UIcon name="i-heroicons-magnifying-glass" class="w-10 h-10 text-slate-300 mx-auto" />
+        <h3 class="font-bold text-[#0B1120]">No results for &ldquo;{{ searchQuery }}&rdquo;</h3>
+        <p class="text-sm text-slate-500">Try a different search term.</p>
+        <UButton label="Clear Search" variant="ghost" size="sm" class="rounded-full" @click="searchQuery = ''" />
       </div>
-    </UCard>
+    </div>
 
     <!-- Cards List -->
     <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      <UCard
+      <div
         v-for="form in forms"
         :key="form.id"
-        class="hover:shadow-lg transition-all border border-gray-100 relative group flex flex-col justify-between overflow-hidden"
-        :class="{
-          'border-t-4 border-t-blue-500': form.status === 'published',
-          'border-t-4 border-t-gray-400': form.status === 'draft',
-          'border-t-4 border-t-red-400': form.status === 'closed',
-        }"
-        :ui="{ body: { padding: 'p-0' } }"
+        class="ticket-card group relative rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-200"
       >
-        <!-- Landing image banner -->
-        <div class="relative w-full overflow-hidden" style="height: 120px;">
+        <!-- Poster / landing image -->
+        <div class="relative w-full h-44 rounded-t-2xl overflow-hidden">
           <img
             v-if="form.landing_image"
             :src="form.landing_image"
             alt="Form landing image"
             class="w-full h-full object-cover"
           />
-          <div
-            v-else
-            class="w-full h-full bg-gradient-to-r"
-            :class="{
-              'from-blue-400 to-indigo-500': form.status === 'published',
-              'from-gray-300 to-gray-400': form.status === 'draft',
-              'from-red-300 to-rose-400': form.status === 'closed',
-            }"
-          />
-        </div>
+          <div v-else class="w-full h-full ticket-placeholder" :class="statusMeta(form.status).placeholder" />
 
-        <!-- Card body -->
-        <div class="p-4 space-y-3 flex-1">
-        <div class="space-y-3 flex-1">
-          <div class="flex items-start justify-between gap-2">
-            <div class="flex-1 min-w-0">
-              <h4 class="font-bold text-gray-900 text-lg truncate group-hover:text-blue-600 cursor-pointer" @click="$emit('edit', form.id)">
-                {{ form.title }}
-              </h4>
-              <p class="text-xs text-gray-400 mt-0.5">
-                Created {{ formatDate(form.created_at) }}
-              </p>
-            </div>
-            <div class="flex items-center gap-1 flex-shrink-0" v-if="!readOnly">
-              <UDropdown
-                :items="getActionMenuItems(form)"
-                :popper="{ placement: 'bottom-end' }"
-              >
-                <UButton
-                  color="gray"
-                  variant="ghost"
-                  icon="i-heroicons-ellipsis-vertical"
-                  size="xs"
-                />
-              </UDropdown>
-            </div>
+          <!-- scrim -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent"></div>
+
+          <!-- actions menu -->
+          <div class="absolute top-2.5 right-2.5" v-if="!readOnly">
+            <UDropdown :items="getActionMenuItems(form)" :popper="{ placement: 'bottom-end' }">
+              <UButton
+                color="white"
+                variant="solid"
+                icon="i-heroicons-ellipsis-vertical"
+                size="xs"
+                class="rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm ring-1 ring-white/30 text-white"
+              />
+            </UDropdown>
           </div>
 
-          <p class="text-sm text-gray-600 line-clamp-3 min-h-[40px]">
+          <!-- status pill, top-left -->
+          <span
+            class="absolute top-2.5 left-2.5 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest shadow"
+            :class="statusMeta(form.status).pill"
+          >
+            <span class="h-1.5 w-1.5 rounded-full" :class="statusMeta(form.status).dot"></span>
+            {{ form.status_display || form.status }}
+          </span>
+
+          <!-- title over scrim -->
+          <div class="absolute bottom-0 left-0 right-0 p-3">
+            <h4
+              class="font-extrabold tracking-tight text-lg text-white leading-tight truncate cursor-pointer drop-shadow-sm"
+              @click="$emit('edit', form.id)"
+            >
+              {{ form.title }}
+            </h4>
+            <p class="text-[11px] font-medium text-white/70 mt-0.5 uppercase tracking-wide">
+              Created {{ formatDate(form.created_at) }}
+            </p>
+          </div>
+        </div>
+
+        <!-- Ticket stub perforation -->
+        <div class="ticket-perforation"></div>
+
+        <!-- Card body -->
+        <div class="px-4 pb-4 pt-3 space-y-3">
+          <p class="text-sm text-slate-500 line-clamp-2 min-h-[36px]">
             {{ form.description || 'No description provided.' }}
           </p>
 
-          <div class="flex items-center gap-4 pt-3 border-t border-gray-100 flex-wrap">
-            <UBadge
-              :label="form.status_display || form.status"
-              :color="getStatusColor(form.status)"
-              variant="soft"
-              size="xs"
-            />
-            <div class="flex items-center gap-1 text-xs text-gray-500">
-              <UIcon name="i-heroicons-question-mark-circle" class="w-4 h-4" />
-              <span>{{ form.question_count || 0 }} questions</span>
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <div class="stub-tag">
+                <span class="stub-tag-num">{{ form.question_count || 0 }}</span>
+                <span class="stub-tag-label">Q's</span>
+              </div>
+              <UBadge
+                v-if="form.required"
+                label="Required"
+                variant="soft"
+                size="xs"
+                class="font-bold"
+                :ui="{ rounded: 'rounded-full' }"
+                color="amber"
+              />
             </div>
-            <UBadge
-              v-if="form.required"
-              label="Required"
-              color="red"
-              variant="soft"
+          </div>
+
+          <div class="flex items-center gap-2 justify-end pt-1 border-t border-dashed border-slate-200">
+            <UButton
+              label="Edit Questions"
+              icon="i-heroicons-pencil-square"
               size="xs"
+              variant="soft"
+              class="rounded-full font-semibold mt-2"
+              @click="$emit('edit', form.id)"
+            />
+            <UButton
+              v-if="form.status === 'published' && !readOnly"
+              label="Close"
+              color="red"
+              variant="ghost"
+              size="xs"
+              class="rounded-full font-semibold mt-2"
+              @click="closeForm(form.id)"
+            />
+            <UButton
+              v-if="form.status === 'draft' && !readOnly"
+              label="Publish"
+              size="xs"
+              class="rounded-full font-bold mt-2 bg-[#16A34A] hover:bg-[#128038]"
+              @click="publishForm(form.id)"
             />
           </div>
         </div>
-
-        <div class="pt-4 mt-auto flex items-center gap-2 justify-end">
-          <UButton
-            label="Edit Questions"
-            icon="i-heroicons-pencil-square"
-            size="xs"
-            variant="soft"
-            @click="$emit('edit', form.id)"
-          />
-          <UButton
-            v-if="form.status === 'published' && !readOnly"
-            label="Close Form"
-            color="red"
-            variant="ghost"
-            size="xs"
-            @click="closeForm(form.id)"
-          />
-          <UButton
-            v-if="form.status === 'draft' && !readOnly"
-            label="Publish"
-            color="green"
-            variant="solid"
-            size="xs"
-            @click="publishForm(form.id)"
-          />
-        </div>
-        </div>
-      </UCard>
+      </div>
     </div>
 
     <!-- Create Form Modal -->
     <UModal v-model="showCreateModal">
-      <UCard>
+      <UCard :ui="{ rounded: 'rounded-2xl', ring: '' }">
         <template #header>
           <div class="flex items-center justify-between">
-            <h3 class="font-semibold text-gray-900 text-lg">
+            <h3 class="font-extrabold tracking-tight text-[#0B1120] text-lg">
               {{ editingFormId ? 'Edit Form Settings' : 'Create Custom Form' }}
             </h3>
             <UButton
               icon="i-heroicons-x-mark"
               variant="ghost"
               size="xs"
+              class="rounded-full"
               @click="closeCreateModal"
             />
           </div>
@@ -199,30 +209,30 @@
         <div class="space-y-4">
           <!-- Landing Image Upload -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Landing Image</label>
+            <label class="block text-sm font-semibold text-[#0B1120] mb-1">Landing Image</label>
             <!-- Preview -->
             <div v-if="formImagePreview || (editingFormId && editingFormLandingImage)" class="relative mb-2">
               <img
                 :src="formImagePreview || editingFormLandingImage || ''"
                 alt="Landing image preview"
-                class="w-full h-32 object-cover rounded-lg border border-gray-200"
+                class="w-full h-32 object-cover rounded-xl border border-slate-200"
               />
               <UButton
                 icon="i-heroicons-x-mark"
                 variant="ghost"
                 size="xs"
                 color="gray"
-                class="absolute top-2 right-2 bg-white/80 hover:bg-white shadow"
+                class="absolute top-2 right-2 bg-white/80 hover:bg-white shadow rounded-full"
                 title="Remove image"
                 @click="clearFormImage"
               />
             </div>
             <!-- Drop zone -->
             <div
-              class="relative flex flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed transition-colors cursor-pointer"
+              class="relative flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed transition-colors cursor-pointer"
               :class="isFormImageDragging
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50/50'"
+                ? 'border-[#2F6FED] bg-[#2F6FED]/5'
+                : 'border-slate-300 bg-slate-50 hover:border-[#2F6FED]/60 hover:bg-[#2F6FED]/5'"
               style="min-height: 80px;"
               @dragover.prevent="isFormImageDragging = true"
               @dragleave.prevent="isFormImageDragging = false"
@@ -232,12 +242,12 @@
               <UIcon
                 :name="isFormImageDragging ? 'i-heroicons-arrow-down-tray' : 'i-heroicons-photo'"
                 class="w-6 h-6"
-                :class="isFormImageDragging ? 'text-blue-500' : 'text-gray-400'"
+                :class="isFormImageDragging ? 'text-[#2F6FED]' : 'text-slate-400'"
               />
-              <p class="text-xs font-medium" :class="isFormImageDragging ? 'text-blue-600' : 'text-gray-500'">
+              <p class="text-xs font-semibold" :class="isFormImageDragging ? 'text-[#2F6FED]' : 'text-slate-500'">
                 {{ isFormImageDragging ? 'Drop to upload' : 'Drag & drop or click to upload' }}
               </p>
-              <p class="text-[10px] text-gray-400">JPG, PNG, WEBP — max 5 MB</p>
+              <p class="text-[10px] text-slate-400">JPG, PNG, WEBP — max 5 MB</p>
               <input
                 ref="formImageInputRef"
                 type="file"
@@ -253,6 +263,7 @@
               v-model="formFields.title"
               placeholder="e.g. Workshop Session Feedback"
               :disabled="isSubmitting"
+              :ui="{ rounded: 'rounded-lg' }"
             />
           </UFormGroup>
 
@@ -262,10 +273,11 @@
               placeholder="Provide context or instructions for attendees answering this form."
               :rows="4"
               :disabled="isSubmitting"
+              :ui="{ rounded: 'rounded-lg' }"
             />
           </UFormGroup>
 
-          <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3">
+          <div class="rounded-xl border border-slate-200 bg-slate-50 p-3 space-y-3">
             <UCheckbox
               v-model="formFields.required"
               label="All attendees are required to fill this form"
@@ -279,24 +291,24 @@
           </div>
 
           <!-- Scheduling -->
-          <div class="space-y-3 pt-2 border-t border-gray-200">
-            <p class="text-xs font-semibold text-gray-700 uppercase tracking-wide">Scheduling</p>
+          <div class="space-y-3 pt-2 border-t border-slate-200">
+            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-widest">Scheduling</p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <UFormGroup label="Opens At"> 
+              <UFormGroup label="Opens At">
                 <UInput
-                  label="Opens At"
                   v-model="formFields.opens_at"
                   type="datetime-local"
                   :disabled="isSubmitting"
+                  :ui="{ rounded: 'rounded-lg' }"
                 />
               </UFormGroup>
-              <UFormGroup label="Deadline"> 
+              <UFormGroup label="Deadline">
                 <UInput
-                  label="Deadline"
                   v-model="formFields.deadline"
                   type="datetime-local"
                   :disabled="isSubmitting"
+                  :ui="{ rounded: 'rounded-lg' }"
                 />
               </UFormGroup>
             </div>
@@ -306,6 +318,7 @@
                 v-model="formFields.pre_opens_message"
                 placeholder="e.g. This form will open on June 15th."
                 :disabled="isSubmitting"
+                :ui="{ rounded: 'rounded-lg' }"
               />
             </UFormGroup>
 
@@ -314,6 +327,7 @@
                 v-model="formFields.deadline_message"
                 placeholder="e.g. Submissions are now closed."
                 :disabled="isSubmitting"
+                :ui="{ rounded: 'rounded-lg' }"
               />
             </UFormGroup>
           </div>
@@ -325,12 +339,14 @@
               label="Cancel"
               variant="ghost"
               size="sm"
+              class="rounded-full"
               @click="closeCreateModal"
             />
             <UButton
               :label="editingFormId ? 'Save Changes' : 'Create'"
               size="sm"
               :loading="isSubmitting"
+              class="rounded-full font-bold bg-[#2F6FED] hover:bg-[#2559C7] px-5"
               @click="submitForm"
             />
           </div>
@@ -428,9 +444,7 @@ const formFields = reactive({
 const toDatetimeLocal = (iso: string | null | undefined): string => {
   if (!iso) return ''
   try {
-    console.log('Converting ISO to local:', iso)
     const d = new Date(iso)
-    // Offset to local time
     const offset = d.getTimezoneOffset() * 60000
     return new Date(d.getTime() - offset).toISOString().slice(0, 16)
   } catch {
@@ -453,15 +467,26 @@ const forms = computed(() => {
   )
 })
 
-type BadgeColor = 'red' | 'orange' | 'amber' | 'yellow' | 'lime' | 'green' | 'emerald' | 'teal' | 'cyan' | 'sky' | 'blue' | 'indigo' | 'violet' | 'purple' | 'fuchsia' | 'pink' | 'rose' | 'gray' | 'white' | 'black'
-
-const getStatusColor = (status: string): BadgeColor => {
-  const colors: Record<string, BadgeColor> = {
-    draft: 'gray',
-    published: 'green',
-    closed: 'red',
+// Status → visual language (pill, dot, image placeholder pattern)
+const statusMeta = (status: string) => {
+  const map: Record<string, { pill: string; dot: string; placeholder: string }> = {
+    draft: {
+      pill: 'bg-white/90 text-slate-600',
+      dot: 'bg-slate-400',
+      placeholder: 'ticket-placeholder--draft',
+    },
+    published: {
+      pill: 'bg-[#16A34A] text-white',
+      dot: 'bg-white',
+      placeholder: 'ticket-placeholder--published',
+    },
+    closed: {
+      pill: 'bg-[#E11D48] text-white',
+      dot: 'bg-white',
+      placeholder: 'ticket-placeholder--closed',
+    },
   }
-  return colors[status] ?? 'gray'
+  return map[status] ?? map.draft
 }
 
 const formatDate = (isoString: string) => {
@@ -527,7 +552,7 @@ const submitForm = async () => {
     }
 
     const payload = {
-      event: props.eventUuid, // required by schema field Event slug slugrelatedfield
+      event: props.eventUuid,
       title: formFields.title.trim(),
       description: formFields.description.trim() || null,
       required: formFields.required,
@@ -538,7 +563,6 @@ const submitForm = async () => {
       pre_opens_message: formFields.pre_opens_message.trim(),
     }
 
-    // Determine if we need to clear the landing image
     const clearImage = editingFormId.value ? editingFormLandingImage.value === null && !formImageFile.value : false
     const imagePayload = clearImage ? { landing_image: null as null } : {}
 
@@ -550,7 +574,6 @@ const submitForm = async () => {
       })
       toast.add({ title: 'Form Updated', description: 'Form settings saved successfully', color: 'green' })
     } else {
-      // For create, first create the form then upload the image if provided
       const created = await createFormMutation.mutateAsync(payload)
       if (formImageFile.value && created?.data?.id) {
         await updateFormMutation.mutateAsync({
@@ -580,7 +603,7 @@ const publishForm = async (formId: string) => {
     text: 'Attendees will be able to view and answer this form.',
     icon: 'info',
     showCancelButton: true,
-    confirmButtonColor: '#10b981',
+    confirmButtonColor: '#16A34A',
     cancelButtonColor: '#6b7280',
     confirmButtonText: 'Publish Now',
   })
@@ -602,7 +625,7 @@ const closeForm = async (formId: string) => {
     text: 'Further submissions will be disabled.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#ef4444',
+    confirmButtonColor: '#E11D48',
     cancelButtonColor: '#6b7280',
     confirmButtonText: 'Close Form',
   })
@@ -624,7 +647,7 @@ const deleteForm = async (formId: string, title: string) => {
     text: `Are you sure you want to delete "${title}"? This will permanently remove all questions and attendee responses!`,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#ef4444',
+    confirmButtonColor: '#E11D48',
     cancelButtonColor: '#6b7280',
     confirmButtonText: 'Delete Permanently',
   })
@@ -658,3 +681,68 @@ const getActionMenuItems = (form: any) => {
   ]
 }
 </script>
+
+<style scoped>
+/* Torn-ticket-stub divider: dashed rule with circular notches cut
+   into the card, echoing a physical ticket stub tear-line. */
+.ticket-perforation {
+  position: relative;
+  height: 1px;
+  margin: 0 14px;
+  border-top: 2px dashed theme('colors.slate.200');
+}
+.ticket-perforation::before,
+.ticket-perforation::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: theme('colors.slate.50'); /* matches page background so it reads as a cutout */
+  transform: translateY(-50%);
+}
+.ticket-perforation::before { left: -23px; }
+.ticket-perforation::after { right: -23px; }
+
+/* Small "stub" tag showing the question count, styled like a price/admit tag */
+.stub-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 2px 8px;
+  border: 1px dashed theme('colors.slate.300');
+  border-radius: 6px;
+  background: theme('colors.slate.50');
+}
+.stub-tag-num {
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: theme('colors.slate.700');
+}
+.stub-tag-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: theme('colors.slate.400');
+}
+
+/* Placeholder art for forms without a landing image, diagonal ticket-stripe pattern */
+.ticket-placeholder {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.08) 0px,
+    rgba(255, 255, 255, 0.08) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+}
+.ticket-placeholder--draft { background-color: #64748B; }
+.ticket-placeholder--published { background-color: #2F6FED; }
+.ticket-placeholder--closed { background-color: #E11D48; }
+
+.ticket-card {
+  overflow: visible; /* let the perforation notches sit outside the card edge */
+}
+</style>
