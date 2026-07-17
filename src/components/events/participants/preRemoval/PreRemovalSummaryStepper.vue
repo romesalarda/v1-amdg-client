@@ -94,15 +94,6 @@
                       <span v-if="payment.item.method_title"> • {{ payment.item.method_title }}</span>
                     </p>
                   </div>
-                  <UButton
-                    color="blue"
-                    variant="soft"
-                    size="xs"
-                    :disabled="payment.item.can_request_refund === false"
-                    @click="$emit('requestRefund', payment.item)"
-                  >
-                    Refund
-                  </UButton>
                 </div>
               </div>
             </div>
@@ -193,16 +184,6 @@
             </div>
 
             <div class="flex flex-col gap-2 md:items-end">
-              <UButton
-                color="blue"
-                variant="solid"
-                size="sm"
-                :disabled="payment.item.can_request_refund === false"
-                :class="payment.item.can_request_refund ? '' : 'cursor-not-allowed opacity-50'"
-                @click="$emit('requestRefund', payment.item)"
-              >
-                Request refund
-              </UButton>
               <p
                 v-if="payment.item.can_request_refund === false && payment.item.refund_block_reason"
                 class="max-w-xs text-xs text-amber-700"
