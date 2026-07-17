@@ -37,7 +37,7 @@
       />
     </PolicyFieldSection>
 
-    <div class="border-t border-deep-navy/10" />
+    <div class="h-px bg-gradient-to-r from-transparent via-deep-navy/15 to-transparent" />
 
     <!-- Content Requirements -->
     <PolicyFieldSection
@@ -64,7 +64,7 @@
       />
     </PolicyFieldSection>
 
-    <div class="border-t border-deep-navy/10" />
+    <div class="h-px bg-gradient-to-r from-transparent via-deep-navy/15 to-transparent" />
 
     <!-- Approval Workflow -->
     <PolicyFieldSection
@@ -85,7 +85,7 @@
       />
     </PolicyFieldSection>
 
-    <div class="border-t border-deep-navy/10" />
+    <div class="h-px bg-gradient-to-r from-transparent via-deep-navy/15 to-transparent" />
 
     <!-- Attendance & Event Limits -->
     <PolicyFieldSection
@@ -96,33 +96,49 @@
         <label class="block text-[10px] font-black text-deep-navy/50 mb-1.5 uppercase tracking-[0.15em]">
           Max Attendees Per Event
         </label>
-        <input
-          v-model.number="draft.max_attendees_per_event"
-          type="number"
-          min="0"
-          :disabled="!canEdit"
-          placeholder="0 = unlimited"
-          class="w-full px-3 py-2.5 border-2 border-deep-navy/20 rounded-xl text-sm font-medium text-deep-navy bg-white disabled:opacity-50"
-        />
-        <p class="text-[10px] text-deep-navy/40 mt-1">0 means no limit</p>
+        <div class="relative">
+          <UIcon name="i-heroicons-user-group" class="w-4 h-4 text-deep-navy/30 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            v-model.number="draft.max_attendees_per_event"
+            type="number"
+            min="0"
+            :disabled="!canEdit"
+            placeholder="0"
+            class="w-full pl-9 pr-20 py-2.5 border-2 border-deep-navy/15 rounded-xl text-sm font-bold text-deep-navy bg-white transition-colors focus:outline-none focus:border-deep-navy/50 focus:ring-4 focus:ring-deep-navy/5 disabled:opacity-50 disabled:bg-deep-navy/[0.02]"
+          />
+          <span
+            v-if="!draft.max_attendees_per_event"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-wider text-deep-navy/40 bg-deep-navy/5 rounded-full px-2 py-1"
+          >
+            Unlimited
+          </span>
+        </div>
       </div>
       <div>
         <label class="block text-[10px] font-black text-deep-navy/50 mb-1.5 uppercase tracking-[0.15em]">
           Max Events Per Organiser
         </label>
-        <input
-          v-model.number="draft.max_events_per_organiser"
-          type="number"
-          min="0"
-          :disabled="!canEdit"
-          placeholder="0 = unlimited"
-          class="w-full px-3 py-2.5 border-2 border-deep-navy/20 rounded-xl text-sm font-medium text-deep-navy bg-white disabled:opacity-50"
-        />
-        <p class="text-[10px] text-deep-navy/40 mt-1">0 means no limit</p>
+        <div class="relative">
+          <UIcon name="i-heroicons-calendar-days" class="w-4 h-4 text-deep-navy/30 absolute left-3 top-1/2 -translate-y-1/2" />
+          <input
+            v-model.number="draft.max_events_per_organiser"
+            type="number"
+            min="0"
+            :disabled="!canEdit"
+            placeholder="0"
+            class="w-full pl-9 pr-20 py-2.5 border-2 border-deep-navy/15 rounded-xl text-sm font-bold text-deep-navy bg-white transition-colors focus:outline-none focus:border-deep-navy/50 focus:ring-4 focus:ring-deep-navy/5 disabled:opacity-50 disabled:bg-deep-navy/[0.02]"
+          />
+          <span
+            v-if="!draft.max_events_per_organiser"
+            class="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase tracking-wider text-deep-navy/40 bg-deep-navy/5 rounded-full px-2 py-1"
+          >
+            Unlimited
+          </span>
+        </div>
       </div>
     </PolicyFieldSection>
 
-    <div class="border-t border-deep-navy/10" />
+    <div class="h-px bg-gradient-to-r from-transparent via-deep-navy/15 to-transparent" />
 
     <!-- Payments -->
     <PolicyFieldSection
@@ -145,50 +161,72 @@
         <label class="block text-[10px] font-black text-deep-navy/50 mb-1.5 uppercase tracking-[0.15em]">
           Max Package Price
         </label>
-        <input
-          v-model="draft.max_package_price"
-          type="text"
-          :disabled="!canEdit"
-          placeholder="e.g. 150.00 (leave blank for no limit)"
-          class="w-full px-3 py-2.5 border-2 border-deep-navy/20 rounded-xl text-sm font-medium text-deep-navy bg-white disabled:opacity-50"
-        />
-        <p class="text-[10px] text-deep-navy/40 mt-1">Maximum price for a booking package. Leave blank for no limit.</p>
+        <div class="relative">
+          <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-black text-deep-navy/30">£</span>
+          <input
+            v-model="draft.max_package_price"
+            type="text"
+            :disabled="!canEdit"
+            placeholder="No limit"
+            class="w-full pl-7 pr-3 py-2.5 border-2 border-deep-navy/15 rounded-xl text-sm font-bold text-deep-navy bg-white transition-colors focus:outline-none focus:border-deep-navy/50 focus:ring-4 focus:ring-deep-navy/5 disabled:opacity-50 disabled:bg-deep-navy/[0.02]"
+          />
+        </div>
+        <p class="text-[10px] text-deep-navy/40 mt-1.5">Maximum price for a booking package. Leave blank for no limit.</p>
       </div>
     </PolicyFieldSection>
 
-    <!-- Save / status -->
-    <div v-if="canEdit" class="pt-2">
-      <div class="flex items-center gap-4">
+    <!-- Save / status bar -->
+    <div
+      v-if="canEdit"
+      class="sticky bottom-4 z-10"
+    >
+      <div
+        class="flex items-center gap-4 rounded-2xl border border-deep-navy/10 bg-white/95 backdrop-blur px-5 py-4 transition-shadow"
+        :class="isDirty ? 'shadow-xl shadow-deep-navy/10 ring-1 ring-deep-navy/10' : 'shadow-sm'"
+      >
         <button
           :disabled="!isDirty || isSaving"
-          class="px-6 py-3 bg-deep-navy text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all hover:bg-deep-navy/90 disabled:opacity-40"
+          class="px-6 py-2.5 bg-deep-navy text-white rounded-full font-black text-xs uppercase tracking-wider transition-all hover:bg-deep-navy/90 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2"
           @click="save"
         >
+          <UIcon v-if="isSaving" name="i-heroicons-arrow-path" class="w-3.5 h-3.5 animate-spin" />
           {{ isSaving ? 'Saving…' : 'Save Changes' }}
         </button>
         <button
           v-if="isDirty"
-          class="px-5 py-2.5 border-2 border-deep-navy/20 text-deep-navy rounded-xl font-black text-xs uppercase tracking-wider transition-all hover:bg-deep-navy/5"
+          class="px-5 py-2.5 border-2 border-deep-navy/15 text-deep-navy rounded-full font-black text-[11px] uppercase tracking-wider transition-all hover:bg-deep-navy/5"
           @click="reset"
         >
           Discard
         </button>
-        <p v-if="!isDirty && lastSaved" class="text-xs text-deep-navy/50 font-medium">
-          Last updated {{ lastSaved }}
-        </p>
+        <div class="flex items-center gap-2 ml-auto">
+          <span
+            v-if="isDirty"
+            class="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-600"
+          >
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+            Unsaved changes
+          </span>
+          <p v-else-if="lastSaved" class="text-xs text-deep-navy/40 font-semibold">
+            Last updated {{ lastSaved }}
+          </p>
+        </div>
       </div>
     </div>
 
     <div v-else class="pt-2">
-      <p class="text-xs text-deep-navy/50 font-medium italic">
-        You have read-only access to this policy.
-      </p>
+      <div class="flex items-center gap-2 rounded-xl bg-deep-navy/[0.03] border border-deep-navy/10 px-4 py-3">
+        <UIcon name="i-heroicons-lock-closed" class="w-4 h-4 text-deep-navy/40" />
+        <p class="text-xs text-deep-navy/50 font-semibold">
+          You have read-only access to this policy.
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, reactive, watch, h, defineComponent } from 'vue'
 import type { OrganisationEventPolicy } from '~/api/types.gen'
 import { useUpdateOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 import PolicyFieldSection from './PolicyFieldSection.vue'
@@ -205,7 +243,7 @@ const PolicyToggleField = defineComponent({
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     return () => h('label', { class: 'flex items-start gap-3 cursor-pointer group' }, [
-      h('div', { class: 'relative mt-0.5' }, [
+      h('div', { class: 'relative mt-0.5 flex-shrink-0' }, [
         h('input', {
           type: 'checkbox',
           checked: props.modelValue,
@@ -215,22 +253,22 @@ const PolicyToggleField = defineComponent({
         }),
         h('div', {
           class: [
-            'w-10 h-5 rounded-full border-2 transition-all',
+            'w-10 h-[22px] rounded-full border-2 transition-all duration-200 shadow-inner',
             'peer-checked:bg-deep-navy peer-checked:border-deep-navy',
-            'bg-white border-deep-navy/30',
+            'bg-deep-navy/[0.04] border-deep-navy/20 group-hover:border-deep-navy/40',
             props.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer',
           ].join(' '),
         }),
         h('div', {
           class: [
-            'absolute top-0.5 left-0.5 w-4 h-4 bg-deep-navy/30 rounded-full transition-all',
-            'peer-checked:translate-x-5 peer-checked:bg-white',
+            'absolute top-[3px] left-[3px] w-3.5 h-3.5 bg-deep-navy/30 rounded-full transition-all duration-200 shadow',
+            'peer-checked:translate-x-[19px] peer-checked:bg-white',
           ].join(' '),
         }),
       ]),
       h('div', {}, [
         h('p', { class: 'text-sm font-bold text-deep-navy' }, props.label),
-        h('p', { class: 'text-xs text-deep-navy/50 font-medium mt-0.5' }, props.description),
+        h('p', { class: 'text-xs text-deep-navy/50 font-medium mt-0.5 leading-snug' }, props.description),
       ]),
     ])
   },

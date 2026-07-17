@@ -14,9 +14,8 @@
           :key="reg.registration_id"
           class="flex items-center gap-3 px-5 py-3 cursor-pointer hover:bg-navy-50 transition-colors"
           @click="infoModalWorkshopId = reg.workshop; infoModalOpen = true"
-        >
-        
-          <div class="flex-1 min-w-0">
+        >        
+          <div class="flex-1 min-w-0" v-if="reg.status === 'CONFIRMED'">
             <img
               v-if="workshopNameMap[reg.workshop]?.landing"
               :src="workshopNameMap[reg.workshop]?.landing"
@@ -28,6 +27,14 @@
             </p>
             <p class="text-md text-navy-400">
               Registered {{ formatDate(reg.registered_at) }}
+            </p>
+          </div>
+          <div class="flex-1 min-w-0" v-else-if="reg.status === 'CANCELLED'">
+            <p class="text-xl font-bold text-navy-900 truncate">
+              {{ workshopNameMap[reg.workshop]?.title ?? `Workshop #${reg.workshop}` }}
+            </p>
+            <p class="text-md text-navy-400 bg-red-50 px-2 py-1 rounded-md inline-block mt-1">
+              Cancelled registration {{ formatDate(reg.registered_at) }}
             </p>
           </div>
         </div>

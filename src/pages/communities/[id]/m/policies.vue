@@ -1,9 +1,26 @@
 <template>
     <CommunitiesManagementLayout :organisation-id="organisationId" :organisation="organisation">
         <div class="space-y-8 m-5">
-            <div class="flex items-center justify-between">
-                <h1 class="text-3xl font-black text-deep-navy uppercase tracking-tight">Community Policies</h1>
-            </div>
+            <div class="flex items-center justify-between bg-[#026CDF] rounded-lg px-6 py-4">
+				<div>
+					<h1 class="text-2xl font-black text-white uppercase">Community Policies</h1>
+					<p class="text-sm text-white/60 font-medium mt-1">
+						Policies for {{ organisation?.title || 'this community' }}
+					</p>
+				</div>
+				<div class="flex items-center gap-3">
+					<UButton
+						:to="`/communities/${organisationId}/m/dashboard`"
+						variant="outline"
+						color="white"
+						icon="i-heroicons-arrow-left"
+						size="sm"
+						class="text-white"
+					>
+						Back to Dashboard
+					</UButton>
+				</div>
+			</div>
 
             <div v-if="isLoadingPolicy" class="space-y-4">
                 <USkeleton class="h-48 w-full rounded-xl" />

@@ -401,7 +401,7 @@
           <div class="p-6 space-y-6">
             <div class="space-y-1">
               <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Event Uptime</p>
-              <p class="text-[11px] font-bold text-primary break-all bg-mist-blue p-2 rounded-lg border border-navy-100/50">
+              <p class="text-[12px] font-bold text-primary break-all bg-mist-blue p-2 rounded-lg border border-navy-100/50">
                 {{ event?.uptime }}
               </p>
             </div>
@@ -428,7 +428,7 @@
               </div>
               <div class="flex justify-between items-center mt-2">
                 <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Identifier</p>
-                <span class="bg-blue-600 text-white px-3 py-1 rounded text-[9px] font-black font-mono"
+                <span class="bg-blue-600 text-white px-3 py-1 rounded text-[12px] font-black font-mono"
                 @click=""
                 >
                     {{ event?.display_identifier || 0 }}
