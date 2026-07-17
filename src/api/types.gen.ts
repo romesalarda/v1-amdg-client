@@ -6715,6 +6715,7 @@ export type EventDetail = {
     long_description?: string | null;
     what_to_bring?: string | null;
     important_information?: string | null;
+    readonly organisation_url_safe_title: string;
     theme?: string | null;
     anchor_verse?: string | null;
     expected_attendance?: number | null;

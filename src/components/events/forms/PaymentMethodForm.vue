@@ -41,7 +41,8 @@
           class="flex items-start gap-3 p-3 border border-primary-500/20 rounded-lg transition-colors"
           :class="[
             method_type === methodType.value ? 'border-primary bg-mist-blue/60' : 'hover:bg-mist-blue/50',
-            isMethodTypeUnavailable(methodType.value) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'
+            (isMethodTypeUnavailable(methodType.value) || isMethodTypeBlockedByPolicy(methodType.value)) ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer',
+            isMethodTypeBlockedByPolicy(methodType.value) ? 'border-amber-300 bg-amber-50/40' : '',
           ]"
         >
           <input
@@ -49,13 +50,17 @@
             v-bind="method_typeAttrs"
             type="radio"
             :value="methodType.value"
-            :disabled="isMethodTypeUnavailable(methodType.value)"
+            :disabled="isMethodTypeUnavailable(methodType.value) || isMethodTypeBlockedByPolicy(methodType.value)"
             class="mt-1 h-4 w-4 border border-navy-300 bg-white accent-[rgb(0,33,71)]"
           />
           <div class="flex-1">
             <span class="block font-medium text-primary">{{ methodType.label }}</span>
             <p class="text-sm text-primary-500/60">{{ methodType.description }}</p>
-            <p v-if="isMethodTypeUnavailable(methodType.value)" class="text-xs text-amber-700 mt-1">
+            <p v-if="isMethodTypeBlockedByPolicy(methodType.value)" class="text-xs text-amber-700 mt-1 flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">policy</span>
+              Disabled by your community's policy.
+            </p>
+            <p v-else-if="isMethodTypeUnavailable(methodType.value)" class="text-xs text-amber-700 mt-1">
               Already configured for this event.
             </p>
           </div>
@@ -289,12 +294,16 @@ interface Props {
   eventId: number | undefined
   existingMethodTypes?: string[]
   isLoading?: boolean
+  allowCardPayments?: boolean
+  allowBankTransfers?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   modelValue: undefined,
   existingMethodTypes: () => [],
   isLoading: false,
+  allowCardPayments: true,
+  allowBankTransfers: true,
 })
 
 const route = useRoute()
@@ -396,8 +405,18 @@ const isMethodTypeUnavailable = (type: string) => {
   return existingTypeSet.has(type)
 }
 
+const isMethodTypeBlockedByPolicy = (type: string) => {
+  if (type === 'STRIPE' && !props.allowCardPayments) return true
+  if (type === 'BANK_TRANSFER' && !props.allowBankTransfers) return true
+  return false
+}
+
 // Handle form submission
 const onSubmit = handleSubmit((values) => {
+  if (isMethodTypeBlockedByPolicy(values.method_type)) {
+    setFieldError('method_type', 'This payment method type is disabled by your community\'s policy.')
+    return
+  }
   if (isMethodTypeUnavailable(values.method_type)) {
     setFieldError('method_type', 'This payment method type already exists for this event.')
     return

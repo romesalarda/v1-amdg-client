@@ -135,7 +135,7 @@
 
               <!-- Short Description -->
               <div class="space-y-2">
-                <label class="block text-xs font-black text-primary uppercase tracking-wider">Short Description</label>
+                <label class="block text-xs font-black text-primary uppercase tracking-wider">Short Description<span v-if="policy?.require_short_description" class="text-red-500"> *</span></label>
                 <input
                   v-if="isEditMode"
                   v-model="short_description"
@@ -143,9 +143,14 @@
                   maxlength="255"
                   placeholder="Brief description of your event"
                   class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all"
+                  :class="{ 'border border-red-400': policy?.require_short_description && !short_description?.trim() && isEditMode }"
                 />
                 <p v-else class="w-full px-4 py-3 bg-mist-blue/50 rounded-xl text-sm font-medium text-navy-900">{{ short_description || '-' }}</p>
                 <span v-if="errors.short_description" class="text-xs text-red-500 font-medium">{{ errors.short_description }}</span>
+                <div v-if="isEditMode && policy?.require_short_description && !short_description?.trim()" class="text-xs text-red-600 font-medium flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">error</span>
+                  A short description is required by your community's policy
+                </div>
               </div>
 
               <!-- External Link -->
@@ -155,6 +160,7 @@
                   v-if="isEditMode"
                   v-model="external_link"
                   type="url"
+                  :disabled="!policy?.allow_external_events"
                   placeholder="https://example.com"
                   class="w-full px-4 py-3 bg-mist-blue border-transparent focus:border-primary focus:ring-0 rounded-xl text-sm font-medium text-navy-900 transition-all"
                 />
@@ -166,14 +172,14 @@
               </div>
 
               <!-- External Event Toggle -->
-              <div class="space-y-2">
+              <div class="space-y-2"> 
                 <label class="block text-xs font-black text-primary uppercase tracking-wider">External Event</label>
                 <div v-if="isEditMode" class="flex items-center gap-3 px-4 py-3 bg-mist-blue rounded-xl">
                   <input
                     :id="`external_event_toggle`"
                     v-model="external_event"
                     type="checkbox"
-                    :disabled="!isValidExternalLink"
+                    :disabled="!isValidExternalLink || !policy?.allow_external_events"
                     :class="[
                       'w-5 h-5 text-primary rounded',
                       isValidExternalLink ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'
@@ -195,6 +201,10 @@
                   </span>
                   <span v-else>-</span>
                 </p>
+              </div>
+
+              <div v-if="!policy?.allow_external_events" class="col-span-full bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-sm font-medium text-yellow-800">
+                Warning: Your community's policy does not allow external events. You will not be able to mark this event as external or provide an external link.
               </div>
             </div>
           </section>
@@ -218,6 +228,10 @@
                   <MarkdownPreview :content="long_description || undefined" />
                 </div>
                 <span v-if="errors.long_description" class="text-xs text-red-500 font-medium">{{ errors.long_description }}</span>
+                <div v-if="policy?.require_long_description && !long_description?.trim()" class="text-xs text-yellow-600 font-medium flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">info</span>
+                  A long description is required by your community's policy
+                </div>
               </div>
 
               <!-- Theme -->
@@ -567,7 +581,7 @@
                   <button
                     type="button"
                     @click="saveChanges"
-                    :disabled="isSubmitting"
+                    :disabled="isSubmitting || !canSubmit()"
                     class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl hover:bg-navy-600 transition-all text-xs font-bold uppercase tracking-wide shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span class="material-symbols-outlined text-base" v-if="!isSubmitting">save</span>
@@ -723,6 +737,8 @@ import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
 import EventMarkdownEditor from '~/components/events/EventMarkdownEditor.vue'
 import MarkdownPreview from '~/components/events/MarkdownPreview.vue'
 import { EventBaseSchema } from '~/schemas/event.schema'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
+
 
 definePageMeta({
   layout: false,
@@ -752,6 +768,9 @@ const { data: authData } = useEventAuthorizations(computed(() => ({ event: event
 const authorizationHistory = computed(() => authData.value?.data?.results || [])
 const currentAuthorization = computed(() => authorizationHistory.value?.[0])
 
+const orgUrlSafeTitle = computed(() => eventData.value?.data?.organisation_url_safe_title || '')
+const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
+const policy = computed(() => policyData.value?.data)
 // Modal state
 const confirmModal = ref({
   isOpen: false,
@@ -1221,4 +1240,16 @@ const resetForm = () => {
 
 const isSubmitting = computed(() => updateMutation.isPending.value)
 
+const canSubmit = () => {
+  if (errors.value && Object.keys(errors.value).length > 0) {
+    return false
+  }
+  if (!long_description.value?.trim() && policy.value?.require_long_description) {
+    return false
+  }
+  if (!short_description.value?.trim() && policy.value?.require_short_description) {
+    return false
+  }
+  return true
+}
 </script>

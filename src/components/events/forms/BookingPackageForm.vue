@@ -94,6 +94,10 @@
           class="w-full rounded-xl border border-primary-500/20 bg-white px-4 py-2 text-sm text-background-dark-600 placeholder:text-background-dark-600 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:cursor-not-allowed disabled:bg-slate-100"
         />
         <p v-if="errors.base_amount" class="text-xs text-red-500">{{ errors.base_amount }}</p>
+        <p v-if="packagePriceExceeded" class="text-xs text-red-600 font-semibold flex items-center gap-1">
+          <span class="material-symbols-outlined text-sm">policy</span>
+          Price exceeds the community maximum of {{ props.maxPackagePrice }}
+        </p>
         <p v-if="isFree" class="text-xs font-semibold text-emerald-700">Free package enabled: amount is locked to 0.00.</p>
       </div>
 
@@ -139,7 +143,7 @@
       </button>
       <button
         type="submit"
-        :disabled="isSubmitting"
+        :disabled="isSubmitting || packagePriceExceeded"
         class="rounded-xl bg-primary px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-70"
       >
         {{ modelValue ? 'Update Package' : 'Create Package' }}
@@ -159,6 +163,7 @@ const props = defineProps<{
   ticketTypes: TicketTypeList[]
   eventId: number
   currencySymbol?: string
+  maxPackagePrice?: number | null
 }>()
 
 const emit = defineEmits<{
@@ -167,6 +172,12 @@ const emit = defineEmits<{
 }>()
 
 const isSubmitting = ref(false)
+
+const packagePriceExceeded = computed(() => {
+  if (!props.maxPackagePrice || isFree.value) return false
+  const amount = Number(base_amount.value)
+  return Number.isFinite(amount) && amount > props.maxPackagePrice
+})
 
 // Currency options
 const currencyOptions = [

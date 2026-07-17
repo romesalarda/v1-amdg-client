@@ -3,6 +3,19 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <!-- Main Content (8/12) -->
       <div class="lg:col-span-8 space-y-8">
+        <!-- Policy: Require Landing Image Banner -->
+        <div v-if="requiresImageWarning" class="bg-yellow-50 border-2 border-yellow-400 rounded-2xl p-5 shadow-lg">
+          <div class="flex items-start gap-4">
+            <div class="flex items-center justify-center w-10 h-10 bg-yellow-100 rounded-full flex-shrink-0">
+              <span class="material-symbols-outlined text-yellow-700 text-xl">policy</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="text-xs font-black text-yellow-900 uppercase tracking-wider mb-1">Landing Image Required</h3>
+              <p class="text-sm text-yellow-800 leading-relaxed">Your community's policy requires a main landing image before this event can be published. Upload an image below and mark it as the main image.</p>
+            </div>
+          </div>
+        </div>
+
         <!-- Landing Images Section -->
         <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden p-8">
           <div class="flex items-center gap-2 mb-6 pb-4 border-b border-navy-50">
@@ -149,6 +162,15 @@
               <span class="text-sm text-navy-600 font-medium">Secondary Images</span>
               <span class="text-lg font-black text-blue-600">{{ landingImagesList.filter(img => img.tag === 'LANDING_PHOTO_SECONDARY').length }}</span>
             </div>
+            <div v-if="policy?.require_landing_image" class="pt-3 mt-3 border-t border-navy-50 flex items-center justify-between">
+              <span class="text-sm text-navy-600 font-medium flex items-center gap-1">
+                <span class="material-symbols-outlined text-sm">policy</span>
+                Image Required
+              </span>
+              <span class="text-xs font-black px-2 py-1 rounded-full" :class="hasMainImage ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'">
+                {{ hasMainImage ? 'Satisfied' : 'Missing' }}
+              </span>
+            </div>
           </div>
         </section>
 
@@ -275,6 +297,7 @@ import { resolveImageUrl, onImageError } from '~/utils/image'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import AppImage from '~/components/common/AppImage.vue'
 import ImageCropModal from '~/components/common/ImageCropModal.vue'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 
 definePageMeta({
   layout: false,
@@ -294,6 +317,13 @@ const id = computed(() => route.params.id as string)
 // Fetch data
 const { data: eventData } = useEvent(id)
 const event = computed(() => eventData.value?.data)
+
+const orgUrlSafeTitle = computed(() => event.value?.organisation_url_safe_title || '')
+const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
+const policy = computed(() => policyData.value?.data)
+
+const hasMainImage = computed(() => landingImagesList.value.some((img: any) => img.tag === 'LANDING_PHOTO_MAIN'))
+const requiresImageWarning = computed(() => policy.value?.require_landing_image && !hasMainImage.value)
 
 const landingImages = useEventLandingImages(id)
 const landingImagesList = computed(() => landingImages.data.value?.data?.results || [])

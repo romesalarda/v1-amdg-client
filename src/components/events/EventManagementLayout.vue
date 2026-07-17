@@ -79,22 +79,22 @@
         v-for="tab in tabs"
         :key="tab.path"
         :to="`/events/${eventId}/m/${tab.path}`"
-        @click="onTabClick($event, tab.disabled)"
-        :aria-disabled="tab.disabled ? 'true' : undefined"
-        :tabindex="tab.disabled ? -1 : undefined"
+        @click="onTabClick($event, tab.disabled, (tab as any).policyDisabled)"
+        :aria-disabled="(tab.disabled || (tab as any).policyDisabled) ? 'true' : undefined"
+        :tabindex="(tab.disabled || (tab as any).policyDisabled) ? -1 : undefined"
+        :title="(tab as any).policyDisabled ? (tab as any).policyReason : undefined"
         :class="[
           'flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-semibold transition-all',
           isActive(tab.path)
             ? 'bg-white/10 text-white'
             : 'text-white/60 hover:text-white hover:bg-white/5',
-          tab.disabled ? 'cursor-not-allowed opacity-50 pointer-events-none' : ''
-          
+          tab.disabled ? 'cursor-not-allowed opacity-50 pointer-events-none' : '',
+          (tab as any).policyDisabled ? 'cursor-not-allowed opacity-60 pointer-events-none !text-amber-400/70 hover:!text-amber-400/70' : '',
         ]"
-
-        
       >
         <UIcon :name="tab.icon" class="w-5 h-5" />
-        <span>{{ tab.label }}</span>
+        <span class="flex-1">{{ tab.label }}</span>
+        <span v-if="(tab as any).policyDisabled" class="material-symbols-outlined text-sm text-amber-400/80 flex-shrink-0">lock</span>
       </NuxtLink>
     </nav>
 
@@ -187,6 +187,7 @@ import { ref, computed } from 'vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import Navbar from '~/components/common/Navbar.vue'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 import type { EventDetail } from '~/api/types.gen'
 
 const props = defineProps<{
@@ -196,6 +197,10 @@ const props = defineProps<{
 }>()
 const { data: settingsData } = useEventSettings(props.eventId)
 const eventSettings = computed(() => settingsData.value?.data)
+
+const orgUrlSafeTitle = computed(() => props.event?.organisation_url_safe_title || '')
+const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
+const orgPolicy = computed(() => policyData.value?.data)
 
 const route = useRoute()
 const sidebarOpen = ref(true)
@@ -272,11 +277,15 @@ const tabs = computed(() => [
     label: 'Sponsors',
     icon: 'i-heroicons-building-office-2',
     disabled: !eventSettings.value?.accepting_sponsorships_enabled || props.event?.external_event,
+    policyDisabled: orgPolicy.value !== undefined && orgPolicy.value.allow_sponsors === false,
+    policyReason: 'Sponsors are disabled by your community\'s policy',
   },
   {
     path: 'workshops',
     label: 'Workshops',
     icon: 'i-heroicons-academic-cap',
+    policyDisabled: orgPolicy.value !== undefined && orgPolicy.value.allow_workshops === false,
+    policyReason: 'Workshops are disabled by your community\'s policy',
   },
   {
     path: 'transport',
@@ -295,8 +304,8 @@ const tabs = computed(() => [
   }
 ])
 
-const onTabClick = (event: MouseEvent, disabled?: boolean) => {
-  if (disabled) {
+const onTabClick = (event: MouseEvent, disabled?: boolean, policyDisabled?: boolean) => {
+  if (disabled || policyDisabled) {
     event.preventDefault()
     event.stopPropagation()
     return

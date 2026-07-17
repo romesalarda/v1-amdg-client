@@ -178,6 +178,7 @@
           :model-value="editingPackage"
           :event-id="Number(id)"
           :ticket-types="ticketTypes"
+          :max-package-price="maxPackagePrice"
           @submit="handlePackageSubmit"
           @cancel="closePackageModal"
         />
@@ -262,6 +263,7 @@ import { useBookingPackageManagement } from '~/composables/booking/useBookingPac
 import { useDiscountManagement } from '~/composables/booking/useDiscountManagement'
 import { useAlternativeSignInManagement } from '~/composables/booking/useAlternativeSignInManagement'
 import { useEventSettings, usePartialUpdateEventSettings } from '~/composables/resources/events/eventSettings'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 import type { Ref } from 'vue'
 
 definePageMeta({
@@ -310,6 +312,15 @@ const { data: event } = useEvent(id)
 const { data: settingsData } = useEventSettings(id)
 const updateSettingsMutation = usePartialUpdateEventSettings()
 const event_pk = computed(() => event.value?.data?.id ?? null) as Ref<number | null>
+
+// Organisation policy
+const orgUrlSafeTitle = computed(() => event.value?.data?.organisation_url_safe_title || '')
+const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
+const orgPolicy = computed(() => policyData.value?.data)
+const maxPackagePrice = computed(() => {
+  const limit = Number(orgPolicy.value?.max_package_price ?? 0)
+  return limit > 0 ? limit : null
+})
 
 const settings = computed(() => settingsData.value?.data)
 const maxAttendeesPerBooking = computed(() => Number(settings.value?.max_attendees_per_booking || 5))

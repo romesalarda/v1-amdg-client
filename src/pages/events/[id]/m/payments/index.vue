@@ -115,6 +115,22 @@
             </button>
           </div>
 
+          <!-- Policy warning: blocked payment types -->
+          <div v-if="policyBlocksCardPayments || policyBlocksBankTransfers" class="mb-4 bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4">
+            <div class="flex items-start gap-3">
+              <span class="material-symbols-outlined text-yellow-700 text-xl flex-shrink-0">policy</span>
+              <div>
+                <p class="text-xs font-black text-yellow-900 uppercase tracking-wider mb-1">Community Policy Restriction</p>
+                <p class="text-sm text-yellow-800">
+                  <span v-if="policyBlocksCardPayments && policyBlocksBankTransfers">Card payments and bank transfers are both disabled by your community's policy.</span>
+                  <span v-else-if="policyBlocksCardPayments">Card payments (Stripe) are disabled by your community's policy.</span>
+                  <span v-else-if="policyBlocksBankTransfers">Bank transfers are disabled by your community's policy.</span>
+                  New methods of these types cannot be added, and existing ones should be removed.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div v-if="paymentMethodsLoading" class="space-y-3">
             <div v-for="i in 2" :key="i" class="h-16 bg-mist-blue/60 rounded-xl animate-pulse" />
           </div>
@@ -155,10 +171,14 @@
                   </div>
 
                   <div class="flex-1">
-                  <div class="flex items-center gap-2 mb-1">
+                  <div class="flex items-center gap-2 mb-1 flex-wrap">
                     <h3 class="text-sm font-semibold text-navy-900">{{ method.title }}</h3>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
                       {{ getMethodTypeLabel(method.method_type) }}
+                    </span>
+                    <span v-if="isMethodBlockedByPolicy(method.method_type)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                      <span class="material-symbols-outlined text-xs">policy</span>
+                      Blocked by policy
                     </span>
                   </div>
                   <p v-if="(method as any).description" class="text-xs text-navy-500 mb-2">
@@ -373,6 +393,8 @@
               :event-id="event?.data?.id"
               :existing-method-types="paymentMethodTypesInEvent"
               :is-loading="paymentMethodMutationLoading"
+              :allow-card-payments="!policyBlocksCardPayments"
+              :allow-bank-transfers="!policyBlocksBankTransfers"
               @submit="handlePaymentMethodSubmit"
               @cancel="closePaymentMethodModal"
             />
@@ -435,6 +457,7 @@ import { paymentMethodTypeLabels } from '~/schemas/events/paymentConfig'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
+import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 
 import Swal from 'sweetalert2'
 
@@ -460,6 +483,19 @@ const canCreatePaymentMethods = computed(() => can('PAYMENT_MANAGEMENT', 'create
 
 // Fetch event data
 const { data: event } = useEvent(id)
+
+// Organisation policy
+const orgUrlSafeTitle = computed(() => event.value?.data?.organisation_url_safe_title || '')
+const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
+const orgPolicy = computed(() => policyData.value?.data)
+const policyBlocksCardPayments = computed(() => orgPolicy.value?.card_payments_are_allowed === false)
+const policyBlocksBankTransfers = computed(() => orgPolicy.value?.bank_transfers_are_allowed === false)
+
+const isMethodBlockedByPolicy = (methodType: string) => {
+  if (methodType === 'STRIPE' && policyBlocksCardPayments.value) return true
+  if (methodType === 'BANK_TRANSFER' && policyBlocksBankTransfers.value) return true
+  return false
+}
 
 // Fetch settings and payment methods
 const { data: settingsData, isLoading: settingsLoading } = useEventSettings(id)
