@@ -71,10 +71,10 @@
                 <OrganisationSelect :model-value="orgValue" :multiple="true" @update:model-value="onOrgChange" />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-700 mb-2">Location (Area From)</label>
+                <label class="block text-xs font-semibold text-gray-700 mb-2">Location</label>
                 <LocationMultiSelect
                   :model-value="locationValue"
-                  :allowed-types="['area']"
+                  :allowed-types="['area', 'chapter', 'cluster', 'country']"
                   @update:model-value="onLocationChange"
                 />
               </div>
