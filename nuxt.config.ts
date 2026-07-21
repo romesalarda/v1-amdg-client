@@ -22,6 +22,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     public: {
+      apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || 'https://api.amdgevents.co.uk',
       apiBaseUrl: import.meta.env.NUXT_PUBLIC_API_BASE_URL || 'https://api.amdgevents.co.uk',
       stripeTestMode: import.meta.env.NUXT_PUBLIC_STRIPE_TEST_MODE === 'true',
       stripeTestPublishableKey: import.meta.env.NUXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY || ''
