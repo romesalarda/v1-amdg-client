@@ -4,6 +4,7 @@ export default defineNuxtPlugin(() => {
     const config = useRuntimeConfig()
     client.setConfig({
         baseUrl: config.public.apiBaseUrl as string,
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         }
