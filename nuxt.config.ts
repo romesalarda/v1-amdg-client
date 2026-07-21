@@ -22,7 +22,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     public: {
-      apiBaseUrl: 'http://localhost:8000',
+      apiBaseUrl: 'https://api.amdgevents.co.uk',
       stripeTestMode: import.meta.env.NUXT_PUBLIC_STRIPE_TEST_MODE === 'true',
       stripeTestPublishableKey: import.meta.env.NUXT_PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY || ''
     }
@@ -31,11 +31,11 @@ export default defineNuxtConfig({
     server: {
       proxy: {
         '/api': {
-          target: 'http://localhost:8000',
+          target: 'https://api.amdgevents.co.uk',
           changeOrigin: true
         },
         '/ws': {
-          target: 'ws://localhost:8000',
+          target: 'wss://api.amdgevents.co.uk',
           ws: true,
           changeOrigin: true
         }
