@@ -18,6 +18,7 @@ export const useAuthStore = defineStore('auth', {
         user: null as User | null,
         isAuthenticated: false,
         loading: false,
+        accessToken: null as string | null,  // In-memory Bearer token
         initPromise: null as Promise<void> | null,  // Promise for initialization
         refreshTimer: null as ReturnType<typeof setTimeout> | null,  // Timer for proactive refresh
     }),
@@ -31,6 +32,10 @@ export const useAuthStore = defineStore('auth', {
                 })
 
                 if (response.data) {
+                    const data = response.data as { user?: unknown; access?: string; message?: string }
+                    if (data.access) {
+                        this.accessToken = data.access
+                    }
                     await this.fetchUser()
                     if (!this.isAuthenticated) {
                         throw new Error('Failed to fetch user after login')
@@ -103,6 +108,10 @@ export const useAuthStore = defineStore('auth', {
                 })
                 
                 if (response.data) {
+                    const data = response.data as { access?: string; message?: string }
+                    if (data.access) {
+                        this.accessToken = data.access
+                    }
                     this.scheduleTokenRefresh()
                     return true
                 }
@@ -142,6 +151,7 @@ export const useAuthStore = defineStore('auth', {
                 this.clearRefreshTimer()
                 this.user = null
                 this.isAuthenticated = false
+                this.accessToken = null
                 this.initPromise = null
                 const router = useRouter()
                 router.push('/login')
@@ -152,6 +162,7 @@ export const useAuthStore = defineStore('auth', {
             this.clearRefreshTimer()
             this.user = null
             this.isAuthenticated = false
+            this.accessToken = null
             this.initPromise = null
             const router = useRouter()
             const route = useRoute()
