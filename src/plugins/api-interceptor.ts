@@ -1,5 +1,12 @@
 import { client } from '@/api/client.gen'
 
+client.setConfig({
+    baseUrl: useRuntimeConfig().public.apiBaseUrl,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+})
+
 export default defineNuxtPlugin(() => {
     const authStore = useAuthStore()
     let isRefreshing = false
