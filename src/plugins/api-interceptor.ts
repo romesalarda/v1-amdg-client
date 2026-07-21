@@ -1,13 +1,14 @@
 import { client } from '@/api/client.gen'
 
-client.setConfig({
-    baseUrl: useRuntimeConfig().public.apiBaseUrl,
-    headers: {
-        'Content-Type': 'application/json'
-    }
-})
-
 export default defineNuxtPlugin(() => {
+    const config = useRuntimeConfig()
+    client.setConfig({
+        baseUrl: config.public.apiBaseUrl as string,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+
     const authStore = useAuthStore()
     let isRefreshing = false
     let failedQueue: Array<{ resolve: () => void; reject: (error: any) => void }> = []
