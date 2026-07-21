@@ -22,7 +22,7 @@ export async function uploadMultipart<T = unknown>(
   },
 ): Promise<T> {
   const config = useRuntimeConfig()
-  const apiUrl = config.public.apiUrl || 'http://localhost:8000'
+  const apiUrl = config.public.apiBaseUrl || 'http://localhost:8000'
   
   // Construct full URL
   const fullUrl = url.startsWith('http') 
