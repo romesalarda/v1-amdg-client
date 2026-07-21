@@ -25,17 +25,28 @@ export default defineNuxtPlugin(() => {
         failedQueue = []
     }
 
-    // Attach Bearer token to every request from the in-memory access token.
-    // This is the primary auth mechanism for cross-origin requests —
-    // HttpOnly cookie sending is unreliable from a different domain.
+    // Attach Bearer token and CSRF token to every request.
+    // - Authorization Bearer: primary auth mechanism (cross-origin reliable)
+    // - X-CSRFToken: required by DRF's SessionAuthentication CSRF enforcement
+    //   when a sessionid cookie is present (csrftoken cookie is not HttpOnly so JS can read it)
     client.interceptors.request.use((request) => {
+        const headers = new Headers(request.headers)
+
         const token = authStore.accessToken
         if (token) {
-            const headers = new Headers(request.headers)
             headers.set('Authorization', `Bearer ${token}`)
-            return new Request(request, { headers })
         }
-        return request
+
+        // Read CSRF token from cookie (always present after first page load)
+        const csrfToken = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('csrftoken='))
+            ?.split('=')[1]
+        if (csrfToken) {
+            headers.set('X-CSRFToken', csrfToken)
+        }
+
+        return new Request(request, { headers })
     })
 
     // Add response interceptor

@@ -45,6 +45,10 @@ onMounted(async () => {
     })
 
     if (response.data) {
+      const data = response.data as { user?: unknown; access?: string; message?: string }
+      if (data.access) {
+        auth.accessToken = data.access
+      }
       // Fetch user data to update store
       await auth.fetchUser()
       
