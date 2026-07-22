@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import type { ComputedRef } from 'vue'
 import { usePaymentMethods } from '~/composables/resources/payments/paymentMethods'
+import { bookingsReserveBankTransferPayment } from '~/api'
 import { uploadMultipart } from '~/utils/upload'
 
 export interface UsePaymentMethodManagerOptions {
@@ -10,8 +11,6 @@ export interface UsePaymentMethodManagerOptions {
 
 export function usePaymentMethodManager(options: UsePaymentMethodManagerOptions) {
 	const { eventUuid, bookingIntentId } = options
-
-	const requestFetch = useRequestFetch()
 
 	// ── Payment methods ──────────────────────────────────────────────────────────
 
@@ -91,14 +90,19 @@ export function usePaymentMethodManager(options: UsePaymentMethodManagerOptions)
 		reservedBankTransferError.value = ''
 
 		try {
-			const response = (await requestFetch('/api/bookings/list/reserve-bank-transfer-payment/', {
-				method: 'POST',
+			const { data, error } = await bookingsReserveBankTransferPayment({
 				body: {
 					booking_intent_id: intentId,
 					payment_method_id: selectedPaymentMethodId.value,
 				},
-			})) as Record<string, unknown>
+				throwOnError: false,
+			})
 
+			if (error) {
+				throw new Error('Reservation request failed.')
+			}
+
+			const response = data as Record<string, unknown>
 			const paymentId = typeof response.payment_id === 'string' ? response.payment_id : ''
 			const paymentReference = typeof response.payment_reference === 'string' ? response.payment_reference : ''
 			const bankTransferReference =
