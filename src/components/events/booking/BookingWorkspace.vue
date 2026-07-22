@@ -1424,7 +1424,7 @@ import FormsTab from '~/components/events/booking/tabs/FormsTab.vue'
 import WorkshopsTab from '~/components/events/booking/tabs/WorkshopsTab.vue'
 import { resolveImageUrl, onImageError } from '~/utils/image'
 import { uploadMultipart } from '~/utils/upload'
-import { locationsAreasList } from '~/api/sdk.gen'
+import { locationsAreasList, paymentsListRetrieve } from '~/api/sdk.gen'
 import { useEvent } from '~/composables/resources/events/events'
 import { useEventVenues } from '~/composables/resources/events/eventVenues'
 import {
@@ -1478,7 +1478,6 @@ const props = defineProps<{
 
 const { $notyf } = useNuxtApp()
 const queryClient = useQueryClient()
-const requestFetch = useRequestFetch()
 const route = useRoute()
 const router = useRouter()
 const eventId = computed(() => props.eventId)
@@ -2428,8 +2427,8 @@ async function fetchPaymentDetails(paymentId: string) {
 
   paymentDetailLoading.value[paymentId] = true
   try {
-    const paymentData = await requestFetch(`/api/payments/list/${paymentId}/`)
-    paymentDetails.value[paymentId] = paymentData
+    const response = await paymentsListRetrieve({ path: { payment_id: paymentId } })
+    paymentDetails.value[paymentId] = response.data ?? response
   } catch (error) {
     console.error('Failed to fetch payment detail', error)
     $notyf?.error('Could not load payment method details.')

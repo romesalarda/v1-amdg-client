@@ -14,6 +14,7 @@ import {
   productsOrdersCheckoutCreate,
   productsOrdersCompleteCreate,
   productsOrdersReserveBankTransferPayment,
+  productsOrdersRemoveItemCreate,
   productsOrdersSubmitCreate,
   productsOrdersUpdateItemCreate,
   productsOrdersValidateCodeCreate,
@@ -31,6 +32,7 @@ import type {
   ProductsOrdersCheckoutCreateData,
   ProductsOrdersCompleteCreateData,
   ProductsOrdersReserveBankTransferPaymentData,
+  ProductsOrdersRemoveItemCreateData,
   ProductsOrdersSubmitCreateData,
   ProductsOrdersRetrieveData,
   ProductsOrdersUpdateItemCreateData,
@@ -234,7 +236,6 @@ export function useUpdateProductOrderItem() {
  */
 export function useRemoveProductOrderItem() {
   const queryClient = useQueryClient()
-  const requestFetch = useRequestFetch()
 
   return useMutation({
     mutationFn: ({
@@ -244,11 +245,9 @@ export function useRemoveProductOrderItem() {
       orderId: string | number
       orderItemId: number
     }) =>
-      requestFetch(`/api/products/orders/${String(orderId)}/remove-item/`, {
-        method: 'POST',
-        body: {
-          order_item_id: orderItemId,
-        },
+      productsOrdersRemoveItemCreate({
+        path: { order_id: String(orderId) },
+        body: { order_item_id: orderItemId } as ProductsOrdersRemoveItemCreateData['body'],
       }),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })

@@ -252,6 +252,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
+import { paymentsListRetrieve } from '~/api/sdk.gen'
 import { uploadMultipart } from '~/utils/upload'
 
 interface OutstandingPayment {
@@ -293,7 +294,6 @@ const emit = defineEmits<{
   (event: 'refresh'): void
 }>()
 
-const requestFetch = useRequestFetch()
 const { $notyf } = useNuxtApp()
 
 const currentIndex = ref(0)
@@ -434,8 +434,8 @@ async function fetchCurrentPaymentDetail(force: boolean) {
   detailLoading.value[paymentId] = true
 
   try {
-    const response = await requestFetch(`/api/payments/list/${paymentId}/`)
-    detailCache.value[paymentId] = response as PaymentDetail
+    const response = await paymentsListRetrieve({ path: { payment_id: paymentId } })
+    detailCache.value[paymentId] = (response.data ?? response) as PaymentDetail
   } catch (error) {
     const message = (error as { message?: string })?.message || 'Failed to fetch payment details.'
     detailErrors.value[paymentId] = message

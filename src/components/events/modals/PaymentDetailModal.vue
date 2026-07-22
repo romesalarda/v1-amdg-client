@@ -926,7 +926,7 @@
 
 <script setup lang="ts">
 import { reactive } from 'vue'
-import { bookingsPackageProductsList, paymentsRefundsRetrieve, productsListVariantsRetrieve } from '~/api/sdk.gen'
+import { bookingsPackageProductsList, paymentsRefundsRetrieve, paymentsBankTransferEvidenceConfirmPaymentMatchCreate, productsListVariantsRetrieve } from '~/api/sdk.gen'
 import type { PackageProduct, ProductVariantDetail } from '~/api/types.gen'
 import {
   getPaymentStatusLabel,
@@ -956,7 +956,6 @@ interface Props {
 const props = defineProps<Props>()
 defineEmits(['close', 'refund', 'verify'])
 const { $notyf } = useNuxtApp()
-const requestFetch = useRequestFetch()
 const router = useRouter()
 const eventId = computed(() => router.currentRoute.value.params.id as string)
 // Fetch full payment details
@@ -1159,8 +1158,9 @@ async function verifyBankTransferEvidence() {
 
   evidenceVerifyPending.value = true
   try {
-    await requestFetch(`/api/payments/bank-transfer-evidence/${String(evidence.bank_transfer_id)}/confirm_payment_match/`, {
-      method: 'POST',
+    await paymentsBankTransferEvidenceConfirmPaymentMatchCreate({
+      path: { bank_transfer_id: String(evidence.bank_transfer_id) },
+      throwOnError: true,
     })
     $notyf?.success('Bank transfer evidence verified.')
     await refetchPaymentDetail()
