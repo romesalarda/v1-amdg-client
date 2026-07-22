@@ -130,51 +130,55 @@
       <!-- Sticky Floating Info Bar -->
       <div class="relative z-20 bg-white border-b border-deep-navy/10 shadow-lg">
         <div class="max-container-fluid">
-          <div class="grid grid-cols-2 lg:grid-cols-4 divide-x divide-deep-navy/10">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-deep-navy/10"
+          >
             <!-- Date -->
-            <div class="flex items-center gap-4 p-6">
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
+              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy text-[17px]">{{ formatDate(event.start_datetime, 'MMM d, yyyy') }} - {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}</p>
+                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug">
+                  {{ formatDate(event.start_datetime, 'MMM d, yyyy') }} – {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}
+                </p>
               </div>
             </div>
 
             <!-- Time -->
-            <div class="flex items-center gap-4 p-6">
-              <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
+              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
-                <p class="font-black text-deep-navy text-[17px]">
+                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug">
                   {{ formatTime(event.start_datetime, event.timezone) }}
-                  <span class="text-md text-deep-navy/70">({{ event.timezone }})</span>
+                  <span class="font-bold text-deep-navy/60 text-[13px] sm:text-sm">({{ event.timezone }})</span>
                 </p>
               </div>
             </div>
 
             <!-- Location -->
-            <div class="flex items-center gap-4 p-6">
-              <svg class="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
+              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
               </svg>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
-                <p class="font-black text-deep-navy text-[17px]">
+                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug truncate">
                   {{ primaryVenue?.name || event.organisation_name || 'TBA' }}
                 </p>
               </div>
             </div>
 
             <!-- Cost -->
-            <div class="flex items-center gap-4 p-6">
-              <UIcon name="i-heroicons-currency-pound" class="w-8 h-8 text-blue-500" />
+            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
+              <UIcon name="i-heroicons-currency-pound" class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" />
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Registration Fee</p>
-                <p class="font-black text-deep-navy truncate text-[17px]">
+                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug truncate">
                   {{ event.general_price }}
                 </p>
               </div>
@@ -267,36 +271,38 @@
           <div class="space-y-6">
             <!-- Countdown Timer Card -->
             <div class="space-y-6">
-              <div class="rounded-2xl bg-deep-navy p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
-                <p class="text-sm font-bold text-center text-white/80 mb-4">
+              <div class="rounded-2xl bg-deep-navy p-5 sm:p-8 text-white shadow-drawn-dark border-2 border-deep-navy">
+                <p class="text-xs sm:text-sm font-bold text-center text-white/80 mb-3 sm:mb-4">
                   <span v-if="!countdown.isExpired">{{ countdownDisplay.statusText }}</span>
                   <span v-else>{{ countdownDisplay.expiredLabel }}</span>
                 </p>
-                
+
                 <!-- Countdown Display -->
-                <div v-if="!countdown.isExpired" class="flex items-center justify-center gap-6">
-                  <div class="text-center">
-                    <p class="text-4xl font-black">{{ String(countdown.days).padStart(2, '0') }}</p>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Days</p>
-                  </div>
-                  <div class="w-px h-8 bg-white/10"></div>
-                  <div class="text-center">
-                    <p class="text-4xl font-black">{{ String(countdown.hours).padStart(2, '0') }}</p>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Hrs</p>
-                  </div>
-                  <div class="w-px h-8 bg-white/10"></div>
-                  <div class="text-center">
-                    <p class="text-4xl font-black">{{ String(countdown.minutes).padStart(2, '0') }}</p>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Mins</p>
-                  </div>
-                  <div class="w-px h-8 bg-white/10"></div>
-                  <div class="text-center">
-                    <p class="text-4xl font-black animate-pulse">{{ String(countdown.seconds).padStart(2, '0') }}</p>
-                    <p class="text-[9px] font-black uppercase tracking-widest text-white/40">Secs</p>
-                  </div>
+                <div v-if="!countdown.isExpired" class="grid grid-cols-4 gap-1 sm:gap-6">
+                  <template v-for="(unit, i) in [
+                    { value: countdown.days, label: 'Days' },
+                    { value: countdown.hours, label: 'Hrs' },
+                    { value: countdown.minutes, label: 'Mins' },
+                    { value: countdown.seconds, label: 'Secs' },
+                  ]" :key="unit.label">
+                    <div class="flex items-center">
+                      <div class="flex-1 text-center min-w-0">
+                        <p
+                          class="font-black tabular-nums text-2xl sm:text-4xl"
+                          :class="unit.label === 'Secs' ? 'animate-pulse' : ''"
+                        >
+                          {{ String(unit.value).padStart(2, '0') }}
+                        </p>
+                        <p class="text-[8px] sm:text-[9px] font-black uppercase tracking-widest text-white/40">
+                          {{ unit.label }}
+                        </p>
+                      </div>
+                      <div v-if="i < 3" class="w-px h-6 sm:h-8 bg-white/10 ml-1 sm:ml-6"></div>
+                    </div>
+                  </template>
                 </div>
-                
-                <h2 v-if="countdown.isExpired" class="text-3xl font-black text-center">
+
+                <h2 v-if="countdown.isExpired" class="text-2xl sm:text-3xl font-black text-center">
                   {{ countdownDisplay.expiredHeadline }}
                 </h2>
               </div>
