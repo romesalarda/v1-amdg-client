@@ -134,51 +134,63 @@
             class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-deep-navy/10"
           >
             <!-- Date -->
-            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
-              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </span>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Date</p>
-                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug">
+                <p class="font-extrabold text-deep-navy text-base sm:text-lg leading-snug">
                   {{ formatDate(event.start_datetime, 'MMM d, yyyy') }} – {{ formatDate(event.end_datetime, 'MMM d, yyyy') }}
                 </p>
               </div>
             </div>
 
             <!-- Time -->
-            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
-              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+            <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </span>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Event Start Time</p>
-                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug">
+                <p class="font-extrabold text-deep-navy text-base sm:text-lg leading-snug">
                   {{ formatTime(event.start_datetime, event.timezone) }}
-                  <span class="font-bold text-deep-navy/60 text-[13px] sm:text-sm">({{ event.timezone }})</span>
+                  <span class="font-bold text-deep-navy/60 text-sm">({{ event.timezone }})</span>
                 </p>
               </div>
             </div>
 
             <!-- Location -->
-            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
-              <svg class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
+            <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0l-4.243-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </span>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Location</p>
-                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug truncate">
+                <p class="font-extrabold text-deep-navy text-base sm:text-lg leading-snug">
                   {{ primaryVenue?.name || event.organisation_name || 'TBA' }}
                 </p>
               </div>
             </div>
 
             <!-- Cost -->
-            <div class="flex items-center gap-3 sm:gap-4 px-5 py-4 sm:p-6">
-              <UIcon name="i-heroicons-currency-pound" class="w-6 h-6 sm:w-8 sm:h-8 text-blue-500 shrink-0" />
+            <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
+              <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-6 4h4m1 6H8a2 2 0 01-2-2V8a2 2 0 012-2h1.5L11 4h2l1.5 2H16a2 2 0 012 2v3" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l-3 3m0 0l-3-3m3 3v-7" />
+                </svg>
+              </span>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Registration Fee</p>
-                <p class="font-black text-deep-navy text-[15px] sm:text-[17px] leading-snug truncate">
+                <p class="font-extrabold text-deep-navy text-base sm:text-lg leading-snug truncate">
                   {{ event.general_price }}
                 </p>
               </div>
@@ -242,29 +254,67 @@
             <!-- Venue Location -->
             <div v-if="primaryVenue" class="bg-white border border-deep-navy/10 rounded-2xl overflow-hidden shadow-drawn">
               <div class="p-8">
-                <h2 class="text-xl font-black text-deep-navy mb-6 flex items-center gap-3 uppercase tracking-tight">
-                  <svg class="w-6 h-6 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                  </svg>
-                  Venue Location
-                </h2>
-                <div class="space-y-2">
-                  <h3 class="text-xl font-black text-deep-navy">{{ primaryVenue.name }}</h3>
-                  <p v-if="primaryVenue.address" class="text-deep-navy/60 text-sm">{{ primaryVenue.address }}</p>
-                  <p v-if="primaryVenue.city" class="text-deep-navy/60 text-sm">{{ primaryVenue.city }}</p>
+                <div class="flex items-start justify-between gap-4 mb-6">
+                  <h2 class="text-xl font-black text-deep-navy flex items-center gap-3 uppercase tracking-tight">
+                    <span class="w-9 h-9 rounded-lg bg-blue-500 flex items-center justify-center shrink-0">
+                      <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                    </span>
+                    Venue Location
+                  </h2>
+
+                  <a
+                    v-if="primaryVenue.address"
+                    :href="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.address + ' ' + (primaryVenue.city || ''))}`"
+                    target="_blank"
+                    rel="noopener"
+                    class="hidden sm:flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wide px-4 py-2.5 rounded-full transition-colors shrink-0"
+                  >
+                    Get Directions
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </a>
                 </div>
+
+                <div class="flex items-start justify-between gap-4">
+                  <div class="space-y-1.5">
+                    <h3 class="text-2xl font-black text-deep-navy leading-tight">{{ primaryVenue.name }}</h3>
+                    <p v-if="primaryVenue.address" class="text-deep-navy/60 text-sm font-medium">
+                      {{ primaryVenue.address }}<span v-if="primaryVenue.city">, {{ primaryVenue.city }}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  v-if="primaryVenue.address"
+                  :href="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.address + ' ' + (primaryVenue.city || ''))}`"
+                  target="_blank"
+                  rel="noopener"
+                  class="sm:hidden mt-5 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-black uppercase tracking-wide px-4 py-3 rounded-full transition-colors"
+                >
+                  Get Directions
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </a>
               </div>
-              
+
               <!-- Map Section -->
-              <div v-if="primaryVenue.address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10">
+              <div v-if="primaryVenue.address" class="relative h-64 bg-mist-blue border-t border-deep-navy/10">
                 <iframe
                   :src="`https://maps.google.com/maps?q=${encodeURIComponent(primaryVenue.address + ' ' + (primaryVenue.city || ''))}&output=embed`"
-                  class="w-full h-full border-0"
+                  class="w-full h-full border-0 grayscale-[15%] contrast-[1.05]"
                   loading="lazy"
                   referrerpolicy="no-referrer-when-downgrade"
                 ></iframe>
+
+                <!-- Pin badge overlay, ties the map back to the header icon -->
+                <div class="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-deep-navy/20 to-transparent"></div>
               </div>
             </div>
+
           </div>
 
           <!-- Sidebar (1/3) -->
@@ -368,17 +418,22 @@
                 <NuxtLink
                   v-if="bookingData?.bookings && bookingData.bookings.length > 0 && !isPreview"
                   :href="!onlyOneBooking ? `/events/${event.url_safe_title}/b` : `/events/${event.url_safe_title}/b/${singleBookingId}`"
-                  class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  class="w-full mt-4 bg-navy-600 hover:bg-deep-navy/90 text-white text-center py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
                 >
                   View my bookings
                 </NuxtLink>
 
                 <!-- Capacity Status -->
                 <div v-if="event.maximum_attendance && !countdown.isExpired" class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6">
-                  <div class="flex justify-between items-center text-xs font-black mb-3">
-                    <span class="text-deep-navy uppercase tracking-wider">Capacity Status</span>
-                    <span class="text-blue-600">{{ event.maximum_attendance - event.number_of_attendees }} Spots Left</span>
-                  </div>
+                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center text-xs font-black mb-3 gap-1">
+                  <span class="text-deep-navy uppercase tracking-wider">
+                    Capacity Status
+                  </span>
+
+                  <span class="text-blue-600 lg:text-right">
+                    {{ event.maximum_attendance - event.number_of_attendees }} Spots Left
+                  </span>
+                </div>
                   <div class="w-full bg-deep-navy/5 h-3 rounded-full overflow-hidden border border-deep-navy/10">
                     <div 
                       class="bg-blue-500 h-full rounded-full transition-all"
@@ -418,7 +473,7 @@
                     {{ event.status_display }}
                   </span>
                 </div>
-                <div class="font-black text-sm text-black text-left mt-4">
+                <div class="text-sm text-black text-left mt-4">
                   {{ event.uptime }}
                 </div>
               </div>
