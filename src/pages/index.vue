@@ -2,7 +2,7 @@
   <div class="min-h-screen bg-gray-50 text-on-surface">
 
     <!-- Dark Navy Search Strip -->
-    <section class="w-full bg-blue-600 sticky top-[40px] z-40">
+    <section class="w-full bg-blue-600 sticky top-12 z-40">
       <!-- Collapse Toggle Bar -->
       <div
         class="flex items-center justify-between px-6 py-2 cursor-pointer select-none md:hidden"

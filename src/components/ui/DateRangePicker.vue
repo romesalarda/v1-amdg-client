@@ -7,28 +7,47 @@
 
     <!-- Modal overlay -->
     <Teleport to="body">
-      <Transition name="fade">
+      <Transition name="sheet">
         <div
           v-if="open"
-          class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+          class="fixed inset-0 z-[200] flex items-end justify-center sm:items-center p-0 sm:p-4"
           @click.self="cancel"
         >
           <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="cancel" />
           <div
-            class="relative bg-white rounded-2xl shadow-2xl p-6 w-full max-w-[700px] z-10"
+            class="relative bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 pt-3 sm:p-6 w-full max-w-[700px] z-10 max-h-[92vh] sm:max-h-none overflow-y-auto"
             @click.stop
           >
+            <!-- Mobile-only drag handle + header -->
+            <div class="flex items-center justify-between mb-2 sm:hidden">
+              <span class="mx-auto block h-1.5 w-10 rounded-full bg-gray-200 absolute left-1/2 -translate-x-1/2 top-2.5" />
+            </div>
+            <div class="flex items-center justify-between mb-4 sm:hidden">
+              <h2 class="text-base font-black text-gray-900">Select dates</h2>
+              <button
+                type="button"
+                @click="cancel"
+                aria-label="Close"
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
             <!-- Header inputs -->
-            <div class="grid grid-cols-2 gap-4 mb-5">
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-5">
               <div>
                 <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5">Start date</label>
                 <input
                   :value="formatInputDate(draft.start)"
                   @input="onStartInput"
                   type="text"
+                  inputmode="numeric"
                   placeholder="DD/MM/YYYY"
                   maxlength="10"
-                  class="w-full h-10 px-3 rounded-lg border-2 text-sm font-semibold text-gray-800 focus:outline-none transition-colors"
+                  class="w-full h-11 sm:h-10 px-3 rounded-lg border-2 text-sm font-semibold text-gray-800 focus:outline-none transition-colors"
                   :class="draft.start ? 'border-blue-500 focus:border-blue-600' : 'border-blue-400 focus:border-blue-500'"
                 />
               </div>
@@ -38,15 +57,16 @@
                   :value="formatInputDate(draft.end)"
                   @input="onEndInput"
                   type="text"
+                  inputmode="numeric"
                   placeholder="DD/MM/YYYY"
                   maxlength="10"
-                  class="w-full h-10 px-3 rounded-lg border text-sm font-semibold text-gray-800 focus:outline-none transition-colors"
+                  class="w-full h-11 sm:h-10 px-3 rounded-lg border text-sm font-semibold text-gray-800 focus:outline-none transition-colors"
                   :class="draft.end ? 'border-blue-500 focus:border-blue-600' : 'border-gray-200 focus:border-gray-300'"
                 />
               </div>
             </div>
 
-            <!-- Dual calendars -->
+            <!-- Dual calendars: single month on mobile (both nav arrows active), dual month on sm+ (unchanged desktop layout) -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <CalendarMonth
                 :year="leftYear"
@@ -57,8 +77,10 @@
                 @select="onSelect"
                 @hover="hoverDate = $event"
                 @prev="prevMonth"
+                @next="nextMonth"
               />
               <CalendarMonth
+                class="hidden sm:block"
                 :year="rightYear"
                 :month="rightMonth"
                 :draft="draft"
@@ -71,26 +93,26 @@
             </div>
 
             <!-- Footer actions -->
-            <div class="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
+            <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between mt-6 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 @click="reset"
-                class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                class="text-sm font-bold text-blue-600 hover:text-blue-700 transition-colors text-center sm:text-left"
               >
                 Reset
               </button>
-              <div class="flex items-center gap-3">
+              <div class="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:gap-3">
                 <button
                   type="button"
                   @click="cancel"
-                  class="px-5 py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:border-gray-300 transition-colors"
+                  class="w-full sm:w-auto px-5 py-3 sm:py-2 rounded-lg border border-gray-200 text-sm font-bold text-gray-600 hover:border-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   @click="apply"
-                  class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
+                  class="w-full sm:w-auto px-5 py-3 sm:py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors"
                 >
                   Apply
                 </button>
@@ -332,7 +354,7 @@ export const CalendarMonth = defineComponent({
         h('div', { class: 'flex items-center justify-between mb-4' }, [
           h('button', {
             type: 'button',
-            class: 'w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700',
+            class: 'w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-400 hover:text-gray-700',
             style: props.next ? 'visibility:hidden' : '',
             onClick: () => emit('prev'),
           }, [
@@ -343,7 +365,7 @@ export const CalendarMonth = defineComponent({
           h('span', { class: 'text-sm font-bold text-gray-800' }, monthLabel),
           h('button', {
             type: 'button',
-            class: 'w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-700',
+            class: 'w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors text-gray-400 hover:text-gray-700',
             style: props.prev ? 'visibility:hidden' : '',
             onClick: () => emit('next'),
           }, [
@@ -377,7 +399,7 @@ export const CalendarMonth = defineComponent({
 
             const innerClass = [
               'w-9 h-9 flex items-center justify-center rounded-full transition-colors z-10 relative',
-              (start || end) ? 'bg-blue-600 text-white' : today && !inRange ? 'border-b-2 border-blue-500' : cell.currentMonth ? 'hover:bg-gray-100' : 'cursor-default',
+              (start || end) ? 'bg-blue-600 text-white' : today && !inRange ? 'border-b-2 border-blue-500' : cell.currentMonth ? 'hover:bg-gray-100 active:bg-gray-200' : 'cursor-default',
             ].join(' ')
 
             const conflictIndicatorClass = (window: AvailabilityWindow) => {
@@ -420,12 +442,38 @@ export const CalendarMonth = defineComponent({
 </script>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
+/* Desktop: unchanged centered fade */
+.sheet-enter-active,
+.sheet-leave-active {
   transition: opacity 0.15s ease;
 }
-.fade-enter-from,
-.fade-leave-to {
+.sheet-enter-from,
+.sheet-leave-to {
   opacity: 0;
+}
+
+/* Mobile: slide up as a bottom sheet instead of a plain fade */
+@media (max-width: 639px) {
+  .sheet-enter-active,
+  .sheet-leave-active {
+    transition: opacity 0.2s ease;
+  }
+  .sheet-enter-active > div:last-child,
+  .sheet-leave-active > div:last-child {
+    transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .sheet-enter-from > div:last-child,
+  .sheet-leave-to > div:last-child {
+    transform: translateY(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet-enter-active > div:last-child,
+  .sheet-leave-active > div:last-child,
+  .sheet-enter-active,
+  .sheet-leave-active {
+    transition: none !important;
+  }
 }
 </style>

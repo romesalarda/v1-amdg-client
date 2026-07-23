@@ -64,8 +64,8 @@
 				/>
 
 	
-				<main class="min-w-0 flex-1">
-					<div class="rounded-3xl border-2 border-slate-900/80 bg-white shadow-[10px_10px_0px_0px_rgba(15,23,42,0.2)]">
+				<main class="min-w-0 flex-1 overflow-hidden">
+					<div class="overflow-hidden rounded-3xl border-2 border-slate-900/80 bg-white shadow-[10px_10px_0px_0px_rgba(15,23,42,0.2)]">
 						<div class="p-6 md:p-10">
 							<div class="border-b border-slate-100 pb-6">
 								<h2 class="text-2xl font-black tracking-tight text-slate-900 md:text-3xl">

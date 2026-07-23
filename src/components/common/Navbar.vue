@@ -161,7 +161,7 @@
     >
       <div
         v-if="isMobileMenuOpen"
-        class="lg:hidden border-t border-white/10 bg-deep-navy px-4 py-3"
+        class="lg:hidden border-t border-white/10 bg-deep-navy px-4 py-3 mt-2"
       >
         <nav class="flex flex-col gap-0.5 text-[11px] font-bold uppercase tracking-widest">
           <NuxtLink

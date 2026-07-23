@@ -1,8 +1,8 @@
 <!-- Replace AccessibilityRequirementSelect.vue with this file (adds multiple prop + clear) -->
 <template>
-  <div ref="containerRef">
+  <div ref="containerRef" class="w-full min-w-0">
     <div
-      class="w-full px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
+      class="w-full min-w-0 px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
       :class="{ 'border-red-500 focus-within:border-red-500': hasError }"
       @click="openDropdown"
     >
@@ -21,7 +21,7 @@
       />
       <span
         v-if="!multiple && singleLabel && !searchQuery"
-        class="text-xs font-bold text-primary truncate max-w-[180px]"
+        class="shrink min-w-0 text-xs font-bold text-primary truncate max-w-[180px]"
       >{{ singleLabel }}</span>
       <span
         v-if="multiple && multiValues.length > 0 && !searchQuery"
@@ -217,10 +217,15 @@ function updateDropdownPosition() {
   const rect = trigger.getBoundingClientRect()
   const top = Math.round(rect.bottom + 8)
   const maxHeight = Math.max(160, window.innerHeight - top - 16)
+  const viewportWidth = window.innerWidth
+  const dropdownWidth = Math.round(rect.width)
+  const leftPos = Math.round(rect.left)
+  const clampedLeft = Math.max(8, Math.min(leftPos, viewportWidth - dropdownWidth - 8))
+
   dropdownStyle.value = {
     top: `${top}px`,
-    left: `${Math.round(rect.left)}px`,
-    width: `${Math.round(rect.width)}px`,
+    left: `${clampedLeft}px`,
+    width: `${Math.min(dropdownWidth, viewportWidth - 16)}px`,
     maxHeight: `${maxHeight}px`,
     zIndex: '9999',
   }

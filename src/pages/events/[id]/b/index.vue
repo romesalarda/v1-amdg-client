@@ -184,59 +184,67 @@
 							:key="item.booking.booking_reference"
 							:to="getURLRedirect(item.booking)"
 							:class="[
-								'group flex items-center justify-between gap-6 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md',
+								'group flex flex-col gap-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-[#dbe4f0] transition-all hover:-translate-y-0.5 hover:shadow-md sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:p-6',
 								item.booking.is_cancelled ? 'opacity-50' : ''
 							]"
-						>
-							<div class="flex min-w-0 items-center gap-5">
-								<!-- <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#0b132b] font-black text-[#bec5e5]">
-									{{ getBookingInitials(getBookingDisplayTitle(item)) }}
-								</div> -->
+							>
+							<div class="flex min-w-0 items-center gap-4 sm:gap-5">
 								<img
-									:src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${item.booking.booking_reference}`"
-									alt="Default profile"
-									class="w-12 h-12 rounded-full object-cover"
+								:src="`https://api.dicebear.com/9.x/adventurer-neutral/svg?seed=${item.booking.booking_reference}`"
+								alt="Default profile"
+								class="h-10 w-10 shrink-0 rounded-full object-cover sm:h-12 sm:w-12"
 								/>
 								<div class="min-w-0">
-									<h3 class="font-black text-[#181c20] text-xl md:text-2xl">{{ getBookingDisplayTitle(item) }}</h3>
-									<p class="text-sm font-medium text-[#0b132b]/55" v-if="!item.booking.is_cancelled">
-										Ref: #{{ item.booking.booking_reference.slice(0,20).toUpperCase()  }} ...
-									</p>
-									<p class="text-sm font-medium text-red-600" v-else>
-										Cancelled Booking
-									</p>
+								<h3 class="truncate font-black text-[#181c20] text-lg sm:text-xl md:text-2xl">
+									{{ getBookingDisplayTitle(item) }}
+								</h3>
+								<p class="truncate text-xs font-medium text-[#0b132b]/55 sm:text-sm" v-if="!item.booking.is_cancelled">
+									Ref: #{{ item.booking.booking_reference.slice(0,20).toUpperCase() }} ...
+								</p>
+								<p class="text-xs font-medium text-red-600 sm:text-sm" v-else>
+									Cancelled Booking
+								</p>
 								</div>
 							</div>
 
-							<div class="flex items-center justify-items-center gap-10 text-right">
+							<div class="flex items-center justify-between gap-4 border-t border-[#dbe4f0] pt-3 sm:justify-items-center sm:gap-10 sm:border-t-0 sm:pt-0 sm:text-right">
 								<div>
-									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Attendees</p>
-									<div class="flex justify-end -space-x-2">
-										<div
-											v-for="(attendee, attendeeIndex) in getBookingAttendeePreview(item)"
-											:key="`${item.booking.booking_reference}-${attendeeIndex}`"
-											class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
-										>
-											{{ getAttendeeInitials(attendee?.name) }}
-										</div>
-										<div
-											v-if="!getBookingAttendeePreview(item).length"
-											class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
-										>
-											?
-										</div>
+								<p class="mb-1.5 text-[9px] font-black uppercase tracking-widest text-[#0b132b]/45 sm:mb-2 sm:text-[10px]">
+									Attendees
+								</p>
+								<div class="flex -space-x-2 sm:justify-end">
+									<div
+									v-for="(attendee, attendeeIndex) in getBookingAttendeePreview(item)"
+									:key="`${item.booking.booking_reference}-${attendeeIndex}`"
+									class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
+									>
+									{{ getAttendeeInitials(attendee?.name) }}
+									</div>
+									<div
+									v-if="!getBookingAttendeePreview(item).length"
+									class="flex h-6 w-6 items-center justify-center rounded-full border-2 border-white bg-slate-200 text-[9px] font-black text-[#0b132b]"
+									>
+									?
 									</div>
 								</div>
+								</div>
+
 								<div>
-									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Amount</p>
-									<p class="font-black text-lg text-[#181c20]">{{ getBookingPaymentTotal(item.booking.payments) }}</p>
+								<p class="mb-1.5 text-[9px] font-black uppercase tracking-widest text-[#0b132b]/45 sm:mb-2 sm:text-[10px]">
+									Amount
+								</p>
+								<p class="font-black text-base text-[#181c20] sm:text-lg">
+									{{ getBookingPaymentTotal(item.booking.payments) }}
+								</p>
 								</div>
-								<div class="text-right">
-									<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Booked</p>
-									<p class="text-sm font-medium text-[#181c20]">{{ formatRelativeTime(item.booking.booked_at) }}</p>
+
+								<div class="hidden sm:block text-right">
+								<p class="mb-2 text-[10px] font-black uppercase tracking-widest text-[#0b132b]/45">Booked</p>
+								<p class="text-sm font-medium text-[#181c20]">{{ formatRelativeTime(item.booking.booked_at) }}</p>
 								</div>
-								<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f1f4f9] text-[#0b132b] transition-all group-hover:bg-[#0b132b] group-hover:text-white">
-									<UIcon name="i-heroicons-chevron-right" class="h-5 w-5" />
+
+								<div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#f1f4f9] text-[#0b132b] transition-all group-hover:bg-[#0b132b] group-hover:text-white sm:h-10 sm:w-10">
+								<UIcon name="i-heroicons-chevron-right" class="h-5 w-5" />
 								</div>
 							</div>
 						</NuxtLink>

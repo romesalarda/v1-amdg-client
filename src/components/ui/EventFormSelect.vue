@@ -1,7 +1,7 @@
 <template>
-  <div ref="containerRef">
+  <div ref="containerRef" class="w-full min-w-0">
     <div
-      class="w-full px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
+      class="w-full min-w-0 px-4 py-3 bg-mist-blue border border-transparent focus-within:border-primary rounded-xl flex items-center gap-2 cursor-pointer transition-all"
       @mousedown.prevent="openDropdown"
     >
       <span class="material-symbols-outlined text-primary text-base shrink-0">dynamic_form</span>
@@ -19,7 +19,7 @@
       <!-- Single mode: show selected label -->
       <span
         v-if="!multiple && selectedLabel && !searchQuery"
-        class="text-xs font-bold text-primary truncate max-w-[180px]"
+        class="shrink min-w-0 text-xs font-bold text-primary truncate max-w-[180px]"
       >{{ selectedLabel }}</span>
       <!-- Multi mode: show badge with count -->
       <span
@@ -288,10 +288,15 @@ function updateDropdownPosition() {
   const rect = trigger.getBoundingClientRect()
   const top = Math.round(rect.bottom + 8)
   const maxHeight = Math.max(160, window.innerHeight - top - 16)
+  const viewportWidth = window.innerWidth
+  const dropdownWidth = Math.round(rect.width)
+  const leftPos = Math.round(rect.left)
+  const clampedLeft = Math.max(8, Math.min(leftPos, viewportWidth - dropdownWidth - 8))
+
   dropdownStyle.value = {
     top: `${top}px`,
-    left: `${Math.round(rect.left)}px`,
-    width: `${Math.round(rect.width)}px`,
+    left: `${clampedLeft}px`,
+    width: `${Math.min(dropdownWidth, viewportWidth - 16)}px`,
     maxHeight: `${maxHeight}px`,
     zIndex: '9999',
   }

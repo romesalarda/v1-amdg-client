@@ -1,15 +1,16 @@
 <template>
-	<div class="space-y-6">
+	<div class="w-full min-w-0 space-y-6">
 		<div>
 			<h2 class="text-lg font-semibold text-gray-900">Attendee details</h2>
 			<p class="text-sm text-gray-600" v-if="isRegistrarSelf">Please provide <b>YOUR</b> details.</p>
 			<p class="text-sm text-gray-600" v-else>Tell us about this attendee and their relationship to you.</p>
 		</div>
 
-		<div class="grid gap-4 sm:grid-cols-2">
-			<div>
+		<div class="grid w-full min-w-0 gap-4 sm:grid-cols-2">
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">First name <span class="text-red-500">*</span></label>
 				<UInput
+					class="w-full"
 					:model-value="values.first_name"
 					placeholder="First name"
 					maxlength="20"
@@ -18,9 +19,10 @@
 				/>
 				<p v-if="errors.first_name" class="mt-1 text-xs text-red-500">{{ errors.first_name }}</p>
 			</div>
-			<div>
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Last name <span class="text-red-500">*</span></label>
 				<UInput
+					class="w-full"
 					:model-value="values.last_name"
 					placeholder="Last name"
 					maxlength="20"
@@ -29,9 +31,10 @@
 				/>
 				<p v-if="errors.last_name" class="mt-1 text-xs text-red-500">{{ errors.last_name }}</p>
 			</div>
-			<div>
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
 				<UInput
+					class="w-full"
 					:model-value="values.email"
 					type="email"
 					placeholder="email@example.com"
@@ -40,9 +43,10 @@
 				/>
 				<p v-if="errors.email" class="mt-1 text-xs text-red-500">{{ errors.email }}</p>
 			</div>
-			<div>
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Phone number</label>
 				<UInput
+					class="w-full"
 					:model-value="values.phone_number"
 					placeholder="Phone number"
 					@update:model-value="(val) => emit('update-field-validate', 'phone_number', val)"
@@ -50,9 +54,10 @@
 				/>
 				<p v-if="errors.phone_number" class="mt-1 text-xs text-red-500">{{ errors.phone_number }}</p>
 			</div>
-			<div>
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Date of birth <span class="text-red-500">*</span></label>
 				<UInput
+					class="w-full"
 					:model-value="values.date_of_birth"
 					type="date"
 					@update:model-value="(val) => emit('update-field-validate', 'date_of_birth', val)"
@@ -63,9 +68,10 @@
 					Age: <span class="font-bold text-slate-900">{{ currentAttendeeAge }}</span> years old
 				</p>
 			</div>
-			<div>
+			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
 				<USelectMenu
+					class="w-full"
 					:model-value="values.gender"
 					:options="genderOptions"
 					value-attribute="value"
@@ -74,9 +80,10 @@
 					@update:model-value="(val) => emit('update-field', 'gender', val)"
 				/>
 			</div>
-			<div v-if="showRelationshipField && !isRegistrarSelf" class="sm:col-span-2">
+			<div v-if="showRelationshipField && !isRegistrarSelf" class="min-w-0 sm:col-span-2">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
 				<USelectMenu
+					class="w-full"
 					:model-value="values.relationship_to_user"
 					:options="relationshipOptions"
 					value-attribute="value"
@@ -87,7 +94,7 @@
 				/>
 			</div>
 
-			<div class="sm:col-span-2 rounded-xl border border-slate-200 bg-slate-50 p-4">
+			<div class="sm:col-span-2 min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
 				<p class="text-sm font-semibold text-slate-900">Area from <span class="text-red-500">*</span></p>
 				<p class="mt-1 text-xs text-slate-600">
 					Start typing to search for an area, then select from the list.

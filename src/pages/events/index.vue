@@ -2,7 +2,26 @@
   <div class="min-h-screen bg-gray-50 text-on-surface">
 
     <!-- Dark Navy Search Strip -->
-    <section class="w-full bg-blue-600 sticky top-[40px] z-40 pb-6 pt-5">
+    <section class="w-full bg-blue-600 sticky top-12 z-40">
+      <!-- Collapse Toggle Bar -->
+      <div
+        class="flex items-center justify-between px-6 py-2 cursor-pointer select-none md:hidden"
+        @click="isSearchExpanded = !isSearchExpanded"
+      >
+        <span class="text-white text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          {{ searchQuery ? `"${searchQuery}"` : 'Search &amp; Filter' }}
+          <span v-if="selectedFilter !== 'all' || selectedLocation !== 'all' || advancedStartAfter || advancedStartBefore" class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-white/30 text-white text-[9px]">•</span>
+        </span>
+        <svg class="w-4 h-4 text-white transition-transform duration-200" :class="isSearchExpanded ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+      </div>
+
+      <!-- Collapsible content -->
+      <div :class="[isSearchExpanded ? 'block' : 'hidden', 'md:block']" class="pb-6 pt-3 md:pt-5">
       <div class="max-w-[1100px] mx-auto px-6">
 
         <!-- Search Pill -->
@@ -108,29 +127,8 @@
           </div>
         </div>
 
-        <!-- Mobile: More Filters toggle -->
-        <div class="md:hidden mb-3">
-          <button
-            type="button"
-            @click="showAdvancedFilters = !showAdvancedFilters"
-            class="w-full h-10 px-4 rounded-lg text-[10px] font-black uppercase tracking-widest transition-colors inline-flex items-center justify-center gap-2 border"
-            :class="showAdvancedFilters ? 'bg-white text-deep-navy border-white' : 'text-white border-white/30 hover:border-white/60'"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
-            </svg>
-            <span>More Filters</span>
-            <span
-              v-if="advancedActiveCount"
-              class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-blue-500 text-white text-[9px]"
-            >
-              {{ advancedActiveCount }}
-            </span>
-          </button>
-        </div>
-
         <!-- Status Filter Pills -->
-        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1">
+        <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar pb-1 pt-1">
           <button
             @click="selectedFilter = 'all'"
             :class="selectedFilter === 'all' ? 'bg-white text-deep-navy' : 'bg-white/10 text-white/80 border border-white/20 hover:border-white/50 hover:text-white'"
@@ -161,6 +159,7 @@
           </button>
         </div>
 
+      </div>
       </div>
     </section>
 
@@ -467,7 +466,7 @@ definePageMeta({
 const authStore = useAuthStore()
 const route = useRoute()
 const router = useRouter()
-
+const isSearchExpanded = ref(false)
 // Search and filter state
 const searchQuery = ref('')
 const debouncedSearchQuery = ref('')

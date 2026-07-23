@@ -1,7 +1,7 @@
 <template>
-  <div ref="containerRef">
+  <div ref="containerRef" class="w-full min-w-0">
     <div
-      class="w-full px-3 py-2 border rounded-lg flex items-center gap-2 cursor-pointer transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
+      class="w-full min-w-0 px-3 py-2 border rounded-lg flex items-center gap-2 cursor-pointer transition-all focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary"
       :class="modelValue ? 'border-primary/40 bg-primary/5' : 'border-gray-300 bg-white'"
       @click="openDropdown"
     >
@@ -204,10 +204,15 @@ function updateDropdownPosition() {
   const rect = trigger.getBoundingClientRect()
   const top = Math.round(rect.bottom + 6)
   const maxHeight = Math.max(160, window.innerHeight - top - 16)
+  const viewportWidth = window.innerWidth
+  const dropdownWidth = Math.round(rect.width)
+  const leftPos = Math.round(rect.left)
+  const clampedLeft = Math.max(8, Math.min(leftPos, viewportWidth - dropdownWidth - 8))
+
   dropdownStyle.value = {
     top: `${top}px`,
-    left: `${Math.round(rect.left)}px`,
-    width: `${Math.round(rect.width)}px`,
+    left: `${clampedLeft}px`,
+    width: `${Math.min(dropdownWidth, viewportWidth - 16)}px`,
     maxHeight: `${maxHeight}px`,
     zIndex: '9999',
   }
