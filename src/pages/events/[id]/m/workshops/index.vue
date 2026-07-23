@@ -210,7 +210,7 @@
     <WorkshopCreateEditModal
       v-if="event_url_title"
       v-model="showModal"
-      :event-id="event_url_title"
+      :event-id="event_uuid"
       :edit-workshop="editingWorkshop"
       @saved="onSaved"
     />
@@ -258,6 +258,8 @@ const id = computed(() => String(route.params.id))
 
 const { data: event } = useEvent(id)
 const event_url_title = computed(() => event.value?.data?.url_safe_title)
+const event_uuid = computed(() => event.value?.data?.event_id || '')
+
 const eventNumericId = computed<number | null>(() => {
   const raw = (event.value?.data as any)?.id
   return typeof raw === 'number' ? raw : null
