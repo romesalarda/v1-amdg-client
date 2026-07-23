@@ -1,5 +1,5 @@
 <template>
-	<div class="space-y-6">
+	<div class="w-full min-w-0 space-y-6">
 		<div>
 			<h2 class="text-lg font-semibold text-gray-900">Personal info</h2>
 			<p class="text-sm text-gray-600">Add any dietary, medical, or accessibility needs.</p>
@@ -9,9 +9,9 @@
 			</div>
 		</div>
 
-		<div class="grid gap-6">
+		<div class="grid w-full min-w-0 gap-6">
 			<!-- Community identifiers -->
-			<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
 				<h3 class="text-sm font-semibold text-slate-900">Community identifiers</h3>
 				<p class="mt-1 text-xs text-slate-600">Optionally link this attendee to an organisation.</p>
 
@@ -25,7 +25,7 @@
 			</div>
 
 			<!-- Alternative sign-in -->
-			<div class="rounded-xl border border-slate-200 bg-slate-50 p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
 				<h3 class="text-sm font-semibold text-slate-900">Alternative sign-in identifier</h3>
 				<p class="mt-1 text-xs text-slate-600">Optionally attach one event-supported external identifier for this attendee.</p>
 
@@ -99,7 +99,7 @@
 			</div>
 
 			<!-- Dietary Requirements -->
-			<div class="rounded-xl border border-slate-200 bg-white p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-4">
 				<button
 					type="button"
 					class="flex w-full items-center justify-between gap-3 text-left"
@@ -164,7 +164,7 @@
 			</div>
 
 			<!-- Medical Conditions -->
-			<div class="rounded-xl border border-slate-200 bg-white p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-4">
 				<button
 					type="button"
 					class="flex w-full items-center justify-between gap-3 text-left"
@@ -244,7 +244,7 @@
 			</div>
 
 			<!-- Accessibility Requirements -->
-			<div class="rounded-xl border border-slate-200 bg-white p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-4">
 				<button
 					type="button"
 					class="flex w-full items-center justify-between gap-3 text-left"
@@ -309,7 +309,7 @@
 			</div>
 
 			<!-- Emergency Contact -->
-			<div class="rounded-xl border border-slate-200 bg-white p-4">
+			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white p-4">
 				<button
 					type="button"
 					class="flex w-full items-center justify-between gap-3 text-left"
