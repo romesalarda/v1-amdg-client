@@ -1,6 +1,6 @@
 import { client } from '@/api/client.gen'
 
-export default defineNuxtPlugin(() => {
+export default defineNuxtPlugin((nuxtApp) => {
     const config = useRuntimeConfig()
     client.setConfig({
         baseUrl: config.public.apiBaseUrl as string,
@@ -104,6 +104,28 @@ export default defineNuxtPlugin(() => {
         }
 
         return response
+    })
+
+    // Detect network-level failures (ERR_CONNECTION_REFUSED, etc.) and redirect
+    // to the maintenance page. The error interceptor fires when fetch() itself
+    // throws (i.e. no HTTP response at all — server is down / unreachable).
+    client.interceptors.error.use(async (error, _response, _request, _options) => {
+        // _response is undefined only for genuine network failures (ERR_CONNECTION_REFUSED,
+        // DNS failure, etc.). HTTP error responses (401, 403, 500…) have a defined _response,
+        // so we must NOT treat those as a maintenance condition.
+        if (_response !== undefined) {
+            throw error
+        }
+
+        const route = nuxtApp.$route as { path: string } | undefined
+        const healthStore = useHealthStore()
+        healthStore.setUnhealthy()
+
+        if (route?.path !== '/maintainance') {
+            await navigateTo('/maintainance', { replace: true })
+        }
+
+        throw error
     })
 })
 
