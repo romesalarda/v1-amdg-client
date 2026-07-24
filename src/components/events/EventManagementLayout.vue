@@ -188,6 +188,7 @@ import { resolveImageUrl, onImageError } from '~/utils/image'
 import Navbar from '~/components/common/Navbar.vue'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
+import { useSidebarStore } from '~/stores/sidebar'
 import type { EventDetail } from '~/api/types.gen'
 
 const props = defineProps<{
@@ -203,7 +204,11 @@ const { data: policyData } = useOrganisationPolicy(orgUrlSafeTitle)
 const orgPolicy = computed(() => policyData.value?.data)
 
 const route = useRoute()
-const sidebarOpen = ref(true)
+const sidebarStore = useSidebarStore()
+const sidebarOpen = computed({
+  get: () => sidebarStore.isOpen,
+  set: (val) => val ? sidebarStore.open() : sidebarStore.close()
+})
 
 const tabs = computed(() => [
   {
@@ -313,7 +318,7 @@ const onTabClick = (event: MouseEvent, disabled?: boolean, policyDisabled?: bool
 
   // Close sidebar on mobile only
   if (window.innerWidth < 1024) {
-    sidebarOpen.value = false
+    sidebarStore.close()
   }
 }
 

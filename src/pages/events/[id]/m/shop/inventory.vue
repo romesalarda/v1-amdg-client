@@ -230,7 +230,7 @@
 
     <!-- Floating Action Bar -->
     <div
-      class="fixed bottom-0 left-64 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl"
+      :class="['fixed bottom-0 right-0 z-30 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl transition-all duration-300', sidebarStore.isOpen ? 'left-64' : 'left-0']"
     >
       <div class="max-w-screen-xl mx-auto px-8 py-4">
         <div class="flex items-center justify-between">
@@ -270,6 +270,7 @@ import InventoryProductTable from '~/components/events/shop/inventory/InventoryP
 import ProductReceiptModal from '~/components/events/shop/inventory/ProductReceiptModal.vue'
 import VariantAttendeesPanel from '~/components/events/shop/inventory/VariantAttendeesPanel.vue'
 import { useEvent } from '~/composables/resources/events/events'
+import { useSidebarStore } from '~/stores/sidebar'
 import { useInventoryBreakdown } from '~/composables/resources/products/productInventory'
 import { useProductReceiptModal } from '~/composables/shop/useProductReceiptModal'
 import { useCsvExport } from '~/composables/ui/useCsvExport'
@@ -288,6 +289,7 @@ definePageMeta({
 
 const route = useRoute()
 const id = computed(() => route.params.id as string)
+const sidebarStore = useSidebarStore()
 
 const { data: event } = useEvent(id)
 

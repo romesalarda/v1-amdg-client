@@ -339,7 +339,7 @@
     </div>
 
     <!-- Floating Navigation Bar -->
-    <div class="fixed bottom-0 left-64 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl" v-if="settingsData?.data?.payment_enabled">
+    <div v-if="settingsData?.data?.payment_enabled" :class="['fixed bottom-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl transition-all duration-300', sidebarStore.isOpen ? 'left-64' : 'left-0']">
       <div class="max-w-7xl mx-auto px-6 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -458,6 +458,7 @@ import EventManagementLayout from '~/components/events/EventManagementLayout.vue
 import PaymentMethodForm from '~/components/events/forms/PaymentMethodForm.vue'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
 import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
+import { useSidebarStore } from '~/stores/sidebar'
 
 import Swal from 'sweetalert2'
 
@@ -474,6 +475,7 @@ definePageMeta({
 const route = useRoute()
 const id = computed(() => String(route.params.id))
 const toast = useToast()
+const sidebarStore = useSidebarStore()
 
 const { can } = useCurrentUserEventPermissions(id)
 

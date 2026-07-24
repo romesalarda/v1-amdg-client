@@ -33,7 +33,7 @@
     </div>
 
     <!-- Floating Action Bar -->
-    <div class="fixed bottom-0 left-64 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl">
+    <div :class="['fixed bottom-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl transition-all duration-300', sidebarStore.isOpen ? 'left-64' : 'left-0']">
       <div class="max-w-screen-xl mx-auto px-8 py-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-3">
@@ -72,6 +72,7 @@
 
 <script setup lang="ts">
 import { useEvent } from '~/composables/resources/events/events'
+import { useSidebarStore } from '~/stores/sidebar'
 import { useProductsOverview } from '~/composables/statistics/products/product-statistics'
 import EventManagementLayout from '~/components/events/EventManagementLayout.vue'
 import ProductsTab from '~/components/events/shop/dashboard/ProductsTab.vue'
@@ -91,6 +92,7 @@ definePageMeta({
   }
 })
 
+const sidebarStore = useSidebarStore()
 const route = useRoute()
 const id = computed(() => route.params.id as string)
 

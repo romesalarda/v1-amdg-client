@@ -1422,7 +1422,7 @@
       </div>
 
       <!-- Sticky Bottom Save Bar -->
-      <div v-if="!isLoading" class="fixed bottom-0 left-64 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl">
+      <div v-if="!isLoading" :class="['fixed bottom-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl transition-all duration-300', sidebarStore.isOpen ? 'left-64' : 'left-0']">
         <div class="max-w-screen-xl mx-auto flex items-center justify-between px-8 py-4">
           <div class="flex items-center gap-3">
             <UIcon 
@@ -2241,6 +2241,7 @@ import {
 } from '~/schemas/events/productVariantAvailability'
 import type { LocationQueryValue } from 'vue-router'
 import Swal from 'sweetalert2'
+import { useSidebarStore } from '~/stores/sidebar'
 
 
 definePageMeta({
@@ -2255,6 +2256,7 @@ definePageMeta({
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
+const sidebarStore = useSidebarStore()
 
 const eventId = computed(() => route.params.id as string)
 const productId = computed(() => route.params.product_id as string)
