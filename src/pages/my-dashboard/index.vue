@@ -90,7 +90,7 @@
           />
         </div>
 
-        <div class="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+        <div class="flex items-center gap-3 overflow-x-auto pb-5 py-3 no-scrollbar px-3">
           <button 
             @click="activeFilter = 'all'"
             :class="[
