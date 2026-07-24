@@ -60,8 +60,9 @@
               {{ isNewProduct ? 'Add a new product to your event shop' : 'Update product details and variants' }}
             </p>
           </div>
-          <nav class="flex gap-1" aria-label="Tabs">
-            <button
+          <div class="overflow-x-auto md:overflow-x-scroll md:scrollbar-thin">
+            <nav class="flex gap-1" aria-label="Tabs">
+              <button
               v-for="tab in tabs"
               :key="tab.id"
               @click="activeTab = tab.id"
@@ -77,7 +78,8 @@
                 <span>{{ tab.label }}</span>
               </div>
             </button>
-          </nav>
+            </nav>
+          </div>
         </div>
 
         <!-- Tab Content -->
@@ -1327,7 +1329,7 @@
               <div class="mb-4 p-3 bg-primary/5 border border-primary/20 rounded-lg">
                 <div class="flex items-center justify-between mb-2">
                   <span class="text-xs font-medium text-gray-600">Base Price</span>
-                  <span class="text-sm font-semibold text-gray-900">£{{ form.base_amount?.toFixed(2) || '0.00' }}</span>
+                  <span class="text-sm font-semibold text-gray-900">£{{ (Number(form.base_amount) || 0).toFixed(2) }}</span>
                 </div>
                 <div v-if="form.percentage_modifier && form.percentage_modifier !== 0" class="flex items-center justify-between mb-2">
                   <span class="text-xs font-medium text-gray-600">Modifier</span>
@@ -4052,3 +4054,20 @@ function formatDateTimeForInput(dateString: string): string {
   return formatDateTimeLocal(dateString)
 }
 </script>
+<style scoped>
+.no-scrollbar::-webkit-scrollbar {
+display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+  .scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #cbd5e1; /* slate-300 */
+  border-radius: 3px;
+}
+
+</style>
