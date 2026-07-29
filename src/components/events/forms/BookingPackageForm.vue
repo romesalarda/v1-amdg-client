@@ -86,6 +86,7 @@
           id="base-amount"
           v-model="base_amount"
           v-bind="base_amountAttrs"
+          @blur="handleBaseAmountBlur"
           type="number"
           step="0.01"
           min="0"
@@ -241,18 +242,15 @@ watch(() => props.modelValue, (pkg) => {
   }
 }, { immediate: true })
 
-watch(base_amount, (value) => {
-  const amount = normalizeAmount(value)
+const handleBaseAmountBlur = () => {
+  const amount = normalizeAmount(base_amount.value)
   if (amount === 0 && !isFree.value) {
     isFree.value = true
     setFreeAmount()
-    return
-  }
-
-  if (amount > 0 && isFree.value) {
+  } else if (amount > 0 && isFree.value) {
     isFree.value = false
   }
-})
+}
 
 const onSubmit = handleSubmit(async (values) => {
   isSubmitting.value = true

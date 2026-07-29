@@ -18,6 +18,7 @@
         :active-filters="activeFilters"
         :is-live="isConnected"
         :event-id="eventIdentifier"
+        :event-url-safe-title="event?.data?.url_safe_title ?? null"
         @set-mode="setMode"
         @apply-filters="applyFilters"
       />

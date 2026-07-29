@@ -28,15 +28,65 @@
           </span>
       </div>
 
-      <!-- Right: toggle button -->
-      <button
-        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
-        :class="expanded ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
-        @click="expanded = !expanded"
-      >
-        <UIcon :name="expanded ? 'i-heroicons-chevron-up' : 'i-heroicons-adjustments-horizontal'" class="w-3.5 h-3.5" />
-        {{ expanded ? 'Collapse' : 'Settings' }}
-      </button>
+      <!-- Right: access link + toggle button -->
+      <div class="flex items-center gap-2">
+        <button
+          v-if="eventUrlSafeTitle"
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors bg-gray-100 text-gray-600 hover:bg-gray-200"
+          @click="showAccessModal = true"
+        >
+          <UIcon name="i-heroicons-qr-code" class="w-3.5 h-3.5" />
+          Access Link
+        </button>
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+          :class="expanded ? 'bg-primary/10 text-primary' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+          @click="expanded = !expanded"
+        >
+          <UIcon :name="expanded ? 'i-heroicons-chevron-up' : 'i-heroicons-adjustments-horizontal'" class="w-3.5 h-3.5" />
+          {{ expanded ? 'Collapse' : 'Settings' }}
+        </button>
+      </div>
+
+      <!-- Access Link Modal -->
+      <UModal v-model="showAccessModal" :ui="{ width: 'sm:max-w-sm' }">
+        <UCard>
+          <template #header>
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-deep-navy">Live Access Link</h3>
+              <UButton color="gray" variant="ghost" icon="i-heroicons-x-mark" size="xs" @click="showAccessModal = false" />
+            </div>
+          </template>
+
+          <div class="flex flex-col items-center gap-4 py-2">
+            <Qrcode :value="accessUrl" :width="200" :height="200" />
+            <p class="text-xs text-gray-500 text-center break-all">{{ accessUrl }}</p>
+            <div class="flex gap-2 w-full">
+              <UButton
+                color="gray"
+                variant="soft"
+                size="sm"
+                icon="i-heroicons-clipboard"
+                class="flex-1"
+                @click="copyAccessUrl"
+              >
+                {{ copied ? 'Copied!' : 'Copy link' }}
+              </UButton>
+              <UButton
+                color="primary"
+                variant="soft"
+                size="sm"
+                icon="i-heroicons-arrow-top-right-on-square"
+                class="flex-1"
+                :to="accessUrl"
+                target="_blank"
+              >
+                Open
+              </UButton>
+            </div>
+          </div>
+        </UCard>
+      </UModal>
     </div>
 
     <!-- Expandable body -->
@@ -192,6 +242,7 @@ interface Props {
   activeFilters: CheckInFilters
   isLive: boolean
   eventId?: string | null
+  eventUrlSafeTitle?: string | null
 }
 
 const props = defineProps<Props>()
@@ -204,6 +255,24 @@ const emit = defineEmits<{
 // ── Expand / collapse ──────────────────────────────────────────────────────
 
 const expanded = ref(false)
+
+// ── Access link modal ──────────────────────────────────────────────────────
+
+const showAccessModal = ref(false)
+const copied = ref(false)
+
+const accessUrl = computed(() => {
+  const base = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000'
+  return `${base}/events/${props.eventUrlSafeTitle}/live/access`
+})
+
+async function copyAccessUrl() {
+  try {
+    await navigator.clipboard.writeText(accessUrl.value)
+    copied.value = true
+    setTimeout(() => { copied.value = false }, 2000)
+  } catch {}
+}
 
 // ── Local filter state ─────────────────────────────────────────────────────
 

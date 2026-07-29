@@ -1,24 +1,61 @@
 <template>
-  <EventManagementLayout :event-id="eventIdentifier" :event="event?.data">
-    <div class="max-w-7xl mx-auto space-y-4">
+  <EventManagementLayout
+    :event-id="eventIdentifier"
+    :event="event?.data"
+  >
+    <div class="max-w-7xl mx-auto space-y-6">
+
       <!-- Header -->
-      <div class="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 class="text-2xl font-black text-deep-navy">QR Check-in Scanner</h1>
-          <p class="text-sm text-gray-500 mt-0.5">Point camera at attendee ticket QR code</p>
+      <div class="flex items-center justify-between flex-wrap gap-4">
+
+        <div class="flex items-center gap-4">
+          <div
+            class="w-11 h-11 rounded-2xl
+                   bg-indigo-50
+                   border border-indigo-100
+                   flex items-center justify-center"
+          >
+            <UIcon
+              name="i-heroicons-qr-code"
+              class="w-5 h-5 text-indigo-600"
+            />
+          </div>
+
+          <div>
+            <h1 class="text-2xl font-bold text-slate-900">
+              Access Control
+            </h1>
+
+            <p class="text-sm text-slate-500">
+              QR check-in scanner
+            </p>
+          </div>
         </div>
+
         <NuxtLink
           :to="`/events/${eventIdentifier}/live/dashboard`"
-          class="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
+          class="inline-flex items-center gap-2
+                 rounded-xl
+                 border border-slate-200
+                 bg-white
+                 px-4 py-2
+                 text-sm font-semibold
+                 text-slate-700
+                 hover:bg-slate-50
+                 transition"
         >
-          <UIcon name="i-heroicons-chart-bar" class="w-4 h-4" />
-          Live dashboard
+          <UIcon
+            name="i-heroicons-chart-bar"
+            class="w-4 h-4 text-indigo-600"
+          />
+          Live Dashboard
         </NuxtLink>
+
       </div>
 
-      <!-- Two-column layout: scanner (left) + recent log (right) -->
-      <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
-        <!-- Scanner column (2/5) -->
+      <!-- Content -->
+      <div class="grid lg:grid-cols-5 gap-6">
+
         <div class="lg:col-span-2">
           <CheckInScanner
             :is-processing="isProcessing"
@@ -36,102 +73,200 @@
           />
         </div>
 
-        <!-- Recent scans log (3/5) -->
-        <div class="lg:col-span-3 bg-white border border-deep-navy/10 rounded-xl shadow-sm p-5 space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-semibold text-deep-navy uppercase tracking-widest">Recent Scans</h3>
-            <UBadge v-if="recentResults.length" color="gray" variant="subtle" size="xs">
-              {{ recentResults.length }}
-            </UBadge>
+        <!-- Recent Scan Card -->
+        <div
+          class="lg:col-span-3
+                 rounded-3xl
+                 bg-white
+                 border border-slate-200
+                 shadow-sm
+                 overflow-hidden"
+        >
+
+          <!-- Header -->
+          <div
+            class="flex items-center justify-between
+                   px-6 py-5
+                   border-b border-slate-100"
+          >
+
+            <div class="flex items-center gap-3">
+              <h3
+                class="text-xs
+                       uppercase
+                       tracking-[0.25em]
+                       text-slate-500
+                       font-bold"
+              >
+                Recent Scans
+              </h3>
+
+              <span
+                v-if="recentResults.length"
+                class="rounded-full
+                       bg-slate-100
+                       px-2.5 py-1
+                       text-xs
+                       font-semibold
+                       text-slate-600"
+              >
+                {{ recentResults.length }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span
+                class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"
+              />
+
+              <span
+                class="text-xs font-semibold text-emerald-600"
+              >
+                Live
+              </span>
+            </div>
+
           </div>
 
-          <!-- Empty state -->
+          <!-- Empty -->
           <div
             v-if="!recentResults.length"
-            class="flex flex-col items-center justify-center py-16 gap-3 text-gray-300"
+            class="py-24 flex flex-col items-center"
           >
-            <UIcon name="i-heroicons-qr-code" class="w-14 h-14" />
-            <p class="text-sm text-gray-400 font-medium">No scans yet</p>
+            <div
+              class="w-16 h-16 rounded-2xl
+                     bg-slate-100
+                     flex items-center justify-center"
+            >
+              <UIcon
+                name="i-heroicons-qr-code"
+                class="w-8 h-8 text-slate-400"
+              />
+            </div>
+
+            <p class="mt-4 font-semibold text-slate-700">
+              Awaiting first scan
+            </p>
+
+            <p class="text-sm text-slate-500 mt-1">
+              Scan results will appear here automatically.
+            </p>
           </div>
 
-          <!-- Scan entries -->
-          <TransitionGroup name="list" tag="ul" class="space-y-2">
+          <!-- List -->
+          <TransitionGroup
+            tag="ul"
+            name="list"
+            class="divide-y divide-slate-100 max-h-[650px] overflow-y-auto"
+          >
+
             <li
               v-for="item in recentResults"
               :key="item.id"
-              class="flex items-start gap-3 p-3 rounded-xl border transition-colors"
-              :class="
-                item.response.scan_result === 'SUCCESS'
-                  ? 'border-green-200 bg-green-50'
-                  : item.response.scan_result === 'ALREADY_CHECKED_IN' || item.response.scan_result === 'ALREADY_CHECKED_OUT'
-                  ? 'border-amber-200 bg-amber-50'
-                  : 'border-red-200 bg-red-50'
-              "
+              class="flex gap-4 px-6 py-4 hover:bg-slate-50 transition"
             >
-              <!-- Icon -->
+
+              <!-- Status -->
               <div
-                class="w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center mt-0.5"
-                :class="
-                  item.response.scan_result === 'SUCCESS'
-                    ? 'bg-green-100'
-                    : item.response.scan_result === 'ALREADY_CHECKED_IN' || item.response.scan_result === 'ALREADY_CHECKED_OUT'
-                    ? 'bg-amber-100'
-                    : 'bg-red-100'
-                "
+                class="w-10 h-10 rounded-xl flex items-center justify-center"
+                :class="{
+                  'bg-emerald-50': item.response.scan_result==='SUCCESS',
+                  'bg-amber-50':
+                    item.response.scan_result==='ALREADY_CHECKED_IN' ||
+                    item.response.scan_result==='ALREADY_CHECKED_OUT',
+                  'bg-rose-50':
+                    item.response.scan_result!=='SUCCESS' &&
+                    item.response.scan_result!=='ALREADY_CHECKED_IN' &&
+                    item.response.scan_result!=='ALREADY_CHECKED_OUT'
+                }"
               >
                 <UIcon
                   :name="
-                    item.response.scan_result === 'SUCCESS'
+                    item.response.scan_result==='SUCCESS'
                       ? 'i-heroicons-check'
-                      : item.response.scan_result === 'ALREADY_CHECKED_IN' || item.response.scan_result === 'ALREADY_CHECKED_OUT'
+                      : item.response.scan_result==='ALREADY_CHECKED_IN' ||
+                        item.response.scan_result==='ALREADY_CHECKED_OUT'
                       ? 'i-heroicons-arrow-path'
                       : 'i-heroicons-x-mark'
                   "
-                  class="w-4 h-4"
-                  :class="
-                    item.response.scan_result === 'SUCCESS'
-                      ? 'text-green-600'
-                      : item.response.scan_result === 'ALREADY_CHECKED_IN' || item.response.scan_result === 'ALREADY_CHECKED_OUT'
-                      ? 'text-amber-600'
-                      : 'text-red-600'
-                  "
+                  class="w-5 h-5"
+                  :class="{
+                    'text-emerald-600': item.response.scan_result==='SUCCESS',
+                    'text-amber-600':
+                      item.response.scan_result==='ALREADY_CHECKED_IN' ||
+                      item.response.scan_result==='ALREADY_CHECKED_OUT',
+                    'text-rose-600':
+                      item.response.scan_result!=='SUCCESS' &&
+                      item.response.scan_result!=='ALREADY_CHECKED_IN' &&
+                      item.response.scan_result!=='ALREADY_CHECKED_OUT'
+                  }"
                 />
               </div>
 
-              <!-- Detail -->
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-sm font-bold text-deep-navy truncate">
+              <!-- Info -->
+              <div class="flex-1">
+
+                <div class="flex justify-between items-center">
+
+                  <h4 class="font-semibold text-slate-900">
                     {{ item.response.attendee_display_id }}
-                  </p>
-                  <span class="text-xs text-gray-400 flex-shrink-0">
+                  </h4>
+
+                  <span class="text-xs text-slate-400">
                     {{ relativeTime(item.scanned_at) }}
                   </span>
+
                 </div>
-                <p class="text-xs text-gray-500 mt-0.5">
+
+                <p class="text-sm text-slate-500 mt-1">
                   {{ item.response.attendee_full_name }}
                 </p>
-                <div class="flex items-center gap-1.5 mt-1 flex-wrap">
-                  <UBadge
-                    :color="item.response.scan_result === 'SUCCESS' ? 'green' : item.response.scan_result === 'ALREADY_CHECKED_IN' || item.response.scan_result === 'ALREADY_CHECKED_OUT' ? 'amber' : 'red'"
-                    variant="subtle"
-                    size="xs"
+
+                <div class="flex gap-2 flex-wrap mt-3">
+
+                  <span
+                    class="rounded-lg px-2.5 py-1 text-xs font-semibold"
+                    :class="{
+                      'bg-emerald-100 text-emerald-700':
+                        item.response.scan_result==='SUCCESS',
+                      'bg-amber-100 text-amber-700':
+                        item.response.scan_result==='ALREADY_CHECKED_IN' ||
+                        item.response.scan_result==='ALREADY_CHECKED_OUT',
+                      'bg-rose-100 text-rose-700':
+                        item.response.scan_result!=='SUCCESS' &&
+                        item.response.scan_result!=='ALREADY_CHECKED_IN' &&
+                        item.response.scan_result!=='ALREADY_CHECKED_OUT'
+                    }"
                   >
                     {{ scanResultLabel(item.response.scan_result) }}
-                  </UBadge>
-                  <UBadge v-if="item.response.ticket_code" color="gray" variant="subtle" size="xs" class="font-mono">
+                  </span>
+
+                  <span
+                    v-if="item.response.ticket_code"
+                    class="rounded-lg bg-slate-100 px-2.5 py-1 text-xs text-slate-600 font-mono"
+                  >
                     {{ item.response.ticket_code }}
-                  </UBadge>
-                  <UBadge v-if="item.response.has_outstanding_payments" color="red" variant="subtle" size="xs">
-                    <UIcon name="i-heroicons-exclamation-triangle" class="w-3 h-3 mr-0.5" />
+                  </span>
+
+                  <span
+                    v-if="item.response.has_outstanding_payments"
+                    class="rounded-lg bg-rose-100 text-rose-700 px-2.5 py-1 text-xs font-semibold"
+                  >
                     Unpaid
-                  </UBadge>
+                  </span>
+
                 </div>
+
               </div>
+
             </li>
+
           </TransitionGroup>
+
         </div>
+
       </div>
+
     </div>
   </EventManagementLayout>
 </template>
@@ -204,12 +339,11 @@ function scanResultLabel(result: string): string {
 </script>
 
 <style scoped>
-/* Recent scan list entrance animation */
 .list-enter-active {
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .list-enter-from {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateY(-6px);
 }
 </style>
