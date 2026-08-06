@@ -39,8 +39,16 @@
                 rows="3"
                 placeholder="Describe the purpose and scope of this budget proposal..."
                 required
+                minlength="10"
                 class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                :class="{ 'border-red-300': form.proposal_description && form.proposal_description.trim().length < 10 }"
               />
+              <p
+                v-if="form.proposal_description && form.proposal_description.trim().length < 10"
+                class="text-xs text-red-500 mt-1"
+              >
+                Description must be at least 10 characters ({{ form.proposal_description.trim().length }}/10)
+              </p>
             </div>
 
             <div class="flex gap-2 pt-2">
@@ -89,7 +97,7 @@ const form = reactive({
 
 const isSubmitting = ref(false)
 const isFormValid = computed(
-  () => form.proposal_title.trim().length > 0 && form.proposal_description.trim().length > 0
+  () => form.proposal_title.trim().length > 0 && form.proposal_description.trim().length > 10
 )
 
 const createMutation = useCreateBudgetProposal()
