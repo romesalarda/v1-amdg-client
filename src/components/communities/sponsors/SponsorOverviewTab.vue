@@ -20,35 +20,74 @@
 		</div>
 
 		<!-- Charts row -->
-		<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-			<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80">
-				<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Top Inbound Sponsors</p>
+		<div class="grid grid-cols-1 lg:grid-cols-5 gap-4">
+			<!-- Donut: spans 2/5 columns, legend enabled so slices are identifiable -->
+			<div class="lg:col-span-2 p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80 flex flex-col">
+				<div>
+					<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Top Inbound Sponsors</p>
+					<p class="mt-0.5 text-xs text-deep-navy/40">Share of committed revenue</p>
+				</div>
 				<div v-if="isLoadingSponsorFlow" class="mt-4 space-y-2">
 					<USkeleton class="h-6 w-full" />
 					<USkeleton class="h-6 w-5/6" />
+					<USkeleton class="h-6 w-4/6" />
 				</div>
-				<div v-else class="mt-4 h-[220px]">
-					<PieChart :height="'220px'" :data="inboundSponsorChart" :donut="true" :show-legend="false" />
+				<div v-else-if="inboundSponsorChart.length === 0" class="flex flex-1 items-center justify-center py-10">
+					<p class="text-sm text-deep-navy/40 font-semibold">No data yet</p>
+				</div>
+				<div v-else class="mt-4 flex-1 min-h-[300px]">
+					<PieChart :height="'300px'" :data="inboundSponsorChart" :donut="true" :show-legend="true" />
 				</div>
 			</div>
-			<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80">
-				<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Inbound Sponsors by Event</p>
-				<div v-if="isLoadingSponsorFlow" class="mt-4 space-y-2">
-					<USkeleton class="h-6 w-full" />
-					<USkeleton class="h-6 w-5/6" />
+
+			<!-- Horizontal bar charts: span 3/5 columns, stacked -->
+			<div class="lg:col-span-3 flex flex-col gap-4">
+				<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80 flex flex-col flex-1">
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Inbound Sponsors by Event</p>
+						<p class="mt-0.5 text-xs text-deep-navy/40">Number of sponsors funding each event</p>
+					</div>
+					<div v-if="isLoadingSponsorFlow" class="mt-4 space-y-2">
+						<USkeleton class="h-6 w-full" />
+						<USkeleton class="h-6 w-5/6" />
+					</div>
+					<div v-else-if="inboundEventChart.length === 0" class="flex flex-1 items-center justify-center py-6">
+						<p class="text-sm text-deep-navy/40 font-semibold">No data yet</p>
+					</div>
+					<div v-else class="mt-4 flex-1 min-h-[130px]">
+						<BarChart
+							:height="'130px'"
+							:data="inboundEventChart"
+							:color="'#0f766e'"
+							:horizontal="true"
+							:show-values="true"
+							value-unit="sponsors"
+						/>
+					</div>
 				</div>
-				<div v-else class="mt-4 h-[220px]">
-					<BarChart :height="'220px'" :data="inboundEventChart" :color="'#0f766e'" />
-				</div>
-			</div>
-			<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80">
-				<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Outbound Sponsors by Event</p>
-				<div v-if="isLoadingSponsorFlow" class="mt-4 space-y-2">
-					<USkeleton class="h-6 w-full" />
-					<USkeleton class="h-6 w-5/6" />
-				</div>
-				<div v-else class="mt-4 h-[220px]">
-					<BarChart :height="'220px'" :data="outboundEventChart" :color="'#1d4ed8'" />
+
+				<div class="p-5 rounded-2xl border-2 border-deep-navy/10 bg-white/80 flex flex-col flex-1">
+					<div>
+						<p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50">Outbound Sponsors by Event</p>
+						<p class="mt-0.5 text-xs text-deep-navy/40">Events you are sponsoring</p>
+					</div>
+					<div v-if="isLoadingSponsorFlow" class="mt-4 space-y-2">
+						<USkeleton class="h-6 w-full" />
+						<USkeleton class="h-6 w-5/6" />
+					</div>
+					<div v-else-if="outboundEventChart.length === 0" class="flex flex-1 items-center justify-center py-6">
+						<p class="text-sm text-deep-navy/40 font-semibold">No data yet</p>
+					</div>
+					<div v-else class="mt-4 flex-1 min-h-[130px]">
+						<BarChart
+							:height="'130px'"
+							:data="outboundEventChart"
+							:color="'#1d4ed8'"
+							:horizontal="true"
+							:show-values="true"
+							value-unit="sponsors"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -5,11 +5,11 @@
       <div class="lg:col-span-8 space-y-8">
 
         <!-- Tabs -->
-        <div class="flex gap-1 p-1 bg-mist-blue/60 rounded-xl border border-deep-navy/10">
+        <div class="flex gap-1 p-1 bg-blue-600 rounded-2xl shadow-drawn dark:shadow-navy-900/20 overflow-hidden border border-deep-navy/10">
           <button
             @click="activeTab = 'staff'"
             class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors"
-            :class="activeTab === 'staff' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-800'"
+            :class="activeTab === 'staff' ? 'bg-white text-primary shadow-sm' : 'text-white hover:text-navy-800'"
           >
             <span class="material-symbols-outlined text-sm">group</span>
             Staff Members
@@ -21,7 +21,7 @@
           <button
             @click="activeTab = 'invites'"
             class="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors"
-            :class="activeTab === 'invites' ? 'bg-white text-primary shadow-sm' : 'text-navy-500 hover:text-navy-800'"
+            :class="activeTab === 'invites' ? 'bg-white text-primary shadow-sm' : 'text-white hover:text-navy-800'"
           >
             <span class="material-symbols-outlined text-sm">mail</span>
             Invites

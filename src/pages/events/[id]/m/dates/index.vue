@@ -131,7 +131,7 @@
           <div class="flex items-center justify-between px-6 py-4 border-b border-navy-50">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-primary">show_chart</span>
-              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Visualization</h2>
+              <h2 class="text-sm font-black text-primary dark:text-white uppercase tracking-widest">Visualisation</h2>
             </div>
             <div class="flex items-center gap-2 bg-navy-50 rounded-lg p-1">
               <button
