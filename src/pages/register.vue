@@ -9,10 +9,10 @@
       <div class="hidden w-1/2 pr-12 lg:block">
         <p class="mb-4 text-xs uppercase tracking-[0.4em] text-slate-200/80">AMDG Portal</p>
         <h1 class="max-w-md text-5xl font-serif leading-tight text-white">
-          Launch your account and serve with clarity.
+          {{ isCommunityInvite ? 'Create your account to join this community.' : 'Launch your account and serve with clarity.' }}
         </h1>
         <p class="mt-6 max-w-md text-base leading-relaxed text-slate-200/80">
-          Set up your portal access and start managing registrations, outreach, and parish coordination from one place.
+          {{ isCommunityInvite ? 'You\'ve been invited to join a community on AMDG. Create a free account first, and you\'ll be taken straight there.' : 'Set up your portal access and start managing registrations, outreach, and parish coordination from one place.' }}
         </p>
       </div>
 
@@ -20,14 +20,14 @@
         <div class="mx-auto w-full max-w-xl rounded-3xl border border-white/20 bg-white/10 p-8 shadow-2xl backdrop-blur-xl sm:p-10">
           <div class="text-center">
             <div class="mx-auto mb-4 inline-flex rounded-full border border-white/20 bg-white/10 p-1 text-xs font-semibold">
-              <NuxtLink to="/login" class="rounded-full px-4 py-1.5 text-slate-200/80 transition-colors hover:text-white">
+              <NuxtLink :to="redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'" class="rounded-full px-4 py-1.5 text-slate-200/80 transition-colors hover:text-white">
                 Sign in
               </NuxtLink>
               <span class="rounded-full bg-white px-4 py-1.5 text-slate-900">Create account</span>
             </div>
 
             <h2 class="text-3xl font-serif text-white">Create your AMDG account</h2>
-            <p class="mt-2 text-sm text-slate-200/80">Already have an account? <NuxtLink to="/login" class="font-semibold text-white transition-colors hover:text-slate-100">Sign in</NuxtLink></p>
+            <p class="mt-2 text-sm text-slate-200/80">Already have an account? <NuxtLink :to="redirectTo ? `/login?redirect=${encodeURIComponent(redirectTo)}` : '/login'" class="font-semibold text-white transition-colors hover:text-slate-100">Sign in</NuxtLink></p>
           </div>
 
           <form class="mt-8 space-y-6" @submit.prevent="handleRegister">
@@ -205,9 +205,17 @@ useHead({
 const { mutateAsync: createUserAsync } = useCreateUser()
 const auth = useAuthStore()
 const toast = useToast()
+const route = useRoute()
 
 const loading = ref(false)
 const agreedToTerms = ref(false)
+
+const redirectTo = computed(() => route.query.redirect as string | undefined)
+// True when the user arrived via a shareable community invite link
+const isCommunityInvite = computed(() => {
+  const r = redirectTo.value || ''
+  return r.includes('/communities/') && r.includes('/invite')
+})
 
 // Setup vee-validate with Zod schema
 const { handleSubmit } = useForm({
@@ -262,7 +270,7 @@ const handleRegister = handleSubmit(async (values) => {
       })
       
       if (auth.isAuthenticated) {
-        navigateTo('/my-dashboard')
+        navigateTo(redirectTo.value || '/my-dashboard')
       }
     } catch (loginError) {
       // If auto-login fails, redirect to login page
@@ -271,7 +279,8 @@ const handleRegister = handleSubmit(async (values) => {
         description: 'Account created successfully. Please sign in.',
         color: 'blue',
       })
-      navigateTo('/login')
+      const loginPath = redirectTo.value ? `/login?redirect=${encodeURIComponent(redirectTo.value)}` : '/login'
+      navigateTo(loginPath)
     }
   } catch (error: any) {
     // Handle registration errors
@@ -319,6 +328,7 @@ const handleGoogleSignup = async () => {
   }
 
   loading.value = true
+  // Google OAuth callback cannot pass a redirect param — handled post-auth in the callback page if needed
   try {
     await auth.loginWithGoogle()
   } catch (error) {

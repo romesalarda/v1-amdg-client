@@ -21,7 +21,7 @@
           <div class="text-center">
             <div class="mx-auto mb-4 inline-flex rounded-full border border-white/20 bg-white/10 p-1 text-xs font-semibold">
               <span class="rounded-full bg-white px-4 py-1.5 text-slate-900">Sign in</span>
-              <NuxtLink to="/register" class="rounded-full px-4 py-1.5 text-slate-200/80 transition-colors hover:text-white">
+              <NuxtLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(route.query.redirect as string)}` : '/register'" class="rounded-full px-4 py-1.5 text-slate-200/80 transition-colors hover:text-white">
                 Create account
               </NuxtLink>
             </div>
@@ -29,7 +29,7 @@
             <h2 class="text-3xl font-serif text-white">Sign in to AMDG</h2>
             <p class="mt-2 text-sm text-slate-200/80">
               Don't have an account?
-              <NuxtLink to="/register" class="ml-1 font-semibold text-white transition-colors hover:text-slate-100">Create one</NuxtLink>
+              <NuxtLink :to="route.query.redirect ? `/register?redirect=${encodeURIComponent(route.query.redirect as string)}` : '/register'" class="ml-1 font-semibold text-white transition-colors hover:text-slate-100">Create one</NuxtLink>
             </p>
           </div>
 
