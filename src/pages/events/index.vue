@@ -174,8 +174,8 @@
         <!-- <span class="bg-gold text-deep-navy px-3 py-1 rounded-sm text-[12px] font-bold uppercase tracking-widest mb-4">
           Featured Experience
         </span> -->
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-4 max-w-3xl leading-tight tracking-tight">
-          {{ featuredEvent.title }}
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-barbara mb-4 max-w-3xl leading-tight tracking-tight" style="letter-spacing: 0.5px;">
+          {{ featuredEvent.title.toUpperCase() }}
         </h1>
         <p v-if="featuredEvent.start_datetime" class="text-white/80 font-bold text-sm mb-8 uppercase tracking-wider">
           {{ formatEventDate(featuredEvent.start_datetime) }}
