@@ -91,6 +91,7 @@ export default <Partial<Config>>{
         'body-md': ['Inter', ...defaultTheme.fontFamily.sans],
         'body-sm': ['Inter', ...defaultTheme.fontFamily.sans],
         'label-bold': ['Inter', ...defaultTheme.fontFamily.sans],
+        'barbara': ['Barbara', ...defaultTheme.fontFamily.sans],
       },
       fontSize: {
         'display-lg': ['3rem', { lineHeight: '1.2', letterSpacing: '-0.02em', fontWeight: '800' }],

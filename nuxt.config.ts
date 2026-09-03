@@ -19,7 +19,7 @@ export default defineNuxtConfig({
     classSuffix: '',
     storageKey: 'nuxt-color-mode'
   },
-  css: ['~/assets/css/main.css'],
+  css: ['~/assets/css/main.css',],
   runtimeConfig: {
     public: {
       apiUrl: import.meta.env.NUXT_PUBLIC_API_URL || 'https://api.amdgevents.co.uk',

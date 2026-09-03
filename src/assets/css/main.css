@@ -340,4 +340,11 @@
     -webkit-font-feature-settings: 'liga';
     -webkit-font-smoothing: antialiased;
   }
+
+@font-face {
+  font-family: 'Barbara';
+  src: url('../fonts/BARABARA-FINAL.ttf.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
 }
