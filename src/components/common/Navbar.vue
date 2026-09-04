@@ -253,7 +253,7 @@ const { data: profileData, isLoading: isProfileLoading } = useMyProfile()
 // Mobile nav items
 const navItems = [
   { to: '/events', label: 'Events', icon: 'i-heroicons-outline-calendar' },
-  ...(userData.value && profileData.value
+  ...(userData.value
     ? [{ to: '/my-dashboard', label: 'Dashboard', icon: 'i-heroicons-outline-squares-2x2' }]
     : []),
   { to: '/communities', label: 'Communities', icon: 'i-heroicons-outline-users' },

@@ -6,8 +6,8 @@
       <p class="text-xs font-semibold tracking-[0.3em] text-cyan-300/80 uppercase mb-4">
         Error
       </p>
-      <h1 class="text-8xl font-black text-white/10 leading-none select-none">
-        Welp.
+      <h1 class="text-7xl font-barbara text-white leading-none select-none">
+        SO LIKE...
       </h1>
       <h2 class="-mt-6 text-2xl sm:text-3xl font-bold text-white mt-5">
         Something went wrong
@@ -37,4 +37,5 @@ const props = defineProps({
 })
 
 const handleError = () => clearError({ redirect: '/' })
+
 </script>

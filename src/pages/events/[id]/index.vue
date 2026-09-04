@@ -102,7 +102,7 @@
             </span>
 
             <!-- Main Title -->
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-black text-white drop-shadow-2xl leading-[0.9] tracking-tighter mb-6 uppercase">
+            <h1 class="text-5xl md:text-7xl lg:text-8xl font-barbara text-white drop-shadow-2xl leading-[0.9] tracking-wider mb-6 uppercase">
               {{ event.title }}
             </h1>
 

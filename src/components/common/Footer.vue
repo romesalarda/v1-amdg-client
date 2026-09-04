@@ -3,7 +3,7 @@
     <div class="max-container-fluid flex flex-col md:flex-row justify-between items-start gap-12">
       <!-- Brand Section -->
       <div class="max-w-xs">
-        <span class="text-2xl font-black tracking-tighter uppercase mb-6 block">AMDG</span>
+        <span class="text-2xl font-barbara tracking-widest uppercase mb-6 block">AMDG</span>
         <p class="text-[10px] text-white/40 leading-relaxed font-bold tracking-widest uppercase">
           Events Management System for Catholic Events
         </p>
@@ -14,7 +14,7 @@
 
         <!-- Organization -->
         <div>
-          <h4 class="font-black mb-6 uppercase tracking-[0.3em] text-[9px] text-white/30">Organization</h4>
+          <h4 class="font-black mb-6 uppercase tracking-[0.3em] text-[9px] text-white/30">Organisation</h4>
           <ul class="space-y-4 text-[10px] font-bold tracking-widest uppercase text-white/60">
             <li><NuxtLink to="/events" class="hover:text-blue-300 transition-colors no-underline">Events</NuxtLink></li>
             <li><NuxtLink to="/communities" class="hover:text-blue-300 transition-colors no-underline">Communities</NuxtLink></li>
