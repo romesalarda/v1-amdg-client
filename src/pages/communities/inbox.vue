@@ -23,15 +23,17 @@
         </div>
 
         <!-- Stats Row -->
-        <div class="grid grid-cols-3 gap-4 mt-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
           <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
             <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Community Invites</p>
             <p class="text-2xl font-bold text-white mt-1">{{ orgInvites.length }}</p>
           </div>
+
           <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
             <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Leader Invites</p>
             <p class="text-2xl font-bold text-white mt-1">{{ leaderInvites.length }}</p>
           </div>
+
           <div class="bg-white/10 backdrop-blur rounded-lg px-5 py-4 border border-white/20">
             <p class="text-[10px] font-bold uppercase tracking-widest text-blue-200">Staff Invites</p>
             <p class="text-2xl font-bold text-white mt-1">{{ staffInvites.length }}</p>

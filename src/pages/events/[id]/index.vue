@@ -102,7 +102,15 @@
             </span>
 
             <!-- Main Title -->
-            <h1 class="text-5xl md:text-7xl lg:text-8xl font-barbara text-white drop-shadow-2xl leading-[0.9] tracking-wider mb-6 uppercase">
+            <h1
+              class="
+                text-4xl leading-tight
+                sm:text-5xl sm:leading-[0.9]
+                md:text-7xl lg:text-8xl
+                font-barbara text-white drop-shadow-2xl tracking-wider mb-6 uppercase
+                break-words
+              "
+            >
               {{ event.title }}
             </h1>
 
@@ -397,16 +405,26 @@
                 <button
                   v-if="!isPreview"
                   :disabled="countdown.isExpired || !countdownDisplay.isOpen || !event.can_participants_register || isPreview || (event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0)"
-                  class="w-full bg-deep-navy hover:bg-deep-navy/90 text-white py-5 rounded-xl font-black text-lg uppercase tracking-widest transition-all shadow-xl hover:translate-y-[-2px] flex items-center justify-center gap-3 border-2 border-deep-navy disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
+                  class="
+                    w-full py-5 rounded-xl font-black transition-all shadow-xl flex items-center justify-center gap-3 border-2
+                    bg-deep-navy hover:bg-deep-navy/90 text-white border-deep-navy
+                    disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0
+
+                    text-base tracking-normal
+                    sm:text-lg sm:tracking-widest
+                  "
                   @click="openRegistrationModal"
                 >
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
+                  <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z" />
                   </svg>
+
                   <span v-if="countdown.isExpired">Registration Closed</span>
                   <span v-else-if="event.user_remaining_registration_slots != null && event.user_remaining_registration_slots <= 0">Unavailable</span>
                   <span v-else>Register Now</span>
                 </button>
+
                 <NuxtLink
                   v-if="isPreview"
                   :href="`/events/${event.url_safe_title}/register?tickets=1&mode=multiple&uia=false&preview=true`"

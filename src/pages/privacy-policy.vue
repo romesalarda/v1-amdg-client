@@ -9,7 +9,7 @@
         <div class="absolute inset-0 bg-gradient-to-b from-deep-navy/80 to-deep-navy/95" />
       </div>
       <div class="relative z-10 text-center px-4">
-        <h1 class="text-4xl md:text-6xl font-black text-white uppercase tracking-tight drop-shadow-md">
+        <h1 class="text-4xl md:text-6xl font-barbara text-white uppercase tracking-wider drop-shadow-md">
           Legal &amp; Privacy
         </h1>
         <p class="text-lg text-white/80 mt-4 max-w-2xl mx-auto font-medium leading-relaxed">

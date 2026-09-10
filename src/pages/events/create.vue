@@ -3,16 +3,26 @@
     <!-- Back to Dashboard - Fixed Left -->
     <NuxtLink 
       to="/my-dashboard" 
-      class="fixed top-20 left-6 z-50 inline-flex items-center gap-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-primary/10 text-sm text-navy-600 hover:text-primary hover:border-primary/30 transition-all group"
+      class="
+        fixed z-50 inline-flex items-center gap-1.5
+        bg-white/90 backdrop-blur-sm rounded-lg border border-primary/10 shadow-sm
+        text-xs text-navy-600 transition-all group
+
+        px-2.5 py-1.5 top-16 left-3
+        sm:px-4 sm:py-2.5 sm:top-20 sm:left-6 sm:text-sm
+      "
     >
-      <span class="material-symbols-outlined text-lg group-hover:-translate-x-1 transition-transform">arrow_back</span>
-      <span class="font-semibold">Dashboard</span>
+      <span class="material-symbols-outlined text-base sm:text-lg group-hover:-translate-x-1 transition-transform">
+        arrow_back
+      </span>
+      <span class="font-semibold hidden xs:inline sm:inline">Dashboard</span>
     </NuxtLink>
+
 
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8 w-full">
       <!-- Compact Header -->
       <div class="mb-4 text-center">
-        <h1 class="text-4xl font-black text-navy-900 uppercase tracking-widest">Create Event</h1>
+        <h1 class="text-4xl font-barbara text-navy-900 uppercase tracking-widest">Create an Event</h1>
       </div>
 
       <!-- Form Content -->
@@ -425,40 +435,67 @@
             Cancel
           </button>
           
-          <div class="flex gap-2">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               v-if="currentStep < steps.length - 1"
               type="button"
               @click="saveDraft"
               :disabled="isSubmitting"
-              class="rounded-xl border border-navy-300 bg-white px-4 py-2 text-[10px] font-black uppercase tracking-widest text-navy-700 transition-all hover:bg-navy-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              class="
+                rounded-xl border border-navy-300 bg-white px-4 py-2
+                text-[11px] sm:text-[10px]
+                font-black uppercase tracking-wide sm:tracking-widest
+                text-navy-700 transition-all hover:bg-navy-50
+                disabled:opacity-50 disabled:cursor-not-allowed
+                flex items-center justify-center gap-1.5
+              "
             >
               <span class="material-symbols-outlined text-sm">draft</span>
               Save Draft
             </button>
-            
+
             <button
               v-if="currentStep < steps.length - 1"
               type="button"
               @click="nextStep"
-              class="rounded-xl bg-primary px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 shadow-lg shadow-primary/20 flex items-center gap-1.5"
+              class="
+                rounded-xl bg-primary px-5 py-2
+                text-[11px] sm:text-[10px]
+                font-black uppercase tracking-wide sm:tracking-widest
+                text-white transition-all hover:bg-navy-600
+                shadow-lg shadow-primary/20
+                flex items-center justify-center gap-1.5
+              "
             >
               Next
               <span class="material-symbols-outlined text-sm">arrow_forward</span>
             </button>
-            
+
             <button
               v-else
               type="button"
               @click="handleStepSubmit"
               :disabled="isSubmitting"
-              class="rounded-xl bg-primary px-5 py-2 text-[10px] font-black uppercase tracking-widest text-white transition-all hover:bg-navy-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20 flex items-center gap-1.5"
+              class="
+                rounded-xl bg-primary px-5 py-2
+                text-[11px] sm:text-[10px]
+                font-black uppercase tracking-wide sm:tracking-widest
+                text-white transition-all hover:bg-navy-600
+                disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-lg shadow-primary/20
+                flex items-center justify-center gap-1.5
+              "
             >
-              <span v-if="isSubmitting" class="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-              <span v-else class="material-symbols-outlined text-sm">check_circle</span>
+              <span v-if="isSubmitting" class="material-symbols-outlined text-sm animate-spin">
+                progress_activity
+              </span>
+              <span v-else class="material-symbols-outlined text-sm">
+                check_circle
+              </span>
               {{ isSubmitting ? 'Creating...' : 'Create Event' }}
             </button>
           </div>
+
         </div>
       </div>
     </div>

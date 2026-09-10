@@ -3,13 +3,24 @@
     <!-- Sticky top header: barbara stays here, and only here -->
     <div
       :class="[
-        'w-full bg-blue-600 sticky top-10 z-30 px-6 py-6 transition-shadow duration-300',
+        'w-full bg-blue-600 sticky top-10 z-30 transition-shadow duration-300',
+        'px-4 py-3 sm:px-6 sm:py-6',
         scrolled ? 'shadow-lg shadow-primary/20' : 'shadow-none',
       ]"
     >
-      <h1 class="font-barbara text-3xl text-white tracking-widest mb-1">PROFILE SETTINGS</h1>
-      <p class="text-sm text-white/75">Manage your account information and preferences</p>
+      <h1 class="
+        font-barbara text-xl tracking-normal
+        sm:text-3xl sm:tracking-widest
+        text-white mb-1
+      ">
+        PROFILE SETTINGS
+      </h1>
+
+      <p class="text-xs sm:text-sm text-white/75">
+        Manage your account information and preferences
+      </p>
     </div>
+
 
     <div class="max-w-6xl mx-auto px-4 md:px-6 pb-28">
       <!-- Loading State -->

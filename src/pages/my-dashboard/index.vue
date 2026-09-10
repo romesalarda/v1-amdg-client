@@ -308,16 +308,20 @@
                     </div>
                   </div>
                   
-                  <div class="flex items-center justify-between mt-4">
-                    <div class="flex items-center gap-2">
-                      <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Staff Role</span>
-                      <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[8px] font-black uppercase tracking-wider border border-deep-navy/5">Leadership</span>
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-4 gap-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                      <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[10px] font-black uppercase tracking-wider border border-deep-navy/5">
+                        Staff Role
+                      </span>
+                      <span class="px-2.5 py-1 rounded-md bg-mist-blue text-deep-navy/60 text-[10px] font-black uppercase tracking-wider border border-deep-navy/5">
+                        Leadership
+                      </span>
                     </div>
-                    <!-- <button @click.stop="router.push(`/events/${event.url_safe_title}/m/dashboard`)" class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4">Manage Event</button> -->
+
                     <NuxtLink 
-                      :to="`/events/${event.url_safe_title}/m/dashboard`" 
+                      :to="`/events/${event.url_safe_title}/m/dashboard`"
                       target="_blank"
-                      class="text-[10px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4"
+                      class="text-[11px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4 text-right sm:text-left"
                     >
                       Manage Event
                     </NuxtLink>
