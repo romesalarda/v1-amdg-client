@@ -48,8 +48,8 @@ export function useBulkDeleteCheckInLogs() {
       const response = await checkinsBulkDeleteLogsDestroy({
         body,
         throwOnError: true,
-      })
-      return response.data
+      } as any)
+      return response.data as unknown as BulkDeleteResult
     } catch (err: any) {
       error.value = err?.data?.detail ?? err?.message ?? 'Failed to delete logs.'
       throw err
