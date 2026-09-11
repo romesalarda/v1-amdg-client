@@ -1,3 +1,5 @@
+import { checkinsBulkDeleteLogsDestroy } from '~/api/sdk.gen'
+
 export type BulkDeleteMode = 'all' | 'specific' | 'range'
 
 export interface BulkDeleteScope {
@@ -43,10 +45,11 @@ export function useBulkDeleteCheckInLogs() {
     error.value = null
     try {
       const body = buildBulkDeleteLogsBody(eventId, scope)
-      return await $fetch<BulkDeleteResult>('/api/checkins/bulk-delete-logs/', {
-        method: 'DELETE',
+      const response = await checkinsBulkDeleteLogsDestroy({
         body,
+        throwOnError: true,
       })
+      return response.data
     } catch (err: any) {
       error.value = err?.data?.detail ?? err?.message ?? 'Failed to delete logs.'
       throw err

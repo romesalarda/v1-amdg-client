@@ -426,7 +426,7 @@
 
 <script setup lang="ts">
 import type { CheckInResponse } from '~/api/types.gen'
-import { checkinsList } from '~/api/sdk.gen'
+import { checkinsBulkStatusCreate, checkinsList } from '~/api/sdk.gen'
 import AttendeeRosterTable from '~/components/attendees/AttendeeRosterTable.vue'
 import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 import { useBulkDeleteCheckInLogs, type BulkDeleteMode } from '~/composables/attendee/useBulkDeleteCheckInLogs'
@@ -640,12 +640,12 @@ async function executeBulkAction() {
   bulkActionLoading.value = true
   try {
     if (pendingBulkAction.value === 'check_in' || pendingBulkAction.value === 'check_out') {
-      await $fetch('/api/checkins/bulk-status/', {
-        method: 'POST',
+      await checkinsBulkStatusCreate({
         body: {
           event: props.eventId,
           action: pendingBulkAction.value === 'check_in' ? 'CHECK_IN' : 'CHECK_OUT',
-        },
+        } as any,
+        throwOnError: true,
       })
       toast.add({
         title: pendingBulkAction.value === 'check_in' ? 'Bulk check-in complete' : 'Bulk check-out complete',
