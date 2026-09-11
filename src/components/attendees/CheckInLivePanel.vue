@@ -33,220 +33,232 @@
       </div>
     </div>
 
-    <!-- Ticket card -->
-    <div
-      v-else
-      class="relative bg-white rounded-2xl shadow-[0_8px_24px_-8px_rgba(15,23,42,0.25)] overflow-hidden -rotate-[0.4deg] transition-transform duration-200 hover:rotate-0"
-    >
-      <!-- paper grain, faint so it never fights the content -->
+    <!-- Card stack: ghost layers behind + the real, transitioning ticket card -->
+    <div v-else class="relative" style="perspective: 1800px;">
+      <!-- decorative peeking stack, purely cosmetic -->
       <div
-        class="pointer-events-none absolute inset-0 z-0 opacity-[0.4]"
-        style="background-image: repeating-linear-gradient(90deg, rgba(15,23,42,0.02) 0px, rgba(15,23,42,0.02) 1px, transparent 1px, transparent 4px);"
+        v-for="n in ghostLayers"
+        :key="`ghost-${n}`"
+        class="pointer-events-none absolute inset-0 bg-white rounded-2xl border border-deep-navy/5 shadow-[0_4px_16px_-6px_rgba(15,23,42,0.18)]"
+        :style="ghostStyle(n)"
       />
 
-      <!-- Ribbon: status band, printed like a grosgrain stripe with a pinked bottom edge -->
-      <div class="relative z-10">
+      <Transition :name="transitionName">
         <div
-          class="px-4 py-2.5 flex items-center gap-2 text-xs font-black uppercase tracking-widest relative overflow-hidden"
-          :class="theme.ribbon"
+          :key="itemKey"
+          class="relative bg-white rounded-2xl shadow-[0_8px_24px_-8px_rgba(15,23,42,0.25)] overflow-hidden -rotate-[0.4deg] transition-transform duration-200 hover:rotate-0 will-change-transform"
         >
+          <!-- paper grain, faint so it never fights the content -->
           <div
-            class="absolute inset-0 opacity-20"
-            style="background-image: repeating-linear-gradient(-45deg, transparent 0px, transparent 5px, rgba(255,255,255,0.6) 5px, rgba(255,255,255,0.6) 6px);"
+            class="pointer-events-none absolute inset-0 z-0 opacity-[0.4]"
+            style="background-image: repeating-linear-gradient(90deg, rgba(15,23,42,0.02) 0px, rgba(15,23,42,0.02) 1px, transparent 1px, transparent 4px);"
           />
-          <UIcon :name="resultIcon" class="w-4 h-4 relative" />
-          <span class="relative">{{ resultLabel }}</span>
-        </div>
-        <!-- pinked edge under the ribbon -->
-        <div
-          class="h-2 w-full"
-          :class="theme.ribbon"
-          style="clip-path: polygon(0% 0%, 100% 0%, 100% 40%, 96.15% 100%, 92.3% 40%, 88.45% 100%, 84.6% 40%, 80.75% 100%, 76.9% 40%, 73.05% 100%, 69.2% 40%, 65.35% 100%, 61.5% 40%, 57.65% 100%, 53.8% 40%, 49.95% 100%, 46.1% 40%, 42.25% 100%, 38.4% 40%, 34.55% 100%, 30.7% 40%, 26.85% 100%, 23% 40%, 19.15% 100%, 15.3% 40%, 11.45% 100%, 7.6% 40%, 3.75% 100%, 0% 40%);"
-        />
-      </div>
 
-      <!-- Main panel -->
-      <div class="relative z-10 p-5 space-y-4">
-        <!-- Attendee -->
-        <div class="flex items-start gap-3">
-          <div
-            class="w-14 h-14 rounded-full bg-deep-navy/10 flex items-center justify-center flex-shrink-0 font-black text-xl uppercase ring-2 ring-white ring-offset-2"
-            :class="[theme.accent, theme.ringOffset]"
-          >
-            <span v-if="attendeeDetails">{{ attendeeInitials }}</span>
-            <UIcon v-else name="i-heroicons-user" class="w-7 h-7 text-deep-navy/40" />
-          </div>
-          <div class="min-w-0 flex-1">
-            <template v-if="attendeeLoading">
-              <div class="h-6 w-40 bg-gray-100 rounded animate-pulse mb-1.5" />
-              <div class="h-3.5 w-24 bg-gray-100 rounded animate-pulse" />
-            </template>
-            <template v-else>
-              <p class="text-2xl font-black text-deep-navy leading-tight">
-                {{ attendeeDetails?.full_name ?? currentItem.attendee_display_id }}
-              </p>
-              <p class="text-xs text-gray-500 font-mono mt-0.5 tracking-wide">{{ currentItem.attendee_display_id }}</p>
-            </template>
-          </div>
-        </div>
-
-        <!-- Enriched attendee details row -->
-        <div v-if="attendeeDetails && !attendeeLoading" class="grid grid-cols-2 gap-2 text-xs">
-          <div v-if="attendeeDetails.email" class="flex items-center gap-1.5 text-gray-500 min-w-0 col-span-2">
-            <UIcon name="i-heroicons-envelope" class="w-3.5 h-3.5 flex-shrink-0" />
-            <span class="truncate">{{ attendeeDetails.email }}</span>
-          </div>
-          <div v-if="attendeeDetails.age" class="flex items-center gap-1.5">
-            <UIcon name="i-heroicons-cake" class="w-3.5 h-3.5 flex-shrink-0 text-gray-500" />
-            <span
-              class="font-semibold text-sm"
-              :class="attendeeDetails.is_minor ? 'text-amber-700' : 'text-gray-700'"
+          <!-- Ribbon: status band, printed like a grosgrain stripe with a pinked bottom edge -->
+          <div class="relative z-10">
+            <div
+              class="px-4 py-2.5 flex items-center gap-2 text-xs font-black uppercase tracking-widest relative overflow-hidden"
+              :class="theme.ribbon"
             >
-              Age {{ attendeeDetails.age }}
-            </span>
-            <UBadge v-if="attendeeDetails.is_minor" color="amber" variant="solid" size="xs" class="ml-0.5">
-              <UIcon name="i-heroicons-exclamation-triangle" class="w-3 h-3 mr-0.5" />
-              Minor
-            </UBadge>
-          </div>
-          <div v-if="attendeeDetails.area_from_name ?? currentItem.area_from" class="flex items-center gap-1.5 text-gray-500">
-            <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 flex-shrink-0" />
-            <span class="text-sm font-medium text-gray-700 truncate">{{ attendeeDetails.area_from_name ?? currentItem.area_from }}</span>
-          </div>
-        </div>
-        <p v-else-if="!attendeeDetails && currentItem.area_from && !attendeeLoading" class="text-sm text-gray-500">
-          <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 inline-block mr-1" />
-          {{ currentItem.area_from }}
-        </p>
-
-        <!-- Medical / Dietary / Accessibility highlights -->
-        <template v-if="attendeeDetails && !attendeeLoading">
-          <div
-            v-if="medicalConditions.length"
-            class="flex items-start gap-2 bg-red-50 border border-red-300 rounded-lg p-3"
-          >
-            <UIcon name="i-heroicons-heart" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
-            <div class="min-w-0">
-              <p class="text-xs font-black text-red-700 uppercase tracking-wide mb-1">Medical Conditions</p>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="mc in medicalConditions"
-                  :key="mc.id"
-                  class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded-full"
-                >
-                  {{ mc.condition_details?.label ?? mc.id }}
-                </span>
-              </div>
-              <p v-if="medicalConditions.some(m => m.details || m.notes)" class="text-xs text-red-600 mt-1 italic">
-                {{ medicalConditions.map(m => m.details || m.notes).filter(Boolean).join(' · ') }}
-              </p>
+              <div
+                class="absolute inset-0 opacity-20"
+                style="background-image: repeating-linear-gradient(-45deg, transparent 0px, transparent 5px, rgba(255,255,255,0.6) 5px, rgba(255,255,255,0.6) 6px);"
+              />
+              <UIcon :name="resultIcon" class="w-4 h-4 relative" />
+              <span class="relative">{{ resultLabel }}</span>
             </div>
+            <!-- pinked edge under the ribbon -->
+            <div
+              class="h-2 w-full"
+              :class="theme.ribbon"
+              style="clip-path: polygon(0% 0%, 100% 0%, 100% 40%, 96.15% 100%, 92.3% 40%, 88.45% 100%, 84.6% 40%, 80.75% 100%, 76.9% 40%, 73.05% 100%, 69.2% 40%, 65.35% 100%, 61.5% 40%, 57.65% 100%, 53.8% 40%, 49.95% 100%, 46.1% 40%, 42.25% 100%, 38.4% 40%, 34.55% 100%, 30.7% 40%, 26.85% 100%, 23% 40%, 19.15% 100%, 15.3% 40%, 11.45% 100%, 7.6% 40%, 3.75% 100%, 0% 40%);"
+            />
           </div>
 
-          <div
-            v-if="dietaryRequirements.length"
-            class="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg p-3"
-          >
-            <UIcon name="i-heroicons-fire" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            <div class="min-w-0">
-              <p class="text-xs font-black text-amber-700 uppercase tracking-wide mb-1">Dietary Requirements</p>
-              <div class="flex flex-wrap gap-1">
-                <span
-                  v-for="dr in dietaryRequirements"
-                  :key="dr.id"
-                  class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full"
-                >
-                  {{ dr.requirement_details?.label ?? dr.id }}
-                </span>
+          <!-- Main panel -->
+          <div class="relative z-10 p-5 space-y-4">
+            <!-- Attendee -->
+            <div class="flex items-start gap-3">
+              <div
+                class="w-14 h-14 rounded-full bg-deep-navy/10 flex items-center justify-center flex-shrink-0 font-black text-xl uppercase ring-2 ring-white ring-offset-2"
+                :class="[theme.accent, theme.ringOffset]"
+              >
+                <span v-if="attendeeDetails">{{ attendeeInitials }}</span>
+                <UIcon v-else name="i-heroicons-user" class="w-7 h-7 text-deep-navy/40" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <template v-if="attendeeLoading">
+                  <div class="h-6 w-40 bg-gray-100 rounded animate-pulse mb-1.5" />
+                  <div class="h-3.5 w-24 bg-gray-100 rounded animate-pulse" />
+                </template>
+                <template v-else>
+                  <p class="text-2xl font-black text-deep-navy leading-tight">
+                    {{ attendeeDetails?.full_name ?? currentItem.attendee_display_id }}
+                  </p>
+                  <p class="text-xs text-gray-500 font-mono mt-0.5 tracking-wide">{{ currentItem.attendee_display_id }}</p>
+                </template>
               </div>
             </div>
-          </div>
 
-          <div
-            v-if="accessibilityRequirements.length"
-            class="flex items-start gap-2 bg-blue-50 border border-blue-300 rounded-lg p-3"
-          >
-            <UIcon name="i-heroicons-adjustments-horizontal" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div class="min-w-0">
-              <p class="text-xs font-black text-blue-700 uppercase tracking-wide mb-1">Accessibility</p>
-              <div class="flex flex-wrap gap-1">
+            <!-- Enriched attendee details row -->
+            <div v-if="attendeeDetails && !attendeeLoading" class="grid grid-cols-2 gap-2 text-xs">
+              <div v-if="attendeeDetails.email" class="flex items-center gap-1.5 text-gray-500 min-w-0 col-span-2">
+                <UIcon name="i-heroicons-envelope" class="w-3.5 h-3.5 flex-shrink-0" />
+                <span class="truncate">{{ attendeeDetails.email }}</span>
+              </div>
+              <div v-if="attendeeDetails.age" class="flex items-center gap-1.5">
+                <UIcon name="i-heroicons-cake" class="w-3.5 h-3.5 flex-shrink-0 text-gray-500" />
                 <span
-                  v-for="ar in accessibilityRequirements"
-                  :key="ar.id"
-                  class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                  class="font-semibold text-sm"
+                  :class="attendeeDetails.is_minor ? 'text-amber-700' : 'text-gray-700'"
                 >
-                  {{ ar.requirement_details?.label ?? ar.id }}
+                  Age {{ attendeeDetails.age }}
                 </span>
+                <UBadge v-if="attendeeDetails.is_minor" color="amber" variant="solid" size="xs" class="ml-0.5">
+                  <UIcon name="i-heroicons-exclamation-triangle" class="w-3 h-3 mr-0.5" />
+                  Minor
+                </UBadge>
+              </div>
+              <div v-if="attendeeDetails.area_from_name ?? currentItem.area_from" class="flex items-center gap-1.5 text-gray-500">
+                <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 flex-shrink-0" />
+                <span class="text-sm font-medium text-gray-700 truncate">{{ attendeeDetails.area_from_name ?? currentItem.area_from }}</span>
               </div>
             </div>
-          </div>
-        </template>
+            <p v-else-if="!attendeeDetails && currentItem.area_from && !attendeeLoading" class="text-sm text-gray-500">
+              <UIcon name="i-heroicons-map-pin" class="w-3.5 h-3.5 inline-block mr-1" />
+              {{ currentItem.area_from }}
+            </p>
 
-        <!-- Outstanding payments warning -->
-        <div
-          v-if="currentItem.has_outstanding_payments"
-          class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3"
-        >
-          <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
-          <p class="text-xs text-red-700 font-medium">Outstanding payments on this booking</p>
-        </div>
+            <!-- Medical / Dietary / Accessibility highlights -->
+            <template v-if="attendeeDetails && !attendeeLoading">
+              <div
+                v-if="medicalConditions.length"
+                class="flex items-start gap-2 bg-red-50 border border-red-300 rounded-lg p-3"
+              >
+                <UIcon name="i-heroicons-heart" class="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                <div class="min-w-0">
+                  <p class="text-xs font-black text-red-700 uppercase tracking-wide mb-1">Medical Conditions</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="mc in medicalConditions"
+                      :key="mc.id"
+                      class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                    >
+                      {{ mc.condition_details?.label ?? mc.id }}
+                    </span>
+                  </div>
+                  <p v-if="medicalConditions.some(m => m.details || m.notes)" class="text-xs text-red-600 mt-1 italic">
+                    {{ medicalConditions.map(m => m.details || m.notes).filter(Boolean).join(' · ') }}
+                  </p>
+                </div>
+              </div>
 
-        <!-- Timestamp -->
-        <div class="text-xs text-gray-400 flex items-center gap-1">
-          <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5" />
-          {{ relativeTime }}
-        </div>
-      </div>
+              <div
+                v-if="dietaryRequirements.length"
+                class="flex items-start gap-2 bg-amber-50 border border-amber-300 rounded-lg p-3"
+              >
+                <UIcon name="i-heroicons-fire" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div class="min-w-0">
+                  <p class="text-xs font-black text-amber-700 uppercase tracking-wide mb-1">Dietary Requirements</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="dr in dietaryRequirements"
+                      :key="dr.id"
+                      class="inline-block bg-amber-100 text-amber-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                    >
+                      {{ dr.requirement_details?.label ?? dr.id }}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-      <!-- Perforation: sprocket-hole tear line running the full width of the ticket -->
-      <div class="relative z-10 w-full h-5" aria-hidden="true">
-        <div
-          class="absolute inset-y-1/2 left-6 right-6 h-px -translate-y-1/2"
-          style="background-image: radial-gradient(circle, rgba(15,23,42,0.22) 1.4px, transparent 1.6px); background-size: 9px 100%; background-repeat: repeat-x;"
-        />
-        <!-- die-cut notches biting into both edges -->
-        <span class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-50 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]" />
-        <span class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-50 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]" />
-      </div>
+              <div
+                v-if="accessibilityRequirements.length"
+                class="flex items-start gap-2 bg-blue-50 border border-blue-300 rounded-lg p-3"
+              >
+                <UIcon name="i-heroicons-adjustments-horizontal" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div class="min-w-0">
+                  <p class="text-xs font-black text-blue-700 uppercase tracking-wide mb-1">Accessibility</p>
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="ar in accessibilityRequirements"
+                      :key="ar.id"
+                      class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-0.5 rounded-full"
+                    >
+                      {{ ar.requirement_details?.label ?? ar.id }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
 
-      <!-- Stub: the tear-off strip, ticket metadata + QR, tinted by status -->
-      <div class="relative z-10 px-4 py-3 flex items-center gap-4 flex-wrap" :class="theme.stub">
-        <div v-if="currentItem.ticket_code" class="flex items-center gap-3">
-          <div class="flex h-22 w-22 items-center justify-center rounded-lg border border-gray-200 bg-white flex-shrink-0 p-1 shadow-sm">
-            <Qrcode :value="currentItem.ticket_code" :width="120" :height="120" />
-          </div>
-          <div class="flex flex-col">
-            <span
-              class="inline-flex w-fit items-center text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 -rotate-2 border-[1.5px] rounded"
-              :class="theme.accent"
-              style="border-style: double; border-width: 3px 1px;"
+            <!-- Outstanding payments warning -->
+            <div
+              v-if="currentItem.has_outstanding_payments"
+              class="flex items-start gap-2 bg-red-50 border border-red-200 rounded-lg p-3"
             >
-              {{ currentItem.action === 'CHECK_IN' ? 'Admit One' : 'Check Out' }}
-            </span>
-            <span v-if="currentItem.ticket_type_code" class="text-xs font-bold uppercase tracking-wide text-deep-navy/70 mt-1">
-              {{ currentItem.ticket_type_code }}
-            </span>
-            <span class="font-mono text-[10px] text-gray-500 tracking-wider">{{ currentItem.ticket_code.slice(-16) }}</span>
+              <UIcon name="i-heroicons-exclamation-triangle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5" />
+              <p class="text-xs text-red-700 font-medium">Outstanding payments on this booking</p>
+            </div>
+
+            <!-- Timestamp -->
+            <div class="text-xs text-gray-400 flex items-center gap-1">
+              <UIcon name="i-heroicons-clock" class="w-3.5 h-3.5" />
+              {{ relativeTime }}
+            </div>
           </div>
-        </div>
 
-        <div class="ml-auto flex flex-wrap gap-1.5 justify-end">
-          <UBadge color="gray" variant="subtle" size="xs">
-            {{ methodLabel(currentItem.method) }}
-          </UBadge>
-          <UBadge v-if="currentItem.matches_priority_filter" color="purple" variant="subtle" size="xs">
-            <UIcon name="i-heroicons-star" class="w-3 h-3 mr-0.5" />
-            Priority
-          </UBadge>
-          <UBadge v-if="attendeeDetails?.is_event_staff" color="blue" variant="subtle" size="xs">
-            <UIcon name="i-heroicons-shield-check" class="w-3 h-3 mr-0.5" />
-            Staff
-          </UBadge>
-        </div>
-      </div>
+          <!-- Perforation: sprocket-hole tear line running the full width of the ticket -->
+          <div class="relative z-10 w-full h-5" aria-hidden="true">
+            <div
+              class="absolute inset-y-1/2 left-6 right-6 h-px -translate-y-1/2"
+              style="background-image: radial-gradient(circle, rgba(15,23,42,0.22) 1.4px, transparent 1.6px); background-size: 9px 100%; background-repeat: repeat-x;"
+            />
+            <!-- die-cut notches biting into both edges -->
+            <span class="absolute left-0 top-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-50 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]" />
+            <span class="absolute right-0 top-1/2 translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-gray-50 shadow-[inset_0_0_0_1px_rgba(15,23,42,0.06)]" />
+          </div>
 
-      <!-- outer die-cut border, drawn last so it sits above the paper texture -->
-      <div class="pointer-events-none absolute inset-0 rounded-2xl border border-deep-navy/10 z-20" />
+          <!-- Stub: the tear-off strip, ticket metadata + QR, tinted by status -->
+          <div class="relative z-10 px-4 py-3 flex items-center gap-4 flex-wrap" :class="theme.stub">
+            <div v-if="currentItem.ticket_code" class="flex items-center gap-3">
+              <div class="flex h-22 w-22 items-center justify-center rounded-lg border border-gray-200 bg-white flex-shrink-0 p-1 shadow-sm">
+                <Qrcode :value="currentItem.ticket_code" :width="120" :height="120" />
+              </div>
+              <div class="flex flex-col">
+                <span
+                  class="inline-flex w-fit items-center text-[10px] font-black uppercase tracking-widest px-1.5 py-0.5 -rotate-2 border-[1.5px] rounded"
+                  :class="theme.accent"
+                  style="border-style: double; border-width: 3px 1px;"
+                >
+                  {{ currentItem.action === 'CHECK_IN' ? 'Admit One' : 'Check Out' }}
+                </span>
+                <span v-if="currentItem.ticket_type_code" class="text-xs font-bold uppercase tracking-wide text-deep-navy/70 mt-1">
+                  {{ currentItem.ticket_type_code }}
+                </span>
+                <span class="font-mono text-[10px] text-gray-500 tracking-wider">{{ currentItem.ticket_code.slice(-16) }}</span>
+              </div>
+            </div>
+
+            <div class="ml-auto flex flex-wrap gap-1.5 justify-end">
+              <UBadge color="gray" variant="subtle" size="xs">
+                {{ methodLabel(currentItem.method) }}
+              </UBadge>
+              <UBadge v-if="currentItem.matches_priority_filter" color="purple" variant="subtle" size="xs">
+                <UIcon name="i-heroicons-star" class="w-3 h-3 mr-0.5" />
+                Priority
+              </UBadge>
+              <UBadge v-if="attendeeDetails?.is_event_staff" color="blue" variant="subtle" size="xs">
+                <UIcon name="i-heroicons-shield-check" class="w-3 h-3 mr-0.5" />
+                Staff
+              </UBadge>
+            </div>
+          </div>
+
+          <!-- outer die-cut border, drawn last so it sits above the paper texture -->
+          <div class="pointer-events-none absolute inset-0 rounded-2xl border border-deep-navy/10 z-20" />
+        </div>
+      </Transition>
     </div>
 
     <!-- Navigation (manual mode) -->
@@ -257,7 +269,7 @@
         size="sm"
         icon="i-heroicons-chevron-left"
         :disabled="!currentItem"
-        @click="$emit('go-back')"
+        @click="handleGoBack"
       >
         Prev
       </UButton>
@@ -268,7 +280,7 @@
         size="sm"
         trailing-icon="i-heroicons-chevron-right"
         :disabled="!currentItem"
-        @click="$emit('advance')"
+        @click="handleAdvance"
       >
         Next
       </UButton>
@@ -293,11 +305,46 @@ const props = withDefaults(defineProps<Props>(), {
   remainingCount: 0,
 })
 
-defineEmits<{
+const emit = defineEmits<{
   advance: []
   'go-back': []
 }>()
 
+// ── Card-stack navigation ──────────────────────────────────────────────────
+
+const transitionDirection = ref<'forward' | 'backward'>('forward')
+
+function handleAdvance() {
+  transitionDirection.value = 'forward'
+  emit('advance')
+}
+function handleGoBack() {
+  transitionDirection.value = 'backward'
+  emit('go-back')
+}
+
+const transitionName = computed(() =>
+  transitionDirection.value === 'forward' ? 'flip-forward' : 'flip-backward'
+)
+
+const itemKey = computed(() => {
+  const item = props.currentItem
+  if (!item) return 'none'
+  return `${item.ticket_code ?? item.attendee_display_id}-${item.performed_at}`
+})
+
+// Decorative peeking stack behind the active card — purely cosmetic, capped at 2 layers
+const ghostLayers = computed(() => Math.min(props.remainingCount, 2))
+function ghostStyle(n: number) {
+  const offset = n * 1         // px of visible peek per layer
+  const rotate = n % 2 === 0 ? n * 2 : -n * 2
+  return {
+    transform: `translate(${offset * 0.2}px, ${offset}px) rotate(${rotate}deg) scale(${1 - n * 0.025})`,
+    transformOrigin: 'center bottom',
+    zIndex: -n,
+    opacity: 1 - n * 0.16,
+  }
+}
 // ── Attendee detail fetch ─────────────────────────────────────────────────
 
 const attendeeDetails = ref<AttendeeDetail | null>(null)
@@ -455,3 +502,38 @@ function methodLabel(method: string) {
   return { QR_CODE: 'QR Code', MANUAL: 'Manual', ADMIN: 'Admin' }[method] ?? method
 }
 </script>
+
+<style scoped>
+.flip-forward-enter-active,
+.flip-forward-leave-active,
+.flip-backward-enter-active,
+.flip-backward-leave-active {
+  transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  backface-visibility: hidden;
+}
+
+/* pull the leaving card out of flow so the entering one can lay out underneath it */
+.flip-forward-leave-active,
+.flip-backward-leave-active {
+  position: absolute;
+  inset: 0;
+}
+
+.flip-forward-enter-from {
+  transform: rotateY(-8deg) scale(0.97) translateY(6px);
+  opacity: 0.6;
+}
+.flip-forward-leave-to {
+  transform: rotateY(-100deg) scale(0.9);
+  opacity: 0;
+}
+
+.flip-backward-enter-from {
+  transform: rotateY(8deg) scale(0.97) translateY(6px);
+  opacity: 0.6;
+}
+.flip-backward-leave-to {
+  transform: rotateY(100deg) scale(0.9);
+  opacity: 0;
+}
+</style>
