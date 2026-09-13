@@ -1424,6 +1424,24 @@ export type AttendeeRegistrationTrends = {
 };
 
 /**
+ * Validates the POST /api/checkins/attendee-status/ request body.
+ *
+ * Targets one or more specific attendees by UUID; the event is inferred from
+ * the attendees themselves so callers do not need to supply it separately.
+ */
+export type AttendeeStatusUpdateRequest = {
+    /**
+     * One or more attendee UUIDs to check in or out.
+     */
+    attendee_ids: Array<string>;
+    /**
+     * * `CHECK_IN` - Check In
+     * * `CHECK_OUT` - Check Out
+     */
+    action: 'CHECK_IN' | 'CHECK_OUT';
+};
+
+/**
  * Serializer for updating attendees.
  */
 export type AttendeeUpdate = {
@@ -2624,6 +2642,22 @@ export type BudgetProposalUpdateRequest = {
 };
 
 /**
+ * Validates the POST /api/attendee/checkins/bulk-status/ request body.
+ */
+export type BulkAttendeeStatusUpdateRequest = {
+    event: string;
+    /**
+     * * `CHECK_IN` - Check In
+     * * `CHECK_OUT` - Check Out
+     */
+    action: 'CHECK_IN' | 'CHECK_OUT';
+    /**
+     * Specific attendees to update. Omit or send an empty list to act on all non-cancelled attendees in the event.
+     */
+    attendee_ids?: Array<string>;
+};
+
+/**
  * Serializer for capacity utilization statistics.
  */
 export type CapacityUtilization = {
@@ -2886,6 +2920,16 @@ export type CheckInDayStats = {
     event_metadata: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Paginated response for the log-dates action.
+ */
+export type CheckInLogDatesResponse = {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: Array<string>;
 };
 
 /**
@@ -5012,6 +5056,13 @@ export type DebitExpenseUpdateRequest = {
      * * `processed` - Processed
      */
     verification_status?: 'pending' | 'verified' | 'rejected' | 'processed';
+};
+
+/**
+ * Response for the bulk-delete-logs action.
+ */
+export type DeletedCountResponse = {
+    deleted: number;
 };
 
 /**
@@ -21208,6 +21259,13 @@ export type UpcomingEvents = {
 };
 
 /**
+ * Response for bulk-status and attendee-status actions.
+ */
+export type UpdatedCountResponse = {
+    updated: number;
+};
+
+/**
  * Production-grade serializer for CommunityUser model with HATEOAS support.
  *
  * Provides comprehensive user representation with hypermedia links, nested profile data,
@@ -35204,14 +35262,14 @@ export type CheckinsRetrieveResponses = {
 export type CheckinsRetrieveResponse = CheckinsRetrieveResponses[keyof CheckinsRetrieveResponses];
 
 export type CheckinsAttendeeStatusCreateData = {
-    body?: never;
+    body: AttendeeStatusUpdateRequest;
     path?: never;
     query?: never;
     url: '/api/checkins/attendee-status/';
 };
 
 export type CheckinsAttendeeStatusCreateResponses = {
-    200: CheckInResponse;
+    200: UpdatedCountResponse;
 };
 
 export type CheckinsAttendeeStatusCreateResponse = CheckinsAttendeeStatusCreateResponses[keyof CheckinsAttendeeStatusCreateResponses];
@@ -35224,23 +35282,20 @@ export type CheckinsBulkDeleteLogsDestroyData = {
 };
 
 export type CheckinsBulkDeleteLogsDestroyResponses = {
-    /**
-     * No response body
-     */
-    204: void;
+    200: DeletedCountResponse;
 };
 
 export type CheckinsBulkDeleteLogsDestroyResponse = CheckinsBulkDeleteLogsDestroyResponses[keyof CheckinsBulkDeleteLogsDestroyResponses];
 
 export type CheckinsBulkStatusCreateData = {
-    body?: never;
+    body: BulkAttendeeStatusUpdateRequest;
     path?: never;
     query?: never;
     url: '/api/checkins/bulk-status/';
 };
 
 export type CheckinsBulkStatusCreateResponses = {
-    200: CheckInResponse;
+    200: UpdatedCountResponse;
 };
 
 export type CheckinsBulkStatusCreateResponse = CheckinsBulkStatusCreateResponses[keyof CheckinsBulkStatusCreateResponses];
@@ -35248,12 +35303,25 @@ export type CheckinsBulkStatusCreateResponse = CheckinsBulkStatusCreateResponses
 export type CheckinsLogDatesRetrieveData = {
     body?: never;
     path?: never;
-    query?: never;
+    query: {
+        /**
+         * Event UUID
+         */
+        event: string;
+        /**
+         * A page number within the paginated result set.
+         */
+        page?: number;
+        /**
+         * Number of results to return per page.
+         */
+        page_size?: number;
+    };
     url: '/api/checkins/log-dates/';
 };
 
 export type CheckinsLogDatesRetrieveResponses = {
-    200: CheckInResponse;
+    200: CheckInLogDatesResponse;
 };
 
 export type CheckinsLogDatesRetrieveResponse = CheckinsLogDatesRetrieveResponses[keyof CheckinsLogDatesRetrieveResponses];

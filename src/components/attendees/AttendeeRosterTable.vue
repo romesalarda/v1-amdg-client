@@ -199,11 +199,11 @@
         <!-- Check-in status badge -->
         <template #is_checked_in-data="{ row }">
           <UBadge
-            :color="row.is_checked_in ? 'green' : 'amber'"
+            :color="row.is_cancelled ? 'red' : row.is_checked_in ? 'green' : 'amber'"
             variant="subtle"
             size="xs"
           >
-            {{ row.is_checked_in ? 'Checked In' : 'Pending' }}
+            {{ row.is_cancelled ? 'Cancelled' : row.is_checked_in ? 'Checked In' : 'Pending' }}
           </UBadge>
         </template>
 
@@ -265,6 +265,7 @@
 import AttendeeFiltersModal from '~/components/attendees/AttendeeFiltersModal.vue'
 import { useAttendeesPostFilterResults } from '~/composables/resources/attendee/useAttendeesPostFilter'
 import type { AttendeeFiltersRequest, AttendeeFilterRequestRequest, AttendeeList } from '~/api/types.gen'
+import { checkinsAttendeeStatusCreate } from '~/api/sdk.gen'
 
 const toast = useToast()
 
@@ -475,12 +476,12 @@ async function executeSelectionAction(selectedAction: 'CHECK_IN' | 'CHECK_OUT') 
   selectionActionLoading.value = true
   const count = selectedIds.value.length
   try {
-    await $fetch('/api/checkins/attendee-status/', {
-      method: 'POST',
+    await checkinsAttendeeStatusCreate({
       body: {
         action: selectedAction,
         attendee_ids: selectedIds.value,
       },
+      throwOnError: true,
     })
     toast.add({
       title: selectedAction === 'CHECK_IN' ? 'Checked in' : 'Checked out',
@@ -538,4 +539,10 @@ function formatTime(iso: string) {
     second: '2-digit',
   })
 }
+
+// Allows parent views to force a refresh after external bulk actions (e.g. Check In/Out All)
+defineExpose({
+  refetch: refetchAttendees,
+})
 </script>
+

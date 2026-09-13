@@ -71,7 +71,6 @@
 			<div class="min-w-0">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Gender</label>
 				<USelectMenu
-					class="w-full"
 					:model-value="values.gender"
 					:options="genderOptions"
 					value-attribute="value"
@@ -83,7 +82,6 @@
 			<div v-if="showRelationshipField && !isRegistrarSelf" class="min-w-0 sm:col-span-2">
 				<label class="mb-1 block text-sm font-medium text-gray-700">Relationship to you <span class="text-red-500">*</span></label>
 				<USelectMenu
-					class="w-full"
 					:model-value="values.relationship_to_user"
 					:options="relationshipOptions"
 					value-attribute="value"

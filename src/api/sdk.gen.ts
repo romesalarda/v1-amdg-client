@@ -1202,11 +1202,6 @@ export const attendeesStatisticsRelationshipDistributionRetrieve = <ThrowOnError
  * Generate Google OAuth authorization URL for user authentication. Returns a URL that redirects users to Google's authorization page where they can grant permissions. After authorization, Google redirects back to the specified redirect_uri with an authorization code.
  */
 export const authGoogleAuthorizeCreate = <ThrowOnError extends boolean = false>(options: Options<AuthGoogleAuthorizeCreateData, ThrowOnError>) => (options.client ?? client).post<AuthGoogleAuthorizeCreateResponses, AuthGoogleAuthorizeCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
-            in: 'cookie',
-            name: 'sessionid',
-            type: 'apiKey'
-        }],
     url: '/api/auth/google/authorize/',
     ...options,
     headers: {
@@ -1221,11 +1216,6 @@ export const authGoogleAuthorizeCreate = <ThrowOnError extends boolean = false>(
  * Exchange Google OAuth authorization code for user information and authenticate the user. Creates a new user account if the Google email doesn't exist in the system, or logs in existing user. Returns JWT tokens in secure HTTP-only cookies and user profile data in response body. Automatically associates the Google account with the user for future OAuth logins.
  */
 export const authGoogleCallbackCreate = <ThrowOnError extends boolean = false>(options: Options<AuthGoogleCallbackCreateData, ThrowOnError>) => (options.client ?? client).post<AuthGoogleCallbackCreateResponses, AuthGoogleCallbackCreateErrors, ThrowOnError>({
-    security: [{ scheme: 'bearer', type: 'http' }, {
-            in: 'cookie',
-            name: 'sessionid',
-            type: 'apiKey'
-        }],
     url: '/api/auth/google/callback/',
     ...options,
     headers: {
@@ -2758,39 +2748,28 @@ export const checkinsRetrieve = <ThrowOnError extends boolean = false>(options: 
 });
 
 /**
- * Check in or check out one or more specific attendees by their UUIDs.
+ * Check-In / Check-Out Specific Attendees
  *
- * The event is inferred from the attendees, so callers do not need to
- * supply an event UUID. Attendees spanning multiple events are handled
- * correctly — audit records and WS broadcasts are scoped per-event.
- *
- * Request body:
- * attendee_ids (list[UUID])           — required, 1 or more
- * action       (CHECK_IN | CHECK_OUT) — required
+ * Check in or check out one or more specific attendees by UUID. The event is inferred from the attendees, so callers do not need to supply it.
  */
-export const checkinsAttendeeStatusCreate = <ThrowOnError extends boolean = false>(options?: Options<CheckinsAttendeeStatusCreateData, ThrowOnError>) => (options?.client ?? client).post<CheckinsAttendeeStatusCreateResponses, unknown, ThrowOnError>({
+export const checkinsAttendeeStatusCreate = <ThrowOnError extends boolean = false>(options: Options<CheckinsAttendeeStatusCreateData, ThrowOnError>) => (options.client ?? client).post<CheckinsAttendeeStatusCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
         }],
     url: '/api/checkins/attendee-status/',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
- * Delete AttendeeCheckIn audit records for a specific event.
+ * Bulk Delete Check-In Logs
  *
- * Deletion scope (mutually exclusive priority):
- * 1. date       — single calendar date
- * 2. date_from / date_to — inclusive date range (either or both can be set)
- * 3. neither    — delete ALL logs for the event
- *
- * Request body:
- * event     (UUID)  — required
- * date      (date)  — optional; single date, takes precedence
- * date_from (date)  — optional; start of range (inclusive)
- * date_to   (date)  — optional; end of range (inclusive)
+ * Delete AttendeeCheckIn audit records for a specific event, optionally scoped to a date or date range.
  */
 export const checkinsBulkDeleteLogsDestroy = <ThrowOnError extends boolean = false>(options?: Options<CheckinsBulkDeleteLogsDestroyData, ThrowOnError>) => (options?.client ?? client).delete<CheckinsBulkDeleteLogsDestroyResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
@@ -2803,35 +2782,30 @@ export const checkinsBulkDeleteLogsDestroy = <ThrowOnError extends boolean = fal
 });
 
 /**
- * Mass check-in or check-out all (or specific) attendees in an event.
+ * Bulk Check-In / Check-Out Attendees
  *
- * Creates an AttendeeCheckIn audit record for every affected attendee,
- * updates EventAttendance state, and broadcasts a bulk notification over
- * both the check-in and roster WS channel groups.
- *
- * Request body:
- * event        (UUID)        — required
- * action       (CHECK_IN | CHECK_OUT) — required
- * attendee_ids (list[UUID])  — optional; empty = all non-cancelled attendees
+ * Mass check-in or check-out all (or specific) attendees in an event, creating audit records and broadcasting over WebSocket.
  */
-export const checkinsBulkStatusCreate = <ThrowOnError extends boolean = false>(options?: Options<CheckinsBulkStatusCreateData, ThrowOnError>) => (options?.client ?? client).post<CheckinsBulkStatusCreateResponses, unknown, ThrowOnError>({
+export const checkinsBulkStatusCreate = <ThrowOnError extends boolean = false>(options: Options<CheckinsBulkStatusCreateData, ThrowOnError>) => (options.client ?? client).post<CheckinsBulkStatusCreateResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
             in: 'cookie',
             name: 'sessionid',
             type: 'apiKey'
         }],
     url: '/api/checkins/bulk-status/',
-    ...options
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
- * Return a paginated list of distinct calendar dates on which check-in
- * logs exist for a given event, ordered most-recent first.
+ * List Check-In Log Dates
  *
- * Query params:
- * event (UUID)  — required
+ * Return a paginated list of distinct calendar dates on which check-in logs exist for a given event, ordered most-recent first.
  */
-export const checkinsLogDatesRetrieve = <ThrowOnError extends boolean = false>(options?: Options<CheckinsLogDatesRetrieveData, ThrowOnError>) => (options?.client ?? client).get<CheckinsLogDatesRetrieveResponses, unknown, ThrowOnError>({
+export const checkinsLogDatesRetrieve = <ThrowOnError extends boolean = false>(options: Options<CheckinsLogDatesRetrieveData, ThrowOnError>) => (options.client ?? client).get<CheckinsLogDatesRetrieveResponses, unknown, ThrowOnError>({
     security: [{ scheme: 'bearer', type: 'http' }, {
             in: 'cookie',
             name: 'sessionid',

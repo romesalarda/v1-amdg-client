@@ -50,6 +50,7 @@
         </button>
       </div>
       <AttendeeRosterTable
+        ref="rosterTableRef"
         :event-identifier="eventIdentifier"
         class="flex-1 min-h-0"
         @select-attendee="(p) => emit('select-attendee', p)"
@@ -451,6 +452,7 @@ const emit = defineEmits<{
 // ── Tab state ─────────────────────────────────────────────────────────────
 
 const activeTab = ref<'log' | 'roster' | 'statistics'>('log')
+const rosterTableRef = ref<InstanceType<typeof AttendeeRosterTable> | null>(null)
 
 // ── State ─────────────────────────────────────────────────────────────────
 
@@ -644,7 +646,7 @@ async function executeBulkAction() {
         body: {
           event: props.eventId,
           action: pendingBulkAction.value === 'check_in' ? 'CHECK_IN' : 'CHECK_OUT',
-        } as any,
+        },
         throwOnError: true,
       })
       toast.add({
@@ -652,6 +654,11 @@ async function executeBulkAction() {
         description: 'Attendee statuses have been updated.',
         color: 'green',
       })
+
+      // Force the roster table to reflect the new statuses immediately
+      await rosterTableRef.value?.refetch()
+      page.value = 1
+      refresh()
     } else {
       if (isDeleteActionInvalid.value) return
 
