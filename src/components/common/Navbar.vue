@@ -66,7 +66,7 @@
             class="text-white hover:text-blue-300 transition-colors border-b-2 pb-0.5 no-underline"
             :class="route.path.startsWith('/communities') ? 'border-blue-300 text-blue-300' : 'border-transparent'"
           >
-            Communities
+            Ministries
           </NuxtLink>
         </nav>
 

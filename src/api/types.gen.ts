@@ -8318,6 +8318,45 @@ export type EventPermissionRequest = {
     category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
 };
 
+export type EventPolicy = {
+    readonly id: number;
+    readonly event: number;
+    allow_external_events?: boolean;
+    allow_attendee_deletions?: boolean;
+    allow_workshops?: boolean;
+    allow_product_releases?: boolean;
+    allow_sponsors?: boolean;
+    require_long_description?: boolean;
+    require_short_description?: boolean;
+    require_landing_image?: boolean;
+    product_release_must_be_approved_by_organisation?: boolean;
+    must_be_approved_by_organisation?: boolean;
+    max_attendees_per_event?: number;
+    card_payments_are_allowed?: boolean;
+    bank_transfers_are_allowed?: boolean;
+    max_package_price?: string;
+    effective_policy: EventPolicyValues;
+    readonly created_at: string;
+    readonly updated_at: string;
+};
+
+export type EventPolicyValues = {
+    allow_external_events: boolean;
+    allow_attendee_deletions: boolean;
+    allow_workshops: boolean;
+    allow_product_releases: boolean;
+    allow_sponsors: boolean;
+    require_long_description: boolean;
+    require_short_description: boolean;
+    require_landing_image: boolean;
+    product_release_must_be_approved_by_organisation: boolean;
+    must_be_approved_by_organisation: boolean;
+    max_attendees_per_event: number;
+    card_payments_are_allowed: boolean;
+    bank_transfers_are_allowed: boolean;
+    max_package_price: string;
+};
+
 /**
  * List/Detail serializer for EventProductCategory with HATEOAS links.
  */
@@ -16216,6 +16255,23 @@ export type PatchedEventPermissionRequest = {
     category?: 'GENERAL' | 'REGISTRATION' | 'PRODUCT_MANAGEMENT' | 'CONTENT_MANAGEMENT' | 'STAFF_MANAGEMENT' | 'PAYMENT_MANAGEMENT' | 'BOOKING_MANAGEMENT' | 'RESOURCE_MANAGEMENT' | 'REPORTING';
 };
 
+export type PatchedEventPolicyRequest = {
+    allow_external_events?: boolean;
+    allow_attendee_deletions?: boolean;
+    allow_workshops?: boolean;
+    allow_product_releases?: boolean;
+    allow_sponsors?: boolean;
+    require_long_description?: boolean;
+    require_short_description?: boolean;
+    require_landing_image?: boolean;
+    product_release_must_be_approved_by_organisation?: boolean;
+    must_be_approved_by_organisation?: boolean;
+    max_attendees_per_event?: number;
+    card_payments_are_allowed?: boolean;
+    bank_transfers_are_allowed?: boolean;
+    max_package_price?: string;
+};
+
 export type PatchedEventQuestionAnswerChoiceRequest = {
     answer?: number;
     option?: number;
@@ -17608,10 +17664,6 @@ export type PatchedProfileRequest = {
      * The area location where the user is from
      */
     area_from?: number | null;
-    /**
-     * Contact phone number with country code
-     */
-    contact_phone?: string;
     preferred_language?: string;
     /**
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
@@ -19461,10 +19513,6 @@ export type Profile = {
     readonly area_from_details: {
         [key: string]: unknown;
     };
-    /**
-     * Contact phone number with country code
-     */
-    contact_phone?: string;
     preferred_language?: string;
     /**
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
@@ -19559,10 +19607,6 @@ export type ProfileRequest = {
      * The area location where the user is from
      */
     area_from?: number | null;
-    /**
-     * Contact phone number with country code
-     */
-    contact_phone?: string;
     preferred_language?: string;
     /**
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
@@ -25648,6 +25692,23 @@ export type EventPermissionAssignmentWritable = {
     allow_create?: boolean;
 };
 
+export type EventPolicyWritable = {
+    allow_external_events?: boolean;
+    allow_attendee_deletions?: boolean;
+    allow_workshops?: boolean;
+    allow_product_releases?: boolean;
+    allow_sponsors?: boolean;
+    require_long_description?: boolean;
+    require_short_description?: boolean;
+    require_landing_image?: boolean;
+    product_release_must_be_approved_by_organisation?: boolean;
+    must_be_approved_by_organisation?: boolean;
+    max_attendees_per_event?: number;
+    card_payments_are_allowed?: boolean;
+    bank_transfers_are_allowed?: boolean;
+    max_package_price?: string;
+};
+
 /**
  * List/Detail serializer for EventProductCategory with HATEOAS links.
  */
@@ -28594,6 +28655,98 @@ export type PatchedLeaderCreateUpdateRequestWritable = {
 };
 
 /**
+ * Comprehensive serializer for user Profile model.
+ *
+ * Provides full profile management with HATEOAS links and nested relationships.
+ * Supports profile picture uploads, location management, and timezone settings.
+ *
+ * Fields:
+ * - url: HATEOAS link to profile detail
+ * - user: Hyperlinked user reference
+ * - preferred_name: User's preferred display name
+ * - profile_picture: Image upload field
+ * - area_from: Nested area location details
+ * - contact_phone: Validated phone number
+ * - preferred_language: Language preference
+ * - timezone: User's timezone setting
+ * - full_name: Computed full name (read-only)
+ * - created_at: Profile creation timestamp
+ * - updated_at: Last update timestamp
+ *
+ * Example:
+ * ```python
+ * serializer = ProfileSerializer(profile, context={'request': request})
+ * data = serializer.data
+ * # Returns profile with hypermedia links
+ * ```
+ */
+export type PatchedProfileRequestWritable = {
+    /**
+     * Preferred display name (will be title-cased)
+     */
+    preferred_name?: string;
+    /**
+     * Profile picture image (max 5MB, formats: JPEG, PNG, GIF)
+     */
+    profile_picture?: Blob | File | null;
+    /**
+     * The area location where the user is from
+     */
+    area_from?: number | null;
+    preferred_language?: string;
+    /**
+     * User's timezone (e.g., 'Europe/London', 'America/New_York')
+     */
+    timezone?: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
+    /**
+     * ID of the associated user
+     */
+    user_id?: number;
+};
+
+/**
  * Create serializer for RefundAssociation with validation.
  *
  * Note: target_type and target_id should only be set internally by the system.
@@ -29247,10 +29400,6 @@ export type ProfileWritable = {
      * The area location where the user is from
      */
     area_from?: number | null;
-    /**
-     * Contact phone number with country code
-     */
-    contact_phone?: string;
     preferred_language?: string;
     /**
      * User's timezone (e.g., 'Europe/London', 'America/New_York')
@@ -29298,6 +29447,98 @@ export type ProfileWritable = {
      * * `other` - Other
      */
     ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
+};
+
+/**
+ * Comprehensive serializer for user Profile model.
+ *
+ * Provides full profile management with HATEOAS links and nested relationships.
+ * Supports profile picture uploads, location management, and timezone settings.
+ *
+ * Fields:
+ * - url: HATEOAS link to profile detail
+ * - user: Hyperlinked user reference
+ * - preferred_name: User's preferred display name
+ * - profile_picture: Image upload field
+ * - area_from: Nested area location details
+ * - contact_phone: Validated phone number
+ * - preferred_language: Language preference
+ * - timezone: User's timezone setting
+ * - full_name: Computed full name (read-only)
+ * - created_at: Profile creation timestamp
+ * - updated_at: Last update timestamp
+ *
+ * Example:
+ * ```python
+ * serializer = ProfileSerializer(profile, context={'request': request})
+ * data = serializer.data
+ * # Returns profile with hypermedia links
+ * ```
+ */
+export type ProfileRequestWritable = {
+    /**
+     * Preferred display name (will be title-cased)
+     */
+    preferred_name?: string;
+    /**
+     * Profile picture image (max 5MB, formats: JPEG, PNG, GIF)
+     */
+    profile_picture?: Blob | File | null;
+    /**
+     * The area location where the user is from
+     */
+    area_from?: number | null;
+    preferred_language?: string;
+    /**
+     * User's timezone (e.g., 'Europe/London', 'America/New_York')
+     */
+    timezone: string;
+    /**
+     * Whether the profile is visible to others.
+     */
+    is_public?: boolean;
+    /**
+     * Whether the user is clergy or religious.
+     */
+    is_clergy_or_religious?: boolean;
+    /**
+     * The ecclesiastical status of the user, if applicable.
+     *
+     * * `clergy` - Clergy
+     * * `religious` - Religious
+     * * `laity` - Laity
+     */
+    ecclesiastical_status?: 'clergy' | 'religious' | 'laity' | '';
+    /**
+     * The ecclesiastical rank of the user, if applicable.
+     *
+     * * `priest` - Priest
+     * * `deacon` - Deacon
+     * * `nun` - Nun
+     * * `cardinal` - Cardinal
+     * * `major_archbishop` - Major Archbishop
+     * * `archbishop` - Archbishop
+     * * `diocesan_bishop` - Diocesan Bishop
+     * * `auxiliary_bishop` - Auxiliary Bishop
+     * * `dean` - Dean
+     * * `pastor` - Pastor
+     * * `assistant_pastor` - Assistant Pastor
+     * * `assistant_priest` - Assistant Priest
+     * * `transitional_deacon` - Transitional Deacon
+     * * `permanent_deacon` - Permanent Deacon
+     * * `sister` - Sister
+     * * `brother` - Brother
+     * * `abbot` - Abbot
+     * * `abbess` - Abbess
+     * * `monk` - Monk
+     * * `friar` - Friar
+     * * `other` - Other
+     */
+    ecclesiastical_rank?: 'priest' | 'deacon' | 'nun' | 'cardinal' | 'major_archbishop' | 'archbishop' | 'diocesan_bishop' | 'auxiliary_bishop' | 'dean' | 'pastor' | 'assistant_pastor' | 'assistant_priest' | 'transitional_deacon' | 'permanent_deacon' | 'sister' | 'brother' | 'abbot' | 'abbess' | 'monk' | 'friar' | 'other' | '';
+    /**
+     * ID of the associated user
+     */
+    user_id: number;
 };
 
 /**
@@ -37993,6 +38234,42 @@ export type EventListMyPaymentSummaryRetrieveResponses = {
 };
 
 export type EventListMyPaymentSummaryRetrieveResponse = EventListMyPaymentSummaryRetrieveResponses[keyof EventListMyPaymentSummaryRetrieveResponses];
+
+export type EventListPolicyRetrieveData = {
+    body?: never;
+    path: {
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
+    };
+    query?: never;
+    url: '/api/event/list/{url_safe_title}/policy/';
+};
+
+export type EventListPolicyRetrieveResponses = {
+    200: EventPolicy;
+};
+
+export type EventListPolicyRetrieveResponse = EventListPolicyRetrieveResponses[keyof EventListPolicyRetrieveResponses];
+
+export type EventListPolicyPartialUpdateData = {
+    body?: PatchedEventPolicyRequest;
+    path: {
+        /**
+         * URL safe title
+         */
+        url_safe_title: string;
+    };
+    query?: never;
+    url: '/api/event/list/{url_safe_title}/policy/';
+};
+
+export type EventListPolicyPartialUpdateResponses = {
+    200: EventPolicy;
+};
+
+export type EventListPolicyPartialUpdateResponse = EventListPolicyPartialUpdateResponses[keyof EventListPolicyPartialUpdateResponses];
 
 export type EventListPreviewTemplateApplicationRetrieveData = {
     body?: never;
@@ -49297,6 +49574,10 @@ export type PaymentsBudgetProposalsListData = {
          */
         event?: number;
         /**
+         * Filter by event ID (UUID)
+         */
+        event_id?: string;
+        /**
          * Filter by event URL safe title
          */
         event_url_safe_title?: string;
@@ -49505,6 +49786,10 @@ export type PaymentsBudgetProposalsCreditsListData = {
          */
         event?: number;
         /**
+         * Filter by event ID (UUID)
+         */
+        event_id?: string;
+        /**
          * Filter by event URL safe title
          */
         event_url_safe_title?: string;
@@ -49572,6 +49857,10 @@ export type PaymentsBudgetProposalsDebitsListData = {
          * Filter by event ID
          */
         event?: number;
+        /**
+         * Filter by event ID (UUID)
+         */
+        event_id?: string;
         /**
          * Filter by event URL safe title
          */
@@ -49694,7 +49983,7 @@ export type PaymentsBudgetProposalsEventStatisticsRetrieveData = {
     path?: never;
     query: {
         /**
-         * Event UUID to aggregate budget statistics for
+         * Event UUID or url_safe_title to aggregate budget statistics for
          */
         event_id: string;
     };
@@ -52213,7 +52502,7 @@ export type PaymentsStockAuditListData = {
          */
         created_before?: string;
         /**
-         * Filter by event URL-safe title inferred from payment association
+         * Filter by event_id title inferred from payment association
          */
         event_id?: string;
         /**
@@ -55597,7 +55886,7 @@ export type ProfilesListResponses = {
 export type ProfilesListResponse = ProfilesListResponses[keyof ProfilesListResponses];
 
 export type ProfilesCreateData = {
-    body: ProfileRequest;
+    body: ProfileRequestWritable;
     path?: never;
     query?: never;
     url: '/api/profiles/';
@@ -55656,7 +55945,7 @@ export type ProfilesRetrieveResponses = {
 export type ProfilesRetrieveResponse = ProfilesRetrieveResponses[keyof ProfilesRetrieveResponses];
 
 export type ProfilesPartialUpdateData = {
-    body?: PatchedProfileRequest;
+    body?: PatchedProfileRequestWritable;
     path: {
         /**
          * A unique integer value identifying this Profile.
@@ -55674,7 +55963,7 @@ export type ProfilesPartialUpdateResponses = {
 export type ProfilesPartialUpdateResponse = ProfilesPartialUpdateResponses[keyof ProfilesPartialUpdateResponses];
 
 export type ProfilesUpdateData = {
-    body: ProfileRequest;
+    body: ProfileRequestWritable;
     path: {
         /**
          * A unique integer value identifying this Profile.

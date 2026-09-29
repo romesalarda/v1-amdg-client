@@ -66,6 +66,13 @@
               <UIcon name="i-heroicons-shield-check" class="w-6 h-6" />
               Manage Authorisation
             </NuxtLink>
+            <NuxtLink
+              :to="`/communities/${organisationId}/m/events/${eventId}/policy`"
+              class="inline-flex items-center gap-2 px-6 py-3 border-2 border-deep-navy/15 text-deep-navy hover:bg-deep-navy/5 rounded-xl font-black text-sm uppercase tracking-wider transition-all"
+            >
+              <UIcon name="i-heroicons-adjustments-horizontal" class="w-5 h-5" />
+              Event Policy
+            </NuxtLink>
           </div>
         </div>
       </div>

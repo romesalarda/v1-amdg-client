@@ -114,11 +114,11 @@
       <!-- Section Header -->
       <div class="flex justify-between items-end mb-8">
         <div>
-          <h2 class="text-2xl font-bold text-deep-navy mb-1">Browse Communities</h2>
-          <p class="text-gray-500 text-sm">Connect with communities and discover exclusive events.</p>
+          <h2 class="text-2xl font-bold text-deep-navy mb-1">Browse Ministries</h2>
+          <p class="text-gray-500 text-sm">Connect with ministries and discover exclusive events.</p>
         </div>
         <div v-if="!isLoading" class="text-gray-500 text-sm font-mono">
-          {{ displayedOrganisations.length }} {{ displayedOrganisations.length === 1 ? 'community' : 'communities' }}
+          {{ displayedOrganisations.length }} {{ displayedOrganisations.length === 1 ? 'ministry' : 'ministries' }}
         </div>
       </div>
 
@@ -128,8 +128,8 @@
           <svg class="w-16 h-16 mx-auto text-red-400 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          <h3 class="text-xl font-bold text-deep-navy mb-2">Error Loading Communities</h3>
-          <p class="text-gray-500 text-sm">Failed to load communities. Please try again later.</p>
+          <h3 class="text-xl font-bold text-deep-navy mb-2">Error Loading Ministries</h3>
+          <p class="text-gray-500 text-sm">Failed to load ministries. Please try again later.</p>
         </div>
       </div>
 
@@ -229,10 +229,10 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
             <h3 class="text-xl font-bold text-deep-navy mb-2">
-              {{ searchQuery ? 'No Communities Found' : activeTab === 'my' ? 'No Communities Yet' : 'No Communities Found' }}
+              {{ searchQuery ? 'No Ministries Found' : activeTab === 'my' ? 'No Ministries Yet' : 'No Ministries Found' }}
             </h3>
             <p class="text-gray-500 text-sm">
-              {{ searchQuery ? 'Try adjusting your search criteria' : activeTab === 'my' ? 'Discover and join communities to see them here' : 'Check back soon for new communities' }}
+              {{ searchQuery ? 'Try adjusting your search criteria' : activeTab === 'my' ? 'Discover and join ministries to see them here' : 'Check back soon for new ministries' }}
             </p>
             <div v-if="searchQuery || activeTab === 'my'" class="flex gap-4 justify-center mt-6">
               <button
@@ -247,7 +247,7 @@
                 @click="activeTab = 'discover'"
                 class="bg-deep-navy text-white px-8 py-3 rounded-lg font-bold text-sm hover:bg-deep-navy/90 transition-colors"
               >
-                Discover Communities
+                Discover Ministries
               </button>
             </div>
           </div>
@@ -272,7 +272,7 @@
         <div class="relative">
           <h3 class="text-3xl font-bold mb-3">Create Your Account Today</h3>
           <p class="text-white/70 mb-8 max-w-xl mx-auto text-sm leading-relaxed">
-            Join communities, connect with your faith network, and access exclusive events.
+            Join ministries, connect with your faith network, and access exclusive events.
           </p>
           <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <NuxtLink

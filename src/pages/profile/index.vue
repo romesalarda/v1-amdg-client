@@ -482,7 +482,6 @@ type ProfileFormValues = {
   first_name: string
   last_name: string
   preferred_name: string
-  contact_phone: string
   preferred_language: string
   timezone: string
 }
@@ -503,7 +502,6 @@ const hasFieldChanges = computed(() => {
     first_name.value !== initialFormValues.value.first_name
     || last_name.value !== initialFormValues.value.last_name
     || preferred_name.value !== initialFormValues.value.preferred_name
-    || contact_phone.value !== initialFormValues.value.contact_phone
     || preferred_language.value !== initialFormValues.value.preferred_language
     || timezone.value !== initialFormValues.value.timezone
   )
@@ -548,7 +546,6 @@ watch([userData, profileData], () => {
       first_name: userData.value.data.first_name || '',
       last_name: userData.value.data.last_name || '',
       preferred_name: profileData.value.data.preferred_name || '',
-      contact_phone: profileData.value.data.contact_phone || '',
       preferred_language: profileData.value.data.preferred_language || '',
       timezone: profileData.value.data.timezone || 'Europe/London',
     }
@@ -599,7 +596,7 @@ const resetForm = () => {
       first_name: userData.value.data.first_name || '',
       last_name: userData.value.data.last_name || '',
       preferred_name: profileData.value.data.preferred_name || '',
-      contact_phone: profileData.value.data.contact_phone || '',
+      // contact_phone: profileData.value.data.contact_phone || '',
       preferred_language: profileData.value.data.preferred_language || '',
       timezone: profileData.value.data.timezone || 'Europe/London',
     }
@@ -657,7 +654,7 @@ const handleSubmit = handleFormSubmit(async (values) => {
       // Update profile without image - composable uses SDK
       const profileUpdateData: Partial<ProfileRequest> = {
         preferred_name: values.preferred_name || '',
-        contact_phone: values.contact_phone || '',
+        // contact_phone: values.contact_phone || '',
         preferred_language: values.preferred_language || '',
         timezone: values.timezone,
       }
@@ -689,7 +686,6 @@ const handleSubmit = handleFormSubmit(async (values) => {
       first_name: values.first_name,
       last_name: values.last_name,
       preferred_name: values.preferred_name || '',
-      contact_phone: values.contact_phone || '',
       preferred_language: values.preferred_language || '',
       timezone: values.timezone,
     })
