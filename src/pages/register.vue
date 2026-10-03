@@ -108,7 +108,7 @@
               </span>
             </div>
 
-            <h2 class="text-3xl font-serif text-white">
+            <h2 class="text-3xl text-white">
               Create your account
             </h2>
 
@@ -267,10 +267,6 @@
                   </div>
                 </div>
 
-                <p class="mt-1 text-xs text-slate-300/60">
-                  Lowercase, URL-safe and generated automatically.
-                </p>
-
                 <p
                   v-if="usernameError"
                   class="mt-1 text-sm text-rose-200"
@@ -353,7 +349,7 @@
                   I agree to the
 
                   <a
-                    href="#"
+                    href="/privacy-policy"
                     class="font-semibold text-white transition-colors hover:text-slate-100"
                   >
                     Terms of Service
@@ -362,7 +358,7 @@
                   and
 
                   <a
-                    href="#"
+                    href="/privacy-policy"
                     class="font-semibold text-white transition-colors hover:text-slate-100"
                   >
                     Privacy Policy
@@ -610,12 +606,8 @@ const headingWords = computed(() =>
         'community.',
       ]
     : [
-        'We',
-        'are',
-        'ready',
-        'when',
-        'you',
-        'are!'
+        'JOIN',
+        'US!'
       ]
 )
 

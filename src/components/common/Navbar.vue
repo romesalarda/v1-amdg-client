@@ -93,7 +93,7 @@
                 class="w-full h-full object-cover"
                 @error="(e) => onImageError(e)"
               />
-              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-deep-navy font-semibold text-xs">
+              <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-white font-semibold text-xs">
                 {{ getInitials(userData.data?.display_name) }}
               </div>
             </button>
@@ -121,7 +121,7 @@
                       class="w-full h-full object-cover"
                       @error="(e) => onImageError(e)"
                     />
-                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-deep-navy font-semibold text-sm">
+                    <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary to-yellow-600 text-white font-semibold text-sm">
                       {{ getInitials(userData.data?.display_name) }}
                     </div>
                   </div>

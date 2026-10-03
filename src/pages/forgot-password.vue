@@ -45,7 +45,7 @@
           <!-- Request form -->
           <div v-else>
             <div class="text-center">
-              <h2 class="text-3xl font-serif text-white">Forgot password?</h2>
+              <h2 class="text-3xl text-white">Forgot password?</h2>
               <p class="mt-2 text-sm text-slate-200/80">
                 Enter your email and we'll send you a reset link.
               </p>

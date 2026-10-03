@@ -202,7 +202,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div class="space-y-1.5">
+                  <!-- <div class="space-y-1.5">
                     <label class="block text-sm font-medium text-slate-700">Phone number</label>
                     <input
                       v-model="contact_phone"
@@ -216,7 +216,7 @@
                       placeholder="+44 1234 567890"
                     />
                     <p v-if="errors.contact_phone" class="text-xs text-red-500">{{ errors.contact_phone }}</p>
-                  </div>
+                  </div> -->
 
                   <div class="space-y-1.5">
                     <label class="block text-sm font-medium text-slate-700">Preferred language</label>

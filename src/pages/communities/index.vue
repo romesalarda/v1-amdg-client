@@ -91,8 +91,8 @@
       ></div>
       <div class="hero-gradient absolute inset-0"></div>
       <div class="relative max-w-[1300px] mx-auto h-full px-6 flex flex-col justify-center items-start text-white">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-black mb-4 max-w-3xl leading-tight tracking-tight">
-          {{ featuredCommunity.title }}
+        <h1 class="text-4xl md:text-5xl lg:text-6xl font-barbara mb-4 max-w-3xl leading-tight tracking-wider">
+          {{ featuredCommunity.title.toUpperCase() }}
         </h1>
         <p v-if="featuredCommunity.description" class="text-white/80 font-bold text-sm mb-8 max-w-xl line-clamp-2">
           {{ featuredCommunity.description }}

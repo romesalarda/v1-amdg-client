@@ -1,15 +1,6 @@
 <template>
     <Navbar />
 
-  <!-- Mobile menu button -->
-  <!-- <button
-    v-if="!sidebarOpen"
-    @click="sidebarOpen = true"
-    class="lg:hidden fixed top-20 left-4 z-50 p-2 bg-deep-navy text-white rounded-lg shadow-lg hover:bg-deep-navy/90 transition-colors"
-  >
-    <UIcon name="i-heroicons-bars-3" class="w-6 h-6" />
-  </button> -->
-
   <!-- Overlay for mobile -->
   <div
     v-if="sidebarOpen"

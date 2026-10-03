@@ -1,41 +1,64 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-    <FlowingBackground :speed="2" :soft="8" :palette="4" position="absolute" />
+  <Navbar />
 
-    <div class="max-w-md w-full text-center relative z-10 bg-black/50 backdrop-blur-lg rounded-3xl shadow-2xl px-8 py-12 border border-white/10">
-      <p class="text-xs font-semibold tracking-[0.3em] text-cyan-300/80 uppercase mb-4">
-        Error
-      </p>
-      <h1 class="text-7xl font-barbara text-white leading-none select-none">
-        SO LIKE...
-      </h1>
-      <h2 class="-mt-6 text-2xl sm:text-3xl font-bold text-white mt-5">
-        Something went wrong
-      </h2>
-      <p class="mt-3 text-sm text-white/70">
-        {{ error?.message || 'An unexpected error occurred.' }}
-      </p>
-      <div class="mt-8">
-        <UButton
-          to="/"
-          size="lg"
-          class="bg-cyan-400 hover:bg-cyan-300 text-gray-900 font-bold px-8 rounded-full"
-          @click="handleError"
-        >
-          Go back home
-        </UButton>
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div class="text-center max-w-2xl mx-auto">
+          <h1 class="text-9xl font-bold text-gray-800">Sorry!</h1>
+          <h2 class="text-3xl font-semibold text-gray-700 mt-4">Something went wrong</h2>
+          
+          <!-- Custom error message from query -->
+          <p v-if="error?.message" class="text-gray-600 mt-4 mb-8 max-w-md mx-auto">
+              {{ error.message  }}
+          </p>
+          <p v-else class="text-gray-600 mt-4 mb-8 max-w-md mx-auto">
+              An unexpected error occurred.
+          </p>
+
+          <!-- Additional help text -->
+          <div class="text-sm text-gray-500 mb-8">
+              <p>We encountered an unexpected error while trying to process your request. Please try again later or contact support if the issue persists.</p>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex gap-4 justify-center">
+              <button 
+                  @click="goBack"
+                  class="inline-block px-6 py-3 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                  Go Back
+              </button>
+              <NuxtLink 
+                  to="/my-dashboard" 
+                  class="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                  Go to Dashboard
+              </NuxtLink>
+          </div>
       </div>
-    </div>
   </div>
+  <Footer /> 
 </template>
 
 <script setup lang="ts">
-import FlowingBackground from '~/components/ui/flowingBackground.vue'
+
+import Navbar from '~/components/common/Navbar.vue'
+import Footer from '~/components/common/Footer.vue'
 
 const props = defineProps({
   error: Object
 })
 
-const handleError = () => clearError({ redirect: '/' })
+const router = useRouter()
+
+useHead({
+  title: 'An Error Occurred',
+  meta: [
+    { name: 'description', content: 'An error occurred while trying to access the page.' },
+  ],
+})
+
+const goBack = () => {
+    router.back()
+}
 
 </script>

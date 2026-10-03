@@ -438,7 +438,7 @@
             <div class="flex flex-col">
               <span class="text-xs font-black text-deep-navy uppercase tracking-wider group-hover:text-blue-600 transition-colors">{{ org.title }}</span>
               <span class="text-[10px] font-bold text-deep-navy/40 uppercase tracking-widest">
-                {{ org.membership?.is_verified ? 'Active Member' : 'Pending Verification' }}
+                {{ org.membership?.is_verified ? 'Verified' : '' }}
               </span>
             </div>
           </div>

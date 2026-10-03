@@ -94,7 +94,7 @@
               </NuxtLink>
             </div>
 
-            <h2 class="text-3xl font-serif text-white">
+            <h2 class="text-3xl text-white">
               Sign in to AMDG
             </h2>
 
@@ -297,11 +297,8 @@ onBeforeUnmount(() => {
  * Hero interaction
  */
 const headingWords = [
-  'Events',
-  'Management',
-  'for',
-  'Catholic',
-  'Communities',
+  'EVENTS',
+  'MANAGEMENT',
 ]
 
 const heroStyle = computed(() => {
