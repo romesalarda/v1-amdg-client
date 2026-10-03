@@ -139,10 +139,14 @@
                 <label class="block text-sm font-semibold text-navy-900" for="event-type">
                   Organisation <span class="text-red-500">*</span>
                 </label>
-                <OrganisationSelect
+                <EventCreatorOrganisationSelect
                   :model-value="organisation"
                   @update:model-value="(value) => { organisation = typeof value === 'number' ? value : undefined }"
                 />
+                <p v-if="!isLoadingOrganizations && organizationOptions.length === 0" class="text-xs text-amber-500 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-sm">warning</span>
+                  You are not authorised to create events for any organisation
+                </p>
               </div>
 
               <div class="space-y-2">
@@ -508,17 +512,15 @@ import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { useCreateEvent, useEvents } from '~/composables/resources/events/events'
 import { useEventTypes } from '~/composables/resources/events/eventTypes'
-import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
-import { useAuthStore } from '~/stores/auth'
+import { useEventCreatorOrganisations } from '~/composables/resources/organisation/useEventCreatorOrganisations'
 import TimezoneSelect from '~/components/ui/TimezoneSelect.vue'
-import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
+import EventCreatorOrganisationSelect from '~/components/ui/EventCreatorOrganisationSelect.vue'
 import DateRangePicker from '~/components/ui/DateRangePicker.vue'
 
 definePageMeta({
   middleware: 'auth'
 })
 
-const authStore = useAuthStore()
 const { $notyf } = useNuxtApp()
 
 // Stepper state
@@ -557,17 +559,18 @@ const createEventSchema = z.object({
   path: ['end_datetime']
 })
 
-// Fetch organizations user controls
-const { data: controlsData, isLoading: isLoadingOrganizations } = useOrganisationControls(computed(() => ({
-  user: authStore.user?.id,
-})))
-
-const controlledOrganizations = computed(() => controlsData.value?.data?.results || [])
+// Fetch organisations the user is authorised to create events for
+const { data: authorisedOrgsData, isLoading: isLoadingOrganizations } = useEventCreatorOrganisations(
+  computed(() => ({
+    page_size: 80,
+    ordering: 'title',
+  }))
+)
 
 const organizationOptions = computed(() => {
-  return controlledOrganizations.value.map(control => ({
-    value: control.organisation,
-    label: control.organisation_name || `Organisation ${control.organisation}`
+  return (authorisedOrgsData.value?.data?.results || []).map((org: any) => ({
+    value: Number(org.id),
+    label: org.title || `Organisation ${org.id}`
   }))
 })
 

@@ -37540,6 +37540,13 @@ export type EventListCreateData = {
     url: '/api/event/list/';
 };
 
+export type EventListCreateErrors = {
+    /**
+     * User is not authorised to create events for the given organisation.
+     */
+    403: unknown;
+};
+
 export type EventListCreateResponses = {
     201: EventCreateUpdate;
 };
@@ -47799,6 +47806,10 @@ export type OrganisationsListListData = {
     path?: never;
     query?: {
         /**
+         * When true, restrict results to organisations the requesting user is authorised to create events in (organisation controller or leader with event-approval create access).
+         */
+        authorised_event_creator?: boolean;
+        /**
          * Filter organisations created after this date (ISO 8601 format)
          */
         created_after?: string;
@@ -47959,6 +47970,10 @@ export type OrganisationsListContactsListData = {
     };
     query?: {
         /**
+         * Filter to organisations the requesting user is authorised to create events in
+         */
+        authorised_event_creator?: boolean;
+        /**
          * Filter organisations created after this date (ISO 8601 format)
          */
         created_after?: string;
@@ -48030,6 +48045,10 @@ export type OrganisationsListMembershipsListData = {
         url_safe_title: string;
     };
     query?: {
+        /**
+         * Filter to organisations the requesting user is authorised to create events in
+         */
+        authorised_event_creator?: boolean;
         /**
          * Filter organisations created after this date (ISO 8601 format)
          */

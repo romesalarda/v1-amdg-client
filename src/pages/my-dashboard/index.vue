@@ -204,7 +204,7 @@
                 {{ activeTimeFilter === 'past' ? 'You have no past events to display' : 'Check back later for new events' }}
               </p>
                <NuxtLink
-               v-if="selectedDate && selectedDate > DateTime.now()"
+               v-if="selectedDate && selectedDate > DateTime.now() && hasEventCreatorOrganisation"
               :to="`/events/create?sdt=${selectedDate ? encodeURIComponent(selectedDate.toISODate() || '') : ''}`"
               class="inline-flex items-center gap-2 px-6 py-3 mt-4 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
                 >
@@ -388,6 +388,7 @@
               </div>
             </div>
             <NuxtLink
+              v-if="hasEventCreatorOrganisation"
               :to="`/events/create`"
               class="inline-flex justify-center items-center gap-2 px-6 py-3 mt-4 bg-deep-navy hover:bg-deep-navy/90 text-white rounded-xl font-black text-sm uppercase tracking-wider transition-all"
                 >
@@ -544,7 +545,7 @@
 import { useUpcomingEvents, usePastEvents } from '~/composables/resources/events/events'
 import { useOrganisationMemberships } from '~/composables/resources/organisation/organisationMemberships'
 import { useOrganisations } from '~/composables/resources/organisation/organisations'
-import { useOrganisationControls } from '~/composables/resources/organisation/organisationControls'
+import { useEventCreatorOrganisations } from '~/composables/resources/organisation/useEventCreatorOrganisations'
 import { useEventStaff } from '~/composables/resources/events/eventStaff'
 import { useAuthStore } from '~/stores/auth'
 import { DateTime } from 'luxon'
@@ -598,6 +599,10 @@ const { data: membershipsData } = useOrganisationMemberships(computed(() => ({
   user: authStore.user?.id,
 })))
 const userMemberships = computed(() => membershipsData.value?.data?.results || [])
+
+// Check whether the user is authorised to create events in any organisation
+const { data: eventCreatorOrgsData } = useEventCreatorOrganisations({ page_size: 1 })
+const hasEventCreatorOrganisation = computed(() => (eventCreatorOrgsData.value?.data?.count || 0) > 0)
 const userOrganizationIds = computed(() => {
   return userMemberships.value.map(m => m.organisation)
 })
