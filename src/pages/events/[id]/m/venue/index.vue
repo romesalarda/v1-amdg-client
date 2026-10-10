@@ -38,73 +38,84 @@
 							class="rounded-xl border bg-white p-4 transition-colors hover:bg-mist-blue/40"
 							:class="entry.is_primary ? 'border-primary/40 ring-1 ring-primary/20' : 'border-deep-navy/10'"
 						>
-							<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+							<div class="flex flex-col gap-4">
 								<!-- Details -->
-								<div class="flex min-w-0 flex-1 items-start gap-3">
+								<div class="flex min-w-0 items-start gap-3">
 									<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
 										<span class="material-symbols-outlined text-xl text-primary">location_on</span>
 									</div>
 
 									<div class="min-w-0 flex-1">
-										<div class="flex flex-wrap items-center gap-2">
-											<h3 class="truncate text-base font-semibold text-navy-900">{{ entry.name }}</h3>
+										<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+											<h3 class="break-words text-base font-semibold text-navy-900">{{ entry.name }}</h3>
 											<span
 												v-if="entry.is_primary"
-												class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+												class="inline-flex shrink-0 items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
 											>
 												<span class="material-symbols-outlined text-sm">star</span>
 												Primary
 											</span>
 										</div>
 
-										<p class="mt-1 text-sm text-navy-600">
+										<p class="mt-1 break-words text-sm text-navy-600">
 											{{ entry.address || 'No address available' }}
 										</p>
 										<p class="mt-0.5 flex items-center gap-1 text-xs text-navy-400">
-											<span class="material-symbols-outlined text-sm">map</span>
+											<span class="material-symbols-outlined text-sm">location_city</span>
 											{{ entry.city || 'No city' }}
 										</p>
 									</div>
 								</div>
 
 								<!-- Actions -->
-								<div class="flex flex-wrap items-center gap-2 md:shrink-0 md:justify-end">
-									<NuxtLink
-										:to="`/events/${id}/m/venue/${entry.event_venue_id}`"
-										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-									>
-										<span class="material-symbols-outlined text-base">tune</span>
-										Manage
-									</NuxtLink>
+								<div class="flex flex-col gap-2 border-t border-deep-navy/10 pt-3 sm:flex-row sm:items-center">
+									<!-- Navigation -->
+									<div class="grid grid-cols-2 gap-2 sm:flex">
+										<NuxtLink
+											:to="`/events/${id}/m/venue/${entry.event_venue_id}`"
+											class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-8"
+										>
+											<span class="material-symbols-outlined text-base">tune</span>
+											Manage
+										</NuxtLink>
 
-									<NuxtLink
-										:to="`/events/${id}/m/venue/${entry.event_venue_id}/floor-plans`"
-										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-									>
-										<span class="material-symbols-outlined text-base">map</span>
-										Floor Plans
-									</NuxtLink>
+										<NuxtLink
+											:to="`/events/${id}/m/venue/${entry.event_venue_id}/floor-plans`"
+											class="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-8"
+										>
+											<span class="material-symbols-outlined text-base">map</span>
+											Floor Plans
+										</NuxtLink>
+									</div>
 
-									<button
-										v-if="canUpdateVenueLinks && !entry.is_primary"
-										type="button"
-										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-primary/30 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
-										:disabled="partialUpdateEventVenue.isPending.value"
-										@click="setPrimaryVenue(entry.event_venue_id)"
+									<!-- Secondary actions -->
+									<div
+										v-if="(canUpdateVenueLinks && !entry.is_primary) || canDeleteVenueLinks"
+										class="flex items-center gap-2 sm:ml-auto sm:border-l sm:border-deep-navy/10 sm:pl-3"
+										:class="!(canUpdateVenueLinks && !entry.is_primary) && 'justify-end'"
 									>
-										<span class="material-symbols-outlined text-base">star</span>
-										Set as Primary
-									</button>
+										<button
+											v-if="canUpdateVenueLinks && !entry.is_primary"
+											type="button"
+											class="inline-flex h-10 flex-1 items-center justify-center gap-1.5 rounded-lg border border-primary/30 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50 sm:h-8 sm:flex-none"
+											:disabled="partialUpdateEventVenue.isPending.value"
+											@click="setPrimaryVenue(entry.event_venue_id)"
+										>
+											<span class="material-symbols-outlined text-base">star</span>
+											Set as Primary
+										</button>
 
-									<button
-										v-if="canDeleteVenueLinks"
-										type="button"
-										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-3 text-xs font-semibold text-red-600 transition-colors hover:border-red-200 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
-										@click="removeVenueLink(entry.event_venue_id)"
-									>
-										<span class="material-symbols-outlined text-base">delete</span>
-										Remove
-									</button>
+										<button
+											v-if="canDeleteVenueLinks"
+											type="button"
+											class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-transparent text-red-600 transition-colors hover:border-red-200 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 sm:h-8 sm:w-8"
+											:aria-label="`Remove ${entry.name}`"
+											title="Remove venue"
+											@click="removeVenueLink(entry.event_venue_id)"
+										>
+											<span class="material-symbols-outlined text-lg">delete</span>
+										</button>
+									</div>
 								</div>
 							</div>
 

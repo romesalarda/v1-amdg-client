@@ -13,11 +13,11 @@
       </div>
 
       <p class="mb-3 text-xs font-semibold uppercase tracking-[0.4em] text-slate-400">AMDG Portal</p>
-      <h1 class="mb-4 max-w-lg font-serif text-4xl leading-tight text-white sm:text-5xl">
-        Urm, I promise I am working on it. Please wait a moment.
+      <h1 class="mb-4 max-w-lg font-black text-4xl leading-tight text-white sm:text-5xl">
+        Urm, we currently have a server issue.
       </h1>
       <p class="mb-10 max-w-md text-base leading-relaxed text-slate-300/80">
-        The server is temporarily unavailable. This service will be back..... idk when.
+        This service will be back..... idk when.
         This page will automatically reconnect when the service is restored.
       </p>
 

@@ -237,7 +237,7 @@
                   </div>
                 </div>
                 
-               w <div class="flex-grow p-6 flex flex-col justify-between">
+                <div class="flex-grow p-6 flex flex-col justify-between">
                   <div>
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ formatEventDateShort(event.start_datetime) }}</span>
@@ -256,12 +256,6 @@
                   </div>
                   
                   <div class="flex items-center justify-between mt-4">
-                    <div class="flex -space-x-2">
-                      <div class="w-7 h-7 rounded-full bg-slate-200 border-2 border-white text-[9px] flex items-center justify-center font-bold">JD</div>
-                      <div class="w-7 h-7 rounded-full bg-slate-300 border-2 border-white text-[9px] flex items-center justify-center font-bold">MK</div>
-                      <div class="w-7 h-7 rounded-full bg-slate-400 border-2 border-white text-[9px] flex items-center justify-center font-bold">TL</div>
-                      <div class="text-[9px] font-bold text-deep-navy/40 pl-4">+12 others</div>
-                    </div>
                     <button class="bg-blue-500/10 text-blue-600 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 hover:text-white transition-all">View Details</button>
                   </div>
                 </div>
