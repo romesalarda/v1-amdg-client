@@ -35,51 +35,90 @@
 						<article
 							v-for="entry in eventVenueList"
 							:key="entry.event_venue_id"
-							class="border border-deep-navy/10 rounded-xl p-4 bg-white hover:bg-mist-blue/40 transition-colors"
+							class="rounded-xl border bg-white p-4 transition-colors hover:bg-mist-blue/40"
+							:class="entry.is_primary ? 'border-primary/40 ring-1 ring-primary/20' : 'border-deep-navy/10'"
 						>
-							<div class="flex items-start gap-3">
-								<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-									<span class="material-symbols-outlined text-primary">location_on</span>
-								</div>
-
-								<div class="flex-1 min-w-0">
-									<div class="flex items-center gap-2 flex-wrap">
-										<h3 class="text-sm font-black text-navy-900">{{ entry.name }}</h3>
+							<div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+								<!-- Details -->
+								<div class="flex min-w-0 flex-1 items-start gap-3">
+									<div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+										<span class="material-symbols-outlined text-xl text-primary">location_on</span>
 									</div>
-									<p class="text-sm text-navy-600 mt-1">{{ entry.address || 'No address available' }}</p>
-									<p class="text-xs text-navy-400 mt-1">{{ entry.city || 'No city' }}</p>
-									
+
+									<div class="min-w-0 flex-1">
+										<div class="flex flex-wrap items-center gap-2">
+											<h3 class="truncate text-base font-semibold text-navy-900">{{ entry.name }}</h3>
+											<span
+												v-if="entry.is_primary"
+												class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary"
+											>
+												<span class="material-symbols-outlined text-sm">star</span>
+												Primary
+											</span>
+										</div>
+
+										<p class="mt-1 text-sm text-navy-600">
+											{{ entry.address || 'No address available' }}
+										</p>
+										<p class="mt-0.5 flex items-center gap-1 text-xs text-navy-400">
+											<span class="material-symbols-outlined text-sm">map</span>
+											{{ entry.city || 'No city' }}
+										</p>
+									</div>
 								</div>
 
-								<div class="flex items-center gap-1 flex-wrap">
+								<!-- Actions -->
+								<div class="flex flex-wrap items-center gap-2 md:shrink-0 md:justify-end">
 									<NuxtLink
 										:to="`/events/${id}/m/venue/${entry.event_venue_id}`"
-										class="px-3 py-1.5 text-xs font-bold rounded-lg border border-deep-navy/15 text-navy-700 hover:bg-mist-blue/70"
+										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
 									>
-										Manage Details
+										<span class="material-symbols-outlined text-base">tune</span>
+										Manage
 									</NuxtLink>
+
 									<NuxtLink
 										:to="`/events/${id}/m/venue/${entry.event_venue_id}/floor-plans`"
-										class="px-3 py-1.5 text-xs font-bold rounded-lg border border-deep-navy/15 text-navy-700 hover:bg-mist-blue/70"
+										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-deep-navy/15 px-3 text-xs font-semibold text-navy-700 transition-colors hover:bg-mist-blue/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
 									>
-										<!-- <span class="material-symbols-outlined text-sm">map</span> -->
+										<span class="material-symbols-outlined text-base">map</span>
 										Floor Plans
 									</NuxtLink>
+
+									<button
+										v-if="canUpdateVenueLinks && !entry.is_primary"
+										type="button"
+										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-primary/30 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-50"
+										:disabled="partialUpdateEventVenue.isPending.value"
+										@click="setPrimaryVenue(entry.event_venue_id)"
+									>
+										<span class="material-symbols-outlined text-base">star</span>
+										Set as Primary
+									</button>
+
 									<button
 										v-if="canDeleteVenueLinks"
-										class="px-3 py-1.5 text-xs font-bold rounded-lg border border-red-200 text-red-600 hover:bg-red-50"
+										type="button"
+										class="inline-flex h-8 items-center gap-1.5 rounded-lg border border-transparent px-3 text-xs font-semibold text-red-600 transition-colors hover:border-red-200 hover:bg-red-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300"
 										@click="removeVenueLink(entry.event_venue_id)"
 									>
+										<span class="material-symbols-outlined text-base">delete</span>
 										Remove
 									</button>
 								</div>
 							</div>
-								 <div v-if="entry.address" class="h-64 bg-mist-blue relative border-t border-deep-navy/10 mt-4 rounded-lg overflow-hidden flex items-center justify-center">
-									<iframe
+
+							<!-- Map -->
+							<div
+								v-if="entry.address"
+								class="mt-4 h-56 overflow-hidden rounded-lg border border-deep-navy/10 bg-mist-blue"
+							>
+								<iframe
 									:src="`https://maps.google.com/maps?q=${encodeURIComponent(entry.address + ' ' + (entry.city || ''))}&output=embed`"
-								class="w-full h-full border-0"
-								loading="lazy"
-								referrerpolicy="no-referrer-when-downgrade"
+									:title="`Map showing ${entry.name}`"
+									class="h-full w-full border-0"
+									loading="lazy"
+									referrerpolicy="no-referrer-when-downgrade"
 								></iframe>
 							</div>
 						</article>
@@ -151,7 +190,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useEvent } from '~/composables/resources/events/events'
-import { useCreateEventVenue, useDeleteEventVenue, useEventVenues } from '~/composables/resources/events/eventVenues'
+import { useCreateEventVenue, useDeleteEventVenue, useEventVenues, usePartialUpdateEventVenue } from '~/composables/resources/events/eventVenues'
 import { extractResults } from '~/composables/resources/events/eventVenueManagement'
 import { useLocationVenues } from '~/composables/resources/locations/locationVenues'
 import { useCurrentUserEventPermissions } from '~/composables/permissions'
@@ -176,6 +215,7 @@ const { can } = useCurrentUserEventPermissions(id)
 
 const canCreateVenueLinks = computed(() => can('REGISTRATION', 'create').value.allowed)
 const canDeleteVenueLinks = computed(() => can('REGISTRATION', 'delete').value.allowed)
+const canUpdateVenueLinks = computed(() => can('REGISTRATION', 'update').value.allowed)
 
 const { data: event } = useEvent(id)
 const eventInternalId = computed(() => event.value?.data?.id)
@@ -219,6 +259,25 @@ const availableVenueOptions = computed(() => {
 
 const createEventVenue = useCreateEventVenue()
 const deleteEventVenue = useDeleteEventVenue()
+const partialUpdateEventVenue = usePartialUpdateEventVenue()
+
+const setPrimaryVenue = async (eventVenueId: string) => {
+	try {
+		await partialUpdateEventVenue.mutateAsync({ eventVenueId, body: { is_primary: true } })
+		toast.add({
+			title: 'Primary venue updated',
+			description: 'This venue is now the primary venue for the event.',
+			color: 'green',
+		})
+	}
+	catch (error: any) {
+		toast.add({
+			title: 'Could not set primary venue',
+			description: error?.message || 'An error occurred while updating the venue.',
+			color: 'red',
+		})
+	}
+}
 
 const handleVenueSelection = async (venueId: number) => {
 	if (!event.value?.data?.event_id) {

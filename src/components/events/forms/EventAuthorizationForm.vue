@@ -10,7 +10,7 @@
         </div>
         <div>
           <h2 class="text-2xl font-black text-deep-navy uppercase tracking-tight">
-            {{ existingAuthorization ? 'Update Authorization' : 'Authorize Event' }}
+            {{ existingAuthorization ? 'Update Authorisation' : 'Authorize Event' }}
           </h2>
           <p class="text-sm text-deep-navy/60 font-medium mt-1">
             {{ existingAuthorization 

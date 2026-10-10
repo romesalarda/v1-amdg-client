@@ -237,7 +237,7 @@
                   </div>
                 </div>
                 
-                <div class="flex-grow p-6 flex flex-col justify-between">
+               w <div class="flex-grow p-6 flex flex-col justify-between">
                   <div>
                     <div class="flex items-center gap-2 mb-2">
                       <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest">{{ formatEventDateShort(event.start_datetime) }}</span>

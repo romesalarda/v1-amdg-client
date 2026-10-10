@@ -547,7 +547,7 @@ const handleAuthorizationSubmit = async (values: { status: string; reason?: stri
           notes: values.notes || undefined,
         },
       })
-      toast.add({ title: 'Authorization Updated', description: 'Event authorization has been updated successfully.', color: 'green' })
+      toast.add({ title: 'Authorisation Updated', description: 'Event authorisation has been updated successfully.', color: 'green' })
     } else {
       const authPayload: EventAuthorizationRequest = {
         event: event.value.event_id,
@@ -556,17 +556,17 @@ const handleAuthorizationSubmit = async (values: { status: string; reason?: stri
         notes: values.notes || undefined,
       }
       await createMutation.mutateAsync(authPayload)
-      toast.add({ title: 'Authorization Submitted', description: 'Event authorization has been recorded successfully.', color: 'green' })
+      toast.add({ title: 'Authorisation Submitted', description: 'Event authorisation has been recorded successfully.', color: 'green' })
     }
 
-    router.push(`/communities/${organisationId.value}/m/events`)
+    router.push(`/communities/${organisation.value?.url_safe_title}/m/events`)
   } catch (error: any) {
-    toast.add({ title: 'Authorization Failed', description: error.message || 'Failed to submit authorization. Please try again.', color: 'red' })
+    toast.add({ title: 'Authorisation Failed', description: error.message || 'Failed to submit authorisation. Please try again.', color: 'red' })
   }
 }
 
 const handleCancel = () => {
-  router.push(`/communities/${organisationId.value}/m/events/${eventId.value}`)
+  router.push(`/communities/${organisation.value?.url_safe_title}/m/events/${eventId.value}`)
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────

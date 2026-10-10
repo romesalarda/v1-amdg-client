@@ -5,11 +5,8 @@
 
 		<div class="absolute inset-x-0 top-0 z-10 p-6 md:p-8">
 			<div class="mx-auto flex w-full max-w-[1200px] items-center justify-between gap-4">
-				<div class="text-2xl font-black tracking-tight text-white md:text-3xl">AMDG</div>
+				<!-- <div class="text-2xl font-black tracking-tight text-white md:text-3xl">AMDG</div> -->
 				<div class="flex items-center gap-3">
-					<div class="hidden rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-white/80 md:block">
-						Registration flow
-					</div>
 					<UButton color="white" variant="soft" @click="emit('go-back')" class="bg-white">Back to event</UButton>
 				</div>
 			</div>
