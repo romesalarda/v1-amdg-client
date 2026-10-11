@@ -2904,6 +2904,13 @@ export type CheckInDayBreakdown = {
     hourly_timeline: Array<{
         [key: string]: unknown;
     }>;
+    checked_out: number;
+    still_inside: number;
+    peak_occupancy: number;
+    peak_occupancy_time: string | null;
+    hourly_check_out_timeline: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 /**
@@ -2914,12 +2921,27 @@ export type CheckInDayStats = {
     readonly filters_applied: {
         [key: string]: unknown;
     };
+    live: CheckInLiveStats;
     days: Array<CheckInDayBreakdown>;
     total_attendees: number;
     event_days_count: number | null;
     event_metadata: {
         [key: string]: unknown;
     };
+};
+
+/**
+ * Live headcount based on each attendee's latest successful scan.
+ */
+export type CheckInLiveStats = {
+    currently_inside: number;
+    checked_out: number;
+    never_arrived: number;
+    total_attendees: number;
+    percent_on_site: number;
+    percent_checked_out: number;
+    percent_never_arrived: number;
+    longest_inside: Array<LongestInsideAttendee>;
 };
 
 /**
@@ -12185,6 +12207,17 @@ export type LocationLeaderInviteList = {
         target_user?: string;
         accept?: string;
     };
+};
+
+/**
+ * An attendee currently on site, ordered by time since their last check-in.
+ */
+export type LongestInsideAttendee = {
+    attendee_id: string;
+    attendee_display_id: string | null;
+    full_name: string;
+    checked_in_at: string | null;
+    minutes_inside: number;
 };
 
 /**
@@ -23475,6 +23508,7 @@ export type ChapterLocationListWritable = {
  * Serializer for per-event-day check-in statistics.
  */
 export type CheckInDayStatsWritable = {
+    live: CheckInLiveStats;
     days: Array<CheckInDayBreakdown>;
     total_attendees: number;
     event_days_count: number | null;

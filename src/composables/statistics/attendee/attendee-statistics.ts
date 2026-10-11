@@ -301,13 +301,16 @@ export function useOverview(
 }
 
 /**
- * Get per-event-day check-in statistics (check-in rate, not-checked-in count, hourly timeline)
+ * Get check-in statistics: live occupancy (currently inside / checked out / never arrived)
+ * plus per-event-day check-in rate, check-outs, peak occupancy and hourly timelines.
+ * Refetches every 30s so the on-site headcount stays current.
  */
 export function useCheckInStats(
   params?: MaybeRefOrGetter<AttendeesStatisticsCheckinStatsRetrieveData['query'] | undefined>
 ) {
   return useQuery({
     queryKey: [...QUERY_KEY, 'checkin-stats', params] as const,
+    refetchInterval: 30_000,
     queryFn: () => {
       const queryParams = toValue(params)
       return attendeesStatisticsCheckinStatsRetrieve(

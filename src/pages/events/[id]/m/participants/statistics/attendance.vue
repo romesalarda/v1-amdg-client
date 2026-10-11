@@ -5,7 +5,16 @@
       <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
     </div>
 
-    <template v-else-if="days.length">
+    <template v-else-if="days.length || live">
+      <!-- Live occupancy (safeguarding) -->
+      <StatSection
+        v-if="live"
+        title="Live Occupancy"
+        description="Who is on site right now, based on each attendee's latest successful check-in or check-out. Refreshes every 30 seconds."
+      >
+        <LiveOccupancyPanel :live="live" />
+      </StatSection>
+
       <!-- Overall Summary Cards -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
@@ -22,7 +31,7 @@
         />
         <StatCard
           :value="overallCheckedIn"
-          label="Total Checked In"
+          label="Check-ins (all days, cumulative)"
           icon="i-heroicons-check-circle"
           icon-color="green"
         />
@@ -94,6 +103,22 @@
                   </div>
                 </div>
               </div>
+              <div class="grid grid-cols-3 gap-4">
+                <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <div class="text-2xl font-bold text-indigo-900">{{ selectedDayData.checked_out }}</div>
+                  <div class="text-xs text-indigo-700">Checked Out</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-4">
+                  <div class="text-2xl font-bold text-emerald-900">{{ selectedDayData.still_inside }}</div>
+                  <div class="text-xs text-emerald-700">Inside at End of Day</div>
+                </div>
+                <div class="bg-sky-50 border border-sky-200 rounded-lg p-4">
+                  <div class="text-2xl font-bold text-sky-900">{{ selectedDayData.peak_occupancy }}</div>
+                  <div class="text-xs text-sky-700">
+                    Peak Occupancy<span v-if="selectedDayData.peak_occupancy_time"> ({{ selectedDayData.peak_occupancy_time }})</span>
+                  </div>
+                </div>
+              </div>
               <!-- Progress bar -->
               <div>
                 <div class="flex justify-between text-sm font-medium text-gray-700 mb-2">
@@ -126,6 +151,20 @@
           <div v-else class="text-center text-gray-400 py-4 text-sm">
             No hourly timeline data for this day.
           </div>
+
+          <!-- Hourly check-out timeline -->
+          <div v-if="hourlyCheckOutTimeline.labels.length">
+            <div class="text-sm font-semibold text-gray-700 mb-2">Hourly Check-out Timeline</div>
+            <div style="height: 220px;">
+              <LineChart
+                :data="hourlyCheckOutTimeline.data"
+                :labels="hourlyCheckOutTimeline.labels"
+                color="#6366f1"
+                label="Check-outs"
+                height="220px"
+              />
+            </div>
+          </div>
         </div>
       </StatSection>
 
@@ -142,6 +181,9 @@
                 <th class="pb-2 pr-4">Date</th>
                 <th class="pb-2 pr-4 text-right">Checked In</th>
                 <th class="pb-2 pr-4 text-right">Awaiting</th>
+                <th class="pb-2 pr-4 text-right">Checked Out</th>
+                <th class="pb-2 pr-4 text-right">Inside at End</th>
+                <th class="pb-2 pr-4 text-right">Peak</th>
                 <th class="pb-2 pr-4 text-right">Total</th>
                 <th class="pb-2 text-right">Rate</th>
               </tr>
@@ -161,6 +203,9 @@
                 <td class="py-3 pr-4 text-gray-500 text-xs">{{ day.date ? formatDate(day.date) : '—' }}</td>
                 <td class="py-3 pr-4 text-right text-green-700 font-semibold">{{ day.checked_in }}</td>
                 <td class="py-3 pr-4 text-right text-amber-700 font-semibold">{{ day.not_checked_in }}</td>
+                <td class="py-3 pr-4 text-right text-indigo-700 font-semibold">{{ day.checked_out }}</td>
+                <td class="py-3 pr-4 text-right text-emerald-700 font-semibold">{{ day.still_inside }}</td>
+                <td class="py-3 pr-4 text-right text-sky-700 font-semibold">{{ day.peak_occupancy }}</td>
                 <td class="py-3 pr-4 text-right text-gray-600">{{ day.total_attendees }}</td>
                 <td class="py-3 text-right">
                   <div class="flex items-center justify-end gap-2">
@@ -205,15 +250,13 @@ import StatCard from '~/components/statistics/StatCard.vue'
 import StatSection from '~/components/statistics/StatSection.vue'
 import GaugeChart from '~/components/charts/GaugeChart.vue'
 import LineChart from '~/components/charts/LineChart.vue'
+import LiveOccupancyPanel from '~/components/statistics/LiveOccupancyPanel.vue'
+import type { CheckInDayBreakdown, CheckInLiveStats } from '~/api/types.gen'
 
-interface DayData {
+interface DayData extends Omit<CheckInDayBreakdown, 'event_day' | 'hourly_timeline' | 'hourly_check_out_timeline'> {
   event_day: number
-  date: string | null
-  checked_in: number
-  not_checked_in: number
-  total_attendees: number
-  check_in_rate: number
   hourly_timeline: { hour: string; count: number }[]
+  hourly_check_out_timeline: { hour: string; count: number }[]
 }
 
 interface Props {
@@ -230,6 +273,15 @@ const todayDate = new Date().toISOString().slice(0, 10)
 
 // Extracted days array
 const days = computed<DayData[]>(() => (attendanceData.value?.data as any)?.days ?? [])
+const live = computed<CheckInLiveStats | null>(() => attendanceData.value?.data?.live ?? null)
+
+const hourlyCheckOutTimeline = computed(() => {
+  const timeline = selectedDayData.value?.hourly_check_out_timeline ?? []
+  return {
+    labels: timeline.map(t => t.hour),
+    data: timeline.map(t => t.count),
+  }
+})
 
 // Total checked in across all days (de-duped by using top-level total or summing days)
 const overallCheckedIn = computed(() =>
