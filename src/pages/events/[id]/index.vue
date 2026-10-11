@@ -191,9 +191,28 @@
             <!-- Cost -->
             <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
               <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 8h6m-6 4h4m1 6H8a2 2 0 01-2-2V8a2 2 0 012-2h1.5L11 4h2l1.5 2H16a2 2 0 012 2v3" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l-3 3m0 0l-3-3m3 3v-7" />
+                <svg
+                  class="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                  >
+                  <!-- Larger receipt -->
+                  <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.8"
+                  d="M4.5 2.5v19l2.5-1.5 2.5 1.5 2.5-1.5 2.5 1.5 2.5-1.5 2.5 1.5v-19L17 4l-2.5-1.5L12 4 9.5 2.5 7 4 4.5 2.5Z"
+                  />
+
+                  <!-- Smaller, clearer pound sign -->
+                  <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M14 9a2 2 0 0 0-4 0v5m-1.5 0h5m-5 0c0 1.5-.5 2.5-1.5 3.5h7"
+                  />
                 </svg>
               </span>
               <div class="min-w-0">

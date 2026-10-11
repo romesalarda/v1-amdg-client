@@ -91,6 +91,17 @@
 								:attendee-errors="precheckAttendeeErrors"
 							/>
 
+							<div
+								v-if="currentAttendee && activeStepIndex === 2 && personalInfoIssueMessages.length"
+								class="mt-6 rounded-lg border border-red-200 bg-red-50 p-4"
+								role="alert"
+							>
+								<p class="text-sm font-semibold text-red-800">Please fix the following before continuing:</p>
+								<ul class="mt-2 list-disc space-y-1 pl-5 text-sm text-red-700">
+									<li v-for="message in personalInfoIssueMessages" :key="message">{{ message }}</li>
+								</ul>
+							</div>
+
 							<Transition name="step-fade" mode="out-in">
 								<div v-if="currentAttendee" :key="`step-${store.currentIndex}-${activeStepIndex}`" class="mt-8 space-y-6">
 									<RegisterStepAttendeeDetails
@@ -399,6 +410,8 @@ import { usePaymentMethodManager } from '~/composables/registration/usePaymentMe
 import { useStripeCheckoutFlow } from '~/composables/registration/useStripeCheckoutFlow'
 import { usePrecheckBooking, parsePrecheckAttendeeErrors, parsePrecheckBookingErrorCodes, formatPrecheckErrorCode, extractPrecheckResult } from '~/composables/registration/usePrecheckValidation'
 import type { PrecheckResult, PrecheckAttendeeError } from '~/composables/registration/usePrecheckValidation'
+import { usePersonalInfoCheck, extractPersonalInfoCheckResult, formatPersonalInfoIssue } from '~/composables/registration/usePersonalInfoCheck'
+import type { PersonalInfoCheckIssue } from '~/composables/registration/usePersonalInfoCheck'
 import { uploadMultipart } from '~/utils/upload'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatDate, formatTime } from '~/utils/time'
@@ -956,6 +969,49 @@ const effectiveStripePublishableKey = computed(() => {
 const idempotencyKey = ref(createIdempotencyKey())
 const isSaving = ref(false)
 const precheckMutation = usePrecheckBooking()
+const personalInfoCheckMutation = usePersonalInfoCheck()
+const personalInfoIssues = ref<PersonalInfoCheckIssue[]>([])
+watch([() => store.currentIndex, () => activeStepIndex.value], () => {
+	personalInfoIssues.value = []
+})
+const personalInfoIssueMessages = computed(() =>
+	personalInfoIssues.value.map((issue) => {
+		const source = issue.category === 'dietary_requirements'
+			? dietaryRequirements.value
+			: issue.category === 'medical_conditions'
+				? medicalConditions.value
+				: accessibilityRequirements.value
+		const label = (source as Array<{ id: number; label: string }>).find((entry) => entry.id === issue.item_id)?.label
+		const prefix = store.attendees.length > 1 ? `Attendee ${issue.attendee_index + 1} - ` : ''
+		return prefix + formatPersonalInfoIssue(issue, (_category, _id) => label)
+	})
+)
+
+// Returns true when the server confirms personal info is complete and will not be dropped.
+const runPersonalInfoCheck = async (attendees: AttendeeDraft[]): Promise<boolean> => {
+	try {
+		const response = await personalInfoCheckMutation.mutateAsync(attendees)
+		const result = extractPersonalInfoCheckResult(response)
+		if (!result) throw new Error('Unable to parse personal info check response.')
+		personalInfoIssues.value = result.valid ? [] : result.issues
+		if (!result.valid) {
+			toast.add({
+				title: 'Personal information incomplete',
+				description: personalInfoIssueMessages.value[0] || 'Please add details for each selected requirement.',
+				color: 'red',
+			})
+		}
+		return result.valid
+	} catch (checkError) {
+		toast.add({
+			title: 'Personal information check failed',
+			description: 'Unable to validate personal information right now. Please try again.',
+			color: 'red',
+		})
+		console.warn('Personal info check failed and was blocked', checkError)
+		return false
+	}
+}
 const precheckBookingErrors = ref<string[]>([])
 const precheckAttendeeErrors = ref<PrecheckAttendeeError[]>([])
 const checkoutResult = ref<any>(null)
@@ -1324,7 +1380,7 @@ const getCannotContinueMessage = () => {
 			return 'Alternative sign-in requires both type and identifier.'
 		}
 		if (!hasValidPersonalInfoItems(currentAttendee.value)) {
-			return 'Please add details for selected OTHER requirements.'
+			return 'Please add details for every selected dietary, medical or accessibility requirement (marked *).'
 		}
 		return 'Please complete personal information to continue.'
 	}
@@ -1560,6 +1616,10 @@ const handleNext = async () => {
 		return
 	}
 
+	if (activeStepIndex.value === 2) {
+		if (!(await runPersonalInfoCheck([currentAttendee.value]))) return
+	}
+
 	if (activeStepIndex.value === 0 || activeStepIndex.value === 1 || activeStepIndex.value === 2) {
 		if (!isPreviewMode.value) {
 			const passedPrecheck = await runStepPrecheck()
@@ -1633,6 +1693,7 @@ const handleCheckout = async () => {
 	// Only require payment method for paid bookings
 	if (!isBookingFree.value && !selectedPaymentMethodId.value) return
 	if (!(await pingBookingIntent(false))) return
+	if (!(await runPersonalInfoCheck(store.attendees))) return
 
 	// Run server-side precheck before committing to checkout
 	try {

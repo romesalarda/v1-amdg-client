@@ -329,10 +329,7 @@ export const isAttendeeValidForCheckout = (
  * Validates that if "OTHER" is selected (id: -1 or similar), details must be provided
  */
 export const validatePersonalInfoItem = (item: any): { isValid: boolean; error?: string } => {
-  // If it's an "OTHER" option (typically has a specific ID), details are required
-  const isOtherOption = item.id === -1 || item.id === 'other'
-
-  if (isOtherOption && (!item.details || item.details.trim() === '')) {
+  if (!item.details || String(item.details).trim() === '') {
     return {
       isValid: false,
       error: 'Please provide details for this requirement',

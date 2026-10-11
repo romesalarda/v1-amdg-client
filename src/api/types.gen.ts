@@ -12233,7 +12233,7 @@ export type MedicalConditionItemRequest = {
      */
     id: number;
     /**
-     * Additional details about this requirement
+     * Details about this requirement (required - must not be blank)
      */
     details?: string | null;
     /**
@@ -18730,7 +18730,7 @@ export type PersonalInfoItemRequest = {
      */
     id: number;
     /**
-     * Additional details about this requirement
+     * Details about this requirement (required - must not be blank)
      */
     details?: string | null;
     /**
@@ -33519,6 +33519,29 @@ export type BookingsCheckoutPreviewResponses = {
 };
 
 export type BookingsCheckoutPreviewResponse = BookingsCheckoutPreviewResponses[keyof BookingsCheckoutPreviewResponses];
+
+export type BookingsPersonalInfoCheckData = {
+    body?: {
+        [key: string]: unknown;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/bookings/list/personal-info-check/';
+};
+
+export type BookingsPersonalInfoCheckErrors = {
+    /**
+     * Personal info has issues
+     */
+    400: unknown;
+};
+
+export type BookingsPersonalInfoCheckResponses = {
+    /**
+     * All personal info is valid
+     */
+    200: unknown;
+};
 
 export type BookingsListPingIntentRetrieveData = {
     body?: never;

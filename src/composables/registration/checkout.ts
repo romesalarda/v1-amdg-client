@@ -47,12 +47,6 @@ const normalizeText = (value: string | null | undefined): string | undefined => 
   return trimmed.length > 0 ? trimmed : undefined
 }
 
-const hasPersonalInfoItemData = (item: PersonalInfoItemDraft): boolean =>
-  Boolean(normalizeText(item.details) || normalizeText(item.notes))
-
-const hasMedicalConditionItemData = (item: MedicalConditionItemDraft): boolean =>
-  Boolean(item.severity || normalizeText(item.details) || normalizeText(item.notes))
-
 type EmergencyRelationship = NonNullable<AttendeePersonalInfoDraftRequest['emergency_contact']>['relationship']
 
 const isEmergencyRelationship = (value: string | undefined): value is EmergencyRelationship =>
@@ -76,17 +70,11 @@ const buildPersonalInfo = (info: PersonalInfoDraft | undefined): AttendeePersona
         }
       : undefined
 
-  const dietaryRequirements = info.dietaryRequirements
-    .filter(hasPersonalInfoItemData)
-    .map(buildPersonalInfoItem)
+  const dietaryRequirements = info.dietaryRequirements.map(buildPersonalInfoItem)
 
-  const medicalConditions = info.medicalConditions
-    .filter(hasMedicalConditionItemData)
-    .map(buildMedicalConditionItem)
+  const medicalConditions = info.medicalConditions.map(buildMedicalConditionItem)
 
-  const accessibilityRequirements = info.accessibilityRequirements
-    .filter(hasPersonalInfoItemData)
-    .map(buildPersonalInfoItem)
+  const accessibilityRequirements = info.accessibilityRequirements.map(buildPersonalInfoItem)
 
   const emergencyFirstName = normalizeText(info.emergencyContact?.first_name)
   const emergencyLastName = normalizeText(info.emergencyContact?.last_name)

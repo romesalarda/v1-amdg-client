@@ -72,14 +72,43 @@
 
 				<div v-if="currentAttendee.personalInfo.alternativeSigninIdentifier" class="mt-4">
 					<label class="mb-1 block text-sm font-medium text-gray-700">Alternative sign-in identifier</label>
-					<UInput
-						:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier.identifier"
-						placeholder="Enter identifier value"
-						@update:model-value="(value) => {
-							if (!currentAttendee.personalInfo.alternativeSigninIdentifier) return
-							currentAttendee.personalInfo.alternativeSigninIdentifier.identifier = String(value || '')
-						}"
-					/>
+					<div class="flex items-center gap-2">
+						<UInput
+							class="flex-1"
+							:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier.identifier"
+							placeholder="Enter or scan identifier value"
+							@update:model-value="(value) => {
+								if (!currentAttendee.personalInfo.alternativeSigninIdentifier) return
+								currentAttendee.personalInfo.alternativeSigninIdentifier.identifier = String(value || '')
+							}"
+						/>
+						<UButton
+							icon="i-heroicons-qr-code"
+							color="gray"
+							variant="solid"
+							title="Scan QR code"
+							@click="identifierScan.open()"
+						>
+							Scan
+						</UButton>
+					</div>
+					<UModal v-model="identifierScan.isScanning.value" @close="identifierScan.close()">
+						<div class="space-y-3 p-4">
+							<h4 class="text-sm font-semibold text-slate-900">Scan identifier QR code</h4>
+							<div class="relative aspect-square overflow-hidden rounded-xl bg-slate-900">
+								<ClientOnly>
+									<QrcodeStream
+										v-if="identifierScan.isScanning.value"
+										class="absolute inset-0 h-full w-full object-cover"
+										@detect="identifierScan.onDetect"
+										@error="identifierScan.onError"
+									/>
+								</ClientOnly>
+							</div>
+							<p v-if="identifierScan.error.value" class="text-xs text-red-600">{{ identifierScan.error.value }}</p>
+							<UButton color="gray" variant="soft" block @click="identifierScan.close()">Cancel</UButton>
+						</div>
+					</UModal>
 					<p
 						v-if="findAlternativeSigninOption(alternativeSigninOptions, currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId)?.formatMatch"
 						class="mt-2 text-xs text-slate-500"
@@ -140,7 +169,7 @@
 							<div>
 								<label class="mb-1 block text-xs font-semibold text-gray-700">
 									Details
-									<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+									<span class="text-red-500">*</span>
 								</label>
 								<textarea
 									:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.dietaryRequirements)"
@@ -149,7 +178,7 @@
 									class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
 									rows="2"
 								/>
-								<p class="mt-1 text-xs text-gray-500">Visible to event organizers and catering team</p>
+								<p class="mt-1 text-xs text-gray-500">Visible to event organisers and catering team</p>
 								<p
 									v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.dietaryRequirements, requirement.id)"
 									class="mt-1 text-xs text-red-600"
@@ -219,8 +248,8 @@
 							</div>
 							<div>
 								<label class="mb-1 block text-xs font-semibold text-gray-700">
-									Details (public-facing)
-									<span v-if="isOtherOption(condition.id)" class="text-red-500">*</span>
+									Details
+									<span class="text-red-500">*</span>
 								</label>
 								<textarea
 									:value="getDetailsForItem(condition.id, currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[])"
@@ -229,7 +258,7 @@
 									class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
 									rows="2"
 								/>
-								<p class="mt-1 text-xs text-gray-500">Visible to event organizers and first aid team</p>
+								<p class="mt-1 text-xs text-gray-500">Visible to event organisers and first aid team</p>
 								<p
 									v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.medicalConditions as unknown as PersonalInfoItemDraft[], condition.id)"
 									class="mt-1 text-xs text-red-600"
@@ -284,8 +313,8 @@
 						>
 							<div>
 								<label class="mb-1 block text-xs font-semibold text-gray-700">
-									Details (public-facing)
-									<span v-if="isOtherOption(requirement.id)" class="text-red-500">*</span>
+									Details
+									<span class="text-red-500">*</span>
 								</label>
 								<textarea
 									:value="getDetailsForItem(requirement.id, currentAttendee.personalInfo.accessibilityRequirements)"
@@ -294,7 +323,7 @@
 									class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-primary focus:border-primary"
 									rows="2"
 								/>
-								<p class="mt-1 text-xs text-gray-500">Visible to event organizers and accessibility team</p>
+								<p class="mt-1 text-xs text-gray-500">Visible to event organisers and accessibility team</p>
 								<p
 									v-if="getPersonalInfoItemValidationError(currentAttendee.personalInfo.accessibilityRequirements, requirement.id)"
 									class="mt-1 text-xs text-red-600"
@@ -400,6 +429,13 @@
 <script setup lang="ts">
 import type { AttendeeDraft, PersonalInfoItemDraft } from '~/stores/registration'
 import OrganisationSelect from '~/components/ui/OrganisationSelect.vue'
+import { useQRScan } from '~/composables/qrcode/useQRScan'
+
+const identifierScan = useQRScan((value) => {
+	if (props.currentAttendee.personalInfo.alternativeSigninIdentifier) {
+		props.currentAttendee.personalInfo.alternativeSigninIdentifier.identifier = value
+	}
+})
 
 const props = defineProps<{
 	currentAttendee: AttendeeDraft
