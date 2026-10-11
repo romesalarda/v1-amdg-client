@@ -82,7 +82,7 @@
     <div class="flex justify-end gap-2 pt-2">
       <button
         type="button"
-        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:bg-primary hover:text-white"
+        class="rounded-xl border border-primary bg-white px-4 py-2 text-[11px] font-black uppercase tracking-widest text-primary transition-all hover:text-white"
         @click="emit('cancel')"
       >
         Cancel

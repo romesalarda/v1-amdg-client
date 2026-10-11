@@ -108,7 +108,10 @@
             </div>
           </div>
         </div>
-
+        
+        <div v-if="eventSettings?.data?.payment_enabled === false" class="col-span-full bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-sm font-medium text-yellow-800">
+          Payment functionality is currently disabled for this event but you will see any transactions that have already been recorded.
+        </div>
         <!-- Main Table Section -->
         <section class="bg-white border border-deep-navy/10 rounded-2xl shadow-drawn overflow-hidden">
           <!-- Table Header & Toolbar -->
@@ -128,6 +131,7 @@
                 <button
                   @click="showCreatePaymentModal = true"
                   class="px-4 py-2 text-sm font-semibold rounded-xl bg-primary text-white hover:bg-primary/90 transition-colors flex items-center gap-2"
+                  v-if="eventSettings?.data?.payment_enabled"
                 >
                   <span class="material-symbols-outlined text-lg">add</span>
                   Create Payment
@@ -685,6 +689,7 @@ import {
   useMarkPaymentFailed,
   usePartialUpdatePayment,
 } from '~/composables/resources/payments/payments'
+import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import { usePaymentOverview, useRevenueOverview } from '~/composables/statistics/payments/payment-statistics'
 import {
   getPaymentStatusLabel,
@@ -719,6 +724,7 @@ const id = computed(() => String(route.params.id))
 
 // Fetch event data
 const { data: event } = useEvent(id)
+const { data: eventSettings } = useEventSettings(id)
 
 // Tab state
 const activeTab = ref('payments')

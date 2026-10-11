@@ -311,14 +311,16 @@
                         Leadership
                       </span>
                     </div>
-
-                    <NuxtLink 
-                      :to="`/events/${event.url_safe_title}/m/dashboard`"
-                      target="_blank"
-                      class="text-[11px] font-black uppercase tracking-widest text-blue-600 hover:underline underline-offset-4 text-right sm:text-left"
-                    >
-                      Manage Event
-                    </NuxtLink>
+                    <div class="flex items-center justify-end gap-2 sm:justify-start">
+                      <NuxtLink
+                        :to="`/events/${event.url_safe_title}/m/dashboard`"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center justify-center gap-1 rounded-md border border-blue-600 px-3 py-2 text-[11px] font-black uppercase tracking-widest text-blue-600 transition hover:bg-blue-50"
+                      >
+                        DASHBOARD
+                      </NuxtLink>
+                    </div>
                   </div>
                 </div>
               </div>
