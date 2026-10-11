@@ -1,7 +1,7 @@
 import { ref, computed, reactive, watch } from 'vue'
 import type { Ref } from 'vue'
 import type { EventDetail, ProductList } from '~/api/types.gen'
-import { useProducts } from '~/composables/resources/products/products'
+import { useProducts, useDeleteProduct } from '~/composables/resources/products/products'
 import { useProductsOverview } from '~/composables/statistics/products/product-statistics'
 import { useTablePagination } from '~/composables/ui/useTablePagination'
 import { useTableSearch } from '~/composables/ui/useTableSearch'
@@ -15,6 +15,7 @@ import {
 } from '~/schemas/events/productConstants'
 
 export function useProductsTab(eventId: Ref<string>, event: Ref<EventDetail | undefined>) {
+  const toast = useToast()
   const { currentPage, pageSize, resetPage } = useTablePagination(25)
   const { searchQuery, debouncedSearch, clearSearch } = useTableSearch(resetPage)
   const { exportProductsToCSV: _exportProductsToCSV } = useCsvExport()
@@ -129,9 +130,65 @@ export function useProductsTab(eventId: Ref<string>, event: Ref<EventDetail | un
     isPreviewOpen.value = true
   }
 
-  function deleteProduct(product: ProductList) {
-    // TODO: Implement delete confirmation
-    console.log('Delete product:', product)
+  const deleteProductMutation = useDeleteProduct()
+  const isDeleting = ref(false)
+
+  function clearSelection() {
+    selectedProducts.value = []
+    selectAll.value = false
+  }
+
+  async function deleteProduct(product: ProductList) {
+    if (!product.product_id || isDeleting.value) return
+    if (!window.confirm(`Delete "${product.title}"? This cannot be undone.`)) return
+
+    isDeleting.value = true
+    try {
+      await deleteProductMutation.mutateAsync(product.product_id)
+      selectedProducts.value = selectedProducts.value.filter((id) => id !== product.product_id)
+      toast.add({ title: 'Product deleted', description: `"${product.title}" was deleted`, color: 'green' })
+    } catch (error: any) {
+      toast.add({
+        title: 'Delete failed',
+        description: error?.message || 'Failed to delete product',
+        color: 'red',
+      })
+    } finally {
+      isDeleting.value = false
+    }
+  }
+
+  async function bulkDeleteProducts() {
+    const ids = [...selectedProducts.value]
+    if (ids.length === 0 || isDeleting.value) return
+    if (!window.confirm(`Delete ${ids.length} selected product${ids.length === 1 ? '' : 's'}? This cannot be undone.`)) return
+
+    isDeleting.value = true
+    try {
+      const results = await Promise.allSettled(ids.map((id) => deleteProductMutation.mutateAsync(id)))
+      const failedIds = ids.filter((_, i) => results[i].status === 'rejected')
+      const deletedCount = ids.length - failedIds.length
+
+      selectedProducts.value = failedIds
+      selectAll.value = false
+
+      if (deletedCount > 0) {
+        toast.add({
+          title: 'Products deleted',
+          description: `${deletedCount} product${deletedCount === 1 ? '' : 's'} deleted`,
+          color: 'green',
+        })
+      }
+      if (failedIds.length > 0) {
+        toast.add({
+          title: 'Some deletions failed',
+          description: `${failedIds.length} product${failedIds.length === 1 ? '' : 's'} could not be deleted`,
+          color: 'red',
+        })
+      }
+    } finally {
+      isDeleting.value = false
+    }
   }
 
   function formatCurrency(amount?: number | string | null) {
@@ -180,7 +237,11 @@ export function useProductsTab(eventId: Ref<string>, event: Ref<EventDetail | un
     isPreviewOpen,
     selectedProduct,
     viewProductDetails,
+    // Deletion
+    isDeleting,
     deleteProduct,
+    bulkDeleteProducts,
+    clearSelection,
     // Helpers
     formatCurrency,
     getProductStockStatus,

@@ -64,6 +64,26 @@
         </div>
 
         <div class="flex items-center gap-2">
+          <template v-if="tab.selectedProducts.value.length > 0">
+            <UButton
+              size="sm"
+              variant="ghost"
+              color="gray"
+              @click="tab.clearSelection()"
+            >
+              Clear selection
+            </UButton>
+            <UButton
+              size="sm"
+              variant="solid"
+              color="red"
+              icon="i-heroicons-trash"
+              :loading="tab.isDeleting.value"
+              @click="tab.bulkDeleteProducts()"
+            >
+              Delete {{ tab.selectedProducts.value.length }} selected
+            </UButton>
+          </template>
           <UButton
             size="sm"
             variant="ghost"

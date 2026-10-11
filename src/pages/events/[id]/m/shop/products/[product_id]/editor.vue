@@ -1,28 +1,9 @@
 <template>
   <EventManagementLayout :event-id="eventId" :event="event?.data">
     <div class="max-w-7xl mx-auto pb-32">
-      <!-- Header -->
-      <!-- <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-black text-deep-navy uppercase">
-            {{ isNewProduct ? 'Create Product' : 'Edit Product' }}
-          </h1>
-          <p class="text-sm text-gray-500 mt-1">
-            {{ isNewProduct ? 'Add a new product to your event shop' : 'Update product details and variants' }}
-          </p>
-        </div>
-        <UButton
-          variant="ghost"
-          color="gray"
-          icon="i-heroicons-arrow-left"
-          @click="navigateTo(`/events/${eventId}/m/shop/dashboard`)"
-        >
-          Back to Shop
-        </UButton>
-      </div> -->
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div v-if="isLoading && !isNewProduct" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div class="lg:col-span-2 space-y-4">
           <USkeleton class="h-96 w-full" />
           <USkeleton class="h-64 w-full" />
@@ -59,6 +40,9 @@
             <p class="text-sm text-gray-500 mt-1">
               {{ isNewProduct ? 'Add a new product to your event shop' : 'Update product details and variants' }}
             </p>
+          </div>
+          <div v-if="variantsData?.data?.count == 0" class="col-span-full bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-sm font-medium text-yellow-800">
+                Note: Add variants to this product to make it available for purchase.
           </div>
           <div class="overflow-x-auto md:overflow-x-scroll md:scrollbar-thin">
             <nav class="flex gap-1" aria-label="Tabs">
@@ -149,7 +133,7 @@
                   v-model="form.is_active"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
-                  :disabled="variantsData?.data?.count == 0"
+                  :disabled="variantsData?.data?.count == 0 || isNewProduct"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Active</div>
@@ -162,13 +146,16 @@
                   v-model="form.verified"
                   type="checkbox"
                   class="rounded border-gray-300 text-primary focus:ring-primary w-5 h-5"
-                  :disabled="variantsData?.data?.count == 0"
+                  :disabled="variantsData?.data?.count == 0 || isNewProduct"
                 />
                 <div>
                   <div class="text-sm font-semibold text-gray-700">Verified</div>
                   <div class="text-xs text-gray-500">Product has been reviewed and approved</div>
                 </div>
               </label>
+            </div>
+            <div v-if="isNewProduct" class="col-span-full bg-yellow-50 border-2 border-yellow-400 rounded-xl p-4 text-sm font-medium text-yellow-800">
+              Save the product first and create variants to enable this product.
             </div>
           </div>
 
@@ -1442,7 +1429,7 @@
               color="gray"
               @click="navigateTo(`/events/${eventId}/m/shop/dashboard`)"
             >
-              Cancel
+              Back
             </UButton>
             <UButton
               variant="solid"
@@ -2308,9 +2295,7 @@ const eventCategoryNames = computed(() => {
 
 // Product Data (only load if editing existing product)
 const { data: productData, isLoading, error } = useProduct(
-  computed(() => {
-    return productId.value
-  })
+  computed(() => isNewProduct.value ? undefined : productId.value)
 )
 
 // Variants Data (only load if editing existing product)
@@ -3346,9 +3331,10 @@ async function saveAll() {
   const createdProduct = await saveProduct()
   
   if (createdProduct && isNewProduct.value) {
+    console.log('Created product:', createdProduct)
     // If we just created a product, navigate to its edit page
     const newProductId = (createdProduct as any).product_id
-    await router.push(`/events/${eventId.value}/m/shop/products/${newProductId}/editor`)
+    await router.push(`/events/${eventId.value}/m/shop/products`)
     return
   }
 

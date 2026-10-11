@@ -191,29 +191,35 @@
             <!-- Cost -->
             <div class="flex items-center gap-4 px-5 py-4 sm:p-6">
               <span class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-blue-500 flex items-center justify-center shrink-0">
+                
                 <svg
-                  class="w-5 h-5 sm:w-6 sm:h-6 text-white"
+                  class="w-8 h-8 sm:w-8 sm:h-8 text-white"
+                  viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                  >
-                  <!-- Larger receipt -->
-                  <path
+                  stroke-width="1.6"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                  stroke-width="1.8"
-                  d="M4.5 2.5v19l2.5-1.5 2.5 1.5 2.5-1.5 2.5 1.5 2.5-1.5 2.5 1.5v-19L17 4l-2.5-1.5L12 4 9.5 2.5 7 4 4.5 2.5Z"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <!-- Ticket shape with rounded ends and notches -->
+                  <path
+                    d="M4 7.25A2.25 2.25 0 0 0 6.25 5h11.5A2.25 2.25 0 0 0 20 7.25v2a2.25 2.25 0 0 0 0 4.5v2A2.25 2.25 0 0 0 17.75 18H6.25A2.25 2.25 0 0 0 4 15.75v-2a2.25 2.25 0 0 0 0-4.5z"
                   />
 
-                  <!-- Smaller, clearer pound sign -->
+                  <!-- Perforation -->
                   <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="1.5"
-                  d="M14 9a2 2 0 0 0-4 0v5m-1.5 0h5m-5 0c0 1.5-.5 2.5-1.5 3.5h7"
+                    d="M15.5 5v13"
+                    stroke-dasharray="1.5 2"
+                  />
+
+                  <!-- Pound symbol -->
+                  <path
+                    d="M12.9 9a2.15 2.15 0 0 0-4.3 0v3.1c0 1.3-.45 2.1-1.1 2.9h5.2M7.9 12.1h4.2"
+                    stroke-width="1.5"
                   />
                 </svg>
+
               </span>
               <div class="min-w-0">
                 <p class="text-[10px] font-black uppercase tracking-wider text-deep-navy/50 mb-1">Registration Fee</p>
