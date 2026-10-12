@@ -9,11 +9,12 @@
       >
         <UAvatar
           :alt="user.name"
+          :src="getAvatarUrl(user.profile_picture_url)"
           size="sm"
           :ui="{ rounded: 'rounded-full ring-2 ring-white dark:ring-gray-900' }"
         >
           <template #default>
-            {{ getUserInitials(user.name) }}
+            <!-- {{ getUserInitials(user.name) }} -->
           </template>
         </UAvatar>
       </UTooltip>
@@ -39,10 +40,13 @@
 </template>
 
 <script setup lang="ts">
+import { resolveImageUrl } from '~/utils/image'
+
 interface User {
   id: number
   email: string
   name: string
+  profile_picture_url?: string | null
 }
 
 interface Props {
@@ -69,7 +73,9 @@ const remainingUsersText = computed(() => {
 
 const activeUsersText = computed(() => {
   const count = props.activeUsers.length
-  return count === 1 ? '1 other user viewing' : `${count} other users viewing`
+  return count === 1
+    ? '1 other person on this page'
+    : `${count} other people on this page`
 })
 
 function getUserInitials(name: string): string {
@@ -79,5 +85,9 @@ function getUserInitials(name: string): string {
     .join('')
     .toUpperCase()
     .substring(0, 2)
+}
+
+function getAvatarUrl(url?: string | null): string | undefined {
+  return url ? resolveImageUrl(url, '') : undefined
 }
 </script>

@@ -94,6 +94,36 @@
       >
         <UIcon :name="tab.icon" class="w-5 h-5" />
         <span class="flex-1">{{ tab.label }}</span>
+        <div
+          v-if="usersForTab(tab.path).length"
+          class="flex items-center -space-x-1.5"
+          :aria-label="`${usersForTab(tab.path).length} people on ${tab.label}`"
+        >
+          <UTooltip
+            v-for="user in usersForTab(tab.path).slice(0, 2)"
+            :key="user.id"
+            :text="user.name"
+          >
+            <UAvatar
+              :alt="user.name"
+              :src="getPresenceAvatarUrl(user.profile_picture_url)"
+              size="xs"
+              :ui="{ rounded: 'rounded-full ring-1 ring-deep-navy' }"
+            >
+              <!-- {{ getUserInitials(user.name) }} -->
+            </UAvatar>
+          </UTooltip>
+          <UTooltip
+            v-if="usersForTab(tab.path).length > 2"
+            :text="usersForTab(tab.path).slice(2).map(user => user.name).join(', ')"
+          >
+            <span
+              class="flex h-6 w-6 items-center justify-center rounded-full bg-blue-500 text-[10px] font-bold text-white ring-1 ring-deep-navy"
+            >
+              +{{ usersForTab(tab.path).length - 2 }}
+            </span>
+          </UTooltip>
+        </div>
         <span v-if="(tab as any).policyDisabled" class="material-symbols-outlined text-sm text-amber-400/80 flex-shrink-0">lock</span>
       </NuxtLink>
     </nav>
@@ -163,6 +193,11 @@
           {{ event.organisation_name }}
         </span>
 
+        <PresenceIndicator
+          :active-users="otherUsersOnCurrentSection"
+          :max-visible="3"
+        />
+
         <NuxtLink
           :to="`/events/${eventId}/m/notifications`"
           class="text-xs text-blue-500 hover:underline flex items-center gap-1 shrink-0"
@@ -189,6 +224,8 @@ import Navbar from '~/components/common/Navbar.vue'
 import { useEventSettings } from '~/composables/resources/events/eventSettings'
 import { useOrganisationPolicy } from '~/composables/resources/organisation/organisationPolicy'
 import { useSidebarStore } from '~/stores/sidebar'
+import { useAuthStore } from '~/stores/auth'
+import { useDashboardPresence } from '~/composables/websockets/events/useDashboardPresence'
 import type { EventDetail } from '~/api/types.gen'
 
 const props = defineProps<{
@@ -205,6 +242,7 @@ const orgPolicy = computed(() => policyData.value?.data)
 
 const route = useRoute()
 const sidebarStore = useSidebarStore()
+const authStore = useAuthStore()
 const sidebarOpen = computed({
   get: () => sidebarStore.isOpen,
   set: (val) => val ? sidebarStore.open() : sidebarStore.close()
@@ -330,6 +368,42 @@ const currentPageTitle = computed(() => {
   const activeTab = tabs.value.find(tab => isActive(tab.path))
   return activeTab?.label || 'Event Management'
 })
+
+const activeSection = computed(() => {
+  const managementPath = `/events/${props.eventId}/m/`
+  if (!route.path.startsWith(managementPath)) return 'other'
+  return route.path.slice(managementPath.length).split('/')[0] || 'dashboard'
+})
+
+const dashboardPresence = useDashboardPresence(
+  computed(() => props.eventId),
+  activeSection,
+)
+
+const otherUsersOnCurrentSection = computed(() =>
+  dashboardPresence.usersForSection(activeSection.value).filter(
+    user => user.id !== authStore.user?.id,
+  ),
+)
+
+function usersForTab(path: string) {
+  return dashboardPresence
+    .usersForSection(path.split('/')[0])
+    .filter(user => user.id !== authStore.user?.id)
+}
+
+function getUserInitials(name: string): string {
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
+}
+
+function getPresenceAvatarUrl(url?: string | null): string | undefined {
+  return url ? resolveImageUrl(url, '') : undefined
+}
 
 const getStatusColor = (status: string): 'gray' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange' => {
   const colors: Record<string, 'gray' | 'blue' | 'green' | 'red' | 'yellow' | 'purple' | 'orange'> = {
