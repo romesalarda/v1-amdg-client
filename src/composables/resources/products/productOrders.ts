@@ -12,6 +12,7 @@ import {
   productsOrdersAddItemCreate,
   productsOrdersCancelCreate,
   productsOrdersCheckoutCreate,
+  productsOrdersExtendCreate,
   productsOrdersCompleteCreate,
   productsOrdersReserveBankTransferPayment,
   productsOrdersRemoveItemCreate,
@@ -40,6 +41,7 @@ import type {
   ProductsOrdersPreviewPricingCreateData,
 } from '~/api/types.gen'
 import { extractApiErrorMessage } from '~/utils/errors'
+import { useBookingShopStore } from '~/stores/bookingShop'
 
 const QUERY_KEY = ['productOrders'] as const
 
@@ -249,7 +251,14 @@ export function useRemoveProductOrderItem() {
         path: { order_id: String(orderId) },
         body: { order_item_id: orderItemId } as ProductsOrdersRemoveItemCreateData['body'],
       }),
-    onSuccess: (_, variables) => {
+    onSuccess: (response, variables) => {
+      const deleted = (response?.data as { order_deleted?: boolean } | undefined)?.order_deleted
+      if (deleted) {
+        queryClient.removeQueries({ queryKey: [...QUERY_KEY, 'detail', variables.orderId] })
+        useBookingShopStore().setActiveOrder(null)
+        queryClient.invalidateQueries({ queryKey: [...QUERY_KEY, 'list'] })
+        return
+      }
       queryClient.invalidateQueries({ queryKey: QUERY_KEY })
       queryClient.invalidateQueries({
         queryKey: [...QUERY_KEY, 'detail', variables.orderId],
@@ -278,6 +287,18 @@ export function useCancelProductOrder() {
 /**
  * Checkout an order with payment
  */
+export function useExtendProductOrderHold() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ orderId }: { orderId: string | number }) =>
+      productsOrdersExtendCreate({ path: { order_id: String(orderId) } }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY })
+    },
+  })
+}
+
 export function useCheckoutProductOrder() {
   const queryClient = useQueryClient()
 

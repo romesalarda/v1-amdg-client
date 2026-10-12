@@ -26,6 +26,13 @@
 				</div>
 			</section>
 
+			<OrderHoldTimer
+				:order="order"
+				:shop-path="`/events/${eventId}/b/${bookingReference}/shop`"
+				guard-leave
+				:paused="isProcessingCheckout"
+			/>
+
 			<section v-if="!order" class="rounded-2xl border border-deep-navy/10 bg-white p-5 text-sm text-deep-navy/70">
 				No draft cart found. Add items before checkout.
 			</section>
@@ -362,6 +369,7 @@ import { usePaymentMethods } from '~/composables/resources/payments/paymentMetho
 import { toMultipartFormData } from '~/composables/registration/checkout'
 import { useOrderDiscountCode } from '~/composables/shop/useOrderDiscountCode'
 import BankTransferPaymentDetails from '~/components/common/BankTransferPaymentDetails.vue'
+import OrderHoldTimer from '~/components/events/booking/shop/OrderHoldTimer.vue'
 
 definePageMeta({
 	layout: 'booking',
@@ -634,18 +642,6 @@ watch(
 	}
 )
 
-watch(
-	[() => isBankTransferMethod.value, () => activeOrderId.value, () => selectedPaymentMethodId.value],
-	([bankSelected, orderId, methodId]) => {
-		if (!bankSelected || !orderId || !methodId) {
-			clearReservedBankTransferPayment()
-			return
-		}
-		void reserveBankTransferPayment(false)
-	},
-	{ immediate: true }
-)
-
 const canSubmitCheckout = computed(() => {
 	if (isCheckoutLocked.value) return false
 	if (!hasAcceptedTerms.value) return false
@@ -744,7 +740,19 @@ const reserveBankTransferPayment = async (force: boolean = false) => {
 	}
 }
 
-const openSuccessModal = (title: string, message: string) => {
+watch(
+	[() => isBankTransferMethod.value, () => activeOrderId.value, () => selectedPaymentMethodId.value],
+	([bankSelected, orderId, methodId]) => {
+		if (!bankSelected || !orderId || !methodId) {
+			clearReservedBankTransferPayment()
+			return
+		}
+		void reserveBankTransferPayment(false)
+	},
+	{ immediate: true }
+)
+
+const openSuccessModal =  (title: string, message: string) => {
 	successModalTitle.value = title
 	successModalMessage.value = message
 	showSuccessModal.value = true

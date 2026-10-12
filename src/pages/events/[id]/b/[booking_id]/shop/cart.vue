@@ -33,6 +33,11 @@
 				</div>
 			</section>
 
+			<OrderHoldTimer
+				:order="order"
+				:shop-path="`/events/${eventId}/b/${bookingReference}/shop`"
+			/>
+
 			<section v-if="activeOrderQuery.isLoading.value" class="rounded-2xl border border-deep-navy/10 bg-white p-5 text-sm text-deep-navy/70">
 				Loading cart...
 			</section>
@@ -135,6 +140,7 @@
 import { useBookingShop } from '~/composables/booking/useBookingShop'
 import { useRemoveProductOrderItem, useUpdateProductOrderItem } from '~/composables/resources/products/productOrders'
 import { formatMoney } from '~/utils/money'
+import OrderHoldTimer from '~/components/events/booking/shop/OrderHoldTimer.vue'
 
 definePageMeta({
 	layout: 'booking',
@@ -245,7 +251,7 @@ async function removeItem(orderItemId: number) {
 			orderId: activeOrderId.value,
 			orderItemId,
 		})
-		await activeOrderQuery.refetch()
+		if (activeOrderId.value) await activeOrderQuery.refetch()
 
 		toast.add({
 			title: 'Item removed',

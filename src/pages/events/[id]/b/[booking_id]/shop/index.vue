@@ -33,6 +33,10 @@
 		</section>
 
 		<div class="mx-auto max-w-screen-xl space-y-5 px-4 py-6 md:px-6">
+			<OrderHoldTimer
+				:order="cartOrder"
+				:shop-path="`/events/${eventId}/b/${bookingReference}/shop`"
+			/>
 
 			<section v-if="bookingQuery.isLoading.value" class="rounded-2xl border border-deep-navy/10 bg-white p-5 text-sm text-deep-navy/70">
 				Loading booking context...
@@ -247,7 +251,7 @@
 												<dt>Items</dt>
 												<dd class="font-semibold">{{ cartItemCount }}</dd>
 											</div>
-											<div class="flex items-center justify-between">
+											<div class="flex items-center justify-between" v-if="cartOrder?.status != 'draft'">
 												<dt>Status</dt>
 												<dd class="font-semibold capitalize">{{ cartOrder.status || 'draft' }}</dd>
 											</div>
@@ -354,6 +358,7 @@ import { useProducts } from '~/composables/resources/products/products'
 import { useEvent } from '~/composables/resources/events'
 import { onImageError, resolveImageUrl } from '~/utils/image'
 import { formatMoney } from '~/utils/money'
+import OrderHoldTimer from '~/components/events/booking/shop/OrderHoldTimer.vue'
 
 definePageMeta({
 	layout: 'booking',

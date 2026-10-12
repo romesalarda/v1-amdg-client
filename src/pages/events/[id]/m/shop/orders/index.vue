@@ -544,6 +544,40 @@
         </div>
       </div>
     </div>
+    <div :class="['fixed bottom-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-deep-navy/10 shadow-2xl transition-all duration-300', sidebarStore.isOpen ? 'left-64' : 'left-0']">
+      <div class="max-w-screen-xl mx-auto px-8 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <UIcon name="i-heroicons-shopping-bag" class="w-5 h-5 text-primary" />
+            <div>
+              <p class="text-xs font-black text-primary uppercase tracking-widest">Shop Dashboard</p>
+              <p class="text-[10px] text-deep-navy/60 font-medium">Manage products, orders, and categories</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <UButton
+              size="sm"
+              variant="outline"
+              color="gray"
+              icon="i-heroicons-clipboard-document-list"
+              @click="navigateTo(`/events/${id}/m/shop/inventory`)"
+            >
+              Inventory
+            </UButton>
+            <UButton
+              size="sm"
+              variant="outline"
+              color="gray"
+              icon="i-heroicons-shopping-cart"
+              @click="navigateTo(`/events/${id}/m/shop/orders`)"
+            >
+              View Orders
+            </UButton>
+          </div>
+        </div>
+      </div>
+    </div>
   </EventManagementLayout>
 </template>
 
@@ -551,6 +585,8 @@
 import { DateTime } from 'luxon'
 import type { OrderList, ProductsOrdersListData } from '~/api/types.gen'
 import { useEvent } from '~/composables/resources/events/events'
+import { useSidebarStore } from '~/stores/sidebar'
+
 import { useProductOrders, useCancelProductOrder, useCompleteProductOrder, useDeleteProductOrder, useUpdateProductOrderStatus } from '~/composables/resources/products/productOrders'
 import {
   useOrderStatusDistribution,
@@ -578,6 +614,7 @@ const route = useRoute()
 const id = computed(() => route.params.id as string)
 const toast = useToast()
 type OrderStatus = NonNullable<OrderList['status']>
+const sidebarStore = useSidebarStore()
 
 const DEFAULT_FILTER_STATUSES: OrderStatus[] = ['pending', 'processing', 'completed', 'pending_refund']
 

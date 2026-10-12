@@ -12422,6 +12422,20 @@ export type OrderDetail = {
      * Whether this order has been refunded
      */
     readonly is_refunded: boolean;
+    /**
+     * When the stock hold lapses; null if not time limited
+     */
+    readonly expires_at: string;
+    /**
+     * Set if the order was cancelled because its hold expired
+     */
+    readonly expired_at: string;
+    /**
+     * Seconds left on the hold, computed server-side to avoid client clock skew
+     */
+    readonly seconds_remaining: number | null;
+    readonly can_extend_hold: boolean;
+    readonly extension_count: number;
     payment?: number | null;
     created_by?: number | null;
     readonly created_by_name: string | null;
@@ -12532,6 +12546,20 @@ export type OrderList = {
      * Whether this order has been refunded
      */
     readonly is_refunded: boolean;
+    /**
+     * When the stock hold lapses; null if not time limited
+     */
+    readonly expires_at: string;
+    /**
+     * Set if the order was cancelled because its hold expired
+     */
+    readonly expired_at: string;
+    /**
+     * Seconds left on the hold, computed server-side to avoid client clock skew
+     */
+    readonly seconds_remaining: number | null;
+    readonly can_extend_hold: boolean;
+    readonly extension_count: number;
 };
 
 export type OrderPricingPreviewItemRequest = {
@@ -54973,6 +55001,32 @@ export type ProductsOrdersCompleteCreateResponses = {
      */
     200: unknown;
 };
+
+export type ProductsOrdersExtendCreateData = {
+    body?: never;
+    path: {
+        order_id: string;
+    };
+    query?: never;
+    url: '/api/products/orders/{order_id}/extend/';
+};
+
+export type ProductsOrdersExtendCreateErrors = {
+    /**
+     * Extension not allowed (limit reached or payment started)
+     */
+    400: unknown;
+    /**
+     * Order reservation has expired
+     */
+    410: unknown;
+};
+
+export type ProductsOrdersExtendCreateResponses = {
+    200: OrderDetail;
+};
+
+export type ProductsOrdersExtendCreateResponse = ProductsOrdersExtendCreateResponses[keyof ProductsOrdersExtendCreateResponses];
 
 export type ProductsOrdersRemoveItemCreateData = {
     body: OrderRemoveItemRequestRequest;

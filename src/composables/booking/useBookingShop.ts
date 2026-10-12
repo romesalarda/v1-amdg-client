@@ -138,7 +138,13 @@ export function useBookingShop() {
   )
 
   const activeOrderId = computed(() => store.activeOrderId)
-  const activeOrderQuery = useProductOrder({"event": eventUrlSafeTitle.value}, computed(() => activeOrderId.value || ''))
+  const rawActiveOrderQuery = useProductOrder({"event": eventUrlSafeTitle.value}, computed(() => activeOrderId.value || ''))
+  // refetch() bypasses `enabled`, so guard it to avoid hitting /orders// after the order is deleted.
+  const activeOrderQuery = {
+    ...rawActiveOrderQuery,
+    refetch: ((...args: Parameters<typeof rawActiveOrderQuery.refetch>) =>
+      activeOrderId.value ? rawActiveOrderQuery.refetch(...args) : Promise.resolve(undefined)) as typeof rawActiveOrderQuery.refetch,
+  }
   const createOrderMutation = useCreateProductOrder()
   const addOrderItemMutation = useAddProductOrderItem()
 
