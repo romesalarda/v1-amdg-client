@@ -52,7 +52,7 @@
       </div>
     </section>
 
-    <div v-if="booking" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
+    <div v-if="booking" ref="bookingSummaryStripRef" class="relative z-20 bg-white border-b border-deep-navy/10 shadow-sm animate-soft-in-delay">
       <div class="max-w-6xl mx-auto px-3 py-2">
         <div class="flex flex-wrap justify-between gap-3">
           <div class="flex items-center gap-3 px-3 py-4 min-w-0">
@@ -113,7 +113,7 @@
 
    
 
-    <div class="max-w-screen-xl mx-auto px-6 py-8 pb-28">
+    <div class="max-w-screen-xl mx-auto px-6 py-8 pb-44">
       <div v-if="myBooking.isLoading.value" class="rounded-2xl bg-white border border-deep-navy/10 p-6 text-sm text-deep-navy/70">
         Loading booking details...
       </div>
@@ -125,24 +125,6 @@
       <div v-else-if="booking" class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <section class="lg:col-span-8 space-y-4">
-            <div v-if="booking && selectedAttendeeId" class="rounded-2xl bg-primary p-1.5 overflow-x-auto">
-              <div class="tabs-container flex w-full gap-1">
-                <button
-                  v-for="tab in tabs"
-                  :key="tab.id"
-                  @click="setActiveTab(tab.id)"
-                  :disabled="isTabDisabled(tab)"
-                  :class="[
-                    'tab-button relative flex-1 px-2 py-1 rounded-xl text-sm font-semibold transition-all duration-300 ease-out flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
-                    activeTab === tab.id
-                      ? 'bg-white text-deep-navy shadow-sm'
-                      : 'text-white hover:text-deep-navy hover:bg-white/80'
-                  ]"
-                >
-                  {{ tab.label }}
-                </button>
-              </div>
-            </div>
             <article v-if="selectedAttendeeId && selectedAttendeeIsCancelled" class="rounded-2xl border border-rose-200 bg-rose-50/80 p-4">
               <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <div>
@@ -1335,60 +1317,87 @@
     </div>
 
     <div
-      v-if="attendees.length"
-      class="fixed inset-x-0 bottom-0 z-40 border-t border-deep-navy/10 bg-white/95 backdrop-blur-sm shadow-[0_-10px_30px_-12px_rgba(15,23,42,0.35)] pb-[env(safe-area-inset-bottom)]"
-    >
-      <div class="mx-auto flex max-w-6xl items-center gap-3 px-3 py-2.5 sm:px-6">
-        <p
-          class="shrink-0 text-[10px] font-black uppercase tracking-[0.2em]"
-          :class="!isSingleAttendeeBooking && !selectedAttendeeId ? 'text-primary' : 'text-deep-navy/50'"
-        >
-          {{ isSingleAttendeeBooking ? 'Attendee' : (selectedAttendeeId ? 'Viewing' : 'Select an attendee') }}
-        </p>
+        v-if="attendees.length"
+        class="fixed inset-x-0 bottom-0 z-40 border-t border-deep-navy/10 bg-white/95 backdrop-blur-sm shadow-[0_-10px_30px_-12px_rgba(15,23,42,0.35)] pb-[env(safe-area-inset-bottom)]"
+      >
+        <div class="mx-auto flex max-w-6xl flex-col gap-2 px-3 py-3 sm:px-6 sm:py-2.5">
+          <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <!-- Attendee section: label + single attendee chip -->
+            <div class="flex min-w-0 items-center gap-3">
+              <p
+                class="shrink-0 text-[10px] font-black uppercase tracking-[0.2em]"
+                :class="!isSingleAttendeeBooking && !selectedAttendeeId ? 'text-primary' : 'text-deep-navy/50'"
+              >
+                {{ isSingleAttendeeBooking ? '' : (selectedAttendeeId ? 'Viewing' : 'Select an attendee') }}
+              </p>
 
-        <div
-          v-if="isSingleAttendeeBooking"
-          class="flex min-w-0 items-center gap-2.5 rounded-xl border border-blue-500 bg-blue-50 px-3 py-1.5 shadow-sm"
-        >
-          <img
-            :src="attendeeAvatarUrl(attendees[0]?.id)"
-            alt=""
-            class="h-8 w-8 shrink-0 rounded-full border border-blue-300 bg-white"
-          />
-          <p class="truncate text-sm font-semibold text-deep-navy">{{ attendees[0]?.name || 'Unnamed attendee' }}</p>
-          <span v-if="isAttendeeCancelled(attendees[0])" class="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-rose-700">Cancelled</span>
-          <span class="material-symbols-outlined shrink-0 text-blue-700" style="font-size:16px" aria-hidden="true">lock</span>
-        </div>
+              <div
+                v-if="isSingleAttendeeBooking"
+                class="flex min-w-0 items-center gap-2.5 rounded-xl border border-blue-500 bg-blue-50 px-3 py-1.5 shadow-sm"
+              >
+                <img
+                  :src="attendeeAvatarUrl(attendees[0]?.id)"
+                  alt=""
+                  class="h-8 w-8 shrink-0 rounded-full border border-blue-300 bg-white"
+                />
+                <p class="truncate text-sm font-semibold text-deep-navy">{{ attendees[0]?.name || 'Unnamed attendee' }}</p>
+                <span v-if="isAttendeeCancelled(attendees[0])" class="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-rose-700">Cancelled</span>
+                <span class="material-symbols-outlined shrink-0 text-blue-700" style="font-size:16px" aria-hidden="true">lock</span>
+              </div>
+            </div>
 
-        <div
-          v-else
-          class="flex min-w-0 flex-1 gap-2 overflow-x-auto rounded-xl"
-          :class="!selectedAttendeeId ? 'attendee-pulse' : ''"
-        >
-          <button
-            v-for="item in attendees"
-            :key="item.id || item.display_id"
-            type="button"
-            :aria-pressed="selectedAttendeeId === item.id"
-            class="flex shrink-0 items-center gap-2 rounded-xl border px-2.5 py-1.5 text-left transition-all"
-            :class="selectedAttendeeId === item.id
-              ? (isAttendeeCancelled(item) ? 'border-rose-400 bg-rose-50 shadow-sm' : 'border-blue-500 bg-blue-50 shadow-sm')
-              : (isAttendeeCancelled(item) ? 'border-rose-200 bg-rose-50/50 hover:border-rose-300' : 'border-deep-navy/15 bg-white hover:border-blue-400 hover:bg-blue-50/40')"
-            @click="selectAttendee(item.id || '')"
-          >
-            <img
-              :src="attendeeAvatarUrl(item.id)"
-              alt=""
-              class="h-8 w-8 shrink-0 rounded-full border bg-white"
-              :class="isAttendeeCancelled(item) ? 'border-rose-200' : 'border-deep-navy/15'"
-            />
-            <span class="max-w-[9rem] truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</span>
-            <span v-if="isAttendeeCancelled(item)" class="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-rose-700">Cancelled</span>
-            <span v-else-if="selectedAttendeeId === item.id" class="material-symbols-outlined shrink-0 text-blue-700" style="font-size:16px" aria-hidden="true">check_circle</span>
-          </button>
+            <!-- Tabs -->
+            <div v-if="booking && selectedAttendeeId" class="w-full min-w-0 overflow-x-auto rounded-2xl bg-primary p-1.5 sm:w-auto sm:p-1">
+              <div class="tabs-container flex w-full gap-2 sm:gap-1">
+                <button
+                  v-for="tab in tabs"
+                  :key="tab.id"
+                  type="button"
+                  :disabled="isTabDisabled(tab)"
+                  :class="[
+                    'tab-button relative shrink-0 sm:flex-1 whitespace-nowrap px-4 py-2.5 sm:px-3 sm:py-1.5 rounded-xl text-sm font-semibold transition-all duration-300 ease-out flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/70 disabled:cursor-not-allowed disabled:opacity-55',
+                    activeTab === tab.id
+                      ? 'bg-white text-deep-navy shadow-sm'
+                      : 'text-white hover:text-deep-navy hover:bg-white/80'
+                  ]"
+                  @click="setActiveTab(tab.id)"
+                >
+                  {{ tab.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Attendee picker (multi-attendee, none selected) -->
+            <div
+              v-else
+              class="flex min-w-0 flex-1 gap-2 overflow-x-auto rounded-xl"
+              :class="!selectedAttendeeId ? 'attendee-pulse' : ''"
+            >
+              <button
+                v-for="item in attendees"
+                :key="item.id || item.display_id"
+                type="button"
+                :aria-pressed="selectedAttendeeId === item.id"
+                class="flex shrink-0 items-center gap-2 rounded-xl border px-2.5 py-1.5 text-left transition-all"
+                :class="selectedAttendeeId === item.id
+                  ? (isAttendeeCancelled(item) ? 'border-rose-400 bg-rose-50 shadow-sm' : 'border-blue-500 bg-blue-50 shadow-sm')
+                  : (isAttendeeCancelled(item) ? 'border-rose-200 bg-rose-50/50 hover:border-rose-300' : 'border-deep-navy/15 bg-white hover:border-blue-400 hover:bg-blue-50/40')"
+                @click="selectAttendee(item.id || '')"
+              >
+                <img
+                  :src="attendeeAvatarUrl(item.id)"
+                  alt=""
+                  class="h-8 w-8 shrink-0 rounded-full border bg-white"
+                  :class="isAttendeeCancelled(item) ? 'border-rose-200' : 'border-deep-navy/15'"
+                />
+                <span class="max-w-[9rem] truncate text-sm font-semibold text-deep-navy">{{ item.name || 'Unnamed attendee' }}</span>
+                <span v-if="isAttendeeCancelled(item)" class="shrink-0 rounded-full bg-rose-100 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wide text-rose-700">Cancelled</span>
+                <span v-else-if="selectedAttendeeId === item.id" class="material-symbols-outlined shrink-0 text-blue-700" style="font-size:16px" aria-hidden="true">check_circle</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
   </div>
 </template>
@@ -1684,6 +1693,7 @@ const completedPaymentsCount = computed(() => completedSummaryPayments.value.len
 const briefingInfoRef = ref<HTMLElement | null>(null)
 const briefingLocationRef = ref<HTMLElement | null>(null)
 const briefingTimeRef = ref<HTMLElement | null>(null)
+const bookingSummaryStripRef = ref<HTMLElement | null>(null)
 
 function formatCurrencyAmount(value: number): string {
   return `${currencySymbol.value}${value.toFixed(2)}`
@@ -1965,6 +1975,12 @@ function setActiveTab(tab: TabId) {
     return
   }
   activeTab.value = tab
+  scrollToBookingSummary()
+}
+
+function scrollToBookingSummary() {
+  if (typeof window === 'undefined') return
+  bookingSummaryStripRef.value?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 function selectAttendee(attendeeId: string) {
