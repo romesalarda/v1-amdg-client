@@ -226,6 +226,7 @@
                 <DateRangePicker
                   :model-value-start="startDate"
                   :model-value-end="endDate"
+                  disable-past
                   @update:model-value-start="startDate = $event"
                   @update:model-value-end="endDate = $event"
                 >
@@ -588,6 +589,19 @@ const route = useRoute()
 
 // Common timezones
 
+const formatLocalDate = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+// Upcoming Saturday (today if it is already Saturday) and the Sunday after it
+const upcomingWeekend = () => {
+  const saturday = new Date()
+  saturday.setDate(saturday.getDate() + ((6 - saturday.getDay() + 7) % 7))
+  const sunday = new Date(saturday)
+  sunday.setDate(sunday.getDate() + 1)
+  return { start: formatLocalDate(saturday), end: formatLocalDate(sunday) }
+}
+const weekend = upcomingWeekend()
+
 // Form setup
 const { handleSubmit, errors, defineField, setFieldValue, resetForm } = useForm({
   validationSchema: toTypedSchema(createEventSchema),
@@ -596,8 +610,8 @@ const { handleSubmit, errors, defineField, setFieldValue, resetForm } = useForm(
     short_description: '',
     long_description: '',
     timezone: 'UTC',
-    start_datetime: '',
-    end_datetime: '',
+    start_datetime: `${weekend.start}T09:00`,
+    end_datetime: `${weekend.end}T17:00`,
     theme: '',
     anchor_verse: '',
     what_to_bring: '',
@@ -662,9 +676,9 @@ const { data: codeCheckData, isFetching: isCheckingCode } = useEvents(
 const codeExists = computed(() => (codeCheckData.value?.data?.count || 0) > 0 && codeCheckRef.value.length > 0)
 
 // --- DateRangePicker state ---
-const startDate = ref('')
+const startDate = ref(weekend.start)
 const startTime = ref('09:00')
-const endDate = ref('')
+const endDate = ref(weekend.end)
 const endTime = ref('17:00')
 
 // Sync date+time parts → form fields
