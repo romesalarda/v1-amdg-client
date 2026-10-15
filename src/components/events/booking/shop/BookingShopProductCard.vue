@@ -8,13 +8,20 @@
   >
     <!-- Product image -->
     <div class="relative h-44 overflow-hidden bg-mist-blue">
-      <img
-        :src="activeImageUrl"
-        :alt="product.title"
-        class="h-full w-full object-cover transition-opacity duration-300"
+      <button
+        type="button"
+        class="block h-full w-full cursor-zoom-in"
+        :aria-label="`View details for ${product.title}`"
+        @click="isDetailOpen = true"
       >
+        <img
+          :src="activeImageUrl"
+          :alt="product.title"
+          class="h-full w-full object-cover transition-opacity duration-300"
+        >
+      </button>
       <!-- Step progress strip -->
-      <div v-if="step !== 'initial'" class="absolute bottom-0 left-0 right-0 flex gap-0.5 px-3 pb-2">
+      <div v-if="step !== 'initial'" class="pointer-events-none absolute bottom-0 left-0 right-0 flex gap-0.5 px-3 pb-2">
         <div
           class="h-0.5 flex-1 rounded-full transition-colors duration-300"
           :class="['size', 'color', 'quantity'].includes(step) ? 'bg-white' : 'bg-white/30'"
@@ -283,6 +290,14 @@
         </div>
       </Transition>
     </div>
+
+    <BookingShopProductDetailModal
+      v-model="isDetailOpen"
+      :product="product"
+      :image-url="activeImageUrl"
+      :price-label="activePrice"
+      :variants="variantRows"
+    />
   </article>
 </template>
 
@@ -290,6 +305,7 @@
 import type { AvailabilityWindow, ProductList, ProductVariantList } from '~/api/types.gen'
 import { productVariantsAvailabilityWindowsList, productsAvailabilityWindowsList } from '~/api/sdk.gen'
 import { useProductVariants } from '~/composables/resources/products/productVariants'
+import BookingShopProductDetailModal from '~/components/events/booking/shop/BookingShopProductDetailModal.vue'
 import { formatDateTime } from '~/utils/time'
 import { formatMoney } from '~/utils/money'
 
@@ -330,6 +346,7 @@ const selectedColor = ref<string>('')
 const selectedSize = ref<string>('')
 const activeImageUrl = ref<string>('https://placehold.co/800x600?text=Product')
 const addingVariantId = ref<string | null>(null)
+const isDetailOpen = ref(false)
 
 // ── Progressive disclosure step management ──────────────────────────────────
 type Step = 'initial' | 'size' | 'color' | 'quantity'
