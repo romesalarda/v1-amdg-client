@@ -74,6 +74,7 @@
                 :draft="draft"
                 :hover-date="hoverDate"
                 :conflict-windows="conflictWindows"
+                :disable-past="disablePast"
                 @select="onSelect"
                 @hover="hoverDate = $event"
                 @prev="prevMonth"
@@ -86,6 +87,7 @@
                 :draft="draft"
                 :hover-date="hoverDate"
                 :conflict-windows="conflictWindows"
+                :disable-past="disablePast"
                 @select="onSelect"
                 @hover="hoverDate = $event"
                 @next="nextMonth"
@@ -131,6 +133,7 @@ const props = defineProps<{
   modelValueStart?: string
   modelValueEnd?: string
   conflictWindows?: AvailabilityWindow[]
+  disablePast?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -213,16 +216,18 @@ const parseInputDate = (val: string): string => {
   return ''
 }
 
+const isBlockedDate = (iso: string) => !!props.disablePast && iso < toIso(today.getFullYear(), today.getMonth() + 1, today.getDate())
+
 const onStartInput = (e: Event) => {
   const val = (e.target as HTMLInputElement).value
   const iso = parseInputDate(val)
-  if (iso) draft.start = iso
+  if (iso && !isBlockedDate(iso)) draft.start = iso
 }
 
 const onEndInput = (e: Event) => {
   const val = (e.target as HTMLInputElement).value
   const iso = parseInputDate(val)
-  if (iso) draft.end = iso
+  if (iso && !isBlockedDate(iso)) draft.end = iso
 }
 
 
@@ -266,6 +271,9 @@ import type { AvailabilityWindow } from '~/api/types.gen'
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
 
+const toIso = (y: number, m: number, d: number) =>
+  `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+
 export const CalendarMonth = defineComponent({
   name: 'CalendarMonth',
   props: {
@@ -274,6 +282,7 @@ export const CalendarMonth = defineComponent({
     draft: { type: Object as () => { start: string; end: string }, required: true },
     hoverDate: { type: String, default: '' },
     conflictWindows: { type: Array as () => AvailabilityWindow[], default: () => [] },
+    disablePast: { type: Boolean, default: false },
     prev: { type: Boolean, default: false },
     next: { type: Boolean, default: false },
   },
@@ -308,9 +317,6 @@ export const CalendarMonth = defineComponent({
 
       return result
     })
-
-    const toIso = (y: number, m: number, d: number) =>
-      `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
 
     const todayStr = toIso(new Date().getFullYear(), new Date().getMonth() + 1, new Date().getDate())
 
@@ -389,17 +395,19 @@ export const CalendarMonth = defineComponent({
             const today = isToday(cell.dateStr)
             const conflictWindows = getConflictWindowsForDate(cell.dateStr)
             const conflictTooltip = getConflictTooltip(cell.dateStr)
+            const disabled = props.disablePast && cell.currentMonth && cell.dateStr < todayStr
 
             const cellClass = [
-              'relative h-12 flex items-center justify-center text-sm font-semibold cursor-pointer transition-colors',
-              !cell.currentMonth ? 'text-gray-300' : (start || end) ? 'text-white' : inRange ? 'text-blue-700' : today ? 'text-blue-600' : 'text-gray-800',
+              'relative h-12 flex items-center justify-center text-sm font-semibold transition-colors',
+              disabled ? 'cursor-not-allowed' : 'cursor-pointer',
+              !cell.currentMonth ? 'text-gray-300' : disabled ? 'text-gray-300 line-through' : (start || end) ? 'text-white' : inRange ? 'text-blue-700' : today ? 'text-blue-600' : 'text-gray-800',
               inRange ? 'bg-blue-50' : '',
               conflictWindows.length && cell.currentMonth ? 'bg-amber-50/80' : '',
             ].join(' ')
 
             const innerClass = [
               'w-9 h-9 flex items-center justify-center rounded-full transition-colors z-10 relative',
-              (start || end) ? 'bg-blue-600 text-white' : today && !inRange ? 'border-b-2 border-blue-500' : cell.currentMonth ? 'hover:bg-gray-100 active:bg-gray-200' : 'cursor-default',
+              (start || end) ? 'bg-blue-600 text-white' : today && !inRange ? 'border-b-2 border-blue-500' : cell.currentMonth && !disabled ? 'hover:bg-gray-100 active:bg-gray-200' : 'cursor-default',
             ].join(' ')
 
             const conflictIndicatorClass = (window: AvailabilityWindow) => {
@@ -412,8 +420,8 @@ export const CalendarMonth = defineComponent({
 
             return h('div', {
               class: cellClass,
-              onClick: () => cell.currentMonth && emit('select', cell.dateStr),
-              onMouseenter: () => cell.currentMonth && emit('hover', cell.dateStr),
+              onClick: () => cell.currentMonth && !disabled && emit('select', cell.dateStr),
+              onMouseenter: () => cell.currentMonth && !disabled && emit('hover', cell.dateStr),
               onMouseleave: () => emit('hover', ''),
               title: conflictTooltip || undefined,
             }, [

@@ -3,14 +3,14 @@
     <table class="w-full text-left text-sm">
       <thead>
         <tr class="border-b border-gray-200 bg-gray-50">
-          <th class="py-3 px-4">
+          <!-- <th class="py-3 px-4">
             <input
               :checked="selectAll"
               type="checkbox"
               @change="emit('toggle-select-all')"
               class="rounded border-gray-300 text-primary focus:ring-primary"
             />
-          </th>
+          </th> -->
           <th
             class="py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-100"
             @click="emit('set-sorting', 'attendee_display_id')"
@@ -63,7 +63,7 @@
           :key="attendee.attendee_id"
           class="border-b border-gray-100 hover:bg-gray-50 transition-colors"
         >
-          <td class="py-3 px-4">
+          <!-- <td class="py-3 px-4">
             <input
               :checked="selectedAttendees.includes(attendee.attendee_id)"
               type="checkbox"
@@ -71,7 +71,7 @@
               @change="onCheckboxChange(attendee.attendee_id)"
               class="rounded border-gray-300 text-primary focus:ring-primary"
             />
-          </td>
+          </td> -->
           <td class="py-3 px-4">
             <span class="font-mono text-xs text-gray-600">{{ attendee.attendee_display_id }}</span>
           </td>
