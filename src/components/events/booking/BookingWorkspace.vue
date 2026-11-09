@@ -1242,35 +1242,54 @@
           <article class="sticky top-24 bg-white border border-deep-navy/10 rounded-2xl p-5 space-y-5">
             <section>
               <p class="text-xs font-black uppercase tracking-wider text-deep-navy">Payment summary</p>
+
               <div class="mt-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div class="flex items-start justify-between gap-3">
-                  <div class="min-w-0">
-                    <p class="text-[10px] font-black uppercase tracking-[0.22em] text-slate-500">Total spent</p>
-                    <p class="mt-2 text-3xl font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarTotal) }}</p>
-                    <p class="mt-1 text-xs text-deep-navy/60">Current amount after refunds.</p>
+                <!-- Line items -->
+                <dl class="space-y-2 text-sm">
+                  <div class="flex items-baseline justify-between gap-3">
+                    <dt class="text-deep-navy/70">Booking payments</dt>
+                    <dd class="font-semibold tabular-nums text-deep-navy">
+                      {{ formatCurrencyAmount(spentSoFarBooking) }}
+                    </dd>
                   </div>
-                  <span class="shrink-0 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-slate-700">
-                    {{ completedPaymentsCount }} completed
-                  </span>
-                </div>
 
-                <div class="mt-4 flex flex-wrap items-center gap-2 text-sm" v-if="refundedTotalAmount > 0">
-                  <span class="font-semibold text-slate-500">Original total:</span>
-                  <span class="font-black text-slate-500 line-through">{{ formatCurrencyAmount(originalSpentSoFar) }}</span>
-                  <span class="font-semibold text-slate-500">Refunded:</span>
-                  <span class="font-black text-rose-700">- {{ formatCurrencyAmount(refundedTotalAmount) }}</span>
-                </div>
+                  <div v-if="spentSoFarOrders > 0" class="flex items-baseline justify-between gap-3">
+                    <dt class="text-deep-navy/70">Extra products</dt>
+                    <dd class="font-semibold tabular-nums text-deep-navy">
+                      {{ formatCurrencyAmount(spentSoFarOrders) }}
+                    </dd>
+                  </div>
 
-                <dl class="mt-4 grid gap-3 text-xs sm:grid-cols-1">
-                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                    <dt class="font-semibold text-deep-navy/60">Booking payments</dt>
-                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarBooking) }}</dd>
-                  </div>
-                  <div class="rounded-xl border border-slate-200 bg-slate-50 p-3" v-if="spentSoFarOrders > 0">
-                    <dt class="font-semibold text-deep-navy/60">Extra products</dt>
-                    <dd class="mt-1 text-base font-black text-deep-navy">{{ formatCurrencyAmount(spentSoFarOrders) }}</dd>
-                  </div>
+                  <template v-if="refundedTotalAmount > 0">
+                    <div class="flex items-baseline justify-between gap-3 border-t border-slate-100 pt-2">
+                      <dt class="text-deep-navy/70">Subtotal</dt>
+                      <dd class="font-semibold tabular-nums text-deep-navy">
+                        {{ formatCurrencyAmount(originalSpentSoFar) }}
+                      </dd>
+                    </div>
+                    <div class="flex items-baseline justify-between gap-3">
+                      <dt class="text-rose-700">Refunded</dt>
+                      <dd class="font-semibold tabular-nums text-rose-700">
+                        − {{ formatCurrencyAmount(refundedTotalAmount) }}
+                      </dd>
+                    </div>
+                  </template>
                 </dl>
+
+                <!-- Receipt divider -->
+                <div class="my-3 border-t-2 border-dashed border-slate-300" aria-hidden="true"></div>
+
+                <!-- Total -->
+                <div class="flex items-baseline justify-between gap-3">
+                  <p class="text-xs font-black uppercase tracking-[0.2em] text-deep-navy">Total spent</p>
+                  <p class="text-2xl font-black tabular-nums text-deep-navy">
+                    {{ formatCurrencyAmount(spentSoFarTotal) }}
+                  </p>
+                </div>
+
+                <p class="mt-2 text-right text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                  {{ completedPaymentsCount }} completed payment{{ completedPaymentsCount === 1 ? '' : 's' }}
+                </p>
               </div>
             </section>
 

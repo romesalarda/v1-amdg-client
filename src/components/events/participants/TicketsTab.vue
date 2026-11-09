@@ -242,15 +242,6 @@
 
         <div v-if="selectedTicket" class="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between gap-2">
           <span class="text-xs text-gray-500">Ticket management</span>
-          <UButton
-            size="sm"
-            color="red"
-            icon="i-heroicons-no-symbol"
-            :disabled="selectedTicket.status !== 'ACTIVE' || disableTicketMutation.isPending.value"
-            @click="disableSelectedTicket"
-          >
-            Disable Ticket
-          </UButton>
         </div>
       </div>
     </UModal>

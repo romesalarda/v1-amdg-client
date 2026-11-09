@@ -42,7 +42,7 @@
     </section>
 
     <!-- Interest ranking form -->
-    <section class="bg-white rounded-2xl border border-deep-navy/10 shadow-drawn overflow-hidden">
+    <section class="bg-white rounded-2xl border border-deep-navy/10 border-dashed overflow-hidden">
       <div class="flex items-center gap-2 px-5 py-4 border-b border-navy-50">
         <span class="material-symbols-outlined text-primary">format_list_numbered</span>
         <div class="flex-1">

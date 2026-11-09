@@ -510,7 +510,6 @@ const viewTabs = [
   { value: 'bookings' as const, label: 'Bookings' },
   { value: 'statistics' as const, label: 'Statistics' },
   { value: 'tickets' as const, label: 'Tickets' },
-  { value: 'families' as const, label: 'Families' },
 ]
 
 const viewIcon = computed(() => ({
