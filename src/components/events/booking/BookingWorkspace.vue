@@ -1686,9 +1686,9 @@ const spentSoFarBooking = computed(() => {
 })
 
 const spentSoFarOrders = computed(() => {
-  const bookingOrders = (paymentSummaryData.value?.shop_payments || [])
-    .filter(payment => isCompletedPaymentStatus(payment.status))
-    .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
+  // const bookingOrders = (paymentSummaryData.value?.shop_payments || [])
+  //   .filter(payment => isCompletedPaymentStatus(payment.status))
+  //   .reduce((sum, payment) => sum + paymentCurrentAmount(payment), 0)
 
   const bookingCheckoutOrders = bookingLevelPayments.value
     .filter(payment => (
@@ -1704,7 +1704,7 @@ const spentSoFarOrders = computed(() => {
     return sum + ordersAmount
   }, 0)
 
-  return bookingOrders + bookingCheckoutOrders
+  return bookingCheckoutOrders
 })
 
 const spentSoFarTotal = computed(() => spentSoFarBooking.value + spentSoFarOrders.value)
