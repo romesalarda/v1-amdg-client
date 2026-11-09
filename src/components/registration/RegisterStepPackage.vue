@@ -26,8 +26,11 @@
 							/>
 						</div>
 						<p class="mt-2 text-xs text-gray-600">{{ pkg.description || 'No description provided.' }}</p>
-						<p class="mt-3 text-sm font-semibold text-gray-900">
+						<p class="mt-3 text-lg font-semibold text-gray-900" v-if="pkg.modified_amount != '0.00'">
 							{{ pkg.modified_amount }} {{ pkg.base_amount_currency }}
+						</p>
+						<p class="mt-3 text-lg font-semibold text-green-900" v-else>
+							Free
 						</p>
 					</label>
 				</div>

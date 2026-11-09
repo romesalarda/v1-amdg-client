@@ -20,8 +20,8 @@
     </div>
 
     <!-- No Questions -->
-    <div v-else-if="!eventQuestions.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-sm">
-      No questions defined for this event
+    <div v-else-if="!eventQuestions.data.value?.data?.results?.length" class="text-center py-8 text-gray-500 text-md">
+      We have no questions to ask you!
     </div>
 
     <!-- Questions List -->
