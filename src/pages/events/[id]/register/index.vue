@@ -125,7 +125,7 @@
 									<div v-else-if="activeStepIndex === 1" class="space-y-6">
 							<div>
 								<h2 class="text-lg font-semibold text-gray-900">Event questions</h2>
-								<p class="text-sm text-gray-600">Answer any questions the organizer added.</p>
+								<p class="text-sm text-gray-600">Answer any questions the organiser wants to know from you.</p>
 							</div>
 
 							<AttendeeQuestionAnswers

@@ -12,8 +12,8 @@
 		<div class="grid w-full min-w-0 gap-6">
 			<!-- Community identifiers -->
 			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
-				<h3 class="text-sm font-semibold text-slate-900">Community identifiers</h3>
-				<p class="mt-1 text-xs text-slate-600">Optionally link this attendee to an organisation.</p>
+				<h3 class="text-md font-semibold text-slate-900">What community is this attendee part of?</h3>
+				<p class="mt-1 text-sm text-slate-600">Optionally link this attendee to an organisation.</p>
 
 				<div class="mt-4">
 					<label class="mb-1 block text-sm font-medium text-gray-700">Organisation</label>
@@ -26,11 +26,11 @@
 
 			<!-- Alternative sign-in -->
 			<div class="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
-				<h3 class="text-sm font-semibold text-slate-900">Alternative sign-in identifier</h3>
-				<p class="mt-1 text-xs text-slate-600">Optionally attach one event-supported external identifier for this attendee.</p>
+				<h3 class="text-md font-semibold text-slate-900">Want easy check in on the day?</h3>
+				<p class="mt-1 text-sm text-slate-600">Optionally attach a one-off external ID for this attendee so we can scan that on the day of the event.</p>
 
 				<div class="mt-4">
-					<label class="mb-1 block text-sm font-medium text-gray-700">Alternative sign-in type</label>
+					<label class="mb-1 block text-sm font-medium text-gray-700">Type of ID to sign in</label>
 						<USelectMenu
 							:model-value="currentAttendee.personalInfo.alternativeSigninIdentifier?.eventAlternativeSigninId || undefined"
 							:options="buildAlternativeSigninSelectOptions(alternativeSigninOptions)"
